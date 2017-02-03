@@ -41,6 +41,18 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
 
 pd.read_carto = read_carto
 
+
+# TODO: add into update_carto funciton as subfunction?
+def process_item(item):
+    from math import isnan
+    if type(item) == str:
+        return '\'{}\''.format(item)
+    elif type(item) == float:
+        if isnan(item):
+            return 'null'
+        return str(item)
+    return str(item)
+
 def update_carto(self):
     import requests
     api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(
