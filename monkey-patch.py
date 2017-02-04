@@ -3,7 +3,7 @@ Monkey patching pandas to add utilities for CARTO tables
 """
 
 # TODO: hook into pandas.core?
-import pandas
+import pandas as pd
 
 def read_carto(username, tablename, api_key=None, include_geom=True,
                include_date_util=False, limit=None):
@@ -14,7 +14,7 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
     # construct query
     query = 'SELECT * FROM {tablename}'.format(tablename=tablename)
     if limit:
-        if (limit >= 0) and (type(limit) == int):
+        if (limit >= 0) and isinstance(limit, int):
             query += ' LIMIT {limit}'.format(limit=limit)
         else:
             raise ValueError("limit parameter must an integer >= 0")
@@ -32,6 +32,10 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
         params['skipfields'] = 'the_geom,the_geom_webmercator'
     print api_endpoint + urlencode(params)
     _df = pd.read_csv(api_endpoint + urlencode(params))
+    # TODO: add table schema to the metadata
+    # NOTE: pylint complaints that we're accessing a 'protected member
+    #       _metadata of a client class'
+    # TODO: see how geopandas does it
     _df._metadata.append(json.dumps({'carto_table': tablename,
                                      'carto_username': username,
                                      'carto_api_key': api_key,
@@ -45,20 +49,25 @@ pd.read_carto = read_carto
 # TODO: add into update_carto funciton as subfunction?
 def process_item(item):
     from math import isnan
-    if type(item) == str:
+    if isinstance(item, str):
         return '\'{}\''.format(item)
-    elif type(item) == float:
+    elif isinstance(item, float):
         if isnan(item):
             return 'null'
         return str(item)
     return str(item)
 
+
+# TODO: add check of current schema with metadata schema
+#       if new column, do `alter table ... add column ...`
+#       if deleted column, do `alter table ... drop column ... `
 def update_carto(self):
     import requests
+    from urllib import urlencode
     api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(
         json.loads(self._metadata[0])['carto_username'])
     params = {
-        'api_key': APIKEY
+        'api_key': json.loads(self._metadata[0])['api_key']
     }
     for row in self.iterrows():
         cartodb_id = row[0]
@@ -77,7 +86,7 @@ def update_carto(self):
         params['q'] = update_query
         # print update_query
         resp = requests.get(api_endpoint + urlencode(params))
-        # print resp.text
+        print resp.text
         # TODO: return the status of all of the updates
 
 pd.DataFrame.update_carto = update_carto
