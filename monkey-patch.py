@@ -1,9 +1,38 @@
 """
 Monkey patching pandas to add utilities for CARTO tables
+Andy Eschbacher and Stuart Lynn, 2017
+
+Project goals
+    * Like geopandas, have a .cartomap() method which gives back the data
+      as a map using carto's maps api and turbocartocss on an optional
+      attribute
+
+Features to add:
+    * create a dataframe from scratch
+        * establish cartodb_id
+        * set metadata manually
+        * register with carto
+
+Notes on propagating pandas metadata:
+    * https://github.com/pandas-dev/pandas/issues/2485
+    * geopandas does a good job of propagating metadata, seems to be by
+      subclassing Dataframes:
+      https://github.com/geopandas/geopandas/blob/v0.2.1/geopandas/geodataframe.py#L54
+      similar to what we tried in cartopandas.py.
+      A geodataframe stores it's own metadata:
+      https://github.com/geopandas/geopandas/blob/v0.2.1/geopandas/geodataframe.py#L47
 """
 
 # TODO: hook into pandas.core?
 import pandas as pd
+
+def add_meta(self, **kwargs):
+    """
+        Set metadata for a dataframe if none has been already set
+    """
+    for key in kwargs:
+        self._metadata[0][key] = kwargs[key]
+
 
 def read_carto(username, tablename, api_key=None, include_geom=True,
                include_date_util=False, limit=None):
@@ -11,6 +40,7 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
        table information in pandas metadata"""
     import json
     from urllib import urlencode
+
     # construct query
     query = 'SELECT * FROM {tablename}'.format(tablename=tablename)
     if limit:
@@ -18,7 +48,8 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
             query += ' LIMIT {limit}'.format(limit=limit)
         else:
             raise ValueError("limit parameter must an integer >= 0")
-    print query
+    # print query
+    
     # construct API call
     api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(username)
     # add parameters
@@ -66,9 +97,12 @@ def update_carto(self):
     from urllib import urlencode
     api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(
         json.loads(self._metadata[0])['carto_username'])
-    params = {
-        'api_key': json.loads(self._metadata[0])['api_key']
-    }
+    if 'api_key' in json.loads(self._metadata[0]):
+        params = {
+            'api_key': json.loads(self._metadata[0])['api_key']
+        }
+    else:
+        raise Exception("No API key set for this dataframe.")
     for row in self.iterrows():
         cartodb_id = row[0]
         key_vals = zip(['"{}"'.format(c) for c in self.columns], row[1].values)
