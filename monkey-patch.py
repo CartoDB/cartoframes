@@ -91,10 +91,18 @@ def process_item(item):
         return str(item)
     return str(item)
 
+def datatype_map(dtype):
+    if 'float' in dtype:
+        return 'numeric'
+    elif 'int' in dtype:
+        return 'int'
+    else:
+        return 'text'
 
 # TODO: add check of current schema with metadata schema
 #       if new column, do `alter table ... add column ...`
-#       if deleted column, do `alter table ... drop column ... `
+#       if deleted column, do `alter table ... drop column ...
+# TODO: make less buggy about the diff between NaNs and nulls
 def update_carto(self):
     from urllib import urlencode
     import json
@@ -113,7 +121,38 @@ def update_carto(self):
         json.loads(self._metadata[0])['carto_table'])
     print filename
     last_state = pd.read_csv(filename, index_col='cartodb_id')
-    print last_state.head()
+    # print last_state.head()
+
+    # create new column if needed
+    if len(last_state.columns) < len(self.columns):
+        newcols = set(self.columns) - set(last_state.columns)
+        for col in newcols:
+            print "Create new column {c}".format(c=c)
+            alter_query = '''
+                ALTER TABLE {tablename}
+                ADD COLUMN {colname} {datatype};
+            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                       colname=c,
+                        datatype=datatype_map(self.dtypes[c]))
+            requests.get()
+            for item in self[c].iteritems():
+                update_query = '''
+                    UPDATE {tablename}
+                    SET "{colname}" = {colval}
+                    WHERE "cartodb_id" = {cartodb_id}
+                '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                           colname=c,
+                           colval=process_item(item[1]),
+                           cartodb_id=item[0])
+    # drop column if needed
+    elif len(last_state.columns) > len(self.columns)
+        discardedcols = set(self.columns) - set(last_state.columns)
+        for col in discardedcols:
+            alter_query = '''
+
+            '''
+
+    # sync updated values
     df_diff = (self != last_state).stack()
     for i in df_diff.iteritems():
         print i
