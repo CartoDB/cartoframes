@@ -34,8 +34,8 @@ def add_meta(self, **kwargs):
         self._metadata[0][key] = kwargs[key]
 
 
-def read_carto(username, tablename, api_key=None, include_geom=True,
-               include_date_util=False, limit=None):
+def read_carto(self, username, tablename, api_key=None, include_geom=True,
+               limit=None):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
     import json
@@ -49,9 +49,9 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
         else:
             raise ValueError("limit parameter must an integer >= 0")
     # print query
-    
+
     # construct API call
-    api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(username)
+    api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(username=username)
     # add parameters
     params = {'format': 'csv',
               'q': query}
@@ -64,20 +64,23 @@ def read_carto(username, tablename, api_key=None, include_geom=True,
     print api_endpoint + urlencode(params)
     _df = pd.read_csv(api_endpoint + urlencode(params))
     # TODO: add table schema to the metadata
-    # NOTE: pylint complaints that we're accessing a 'protected member
-    #       _metadata of a client class'
-    # TODO: see how geopandas does it
+    # NOTE: pylint complains that we're accessing a 'protected member
+    #       _metadata of a client class' (appending to _metadata only works
+    #       with strings, not JSON, so we're serializing here)
     _df._metadata.append(json.dumps({'carto_table': tablename,
                                      'carto_username': username,
                                      'carto_api_key': api_key,
                                      'carto_include_geom': include_geom,
-                                     'carto_limit': limit}))
-    return _df.set_index('cartodb_id')
+                                     'carto_limit': limit,
+                                     'carto_schema': _df.columns}))
+    _df.set_index('cartodb_id')
+    self.carto_last_state = _df
+    return _df
 
 pd.read_carto = read_carto
 
 
-# TODO: add into update_carto funciton as subfunction?
+# TODO: add into update_carto function as subfunction?
 def process_item(item):
     from math import isnan
     if isinstance(item, str):
@@ -93,36 +96,43 @@ def process_item(item):
 #       if new column, do `alter table ... add column ...`
 #       if deleted column, do `alter table ... drop column ... `
 def update_carto(self):
-    import requests
     from urllib import urlencode
-    api_endpoint = 'https://{}.carto.com/api/v2/sql?'.format(
-        json.loads(self._metadata[0])['carto_username'])
-    if 'api_key' in json.loads(self._metadata[0]):
+    import json
+    import requests
+    api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(
+        username=json.loads(self._metadata[0])['carto_username'])
+    if 'carto_api_key' in json.loads(self._metadata[0]):
         params = {
-            'api_key': json.loads(self._metadata[0])['api_key']
+            'api_key': json.loads(self._metadata[0])['carto_api_key']
         }
     else:
         raise Exception("No API key set for this dataframe.")
-    for row in self.iterrows():
-        cartodb_id = row[0]
-        key_vals = zip(['"{}"'.format(c) for c in self.columns], row[1].values)
-        setcols = ', '.join(["{col} = {val}".format(col=kv[0],
-                                                    val=process_item(kv[1]))
-                             for kv in key_vals])
-
-        update_query = '''
-        UPDATE {tablename}
-        SET {col_exprs}
-        WHERE cartodb_id = {cartodb_id}
-        '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                   col_exprs=setcols,
-                   cartodb_id=cartodb_id)
-        params['q'] = update_query
-        # print update_query
-        resp = requests.get(api_endpoint + urlencode(params))
-        print resp.text
-        # TODO: return the status of all of the updates
+    # update current state of dataframe
+    # diff with the last retrieved version from carto
+    filename = 'carto_temp_{}'.format(
+        json.loads(self._metadata[0])['carto_table'])
+    print filename
+    last_state = pd.read_csv(filename, index_col='cartodb_id')
+    print last_state.head()
+    df_diff = (self != last_state).stack()
+    for i in df_diff.iteritems():
+        print i
+        if i[1]:
+            cartodb_id = i[0][0]
+            colname = i[0][1]
+            update_query = '''
+            UPDATE "{tablename}"
+            SET "{colname}" = {colval}
+            WHERE "cartodb_id" = {cartodb_id}
+            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                       colname=colname,
+                       colval=process_item(self.loc[cartodb_id][colname]),
+                       cartodb_id=cartodb_id)
+            print update_query
+            params['q'] = update_query
+            resp = requests.get(api_endpoint + urlencode(params))
+            print json.loads(resp.text)
+        else:
+            continue
 
 pd.DataFrame.update_carto = update_carto
-
-
