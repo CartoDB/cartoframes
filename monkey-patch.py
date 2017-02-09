@@ -24,6 +24,7 @@ Notes on propagating pandas metadata:
 """
 
 # TODO: hook into pandas.core?
+import os
 import pandas as pd
 
 def add_meta(self, **kwargs):
@@ -124,20 +125,25 @@ def update_carto(self):
     # print last_state.head()
 
     # create new column if needed
-    if len(last_state.columns) < len(self.columns):
+    if len(set(self.columns) - set(last_state.columns)) > 0:
         newcols = set(self.columns) - set(last_state.columns)
         for col in newcols:
             print "Create new column {col}".format(col=col)
             alter_query = '''
                 ALTER TABLE {tablename}
-                ADD COLUMN {colname} {datatype};
+                ADD COLUMN {colname} {datatype}
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col,
                        datatype=datatype_map(self.dtypes[col]))
             print alter_query
             params['q'] = alter_query
-            requests.get(api_endpoint + urllib.urlencode(params))
+            # add column
+            resp = requests.get(api_endpoint + urllib.urlencode(params))
+            print resp.text
+            # update all the values in that column
+            # NOTE: fails if colval is 'inf' or some other Python or NumPy type
             for item in self[col].iteritems():
+                print item
                 update_query = '''
                     UPDATE {tablename}
                     SET "{colname}" = {colval}
@@ -146,16 +152,26 @@ def update_carto(self):
                            colname=col,
                            colval=process_item(item[1]),
                            cartodb_id=item[0])
+                print update_query
+                params['q'] = update_query
+                resp = requests.get(api_endpoint + urllib.urlencode(params))
+                print resp.text
     # drop column if needed
-    elif len(last_state.columns) > len(self.columns):
-        discardedcols = set(self.columns) - set(last_state.columns)
+    if len(set(last_state.columns) - set(self.columns)) > 0:
+        discardedcols = set(last_state.columns) - set(self.columns)
         for col in discardedcols:
             alter_query = '''
-
-            '''
-
+                ALTER TABLE "{tablename}"
+                DROP COLUMN "{colname}"
+            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                       colname=col)
+            params['q'] = alter_query
+            print alter_query
+            resp = requests.get(api_endpoint + urllib.urlencode(params))
+            print resp.text
     # sync updated values
-    df_diff = (self != last_state).stack()
+    common_cols = list(set(self.columns) & set(last_state.columns))
+    df_diff = (self[common_cols] != last_state[common_cols]).stack()
     for i in df_diff.iteritems():
         if i[1]:
             print i
