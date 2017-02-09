@@ -104,7 +104,7 @@ def datatype_map(dtype):
 #       if deleted column, do `alter table ... drop column ...
 # TODO: make less buggy about the diff between NaNs and nulls
 def update_carto(self):
-    from urllib import urlencode
+    import urllib
     import json
     import requests
     api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(
@@ -127,25 +127,27 @@ def update_carto(self):
     if len(last_state.columns) < len(self.columns):
         newcols = set(self.columns) - set(last_state.columns)
         for col in newcols:
-            print "Create new column {c}".format(c=c)
+            print "Create new column {col}".format(col=col)
             alter_query = '''
                 ALTER TABLE {tablename}
                 ADD COLUMN {colname} {datatype};
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                       colname=c,
-                        datatype=datatype_map(self.dtypes[c]))
-            requests.get()
-            for item in self[c].iteritems():
+                       colname=col,
+                       datatype=datatype_map(self.dtypes[col]))
+            print alter_query
+            params['q'] = alter_query
+            requests.get(api_endpoint + urllib.urlencode(params))
+            for item in self[col].iteritems():
                 update_query = '''
                     UPDATE {tablename}
                     SET "{colname}" = {colval}
                     WHERE "cartodb_id" = {cartodb_id}
                 '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                           colname=c,
+                           colname=col,
                            colval=process_item(item[1]),
                            cartodb_id=item[0])
     # drop column if needed
-    elif len(last_state.columns) > len(self.columns)
+    elif len(last_state.columns) > len(self.columns):
         discardedcols = set(self.columns) - set(last_state.columns)
         for col in discardedcols:
             alter_query = '''
@@ -155,21 +157,23 @@ def update_carto(self):
     # sync updated values
     df_diff = (self != last_state).stack()
     for i in df_diff.iteritems():
-        print i
         if i[1]:
+            print i
             cartodb_id = i[0][0]
             colname = i[0][1]
-            update_query = '''
-            UPDATE "{tablename}"
-            SET "{colname}" = {colval}
-            WHERE "cartodb_id" = {cartodb_id}
+            upsert_query = '''
+            INSERT INTO {tablename}("cartodb_id", "{colname}")
+                 VALUES ({cartodb_id}, {colval})
+            ON CONFLICT ("cartodb_id")
+            DO UPDATE SET "{colname}" = {colval}
+            WHERE EXCLUDED."cartodb_id" = {cartodb_id}
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=colname,
                        colval=process_item(self.loc[cartodb_id][colname]),
                        cartodb_id=cartodb_id)
-            print update_query
-            params['q'] = update_query
-            resp = requests.get(api_endpoint + urlencode(params))
+            print upsert_query
+            params['q'] = upsert_query
+            resp = requests.get(api_endpoint + urllib.urlencode(params))
             print json.loads(resp.text)
         else:
             continue
