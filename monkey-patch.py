@@ -3,9 +3,12 @@ Monkey patching pandas to add utilities for CARTO tables
 Andy Eschbacher and Stuart Lynn, 2017
 
 Project goals
+    * Interact with a CARTO table fully within a Jupyter notebook/pandas
+      workflow
     * Like geopandas, have a .cartomap() method which gives back the data
       as a map using carto's maps api and turbocartocss on an optional
       attribute
+    * Add CARTO services like the Data Observatory as methods to a dataframe
 
 Features to add:
     * create a dataframe from scratch
@@ -24,7 +27,6 @@ Notes on propagating pandas metadata:
 """
 
 # TODO: hook into pandas.core?
-import os
 import pandas as pd
 
 def add_meta(self, **kwargs):
@@ -36,11 +38,11 @@ def add_meta(self, **kwargs):
 
 
 def read_carto(self, username, tablename, api_key=None, include_geom=True,
-               limit=None):
+               limit=None, debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
     import json
-    from urllib import urlencode
+    import urllib
 
     # construct query
     query = 'SELECT * FROM {tablename}'.format(tablename=tablename)
@@ -49,7 +51,7 @@ def read_carto(self, username, tablename, api_key=None, include_geom=True,
             query += ' LIMIT {limit}'.format(limit=limit)
         else:
             raise ValueError("limit parameter must an integer >= 0")
-    # print query
+    # if debug: print query
 
     # construct API call
     api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(username=username)
@@ -62,18 +64,18 @@ def read_carto(self, username, tablename, api_key=None, include_geom=True,
     # exclude geometry columns if asked
     if not include_geom:
         params['skipfields'] = 'the_geom,the_geom_webmercator'
-    print api_endpoint + urlencode(params)
-    _df = pd.read_csv(api_endpoint + urlencode(params))
+    if debug: print api_endpoint + urllib.urlencode(params)
+    _df = pd.read_csv(api_endpoint + urllib.urlencode(params))
     # TODO: add table schema to the metadata
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df._metadata.append(json.dumps({'carto_table': tablename,
-                                     'carto_username': username,
-                                     'carto_api_key': api_key,
-                                     'carto_include_geom': include_geom,
-                                     'carto_limit': limit,
-                                     'carto_schema': _df.columns}))
+    _df._metadata[0] = json.dumps({'carto_table': tablename,
+                                   'carto_username': username,
+                                   'carto_api_key': api_key,
+                                   'carto_include_geom': include_geom,
+                                   'carto_limit': limit,
+                                   'carto_schema': _df.columns})
     _df.set_index('cartodb_id')
     self.carto_last_state = _df
     return _df
@@ -83,6 +85,9 @@ pd.read_carto = read_carto
 
 # TODO: add into update_carto function as subfunction?
 def process_item(item):
+    """
+      map NumPy values to PostgreSQL values
+    """
     from math import isnan
     if isinstance(item, str):
         return '\'{}\''.format(item)
@@ -93,6 +98,9 @@ def process_item(item):
     return str(item)
 
 def datatype_map(dtype):
+    """
+       map NumPy types to PostgreSQL types
+    """
     if 'float' in dtype:
         return 'numeric'
     elif 'int' in dtype:
@@ -100,50 +108,63 @@ def datatype_map(dtype):
     else:
         return 'text'
 
-# TODO: add check of current schema with metadata schema
-#       if new column, do `alter table ... add column ...`
-#       if deleted column, do `alter table ... drop column ...
 # TODO: make less buggy about the diff between NaNs and nulls
-def update_carto(self):
+# TODO: batch UPDATES into a transaction
+# TODO: if table metadata doesn't exist, error saying need to set 'create'
+#       flag
+def update_carto(self, createtable=False, debug=False):
     import urllib
     import json
     import requests
+    if createtable is True:
+        # TODO: build this
+        # grab df schema, setup table, cartodbfy, then exit
+        pass
+    elif len(self._metadata) == 0:
+        raise Exception("Table not registered with CARTO. Set `createtable` "
+                        "flag to True")
+
     api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(
         username=json.loads(self._metadata[0])['carto_username'])
+
     if 'carto_api_key' in json.loads(self._metadata[0]):
         params = {
             'api_key': json.loads(self._metadata[0])['carto_api_key']
         }
     else:
-        raise Exception("No API key set for this dataframe.")
+        raise Exception("No API key set for this dataframe. Set with "
+                        "update metadata method.")
     # update current state of dataframe
     # diff with the last retrieved version from carto
-    filename = 'carto_temp_{}'.format(
-        json.loads(self._metadata[0])['carto_table'])
-    print filename
-    last_state = pd.read_csv(filename, index_col='cartodb_id')
-    # print last_state.head()
+    # filename = 'carto_temp_{}'.format(
+    #     json.loads(self._metadata[0])['carto_table'])
+    # if debug: print filename
+    # pd.read_csv(filename, index_col='cartodb_id')
+    last_state = self.carto_last_state
+    # if debug: print last_state.head()
 
     # create new column if needed
+    # TODO: extract to function
     if len(set(self.columns) - set(last_state.columns)) > 0:
         newcols = set(self.columns) - set(last_state.columns)
         for col in newcols:
-            print "Create new column {col}".format(col=col)
+            if debug: print "Create new column {col}".format(col=col)
             alter_query = '''
-                ALTER TABLE {tablename}
-                ADD COLUMN {colname} {datatype}
+                ALTER TABLE "{tablename}"
+                ADD COLUMN "{colname}" {datatype}
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col,
                        datatype=datatype_map(self.dtypes[col]))
-            print alter_query
+            if debug: print alter_query
             params['q'] = alter_query
             # add column
+            # TODO: replace with `carto-python` client
             resp = requests.get(api_endpoint + urllib.urlencode(params))
-            print resp.text
+            if debug: print resp.text
             # update all the values in that column
             # NOTE: fails if colval is 'inf' or some other Python or NumPy type
             for item in self[col].iteritems():
-                print item
+                if debug: print item
                 update_query = '''
                     UPDATE {tablename}
                     SET "{colname}" = {colval}
@@ -152,11 +173,13 @@ def update_carto(self):
                            colname=col,
                            colval=process_item(item[1]),
                            cartodb_id=item[0])
-                print update_query
+                if debug: print update_query
                 params['q'] = update_query
+                # TODO: replace with carto-python client
                 resp = requests.get(api_endpoint + urllib.urlencode(params))
-                print resp.text
+                if debug: print resp.text
     # drop column if needed
+    # TODO: extract to function
     if len(set(last_state.columns) - set(self.columns)) > 0:
         discardedcols = set(last_state.columns) - set(self.columns)
         for col in discardedcols:
@@ -166,15 +189,20 @@ def update_carto(self):
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col)
             params['q'] = alter_query
-            print alter_query
+            if debug: print alter_query
+            # TODO: replace with carto-python client
             resp = requests.get(api_endpoint + urllib.urlencode(params))
-            print resp.text
+            if debug: print resp.text
     # sync updated values
+    # TODO: extract to column
     common_cols = list(set(self.columns) & set(last_state.columns))
     df_diff = (self[common_cols] != last_state[common_cols]).stack()
     for i in df_diff.iteritems():
+        # TODO: instead of doing row by row, build up a list of queries
+        #       testing to be sure the num of characters is lower than
+        #       16368ish. And then run the query as a transaction
         if i[1]:
-            print i
+            if debug: print i
             cartodb_id = i[0][0]
             colname = i[0][1]
             upsert_query = '''
@@ -187,10 +215,11 @@ def update_carto(self):
                        colname=colname,
                        colval=process_item(self.loc[cartodb_id][colname]),
                        cartodb_id=cartodb_id)
-            print upsert_query
+            if debug: print upsert_query
             params['q'] = upsert_query
+            # TODO: replace with carto-python client
             resp = requests.get(api_endpoint + urllib.urlencode(params))
-            print json.loads(resp.text)
+            if debug: print json.loads(resp.text)
         else:
             continue
 
