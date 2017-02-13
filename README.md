@@ -1,10 +1,25 @@
-# CartoPandas
+# CartoFrames
 
 A pandas interface for integrating [Carto](https://carto.com/) into a data science workflow.
 
+
 ## Example usage
 
-Script in <https://github.com/ohasselblad/cartopandas/blob/master/sample.py>:
+See script in `monkey-patch.py`
+
+```python
+import pandas as pd
+import cartoframes
+df = pd.read_carto('username', 'tablename', api_key)
+# do fancy pandas operations (add/drop columns, change values, etc.)
+df.sync_carto() # updates carto table with all changes from this session
+```
+
+
+## Example client version
+
+
+Script in <https://github.com/ohasselblad/cartopandas/blob/master/sample.py>. Relies on `cartopandas.py`:
 
 ```python
 from cartopandas import CartoDF
