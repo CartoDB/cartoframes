@@ -59,14 +59,14 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
-def read_carto(self, cdb_client, username=None, tablename=None,
+def read_carto(cdb_client, username=None, tablename=None,
                custom_query=None, api_key=None, include_geom=True,
                limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
     # NOTE: need json or urllib anymore?
-    # import json
-    # import urllib
+    import json
+    import urllib
 
     # construct query
     if tablename:
@@ -98,20 +98,20 @@ def read_carto(self, cdb_client, username=None, tablename=None,
     #                  index_col='cartodb_id')
     resp = cdb_client.sql(query)
     schema = transform_schema(resp['fields'])
-    _df = pd.DataFrame(resp['rows'], index=index).astype(schema)
+    _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
 
     # TODO: add table schema to the metadata
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df._metadata[0] = json.dumps({'carto_table': tablename,
+    _df._metadata.append(json.dumps({'carto_table': tablename,
                                    'carto_username': username,
                                    'carto_api_key': api_key,
                                    'carto_include_geom': include_geom,
                                    'carto_limit': limit,
-                                   'carto_schema': _df.columns})
+                                   'carto_schema': str(_df.columns)}))
     #_df.set_index('cartodb_id')
-    self.carto_last_state = _df.copy(deep=True)
+    _df.carto_last_state = _df.copy(deep=True)
     return _df
 
 pd.read_carto = read_carto
