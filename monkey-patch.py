@@ -28,6 +28,7 @@ Notes on propagating pandas metadata:
 
 # TODO: hook into pandas.core?
 import pandas as pd
+import cartodb
 
 def add_meta(self, **kwargs):
     """
@@ -36,36 +37,69 @@ def add_meta(self, **kwargs):
     for key in kwargs:
         self._metadata[0][key] = kwargs[key]
 
+def map_dtypes(pgtype):
+    """
+        Map PostgreSQL data types to NumPy/pandas dtypes
+    """
+    dtypes = {'number': 'float64',
+              'date': 'datetime64',
+              'string': 'string',
+              'geometry': 'string',
+              'boolean': 'bool'}
+    return dtypes[pgtype]
 
-def read_carto(self, username, tablename, api_key=None, include_geom=True,
-               limit=None, debug=False):
+def transform_schema(pgschema):
+    """
+        Transform schema returned via SQL API to dict for pandas
+    """
+    datatypes = {}
+    for field in pgschema:
+        if 'cartodb_id' in field:
+            continue
+        datatypes[field] = map_dtypes(pgschema[field]['type'])
+    return datatypes
+
+def read_carto(self, cdb_client, username=None, tablename=None,
+               custom_query=None, api_key=None, include_geom=True,
+               limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
-    import json
-    import urllib
+    # NOTE: need json or urllib anymore?
+    # import json
+    # import urllib
 
     # construct query
-    query = 'SELECT * FROM {tablename}'.format(tablename=tablename)
-    if limit:
-        if (limit >= 0) and isinstance(limit, int):
-            query += ' LIMIT {limit}'.format(limit=limit)
-        else:
-            raise ValueError("limit parameter must an integer >= 0")
-    # if debug: print query
+    if tablename:
+        query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
+        if limit:
+            # NOTE: what if limit is `all` or `none`?
+            if (limit >= 0) and isinstance(limit, int):
+                query += ' LIMIT {limit}'.format(limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
+    elif query:
+        query = custom_query
+    else:
+        raise ValueError("`tablename` or `query` needs to be specified")
 
-    # construct API call
-    api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(username=username)
-    # add parameters
-    params = {'format': 'csv',
-              'q': query}
-    # API key if passed
-    if api_key:
-        params['api_key'] = api_key
+    if debug:
+        print query
+
     # exclude geometry columns if asked
+    # TODO: include_geom in cdb_client structure?
     if not include_geom:
+        params = {}
         params['skipfields'] = 'the_geom,the_geom_webmercator'
-    if debug: print api_endpoint + urllib.urlencode(params)
-    _df = pd.read_csv(api_endpoint + urllib.urlencode(params))
+    if debug:
+        print query
+    # TODO: use the dtype flag in read_csv to set the schema
+    # TODO: use the na_values flag for turning nulls to NaNs deterministically
+    # _df = pd.read_csv(api_endpoint + urllib.urlencode(params),
+    #                  index_col='cartodb_id')
+    resp = cdb_client.sql(query)
+    schema = transform_schema(resp['fields'])
+    _df = pd.DataFrame(resp['rows'], index=index).astype(schema)
+
     # TODO: add table schema to the metadata
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
@@ -76,8 +110,8 @@ def read_carto(self, username, tablename, api_key=None, include_geom=True,
                                    'carto_include_geom': include_geom,
                                    'carto_limit': limit,
                                    'carto_schema': _df.columns})
-    _df.set_index('cartodb_id')
-    self.carto_last_state = _df
+    #_df.set_index('cartodb_id')
+    self.carto_last_state = _df.copy(deep=True)
     return _df
 
 pd.read_carto = read_carto
