@@ -58,15 +58,16 @@ def transform_schema(pgschema):
             continue
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
-
+# NOTE: this is compatible with current version of carto-python client
+# https://github.com/CartoDB/carto-python/blob/584da36530292ca252db1f05ddf36a9cc8464ecb/README.md#using-api-key
 def read_carto(cdb_client, username=None, tablename=None,
                custom_query=None, api_key=None, include_geom=True,
                limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
-    # NOTE: need json or urllib anymore?
+    from carto.sql import SQLClient
     import json
-    import urllib
+    sql = SQLClient(cdb_client)
 
     # construct query
     if tablename:
@@ -80,23 +81,18 @@ def read_carto(cdb_client, username=None, tablename=None,
     elif query:
         query = custom_query
     else:
-        raise ValueError("`tablename` or `query` needs to be specified")
+        raise NameError("`tablename` or `query` needs to be specified")
 
     if debug:
         print query
 
     # exclude geometry columns if asked
     # TODO: include_geom in cdb_client structure?
-    if not include_geom:
-        params = {}
-        params['skipfields'] = 'the_geom,the_geom_webmercator'
+
     if debug:
         print query
-    # TODO: use the dtype flag in read_csv to set the schema
-    # TODO: use the na_values flag for turning nulls to NaNs deterministically
-    # _df = pd.read_csv(api_endpoint + urllib.urlencode(params),
-    #                  index_col='cartodb_id')
-    resp = cdb_client.sql(query)
+    # TODO: how to handle NaNs deterministically?
+    resp = sql.send(query)
     schema = transform_schema(resp['fields'])
     _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
 
@@ -105,12 +101,11 @@ def read_carto(cdb_client, username=None, tablename=None,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
     _df._metadata.append(json.dumps({'carto_table': tablename,
-                                   'carto_username': username,
-                                   'carto_api_key': api_key,
-                                   'carto_include_geom': include_geom,
-                                   'carto_limit': limit,
-                                   'carto_schema': str(_df.columns)}))
-    #_df.set_index('cartodb_id')
+                                    'carto_username': username,
+                                    'carto_api_key': api_key,
+                                    'carto_include_geom': include_geom,
+                                    'carto_limit': limit,
+                                    'carto_schema': str(_df.columns)}))
     _df.carto_last_state = _df.copy(deep=True)
     return _df
 
@@ -120,7 +115,7 @@ pd.read_carto = read_carto
 # TODO: add into update_carto function as subfunction?
 def process_item(item):
     """
-      map NumPy values to PostgreSQL values
+      Map NumPy values to PostgreSQL values
     """
     from math import isnan
     if isinstance(item, str):
