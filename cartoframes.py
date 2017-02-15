@@ -101,12 +101,13 @@ def read_carto(cdb_client, username=None, tablename=None,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
     _df._metadata.append(json.dumps({'carto_table': tablename,
-                                    'carto_username': username,
-                                    'carto_api_key': api_key,
-                                    'carto_include_geom': include_geom,
-                                    'carto_limit': limit,
-                                    'carto_schema': str(_df.columns)}))
+                                     'carto_username': username,
+                                     'carto_api_key': api_key,
+                                     'carto_include_geom': include_geom,
+                                     'carto_limit': limit,
+                                     'carto_schema': str(_df.columns)}))
     _df.carto_last_state = _df.copy(deep=True)
+    _df.carto_sql_client = sql
     return _df
 
 pd.read_carto = read_carto
@@ -142,35 +143,16 @@ def datatype_map(dtype):
 # TODO: if table metadata doesn't exist, error saying need to set 'create'
 #       flag
 def update_carto(self, createtable=False, debug=False):
-    import urllib
     import json
-    import requests
     if createtable is True:
         # TODO: build this
         # grab df schema, setup table, cartodbfy, then exit
         pass
-    elif len(self._metadata) == 0:
+    elif not hasattr(self, 'carto_sql_client'):
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
 
-    api_endpoint = 'https://{username}.carto.com/api/v2/sql?'.format(
-        username=json.loads(self._metadata[0])['carto_username'])
-
-    if 'carto_api_key' in json.loads(self._metadata[0]):
-        params = {
-            'api_key': json.loads(self._metadata[0])['carto_api_key']
-        }
-    else:
-        raise Exception("No API key set for this dataframe. Set with "
-                        "update metadata method.")
-    # update current state of dataframe
-    # diff with the last retrieved version from carto
-    # filename = 'carto_temp_{}'.format(
-    #     json.loads(self._metadata[0])['carto_table'])
-    # if debug: print filename
-    # pd.read_csv(filename, index_col='cartodb_id')
     last_state = self.carto_last_state
-    # if debug: print last_state.head()
 
     # create new column if needed
     # TODO: extract to function
@@ -183,13 +165,10 @@ def update_carto(self, createtable=False, debug=False):
                 ADD COLUMN "{colname}" {datatype}
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col,
-                       datatype=datatype_map(self.dtypes[col]))
+                       datatype=datatype_map(str(self.dtypes[col])))
             if debug: print alter_query
-            params['q'] = alter_query
             # add column
-            # TODO: replace with `carto-python` client
-            resp = requests.get(api_endpoint + urllib.urlencode(params))
-            if debug: print resp.text
+            resp = self.carto_sql_client.send(alter_query)
             # update all the values in that column
             # NOTE: fails if colval is 'inf' or some other Python or NumPy type
             for item in self[col].iteritems():
@@ -197,16 +176,14 @@ def update_carto(self, createtable=False, debug=False):
                 update_query = '''
                     UPDATE {tablename}
                     SET "{colname}" = {colval}
-                    WHERE "cartodb_id" = {cartodb_id}
+                    WHERE "cartodb_id" = {cartodb_id};
                 '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                            colname=col,
                            colval=process_item(item[1]),
                            cartodb_id=item[0])
                 if debug: print update_query
-                params['q'] = update_query
-                # TODO: replace with carto-python client
-                resp = requests.get(api_endpoint + urllib.urlencode(params))
-                if debug: print resp.text
+                resp = self.carto_sql_client.send(update_query)
+                # if debug: print resp.text
     # drop column if needed
     # TODO: extract to function
     if len(set(last_state.columns) - set(self.columns)) > 0:
@@ -217,11 +194,9 @@ def update_carto(self, createtable=False, debug=False):
                 DROP COLUMN "{colname}"
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col)
-            params['q'] = alter_query
+
             if debug: print alter_query
-            # TODO: replace with carto-python client
-            resp = requests.get(api_endpoint + urllib.urlencode(params))
-            if debug: print resp.text
+            resp = self.carto_sql_client.send(alter_query)
     # sync updated values
     # TODO: extract to column
     common_cols = list(set(self.columns) & set(last_state.columns))
@@ -245,9 +220,8 @@ def update_carto(self, createtable=False, debug=False):
                        colval=process_item(self.loc[cartodb_id][colname]),
                        cartodb_id=cartodb_id)
             if debug: print upsert_query
-            params['q'] = upsert_query
             # TODO: replace with carto-python client
-            resp = requests.get(api_endpoint + urllib.urlencode(params))
+            resp = self.carto_sql_client.send(upsert_query)
             if debug: print json.loads(resp.text)
         else:
             continue
