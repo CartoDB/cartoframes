@@ -228,15 +228,28 @@ def update_carto(self, createtable=False, debug=False):
 
 pd.DataFrame.update_carto = update_carto
 
-def carto_map(self, interactive=True):
+def carto_map(self, interactive=True, stylecol=None):
+    """
+        Produce and return CARTO maps or iframe embeds
+    """
     try:
         import IPython
+        return_iframe = False
     except:
         return_iframe = True
     import urllib
+
+    if stylecol:
+        fill_style = ('ramp([{stylecol}], '
+                      '(#ffc6c4, #ee919b, #cc607d, #9e3963, #672044), '
+                      'quantiles)').format(stylecol=stylecol)
+    else:
+        fill_style = '#f00'
+
     df_meta = json.loads(self._metadata[-1])
-    credentials = {'username': df_meta['carto_username'],
-                   'tablename': df_meta['carto_table']}
+    params = {'username': df_meta['carto_username'],
+              'tablename': df_meta['carto_table'],
+               'fill_style': fill_style}
     mapconfig = '''{"user_name": "%(username)s",
                     "type": "cartodb",
                     "sublayers": [{
@@ -244,15 +257,18 @@ def carto_map(self, interactive=True):
                       "urlTemplate": "http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
                       }, {
                       "sql": "select * from %(tablename)s",
-                      "cartocss": "#layer { polygon-fill: #F00; polygon-opacity: 0.3; line-color: #F00; }"
+                      "cartocss": "#layer { polygon-fill: %(fill_style)s; polygon-opacity: 0.9; line-color: #FFF; line-opacity: 0.5; }"
                       }],
                       "subdomains": [ "a", "b", "c" ]
-                      }''' % credentials
-    params = dict({'q': urllib.quote(mapconfig)}, **credentials)
+                      }''' % params
+    params = dict({'q': urllib.quote(mapconfig)}, **params)
     # print params
     url = '?'.join(['/files/cartoframes.html',
                     urllib.urlencode(params)])
     iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
+    if return_iframe is True:
+        return iframe
+
     return IPython.display.HTML(iframe)
 
 pd.DataFrame.carto_map = carto_map
