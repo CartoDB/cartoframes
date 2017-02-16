@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>cartoframes</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+
+    <!-- Map takes up full browser window -->
+    <style>
+      html, body, #map {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="http://libs.cartocdn.com.s3.amazonaws.com/cartodb.js/v3/3.15/cartodb.js"></script>
+
+    <script>
+    function getJsonFromUrl() {
+      var query = location.search.substr(1);
+      var result = {};
+      query.split("&").forEach(function(part) {
+        var item = part.split("=");
+        console.log("ITEM: ", item);
+        result[item[0]] = decodeURIComponent(item[1]);
+      });
+      return result;
+    }
+
+    $(function(){
+
+        console.log(window.location);
+        var params = getJsonFromUrl();
+        var urlsearch = JSON.parse(decodeURIComponent(params.q)),
+            username = params.username,
+            tablename = params.tablename;
+        console.log("USERNAME", username);
+        console.log("TABLENAME", tablename);
+        var map = L.map('map', {
+          // NOTE: map will zoom/center to region after it's instantiated
+          zoom: 3,
+          center: [0, 0]
+        });
+
+        cartodb.createLayer(map, urlsearch, { filter: ['http', 'mapnik'] })
+          .addTo(map)
+          .done(function(layers) {
+            var sql = cartodb.SQL({user: username});
+            console.log("SQL", sql);
+            sql.getBounds('select * from ' + tablename).done(function(bounds) {
+              map.fitBounds(bounds);
+              // or map.fitBounds(bounds, mapView.getSize());
+            });
+          })
+          .error(function(err) {
+            console.log("ERROR: ", err);
+          });
+      });
+    </script>
+
+  </body>
+</html>
