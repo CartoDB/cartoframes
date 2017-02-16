@@ -27,8 +27,8 @@ df.sync_carto() # updates carto table with all changes from this session
 The following will embed a CARTO map in a Jupyter notebook (interactive or static). 
 
 ```python
-df = pd.read_carto(auth_client, 'tablename', stylecol='interesting_col')
-df.carto_map()
+df = pd.read_carto(auth_client, 'tablename')
+df.carto_map(interactive=True, stylecol='interesting_col')
 ```
 
 ![](cartoframe-map-example.png)
