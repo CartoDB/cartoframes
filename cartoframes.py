@@ -227,3 +227,32 @@ def update_carto(self, createtable=False, debug=False):
             continue
 
 pd.DataFrame.update_carto = update_carto
+
+def carto_map(self, interactive=True):
+    try:
+        import IPython
+    except:
+        return_iframe = True
+    import urllib
+    df_meta = json.loads(self._metadata[-1])
+    credentials = {'username': df_meta['carto_username'],
+                   'tablename': df_meta['carto_table']}
+    mapconfig = '''{"user_name": "%(username)s",
+                    "type": "cartodb",
+                    "sublayers": [{
+                      "type": "http",
+                      "urlTemplate": "http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
+                      }, {
+                      "sql": "select * from %(tablename)s",
+                      "cartocss": "#layer { polygon-fill: #F00; polygon-opacity: 0.3; line-color: #F00; }"
+                      }],
+                      "subdomains": [ "a", "b", "c" ]
+                      }''' % credentials
+    params = dict({'q': urllib.quote(mapconfig)}, **credentials)
+    # print params
+    url = '?'.join(['/files/cartoframes.html',
+                    urllib.urlencode(params)])
+    iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
+    return IPython.display.HTML(iframe)
+
+pd.DataFrame.carto_map = carto_map
