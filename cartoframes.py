@@ -84,8 +84,9 @@ def get_geom_type(sql_auth_client, tablename):
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except KeyError:
-        print ("Cannot map ``{tablename}` because it does not have "
-               "geometries").format(tablename=tablename)
+        print("Warning: cannot map `{tablename}` because it does not have "
+              "geometries").format(tablename=tablename)
+        return None
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 # TODO: remove username as a param would be nice.. accessible to write to
@@ -369,6 +370,9 @@ def carto_map(self, interactive=True, stylecol=None):
         # TODO: use carto-python client to create static map (not yet
         #       implemented)
         raise NotImplementedError("This feature is not yet implemented")
+    if (stylecol is not None) and (stylecol not in self.columns):
+        raise Exception(('`{stylecol}` not in '
+                         'dataframe').format(stylecol=stylecol))
 
     df_meta = json.loads(self._metadata[-1])
     mapconfig_params = {'username': df_meta['carto_username'],
