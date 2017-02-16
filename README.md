@@ -5,40 +5,34 @@ A pandas interface for integrating [Carto](https://carto.com/) into a data scien
 
 ## Example usage
 
-See script in `monkey-patch.py`
+
+### Data workflow
+
+Get table from carto, make changes in pandas, sync updates with carto:
 
 ```python
 import pandas as pd
+import carto
 import cartoframes
-df = pd.read_carto('username', 'tablename', api_key)
+
+cdb_auth_client = carto.auth.APIAuthClient(base_url, APIKEY)
+
+df = pd.read_carto(cdb_auth_client, 'tablename')
 # do fancy pandas operations (add/drop columns, change values, etc.)
 df.sync_carto() # updates carto table with all changes from this session
 ```
 
+### Map workflow
 
-## Example client version
-
-
-Script in <https://github.com/ohasselblad/cartopandas/blob/master/sample.py>. Relies on `cartopandas.py`:
+The following will embed a CARTO map in a Jupyter notebook (interactive or static). 
 
 ```python
-from cartopandas import CartoDF
-import json
-
-# modify credentials.json.sample
-cred = json.load(open('credentials.json'))
-
-# instantiate carto dataframe object
-cdf = CartoDF(cred['username'], api_key=cred['api_key'])
-
-# retrieve a table from your account
-eqs = cdf.get_table('all_month_3')
-
-# make modification / create new dataframes
-new_df = eqs[['time', 'latitude', 'longitude', 'mag', 'place']]
-new_df['mag'] = 10**(new_df['mag'])
-new_df.head()
-
-# create a new table in carto
-cdf.to_carto(new_df, 'mehaks_favorite_dataframe')
+df = pd.read_carto(auth_client, 'tablename', stylecol='interesting_col')
+df.carto_map()
 ```
+
+![](cartoframe-map-example.png)
+
+### Augment from Data Observatory
+
+Not yet implemented
