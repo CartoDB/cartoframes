@@ -40,14 +40,19 @@ def add_meta(self, **kwargs):
 
 def map_dtypes(pgtype):
     """
-        Map PostgreSQL data types to NumPy/pandas dtypes
+        Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
     """
+    # may not be a complete list, could not find SQL API documentation
+    # about data types
     dtypes = {'number': 'float64',
               'date': 'datetime64',
-              'string': 'string',
-              'geometry': 'string',
+              'string': 'object',
+              'geometry': 'object',
               'boolean': 'bool'}
-    return dtypes[pgtype]
+    try:
+        return dtypes[pgtype]
+    except KeyError:
+        return 'object'
 
 def transform_schema(pgschema):
     """
@@ -75,9 +80,12 @@ def get_geom_type(sql_auth_client, tablename):
     result = sql_auth_client.send('''
         SELECT ST_GeometryType(the_geom) As geomtype
         FROM "{tablename}"
-        LIMIT 1'''.format(tablename=tablename))['rows'][0]['geomtype']
-
-    return geomtypes[result]
+        LIMIT 1'''.format(tablename=tablename))
+    try:
+        return geomtypes[result['rows'][0]['geomtype']]
+    except KeyError:
+        print ("Cannot map ``{tablename}` because it does not have "
+               "geometries").format(tablename=tablename)
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 # TODO: remove username as a param would be nice.. accessible to write to
@@ -128,7 +136,6 @@ def read_carto(cdb_client, username=None, tablename=None,
     #       with strings, not JSON, so we're serializing here)
     _df._metadata.append(json.dumps({'carto_table': tablename,
                                      'carto_username': username,
-                                     'carto_api_key': api_key,
                                      'carto_include_geom': include_geom,
                                      'carto_limit': limit,
                                      'carto_schema': str(schema),
@@ -158,10 +165,13 @@ def datatype_map(dtype):
     """
        map NumPy types to PostgreSQL types
     """
+    # TODO: add datetype conversion
     if 'float' in dtype:
         return 'numeric'
     elif 'int' in dtype:
         return 'int'
+    elif 'bool' in dtype:
+        return 'boolean'
     else:
         return 'text'
 
@@ -254,34 +264,84 @@ def update_carto(self, createtable=False, debug=False):
 
 pd.DataFrame.update_carto = update_carto
 
+def cartocss_by_geom(geomtype):
+    if geomtype == 'point':
+        markercss = '''
+            #layer {
+              marker-width: 7;
+              marker-fill: %(filltype)s;
+              marker-fill-opacity: 1;
+              marker-allow-overlap: true;
+              marker-line-width: 1;
+              marker-line-color: #FFF;
+              marker-line-opacity: 1;
+            }
+        '''.replace('\n', '')
+        return markercss
+    elif geomtype == 'line':
+        linecss = '''
+            #layer {
+              line-width: 1.5;
+              line-color: %(filltype)s;
+            }
+        '''.replace('\n', '')
+        return linecss
+    elif geomtype == 'polygon':
+        polygoncss = '''
+            #layer {
+              polygon-fill: %(filltype)s;
+              line-width: 0.5;
+              line-color: #FFF;
+              line-opacity: 0.5;
+            }
+        '''.replace('\n', '')
+        return polygoncss
+    return None
 
-def carto_map(self, interactive=True, stylecol=None):
+
+def get_fillstyle(params):
     """
-        Produce and return CARTO maps or iframe embeds
+
     """
-    import urllib
-    import json
-    try:
-        import IPython
-        return_iframe = False
-    except ImportError:
-        return_iframe = True
 
-    if interactive is False:
-        # TODO: use carto-python client to create static map?
-        pass
-
-    if stylecol:
-        fill_style = ('ramp([{stylecol}], '
-                      '(#ffc6c4, #ee919b, #cc607d, #9e3963, #672044), '
-                      'quantiles)').format(stylecol=stylecol)
+    if params['stylecol']:
+        if params['datatype'] == 'float64':
+            fillstyle = ('ramp([{stylecol}], cartocolor(RedOr), '
+                         'quantiles())'.format(stylecol=params['stylecol']))
+        else:
+            fillstyle = ('ramp([{stylecol}], cartocolor(Bold), '
+                         'category(10))'.format(stylecol=params['stylecol']))
     else:
-        fill_style = '#f00'
+        fillstyle = '#f00'
 
-    df_meta = json.loads(self._metadata[-1])
-    params = {'username': df_meta['carto_username'],
-              'tablename': df_meta['carto_table'],
-              'fill_style': fill_style}
+    return fillstyle
+
+
+def get_mapconfig(params):
+    """
+        Anonymous Maps API template for carto.js
+        mapconfig_params = {'username': df_meta['carto_username'],
+                            'tablename': df_meta['carto_table'],
+                            'geomtype': df_meta['geomtype'],
+                            'stylecol': stylecol,
+                            'datatype': str(self[stylecol].dtype)}
+        dtypes one of
+          * quantitative: float64 (float32, int32, int64)
+          * categorical: bool, object
+            * cartocss rule: ramp([room_type], cartocolor(Bold), category(4))
+              dtypes = {'number': 'float64',
+                        'date': 'datetime64',
+                        'string': 'object',
+                        'geometry': 'object',
+                        'boolean': 'bool'}
+        color palettes: https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
+    """
+
+    cartocss = cartocss_by_geom(params['geomtype']) % {'filltype': get_fillstyle(params)}
+
+    hyperparams = dict({'cartocss': cartocss}, **params)
+    # print hyperparams
+
     mapconfig = '''{"user_name": "%(username)s",
                     "type": "cartodb",
                     "sublayers": [{
@@ -289,14 +349,43 @@ def carto_map(self, interactive=True, stylecol=None):
                       "urlTemplate": "http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png"
                       }, {
                       "sql": "select * from %(tablename)s",
-                      "cartocss": "#layer { polygon-fill: %(fill_style)s; polygon-opacity: 0.9; line-color: #FFF; line-opacity: 0.5; }"
+                      "cartocss": "%(cartocss)s"
                       }],
                       "subdomains": [ "a", "b", "c" ]
-                      }''' % params
-    params['q'] = urllib.quote(mapconfig)
+                      }''' % hyperparams
+
+    return mapconfig
+
+def carto_map(self, interactive=True, stylecol=None):
+    """
+        Produce and return CARTO maps or iframe embeds
+    """
+    import urllib
+    import json
+    import IPython
+    return_iframe = False
+    # create static map
+    if interactive is False:
+        # TODO: use carto-python client to create static map (not yet
+        #       implemented)
+        raise NotImplementedError("This feature is not yet implemented")
+
+    df_meta = json.loads(self._metadata[-1])
+    mapconfig_params = {'username': df_meta['carto_username'],
+                        'tablename': df_meta['carto_table'],
+                        'geomtype': df_meta['carto_geomtype'],
+                        'stylecol': stylecol,
+                        'datatype': (str(self[stylecol].dtype)
+                                     if stylecol in self.columns
+                                     else None)}
+
+    mapconfig = get_mapconfig(mapconfig_params)
+    # TODO: include in uriencode in mapconfig?
+    mapconfig_params['q'] = urllib.quote(mapconfig)
+
     # print params
     url = '?'.join(['/files/cartoframes.html',
-                    urllib.urlencode(params)])
+                    urllib.urlencode(mapconfig_params)])
     iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
     if return_iframe is True:
         return iframe
