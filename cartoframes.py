@@ -155,7 +155,7 @@ def read_carto(cdb_client, tablename=None,
 pd.read_carto = read_carto
 
 
-# TODO: add into update_carto function as subfunction?
+# TODO: add into sync_carto function as subfunction?
 def process_item(item):
     """
       Map NumPy values to PostgreSQL values
@@ -183,11 +183,35 @@ def datatype_map(dtype):
     else:
         return 'text'
 
+def upsert_table(self, df_diff, debug):
+    if debug:
+        import json
+
+    for i in df_diff.iteritems():
+        # TODO: instead of doing row by row, build up a list of queries
+        #       testing to be sure the num of characters is lower than
+        #       16368ish. And then run the query as a transaction
+        if debug: print i
+        cartodb_id = i[0][0]
+        colname = i[0][1]
+        upsert_query = '''
+        INSERT INTO "{tablename}"("cartodb_id", "{colname}")
+             VALUES ({cartodb_id}, {colval})
+        ON CONFLICT ("cartodb_id")
+        DO UPDATE SET "{colname}" = {colval}
+        WHERE EXCLUDED."cartodb_id" = {cartodb_id}
+        '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                   colname=colname,
+                   colval=process_item(self.loc[cartodb_id][colname]),
+                   cartodb_id=cartodb_id)
+        if debug: print upsert_query
+        resp = self.carto_sql_client.send(upsert_query)
+
 # TODO: make less buggy about the diff between NaNs and nulls
 # TODO: batch UPDATES into a transaction
 # TODO: if table metadata doesn't exist, error saying need to set 'create'
 #       flag
-def update_carto(self, createtable=False, debug=False):
+def sync_carto(self, createtable=False, debug=False):
     import json
     if createtable is True:
         # TODO: build this
@@ -241,36 +265,20 @@ def update_carto(self, createtable=False, debug=False):
             if debug: print alter_query
             resp = self.carto_sql_client.send(alter_query)
     # sync updated values
-    # TODO: extract to functon
     common_cols = list(set(self.columns) & set(self.carto_last_state.columns))
-    df_diff = (self[common_cols] != self.carto_last_state[common_cols]).stack()
-    for i in df_diff.iteritems():
-        # TODO: instead of doing row by row, build up a list of queries
-        #       testing to be sure the num of characters is lower than
-        #       16368ish. And then run the query as a transaction
-        if i[1]:
-            if debug: print i
-            cartodb_id = i[0][0]
-            colname = i[0][1]
-            upsert_query = '''
-            INSERT INTO "{tablename}"("cartodb_id", "{colname}")
-                 VALUES ({cartodb_id}, {colval})
-            ON CONFLICT ("cartodb_id")
-            DO UPDATE SET "{colname}" = {colval}
-            WHERE EXCLUDED."cartodb_id" = {cartodb_id}
-            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                       colname=colname,
-                       colval=process_item(self.loc[cartodb_id][colname]),
-                       cartodb_id=cartodb_id)
-            if debug: print upsert_query
-            resp = self.carto_sql_client.send(upsert_query)
-            if debug: print json.loads(resp.text)
-        else:
-            continue
+    if not self[common_cols].equals(self.carto_last_state[common_cols]):
+        # NOTE: this updates null-valued cells which have not changed since
+        #       np.nan != np.nan is True
+        df_diff = (self[common_cols] !=
+                   self.carto_last_state[common_cols]).stack()
+        df_diff = df_diff[df_diff]
+        upsert_table(self, df_diff, debug)
+
     # update state of dataframe
     self.carto_last_state = self.copy(deep=True)
+    print "Sync completed successfully"
 
-pd.DataFrame.update_carto = update_carto
+pd.DataFrame.sync_carto = sync_carto
 
 def cartocss_by_geom(geomtype):
     if geomtype == 'point':
@@ -374,7 +382,7 @@ def carto_map(self, interactive=True, stylecol=None):
     import IPython
 
     if (stylecol is not None) and (stylecol not in self.columns):
-        raise Exception(('`{stylecol}` not in '
+        raise NameError(('`{stylecol}` not in '
                          'dataframe').format(stylecol=stylecol))
     # create static map
     if interactive is False:
