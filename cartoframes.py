@@ -28,7 +28,6 @@ Notes on propagating pandas metadata:
 
 # TODO: hook into pandas.core?
 import pandas as pd
-import cartodb
 
 # not currently used
 def add_meta(self, **kwargs):
@@ -65,6 +64,14 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
+def get_username(baseurl):
+    """
+    NOTE: Not compatible with onprem, etc.
+    """
+    import re
+    m = re.search('https://(.*?).carto.com/api/', baseurl)
+    return m.group(1)
+
 def get_geom_type(sql_auth_client, tablename):
     """
         Get the geometry type in tablename for storing in
@@ -91,8 +98,8 @@ def get_geom_type(sql_auth_client, tablename):
 # NOTE: this is compatible with v1.0.0 of carto-python client
 # TODO: remove username as a param would be nice.. accessible to write to
 #       metadata from carto python client?
-def read_carto(cdb_client, username=None, tablename=None,
-               custom_query=None, include_geom=True,
+def read_carto(cdb_client, tablename=None,
+               query=None, include_geom=True,
                limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata"""
@@ -136,7 +143,7 @@ def read_carto(cdb_client, username=None, tablename=None,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
     _df._metadata.append(json.dumps({'carto_table': tablename,
-                                     'carto_username': username,
+                                     'carto_username': get_username(cdb_client.base_url),
                                      'carto_include_geom': include_geom,
                                      'carto_limit': limit,
                                      'carto_schema': str(schema),
@@ -304,7 +311,8 @@ def get_fillstyle(params):
     """
 
     """
-
+    if 'colorramp' not in params:
+        pass
     if params['stylecol']:
         if params['datatype'] == 'float64':
             fillstyle = ('ramp([{stylecol}], cartocolor(RedOr), '
@@ -364,15 +372,15 @@ def carto_map(self, interactive=True, stylecol=None):
     import urllib
     import json
     import IPython
-    return_iframe = False
+
+    if (stylecol is not None) and (stylecol not in self.columns):
+        raise Exception(('`{stylecol}` not in '
+                         'dataframe').format(stylecol=stylecol))
     # create static map
     if interactive is False:
         # TODO: use carto-python client to create static map (not yet
         #       implemented)
         raise NotImplementedError("This feature is not yet implemented")
-    if (stylecol is not None) and (stylecol not in self.columns):
-        raise Exception(('`{stylecol}` not in '
-                         'dataframe').format(stylecol=stylecol))
 
     df_meta = json.loads(self._metadata[-1])
     mapconfig_params = {'username': df_meta['carto_username'],
@@ -383,17 +391,12 @@ def carto_map(self, interactive=True, stylecol=None):
                                      if stylecol in self.columns
                                      else None)}
 
-    mapconfig = get_mapconfig(mapconfig_params)
-    # TODO: include in uriencode in mapconfig?
-    mapconfig_params['q'] = urllib.quote(mapconfig)
+    mapconfig_params['q'] = urllib.quote(get_mapconfig(mapconfig_params))
 
     # print params
     url = '?'.join(['/files/cartoframes.html',
                     urllib.urlencode(mapconfig_params)])
     iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
-    if return_iframe is True:
-        return iframe
-
     return IPython.display.HTML(iframe)
 
 pd.DataFrame.carto_map = carto_map
