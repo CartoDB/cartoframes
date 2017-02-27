@@ -29,7 +29,7 @@ Notes on propagating pandas metadata:
 # TODO: hook into pandas.core?
 import pandas as pd
 
-# not currently used
+# NOTE: `add_meta` not currently used
 def add_meta(self, **kwargs):
     """
         Set metadata for a dataframe if none has been already set
@@ -84,6 +84,7 @@ def get_geom_type(sql_auth_client, tablename):
                  'ST_Polygon': 'polygon',
                  'ST_MultiPolygon': 'polygon'}
 
+    # NOTE: assumes one geometry type per table
     result = sql_auth_client.send('''
         SELECT ST_GeometryType(the_geom) As geomtype
         FROM "{tablename}"
@@ -91,8 +92,8 @@ def get_geom_type(sql_auth_client, tablename):
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except KeyError:
-        print("Warning: cannot map `{tablename}` because it does not have "
-              "geometries").format(tablename=tablename)
+        print("Warning: cannot create a map from `{tablename}` because this "
+              "table does not have geometries").format(tablename=tablename)
         return None
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
@@ -126,13 +127,13 @@ def read_carto(cdb_client, tablename=None,
         raise NameError("`tablename` or `query` needs to be specified")
 
     if debug:
-        print query
+        print(query)
 
     # exclude geometry columns if asked
     # TODO: include_geom in cdb_client structure?
 
     if debug:
-        print query
+        print(query)
     # TODO: how to handle NaNs deterministically?
     resp = sql.send(query)
     schema = transform_schema(resp['fields'])
@@ -191,7 +192,7 @@ def upsert_table(self, df_diff, debug):
         # TODO: instead of doing row by row, build up a list of queries
         #       testing to be sure the num of characters is lower than
         #       16368ish. And then run the query as a transaction
-        if debug: print i
+        if debug: print(i)
         cartodb_id = i[0][0]
         colname = i[0][1]
         upsert_query = '''
@@ -204,7 +205,7 @@ def upsert_table(self, df_diff, debug):
                    colname=colname,
                    colval=process_item(self.loc[cartodb_id][colname]),
                    cartodb_id=cartodb_id)
-        if debug: print upsert_query
+        if debug: print(upsert_query)
         resp = self.carto_sql_client.send(upsert_query)
 
 # TODO: make less buggy about the diff between NaNs and nulls
@@ -226,20 +227,20 @@ def sync_carto(self, createtable=False, debug=False):
     if len(set(self.columns) - set(self.carto_last_state.columns)) > 0:
         newcols = set(self.columns) - set(self.carto_last_state.columns)
         for col in newcols:
-            if debug: print "Create new column {col}".format(col=col)
+            if debug: print("Create new column {col}".format(col=col))
             alter_query = '''
                 ALTER TABLE "{tablename}"
                 ADD COLUMN "{colname}" {datatype}
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col,
                        datatype=datatype_map(str(self.dtypes[col])))
-            if debug: print alter_query
+            if debug: print(alter_query)
             # add column
             resp = self.carto_sql_client.send(alter_query)
             # update all the values in that column
             # NOTE: fails if colval is 'inf' or some other Python or NumPy type
             for item in self[col].iteritems():
-                if debug: print item
+                if debug: print(item)
                 update_query = '''
                     UPDATE "{tablename}"
                     SET "{colname}" = {colval}
@@ -248,9 +249,9 @@ def sync_carto(self, createtable=False, debug=False):
                            colname=col,
                            colval=process_item(item[1]),
                            cartodb_id=item[0])
-                if debug: print update_query
+                if debug: print(update_query)
                 resp = self.carto_sql_client.send(update_query)
-                # if debug: print resp.text
+                # if debug: print(resp.text)
     # drop column if needed
     # TODO: extract to function
     if len(set(self.carto_last_state.columns) - set(self.columns)) > 0:
@@ -262,7 +263,7 @@ def sync_carto(self, createtable=False, debug=False):
             '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                        colname=col)
 
-            if debug: print alter_query
+            if debug: print(alter_query)
             resp = self.carto_sql_client.send(alter_query)
     # sync updated values
     common_cols = list(set(self.columns) & set(self.carto_last_state.columns))
@@ -276,7 +277,7 @@ def sync_carto(self, createtable=False, debug=False):
 
     # update state of dataframe
     self.carto_last_state = self.copy(deep=True)
-    print "Sync completed successfully"
+    print("Sync completed successfully")
 
 pd.DataFrame.sync_carto = sync_carto
 
@@ -357,7 +358,7 @@ def get_mapconfig(params):
     cartocss = cartocss_by_geom(params['geomtype']) % {'filltype': get_fillstyle(params)}
 
     hyperparams = dict({'cartocss': cartocss}, **params)
-    # print hyperparams
+    # print(hyperparams)
 
     mapconfig = '''{"user_name": "%(username)s",
                     "type": "cartodb",
@@ -377,6 +378,7 @@ def carto_map(self, interactive=True, stylecol=None):
     """
         Produce and return CARTO maps or iframe embeds
     """
+    # TODO: make this agnostic (for urllib) for python 2 v 3
     import urllib
     import json
     import IPython
@@ -388,8 +390,9 @@ def carto_map(self, interactive=True, stylecol=None):
     if interactive is False:
         # TODO: use carto-python client to create static map (not yet
         #       implemented)
-        raise NotImplementedError("This feature is not yet implemented")
+        raise NotImplementedError("Static maps are not yet implemented.")
 
+    # TODO: find more robust way to check which metadata item was checked
     df_meta = json.loads(self._metadata[-1])
     mapconfig_params = {'username': df_meta['carto_username'],
                         'tablename': df_meta['carto_table'],
@@ -401,7 +404,7 @@ def carto_map(self, interactive=True, stylecol=None):
 
     mapconfig_params['q'] = urllib.quote(get_mapconfig(mapconfig_params))
 
-    # print params
+    # print(params)
     url = '?'.join(['/files/cartoframes.html',
                     urllib.urlencode(mapconfig_params)])
     iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
