@@ -42,14 +42,12 @@ setup(
     keywords='data science maps spatial pandas',
     packages=['cartoframes'],
 
-    # List run-time dependencies here.  These will be installed by pip when
-    # your project is installed. For an analysis of "install_requires" vs pip's
-    # requirements files see:
-    # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'https://github.com/CartoDB/carto-python.git@e404d9a96afcd5cdd72cadf8e5461c3e67fd6d76#egg=carto',
+        'carto',
         'pandas'
     ],
+    dependency_links = [        'git+https://github.com/CartoDB/carto-python.git@e404d9a96afcd5cdd72cadf8e5461c3e67fd6d76#egg=carto'],
+
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
