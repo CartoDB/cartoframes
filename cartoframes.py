@@ -53,6 +53,22 @@ def map_dtypes(pgtype):
     except KeyError:
         return 'object'
 
+def dtype_to_pgtype(dtype, colname):
+    """
+    Map dataframe types to carto postgres types
+    """
+    if colname in ('the_geom', 'the_geom_webmercator'):
+        return 'geometry'
+    else:
+        mapping = {'float64': 'numeric',
+                   'datetime64': 'date',
+                   'object': 'text',
+                   'bool': 'boolean'}
+        try:
+            return mapping[dtype]
+        except KeyError:
+            return 'string'
+
 def transform_schema(pgschema):
     """
         Transform schema returned via SQL API to dict for pandas
@@ -184,40 +200,122 @@ def datatype_map(dtype):
     else:
         return 'text'
 
-def upsert_table(self, df_diff, debug):
-    if debug:
-        import json
 
-    for i in df_diff.iteritems():
-        # TODO: instead of doing row by row, build up a list of queries
-        #       testing to be sure the num of characters is lower than
-        #       16368ish. And then run the query as a transaction
-        if debug: print(i)
-        cartodb_id = i[0][0]
-        colname = i[0][1]
+def upsert_table(self, df_diff, debug, n_batch=20):
+    import json
+
+    n_items = len(df_diff)
+    queries = []
+
+    for row_num, row in enumerate(df_diff.iteritems()):
+        if debug: print(row)
+        cartodb_id = row[0][0]
+        colname = row[0][1]
         upsert_query = '''
         INSERT INTO "{tablename}"("cartodb_id", "{colname}")
              VALUES ({cartodb_id}, {colval})
         ON CONFLICT ("cartodb_id")
         DO UPDATE SET "{colname}" = {colval}
-        WHERE EXCLUDED."cartodb_id" = {cartodb_id}
+        WHERE EXCLUDED."cartodb_id" = {cartodb_id};
         '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
                    colname=colname,
                    colval=process_item(self.loc[cartodb_id][colname]),
-                   cartodb_id=cartodb_id)
-        if debug: print(upsert_query)
-        resp = self.carto_sql_client.send(upsert_query)
+                   cartodb_id=cartodb_id).strip().replace('\n', ' ')
+        queries.append(upsert_query)
+        # if debug: print(upsert_query)
+
+        # run batch if at n_batch queries, or at last item
+        if (len(queries) == n_batch) or (row_num == n_items - 1):
+            batchquery = '\n'.join(queries)
+            if debug:
+                print("Num characters in batch query: "
+                      "{}".format(len(batchquery)))
+            resp = self.carto_sql_client.send(batchquery)
+            if debug: print(resp)
+            queries = []
+    return None
+
+
+def drop_col(self, colname, debug):
+    """
+        Drop specified column
+    """
+    import json
+    alter_query = '''
+        ALTER TABLE "{tablename}"
+        DROP COLUMN "{colname}"
+    '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+               colname=colname)
+
+    if debug: print(alter_query)
+    resp = self.carto_sql_client.send(alter_query)
+    if debug: print(resp)
+    return None
+
+
+def add_col(self, colname, debug):
+    """
+        Alter table add col
+    """
+    import json
+    if debug: print("Create new column {col}".format(col=colname))
+    alter_query = '''
+        ALTER TABLE "{tablename}"
+        ADD COLUMN "{colname}" {datatype}
+    '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+               colname=colname,
+               datatype=datatype_map(str(self.dtypes[colname])))
+    if debug: print(alter_query)
+    # add column
+    resp = self.carto_sql_client.send(alter_query)
+    if debug: print(resp)
+    # update all the values in that column
+    # NOTE: fails if colval is 'inf' or some other Python or NumPy type
+    for item in self[colname].iteritems():
+        if debug: print(item)
+        update_query = '''
+            UPDATE "{tablename}"
+            SET "{colname}" = {colval}
+            WHERE "cartodb_id" = {cartodb_id};
+        '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+                   colname=colname,
+                   colval=process_item(item[1]),
+                   cartodb_id=item[0])
+        if debug: print(update_query)
+        resp = self.carto_sql_client.send(update_query)
+        # if debug: print(resp.text)
+    return None
+
+def create_carto_table(self, auth_client, tablename, debug=False):
+    """
+
+    """
+    schema = dict([(col, dtype_to_pgtype(str(dtype), colname))
+                   for col, dtype in zip(self.columns, self.dtypes)])
+    return None
+
 
 # TODO: make less buggy about the diff between NaNs and nulls
-# TODO: batch UPDATES into a transaction
-# TODO: if table metadata doesn't exist, error saying need to set 'create'
-#       flag
-def sync_carto(self, createtable=False, debug=False):
+def sync_carto(self, createtable=False, auth_client=None,
+               new_tablename=None, debug=False):
+    """
+        :param createtable (boolean): if set, creates a new table with name
+                                      `new_tablename` on account connected
+                                      through the auth_client
+        :param auth_client (object): carto api auth client
+        :param new_tablename (string): new name of table to create from
+                                       dataframe
+    """
+
     import json
+
+    # create table on carto if it doesn't not already exist
     if createtable is True:
         # TODO: build this
         # grab df schema, setup table, cartodbfy, then exit
-        pass
+        if auth_client is None:
+            raise Exception("Set `auth_client` flag to create a table.")
+        raise NotImplementedError("This feature is not yet implemented.")
     elif not hasattr(self, 'carto_sql_client'):
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
@@ -227,45 +325,17 @@ def sync_carto(self, createtable=False, debug=False):
     if len(set(self.columns) - set(self.carto_last_state.columns)) > 0:
         newcols = set(self.columns) - set(self.carto_last_state.columns)
         for col in newcols:
-            if debug: print("Create new column {col}".format(col=col))
-            alter_query = '''
-                ALTER TABLE "{tablename}"
-                ADD COLUMN "{colname}" {datatype}
-            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                       colname=col,
-                       datatype=datatype_map(str(self.dtypes[col])))
-            if debug: print(alter_query)
-            # add column
-            resp = self.carto_sql_client.send(alter_query)
-            # update all the values in that column
-            # NOTE: fails if colval is 'inf' or some other Python or NumPy type
-            for item in self[col].iteritems():
-                if debug: print(item)
-                update_query = '''
-                    UPDATE "{tablename}"
-                    SET "{colname}" = {colval}
-                    WHERE "cartodb_id" = {cartodb_id};
-                '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                           colname=col,
-                           colval=process_item(item[1]),
-                           cartodb_id=item[0])
-                if debug: print(update_query)
-                resp = self.carto_sql_client.send(update_query)
-                # if debug: print(resp.text)
+            add_col(self, col, debug)
+
     # drop column if needed
     # TODO: extract to function
     if len(set(self.carto_last_state.columns) - set(self.columns)) > 0:
         discardedcols = set(self.carto_last_state.columns) - set(self.columns)
         for col in discardedcols:
-            alter_query = '''
-                ALTER TABLE "{tablename}"
-                DROP COLUMN "{colname}"
-            '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                       colname=col)
+            drop_col(self, col, debug)
 
-            if debug: print(alter_query)
-            resp = self.carto_sql_client.send(alter_query)
     # sync updated values
+    # TODO: what happens if rows are removed?
     common_cols = list(set(self.columns) & set(self.carto_last_state.columns))
     if not self[common_cols].equals(self.carto_last_state[common_cols]):
         # NOTE: this updates null-valued cells which have not changed since
