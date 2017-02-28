@@ -80,19 +80,36 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df._set_metadata(tablename=tablename,
+    _df.set_metadata(tablename=tablename,
                       include_geom=include_geom,
                       limit=limit,
                       schema=schema,
                       geomtype=geomtype)
 
     # save the state for later use
-    _df.carto_last_state = _df.copy(deep=True)
-    _df.carto_sql_client = sql
+    # NOTE: this doubles the size of the dataframe
+    _df.set_last_state()
+
+    # store carto sql client for later use
+    _df.set_carto_sql_client(sql)
+
     return _df
 
 
-def _set_metadata(self, tablename=None, include_geom=None, limit=None,
+def set_last_state(self):
+    """
+    Store the state of the cartoframe
+    """
+    self.carto_last_state = self.copy(deep=True)
+
+def set_carto_sql_client(self, sql_client):
+    """
+    Store the SQL client for later use
+    """
+    self.carto_sql_client = sql_client
+
+
+def set_metadata(self, tablename=None, include_geom=None, limit=None,
                   schema=None, geomtype=None):
     """
     Method for storing metadata in a dataframe
@@ -208,6 +225,8 @@ def carto_map(self, interactive=True, stylecol=None):
 # Monkey patch these methods to pandas
 
 pd.read_carto = read_carto
-pd.DataFrame._set_metadata = _set_metadata
+pd.DataFrame.set_last_state = set_last_state
+pd.DataFrame.set_carto_sql_client = set_carto_sql_client
+pd.DataFrame.set_metadata = set_metadata
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto
