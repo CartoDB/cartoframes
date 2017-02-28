@@ -126,8 +126,7 @@ def get_geom_type(sql_auth_client, tablename):
 
 # utilities for pandas.DataFrame.carto_sync
 
-# TODO: add into sync_carto function as subfunction?
-def process_item(item):
+def map_numpy_to_postgres(item):
     """
       Map NumPy values to PostgreSQL values
     """
@@ -160,39 +159,47 @@ def upsert_table(self, df_diff, debug, n_batch=20):
 
     n_items = len(df_diff)
     queries = []
-
-    for row_num, row in enumerate(df_diff.iteritems()):
-        if debug: print(row)
-        cartodb_id = row[0][0]
-        colname = row[0][1]
-        upsert_query = '''
+    upsert_query = '''
         INSERT INTO "{tablename}"("cartodb_id", "{colname}")
              VALUES ({cartodb_id}, {colval})
         ON CONFLICT ("cartodb_id")
         DO UPDATE SET "{colname}" = {colval}
         WHERE EXCLUDED."cartodb_id" = {cartodb_id};
-        '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                   colname=colname,
-                   colval=process_item(self.loc[cartodb_id][colname]),
-                   cartodb_id=cartodb_id).strip().replace('\n', ' ')
+        '''
+
+    for row_num, row in enumerate(df_diff.iteritems()):
+        if debug: print(row)
+        cartodb_id = row[0][0]
+        colname = row[0][1]
+
+        # fill query template
+        upsert_query.format(
+            tablename=json.loads(self._metadata[0])['carto_table'],
+            colname=colname,
+            colval=map_numpy_to_postgres(self.loc[cartodb_id][colname]),
+            cartodb_id=cartodb_id).strip().replace('\n', ' ')
+
         queries.append(upsert_query)
-        # if debug: print(upsert_query)
+        if debug: print(upsert_query)
 
         # run batch if at n_batch queries, or at last item
         if (len(queries) == n_batch) or (row_num == n_items - 1):
             batchquery = '\n'.join(queries)
-            if debug:
-                print("Num characters in batch query: "
-                      "{}".format(len(batchquery)))
+            if debug: print("Num chars in batch: {}".format(len(batchquery)))
+
+            # send batch query to carto
             resp = self.carto_sql_client.send(batchquery)
             if debug: print(resp)
+
+            # clear for another batch
             queries = []
+
     return None
 
-
-def drop_col(self, colname, debug):
+# TODO: change this to be a list of colnames
+def drop_col(self, colname, n_batch=20, debug=False):
     """
-        Drop specified column
+    Drop specified column
     """
     import json
     alter_query = '''
@@ -207,37 +214,52 @@ def drop_col(self, colname, debug):
     return None
 
 
-def add_col(self, colname, debug):
+def add_col(self, colname, n_batch=20, debug=False):
     """
-        Alter table add col
+    Alter table by adding a column created from a DataFrame operation
     """
     import json
     if debug: print("Create new column {col}".format(col=colname))
+    # Alter table add column
+    #
     alter_query = '''
         ALTER TABLE "{tablename}"
-        ADD COLUMN "{colname}" {datatype}
-    '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+        ADD COLUMN "{colname}" {datatype};
+    '''.format(tablename=json.loads(self._metadata[-1])['carto_table'],
                colname=colname,
                datatype=datatype_map(str(self.dtypes[colname])))
     if debug: print(alter_query)
+
     # add column
     resp = self.carto_sql_client.send(alter_query)
     if debug: print(resp)
+
     # update all the values in that column
-    # NOTE: fails if colval is 'inf' or some other Python or NumPy type
-    for item in self[colname].iteritems():
+    #
+    # NOTE: fails if colval is 'inf' or some other exceptional Python
+    #  or NumPy type
+    n_items = len(self[colname])
+    update_query = '''
+        UPDATE "{tablename}"
+        SET "{colname}" = {colval}
+        WHERE "cartodb_id" = {cartodb_id};
+    '''
+    queries = []
+
+    for row_num, item in enumerate(self[colname].iteritems()):
         if debug: print(item)
-        update_query = '''
-            UPDATE "{tablename}"
-            SET "{colname}" = {colval}
-            WHERE "cartodb_id" = {cartodb_id};
-        '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
-                   colname=colname,
-                   colval=process_item(item[1]),
-                   cartodb_id=item[0])
-        if debug: print(update_query)
-        resp = self.carto_sql_client.send(update_query)
-        # if debug: print(resp.text)
+        temp_query = update_query.format(
+            tablename=json.loads(self._metadata[0])['carto_table'],
+            colname=colname,
+            colval=map_numpy_to_postgres(item[1]),
+            cartodb_id=item[0]).strip()
+        queries.append(temp_query)
+        if (len(queries) == n_batch) or (row_num == n_items - 1):
+            output_query = '\n'.join(queries)
+            if debug: print(output_query)
+            if debug: print("Num chars in query: {}".format(len(output_query)))
+            resp = self.carto_sql_client.send(output_query)
+
     return None
 
 def create_carto_table(self, auth_client, tablename, debug=False):

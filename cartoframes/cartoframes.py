@@ -81,10 +81,10 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
     _df.set_metadata(tablename=tablename,
-                      include_geom=include_geom,
-                      limit=limit,
-                      schema=schema,
-                      geomtype=geomtype)
+                     include_geom=include_geom,
+                     limit=limit,
+                     schema=schema,
+                     geomtype=geomtype)
 
     # save the state for later use
     # NOTE: this doubles the size of the dataframe
@@ -107,10 +107,17 @@ def set_carto_sql_client(self, sql_client):
     Store the SQL client for later use
     """
     self.carto_sql_client = sql_client
+    # self._metadata[-1] = json.dumps()
+
+def get_carto_sql_client(self, sql_client):
+    """
+    return the internally stored sql client
+    """
+    return self.carto_sql_client
 
 
 def set_metadata(self, tablename=None, include_geom=None, limit=None,
-                  schema=None, geomtype=None):
+                 schema=None, geomtype=None):
     """
     Method for storing metadata in a dataframe
     """
@@ -122,9 +129,10 @@ def set_metadata(self, tablename=None, include_geom=None, limit=None,
                     'carto_schema': str(schema),
                     'carto_geomtype': geomtype}))
 
+
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, createtable=False, auth_client=None,
-               new_tablename=None, debug=False):
+               new_tablename=None, n_batch=20, debug=False):
     """
     :param createtable (boolean): if set, creates a new table with name
                                   `new_tablename` on account connected
@@ -150,12 +158,17 @@ def sync_carto(self, createtable=False, auth_client=None,
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
 
+    if self.equals(self.carto_last_state):
+        print("Cartoframes are already synced")
+        return None
+
     # create new column if needed
     # TODO: extract to function
     if len(set(self.columns) - set(self.carto_last_state.columns)) > 0:
         newcols = set(self.columns) - set(self.carto_last_state.columns)
         for col in newcols:
-            cartoframes_utils.add_col(self, col, debug)
+            cartoframes_utils.add_col(self, col, n_batch=n_batch,
+                                      debug=debug)
 
     # drop column if needed
     # TODO: extract to function
@@ -176,7 +189,7 @@ def sync_carto(self, createtable=False, auth_client=None,
         cartoframes_utils.upsert_table(self, df_diff, debug)
 
     # update state of dataframe
-    self.carto_last_state = self.copy(deep=True)
+    self.set_last_state()
     print("Sync completed successfully")
 
 
@@ -230,3 +243,8 @@ pd.DataFrame.set_carto_sql_client = set_carto_sql_client
 pd.DataFrame.set_metadata = set_metadata
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto
+
+# Monkey patch these attributes
+
+pd.DataFrame.carto_sql_client = None
+pd.DataFrame.carto_last_state = None
