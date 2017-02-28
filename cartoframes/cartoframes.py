@@ -18,34 +18,38 @@ Features to add: see issues in the repository https://github.com/CartoDB/cartofr
 import pandas as pd
 import cartoframes_utils
 import carto
-# TODO: setup carto authentication through a method
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(cdb_client=None, username=None, api_key=None,
-               tablename=None, query=None, include_geom=True,
+def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
+               tablename=None, query=None, include_geom=True, sync=True,
                limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata.
        Inputs:
        :param cdb_client: object CARTO Python SDK authentication client
                           (default None)
-       :param
+       :param username: string CARTO username (default None)
+       :param api_key: string CARTO API key
+       :param onprem: string BASEURL for onprem (not yet implemented)
+       :param tablename: string Table to create a cartoframe from
+       :param query: string Query for generating a cartoframe (not yet
+                     implemented)
+       :param include_geom: string Not yet implemented
+       :param sync: boolean Create a cartoframe that can later be sync'd (True)
+                    or just pull down data (False)
+       :param limit: integer The maximum number of rows to pull
+       :param index: string Column to use for the index (default `cartodb_id`)
        """
-    from carto.sql import SQLClient
-    from carto.auth import APIKeyAuthClient
     import json
-    if cdb_client is None:
-        BASEURL = 'https://{username}.carto.com/api/'.format(username=USERNAME)
-        cdb_client = APIKeyAuthClient(BASEURL, API_KEY)
-        sql = SQLClient(cdb_client)
-    else:
-        sql = SQLClient(cdb_client)
+    # TODO: if onprem, use the specified template/domain? instead
+    # either cdb_client or user credentials have to be specified
+    sql = cartoframes_utils.get_auth_client(username, api_key, cdb_client)
 
     # construct query
     if tablename:
         query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
-        geomtype = carto_utils.get_geom_type(sql, tablename)
+        geomtype = cartoframes_utils.get_geom_type(sql, tablename)
         # Add limit if requested
         if limit:
             # NOTE: what if limit is `all` or `none`?
@@ -55,51 +59,65 @@ def read_carto(cdb_client=None, username=None, api_key=None,
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
     elif query:
-        # NOTE: note yet implemented
+        # NOTE: not yet implemented
+        # TODO: this would have to register a table on CARTO if sync=True
         # query = custom_query
         raise NotImplementedError("Creating a cartoframe from a query is not "
                                   "yet implemented.")
     else:
         raise NameError("Either `tablename` or `query` needs to be specified")
 
-    if debug:
-        print(query)
+    if debug: print(query)
 
     # exclude geometry columns if asked
     # TODO: include_geom in cdb_client structure?
 
-    if debug:
-        print(query)
-    # TODO: how to handle NaNs deterministically?
     resp = sql.send(query)
-    schema = carto_utils.transform_schema(resp['fields'])
-    carto_utils.df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
+    schema = cartoframes_utils.transform_schema(resp['fields'])
+    # TODO: what happens if index is None?
+    _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
 
-    # TODO: add table schema to the metadata
     # NOTE: pylint complains that we're accessing a 'protected member
-    #       carto_utils.metadata of a client class' (appending to _metadata only works
+    #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df._metadata.append(json.dumps({'carto_table': tablename,
-                                     'carto_username': carto_utils.get_username(cdb_client.base_url),
-                                     'carto_include_geom': include_geom,
-                                     'carto_limit': limit,
-                                     'carto_schema': str(schema),
-                                     'carto_geomtype': geomtype}))
+    _df._set_metadata(tablename=tablename,
+                      include_geom=include_geom,
+                      limit=limit,
+                      schema=schema,
+                      geomtype=geomtype)
+
+    # save the state for later use
     _df.carto_last_state = _df.copy(deep=True)
     _df.carto_sql_client = sql
     return _df
 
 
+def _set_metadata(self, tablename=None, include_geom=None, limit=None,
+                  schema=None, geomtype=None):
+    """
+    Method for storing metadata in a dataframe
+    """
+    import json
+    self._metadata.append(
+        json.dumps({'carto_table': tablename,
+                    'carto_include_geom': include_geom,
+                    'carto_limit': limit,
+                    'carto_schema': str(schema),
+                    'carto_geomtype': geomtype}))
+
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, createtable=False, auth_client=None,
                new_tablename=None, debug=False):
     """
-        :param createtable (boolean): if set, creates a new table with name
-                                      `new_tablename` on account connected
-                                      through the auth_client
-        :param auth_client (object): carto api auth client
-        :param new_tablename (string): new name of table to create from
-                                       dataframe
+    :param createtable (boolean): if set, creates a new table with name
+                                  `new_tablename` on account connected
+                                  through the auth_client
+    :param new_tablename (string): new name of table to create from dataframe.
+                                   If specified and dataframe was sourced from
+                                   CARTO, this will not overwrite the original
+                                   table. If specified and dataframe was not
+                                   read from CARTO, then this will create a new
+                                   table in user's CARTO account.
     """
 
     import json
@@ -120,14 +138,14 @@ def sync_carto(self, createtable=False, auth_client=None,
     if len(set(self.columns) - set(self.carto_last_state.columns)) > 0:
         newcols = set(self.columns) - set(self.carto_last_state.columns)
         for col in newcols:
-            carto_utils.add_col(self, col, debug)
+            cartoframes_utils.add_col(self, col, debug)
 
     # drop column if needed
     # TODO: extract to function
     if len(set(self.carto_last_state.columns) - set(self.columns)) > 0:
         discardedcols = set(self.carto_last_state.columns) - set(self.columns)
         for col in discardedcols:
-            carto_utils.drop_col(self, col, debug)
+            cartoframes_utils.drop_col(self, col, debug)
 
     # sync updated values
     # TODO: what happens if rows are removed?
@@ -138,7 +156,7 @@ def sync_carto(self, createtable=False, auth_client=None,
         df_diff = (self[common_cols] !=
                    self.carto_last_state[common_cols]).stack()
         df_diff = df_diff[df_diff]
-        carto_utils.upsert_table(self, df_diff, debug)
+        cartoframes_utils.upsert_table(self, df_diff, debug)
 
     # update state of dataframe
     self.carto_last_state = self.copy(deep=True)
@@ -178,7 +196,7 @@ def carto_map(self, interactive=True, stylecol=None):
                                      else None)}
 
     mapconfig_params['q'] = urllib.quote(
-        carto_utils.get_mapconfig(mapconfig_params))
+        cartoframes_utils.get_mapconfig(mapconfig_params))
 
     # print(params)
     url = '?'.join(['/files/cartoframes.html',
@@ -190,5 +208,6 @@ def carto_map(self, interactive=True, stylecol=None):
 # Monkey patch these methods to pandas
 
 pd.read_carto = read_carto
+pd.DataFrame._set_metadata = _set_metadata
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto

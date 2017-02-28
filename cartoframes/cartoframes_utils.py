@@ -2,6 +2,21 @@
 private functions used in cartoframes methods
 """
 
+
+def get_auth_client(username, api_key, cdb_client):
+    """
+    """
+    from carto.sql import SQLClient
+    from carto.auth import APIKeyAuthClient
+    if cdb_client is None:
+        BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
+        auth_client = APIKeyAuthClient(BASEURL, api_key)
+        sql = SQLClient(auth_client)
+    else:
+        sql = SQLClient(cdb_client)
+    return sql
+
+
 # utilities for pandas.read_carto
 
 # NOTE: `_add_meta` not currently used
