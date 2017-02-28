@@ -1,17 +1,15 @@
 """
 cartoframes
+
+NOTE: to install with pip in edit mode, use
+  `pip --process-dependency-links --upgrade -e .`
 """
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-# TODO: fill this in
-packages = [
-    'pandas',
-]
-
 
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
@@ -41,27 +39,14 @@ setup(
     ],
     keywords='data science maps spatial pandas',
     packages=['cartoframes'],
-
     install_requires=[
-        'carto',
+        'carto==1.0.0',
         'pandas'
     ],
-    dependency_links = [        'git+https://github.com/CartoDB/carto-python.git@e404d9a96afcd5cdd72cadf8e5461c3e67fd6d76#egg=carto'],
-
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    # extras_require={
-    #     'dev': ['check-manifest'],
-    #     'test': ['coverage'],
-    # },
-
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.  If using Python 2.6 or less, then these
-    # have to be included in MANIFEST.in as well.
+    dependency_links=[
+        'https://github.com/cartodb/carto-python/tarball/1.0.0#egg=carto-1.0.0'
+    ],
     package_data={
-        '': ['LICENSE'],
+        '': ['LICENSE', 'CONTRIBUTORS'],
     },
 )
