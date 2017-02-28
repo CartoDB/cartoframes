@@ -35,8 +35,8 @@ or static).
     df = pd.read_carto(auth_client, 'tablename')
     df.carto_map(interactive=True, stylecol='interesting_col')
 
-.. figure:: cartoframe-map-example.png
-   :alt: 
+.. figure:: examples/cartoframe-map-example.png
+   :alt: Example of cartoframes in use
 
 Augment from Data Observatory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
