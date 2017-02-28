@@ -22,18 +22,25 @@ import carto
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(cdb_client, tablename=None,
-               query=None, include_geom=True,
+def read_carto(cdb_client=None, username=None, api_key=None,
+               tablename=None, query=None, include_geom=True,
                limit=None, index='cartodb_id', debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata.
        Inputs:
        :param cdb_client: object CARTO Python SDK authentication client
+                          (default None)
        :param
        """
     from carto.sql import SQLClient
+    from carto.auth import APIKeyAuthClient
     import json
-    sql = SQLClient(cdb_client)
+    if cdb_client is None:
+        BASEURL = 'https://{username}.carto.com/api/'.format(username=USERNAME)
+        cdb_client = APIKeyAuthClient(BASEURL, API_KEY)
+        sql = SQLClient(cdb_client)
+    else:
+        sql = SQLClient(cdb_client)
 
     # construct query
     if tablename:
