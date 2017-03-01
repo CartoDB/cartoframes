@@ -15,14 +15,21 @@ Get table from carto, make changes in pandas, sync updates with carto:
 .. code:: python
 
     import pandas as pd
-    import carto
     import cartoframes
-
-    cdb_auth_client = carto.auth.APIAuthClient(base_url, APIKEY)
-
-    df = pd.read_carto(cdb_auth_client, 'tablename')
+    username = 'eschbacher'
+    api_key = 'abcdefghijklmnopqrstuvwxyz'
+    df = pd.read_carto(username=username,
+                       api_key=api_key,
+                       tablename='favorite_table')
     # do fancy pandas operations (add/drop columns, change values, etc.)
-    df.sync_carto() # updates carto table with all changes from this session
+    df['poverty_per_pop'] = df['poverty_count'].
+
+    # updates carto table with all changes from this session
+    # show all database access with debug=True
+    df.sync_carto(debug=True)
+
+.. figure:: examples/carto_map.png
+   :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
 
 Map workflow
 ~~~~~~~~~~~~
@@ -32,11 +39,13 @@ or static).
 
 .. code:: python
 
-    df = pd.read_carto(auth_client, 'tablename')
-    df.carto_map(interactive=True, stylecol='interesting_col')
+    df = pd.read_carto(username=username,
+                       api_key=api_key,
+                       tablename='brooklyn_poverty')
+    df.carto_map(interactive=True, stylecol='poverty_per_pop')
 
-.. figure:: examples/cartoframe-map-example.png
-   :alt: Example of cartoframes in use
+.. figure:: examples/carto_map.png
+   :alt: Example of creating a cartoframe map in a Jupyter notebook
 
 Augment from Data Observatory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
