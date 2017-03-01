@@ -5,6 +5,9 @@ NOTE: to install with pip in edit mode, use
   `pip --process-dependency-links --upgrade -e .`
 """
 
+# TODO: update this once carto-python is a module
+# NOTE: first do `pip install -r requirements.txt` to get setup
+
 from setuptools import setup
 from codecs import open
 from os import path
@@ -39,13 +42,7 @@ setup(
     ],
     keywords='data science maps spatial pandas',
     packages=['cartoframes'],
-    install_requires=[
-        'carto==1.0.0',
-        'pandas'
-    ],
-    dependency_links=[
-        'https://github.com/cartodb/carto-python/tarball/1.0.0#egg=carto-1.0.0'
-    ],
+    install_requires=['pandas'],
     package_data={
         '': ['LICENSE', 'CONTRIBUTORS'],
     },
