@@ -23,7 +23,7 @@ def get_auth_client(username, api_key, cdb_client):
 def add_meta(self, **kwargs):
     """Set metadata for a dataframe if none has been already set"""
     for key in kwargs:
-        self._metadata[0][key] = kwargs[key]
+        self._metadata[-1][key] = kwargs[key]
 
 def map_dtypes(pgtype):
     """
@@ -115,13 +115,18 @@ def get_geom_type(sql_auth_client, tablename):
     result = sql_auth_client.send('''
         SELECT ST_GeometryType(the_geom) As geomtype
         FROM "{tablename}"
+        WHERE the_geom IS NOT NULL
         LIMIT 1'''.format(tablename=tablename))
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except KeyError:
         raise Exception(("Cannot create a map from `{tablename}` because this "
                         "table does not have "
-                        "geometries").format(tablename=tablename))
+                        "geometries ({geomreported})").format(
+                            tablename=tablename,
+                            geomreported=result['rows'][0]['geomtype']))
+    except Exception, err:
+        print("ERROR: {}".format(err))
     return None
 
 # utilities for pandas.DataFrame.carto_sync
@@ -137,6 +142,8 @@ def map_numpy_to_postgres(item):
         if math.isnan(item):
             return 'null'
         return str(item)
+    elif item is None:
+        return 'null'
     return str(item)
 
 def datatype_map(dtype):
@@ -154,38 +161,42 @@ def datatype_map(dtype):
         return 'text'
 
 
-def upsert_table(self, df_diff, debug, n_batch=20):
+def upsert_table(self, df_diff, debug=False, n_batch=30):
     import json
 
     n_items = len(df_diff)
     queries = []
-    upsert_query = '''
-        INSERT INTO "{tablename}"("cartodb_id", "{colname}")
-             VALUES ({cartodb_id}, {colval})
-        ON CONFLICT ("cartodb_id")
-        DO UPDATE SET "{colname}" = {colval}
-        WHERE EXCLUDED."cartodb_id" = {cartodb_id};
-        '''
-
+    upsert_query = ' '.join(
+        ("INSERT INTO \"{tablename}\"(\"cartodb_id\", \"{colname}\")",
+         "VALUES ({cartodb_id}, {colval})",
+         "ON CONFLICT (\"cartodb_id\")",
+         "DO UPDATE SET \"{colname}\" = {colval}",
+         "WHERE EXCLUDED.\"cartodb_id\" = {cartodb_id};"))
+    n_batches = n_items / n_batch
+    batch_num = 1
     for row_num, row in enumerate(df_diff.iteritems()):
-        if debug: print(row)
+        # if debug: print(row)
         cartodb_id = row[0][0]
         colname = row[0][1]
 
         # fill query template
-        upsert_query.format(
-            tablename=json.loads(self._metadata[0])['carto_table'],
+        temp_query = upsert_query.format(
+            tablename=json.loads(self._metadata[-1])['carto_table'],
             colname=colname,
             colval=map_numpy_to_postgres(self.loc[cartodb_id][colname]),
-            cartodb_id=cartodb_id).strip().replace('\n', ' ')
+            cartodb_id=cartodb_id)
 
-        queries.append(upsert_query)
-        if debug: print(upsert_query)
+        queries.append(temp_query)
 
         # run batch if at n_batch queries, or at last item
         if (len(queries) == n_batch) or (row_num == n_items - 1):
             batchquery = '\n'.join(queries)
+            print("{curr_batch} of {n_batches}".format(
+                curr_batch=batch_num,
+                n_batches=n_batches))
+            batch_num = batch_num + 1
             if debug: print("Num chars in batch: {}".format(len(batchquery)))
+            if debug: print(batchquery)
 
             # send batch query to carto
             resp = self.carto_sql_client.send(batchquery)
@@ -197,7 +208,7 @@ def upsert_table(self, df_diff, debug, n_batch=20):
     return None
 
 # TODO: change this to be a list of colnames
-def drop_col(self, colname, n_batch=20, debug=False):
+def drop_col(self, colname, n_batch=30, debug=False):
     """
     Drop specified column
     """
@@ -205,7 +216,7 @@ def drop_col(self, colname, n_batch=20, debug=False):
     alter_query = '''
         ALTER TABLE "{tablename}"
         DROP COLUMN "{colname}"
-    '''.format(tablename=json.loads(self._metadata[0])['carto_table'],
+    '''.format(tablename=json.loads(self._metadata[-1])['carto_table'],
                colname=colname)
 
     if debug: print(alter_query)
@@ -214,7 +225,7 @@ def drop_col(self, colname, n_batch=20, debug=False):
     return None
 
 
-def add_col(self, colname, n_batch=20, debug=False):
+def add_col(self, colname, n_batch=30, debug=False):
     """
     Alter table by adding a column created from a DataFrame operation
     """
@@ -249,7 +260,7 @@ def add_col(self, colname, n_batch=20, debug=False):
     for row_num, item in enumerate(self[colname].iteritems()):
         if debug: print(item)
         temp_query = update_query.format(
-            tablename=json.loads(self._metadata[0])['carto_table'],
+            tablename=json.loads(self._metadata[-1])['carto_table'],
             colname=colname,
             colval=map_numpy_to_postgres(item[1]),
             cartodb_id=item[0]).strip()
