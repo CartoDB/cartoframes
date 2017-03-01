@@ -72,10 +72,7 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     # exclude geometry columns if asked
     # TODO: include_geom in cdb_client structure?
 
-    resp = sql.send(query)
-    schema = cartoframes_utils.transform_schema(resp['fields'])
-    # TODO: what happens if index is None?
-    _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
+    _df = cartoframes_utils.df_from_query(query, sql, index=index)
 
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
@@ -85,7 +82,6 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                      api_key=api_key,
                      include_geom=include_geom,
                      limit=limit,
-                     schema=schema,
                      geomtype=geomtype)
 
     # save the state for later use
@@ -119,7 +115,7 @@ def get_carto_sql_client(self, sql_client):
 
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
-                 include_geom=None, limit=None, schema=None, geomtype=None):
+                 include_geom=None, limit=None, geomtype=None):
     """
     Method for storing metadata in a dataframe
     """
@@ -130,7 +126,6 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                     'carto_api_key': api_key,
                     'carto_include_geom': include_geom,
                     'carto_limit': limit,
-                    'carto_schema': str(schema),
                     'carto_geomtype': geomtype}))
 
 

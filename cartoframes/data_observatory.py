@@ -16,8 +16,8 @@ def read_data_obs(self, hints, debug=False):
     ) numers'''.format(tablename=json.loads(self._metadata[-1])['carto_table'],
                        array_of_things=hints)
     if debug: print(numerator_query)
-    resp = self.carto_sql_client.send(numerator_query)
-    schema = cartoframes_utils.transform_schema(resp['fields'])
-    return pd.DataFrame(resp['rows']).astype(schema)
+    return cartoframes_utils.df_from_query(numerator_query,
+                                           self.carto_sql_client,
+                                           index=None)
 
 pd.DataFrame.read_data_obs = read_data_obs
