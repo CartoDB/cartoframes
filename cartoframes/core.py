@@ -16,7 +16,7 @@ Features to add: see issues in the repository https://github.com/CartoDB/cartofr
 
 # TODO: hook into pandas.core?
 import pandas as pd
-import utils
+import cartoframes.utils as utils
 import carto
 
 

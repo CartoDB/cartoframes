@@ -128,7 +128,7 @@ def get_geom_type(sql_auth_client, tablename):
                         "geometries ({geomreported})").format(
                             tablename=tablename,
                             geomreported=result['rows'][0]['geomtype']))
-    except Exception, err:
+    except Exception as err:
         print("ERROR: {}".format(err))
     return None
 
