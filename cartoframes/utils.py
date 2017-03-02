@@ -164,7 +164,7 @@ def datatype_map(dtype):
         return 'text'
 
 
-def upsert_table(self, df_diff, debug=False, n_batch=30):
+def upsert_table(self, df_diff, n_batch=30, debug=False):
     import json
 
     n_items = len(df_diff)
@@ -261,7 +261,7 @@ def add_col(self, colname, n_batch=30, debug=False):
     queries = []
 
     for row_num, item in enumerate(self[colname].iteritems()):
-        if debug: print(item)
+        # if debug: print(item)
         temp_query = update_query.format(
             tablename=json.loads(self._metadata[-1])['carto_table'],
             colname=colname,
@@ -273,6 +273,7 @@ def add_col(self, colname, n_batch=30, debug=False):
             if debug: print(output_query)
             if debug: print("Num chars in query: {}".format(len(output_query)))
             resp = self.carto_sql_client.send(output_query)
+            queries = []
 
     return None
 
