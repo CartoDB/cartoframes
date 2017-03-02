@@ -74,10 +74,7 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     # exclude geometry columns if asked
     # TODO: include_geom in cdb_client structure?
 
-    resp = sql.send(query)
-    schema = utils.transform_schema(resp['fields'])
-    # TODO: what happens if index is None?
-    _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
+    _df = utils.df_from_query(query, sql, index=index)
 
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
@@ -87,7 +84,6 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                      api_key=api_key,
                      include_geom=include_geom,
                      limit=limit,
-                     schema=schema,
                      geomtype=geomtype)
 
     # save the state for later use
@@ -99,6 +95,16 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
 
     return _df
 
+
+def carto_registered(self):
+    """Says whether dataframe is registered as a table on CARTO"""
+    # TODO: write this :)
+    return True
+
+def carto_insync(self):
+    """Says whether current cartoframe is in sync with last saved state"""
+    # TODO: write this :)
+    return True
 
 def set_last_state(self):
     """
@@ -113,15 +119,44 @@ def set_carto_sql_client(self, sql_client):
     self.carto_sql_client = sql_client
     # self._metadata[-1] = json.dumps()
 
-def get_carto_sql_client(self, sql_client):
+def get_carto_sql_client(self):
     """
     return the internally stored sql client
     """
     return self.carto_sql_client
 
+# TODO: write a decorator for the following two functions (more will be added
+#       that follow this format)
+def get_carto_api_key(self):
+    """return the username of a cartoframe"""
+    import json
+    try:
+        return json.loads(self._metadata[-1])['carto_api_key']
+    except KeyError:
+        raise Exception("This cartoframe is not registered. "
+                        "Use `DataFrame.carto_register()`.")
+
+def get_carto_username(self):
+    """return the username of a cartoframe"""
+    import json
+    try:
+        return json.loads(self._metadata[-1])['carto_username']
+    except KeyError:
+        raise Exception("This cartoframe is not registered. "
+                        "Use `DataFrame.carto_register()`.")
+
+def get_carto_tablename(self):
+    """return the username of a cartoframe"""
+    import json
+    try:
+        return json.loads(self._metadata[-1])['carto_table']
+    except KeyError:
+        raise Exception("This cartoframe is not registered. "
+                        "Use `DataFrame.carto_register()`.")
+
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
-                 include_geom=None, limit=None, schema=None, geomtype=None):
+                 include_geom=None, limit=None, geomtype=None):
     """
     Method for storing metadata in a dataframe
     """
@@ -132,7 +167,6 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                     'carto_api_key': api_key,
                     'carto_include_geom': include_geom,
                     'carto_limit': limit,
-                    'carto_schema': str(schema),
                     'carto_geomtype': geomtype}))
 
 
@@ -270,6 +304,11 @@ pd.DataFrame.set_carto_sql_client = set_carto_sql_client
 pd.DataFrame.set_metadata = set_metadata
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto
+pd.DataFrame.get_carto_api_key = get_carto_api_key
+pd.DataFrame.get_carto_username = get_carto_username
+pd.DataFrame.get_carto_tablename = get_carto_tablename
+pd.DataFrame.carto_registered = carto_registered
+pd.DataFrame.carto_insync = carto_insync
 
 # Monkey patch these attributes
 

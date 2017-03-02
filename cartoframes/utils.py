@@ -1,7 +1,7 @@
 """
 private functions used in cartoframes methods
 """
-
+import pandas as pd
 
 def get_auth_client(username=None, api_key=None, cdb_client=None):
     """
@@ -163,6 +163,16 @@ def datatype_map(dtype):
     else:
         return 'text'
 
+def df_from_query(query, carto_sql_client, index=None):
+    """
+    Create a pandas DataFrame from a CARTO table
+    """
+    resp = carto_sql_client.send(query)
+    schema = transform_schema(resp['fields'])
+    if index:
+        return pd.DataFrame(resp['rows']).set_index('cartodb_id').astype(schema)
+    else:
+        return pd.DataFrame(resp['rows']).astype(schema)
 
 def upsert_table(self, df_diff, n_batch=30, debug=False):
     import json
