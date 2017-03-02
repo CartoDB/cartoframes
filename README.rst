@@ -50,4 +50,18 @@ or static).
 Augment from Data Observatory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Not yet implemented
+Interact with CARTO's Data Observatory:
+
+.. code:: python
+    # total pop, high school diploma (normalized), median income, poverty status (normalized)
+    # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html 
+    data_obs_measures = [{'numer_id': 'us.census.acs.B01003001'},
+                         {'numer_id': 'us.census.acs.B15003017', 'denominator': 'predenominated'},
+                         {'numer_id': 'us.census.acs.B19013001'},
+                         {'numer_id': 'us.census.acs.B17001002', 'denominator': 'predenominated'}]
+    df.carto_do_augment(data_obs_measures)
+    df.head(10)
+
+.. figure:: examples/data_obs_augmentation.png
+   :alt: Example of using data observatory augmentation methods
+
