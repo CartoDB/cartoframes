@@ -45,8 +45,8 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
     sql = utils.get_auth_client(username=username,
-                                            api_key=api_key,
-                                            cdb_client=cdb_client)
+                                api_key=api_key,
+                                cdb_client=cdb_client)
 
     # construct query
     if tablename:
@@ -155,6 +155,12 @@ def get_carto_tablename(self):
                         "Use `DataFrame.carto_register()`.")
 
 
+def get_carto_geomtype(self):
+    """return the geometry type of the cartoframe"""
+    import json
+    return json.loads(self._metadata[-1])['carto_geomtype']
+
+
 def set_metadata(self, tablename=None, username=None, api_key=None,
                  include_geom=None, limit=None, geomtype=None):
     """
@@ -184,8 +190,6 @@ def sync_carto(self, createtable=False, auth_client=None,
                                    read from CARTO, then this will create a new
                                    table in user's CARTO account.
     """
-
-    import json
 
     # create table on carto if it doesn't not already exist
     if createtable is True:
@@ -264,7 +268,6 @@ def carto_map(self, interactive=True, stylecol=None):
     except ImportError:
         # if Python 2
         import urllib
-    import json
     import IPython
 
     if (stylecol is not None) and (stylecol not in self.columns):
@@ -277,10 +280,9 @@ def carto_map(self, interactive=True, stylecol=None):
         raise NotImplementedError("Static maps are not yet implemented.")
 
     # TODO: find more robust way to check which metadata item was checked
-    df_meta = json.loads(self._metadata[-1])
-    mapconfig_params = {'username': df_meta['carto_username'],
-                        'tablename': df_meta['carto_table'],
-                        'geomtype': df_meta['carto_geomtype'],
+    mapconfig_params = {'username': self.get_carto_username(),
+                        'tablename': self.get_carto_tablename(),
+                        'geomtype': self.get_carto_geomtype(),
                         'stylecol': stylecol,
                         'datatype': (str(self[stylecol].dtype)
                                      if stylecol in self.columns
@@ -298,15 +300,23 @@ def carto_map(self, interactive=True, stylecol=None):
 
 # Monkey patch these methods to pandas
 
+# higher level functions and methods
 pd.read_carto = read_carto
+pd.DataFrame.carto_map = carto_map
+pd.DataFrame.sync_carto = sync_carto
+
+# set methods
 pd.DataFrame.set_last_state = set_last_state
 pd.DataFrame.set_carto_sql_client = set_carto_sql_client
 pd.DataFrame.set_metadata = set_metadata
-pd.DataFrame.carto_map = carto_map
-pd.DataFrame.sync_carto = sync_carto
+
+# get methods
 pd.DataFrame.get_carto_api_key = get_carto_api_key
 pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
+pd.DataFrame.get_carto_geomtype = get_carto_geomtype
+
+# internal state methods
 pd.DataFrame.carto_registered = carto_registered
 pd.DataFrame.carto_insync = carto_insync
 

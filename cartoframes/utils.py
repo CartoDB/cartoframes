@@ -175,7 +175,6 @@ def df_from_query(query, carto_sql_client, index=None):
         return pd.DataFrame(resp['rows']).astype(schema)
 
 def upsert_table(self, df_diff, n_batch=30, debug=False):
-    import json
 
     n_items = len(df_diff)
     queries = []
@@ -194,7 +193,7 @@ def upsert_table(self, df_diff, n_batch=30, debug=False):
 
         # fill query template
         temp_query = upsert_query.format(
-            tablename=json.loads(self._metadata[-1])['carto_table'],
+            tablename=self.get_carto_tablename(),
             colname=colname,
             colval=map_numpy_to_postgres(self.loc[cartodb_id][colname]),
             cartodb_id=cartodb_id)
@@ -225,11 +224,11 @@ def drop_col(self, colname, n_batch=30, debug=False):
     """
     Drop specified column
     """
-    import json
+
     alter_query = '''
         ALTER TABLE "{tablename}"
         DROP COLUMN "{colname}"
-    '''.format(tablename=json.loads(self._metadata[-1])['carto_table'],
+    '''.format(tablename=self.get_carto_tablename(),
                colname=colname)
 
     if debug: print(alter_query)
@@ -242,14 +241,14 @@ def add_col(self, colname, n_batch=30, debug=False):
     """
     Alter table by adding a column created from a DataFrame operation
     """
-    import json
+
     if debug: print("Create new column {col}".format(col=colname))
     # Alter table add column
     #
     alter_query = '''
         ALTER TABLE "{tablename}"
         ADD COLUMN "{colname}" {datatype};
-    '''.format(tablename=json.loads(self._metadata[-1])['carto_table'],
+    '''.format(tablename=self.get_carto_tablename(),
                colname=colname,
                datatype=datatype_map(str(self.dtypes[colname])))
     if debug: print(alter_query)
@@ -273,7 +272,7 @@ def add_col(self, colname, n_batch=30, debug=False):
     for row_num, item in enumerate(self[colname].iteritems()):
         # if debug: print(item)
         temp_query = update_query.format(
-            tablename=json.loads(self._metadata[-1])['carto_table'],
+            tablename=self.get_carto_tablename(),
             colname=colname,
             colval=map_numpy_to_postgres(item[1]),
             cartodb_id=item[0]).strip()
