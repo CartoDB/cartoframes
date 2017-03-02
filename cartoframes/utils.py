@@ -48,6 +48,18 @@ def map_dtypes(pgtype):
         # make it a string if not in dict above
         return 'object'
 
+def create_table_query(tablename, schema):
+    """write a create table query from tablename and schema"""
+
+    cols = ', '.join(["{colname} {datatype}".format(colname=k,
+                                                    datatype=schema[k])
+                      for k in schema])
+    query = ("CREATE TABLE IF NOT EXISTS "
+             "{tablename}({cols});").format(tablename=tablename,
+                                            cols=cols)
+    return query
+
+
 def dtype_to_pgtype(dtype, colname):
     """
     Map dataframe types to carto postgres types
@@ -284,14 +296,6 @@ def add_col(self, colname, n_batch=30, debug=False):
             resp = self.carto_sql_client.send(output_query)
             queries = []
 
-    return None
-
-def create_carto_table(self, auth_client, tablename, debug=False):
-    """
-
-    """
-    schema = dict([(col, dtype_to_pgtype(str(dtype), colname))
-                   for col, dtype in zip(self.columns, self.dtypes)])
     return None
 
 # utilities for pandas.DataFrame.carto_map

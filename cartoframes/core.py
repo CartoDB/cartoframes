@@ -177,8 +177,8 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
-def sync_carto(self, createtable=False, auth_client=None,
-               new_tablename=None, n_batch=20, debug=False):
+def sync_carto(self, createtable=False, username=None, api_key=None,
+               requested_tablename=None, n_batch=20, debug=False):
     """
     :param createtable (boolean): if set, creates a new table with name
                                   `new_tablename` on account connected
@@ -191,14 +191,13 @@ def sync_carto(self, createtable=False, auth_client=None,
                                    table in user's CARTO account.
     """
 
-    # create table on carto if it doesn't not already exist
-    if createtable is True:
-        # TODO: build this
+    if (createtable is True and username is not None and
+            api_key is not None):
+        # create table on carto if it doesn't not already exist
+        self.carto_create(username, api_key, requested_tablename)
         # grab df schema, setup table, cartodbfy, then exit
-        if auth_client is None:
-            raise Exception("Set `auth_client` flag to create a table.")
         raise NotImplementedError("This feature is not yet implemented.")
-    elif not hasattr(self, 'carto_sql_client'):
+    elif not self.carto_registered():
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
 
@@ -235,6 +234,50 @@ def sync_carto(self, createtable=False, auth_client=None,
     # update state of dataframe
     self.set_last_state()
     print("Sync completed successfully")
+
+
+def carto_create(self, username, api_key, tablename, debug=True):
+    """create and populate a table on carto with a dataframe"""
+
+    # give dataframe authentication client
+    set_carto_sql_client(
+        utils.get_auth_client(username=username,
+                              api_key=api_key))
+
+    self.carto_create_table(tablename, debug=True)
+    self.carto_insert_values(debug=True)
+
+    return None
+
+
+def carto_create_table(self, tablename, debug=True):
+    """create table in carto with a specified schema"""
+    schema = dict([(col, utils.dtype_to_pgtype(str(dtype), col))
+                   for col, dtype in zip(self.columns, self.dtypes)])
+    query = utils.create_table_query(tablename, schema)
+    resp = self.carto_sql_client.send(query)
+    if debug: print(resp)
+
+    return None
+
+def carto_insert_values(self, n_batch=200, debug=True):
+    """insert new values into a table"""
+    n_items = len(self)
+    row_vals = []
+    insert_stem = ("INSERT INTO {tablename}({cols})"
+                   "VALUES ").format(tablename=self.get_carto_tablename(),
+                                      cols=','.join(self.columns))
+
+    for row_num, row in self.iteritems():
+        row_vals.append('({})'.format(rowitems=','.join([str(r)
+                                                         for r in row[1]])
+        if len(row_vals) == n_batch or row_num == n_items - 1:
+            query = ''.join(insert_stem, ', '.join(row_vals))
+            if debug: print(query)
+            return None
+
+
+    return None
 
 
 def make_cartoframe(self, username, api_key, tablename,
