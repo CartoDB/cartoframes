@@ -28,7 +28,7 @@ Get table from carto, make changes in pandas, sync updates with carto:
     # show all database access with debug=True
     df.sync_carto()
 
-.. figure:: examples/carto_map.png
+.. figure:: examples/read_carto.png
    :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
 
 Map workflow

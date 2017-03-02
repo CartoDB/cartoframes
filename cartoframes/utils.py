@@ -3,7 +3,7 @@ private functions used in cartoframes methods
 """
 import pandas as pd
 
-def get_auth_client(username, api_key, cdb_client):
+def get_auth_client(username=None, api_key=None, cdb_client=None):
     """
     """
     from carto.sql import SQLClient
@@ -12,8 +12,11 @@ def get_auth_client(username, api_key, cdb_client):
         BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
-    else:
+    elif (username is not None) and (api_key is not None):
         sql = SQLClient(cdb_client)
+    else:
+        raise Exception("`username` and `api_key` or `cdb_client` has to be "
+                        "specified.")
     return sql
 
 
@@ -125,7 +128,7 @@ def get_geom_type(sql_auth_client, tablename):
                         "geometries ({geomreported})").format(
                             tablename=tablename,
                             geomreported=result['rows'][0]['geomtype']))
-    except Exception, err:
+    except Exception as err:
         print("ERROR: {}".format(err))
     return None
 
@@ -171,7 +174,7 @@ def df_from_query(query, carto_sql_client, index=None):
     else:
         return pd.DataFrame(resp['rows']).astype(schema)
 
-def upsert_table(self, df_diff, debug=False, n_batch=30):
+def upsert_table(self, df_diff, n_batch=30, debug=False):
     import json
 
     n_items = len(df_diff)
@@ -268,7 +271,7 @@ def add_col(self, colname, n_batch=30, debug=False):
     queries = []
 
     for row_num, item in enumerate(self[colname].iteritems()):
-        if debug: print(item)
+        # if debug: print(item)
         temp_query = update_query.format(
             tablename=json.loads(self._metadata[-1])['carto_table'],
             colname=colname,
@@ -280,6 +283,7 @@ def add_col(self, colname, n_batch=30, debug=False):
             if debug: print(output_query)
             if debug: print("Num chars in query: {}".format(len(output_query)))
             resp = self.carto_sql_client.send(output_query)
+            queries = []
 
     return None
 
