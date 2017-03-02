@@ -3,7 +3,7 @@ private functions used in cartoframes methods
 """
 
 
-def get_auth_client(username, api_key, cdb_client):
+def get_auth_client(username=None, api_key=None, cdb_client=None):
     """
     """
     from carto.sql import SQLClient
@@ -12,8 +12,11 @@ def get_auth_client(username, api_key, cdb_client):
         BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
-    else:
+    elif (username is not None) and (api_key is not None):
         sql = SQLClient(cdb_client)
+    else:
+        raise Exception("`username` and `api_key` or `cdb_client` has to be "
+                        "specified.")
     return sql
 
 

@@ -16,7 +16,7 @@ Features to add: see issues in the repository https://github.com/CartoDB/cartofr
 
 # TODO: hook into pandas.core?
 import pandas as pd
-import cartoframes_utils
+import utils
 import carto
 
 
@@ -44,12 +44,14 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     import json
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
-    sql = cartoframes_utils.get_auth_client(username, api_key, cdb_client)
+    sql = utils.get_auth_client(username=username,
+                                            api_key=api_key,
+                                            cdb_client=cdb_client)
 
     # construct query
     if tablename:
         query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
-        geomtype = cartoframes_utils.get_geom_type(sql, tablename)
+        geomtype = utils.get_geom_type(sql, tablename)
         # Add limit if requested
         if limit:
             # NOTE: what if limit is `all` or `none`?
@@ -73,7 +75,7 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     # TODO: include_geom in cdb_client structure?
 
     resp = sql.send(query)
-    schema = cartoframes_utils.transform_schema(resp['fields'])
+    schema = utils.transform_schema(resp['fields'])
     # TODO: what happens if index is None?
     _df = pd.DataFrame(resp['rows']).set_index(index).astype(schema)
 
@@ -171,7 +173,7 @@ def sync_carto(self, createtable=False, auth_client=None,
     if len(set(self.columns) - set(self.carto_last_state.columns)) > 0:
         newcols = set(self.columns) - set(self.carto_last_state.columns)
         for col in newcols:
-            cartoframes_utils.add_col(self, col, n_batch=n_batch,
+            utils.add_col(self, col, n_batch=n_batch,
                                       debug=debug)
 
     # drop column if needed
@@ -179,7 +181,7 @@ def sync_carto(self, createtable=False, auth_client=None,
     if len(set(self.carto_last_state.columns) - set(self.columns)) > 0:
         discardedcols = set(self.carto_last_state.columns) - set(self.columns)
         for col in discardedcols:
-            cartoframes_utils.drop_col(self, col, debug=debug)
+            utils.drop_col(self, col, debug=debug)
 
     # sync updated values
     # TODO: what happens if rows are removed?
@@ -190,11 +192,32 @@ def sync_carto(self, createtable=False, auth_client=None,
         df_diff = (self[common_cols] !=
                    self.carto_last_state[common_cols]).stack()
         df_diff = df_diff[df_diff]
-        cartoframes_utils.upsert_table(self, df_diff, debug=debug)
+        utils.upsert_table(self, df_diff, debug=debug)
 
     # update state of dataframe
     self.set_last_state()
     print("Sync completed successfully")
+
+
+def make_cartoframe(self, username, api_key, tablename,
+                    api_type=None):
+    """
+    :param username (string): CARTO username
+    :param api_key (string): CARTO API key
+    :param tablename (string): desired tablename
+    1. instantiate sql client
+    2. setup schema on carto
+    3.
+    """
+    if (len(self) > 5000) or (api_type == 'import'):
+        # write to csv + use import api
+        pass
+    elif (len(self) <= 5000) or (api_type == 'sql'):
+        sql = utils.get_auth_client(username, api_key)
+    else:
+        pass
+
+    return None
 
 
 def carto_map(self, interactive=True, stylecol=None):
@@ -230,7 +253,7 @@ def carto_map(self, interactive=True, stylecol=None):
                                      else None)}
 
     mapconfig_params['q'] = urllib.quote(
-        cartoframes_utils.get_mapconfig(mapconfig_params))
+        utils.get_mapconfig(mapconfig_params))
 
     # print(params)
     url = '?'.join(['/files/cartoframes.html',
