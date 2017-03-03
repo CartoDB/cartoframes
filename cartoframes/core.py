@@ -178,7 +178,8 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, createtable=False, username=None, api_key=None,
-               requested_tablename=None, n_batch=20, debug=False):
+               requested_tablename=None, n_batch=20, latlng_cols=None,
+               is_org_user=False, debug=False):
     """
     :param createtable (boolean): if set, creates a new table with name
                                   `new_tablename` on account connected
@@ -195,9 +196,9 @@ def sync_carto(self, createtable=False, username=None, api_key=None,
             api_key is not None):
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
-        self.carto_create(username, api_key, requested_tablename)
-        # grab df schema, setup table, cartodbfy, then exit
-        raise NotImplementedError("This feature is not yet implemented.")
+        self.carto_create(username, api_key, requested_tablename, debug=debug,
+                          is_org_user=is_org_user, latlng_cols=latlng_cols)
+        return None
     elif not self.carto_registered():
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
