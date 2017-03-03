@@ -238,8 +238,8 @@ def sync_carto(self, createtable=False, username=None, api_key=None,
 
 # TODO: add geometry creation (now there is no trigger to fill in `the_geom`
 #       like there is for the import api)
-def carto_create(self, username, api_key, tablename,
-                 is_org_user=False, debug=True):
+def carto_create(self, username, api_key, tablename, latlng_cols=None,
+                 is_org_user=False, debug=False):
     """create and populate a table on carto with a dataframe"""
 
     # give dataframe authentication client
@@ -257,14 +257,45 @@ def carto_create(self, username, api_key, tablename,
                       api_key=api_key,
                       include_geom=None,
                       limit=None,
-                      geomtype=None)
+                      geomtype='point' if latlng_cols else None)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
     self.carto_insert_values(debug=debug)
+
+    # override index
+    self.index = range(1, len(self) + 1)
+    self.index.name = 'cartodb_id'
+
+    # add columns
+    if latlng_cols:
+        self._update_geom_col(latlng_cols)
+    else:
+        # NOTE: carto utility columns are not pulled down. These include:
+        #    the_geom, the_geom_webmercator
+        pass
+
     print("New cartoframe created. Table on CARTO is "
           "called `{tablename}`".format(tablename=self.get_carto_tablename()))
 
     return None
+
+
+def _update_geom_col(self, latlng_cols):
+    """update the_geom with the given latlng_cols"""
+    query = '''
+        UPDATE "{tablename}"
+        SET the_geom = CDB_LatLng({lat}, {lng})
+    '''.format(tablename=self.get_carto_tablename(),
+               lat=latlng_cols[0],
+               lng=latlng_cols[1])
+    self.carto_sql_client.send(query)
+    # collect the_geom
+    resp = self.carto_sql_client.send('''
+        SELECT cartodb_id, the_geom
+          FROM "{tablename}";
+    '''.format(tablename=self.get_carto_tablename()))
+
+    self['the_geom'] = pd.DataFrame(resp['rows'])['the_geom']
 
 
 def carto_create_table(self, tablename, username,
@@ -384,6 +415,7 @@ pd.DataFrame.sync_carto = sync_carto
 pd.DataFrame.carto_create = carto_create
 pd.DataFrame.carto_create_table = carto_create_table
 pd.DataFrame.carto_insert_values = carto_insert_values
+pd.DataFrame._update_geom_col = _update_geom_col
 
 # set methods
 pd.DataFrame.set_last_state = set_last_state

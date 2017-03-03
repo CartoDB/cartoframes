@@ -220,7 +220,7 @@ def upsert_table(self, df_diff, n_batch=30, debug=False):
          "ON CONFLICT (\"cartodb_id\")",
          "DO UPDATE SET \"{colname}\" = {colval}",
          "WHERE EXCLUDED.\"cartodb_id\" = {cartodb_id};"))
-    n_batches = n_items / n_batch
+    n_batches = n_items // n_batch
     batch_num = 1
     for row_num, row in enumerate(df_diff.iteritems()):
         # if debug: print(row)
