@@ -48,15 +48,25 @@ def map_dtypes(pgtype):
         # make it a string if not in dict above
         return 'object'
 
-def create_table_query(tablename, schema):
-    """write a create table query from tablename and schema"""
+def create_table_query(tablename, schema, username, is_org_user=False,
+                       debug=False):
+    """write a create table query from tablename and schema
+        Example output:
+        CREATE TABLE "interesting_birds"(location text, name text, size numeric);
+        SELECT CDB_CartodbfyTable('eschbacher', 'interesting_birds');
+    """
 
     cols = ', '.join(["{colname} {datatype}".format(colname=k,
                                                     datatype=schema[k])
                       for k in schema])
-    query = ("CREATE TABLE IF NOT EXISTS "
-             "{tablename}({cols});").format(tablename=tablename,
-                                            cols=cols)
+    if debug: print(cols)
+    query = '''
+        CREATE TABLE "{tablename}"({cols});
+        SELECT CDB_CartodbfyTable('{username}', '{tablename}');
+        '''.format(tablename=tablename,
+                   cols=cols,
+                   username=(username if is_org_user else 'public'))
+    if debug: print(query)
     return query
 
 
@@ -68,6 +78,7 @@ def dtype_to_pgtype(dtype, colname):
         return 'geometry'
     else:
         mapping = {'float64': 'numeric',
+                   'int64': 'int',
                    'datetime64': 'date',
                    'object': 'text',
                    'bool': 'boolean'}
@@ -75,6 +86,19 @@ def dtype_to_pgtype(dtype, colname):
             return mapping[dtype]
         except KeyError:
             return 'text'
+
+def format_val(val, dtype):
+    mapped_dtype = dtype_to_pgtype(str(dtype), None)
+    if mapped_dtype in ('text', 'date'):
+        return "'{}'".format(val)
+    else:
+        return str(val)
+
+def format_row(rowvals, schema):
+    mapped_vals = []
+    for idx, val in enumerate(rowvals):
+        mapped_vals.append(format_val(val, schema[idx]))
+    return ','.join(mapped_vals)
 
 def transform_schema(pgschema):
     """

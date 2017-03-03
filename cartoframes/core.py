@@ -194,6 +194,7 @@ def sync_carto(self, createtable=False, username=None, api_key=None,
     if (createtable is True and username is not None and
             api_key is not None):
         # create table on carto if it doesn't not already exist
+        # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename)
         # grab df schema, setup table, cartodbfy, then exit
         raise NotImplementedError("This feature is not yet implemented.")
@@ -235,45 +236,76 @@ def sync_carto(self, createtable=False, username=None, api_key=None,
     self.set_last_state()
     print("Sync completed successfully")
 
-
-def carto_create(self, username, api_key, tablename, debug=True):
+# TODO: add geometry creation (now there is no trigger to fill in `the_geom`
+#       like there is for the import api)
+def carto_create(self, username, api_key, tablename,
+                 is_org_user=False, debug=True):
     """create and populate a table on carto with a dataframe"""
 
     # give dataframe authentication client
-    set_carto_sql_client(
+    self.set_carto_sql_client(
         utils.get_auth_client(username=username,
                               api_key=api_key))
 
-    self.carto_create_table(tablename, debug=True)
-    self.carto_insert_values(debug=True)
+    final_tablename = self.carto_create_table(tablename, username,
+                            is_org_user=is_org_user, debug=debug)
+    if debug: print("final_tablename: {}".format(final_tablename))
+    # TODO: fix the geomtype piece, and is_org_user may be important (or some
+    #        variation of it) for the onprem-flexible version of this module
+    self.set_metadata(tablename=final_tablename,
+                      username=username,
+                      api_key=api_key,
+                      include_geom=None,
+                      limit=None,
+                      geomtype=None)
+    # TODO: would it be better to cartodbfy after the inserts?
+    # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
+    self.carto_insert_values(debug=debug)
+    print("New cartoframe created. Table on CARTO is "
+          "called `{tablename}`".format(tablename=self.get_carto_tablename()))
 
     return None
 
 
-def carto_create_table(self, tablename, debug=True):
+def carto_create_table(self, tablename, username,
+                       is_org_user=False, debug=False):
     """create table in carto with a specified schema"""
     schema = dict([(col, utils.dtype_to_pgtype(str(dtype), col))
                    for col, dtype in zip(self.columns, self.dtypes)])
-    query = utils.create_table_query(tablename, schema)
+    if debug: print(schema)
+    query = utils.create_table_query(tablename, schema, username,
+                                     is_org_user=is_org_user, debug=debug)
     resp = self.carto_sql_client.send(query)
     if debug: print(resp)
 
-    return None
+    # return the tablename if successful
+    return resp['rows'][0]['cdb_cartodbfytable']
 
-def carto_insert_values(self, n_batch=200, debug=True):
+# TODO: how best to handle indexes from a dataframe and the cartodb_id index?
+#  1. If a df has more than one index, error out saying that it is unsupported for now
+#  2. If index is non-integer, error out saying that it's not compatible
+#  3. What happens if it is a named index? if it's the default index, name it cartodb_id, and create the index on carto (carto seems to handle indexes that are in the space of integers, not just natural numbers)
+# NOTE: right now it's clumsy on index
+def carto_insert_values(self, n_batch=200, debug=False):
     """insert new values into a table"""
     n_items = len(self)
+    if debug: print("self has {} rows".format(n_items))
     row_vals = []
-    insert_stem = ("INSERT INTO {tablename}({cols})"
+    insert_stem = ("INSERT INTO {tablename}({cols}) "
                    "VALUES ").format(tablename=self.get_carto_tablename(),
-                                      cols=','.join(self.columns))
+                                     cols=','.join(self.columns))
+    if debug: print("insert_stem: {}".format(insert_stem))
 
-    for row_num, row in self.iteritems():
-        row_vals.append('({})'.format(rowitems=','.join([str(r)
-                                                         for r in row[1]])
+    for row_num, row in enumerate(self.iterrows()):
+        row_vals.append('({rowitems})'.format(rowitems=utils.format_row(row[1], self.dtypes)))
+        if debug: print("row_num: {0}, row: {1}".format(row_num, row))
         if len(row_vals) == n_batch or row_num == n_items - 1:
-            query = ''.join(insert_stem, ', '.join(row_vals))
-            if debug: print(query)
+            query = ''.join([insert_stem, ', '.join(row_vals), ';'])
+            if debug: print("insert query: {}".format(query))
+            resp = self.carto_sql_client.send(query)
+            if debug: print("insert response: {}".format(resp))
+            # reset batch
+            row_vals = []
             return None
 
 
@@ -347,6 +379,11 @@ def carto_map(self, interactive=True, stylecol=None):
 pd.read_carto = read_carto
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto
+
+# carto_create methods
+pd.DataFrame.carto_create = carto_create
+pd.DataFrame.carto_create_table = carto_create_table
+pd.DataFrame.carto_insert_values = carto_insert_values
 
 # set methods
 pd.DataFrame.set_last_state = set_last_state
