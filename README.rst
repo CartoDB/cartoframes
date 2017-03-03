@@ -4,6 +4,25 @@ CartoFrames
 A pandas interface for integrating `Carto <https://carto.com/>`__ into a
 data science workflow.
 
+Install Instructions
+--------------------
+
+`cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and a development version of the CARTO Python SDK (on branch `1.0.0 <https://github.com/CartoDB/carto-python/tree/1.0.0>`__). To install `cartoframes` on your machine, do the following:
+
+Copy the requirements.txt file in this repo to your machine and run:
+.. code:: bash
+    $ pip install -r requirements.txt
+    $ pip install pyrestcli
+
+Next, install `cartoframes` through `pip`:
+.. code:: bash
+    $ pip install cartoframes
+
+Once you've done this, `cartoframes` should be installed on your machine. See the example usage section below for using cartoframes in a Jupyter notebook.
+
+Note: Eventually `cartoframes` will be fully installable from `pip`.
+
+
 Example usage
 -------------
 
@@ -30,6 +49,27 @@ Get table from carto, make changes in pandas, sync updates with carto:
 
 .. figure:: examples/read_carto.png
    :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
+
+
+Associate an existing pandas dataframe with CARTO, and optionally get the geometry.
+
+.. code:: python
+    import pandas as pd
+    import cartoframes
+    import numpy as np
+    arr = np.arange(10)
+    np.random.shuffle(arr)
+    ingest = {'ids': list('abcdefghij'),
+              'scores': np.random.random(10),
+              'other_rank': arr,
+              'lat': 40.7128 + (0.5 - np.random.random(10)),
+              'lon': -74.0059 + (0.5 - np.random.random(10))}
+    df = pd.DataFrame(ingest)
+    df.carto_create('eschbacher',
+                    '05a458d3a45d1237699a4ee05297bb92accce3f4', 
+                    'awesome_new_table',
+                    is_org_user=True, latlng_cols=('lat', 'lon'))
+
 
 Map workflow
 ~~~~~~~~~~~~
