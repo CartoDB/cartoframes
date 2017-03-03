@@ -58,6 +58,7 @@ Get table from carto, make changes in pandas, sync updates with carto:
 Associate an existing pandas dataframe with CARTO, and optionally get the geometry.
 
 .. code:: python
+
     import pandas as pd
     import cartoframes
     import numpy as np
