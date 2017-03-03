@@ -98,8 +98,10 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
 
 def carto_registered(self):
     """Says whether dataframe is registered as a table on CARTO"""
-    # TODO: write this :)
-    return True
+    try:
+        return self.get_carto_tablename() is not None
+    except IndexError:
+        return False
 
 def carto_insync(self):
     """Says whether current cartoframe is in sync with last saved state"""
