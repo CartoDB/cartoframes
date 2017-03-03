@@ -37,10 +37,6 @@ Get table from carto, make changes in pandas, sync updates with carto:
 
 .. code:: python
 
-    import pandas as pd
-    import cartoframes
-    username = 'eschbacher'
-    api_key = 'abcdefghijklmnopqrstuvwxyz'
     df = pd.read_carto(username=username,
                        api_key=api_key,
                        tablename='brooklyn_poverty_census_tracts')
