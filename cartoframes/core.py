@@ -315,16 +315,19 @@ def carto_create_table(self, tablename, username,
     # return the tablename if successful
     return resp['rows'][0]['cdb_cartodbfytable']
 
+# TODO: create a batch class which retains information about the batch size and
+#       the request being built up
 # TODO: how best to handle indexes from a dataframe and the cartodb_id index?
 #  1. If a df has more than one index, error out saying that it is unsupported for now
 #  2. If index is non-integer, error out saying that it's not compatible
 #  3. What happens if it is a named index? if it's the default index, name it cartodb_id, and create the index on carto (carto seems to handle indexes that are in the space of integers, not just natural numbers)
 # NOTE: right now it's clumsy on index
-def carto_insert_values(self, n_batch=200, debug=False):
+def carto_insert_values(self, n_batch=10000, debug=False):
     """insert new values into a table"""
     n_items = len(self)
     if debug: print("self has {} rows".format(n_items))
     row_vals = []
+    char_count = 0
     insert_stem = ("INSERT INTO {tablename}({cols}) "
                    "VALUES ").format(tablename=self.get_carto_tablename(),
                                      cols=','.join(self.columns))
@@ -332,15 +335,20 @@ def carto_insert_values(self, n_batch=200, debug=False):
 
     for row_num, row in enumerate(self.iterrows()):
         row_vals.append('({rowitems})'.format(rowitems=utils.format_row(row[1], self.dtypes)))
+        char_count += len(row_vals[-1])
         if debug: print("row_num: {0}, row: {1}".format(row_num, row))
-        if len(row_vals) == n_batch or row_num == n_items - 1:
+        # run query if at batch size, end of dataframe, or near POST limit
+        if (len(row_vals) == n_batch or
+                row_num == n_items - 1 or char_count > 900000):
+
             query = ''.join([insert_stem, ', '.join(row_vals), ';'])
             if debug: print("insert query: {}".format(query))
             resp = self.carto_sql_client.send(query)
             if debug: print("insert response: {}".format(resp))
+
             # reset batch
             row_vals = []
-            return None
+            char_count = 0
 
 
     return None
