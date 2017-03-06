@@ -67,7 +67,7 @@ Associate an existing pandas dataframe with CARTO, and optionally get the geomet
               'lon': -74.0059 + (0.5 - np.random.random(10))}
     df = pd.DataFrame(ingest)
     df.carto_create('eschbacher',
-                    '05a458d3a45d1237699a4ee05297bb92accce3f4',
+                    'abcdefghijklmnopqrstuvwxyz',
                     'awesome_new_table',
                     is_org_user=True, latlng_cols=('lat', 'lon'))
 
