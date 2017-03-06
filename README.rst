@@ -90,7 +90,7 @@ or static).
                        tablename='brooklyn_poverty_census_tracts')
     df.carto_map(interactive=True, stylecol='poverty_per_pop')
 
-.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/data_obs_augmentation.png
+.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/carto_map.png
    :alt: Example of creating a cartoframe map in a Jupyter notebook
 
 Augment from Data Observatory
