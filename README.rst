@@ -66,10 +66,12 @@ Associate an existing pandas dataframe with CARTO, and optionally get the geomet
               'lat': 40.7128 + (0.5 - np.random.random(10)),
               'lon': -74.0059 + (0.5 - np.random.random(10))}
     df = pd.DataFrame(ingest)
-    df.carto_create('eschbacher',
-                    'abcdefghijklmnopqrstuvwxyz',
-                    'awesome_new_table',
-                    is_org_user=True, latlng_cols=('lat', 'lon'))
+    df.sync_carto(username=USERNAME,
+                  api_key=APIKEY,
+                  requested_tablename='awesome_new_table',
+                  createtable=True,
+                  is_org_user=True,
+                  latlng_cols=('lat', 'lon'))
 
 .. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/create_carto.png
    :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
