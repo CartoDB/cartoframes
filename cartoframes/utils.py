@@ -198,10 +198,14 @@ def get_geom_type(sql_auth_client, tablename):
 def df_from_query(query, carto_sql_client, is_org_user, username,
                   tablename=None, debug=False):
     """
-
+        Create a cartoframe or fill a pd.DataFrame with data from a CARTO
+        account based on a custom query.
+        :param query: string Custom query
+        :param carto_sql_client: object CARTO authentication client for SQL API
+        :param is_org_user: boolean Whether the user is in an organization or
+                            not
+        :param username: string CARTO username
     """
-    import time
-    if debug: print(tablename)
     if tablename:
         create_table = '''
             CREATE TABLE {tablename} As
