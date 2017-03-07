@@ -194,9 +194,41 @@ def get_geom_type(sql_auth_client, tablename):
         print("ERROR: {}".format(err))
     return None
 
-# utilities for pandas.DataFrame.carto_sync
+# TODO: let DO augmentation code use this
+def df_from_query(query, carto_sql_client, is_org_user, username,
+                  tablename=None, debug=False):
+    """
 
-def df_from_query(query, carto_sql_client, index=None):
+    """
+    import time
+    if debug: print(tablename)
+    if tablename:
+        create_table = '''
+            CREATE TABLE {tablename} As
+            SELECT *
+              FROM ({query}) As _wrap;
+            SELECT CDB_CartodbfyTable('{org}', '{tablename}');
+        '''.format(tablename=tablename,
+                   query=query,
+                   org='public' if is_org_user else username)
+        if debug: print("Creating table: {}".format(create_table))
+        resp = carto_sql_client.send(create_table)
+        if debug: print(resp)
+        new_tablename = resp['rows'][0]['cdb_cartodbfytable']
+        table_resp = carto_sql_client.send(
+            'SELECT * FROM {tablename}'.format(tablename=new_tablename))
+        if debug: print(table_resp)
+        schema = transform_schema(table_resp['fields'])
+        return pd.DataFrame(table_resp['rows']).set_index('cartodb_id').astype(schema)
+    else:
+        resp = carto_sql_client.send(query)
+        schema = transform_schema(resp['fields'])
+        return pd.DataFrame(resp['rows']).astype(schema)
+
+    return None
+
+
+def df_from_table(query, carto_sql_client, index=None):
     """
     Create a pandas DataFrame from a CARTO table
     """
