@@ -179,7 +179,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
-def sync_carto(self, createtable=False, username=None, api_key=None,
+def sync_carto(self, username=None, api_key=None,
                requested_tablename=None, n_batch=20, latlng_cols=None,
                is_org_user=False, debug=False):
     """
@@ -194,7 +194,7 @@ def sync_carto(self, createtable=False, username=None, api_key=None,
                                    table in user's CARTO account.
     """
 
-    if (createtable is True and username is not None and
+    if (requested_tablename is not None and username is not None and
             api_key is not None):
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create

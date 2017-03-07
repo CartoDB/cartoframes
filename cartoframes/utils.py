@@ -28,25 +28,6 @@ def add_meta(self, **kwargs):
     for key in kwargs:
         self._metadata[-1][key] = kwargs[key]
 
-def map_dtypes(pgtype):
-    """
-    Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
-    :param pgtype: string PostgreSQL/CARTO datatype to map to pandas data type
-    Output
-    :param : string data type used in pandas
-    """
-    # may not be a complete list, could not find CARTO SQL API documentation
-    # about data types
-    dtypes = {'number': 'float64',
-              'date': 'datetime64',
-              'string': 'object',
-              'geometry': 'object',
-              'boolean': 'bool'}
-    try:
-        return dtypes[pgtype]
-    except KeyError:
-        # make it a string if not in dict above
-        return 'object'
 
 def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):
@@ -69,6 +50,26 @@ def create_table_query(tablename, schema, username, is_org_user=False,
     if debug: print(query)
     return query
 
+# TODO: combine this with other datatype maps
+def map_dtypes(pgtype):
+    """
+    Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
+    :param pgtype: string PostgreSQL/CARTO datatype to map to pandas data type
+    Output
+    :param : string data type used in pandas
+    """
+    # may not be a complete list, could not find CARTO SQL API documentation
+    # about data types
+    dtypes = {'number': 'float64',
+              'date': 'datetime64',
+              'string': 'object',
+              'geometry': 'object',
+              'boolean': 'bool'}
+    try:
+        return dtypes[pgtype]
+    except KeyError:
+        # make it a string if not in dict above
+        return 'object'
 
 def dtype_to_pgtype(dtype, colname):
     """
@@ -87,17 +88,42 @@ def dtype_to_pgtype(dtype, colname):
         except KeyError:
             return 'text'
 
-def format_val(val, dtype):
-    mapped_dtype = dtype_to_pgtype(str(dtype), None)
-    if mapped_dtype in ('text', 'date'):
-        return "'{}'".format(val)
+def map_numpy_to_postgres(item):
+    """
+      Map NumPy values to PostgreSQL values
+    """
+    import math
+    if isinstance(item, str):
+        if "'" in item:
+            return "'{}'".format(item.replace("'", "\'\'"))
+        return "'{}'".format(item)
+    elif isinstance(item, float):
+        if math.isnan(item):
+            return 'null'
+        return str(item)
+    elif item is None:
+        return 'null'
+    return str(item)
+
+def datatype_map(dtype):
+    """
+       map NumPy types to PostgreSQL types
+    """
+    # TODO: add datetype conversion
+    if 'float' in dtype:
+        return 'numeric'
+    elif 'int' in dtype:
+        return 'int'
+    elif 'bool' in dtype:
+        return 'boolean'
     else:
-        return str(val)
+        return 'text'
+
 
 def format_row(rowvals, schema):
     mapped_vals = []
     for idx, val in enumerate(rowvals):
-        mapped_vals.append(format_val(val, schema[idx]))
+        mapped_vals.append(map_numpy_to_postgres(val))
     return ','.join(mapped_vals)
 
 def transform_schema(pgschema):
@@ -169,35 +195,6 @@ def get_geom_type(sql_auth_client, tablename):
     return None
 
 # utilities for pandas.DataFrame.carto_sync
-
-def map_numpy_to_postgres(item):
-    """
-      Map NumPy values to PostgreSQL values
-    """
-    import math
-    if isinstance(item, str):
-        return '\'{}\''.format(item)
-    elif isinstance(item, float):
-        if math.isnan(item):
-            return 'null'
-        return str(item)
-    elif item is None:
-        return 'null'
-    return str(item)
-
-def datatype_map(dtype):
-    """
-       map NumPy types to PostgreSQL types
-    """
-    # TODO: add datetype conversion
-    if 'float' in dtype:
-        return 'numeric'
-    elif 'int' in dtype:
-        return 'int'
-    elif 'bool' in dtype:
-        return 'boolean'
-    else:
-        return 'text'
 
 def df_from_query(query, carto_sql_client, index=None):
     """
