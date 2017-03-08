@@ -22,8 +22,9 @@ import carto
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
-               tablename=None, query=None, include_geom=True, sync=True,
-               limit=None, index='cartodb_id', debug=False):
+               tablename=None, query=None, include_geom=True,
+               is_org_user=False, limit=None, index='cartodb_id',
+               debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata.
        Inputs:
@@ -49,9 +50,8 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                                 cdb_client=cdb_client)
 
     # construct query
-    if tablename:
+    if tablename is not None and query is None:
         query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
-        geomtype = utils.get_geom_type(sql, tablename)
         # Add limit if requested
         if limit:
             # NOTE: what if limit is `all` or `none`?
@@ -60,38 +60,36 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
+        if debug: print(query)
+        _df = utils.df_from_table(query, sql, index=index)
     elif query:
         # NOTE: not yet implemented
         # TODO: this would have to register a table on CARTO if sync=True
-        # query = custom_query
-        raise NotImplementedError("Creating a cartoframe from a query is not "
-                                  "yet implemented.")
+        _df = utils.df_from_query(query, sql, is_org_user, username,
+                                  tablename=tablename, debug=debug)
     else:
-        raise NameError("Either `tablename` or `query` needs to be specified")
-
-    if debug: print(query)
-
-    # exclude geometry columns if asked
-    # TODO: include_geom in cdb_client structure?
-
-    _df = utils.df_from_query(query, sql, index=index)
+        raise NameError("Either `tablename` or `query` (or both) needs to be "
+                        "specified")
 
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df.set_metadata(tablename=tablename,
-                     username=username,
-                     api_key=api_key,
-                     include_geom=include_geom,
-                     limit=limit,
-                     geomtype=geomtype)
 
-    # save the state for later use
-    # NOTE: this doubles the size of the dataframe
-    _df.set_last_state()
+    # only set metadata if it's becoming a cartoframe
+    if tablename:
+        _df.set_metadata(tablename=tablename,
+                         username=username,
+                         api_key=api_key,
+                         include_geom=include_geom,
+                         limit=limit,
+                         geomtype=utils.get_geom_type(sql, tablename))
 
-    # store carto sql client for later use
-    _df.set_carto_sql_client(sql)
+        # save the state for later use
+        # NOTE: this doubles the size of the dataframe
+        _df.set_last_state()
+
+        # store carto sql client for later use
+        _df.set_carto_sql_client(sql)
 
     return _df
 
