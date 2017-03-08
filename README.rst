@@ -80,15 +80,13 @@ Associate an existing pandas dataframe with CARTO, and optionally get the geomet
 Map workflow
 ~~~~~~~~~~~~
 
-The following will embed a CARTO map in a Jupyter notebook (interactive
-or static).
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__
 
 .. code:: python
 
-    df = pd.read_carto(username=username,
-                       api_key=api_key,
-                       tablename='brooklyn_poverty_census_tracts')
-    df.carto_map(interactive=True, stylecol='poverty_per_pop')
+    df.carto_map(color={'colname': 'net', 'ramp': 'Bold'},
+                 size={'colname': 'depth', 'min': 6, 'max': 20, 'quant_method': 'headtails'},
+                 basemap='http://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png')
 
 .. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/carto_map.png
    :alt: Example of creating a cartoframe map in a Jupyter notebook
