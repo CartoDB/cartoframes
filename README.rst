@@ -1,13 +1,14 @@
 CartoFrames
 ===========
 
-A pandas interface for integrating `Carto <https://carto.com/>`__ into a
-data science workflow.
+A pandas interface for integrating `Carto <https://carto.com/>`__ into a data science workflow.
 
 Install Instructions
 --------------------
 
 `cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and a development version of the CARTO Python SDK (on branch `1.0.0 <https://github.com/CartoDB/carto-python/tree/1.0.0>`__). To install `cartoframes` on your machine, do the following:
+
+Clone this repository.
 
 Copy the requirements.txt file in this repo to your machine and run:
 
@@ -16,11 +17,11 @@ Copy the requirements.txt file in this repo to your machine and run:
     $ pip install -r requirements.txt
     $ pip install pyrestcli
 
-Next, install `cartoframes` through `pip`:
+Next, from the install `cartoframes` through `pip` using edit mode:
 
 .. code:: bash
 
-    $ pip install cartoframes
+    $ pip install -e .
 
 Once you've done this, `cartoframes` should be installed on your machine. See the example usage section below for using cartoframes in a Jupyter notebook.
 
@@ -80,15 +81,13 @@ Associate an existing pandas dataframe with CARTO, and optionally get the geomet
 Map workflow
 ~~~~~~~~~~~~
 
-The following will embed a CARTO map in a Jupyter notebook (interactive
-or static).
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__.
 
 .. code:: python
 
-    df = pd.read_carto(username=username,
-                       api_key=api_key,
-                       tablename='brooklyn_poverty_census_tracts')
-    df.carto_map(interactive=True, stylecol='poverty_per_pop')
+    df.carto_map(color={'colname': 'net', 'ramp': 'Bold'},
+                 size={'colname': 'depth', 'min': 6, 'max': 20, 'quant_method': 'headtails'},
+                 basemap='http://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png')
 
 .. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/carto_map.png
    :alt: Example of creating a cartoframe map in a Jupyter notebook

@@ -373,10 +373,12 @@ def make_cartoframe(self, username, api_key, tablename,
     return None
 
 
-def carto_map(self, interactive=True, stylecol=None):
+def carto_map(self, interactive=True, stylecol=None, color=None, size=None,
+              cartocss=None, basemap=None, debug=None):
     """
         Produce and return CARTO maps or iframe embeds
     """
+    import cartoframes.styling as styling
     try:
         # if Python 3
         import urllib.parse as urllib
@@ -385,31 +387,30 @@ def carto_map(self, interactive=True, stylecol=None):
         import urllib
     import IPython
 
-    if (stylecol is not None) and (stylecol not in self.columns):
-        raise NameError(('`{stylecol}` not in '
-                         'dataframe').format(stylecol=stylecol))
-    # create static map
-    if interactive is False:
+    if interactive is True:
+        if cartocss is None:
+            css = styling.CartoCSS(self, size=size,
+                                   color=color, cartocss=cartocss)
+            cartocss = css.get_cartocss()
+            if debug: print(cartocss)
+        mapconfig_params = {'username': self.get_carto_username(),
+                            'tablename': self.get_carto_tablename(),
+                            'cartocss': cartocss,
+                            'basemap': basemap}
+
+    else:
+        # create static map
         # TODO: use carto-python client to create static map (not yet
         #       implemented)
         raise NotImplementedError("Static maps are not yet implemented.")
 
-    # TODO: find more robust way to check which metadata item was checked
-    mapconfig_params = {'username': self.get_carto_username(),
-                        'tablename': self.get_carto_tablename(),
-                        'geomtype': self.get_carto_geomtype(),
-                        'stylecol': stylecol,
-                        'datatype': (str(self[stylecol].dtype)
-                                     if stylecol in self.columns
-                                     else None)}
-
     mapconfig_params['q'] = urllib.quote(
         utils.get_mapconfig(mapconfig_params))
 
-    # print(params)
     url = '?'.join(['/files/cartoframes.html',
                     urllib.urlencode(mapconfig_params)])
-    iframe = '<iframe src="{url}" width=700 height=350></iframe>'.format(url=url)
+    iframe = ('<iframe src="{url}" width=700 '
+              'height=350></iframe>').format(url=url)
     return IPython.display.HTML(iframe)
 
 
