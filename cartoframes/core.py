@@ -22,8 +22,9 @@ import carto
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
-               tablename=None, query=None, include_geom=True, sync=True,
-               limit=None, index='cartodb_id', debug=False):
+               tablename=None, query=None, include_geom=True,
+               is_org_user=False, limit=None, index='cartodb_id',
+               debug=False):
     """Import a table from carto into a pandas dataframe, storing
        table information in pandas metadata.
        Inputs:
@@ -49,9 +50,8 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                                 cdb_client=cdb_client)
 
     # construct query
-    if tablename:
+    if tablename is not None and query is None:
         query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
-        geomtype = utils.get_geom_type(sql, tablename)
         # Add limit if requested
         if limit:
             # NOTE: what if limit is `all` or `none`?
@@ -60,46 +60,46 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
+        if debug: print(query)
+        _df = utils.df_from_table(query, sql, index=index)
     elif query:
         # NOTE: not yet implemented
         # TODO: this would have to register a table on CARTO if sync=True
-        # query = custom_query
-        raise NotImplementedError("Creating a cartoframe from a query is not "
-                                  "yet implemented.")
+        _df = utils.df_from_query(query, sql, is_org_user, username,
+                                  tablename=tablename, debug=debug)
     else:
-        raise NameError("Either `tablename` or `query` needs to be specified")
-
-    if debug: print(query)
-
-    # exclude geometry columns if asked
-    # TODO: include_geom in cdb_client structure?
-
-    _df = utils.df_from_query(query, sql, index=index)
+        raise NameError("Either `tablename` or `query` (or both) needs to be "
+                        "specified")
 
     # NOTE: pylint complains that we're accessing a 'protected member
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
-    _df.set_metadata(tablename=tablename,
-                     username=username,
-                     api_key=api_key,
-                     include_geom=include_geom,
-                     limit=limit,
-                     geomtype=geomtype)
 
-    # save the state for later use
-    # NOTE: this doubles the size of the dataframe
-    _df.set_last_state()
+    # only set metadata if it's becoming a cartoframe
+    if tablename:
+        _df.set_metadata(tablename=tablename,
+                         username=username,
+                         api_key=api_key,
+                         include_geom=include_geom,
+                         limit=limit,
+                         geomtype=utils.get_geom_type(sql, tablename))
 
-    # store carto sql client for later use
-    _df.set_carto_sql_client(sql)
+        # save the state for later use
+        # NOTE: this doubles the size of the dataframe
+        _df.set_last_state()
+
+        # store carto sql client for later use
+        _df.set_carto_sql_client(sql)
 
     return _df
 
 
 def carto_registered(self):
     """Says whether dataframe is registered as a table on CARTO"""
-    # TODO: write this :)
-    return True
+    try:
+        return self.get_carto_tablename() is not None
+    except IndexError:
+        return False
 
 def carto_insync(self):
     """Says whether current cartoframe is in sync with last saved state"""
@@ -177,8 +177,9 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
-def sync_carto(self, createtable=False, auth_client=None,
-               new_tablename=None, n_batch=20, debug=False):
+def sync_carto(self, username=None, api_key=None,
+               requested_tablename=None, n_batch=20, latlng_cols=None,
+               is_org_user=False, debug=False):
     """
     :param createtable (boolean): if set, creates a new table with name
                                   `new_tablename` on account connected
@@ -191,14 +192,14 @@ def sync_carto(self, createtable=False, auth_client=None,
                                    table in user's CARTO account.
     """
 
-    # create table on carto if it doesn't not already exist
-    if createtable is True:
-        # TODO: build this
-        # grab df schema, setup table, cartodbfy, then exit
-        if auth_client is None:
-            raise Exception("Set `auth_client` flag to create a table.")
-        raise NotImplementedError("This feature is not yet implemented.")
-    elif not hasattr(self, 'carto_sql_client'):
+    if (requested_tablename is not None and username is not None and
+            api_key is not None):
+        # create table on carto if it doesn't not already exist
+        # TODO: make this the main way of intereacting with carto_create
+        self.carto_create(username, api_key, requested_tablename, debug=debug,
+                          is_org_user=is_org_user, latlng_cols=latlng_cols)
+        return None
+    elif not self.carto_registered():
         raise Exception("Table not registered with CARTO. Set `createtable` "
                         "flag to True")
 
@@ -235,6 +236,120 @@ def sync_carto(self, createtable=False, auth_client=None,
     # update state of dataframe
     self.set_last_state()
     print("Sync completed successfully")
+
+# TODO: add geometry creation (now there is no trigger to fill in `the_geom`
+#       like there is for the import api)
+def carto_create(self, username, api_key, tablename, latlng_cols=None,
+                 is_org_user=False, debug=False):
+    """create and populate a table on carto with a dataframe"""
+
+    # give dataframe authentication client
+    self.set_carto_sql_client(
+        utils.get_auth_client(username=username,
+                              api_key=api_key))
+
+    final_tablename = self.carto_create_table(tablename, username,
+                            is_org_user=is_org_user, debug=debug)
+    if debug: print("final_tablename: {}".format(final_tablename))
+    # TODO: fix the geomtype piece, and is_org_user may be important (or some
+    #        variation of it) for the onprem-flexible version of this module
+    self.set_metadata(tablename=final_tablename,
+                      username=username,
+                      api_key=api_key,
+                      include_geom=None,
+                      limit=None,
+                      geomtype='point' if latlng_cols else None)
+    # TODO: would it be better to cartodbfy after the inserts?
+    # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
+    self.carto_insert_values(debug=debug)
+
+    # override index
+    self.index = range(1, len(self) + 1)
+    self.index.name = 'cartodb_id'
+
+    # add columns
+    if latlng_cols:
+        self._update_geom_col(latlng_cols)
+    else:
+        # NOTE: carto utility columns are not pulled down. These include:
+        #    the_geom, the_geom_webmercator
+        pass
+
+    print("New cartoframe created. Table on CARTO is "
+          "called `{tablename}`".format(tablename=self.get_carto_tablename()))
+
+    return None
+
+
+def _update_geom_col(self, latlng_cols):
+    """update the_geom with the given latlng_cols"""
+    query = '''
+        UPDATE "{tablename}"
+        SET the_geom = CDB_LatLng({lat}, {lng})
+    '''.format(tablename=self.get_carto_tablename(),
+               lat=latlng_cols[0],
+               lng=latlng_cols[1])
+    self.carto_sql_client.send(query)
+    # collect the_geom
+    resp = self.carto_sql_client.send('''
+        SELECT cartodb_id, the_geom
+          FROM "{tablename}";
+    '''.format(tablename=self.get_carto_tablename()))
+
+    self['the_geom'] = pd.DataFrame(resp['rows'])['the_geom']
+
+
+def carto_create_table(self, tablename, username,
+                       is_org_user=False, debug=False):
+    """create table in carto with a specified schema"""
+    schema = dict([(col, utils.dtype_to_pgtype(str(dtype), col))
+                   for col, dtype in zip(self.columns, self.dtypes)])
+    if debug: print(schema)
+    query = utils.create_table_query(tablename, schema, username,
+                                     is_org_user=is_org_user, debug=debug)
+    resp = self.carto_sql_client.send(query)
+    if debug: print(resp)
+
+    # return the tablename if successful
+    return resp['rows'][0]['cdb_cartodbfytable']
+
+# TODO: create a batch class which retains information about the batch size and
+#       the request being built up
+# TODO: how best to handle indexes from a dataframe and the cartodb_id index?
+#  1. If a df has more than one index, error out saying that it is unsupported for now
+#  2. If index is non-integer, error out saying that it's not compatible
+#  3. What happens if it is a named index? if it's the default index, name it cartodb_id, and create the index on carto (carto seems to handle indexes that are in the space of integers, not just natural numbers)
+# NOTE: right now it's clumsy on index
+def carto_insert_values(self, n_batch=10000, debug=False):
+    """insert new values into a table"""
+    n_items = len(self)
+    if debug: print("self has {} rows".format(n_items))
+    row_vals = []
+    char_count = 0
+    insert_stem = ("INSERT INTO {tablename}({cols}) "
+                   "VALUES ").format(tablename=self.get_carto_tablename(),
+                                     cols=','.join(self.columns))
+    if debug: print("insert_stem: {}".format(insert_stem))
+
+    for row_num, row in enumerate(self.iterrows()):
+        row_vals.append('({rowitems})'.format(rowitems=utils.format_row(row[1], self.dtypes)))
+        char_count += len(row_vals[-1])
+        if debug: print("row_num: {0}, row: {1}".format(row_num, row))
+        # run query if at batch size, end of dataframe, or near POST limit
+        if (len(row_vals) == n_batch or
+                row_num == n_items - 1 or char_count > 900000):
+
+            query = ''.join([insert_stem, ', '.join(row_vals), ';'])
+            if debug: print("insert query: {}".format(query))
+            resp = self.carto_sql_client.send(query)
+            if debug: print("insert response: {}".format(resp))
+
+            # reset batch
+            row_vals = []
+            char_count = 0
+
+
+    return None
 
 
 def make_cartoframe(self, username, api_key, tablename,
@@ -304,6 +419,12 @@ def carto_map(self, interactive=True, stylecol=None):
 pd.read_carto = read_carto
 pd.DataFrame.carto_map = carto_map
 pd.DataFrame.sync_carto = sync_carto
+
+# carto_create methods
+pd.DataFrame.carto_create = carto_create
+pd.DataFrame.carto_create_table = carto_create_table
+pd.DataFrame.carto_insert_values = carto_insert_values
+pd.DataFrame._update_geom_col = _update_geom_col
 
 # set methods
 pd.DataFrame.set_last_state = set_last_state

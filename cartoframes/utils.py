@@ -28,6 +28,29 @@ def add_meta(self, **kwargs):
     for key in kwargs:
         self._metadata[-1][key] = kwargs[key]
 
+
+def create_table_query(tablename, schema, username, is_org_user=False,
+                       debug=False):
+    """write a create table query from tablename and schema
+        Example output:
+        CREATE TABLE "interesting_birds"(location text, name text, size numeric);
+        SELECT CDB_CartodbfyTable('eschbacher', 'interesting_birds');
+    """
+
+    cols = ', '.join(["{colname} {datatype}".format(colname=k,
+                                                    datatype=schema[k])
+                      for k in schema])
+    if debug: print(cols)
+    query = '''
+        CREATE TABLE "{tablename}"({cols});
+        SELECT CDB_CartodbfyTable('{username}', '{tablename}');
+        '''.format(tablename=tablename,
+                   cols=cols,
+                   username=(username if is_org_user else 'public'))
+    if debug: print(query)
+    return query
+
+# TODO: combine this with other datatype maps
 def map_dtypes(pgtype):
     """
     Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
@@ -56,6 +79,7 @@ def dtype_to_pgtype(dtype, colname):
         return 'geometry'
     else:
         mapping = {'float64': 'numeric',
+                   'int64': 'int',
                    'datetime64': 'date',
                    'object': 'text',
                    'bool': 'boolean'}
@@ -63,6 +87,44 @@ def dtype_to_pgtype(dtype, colname):
             return mapping[dtype]
         except KeyError:
             return 'text'
+
+def map_numpy_to_postgres(item):
+    """
+      Map NumPy values to PostgreSQL values
+    """
+    import math
+    if isinstance(item, str):
+        if "'" in item:
+            return "'{}'".format(item.replace("'", "\'\'"))
+        return "'{}'".format(item)
+    elif isinstance(item, float):
+        if math.isnan(item):
+            return 'null'
+        return str(item)
+    elif item is None:
+        return 'null'
+    return str(item)
+
+def datatype_map(dtype):
+    """
+       map NumPy types to PostgreSQL types
+    """
+    # TODO: add datetype conversion
+    if 'float' in dtype:
+        return 'numeric'
+    elif 'int' in dtype:
+        return 'int'
+    elif 'bool' in dtype:
+        return 'boolean'
+    else:
+        return 'text'
+
+
+def format_row(rowvals, schema):
+    mapped_vals = []
+    for idx, val in enumerate(rowvals):
+        mapped_vals.append(map_numpy_to_postgres(val))
+    return ','.join(mapped_vals)
 
 def transform_schema(pgschema):
     """
@@ -132,38 +194,45 @@ def get_geom_type(sql_auth_client, tablename):
         print("ERROR: {}".format(err))
     return None
 
-# utilities for pandas.DataFrame.carto_sync
-
-def map_numpy_to_postgres(item):
+# TODO: let DO augmentation code use this
+def df_from_query(query, carto_sql_client, is_org_user, username,
+                  tablename=None, debug=False):
     """
-      Map NumPy values to PostgreSQL values
+        Create a cartoframe or fill a pd.DataFrame with data from a CARTO
+        account based on a custom query.
+        :param query: string Custom query
+        :param carto_sql_client: object CARTO authentication client for SQL API
+        :param is_org_user: boolean Whether the user is in an organization or
+                            not
+        :param username: string CARTO username
     """
-    import math
-    if isinstance(item, str):
-        return '\'{}\''.format(item)
-    elif isinstance(item, float):
-        if math.isnan(item):
-            return 'null'
-        return str(item)
-    elif item is None:
-        return 'null'
-    return str(item)
-
-def datatype_map(dtype):
-    """
-       map NumPy types to PostgreSQL types
-    """
-    # TODO: add datetype conversion
-    if 'float' in dtype:
-        return 'numeric'
-    elif 'int' in dtype:
-        return 'int'
-    elif 'bool' in dtype:
-        return 'boolean'
+    if tablename:
+        create_table = '''
+            CREATE TABLE {tablename} As
+            SELECT *
+              FROM ({query}) As _wrap;
+            SELECT CDB_CartodbfyTable('{org}', '{tablename}');
+        '''.format(tablename=tablename,
+                   query=query,
+                   org='public' if is_org_user else username)
+        if debug: print("Creating table: {}".format(create_table))
+        resp = carto_sql_client.send(create_table)
+        if debug: print(resp)
+        new_tablename = resp['rows'][0]['cdb_cartodbfytable']
+        table_resp = carto_sql_client.send(
+            'SELECT * FROM {tablename}'.format(tablename=new_tablename))
+        if debug: print(table_resp)
+        schema = transform_schema(table_resp['fields'])
+        return pd.DataFrame(table_resp['rows']).set_index('cartodb_id').astype(schema)
     else:
-        return 'text'
+        resp = carto_sql_client.send(query)
+        schema = transform_schema(resp['fields'])
+        return pd.DataFrame(resp['rows']).astype(schema)
 
-def df_from_query(query, carto_sql_client, index=None):
+    return None
+
+
+def df_from_table(query, carto_sql_client, index=None):
     """
     Create a pandas DataFrame from a CARTO table
     """
@@ -184,7 +253,7 @@ def upsert_table(self, df_diff, n_batch=30, debug=False):
          "ON CONFLICT (\"cartodb_id\")",
          "DO UPDATE SET \"{colname}\" = {colval}",
          "WHERE EXCLUDED.\"cartodb_id\" = {cartodb_id};"))
-    n_batches = n_items / n_batch
+    n_batches = n_items // n_batch
     batch_num = 1
     for row_num, row in enumerate(df_diff.iteritems()):
         # if debug: print(row)
@@ -284,14 +353,6 @@ def add_col(self, colname, n_batch=30, debug=False):
             resp = self.carto_sql_client.send(output_query)
             queries = []
 
-    return None
-
-def create_carto_table(self, auth_client, tablename, debug=False):
-    """
-
-    """
-    schema = dict([(col, dtype_to_pgtype(str(dtype), colname))
-                   for col, dtype in zip(self.columns, self.dtypes)])
     return None
 
 # utilities for pandas.DataFrame.carto_map
