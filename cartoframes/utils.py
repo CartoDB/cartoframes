@@ -357,39 +357,7 @@ def add_col(self, colname, n_batch=30, debug=False):
 
 # utilities for pandas.DataFrame.carto_map
 
-def cartocss_by_geom(geomtype):
-    if geomtype == 'point':
-        markercss = '''
-            #layer {
-              marker-width: 7;
-              marker-fill: %(filltype)s;
-              marker-fill-opacity: 1;
-              marker-allow-overlap: true;
-              marker-line-width: 1;
-              marker-line-color: #FFF;
-              marker-line-opacity: 1;
-            }
-        '''.replace('\n', '')
-        return markercss
-    elif geomtype == 'line':
-        linecss = '''
-            #layer {
-              line-width: 1.5;
-              line-color: %(filltype)s;
-            }
-        '''.replace('\n', '')
-        return linecss
-    elif geomtype == 'polygon':
-        polygoncss = '''
-            #layer {
-              polygon-fill: %(filltype)s;
-              line-width: 0.5;
-              line-color: #FFF;
-              line-opacity: 0.5;
-            }
-        '''.replace('\n', '')
-        return polygoncss
-    return None
+
 
 
 def get_fillstyle(params):
@@ -432,9 +400,11 @@ def get_mapconfig(params):
 
     color palettes: https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
     """
-
-    cartocss = cartocss_by_geom(
-        params['geomtype']) % {'filltype': get_fillstyle(params)}
+    if 'cartocss' in params:
+        cartocss = params['cartocss']
+    else:
+        cartocss = cartocss_by_geom(
+            params['geomtype']) % {'filltype': get_fillstyle(params)}
 
     hyperparams = dict({'cartocss': cartocss}, **params)
     # print(hyperparams)
