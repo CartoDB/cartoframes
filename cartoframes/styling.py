@@ -5,12 +5,76 @@ class CartoCSS(object):
     """
         class for constructing CartoCSS
     """
-    def __init__(self, df, size=None, color=None):
+    def __init__(self, df, size=None, color=None, cartocss=None):
         """
         """
+        self.df = df
         self.size = size
         self.color = color
-        self.df = df
+        self.cartocss = cartocss
+
+    def get_cartocss(self):
+        """Given options for CartoCSS styling, return
+        CartoCSS
+        """
+        if self.cartocss is None:
+            # get cartocss by geometry type
+            css_template = self.cartocss_by_geom(self.df.get_carto_geomtype())
+
+            # fill in based on user inputs
+            css_filled = css_template % {'fillstyle': self.get_color_css(),
+                                         'sizestyle': self.get_size_css()}
+            return css_filled
+        else:
+            return self.cartocss
+
+    def get_markercss(self):
+        """Return CartoCSS for points"""
+        markercss = ''.join(
+            ("#layer { ",
+             "marker-width: %(sizestyle)s; ",
+             "marker-fill: %(fillstyle)s; ",
+             "marker-fill-opacity: 1; ",
+             "marker-allow-overlap: true; ",
+             "marker-line-width: 1; ",
+             "marker-line-color: #FFF; ",
+             "marker-line-opacity: 1; ",
+             "}"))
+        return markercss
+
+    def get_linecss(self):
+        """Return CartoCSS template for lines"""
+        linecss = ''.join(
+            ("#layer { ",
+             "line-width: 1.5; ",
+             "line-color: %(fillstyle)s; ",
+             "}"))
+        return linecss
+
+    def get_polygoncss(self):
+        """Return CartoCSS template for polygons"""
+        polygoncss = ''.join(
+            ("#layer { ",
+             "polygon-fill: %(fillstyle)s; ",
+             "line-width: 0.5; ",
+             "line-color: #FFF; ",
+             "line-opacity: 0.5; ",
+             "}"))
+        return polygoncss
+
+    def cartocss_by_geom(self, geomtype):
+        """Return CartoCSS template by geometry type"""
+
+        cartocss = {'point': self.get_markercss(),
+                    'line': self.get_linecss(),
+                    'polygon': self.get_polygoncss()}
+
+        try:
+            return cartocss[geomtype]
+        except KeyError:
+            raise ValueError("No CartoCSS for type `{}`".format(geomtype))
+
+        return None
 
     def check_size_inputs(self, inputs):
         """Checks whether the inputs are valid
@@ -46,7 +110,6 @@ class CartoCSS(object):
     def check_color_inputs(self, inputs):
         """Checks whether the inputs are valid
         """
-        import numbers
         quant_methods = {'quantiles', 'jenks', 'headtails',
                          'equal', 'category'}
         ramp_providers = {'cartocolor', 'colorbrewer'}
@@ -100,10 +163,10 @@ class CartoCSS(object):
 
             missing_keys = set(defaults) - set(self.size)
             args = dict(self.size, **{k: defaults[k] for k in missing_keys})
-            self.check_color_inputs(args)
+            self.check_size_inputs(args)
             # parse dict
             css = ("marker-width: ramp([{colname}], range({min}, {max}), "
-                   "{quant_method}());").format(**args)
+                   "{quant_method}())").format(**args)
             return css
         elif isinstance(self.size, str):
             self.check_size_inputs(self.size)
@@ -112,7 +175,7 @@ class CartoCSS(object):
                 # if string is a column name
                 # size by 'reasonable' values
                 css = ("marker-width: ramp([{colname}], range(4, 15), "
-                       "quantiles());").format(colname=self.size)
+                       "quantiles())").format(colname=self.size)
                 return css
             else:
                 raise Exception('`{}` is not a column name.'.format(self.size))
@@ -127,12 +190,11 @@ class CartoCSS(object):
     def get_color_css(self):
         """
         """
-        import numbers
-        if isinstance(self.size, dict):
+        if isinstance(self.color, dict):
             # TODO: check with mamata on cartographic best-practices
 
             # choose category or quantitative defaults
-            if self.df[self.size['colname']].dtype in ('float64', 'int64'):
+            if self.df[self.color['colname']].dtype in ('float64', 'int64'):
                 defaults = {'ramp': 'RedOr',
                             'ramp_provider': 'cartocolor',
                             'quant_method': 'quantiles',
@@ -143,8 +205,8 @@ class CartoCSS(object):
                             'quant_method': 'category',
                             'num_bins': ''}
 
-            missing_keys = set(defaults) - set(self.size)
-            args = dict(self.size, **{k: defaults[k] for k in missing_keys})
+            missing_keys = set(defaults) - set(self.color)
+            args = dict(self.color, **{k: defaults[k] for k in missing_keys})
             self.check_color_inputs(args)
 
             # convert items to comma-separated list if appropriate
@@ -154,10 +216,10 @@ class CartoCSS(object):
 
             # parse dict
             css = ("marker-fill: ramp([{colname}], {ramp_provider}({ramp}), "
-                   "{quant_method}({num_bins}));").format(**args)
+                   "{quant_method}({num_bins}))").format(**args)
             return css
         elif isinstance(self.color, str) and self.color in self.df.columns:
-            self.check_size_inputs(self.color)
+            self.check_color_inputs(self.color)
             default_quant = ('quantiles' if self.df[self.color].dtype in
                                  ('float64', 'int64')
                              else 'category')
@@ -166,14 +228,14 @@ class CartoCSS(object):
                         'quant_method': default_quant}
             args = dict(defaults, **{'colname': self.color})
             # parse string
-            if self.size in self.df.columns:
+            if self.color in self.df.columns:
                 # if string is a column name
                 css = ("marker-fill: ramp([{colname}], "
                        "{ramp_provider}({ramp}), "
-                       "{quant_method}({num_bins}));").format(**args)
+                       "{quant_method}({num_bins}))").format(**args)
                 return css
             else:
-                css = "marker-fill: {};".format(self.size)
+                css = "marker-fill: {};".format(self.color)
                 return css
         else:
             # return red
