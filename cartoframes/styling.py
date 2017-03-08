@@ -135,7 +135,8 @@ class CartoCSS(object):
             elif (not isinstance(inputs['ramp'], str) and
                       not isinstance(inputs['ramp'], list) and
                       not isinstance(inputs['ramp'], tuple)):
-                raise TypeError("`ramp` param must be of type string")
+                raise TypeError("`ramp` param must be of type string, list, "
+                                "or tuple.")
             elif not isinstance(inputs['quant_method'], str):
                 raise TypeError("`quant_method` must be of type string.")
             elif not isinstance(inputs['ramp_provider'], str):
@@ -156,7 +157,6 @@ class CartoCSS(object):
         import numbers
 
         if isinstance(self.size, dict):
-            # TODO: check with mamata on cartographic best-practices
             defaults = {'min': 4,
                         'max': 15,
                         'quant_method': 'quantiles'}
@@ -181,17 +181,16 @@ class CartoCSS(object):
                 raise Exception('`{}` is not a column name.'.format(self.size))
         elif isinstance(self.size, numbers.Number):
             self.check_size_inputs(self.size)
-            css = "{};".format(self.size)
+            css = str(self.size)
             return css
         else:
             # return red
-            return "7;"
+            return "7"
 
     def get_color_css(self):
         """
         """
         if isinstance(self.color, dict):
-            # TODO: check with mamata on cartographic best-practices
 
             # choose category or quantitative defaults
             if self.df[self.color['colname']].dtype in ('float64', 'int64'):
@@ -220,11 +219,15 @@ class CartoCSS(object):
             return css
         elif isinstance(self.color, str) and self.color in self.df.columns:
             self.check_color_inputs(self.color)
-            default_quant = ('quantiles' if self.df[self.color].dtype in
-                                 ('float64', 'int64')
-                             else 'category')
+            print(self.color)
+            if self.df[self.color].dtype in ('float64', 'int64'):
+                default_quant = 'quantiles'
+                default_ramp = 'RedOr'
+            else:
+                default_quant = 'category'
+                default_ramp = 'Bold'
             defaults = {'ramp_provider': 'cartocolor',
-                        'ramp': 'RedOr',
+                        'ramp': default_ramp,
                         'quant_method': default_quant,
                         'num_bins': 7}
             args = dict(defaults, **{'colname': self.color})
@@ -234,10 +237,10 @@ class CartoCSS(object):
                 css = ("ramp([{colname}], "
                        "{ramp_provider}({ramp}), "
                        "{quant_method}({num_bins}))").format(**args)
+                print(css)
                 return css
             else:
-                css = "{};".format(self.color)
-                return css
+                return self.color
         else:
             # return red
-            return "#f00;"
+            return "#f00"
