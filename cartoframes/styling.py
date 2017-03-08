@@ -165,7 +165,7 @@ class CartoCSS(object):
             args = dict(self.size, **{k: defaults[k] for k in missing_keys})
             self.check_size_inputs(args)
             # parse dict
-            css = ("marker-width: ramp([{colname}], range({min}, {max}), "
+            css = ("ramp([{colname}], range({min}, {max}), "
                    "{quant_method}())").format(**args)
             return css
         elif isinstance(self.size, str):
@@ -174,18 +174,18 @@ class CartoCSS(object):
             if self.size in self.df.columns:
                 # if string is a column name
                 # size by 'reasonable' values
-                css = ("marker-width: ramp([{colname}], range(4, 15), "
+                css = ("ramp([{colname}], range(4, 15), "
                        "quantiles())").format(colname=self.size)
                 return css
             else:
                 raise Exception('`{}` is not a column name.'.format(self.size))
         elif isinstance(self.size, numbers.Number):
             self.check_size_inputs(self.size)
-            css = "marker-width: {};".format(self.size)
+            css = "{};".format(self.size)
             return css
         else:
             # return red
-            return "marker-width: 7;"
+            return "7;"
 
     def get_color_css(self):
         """
@@ -215,7 +215,7 @@ class CartoCSS(object):
                 args['ramp'] = ', '.join([str(r) for r in args['ramp']])
 
             # parse dict
-            css = ("marker-fill: ramp([{colname}], {ramp_provider}({ramp}), "
+            css = ("ramp([{colname}], {ramp_provider}({ramp}), "
                    "{quant_method}({num_bins}))").format(**args)
             return css
         elif isinstance(self.color, str) and self.color in self.df.columns:
@@ -225,18 +225,19 @@ class CartoCSS(object):
                              else 'category')
             defaults = {'ramp_provider': 'cartocolor',
                         'ramp': 'RedOr',
-                        'quant_method': default_quant}
+                        'quant_method': default_quant,
+                        'num_bins': 7}
             args = dict(defaults, **{'colname': self.color})
             # parse string
             if self.color in self.df.columns:
                 # if string is a column name
-                css = ("marker-fill: ramp([{colname}], "
+                css = ("ramp([{colname}], "
                        "{ramp_provider}({ramp}), "
                        "{quant_method}({num_bins}))").format(**args)
                 return css
             else:
-                css = "marker-fill: {};".format(self.color)
+                css = "{};".format(self.color)
                 return css
         else:
             # return red
-            return "marker-fill: #f00;"
+            return "#f00;"
