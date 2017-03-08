@@ -219,7 +219,6 @@ class CartoCSS(object):
             return css
         elif isinstance(self.color, str) and self.color in self.df.columns:
             self.check_color_inputs(self.color)
-            print(self.color)
             if self.df[self.color].dtype in ('float64', 'int64'):
                 default_quant = 'quantiles'
                 default_ramp = 'RedOr'
@@ -237,7 +236,6 @@ class CartoCSS(object):
                 css = ("ramp([{colname}], "
                        "{ramp_provider}({ramp}), "
                        "{quant_method}({num_bins}))").format(**args)
-                print(css)
                 return css
             else:
                 return self.color
