@@ -148,6 +148,7 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
+# TODO: not used anywhere
 def get_username(baseurl):
     """
     Retrieve the username from the baseurl.
@@ -183,7 +184,7 @@ def get_geom_type(sql_auth_client, tablename):
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except KeyError:
-        raise Exception(("Cannot create a map from `{tablename}` because this "
+        raise TypeError(("Cannot create a map from `{tablename}` because this "
                         "table does not have "
                         "geometries ({geomreported})").format(
                             tablename=tablename,
@@ -352,49 +353,3 @@ def add_col(self, colname, n_batch=30, debug=False):
             queries = []
 
     return None
-
-# utilities for pandas.DataFrame.carto_map
-
-
-def get_anon_mapconfig(params):
-    """Anonymous Maps API template for carto.js
-    :param mapconfig_params: dict with the following keys:
-      - username: string username of CARTO account
-      - tablename: string tablename cartoframe is associated with
-      - cartocss: CartoCSS string for styling the data on the map
-      - basemap: Default basemap of the data
-
-    dtypes one of
-      * quantitative: float64 (float32, int32, int64)
-      * categorical: bool, object
-        * cartocss rule: ramp([room_type], cartocolor(Bold), category(4))
-          dtypes = {'number': 'float64',
-                    'date': 'datetime64',
-                    'string': 'object',
-                    'geometry': 'object',
-                    'boolean': 'bool'}
-
-    color palettes: https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
-    """
-
-    if params['basemap'] is not None:
-        basemap = params['basemap']
-    else:
-        basemap = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'
-    map_args = {'cartocss': params['cartocss'],
-                'basemap': basemap,
-                'tablename': params['tablename'],
-                'username': params['username']}
-
-    mapconfig = '''{"user_name": "%(username)s",
-                    "type": "cartodb",
-                    "sublayers": [{
-                      "type": "http",
-                      "urlTemplate": "%(basemap)s"
-                      }, {
-                      "sql": "select * from %(tablename)s",
-                      "cartocss": "%(cartocss)s"
-                      }],
-                      "subdomains": [ "a", "b", "c" ]
-                      }''' % map_args
-    return mapconfig

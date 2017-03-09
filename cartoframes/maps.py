@@ -13,7 +13,6 @@ def create_named_map(username, api_key, tablename):
 
     map_name = '{table}_{time}'.format(table=tablename,
                                        time=str(time()).replace('.', '_'))
-    print("map name: {}".format(map_name))
 
     defaults = {'named_map_name': map_name,
                 'basemap': 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
@@ -29,11 +28,9 @@ def create_named_map(username, api_key, tablename):
     api_endpoint = ('https://{username}.carto.com/api/v1/map/named'
                     '?api_key={api_key}').format(username=username,
                                                  api_key=api_key)
-    print("api_endpoint: {}".format(api_endpoint))
     resp = requests.post(api_endpoint,
                          data=filled_template,
                          headers={'content-type': 'application/json'})
-    print("response: {}".format(resp))
     if resp.status_code == requests.codes.ok:
         return json.loads(resp.text)['template_id']
     else:
@@ -59,7 +56,7 @@ def get_bounds(self, debug=False):
     return bounds['rows'][0]
 
 
-def get_static_snapshot(self, cartocss, basemap, debug=False):
+def get_static_snapshot(self, cartocss, basemap, figsize=(647, 400), debug=False):
     """update a named map with a new configuration"""
     import requests
     if basemap:
@@ -89,12 +86,13 @@ def get_static_snapshot(self, cartocss, basemap, debug=False):
     #       do this in the map creation/updating?
     # https://carto.com/docs/carto-engine/maps-api/named-maps#arguments
     img = ("http://{username}.carto.com/api/v1/map/static/named/"
-           "{map_name}/400/400.png")
+           "{map_name}/{width}/{height}.png")
 
-    # print("response: {}".format(resp))
     if resp.status_code == requests.codes.ok:
         return img.format(username=self.get_carto_username(),
-                          map_name=self.get_carto_namedmap())
+                          map_name=self.get_carto_namedmap(),
+                          width=figsize[0],
+                          height=figsize[1])
     else:
         resp.raise_for_status()
 
@@ -149,3 +147,23 @@ def get_named_map_template():
       }
     }'''
     return template
+
+
+def get_named_mapconfig(username, mapname):
+    """Named Maps API template for carto.js
+    :param mapconfig_params: dict with the following keys:
+      - username: The username of CARTO account
+      - mapname: The mapname a cartoframe is associated with
+    """
+    map_args = {'mapname': mapname,
+                'username': username}
+
+    mapconfig = '''{
+      "user_name": "%(username)s",
+      "type": "namedmap",
+      "named_map": {
+        "name": "%(mapname)s"
+      },
+      "subdomains": [ "a", "b", "c" ]
+      }''' % map_args
+    return mapconfig

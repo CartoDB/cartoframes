@@ -390,9 +390,12 @@ def make_cartoframe(self, username, api_key, tablename,
 
 
 def carto_map(self, interactive=True, color=None, size=None,
-              cartocss=None, basemap=None, debug=False):
+              cartocss=None, basemap=None, figsize=(647, 400), debug=False):
     """
         Produce and return CARTO maps or iframe embeds
+
+        :param figsize: Tuple of dimensions (width, height) for output embed or
+                        image
     """
     import cartoframes.styling as styling
     import cartoframes.maps as maps
@@ -411,29 +414,35 @@ def carto_map(self, interactive=True, color=None, size=None,
 
     if debug: print(cartocss)
 
-    if interactive is True:
+    # create static map
+    # TODO: use carto-python client to create static map (not yet
+    #       implemented)
+    url = self.get_static_snapshot(cartocss, basemap, figsize, debug=False)
+    img = '<img src="{url}" />'.format(url=url)
+
+    if interactive is False:
+        return IPython.display.HTML(img)
+    else:
+        bounds = self.get_bounds()
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
-                            'basemap': basemap}
+                            'basemap': basemap,
+                            'bounds': ','.join(map(str, [bounds['north'], bounds['east'],
+                                       bounds['south'], bounds['west']]))}
 
         mapconfig_params['q'] = urllib.quote(
-            utils.get_anon_mapconfig(mapconfig_params))
+            maps.get_named_mapconfig(self.get_carto_username(),
+                                     self.get_carto_namedmap()))
 
         url = '?'.join(['/files/cartoframes.html',
                         urllib.urlencode(mapconfig_params)])
-        iframe = ('<iframe src="{url}" width=700 '
-                  'height=350></iframe>').format(url=url)
+        iframe = ('<iframe src="{url}" width={width} height={height}>'
+                  'Preview image: {img}</iframe>').format(url=url,
+                                                          width=figsize[0],
+                                                          height=figsize[1],
+                                                          img=img)
         return IPython.display.HTML(iframe)
-
-    else:
-        # create static map
-        # TODO: use carto-python client to create static map (not yet
-        #       implemented)
-        url = self.get_static_snapshot(cartocss, basemap, debug=False)
-        img = '<img src="{url}" />'.format(url=url)
-        return IPython.display.HTML(img)
-        # raise NotImplementedError("Static maps are not yet implemented.")
 
 
 # Monkey patch these methods to pandas
