@@ -43,6 +43,8 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
        :param index: string Column to use for the index (default `cartodb_id`)
        """
     import json
+    import time
+    import cartoframes.maps as maps
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
     sql = utils.get_auth_client(username=username,
@@ -75,11 +77,16 @@ def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
 
+    # TODO: find out of there's a max length to clip on
+    named_map_name = maps.create_named_map(username, api_key, tablename)
+    print("Named map name: {}".format(named_map_name))
+
     # only set metadata if it's becoming a cartoframe
     if tablename:
         _df.set_metadata(tablename=tablename,
                          username=username,
                          api_key=api_key,
+                         named_map_name=named_map_name,
                          include_geom=include_geom,
                          limit=limit,
                          geomtype=utils.get_geom_type(sql, tablename))
@@ -160,9 +167,17 @@ def get_carto_geomtype(self):
     import json
     return json.loads(self._metadata[-1])['carto_geomtype']
 
+def get_carto_namedmap(self):
+    return self.get_carto('carto_named_map')
+
+def get_carto(self, key):
+    import json
+    return json.loads(self._metadata[-1])[key]
+
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
-                 include_geom=None, limit=None, geomtype=None):
+                 include_geom=None, limit=None, geomtype=None,
+                 named_map_name=None):
     """
     Method for storing metadata in a dataframe
     """
@@ -171,6 +186,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
         json.dumps({'carto_table': tablename,
                     'carto_username': username,
                     'carto_api_key': api_key,
+                    'carto_named_map': named_map_name,
                     'carto_include_geom': include_geom,
                     'carto_limit': limit,
                     'carto_geomtype': geomtype}))
@@ -373,12 +389,13 @@ def make_cartoframe(self, username, api_key, tablename,
     return None
 
 
-def carto_map(self, interactive=True, stylecol=None, color=None, size=None,
-              cartocss=None, basemap=None, debug=None):
+def carto_map(self, interactive=True, color=None, size=None,
+              cartocss=None, basemap=None, debug=False):
     """
         Produce and return CARTO maps or iframe embeds
     """
     import cartoframes.styling as styling
+    import cartoframes.maps as maps
     try:
         # if Python 3
         import urllib.parse as urllib
@@ -387,31 +404,36 @@ def carto_map(self, interactive=True, stylecol=None, color=None, size=None,
         import urllib
     import IPython
 
+    if cartocss is None:
+        css = styling.CartoCSS(self, size=size,
+                               color=color, cartocss=cartocss)
+        cartocss = css.get_cartocss()
+
+    if debug: print(cartocss)
+
     if interactive is True:
-        if cartocss is None:
-            css = styling.CartoCSS(self, size=size,
-                                   color=color, cartocss=cartocss)
-            cartocss = css.get_cartocss()
-            if debug: print(cartocss)
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
                             'basemap': basemap}
 
+        mapconfig_params['q'] = urllib.quote(
+            utils.get_anon_mapconfig(mapconfig_params))
+
+        url = '?'.join(['/files/cartoframes.html',
+                        urllib.urlencode(mapconfig_params)])
+        iframe = ('<iframe src="{url}" width=700 '
+                  'height=350></iframe>').format(url=url)
+        return IPython.display.HTML(iframe)
+
     else:
         # create static map
         # TODO: use carto-python client to create static map (not yet
         #       implemented)
-        raise NotImplementedError("Static maps are not yet implemented.")
-
-    mapconfig_params['q'] = urllib.quote(
-        utils.get_mapconfig(mapconfig_params))
-
-    url = '?'.join(['/files/cartoframes.html',
-                    urllib.urlencode(mapconfig_params)])
-    iframe = ('<iframe src="{url}" width=700 '
-              'height=350></iframe>').format(url=url)
-    return IPython.display.HTML(iframe)
+        url = self.get_static_snapshot(cartocss, basemap, debug=False)
+        img = '<img src="{url}" />'.format(url=url)
+        return IPython.display.HTML(img)
+        # raise NotImplementedError("Static maps are not yet implemented.")
 
 
 # Monkey patch these methods to pandas
@@ -433,10 +455,12 @@ pd.DataFrame.set_carto_sql_client = set_carto_sql_client
 pd.DataFrame.set_metadata = set_metadata
 
 # get methods
+pd.DataFrame.get_carto = get_carto
 pd.DataFrame.get_carto_api_key = get_carto_api_key
 pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
+pd.DataFrame.get_carto_namedmap = get_carto_namedmap
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered

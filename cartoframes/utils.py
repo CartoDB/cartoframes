@@ -4,7 +4,7 @@ private functions used in cartoframes methods
 import pandas as pd
 
 def get_auth_client(username=None, api_key=None, cdb_client=None):
-    """
+    """Instantiates a SQL Client from the Carto Python SDK (v1.0.0)
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
@@ -12,21 +12,12 @@ def get_auth_client(username=None, api_key=None, cdb_client=None):
         BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
-    elif (username is not None) and (api_key is not None):
+    elif (username is None) and (api_key is None):
         sql = SQLClient(cdb_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
                         "specified.")
     return sql
-
-
-# utilities for pandas.read_carto
-
-# NOTE: `_add_meta` not currently used
-def add_meta(self, **kwargs):
-    """Set metadata for a dataframe if none has been already set"""
-    for key in kwargs:
-        self._metadata[-1][key] = kwargs[key]
 
 
 def create_table_query(tablename, schema, username, is_org_user=False,
@@ -51,6 +42,7 @@ def create_table_query(tablename, schema, username, is_org_user=False,
     return query
 
 # TODO: combine this with other datatype maps
+# PostgreSQL -> pandas
 def map_dtypes(pgtype):
     """
     Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
@@ -71,6 +63,7 @@ def map_dtypes(pgtype):
         # make it a string if not in dict above
         return 'object'
 
+# pandas -> PostgreSQL
 def dtype_to_pgtype(dtype, colname):
     """
     Map dataframe types to carto postgres types
@@ -88,6 +81,7 @@ def dtype_to_pgtype(dtype, colname):
         except KeyError:
             return 'text'
 
+# NumPy -> PostgreSQL
 def map_numpy_to_postgres(item):
     """
       Map NumPy values to PostgreSQL values
@@ -105,6 +99,7 @@ def map_numpy_to_postgres(item):
         return 'null'
     return str(item)
 
+# PostgreSQL -> NumPy
 def datatype_map(dtype):
     """
        map NumPy types to PostgreSQL types
@@ -120,7 +115,10 @@ def datatype_map(dtype):
         return 'text'
 
 
-def format_row(rowvals, schema):
+def format_row(rowvals, dtypes):
+    """
+
+    """
     mapped_vals = []
     for idx, val in enumerate(rowvals):
         mapped_vals.append(map_numpy_to_postgres(val))
@@ -358,7 +356,7 @@ def add_col(self, colname, n_batch=30, debug=False):
 # utilities for pandas.DataFrame.carto_map
 
 
-def get_mapconfig(params):
+def get_anon_mapconfig(params):
     """Anonymous Maps API template for carto.js
     :param mapconfig_params: dict with the following keys:
       - username: string username of CARTO account
