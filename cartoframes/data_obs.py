@@ -1,7 +1,7 @@
 """Data Observatory methods"""
 import json
 import pandas as pd
-import cartoframes.utils as utils
+import cartoframes.utils
 
 def read_data_obs(self, hints, debug=False):
     """
@@ -76,6 +76,50 @@ def _do_colname_normalize(entry, debug=False):
                                     if entry['normalization'] else '')),
         numer_timespan=entry['numer_timespan'].replace(' - ', '_'))
 
+def from_carto_do(self,bounding,cols_meta,table_name=None , debug=False):
+	metadata_query  = """
+  			SELECT cdb_dataservices_client.OBS_GetMeta(
+    			{bounding},
+				'{cols_meata}',
+    		1, 1, 1
+  			) meta
+		)
+	"""
+
+	resp = self.carto_sql_client.send(metadata_query);
+
+	meta = resp['rows'][0]['meta']
+	select_vals = ','.join([ "r->{0}->'value' as {1}".foramt(index, col['numer_name']) for index,col in enumerate(json.loads(meta))])
+	if debug: print(resp)
+
+	do_generate_table = """
+		with geometries as(
+			SELECT * FROM OBS_GetBoundariesByGeometry(
+      			st_makeenvelope({bounding},4326),
+	  			'us.census.tiger.census_tract'
+			) As m(the_geom, geoid)
+
+		)
+		select {select_vals}, geometries.the_geom  from cdb_dataservices_client.OBS_GetData( (select array_agg(geoid) from geometries) , '{meta}') as r,
+		geometries
+		where geometries.geoid = r.id
+        )
+        """.format( meta = meta, select_vals= select_vals)
+	if debug: print(do_generate_table)
+	resp = self.carto_sql_client.send(do_generate_table)
+	return resp
+
+
+def do_aggregate(self, geom_level, cols_args = None, result_table_name=None):
+    username=self.get_carto_username()
+    if(result_table_name):
+        query = """
+
+        """
+    else:
+        query = """
+        """
+
 def do_augment(self, cols_meta, add_geom_id=None, debug=False):
     """create data observatory columns in a dataset"""
     import json
@@ -98,6 +142,7 @@ def do_augment(self, cols_meta, add_geom_id=None, debug=False):
 
 # Monkey patch methods
 
+pd.from_carto_do = from_carto_do
 pd.DataFrame.read_data_obs = read_data_obs
 pd.DataFrame.carto_do_augment = carto_do_augment
 pd.DataFrame.do_augment = do_augment
