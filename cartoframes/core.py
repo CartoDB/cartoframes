@@ -392,10 +392,51 @@ def make_cartoframe(self, username, api_key, tablename,
 def carto_map(self, interactive=True, color=None, size=None,
               cartocss=None, basemap=None, figsize=(647, 400), debug=False):
     """
-        Produce and return CARTO maps or iframe embeds
+        Produce and return CARTO maps. Can be interactive or static.
 
+        :param interactive: Boolean value on whether to show an interactive
+                            map or static map
+        :param color: string or dict.
+            If color is a string, can be a column name or a hex value
+            (beginning with a #). When a hex value, all geometries are colored
+            the same. If the column name, use CARTO's TurtoCarto to create
+            qualitative or category mapping.
+
+            If color is a dict, parse the parameters to custom style the map.
+            Values are:
+            - colname (required): column name to base the styling on
+            - ramp (optional): If text, type of color ramp to use. See
+              https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
+              for a full list. If list/tuple, set of hex values.
+            - ramp_provider (optional): Specify the source of the `ramp`
+              (either `cartocolor` or `colorbrewer`)
+            - num_bins: Number of divisions for the ramp
+            - quant_method: Quantification method for dividing the data into
+              classes. Options are `jenks`, `quantiles`, `equal`, or
+              `headtails`. By choosing a custom ramp
+
+        :param size: string or dict. Only works with point geometries. A future
+                     version will allow more sizing options for lines.
+            If size is a number, all points are sized by the same value
+            specified.
+
+            If size is a column name, this option sizes points from a default
+            minimum value of 4 pixels to 15 pixels.
+
+            If size is a dict, size points by the following values if entered.
+            Defaults will be used if they are not requested.
+            - colname: column to base the styling off of
+            - max: maximum marker width (default 15)
+            - min: minimum marker width (default 4)
+            - quant_method: type of quantification to use. Options are `jenks`,
+              `quantiles`, `equal`, or `headtails`.
+        :param cartocss: Complete CartoCSS style to apply to your map. This
+                         will override `size` and `color` attributes if
+                         present.
+        :param basemap: XYZ URL template for the basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for
+                        examples.
         :param figsize: Tuple of dimensions (width, height) for output embed or
-                        image
+                        image. Default is (647, 400).
     """
     import cartoframes.styling as styling
     import cartoframes.maps as maps

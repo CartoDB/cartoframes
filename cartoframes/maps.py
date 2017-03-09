@@ -5,8 +5,7 @@ Functions and methods for interactive and static maps
 import pandas as pd
 
 def create_named_map(username, api_key, tablename):
-    """Create a named map for later use
-    """
+    """Create a default named map for later use"""
     import json
     from time import time
     import requests
