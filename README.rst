@@ -10,17 +10,11 @@ Install Instructions
 
 Clone this repository.
 
-Copy the requirements.txt file in this repo to your machine and run:
+Change your directory to `cartoframes` and run the following:
 
 .. code:: bash
 
     $ pip install -r requirements.txt
-    $ pip install pyrestcli
-
-Next, from the install `cartoframes` through `pip` using edit mode:
-
-.. code:: bash
-
     $ pip install -e .
 
 Once you've done this, `cartoframes` should be installed on your machine. See the example usage section below for using cartoframes in a Jupyter notebook.

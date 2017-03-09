@@ -1,1 +1,2 @@
 -e git+git@github.com:CartoDB/carto-python.git@1.0.0#egg=carto
+pyrestcli
