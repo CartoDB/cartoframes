@@ -4,7 +4,7 @@ private functions used in cartoframes methods
 import pandas as pd
 
 def get_auth_client(username=None, api_key=None, cdb_client=None):
-    """
+    """Instantiates a SQL Client from the Carto Python SDK (v1.0.0)
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
@@ -12,21 +12,12 @@ def get_auth_client(username=None, api_key=None, cdb_client=None):
         BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
-    elif (username is not None) and (api_key is not None):
+    elif (username is None) and (api_key is None):
         sql = SQLClient(cdb_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
                         "specified.")
     return sql
-
-
-# utilities for pandas.read_carto
-
-# NOTE: `_add_meta` not currently used
-def add_meta(self, **kwargs):
-    """Set metadata for a dataframe if none has been already set"""
-    for key in kwargs:
-        self._metadata[-1][key] = kwargs[key]
 
 
 def create_table_query(tablename, schema, username, is_org_user=False,
@@ -51,6 +42,7 @@ def create_table_query(tablename, schema, username, is_org_user=False,
     return query
 
 # TODO: combine this with other datatype maps
+# PostgreSQL -> pandas
 def map_dtypes(pgtype):
     """
     Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
@@ -71,6 +63,7 @@ def map_dtypes(pgtype):
         # make it a string if not in dict above
         return 'object'
 
+# pandas -> PostgreSQL
 def dtype_to_pgtype(dtype, colname):
     """
     Map dataframe types to carto postgres types
@@ -88,6 +81,7 @@ def dtype_to_pgtype(dtype, colname):
         except KeyError:
             return 'text'
 
+# NumPy -> PostgreSQL
 def map_numpy_to_postgres(item):
     """
       Map NumPy values to PostgreSQL values
@@ -105,6 +99,7 @@ def map_numpy_to_postgres(item):
         return 'null'
     return str(item)
 
+# PostgreSQL -> NumPy
 def datatype_map(dtype):
     """
        map NumPy types to PostgreSQL types
@@ -120,7 +115,10 @@ def datatype_map(dtype):
         return 'text'
 
 
-def format_row(rowvals, schema):
+def format_row(rowvals, dtypes):
+    """
+
+    """
     mapped_vals = []
     for idx, val in enumerate(rowvals):
         mapped_vals.append(map_numpy_to_postgres(val))
@@ -150,6 +148,7 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
+# TODO: not used anywhere
 def get_username(baseurl):
     """
     Retrieve the username from the baseurl.
@@ -185,7 +184,7 @@ def get_geom_type(sql_auth_client, tablename):
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except KeyError:
-        raise Exception(("Cannot create a map from `{tablename}` because this "
+        raise TypeError(("Cannot create a map from `{tablename}` because this "
                         "table does not have "
                         "geometries ({geomreported})").format(
                             tablename=tablename,
@@ -354,49 +353,3 @@ def add_col(self, colname, n_batch=30, debug=False):
             queries = []
 
     return None
-
-# utilities for pandas.DataFrame.carto_map
-
-
-def get_mapconfig(params):
-    """Anonymous Maps API template for carto.js
-    :param mapconfig_params: dict with the following keys:
-      - username: string username of CARTO account
-      - tablename: string tablename cartoframe is associated with
-      - cartocss: CartoCSS string for styling the data on the map
-      - basemap: Default basemap of the data
-
-    dtypes one of
-      * quantitative: float64 (float32, int32, int64)
-      * categorical: bool, object
-        * cartocss rule: ramp([room_type], cartocolor(Bold), category(4))
-          dtypes = {'number': 'float64',
-                    'date': 'datetime64',
-                    'string': 'object',
-                    'geometry': 'object',
-                    'boolean': 'bool'}
-
-    color palettes: https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
-    """
-
-    if params['basemap'] is not None:
-        basemap = params['basemap']
-    else:
-        basemap = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'
-    map_args = {'cartocss': params['cartocss'],
-                'basemap': basemap,
-                'tablename': params['tablename'],
-                'username': params['username']}
-
-    mapconfig = '''{"user_name": "%(username)s",
-                    "type": "cartodb",
-                    "sublayers": [{
-                      "type": "http",
-                      "urlTemplate": "%(basemap)s"
-                      }, {
-                      "sql": "select * from %(tablename)s",
-                      "cartocss": "%(cartocss)s"
-                      }],
-                      "subdomains": [ "a", "b", "c" ]
-                      }''' % map_args
-    return mapconfig

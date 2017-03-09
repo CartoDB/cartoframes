@@ -3,3 +3,4 @@
 import cartoframes.core
 import cartoframes.utils
 import cartoframes.data_obs
+import cartoframes.maps
