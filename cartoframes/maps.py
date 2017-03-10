@@ -39,7 +39,14 @@ def create_named_map(username, api_key, tablename):
 
 
 def get_bounds(self, debug=False):
-    """Get the southwestern most point, and northeastern most point"""
+    """Get the southwestern most point, and northeastern most point
+
+    :returns: Dictionary with the following keys:
+        * ``west``: longitude of the western-most extent
+        * ``south``: latitutde of the southern-most extent
+        * ``east``: longitude of the eastern-most extent
+        * ``north``: latitutde of the northern-most extent
+    """
 
     query = '''
         SELECT
@@ -56,7 +63,14 @@ def get_bounds(self, debug=False):
 
 
 def get_static_snapshot(self, cartocss, basemap, figsize=(647, 400), debug=False):
-    """update a named map with a new configuration"""
+    """Update a named map with a new configuration.
+
+    :param cartocss: CartoCSS to define new map style
+    :param basemap: Basemap XYZ template to include in new map style
+    :param figsize: (Optional) Dimensions of output image (width, height) as a tuple
+
+    :returns: URL to newly updated image
+    """
     import requests
     if basemap:
         new_basemap = basemap
@@ -100,8 +114,9 @@ pd.DataFrame.get_bounds = get_bounds
 
 
 def get_named_map_template():
-    """
+    """Return named map template. See CARTO's Maps API documentation for more information: https://carto.com/docs/carto-engine/maps-api/named-maps
 
+    :returns: named map template, with values to be filled in
     """
 
     template = '''{
@@ -150,9 +165,11 @@ def get_named_map_template():
 
 def get_named_mapconfig(username, mapname):
     """Named Maps API template for carto.js
-    :param mapconfig_params: dict with the following keys:
-      - username: The username of CARTO account
-      - mapname: The mapname a cartoframe is associated with
+
+    :param username: The username of the CARTO account
+    :param mapname: The mapname a cartoframe is associated with CARTO account
+
+    :returns: mapconfig object for a named map as serialized JSON
     """
     map_args = {'mapname': mapname,
                 'username': username}

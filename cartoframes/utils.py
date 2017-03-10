@@ -4,7 +4,13 @@ private functions used in cartoframes methods
 import pandas as pd
 
 def get_auth_client(username=None, api_key=None, cdb_client=None):
-    """Instantiates a SQL Client from the Carto Python SDK (v1.0.0)
+    """Instantiates a SQL Client from the CARTO Python SDK (v1.0.0)
+
+    :param username: CARTO username
+    :param api_key: API key of CARTO user ``username``
+    :param cdb_client: CARTO Python SDK Authentication client
+
+    :returns: Authenticated SQL client with user credentials
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
@@ -85,6 +91,11 @@ def dtype_to_pgtype(dtype, colname):
 def map_numpy_to_postgres(item):
     """
       Map NumPy values to PostgreSQL values
+
+      :param item: value
+      :type item: any
+      :returns: Mapped data type of ``item``
+      :rtype: string
     """
     import math
     if isinstance(item, str):
@@ -99,10 +110,15 @@ def map_numpy_to_postgres(item):
         return 'null'
     return str(item)
 
+# TODO: do type checking instead of the casting-to-string checking
 # PostgreSQL -> NumPy
 def datatype_map(dtype):
-    """
-       map NumPy types to PostgreSQL types
+    """Map NumPy types to CARTO-flavored PostgreSQL types
+
+       :param dtype: CARTO-flavored PostgreSQL data type
+       :type dtype: string
+       :returns: dtype in NumPy
+       :rtype: string
     """
     # TODO: add datetype conversion
     if 'float' in dtype:
@@ -116,8 +132,14 @@ def datatype_map(dtype):
 
 
 def format_row(rowvals, dtypes):
-    """
+    """Transform a DataFrame row into a comma-separated list for use in
+        a SQL query.
 
+    :param rowvals: An interable of the values in a row
+    :param type: list
+
+    :returns: string of the row values separated by a comma
+    :rtype: string
     """
     mapped_vals = []
     for idx, val in enumerate(rowvals):
@@ -125,21 +147,30 @@ def format_row(rowvals, dtypes):
     return ','.join(mapped_vals)
 
 def transform_schema(pgschema):
-    """
-    Transform schema returned via SQL API to dict for pandas
-    Input:
-    :param pgschema: dict The schema returned from CARTO's SQL API, in the
-                     following format:
-                     {'col1': {'type': 'numeric'},
-                      'col2': {'type': 'date'},
-                      'col3': {'type': 'numeric'},
-                      ...}
-    Output:
-    Transformed schema data types in the following format:
-    {'col1': 'float64',
-     'col2': 'datetime64',
-     'col3': 'float64',
-     ...}
+    """Transform schema returned via SQL API to dict for pandas
+
+    :param pgschema: The schema returned from CARTO's SQL API, in the
+        following format:
+
+    .. code:: python
+
+        {'col1': {'type': 'numeric'},
+         'col2': {'type': 'date'},
+         'col3': {'type': 'numeric'},
+         ...}
+
+    :type pgschema: dict
+    :returns: Transformed schema data types in the following format:
+
+    .. code:: python
+
+        {'col1': 'float64',
+         'col2': 'datetime64',
+         'col3': 'float64',
+         ...}
+
+    :rtype: dict
+
     """
     datatypes = {}
     for field in pgschema:
@@ -199,11 +230,13 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
     """
         Create a cartoframe or fill a pd.DataFrame with data from a CARTO
         account based on a custom query.
-        :param query: string Custom query
-        :param carto_sql_client: object CARTO authentication client for SQL API
-        :param is_org_user: boolean Whether the user is in an organization or
-                            not
+
+        :param query: Custom query for creating a new cartoframe
+        :param carto_sql_client: CARTO Authentication client for SQL API
+        :param is_org_user: Whether the user is in an organization or not
         :param username: string CARTO username
+
+        :returns: cartoframe created from ``query``
     """
     if tablename:
         create_table = '''

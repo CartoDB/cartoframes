@@ -1,4 +1,7 @@
 """
+cartoframe methods
+==================
+
 A pandas dataframe interface for working with CARTO maps and tables
 
 Andy Eschbacher and Stuart Lynn, 2017
@@ -21,26 +24,36 @@ import carto
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(cdb_client=None, username=None, api_key=None, onprem=False,
-               tablename=None, query=None, include_geom=True,
-               is_org_user=False, limit=None, index='cartodb_id',
-               debug=False):
-    """Import a table from carto into a pandas dataframe, storing
-       table information in pandas metadata.
-       Inputs:
-       :param cdb_client: object CARTO Python SDK authentication client
-                          (default None)
-       :param username: string CARTO username (default None)
-       :param api_key: string CARTO API key
-       :param onprem: string BASEURL for onprem (not yet implemented)
-       :param tablename: string Table to create a cartoframe from
-       :param query: string Query for generating a cartoframe (not yet
-                     implemented)
-       :param include_geom: string Not yet implemented
-       :param sync: boolean Create a cartoframe that can later be sync'd (True)
-                    or just pull down data (False)
-       :param limit: integer The maximum number of rows to pull
-       :param index: string Column to use for the index (default `cartodb_id`)
+def read_carto(username=None, api_key=None, onprem=False, tablename=None,
+               query=None, include_geom=True, is_org_user=False, limit=None,
+               cdb_client=None, index='cartodb_id', debug=False):
+    """Create a DataFrame from a CARTO table, storing table information in
+       pandas metadata that allows for further cartoframe options like syncing,
+       map creation, and augmentation from the Data Observatory.
+
+       :param username: CARTO username (default None)
+       :type username: string
+       :param api_key: CARTO API key
+       :type api_key: string
+       :param onprem: BASEURL for onprem (not yet implemented)
+       :type onprem: string
+       :param tablename: Table to create a cartoframe from
+       :type tablename: string
+       :param query: Query for generating a cartoframe
+       :type query: string
+       :param include_geom: Not implemented
+       :type include_geom: boolean
+       :param sync: Create a cartoframe that can later be sync'd (defaut: True) or just pull down data (False)
+       :type sync: boolean
+       :param limit: The maximum number of rows to pull
+       :type limit: integer
+       :param cdb_client: (optional) CARTO Python SDK authentication client object (default None)
+       :type param: object
+       :param index: (optional) string Column to use for the index (default `cartodb_id`)
+       :type index: string
+
+       :returns: A pandas DataFrame linked to a CARTO table
+       :rtype: cartoframe
        """
     import json
     import time
@@ -193,19 +206,35 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
-def sync_carto(self, username=None, api_key=None,
-               requested_tablename=None, n_batch=20, latlng_cols=None,
-               is_org_user=False, debug=False):
-    """
-    :param createtable (boolean): if set, creates a new table with name
-                                  `new_tablename` on account connected
-                                  through the auth_client
-    :param new_tablename (string): new name of table to create from dataframe.
-                                   If specified and dataframe was sourced from
-                                   CARTO, this will not overwrite the original
-                                   table. If specified and dataframe was not
-                                   read from CARTO, then this will create a new
-                                   table in user's CARTO account.
+def sync_carto(self, username=None, api_key=None, requested_tablename=None,
+               n_batch=20, latlng_cols=None, is_org_user=False, debug=False):
+    """If an existing cartoframe, this method syncs with the CARTO table a
+        cartoframe is associated with. If syncing a DataFrame which has not yet
+        been linked with CARTO, it creates a new table if the tablename does
+        not yet exist and updates the metadata in the DataFrame.
+
+    :param username: CARTO username credentials. Needed only if the DataFrame
+        is not yet linked to CARTO (e.g., it was created with
+        ``pd.DataFrame.read_carto``)
+    :type username: string
+    :param api_key: CARTO API key. Needed only if linking a DataFrame with a
+        table on CARTO.
+    :type api_key: string
+    :param requested_tablename: if set, creates a new table with name
+        `new_tablename` on account connected through the auth_client. If this
+        tablename exists on CARTO already, an exception will be thrown.
+    :type requested_tablename: string
+    :param n_batch: Number of queries to include in a batch update to the
+        database (experimental).
+    :type n_batch: integer
+    :param latlng_cols: Columns which have the latitude and longitude (in that
+        order) for creating the geometry in the database. Once this cartoframe
+        syncs, a new column called `the_geom` will be pulled down that is a
+        text representation of the geometry.
+    :type latlng_cols: tuple
+    :param is_org_user: This flag needs to be set if a user is in a
+        multiuser account.
+    :type is_org_user: boolean
     """
 
     if (requested_tablename is not None and username is not None and
@@ -257,14 +286,17 @@ def sync_carto(self, username=None, api_key=None,
 #       like there is for the import api)
 def carto_create(self, username, api_key, tablename, latlng_cols=None,
                  is_org_user=False, debug=False):
-    """create and populate a table on carto with a dataframe"""
+    """Create and populate a table on carto with a dataframe.
+    This is a private method, but can be used to create a new table on
+    CARTO. It is used in carto_sync if a DataFrame is not yet linked to a
+    CARTO table."""
 
     # give dataframe authentication client
     self.set_carto_sql_client(
         utils.get_auth_client(username=username,
                               api_key=api_key))
 
-    final_tablename = self.carto_create_table(tablename, username,
+    final_tablename = self._carto_create_table(tablename, username,
                             is_org_user=is_org_user, debug=debug)
     if debug: print("final_tablename: {}".format(final_tablename))
     # TODO: fix the geomtype piece, and is_org_user may be important (or some
@@ -277,7 +309,7 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
                       geomtype='point' if latlng_cols else None)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
-    self.carto_insert_values(debug=debug)
+    self._carto_insert_values(debug=debug)
 
     # override index
     self.index = range(1, len(self) + 1)
@@ -298,7 +330,7 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
 
 
 def _update_geom_col(self, latlng_cols):
-    """update the_geom with the given latlng_cols"""
+    """Private method. Update the_geom with the given latlng_cols"""
     query = '''
         UPDATE "{tablename}"
         SET the_geom = CDB_LatLng({lat}, {lng})
@@ -315,9 +347,9 @@ def _update_geom_col(self, latlng_cols):
     self['the_geom'] = pd.DataFrame(resp['rows'])['the_geom']
 
 
-def carto_create_table(self, tablename, username,
+def _carto_create_table(self, tablename, username,
                        is_org_user=False, debug=False):
-    """create table in carto with a specified schema"""
+    """Private method. Create table in carto with a specified schema"""
     schema = dict([(col, utils.dtype_to_pgtype(str(dtype), col))
                    for col, dtype in zip(self.columns, self.dtypes)])
     if debug: print(schema)
@@ -336,8 +368,8 @@ def carto_create_table(self, tablename, username,
 #  2. If index is non-integer, error out saying that it's not compatible
 #  3. What happens if it is a named index? if it's the default index, name it cartodb_id, and create the index on carto (carto seems to handle indexes that are in the space of integers, not just natural numbers)
 # NOTE: right now it's clumsy on index
-def carto_insert_values(self, n_batch=10000, debug=False):
-    """insert new values into a table"""
+def _carto_insert_values(self, n_batch=10000, debug=False):
+    """Private method. Insert new values into a table"""
     n_items = len(self)
     if debug: print("self has {} rows".format(n_items))
     row_vals = []
@@ -370,19 +402,23 @@ def carto_insert_values(self, n_batch=10000, debug=False):
 
 def make_cartoframe(self, username, api_key, tablename,
                     api_type=None):
-    """
+    """Placeholder method (not functioning)
+
+    1. instantiate sql client
+    2. setup schema on carto
+    3. ...
+
     :param username (string): CARTO username
     :param api_key (string): CARTO API key
     :param tablename (string): desired tablename
-    1. instantiate sql client
-    2. setup schema on carto
-    3.
+
     """
     if (len(self) > 5000) or (api_type == 'import'):
         # write to csv + use import api
         pass
     elif (len(self) <= 5000) or (api_type == 'sql'):
-        sql = utils.get_auth_client(username, api_key)
+        # sql = utils.get_auth_client(username, api_key)
+        pass
     else:
         pass
 
@@ -391,52 +427,43 @@ def make_cartoframe(self, username, api_key, tablename,
 
 def carto_map(self, interactive=True, color=None, size=None,
               cartocss=None, basemap=None, figsize=(647, 400), debug=False):
-    """
-        Produce and return CARTO maps. Can be interactive or static.
+    """Produce and return CARTO maps. Can be interactive or static.
 
-        :param interactive: Boolean value on whether to show an interactive
-                            map or static map
-        :param color: string or dict.
-            If color is a string, can be a column name or a hex value
-            (beginning with a #). When a hex value, all geometries are colored
-            the same. If the column name, use CARTO's TurtoCarto to create
-            qualitative or category mapping.
+    :param interactive: (optional) Value on whether to show an interactive map or static map
+    :type interactive: boolean
+    :param color: (optional)
 
-            If color is a dict, parse the parameters to custom style the map.
-            Values are:
+        * If color is a string, can be a column name or a hex value (beginning with a ``#``). When a hex value, all geometries are colored the same. If the column name, use CARTO's TurtoCarto to create qualitative or category mapping.
+        * If color is a dict, parse the parameters to custom style the map. Values are:
+
             - colname (required): column name to base the styling on
-            - ramp (optional): If text, type of color ramp to use. See
-              https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js
-              for a full list. If list/tuple, set of hex values.
-            - ramp_provider (optional): Specify the source of the `ramp`
-              (either `cartocolor` or `colorbrewer`)
+            - ramp (optional): If text, type of color ramp to use. See https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js for a full list. If list/tuple, set of hex values.
+            - ramp_provider (optional): Specify the source of the `ramp` (either `cartocolor` or `colorbrewer`)
             - num_bins: Number of divisions for the ramp
-            - quant_method: Quantification method for dividing the data into
-              classes. Options are `jenks`, `quantiles`, `equal`, or
-              `headtails`. By choosing a custom ramp
+            - quant_method: Quantification method for dividing the data into classes. Options are `jenks`, `quantiles`, `equal`, or `headtails`. By choosing a custom ramp
 
-        :param size: string or dict. Only works with point geometries. A future
-                     version will allow more sizing options for lines.
-            If size is a number, all points are sized by the same value
-            specified.
+    :type color: dict, string
+    :param size: (optional) Only works with point geometries. A future version will allow more sizing options for lines.
 
-            If size is a column name, this option sizes points from a default
-            minimum value of 4 pixels to 15 pixels.
+        * If size is an integer, all points are sized by the same value specified.
+        * If size is a column name, this option sizes points from a default minimum value of 4 pixels to 15 pixels.
+        * If size is a dict, size points by the following values if entered. Defaults will be used if they are not requested.
 
-            If size is a dict, size points by the following values if entered.
-            Defaults will be used if they are not requested.
-            - colname: column to base the styling off of
-            - max: maximum marker width (default 15)
-            - min: minimum marker width (default 4)
-            - quant_method: type of quantification to use. Options are `jenks`,
-              `quantiles`, `equal`, or `headtails`.
-        :param cartocss: Complete CartoCSS style to apply to your map. This
-                         will override `size` and `color` attributes if
-                         present.
-        :param basemap: XYZ URL template for the basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for
-                        examples.
-        :param figsize: Tuple of dimensions (width, height) for output embed or
-                        image. Default is (647, 400).
+          - colname: column to base the styling off of
+          - max: maximum marker width (default 15)
+          - min: minimum marker width (default 4)
+          - quant_method: type of quantification to use. Options are `jenks`, `quantiles`, `equal`, or `headtails`.
+
+    :type size: integer, string, dict
+    :param cartocss: Complete CartoCSS style to apply to your map. This will override `size` and `color` attributes if present.
+    :type cartocss: string
+    :param basemap: (optional) XYZ URL template for the basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for examples.
+    :type basemap: string
+    :param figsize: (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).
+    :type figsize: tuple
+    :returns: an interactive or static CARTO map optionally styled
+    :rtype: HTML embed
+
     """
     import cartoframes.styling as styling
     import cartoframes.maps as maps
@@ -495,8 +522,8 @@ pd.DataFrame.sync_carto = sync_carto
 
 # carto_create methods
 pd.DataFrame.carto_create = carto_create
-pd.DataFrame.carto_create_table = carto_create_table
-pd.DataFrame.carto_insert_values = carto_insert_values
+pd.DataFrame._carto_create_table = _carto_create_table
+pd.DataFrame._carto_insert_values = _carto_insert_values
 pd.DataFrame._update_geom_col = _update_geom_col
 
 # set methods
