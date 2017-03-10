@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='cartoframes',
-    version='0.1.1',
+    version='0.1.2',
     description='An experimental Python pandas interface for using CARTO',
     long_description=long_description,
     url='https://github.com/CartoDB/cartoframes',
