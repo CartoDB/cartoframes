@@ -1,6 +1,6 @@
 """
 cartoframe methods
-==================
+~~~~~~~~~~~~~~~~~~
 
 A pandas dataframe interface for working with CARTO maps and tables
 
@@ -485,7 +485,7 @@ def carto_map(self, interactive=True, color=None, size=None,
     # create static map
     # TODO: use carto-python client to create static map (not yet
     #       implemented)
-    url = self.get_static_snapshot(cartocss, basemap, figsize, debug=False)
+    url = self._get_static_snapshot(cartocss, basemap, figsize, debug=False)
     img = '<img src="{url}" />'.format(url=url)
 
     if interactive is False:

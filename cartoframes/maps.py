@@ -62,7 +62,8 @@ def get_bounds(self, debug=False):
     return bounds['rows'][0]
 
 
-def get_static_snapshot(self, cartocss, basemap, figsize=(647, 400), debug=False):
+def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
+                         debug=False):
     """Update a named map with a new configuration.
 
     :param cartocss: CartoCSS to define new map style
@@ -109,7 +110,7 @@ def get_static_snapshot(self, cartocss, basemap, figsize=(647, 400), debug=False
     else:
         resp.raise_for_status()
 
-pd.DataFrame.get_static_snapshot = get_static_snapshot
+pd.DataFrame._get_static_snapshot = _get_static_snapshot
 pd.DataFrame.get_bounds = get_bounds
 
 
