@@ -67,16 +67,20 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     """Update a named map with a new configuration.
 
     :param cartocss: CartoCSS to define new map style
+    :type cartocss: string
     :param basemap: Basemap XYZ template to include in new map style
+    :type basemap: string
     :param figsize: (Optional) Dimensions of output image (width, height) as a tuple
+    :type figsize: tuple of integers
 
     :returns: URL to newly updated image
+    :rtype: string
     """
     import requests
     if basemap:
         new_basemap = basemap
     else:
-        new_basemap = 'http://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png'
+        new_basemap = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'
 
     map_params = {'named_map_name': self.get_carto_namedmap(),
                   'basemap': new_basemap,
