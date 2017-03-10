@@ -3,19 +3,31 @@ private functions used in cartoframes methods
 """
 import pandas as pd
 
-def get_auth_client(username=None, api_key=None, cdb_client=None):
+def get_auth_client(username=None, api_key=None,
+                    baseurl=None, cdb_client=None):
     """Instantiates a SQL Client from the CARTO Python SDK (v1.0.0)
 
     :param username: CARTO username
+    :type username: string
     :param api_key: API key of CARTO user ``username``
+    :type api_key: string
+    :param baseurl: Base URL for CARTO instance (usually suitable or on prem)
+    :type baseurl: string
     :param cdb_client: CARTO Python SDK Authentication client
+    :type cdb_client: object
 
     :returns: Authenticated SQL client with user credentials
+    :rtype: sql auth object
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
     if cdb_client is None:
-        BASEURL = 'https://{username}.carto.com/api/'.format(username=username)
+
+        if baseurl is None:
+            BASEURL = 'https://{username}.carto.com/api/'.format(
+                username=username)
+        else:
+            BASEURL = baseurl
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
     elif (username is None) and (api_key is None):
