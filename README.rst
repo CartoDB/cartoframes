@@ -1,7 +1,7 @@
-CartoFrames
+CARTOFrames
 ===========
 
-A pandas interface for integrating `Carto <https://carto.com/>`__ into a data science workflow.
+A pandas interface for integrating `CARTO <https://carto.com/>`__ into data science workflows.
 
 Install Instructions
 --------------------
@@ -15,9 +15,9 @@ Change your directory to `cartoframes` and run the following:
 .. code:: bash
 
     $ pip install -r requirements.txt
-    $ pip install -e .
+    $ pip install cartoframes
 
-Once you've done this, `cartoframes` should be installed on your machine. See the example usage section below for using cartoframes in a Jupyter notebook.
+Once you've done this, `cartoframes` will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.
 
 Note: Eventually `cartoframes` will be fully installable from `pip`.
 
@@ -92,6 +92,7 @@ Augment from Data Observatory
 Interact with CARTO's Data Observatory:
 
 .. code:: python
+
     # total pop, high school diploma (normalized), median income, poverty status (normalized)
     # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html
     data_obs_measures = [{'numer_id': 'us.census.acs.B01003001'},
