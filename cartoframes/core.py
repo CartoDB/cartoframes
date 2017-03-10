@@ -503,8 +503,12 @@ def carto_map(self, interactive=True, color=None, size=None,
             maps.get_named_mapconfig(self.get_carto_username(),
                                      self.get_carto_namedmap()))
 
-        url = '?'.join(['/files/cartoframes.html',
+        baseurl = 'https://cdn.rawgit.com/andy-esch/6d993d3f25c5856ea38d1f374e57722e/raw/ce30379f35aafd027816f065b4e5c52f881c4a86/index.html'
+
+        url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])
+
+        if debug: print(url)
         iframe = ('<iframe src="{url}" width={width} height={height}>'
                   'Preview image: {img}</iframe>').format(url=url,
                                                           width=figsize[0],
