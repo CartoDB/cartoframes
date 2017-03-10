@@ -1,0 +1,7 @@
+cartoframes.core module
+=======================
+
+.. automodule:: cartoframes.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
