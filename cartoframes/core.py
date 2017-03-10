@@ -2,7 +2,7 @@
 cartoframe methods
 ~~~~~~~~~~~~~~~~~~
 
-A pandas dataframe interface for working with CARTO maps and tables
+A pandas dataframe interface for working with CARTO maps and tables.
 
 Andy Eschbacher and Stuart Lynn, 2017
 
@@ -24,7 +24,7 @@ import carto
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(username=None, api_key=None, onprem=False, tablename=None,
+def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
                query=None, include_geom=True, is_org_user=False, limit=None,
                cdb_client=None, index='cartodb_id', debug=False):
     """Create a DataFrame from a CARTO table, storing table information in
@@ -35,8 +35,8 @@ def read_carto(username=None, api_key=None, onprem=False, tablename=None,
        :type username: string
        :param api_key: CARTO API key
        :type api_key: string
-       :param onprem: BASEURL for onprem (not yet implemented)
-       :type onprem: string
+       :param baseurl: BASEURL for onprem
+       :type baseurl: string
        :param tablename: Table to create a cartoframe from
        :type tablename: string
        :param query: Query for generating a cartoframe
@@ -54,7 +54,7 @@ def read_carto(username=None, api_key=None, onprem=False, tablename=None,
 
        :returns: A pandas DataFrame linked to a CARTO table
        :rtype: cartoframe
-       """
+    """
     import json
     import time
     import cartoframes.maps as maps
@@ -62,6 +62,7 @@ def read_carto(username=None, api_key=None, onprem=False, tablename=None,
     # either cdb_client or user credentials have to be specified
     sql = utils.get_auth_client(username=username,
                                 api_key=api_key,
+                                baseurl=baseurl,
                                 cdb_client=cdb_client)
 
     # construct query
@@ -69,7 +70,6 @@ def read_carto(username=None, api_key=None, onprem=False, tablename=None,
         query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
         # Add limit if requested
         if limit:
-            # NOTE: what if limit is `all` or `none`?
             # TODO: ensure that this does not cause sync problems
             if (limit >= 0) and isinstance(limit, int):
                 query += ' LIMIT {limit}'.format(limit=limit)
@@ -123,8 +123,7 @@ def carto_registered(self):
 
 def carto_insync(self):
     """Says whether current cartoframe is in sync with last saved state"""
-    # TODO: write this :)
-    return True
+    return self.equals(self.carto_last_state)
 
 def set_last_state(self):
     """
@@ -141,49 +140,89 @@ def set_carto_sql_client(self, sql_client):
 
 def get_carto_sql_client(self):
     """
-    return the internally stored sql client
+    :returns: the internally stored sql client
+    :rtype: CARTO SQL Auth client object
     """
     return self.carto_sql_client
 
 # TODO: write a decorator for the following two functions (more will be added
 #       that follow this format)
 def get_carto_api_key(self):
-    """return the username of a cartoframe"""
+    """return the username of a cartoframe
+    :returns: CARTO API key associated with cartoframe
+    :rtype: string
+    """
     import json
     try:
-        return json.loads(self._metadata[-1])['carto_api_key']
+        return self.get_carto('carto_api_key')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
 
 def get_carto_username(self):
-    """return the username of a cartoframe"""
+    """return the username of a cartoframe
+    :returns: CARTO username associated with cartoframe
+    :rtype: string
+    """
     import json
     try:
-        return json.loads(self._metadata[-1])['carto_username']
+        return self.get_carto('carto_username')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
 
+def get_carto_datapage(self):
+    """Return the CARTO dataset page
+
+    :returns: URL of data page of dataset on CARTO (behind password if private)
+    :rtype: string
+    """
+    # TODO: generalize this for onprem
+    # e.g., https://eschbacher.carto.com/dataset/research_team
+    url_template = 'https://{username}.carto.com/dataset/{tablename}'
+
+    return url_template.format(username=self.get_carto_username(),
+                               tablename=self.get_carto_tablename())
+
 def get_carto_tablename(self):
-    """return the username of a cartoframe"""
+    """return the username of a cartoframe
+
+    :returns: Table that cartoframe is associated with
+    :rtype: string
+    """
     import json
     try:
-        return json.loads(self._metadata[-1])['carto_table']
+        return self.get_carto('carto_table')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
 
 
 def get_carto_geomtype(self):
-    """return the geometry type of the cartoframe"""
+    """return the geometry type of the cartoframe
+
+    :returns: Geometry type in table
+    """
     import json
-    return json.loads(self._metadata[-1])['carto_geomtype']
+    return self.get_carto('carto_geomtype')
 
 def get_carto_namedmap(self):
+    """Return the named map associated with a cartoframe
+
+    :returns: Name of named map
+    :rtype: string
+    """
     return self.get_carto('carto_named_map')
 
 def get_carto(self, key):
+    """General get method for reading from cartoframe metadata
+
+    :param key: key of item to fetch from metadata. One of `carto_named_map`, `carto_geomtype`, `carto_username`, `carto_table`.
+    :type key: string
+
+    :returns: Value stored in cartoframe metadata
+    :rtype: any
+    """
     import json
     return json.loads(self._metadata[-1])[key]
 
@@ -192,7 +231,9 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                  include_geom=None, limit=None, geomtype=None,
                  named_map_name=None):
     """
-    Method for storing metadata in a dataframe
+    Set method for storing metadata in a dataframe
+
+    :returns: None
     """
     import json
     self._metadata.append(
@@ -203,6 +244,8 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                     'carto_include_geom': include_geom,
                     'carto_limit': limit,
                     'carto_geomtype': geomtype}))
+    return None
+
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
@@ -408,9 +451,12 @@ def make_cartoframe(self, username, api_key, tablename,
     2. setup schema on carto
     3. ...
 
-    :param username (string): CARTO username
-    :param api_key (string): CARTO API key
-    :param tablename (string): desired tablename
+    :param username: CARTO username
+    :type username: string
+    :param api_key: CARTO API key
+    :type api_key: string
+    :param tablename: desired tablename
+    :type tablename: string
 
     """
     if (len(self) > 5000) or (api_type == 'import'):
