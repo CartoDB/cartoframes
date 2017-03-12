@@ -204,7 +204,7 @@ def get_username(baseurl):
     m = re.search('https://(.*?).carto.com/api/', baseurl)
     return m.group(1)
 
-def get_geom_type(sql_auth_client, tablename):
+def get_geom_type(sql_auth_client, tablename=None):
     """
         Get the geometry type in tablename for storing in dataframe metadata
 
@@ -258,7 +258,7 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
             SELECT CDB_CartodbfyTable('{org}', '{tablename}');
         '''.format(tablename=tablename,
                    query=query,
-                   org='public' if is_org_user else username)
+                   org=username if is_org_user else 'public')
         if debug: print("Creating table: {}".format(create_table))
         resp = carto_sql_client.send(create_table)
         if debug: print(resp)

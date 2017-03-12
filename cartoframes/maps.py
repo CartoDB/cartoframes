@@ -5,7 +5,15 @@ Functions and methods for interactive and static maps
 import pandas as pd
 
 def create_named_map(username, api_key, tablename):
-    """Create a default named map for later use"""
+    """Create a default named map for later use
+
+    :param username: CARTO username
+    :type username: string
+    :param api_key: CARTO API key
+    :type api_key: string
+    :param tablename: Table in user account to create a map from
+    :type tablename: string
+    """
     import json
     from time import time
     import requests
@@ -14,7 +22,8 @@ def create_named_map(username, api_key, tablename):
                                        time=str(time()).replace('.', '_'))
 
     defaults = {'named_map_name': map_name,
-                'basemap': 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+                'basemap': ('https://cartodb-basemaps-{s}.global.ssl.fastly'
+                            '.net/dark_all/{z}/{x}/{y}.png'),
                 'cartocss': '#layer{ marker-width: 7; marker-fill: #00F; }',
                 'tablename': tablename,
                 'west': -45,
@@ -80,7 +89,8 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     if basemap:
         new_basemap = basemap
     else:
-        new_basemap = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'
+        new_basemap = ('https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                       'dark_all/{z}/{x}/{y}.png')
 
     map_params = {'named_map_name': self.get_carto_namedmap(),
                   'basemap': new_basemap,

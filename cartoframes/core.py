@@ -67,49 +67,47 @@ def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
 
     # construct query
     if tablename is not None and query is None:
-        query = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
+        tablequery = 'SELECT * FROM "{tablename}"'.format(tablename=tablename)
         # Add limit if requested
         if limit:
             # TODO: ensure that this does not cause sync problems
             if (limit >= 0) and isinstance(limit, int):
-                query += ' LIMIT {limit}'.format(limit=limit)
+                tablequery += ' LIMIT {limit}'.format(limit=limit)
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
-        if debug: print(query)
-        _df = utils.df_from_table(query, sql, index=index)
+        if debug: print(tablequery)
+        _df = utils.df_from_table(tablequery, sql, index=index)
     elif query:
         # NOTE: not yet implemented
         # TODO: this would have to register a table on CARTO if sync=True
         _df = utils.df_from_query(query, sql, is_org_user, username,
                                   tablename=tablename, debug=debug)
     else:
-        raise NameError("Either `tablename` or `query` (or both) needs to be "
-                        "specified")
-
-    # NOTE: pylint complains that we're accessing a 'protected member
-    #       _metadata of a client class' (appending to _metadata only works
-    #       with strings, not JSON, so we're serializing here)
+        raise ValueError("Either `tablename` or `query` (or both) need to be "
+                         "specified.")
 
     # TODO: find out of there's a max length to clip on
-    named_map_name = maps.create_named_map(username, api_key, tablename)
-    print("Named map name: {}".format(named_map_name))
+    # only make map and set metadata if it's becoming a cartoframe
+    if query is not None and tablename is not None:
+        named_map_name = maps.create_named_map(username, api_key,
+                                               tablename=tablename)
+        print("Named map name: {}".format(named_map_name))
 
-    # only set metadata if it's becoming a cartoframe
-    if tablename:
         _df.set_metadata(tablename=tablename,
                          username=username,
                          api_key=api_key,
                          named_map_name=named_map_name,
                          include_geom=include_geom,
                          limit=limit,
-                         geomtype=utils.get_geom_type(sql, tablename))
+                         geomtype=utils.get_geom_type(sql,
+                                                      tablename=tablename))
 
         # save the state for later use
         # NOTE: this doubles the size of the dataframe
         _df.set_last_state()
 
-        # store carto sql client for later use
-        _df.set_carto_sql_client(sql)
+    # store carto sql client for later use
+    _df.set_carto_sql_client(sql)
 
     return _df
 
@@ -236,6 +234,9 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
     :returns: None
     """
     import json
+    # NOTE: pylint complains that we're accessing a 'protected member
+    #       _metadata of a client class' (appending to _metadata only works
+    #       with strings, not JSON, so we're serializing here)
     self._metadata.append(
         json.dumps({'carto_table': tablename,
                     'carto_username': username,
