@@ -190,6 +190,7 @@ class CartoCSS(object):
     def get_color_css(self):
         """
         """
+        import webcolors
         if isinstance(self.color, dict):
 
             # choose category or quantitative defaults
@@ -239,6 +240,10 @@ class CartoCSS(object):
                 return css
             else:
                 return self.color
+        elif (isinstance(self.color, str) and
+              (self.color[0] == '#' or
+               self.color in webcolors.CSS3_NAMES_TO_HEX)):
+            return self.color
         else:
             # return red
             return "#f00"
