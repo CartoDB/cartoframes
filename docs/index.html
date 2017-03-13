@@ -136,7 +136,7 @@ $ pip install cartoframes
 <span id="cartoframe-methods"></span><h1>cartoframe methods<a class="headerlink" href="#module-core" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>cartoframe methods<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>A pandas dataframe interface for working with CARTO maps and tables</p>
+<p>A pandas dataframe interface for working with CARTO maps and tables.</p>
 <p>Andy Eschbacher and Stuart Lynn, 2017</p>
 <dl class="docutils">
 <dt>Project goals</dt>
@@ -227,33 +227,114 @@ CARTO table.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="core.get_carto">
+<code class="descclassname">core.</code><code class="descname">get_carto</code><span class="sig-paren">(</span><em>self</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto" title="Permalink to this definition">¶</a></dt>
+<dd><p>General get method for reading from cartoframe metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>string</em>) &#8211; key of item to fetch from metadata. One of <cite>carto_named_map</cite>, <cite>carto_geomtype</cite>, <cite>carto_username</cite>, <cite>carto_table</cite>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Value stored in cartoframe metadata</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">any</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="core.get_carto_api_key">
 <code class="descclassname">core.</code><code class="descname">get_carto_api_key</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the username of a cartoframe</p>
+<dd><p>return the username of a cartoframe
+:returns: CARTO API key associated with cartoframe
+:rtype: string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.get_carto_datapage">
+<code class="descclassname">core.</code><code class="descname">get_carto_datapage</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_datapage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the CARTO dataset page</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">URL of data page of dataset on CARTO (behind password if private)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="core.get_carto_geomtype">
 <code class="descclassname">core.</code><code class="descname">get_carto_geomtype</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_geomtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the geometry type of the cartoframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Geometry type in table</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.get_carto_namedmap">
+<code class="descclassname">core.</code><code class="descname">get_carto_namedmap</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_namedmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the named map associated with a cartoframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Name of named map</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="core.get_carto_sql_client">
 <code class="descclassname">core.</code><code class="descname">get_carto_sql_client</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_sql_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the internally stored sql client</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the internally stored sql client</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">CARTO SQL Auth client object</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="core.get_carto_tablename">
 <code class="descclassname">core.</code><code class="descname">get_carto_tablename</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_tablename" title="Permalink to this definition">¶</a></dt>
 <dd><p>return the username of a cartoframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Table that cartoframe is associated with</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="core.get_carto_username">
 <code class="descclassname">core.</code><code class="descname">get_carto_username</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_username" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the username of a cartoframe</p>
+<dd><p>return the username of a cartoframe
+:returns: CARTO username associated with cartoframe
+:rtype: string</p>
 </dd></dl>
 
 <dl class="function">
@@ -270,9 +351,9 @@ CARTO table.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong></strong><strong>(</strong><strong>string</strong><strong>)</strong><strong></strong> (<em>tablename</em>) &#8211; CARTO username</li>
-<li><strong></strong><strong>(</strong><strong>string</strong><strong>)</strong><strong></strong> &#8211; CARTO API key</li>
-<li><strong></strong><strong>(</strong><strong>string</strong><strong>)</strong><strong></strong> &#8211; desired tablename</li>
+<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username</li>
+<li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key</li>
+<li><strong>tablename</strong> (<em>string</em>) &#8211; desired tablename</li>
 </ul>
 </td>
 </tr>
@@ -282,7 +363,7 @@ CARTO table.</p>
 
 <dl class="function">
 <dt id="core.read_carto">
-<code class="descclassname">core.</code><code class="descname">read_carto</code><span class="sig-paren">(</span><em>username=None</em>, <em>api_key=None</em>, <em>onprem=False</em>, <em>tablename=None</em>, <em>query=None</em>, <em>include_geom=True</em>, <em>is_org_user=False</em>, <em>limit=None</em>, <em>cdb_client=None</em>, <em>index='cartodb_id'</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.read_carto" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">core.</code><code class="descname">read_carto</code><span class="sig-paren">(</span><em>username=None</em>, <em>api_key=None</em>, <em>onprem_url=None</em>, <em>tablename=None</em>, <em>query=None</em>, <em>include_geom=True</em>, <em>is_org_user=False</em>, <em>limit=None</em>, <em>cdb_client=None</em>, <em>index='cartodb_id'</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.read_carto" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a DataFrame from a CARTO table, storing table information in
 pandas metadata that allows for further cartoframe options like syncing,
 map creation, and augmentation from the Data Observatory.</p>
@@ -293,13 +374,13 @@ map creation, and augmentation from the Data Observatory.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>username</strong> (<em>string</em>) &#8211; CARTO username (default None)</li>
 <li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key</li>
-<li><strong>onprem</strong> (<em>string</em>) &#8211; BASEURL for onprem (not yet implemented)</li>
+<li><strong>onprem_url</strong> (<em>string</em>) &#8211; BASEURL for onprem</li>
 <li><strong>tablename</strong> (<em>string</em>) &#8211; Table to create a cartoframe from</li>
 <li><strong>query</strong> (<em>string</em>) &#8211; Query for generating a cartoframe</li>
 <li><strong>include_geom</strong> (<em>boolean</em>) &#8211; Not implemented</li>
-<li><strong>sync</strong> (<em>boolean</em>) &#8211; Create a cartoframe that can later be sync&#8217;d (defaut: True) or just pull down data (False)</li>
-<li><strong>limit</strong> (<em>integer</em>) &#8211; The maximum number of rows to pull</li>
-<li><strong>cdb_client</strong> &#8211; (optional) CARTO Python SDK authentication client object (default None)</li>
+<li><strong>is_org_user</strong> (<em>boolean</em>) &#8211; (optional) Where <cite>username</cite> is in a multiuser account</li>
+<li><strong>limit</strong> (<em>integer</em>) &#8211; (optional) The maximum number of rows to pull</li>
+<li><strong>cdb_client</strong> (<em>object</em>) &#8211; (optional) CARTO Python SDK authentication client object (default None)</li>
 <li><strong>index</strong> (<em>string</em>) &#8211; (optional) string Column to use for the index (default <cite>cartodb_id</cite>)</li>
 </ul>
 </td>
@@ -329,7 +410,15 @@ map creation, and augmentation from the Data Observatory.</p>
 <dl class="function">
 <dt id="core.set_metadata">
 <code class="descclassname">core.</code><code class="descname">set_metadata</code><span class="sig-paren">(</span><em>self</em>, <em>tablename=None</em>, <em>username=None</em>, <em>api_key=None</em>, <em>include_geom=None</em>, <em>limit=None</em>, <em>geomtype=None</em>, <em>named_map_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#core.set_metadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method for storing metadata in a dataframe</p>
+<dd><p>Set method for storing metadata in a dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

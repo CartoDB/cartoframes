@@ -46,7 +46,7 @@
 <p>private functions used in cartoframes methods</p>
 <dl class="function">
 <dt id="cartoframes.utils.add_col">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">add_col</code><span class="sig-paren">(</span><em>self</em>, <em>colname</em>, <em>n_batch=30</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.add_col" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cartoframes.utils.</code><code class="descname">add_col</code><span class="sig-paren">(</span><em>self</em>, <em>colname</em>, <em>n_batch=5000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.add_col" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alter table by adding a column created from a DataFrame operation</p>
 </dd></dl>
 
@@ -55,8 +55,27 @@
 <code class="descclassname">cartoframes.utils.</code><code class="descname">create_table_query</code><span class="sig-paren">(</span><em>tablename</em>, <em>schema</em>, <em>username</em>, <em>is_org_user=False</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.create_table_query" title="Permalink to this definition">¶</a></dt>
 <dd><p>write a create table query from tablename and schema
 Example output:
-CREATE TABLE &#8220;interesting_birds&#8221;(location text, name text, size numeric);
-SELECT CDB_CartodbfyTable(&#8216;eschbacher&#8217;, &#8216;interesting_birds&#8217;);</p>
+<code class="docutils literal"><span class="pre">CREATE</span> <span class="pre">TABLE</span> <span class="pre">&quot;interesting_birds&quot;(location</span> <span class="pre">text,</span> <span class="pre">name</span> <span class="pre">text,</span> <span class="pre">size</span> <span class="pre">numeric);</span>
+<span class="pre">SELECT</span> <span class="pre">CDB_CartodbfyTable('eschbacher',</span> <span class="pre">'interesting_birds');</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tablename</strong> (<em>string</em>) &#8211; new tablename for table in CARTO</li>
+<li><strong>schema</strong> (<em>dict</em>) &#8211; dictionary of column name/data type pairs</li>
+<li><strong>is_org_user</strong> (<em>boolean</em>) &#8211; Whether a user is in a multiuser account or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">query to create a table and cartodbfy it</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -116,7 +135,25 @@ account based on a custom query.</p>
 <dl class="function">
 <dt id="cartoframes.utils.dtype_to_pgtype">
 <code class="descclassname">cartoframes.utils.</code><code class="descname">dtype_to_pgtype</code><span class="sig-paren">(</span><em>dtype</em>, <em>colname</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.dtype_to_pgtype" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map dataframe types to carto postgres types</p>
+<dd><p>Map dataframe types to CARTO PostgreSQL types</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dtype</strong> (<em>type</em>) &#8211; Pandas dataframe type</li>
+<li><strong>colname</strong> (<em>string</em>) &#8211; Column name of data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">CARTO PostgreSQL equivalent of pandas <cite>dtype</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -148,20 +185,24 @@ account based on a custom query.</p>
 
 <dl class="function">
 <dt id="cartoframes.utils.get_auth_client">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">get_auth_client</code><span class="sig-paren">(</span><em>username=None</em>, <em>api_key=None</em>, <em>cdb_client=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.get_auth_client" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cartoframes.utils.</code><code class="descname">get_auth_client</code><span class="sig-paren">(</span><em>username=None</em>, <em>api_key=None</em>, <em>baseurl=None</em>, <em>cdb_client=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.get_auth_client" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiates a SQL Client from the CARTO Python SDK (v1.0.0)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>username</strong> &#8211; CARTO username</li>
-<li><strong>api_key</strong> &#8211; API key of CARTO user <code class="docutils literal"><span class="pre">username</span></code></li>
-<li><strong>cdb_client</strong> &#8211; CARTO Python SDK Authentication client</li>
+<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username</li>
+<li><strong>api_key</strong> (<em>string</em>) &#8211; API key of CARTO user <code class="docutils literal"><span class="pre">username</span></code></li>
+<li><strong>baseurl</strong> (<em>string</em>) &#8211; Base URL for CARTO instance (usually suitable or on prem)</li>
+<li><strong>cdb_client</strong> (<em>object</em>) &#8211; CARTO Python SDK Authentication client</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Authenticated SQL client with user credentials</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Authenticated SQL client with user credentials</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">sql auth object</p>
 </td>
 </tr>
 </tbody>
@@ -170,7 +211,7 @@ account based on a custom query.</p>
 
 <dl class="function">
 <dt id="cartoframes.utils.get_geom_type">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">get_geom_type</code><span class="sig-paren">(</span><em>sql_auth_client</em>, <em>tablename</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.get_geom_type" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cartoframes.utils.</code><code class="descname">get_geom_type</code><span class="sig-paren">(</span><em>carto_sql_client</em>, <em>tablename</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.get_geom_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the geometry type in tablename for storing in dataframe metadata</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -204,18 +245,24 @@ Output
 </dd></dl>
 
 <dl class="function">
-<dt id="cartoframes.utils.map_numpy_to_postgres">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">map_numpy_to_postgres</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.map_numpy_to_postgres" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map NumPy values to PostgreSQL values</p>
+<dt id="cartoframes.utils.numpy_val_to_pg_val">
+<code class="descclassname">cartoframes.utils.</code><code class="descname">numpy_val_to_pg_val</code><span class="sig-paren">(</span><em>item</em>, <em>dtype</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.numpy_val_to_pg_val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map NumPy values to PostgreSQL values. E.g., np.nan -&gt; null</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<em>any</em>) &#8211; value</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>item</strong> (<em>any</em>) &#8211; value</li>
+<li><strong>dtype</strong> (<em>string</em>) &#8211; PostgreSQL type from <cite>dtype_to_pgtype()</cite></li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Mapped data type of <code class="docutils literal"><span class="pre">item</span></code></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Mapped data type of <code class="docutils literal"><span class="pre">item</span></code></p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -266,7 +313,7 @@ following format:</td>
 
 <dl class="function">
 <dt id="cartoframes.utils.upsert_table">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">upsert_table</code><span class="sig-paren">(</span><em>self</em>, <em>df_diff</em>, <em>n_batch=30</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.upsert_table" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cartoframes.utils.</code><code class="descname">upsert_table</code><span class="sig-paren">(</span><em>self</em>, <em>df_diff</em>, <em>n_batch=5000</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.upsert_table" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
