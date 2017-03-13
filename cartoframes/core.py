@@ -110,31 +110,45 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
 
 
 def carto_registered(self):
-    """Says whether dataframe is registered as a table on CARTO"""
+    """Says whether dataframe is registered as a table on CARTO
+
+    :returns: Whether a DataFrame is registered as a table on CARTO
+    :rtype: boolean
+    """
     try:
         return self.get_carto_tablename() is not None
     except IndexError:
         return False
 
 def carto_insync(self):
-    """Says whether current cartoframe is in sync with last saved state"""
+    """Says whether current cartoframe is in sync with last saved state
+
+    :returns: Whether the current state of the cartoframe has changed since last sychronized with CARTO
+    :rtype: boolean
+    """
     return self.equals(self.carto_last_state)
 
 def set_last_state(self):
     """
     Store the state of the cartoframe
+
+    :returns: None
     """
     self.carto_last_state = self.copy(deep=True)
 
 def set_carto_sql_client(self, sql_client):
     """
     Store the SQL client for later use
+
+    :returns: None
     """
     self.carto_sql_client = sql_client
     # self._metadata[-1] = json.dumps()
 
 def get_carto_sql_client(self):
     """
+    Retrieves the internally stored SQL Auth client
+
     :returns: the internally stored sql client
     :rtype: CARTO SQL Auth client object
     """
@@ -143,6 +157,7 @@ def get_carto_sql_client(self):
 # TODO: write a decorator for the following `get` functions
 def get_carto_api_key(self):
     """return the username of a cartoframe
+
     :returns: CARTO API key associated with cartoframe
     :rtype: string
     """
@@ -193,7 +208,8 @@ def get_carto_tablename(self):
 def get_carto_geomtype(self):
     """return the geometry type of the cartoframe
 
-    :returns: Geometry type in table
+    :returns: Geometry type in table (one of 'point', 'line', 'polygon', or 'None')
+    :rtype: text
     """
     return self.get_carto('carto_geomtype')
 
