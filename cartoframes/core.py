@@ -24,7 +24,7 @@ import carto
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
+def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                query=None, include_geom=True, is_org_user=False, limit=None,
                cdb_client=None, index='cartodb_id', debug=False):
     """Create a DataFrame from a CARTO table, storing table information in
@@ -35,8 +35,8 @@ def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
        :type username: string
        :param api_key: CARTO API key
        :type api_key: string
-       :param baseurl: BASEURL for onprem
-       :type baseurl: string
+       :param onprem_url: BASEURL for onprem
+       :type onprem_url: string
        :param tablename: Table to create a cartoframe from
        :type tablename: string
        :param query: Query for generating a cartoframe
@@ -55,14 +55,12 @@ def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
        :returns: A pandas DataFrame linked to a CARTO table
        :rtype: cartoframe
     """
-    import json
-    import time
     import cartoframes.maps as maps
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
     sql = utils.get_auth_client(username=username,
                                 api_key=api_key,
-                                baseurl=baseurl,
+                                baseurl=onprem_url,
                                 cdb_client=cdb_client)
 
     # construct query
@@ -88,7 +86,7 @@ def read_carto(username=None, api_key=None, baseurl=None, tablename=None,
 
     # TODO: find out of there's a max length to clip on
     # only make map and set metadata if it's becoming a cartoframe
-    if query is not None and tablename is not None:
+    if tablename:
         named_map_name = maps.create_named_map(username, api_key,
                                                tablename=tablename)
         print("Named map name: {}".format(named_map_name))
@@ -143,14 +141,12 @@ def get_carto_sql_client(self):
     """
     return self.carto_sql_client
 
-# TODO: write a decorator for the following two functions (more will be added
-#       that follow this format)
+# TODO: write a decorator for the following `get` functions
 def get_carto_api_key(self):
     """return the username of a cartoframe
     :returns: CARTO API key associated with cartoframe
     :rtype: string
     """
-    import json
     try:
         return self.get_carto('carto_api_key')
     except KeyError:
@@ -162,7 +158,6 @@ def get_carto_username(self):
     :returns: CARTO username associated with cartoframe
     :rtype: string
     """
-    import json
     try:
         return self.get_carto('carto_username')
     except KeyError:
@@ -188,7 +183,6 @@ def get_carto_tablename(self):
     :returns: Table that cartoframe is associated with
     :rtype: string
     """
-    import json
     try:
         return self.get_carto('carto_table')
     except KeyError:
@@ -201,7 +195,6 @@ def get_carto_geomtype(self):
 
     :returns: Geometry type in table
     """
-    import json
     return self.get_carto('carto_geomtype')
 
 def get_carto_namedmap(self):
@@ -222,7 +215,11 @@ def get_carto(self, key):
     :rtype: any
     """
     import json
-    return json.loads(self._metadata[-1])[key]
+    try:
+        return json.loads(self._metadata[-1])[key]
+    except IndexError:
+        raise Exception('DataFrame not linked to CARTO. Use '
+                        '`DataFrame.sync_carto()` with a new tablename.')
 
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
@@ -287,10 +284,11 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename, debug=debug,
                           is_org_user=is_org_user, latlng_cols=latlng_cols)
+        self.set_last_state()
         return None
     elif not self.carto_registered():
-        raise Exception("Table not registered with CARTO. Set `createtable` "
-                        "flag to True")
+        raise Exception("Table not registered with CARTO. Set "
+                        "`requested_tablename` flag to a new tablename and " "enter credentials.")
 
     if self.equals(self.carto_last_state):
         print("Cartoframe is already synced")
@@ -356,8 +354,12 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
     self._carto_insert_values(debug=debug)
 
     # override index
-    self.index = range(1, len(self) + 1)
-    self.index.name = 'cartodb_id'
+    if 'cartodb_id' in self.columns:
+        print("`cartodb_id` will become the new index")
+        self.set_index('cartodb_id', inplace=True)
+    else:
+        self.index = range(1, len(self) + 1)
+        self.index.name = 'cartodb_id'
 
     # add columns
     if latlng_cols:
@@ -539,18 +541,22 @@ def carto_map(self, interactive=True, color=None, size=None,
         return IPython.display.HTML(img)
     else:
         bounds = self.get_bounds()
+        bnd_str = ','.join([str(b) for b in [bounds['north'], bounds['east'],
+                                             bounds['south'], bounds['west']]])
+
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
                             'basemap': basemap,
-                            'bounds': ','.join(map(str, [bounds['north'], bounds['east'],
-                                       bounds['south'], bounds['west']]))}
+                            'bounds': bnd_str}
 
         mapconfig_params['q'] = urllib.quote(
             maps.get_named_mapconfig(self.get_carto_username(),
                                      self.get_carto_namedmap()))
 
-        baseurl = 'https://cdn.rawgit.com/andy-esch/6d993d3f25c5856ea38d1f374e57722e/raw/ce30379f35aafd027816f065b4e5c52f881c4a86/index.html'
+        baseurl = ('https://cdn.rawgit.com/andy-esch/'
+                   '6d993d3f25c5856ea38d1f374e57722e/raw/'
+                   'ce30379f35aafd027816f065b4e5c52f881c4a86/index.html')
 
         url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])

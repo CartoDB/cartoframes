@@ -42,8 +42,17 @@ def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):
     """write a create table query from tablename and schema
         Example output:
-        CREATE TABLE "interesting_birds"(location text, name text, size numeric);
-        SELECT CDB_CartodbfyTable('eschbacher', 'interesting_birds');
+        ``CREATE TABLE "interesting_birds"(location text, name text, size numeric);
+        SELECT CDB_CartodbfyTable('eschbacher', 'interesting_birds');``
+
+        :param tablename: new tablename for table in CARTO
+        :type tablename: string
+        :param schema: dictionary of column name/data type pairs
+        :type schema: dict
+        :param is_org_user: Whether a user is in a multiuser account or not
+        :type is_org_user: boolean
+        :returns: query to create a table and cartodbfy it
+        :rtype: string
     """
 
     cols = ', '.join(["{colname} {datatype}".format(colname=k,
@@ -59,7 +68,7 @@ def create_table_query(tablename, schema, username, is_org_user=False,
     if debug: print(query)
     return query
 
-# TODO: combine this with other datatype maps
+# TODO: Abstract to a class
 # PostgreSQL -> pandas
 def map_dtypes(pgtype):
     """
@@ -81,46 +90,59 @@ def map_dtypes(pgtype):
         # make it a string if not in dict above
         return 'object'
 
-# pandas -> PostgreSQL
+# pandas dtype -> PostgreSQL type
 def dtype_to_pgtype(dtype, colname):
     """
-    Map dataframe types to carto postgres types
+    Map dataframe types to CARTO PostgreSQL types
+
+    :param dtype: Pandas dataframe type
+    :type dtype: type
+    :param colname: Column name of data
+    :type colname: string
+
+    :returns: CARTO PostgreSQL equivalent of pandas `dtype`
+    :rtype: string
     """
     if colname in ('the_geom', 'the_geom_webmercator'):
         return 'geometry'
     else:
-        mapping = {'float64': 'numeric',
-                   'int64': 'int',
-                   'datetime64': 'date',
-                   'object': 'text',
-                   'bool': 'boolean'}
-        try:
-            return mapping[dtype]
-        except KeyError:
+        if dtype == 'float64':
+            return 'numeric'
+        elif dtype == 'int64':
+            return 'int'
+        elif dtype == 'datetime64[ns]':
+            return 'date'
+        elif dtype == 'bool':
+            return 'boolean'
+        else:
             return 'text'
 
-# NumPy -> PostgreSQL
-def map_numpy_to_postgres(item):
+        return None
+
+def numpy_val_to_pg_val(item, dtype):
     """
-      Map NumPy values to PostgreSQL values
+      Map NumPy values to PostgreSQL values. E.g., np.nan -> null
 
       :param item: value
       :type item: any
+      :param dtype: PostgreSQL type from `dtype_to_pgtype()`
+      :type dtype: string
       :returns: Mapped data type of ``item``
       :rtype: string
     """
     import math
-    if isinstance(item, str):
+    if dtype == 'text':
         if "'" in item:
             return "'{}'".format(item.replace("'", "\'\'"))
         return "'{}'".format(item)
-    elif isinstance(item, float):
+    elif dtype == 'numeric' or dtype == 'int':
         if math.isnan(item):
             return 'null'
         return str(item)
     elif item is None:
         return 'null'
-    return str(item)
+    return "'{}'".format(str(item).replace("'", "\'\'"))
+
 
 # TODO: do type checking instead of the casting-to-string checking
 # PostgreSQL -> NumPy
@@ -154,9 +176,12 @@ def format_row(rowvals, dtypes):
     :rtype: string
     """
     mapped_vals = []
-    for idx, val in enumerate(rowvals):
-        mapped_vals.append(map_numpy_to_postgres(val))
+    for colnum, val in enumerate(rowvals):
+        pgtype = dtype_to_pgtype(dtypes[colnum], rowvals[1].index[colnum])
+        mapped_vals.append(numpy_val_to_pg_val(val, pgtype))
+
     return ','.join(mapped_vals)
+
 
 def transform_schema(pgschema):
     """Transform schema returned via SQL API to dict for pandas
@@ -287,28 +312,29 @@ def df_from_table(query, carto_sql_client, index=None):
     else:
         return pd.DataFrame(resp['rows']).astype(schema)
 
-def upsert_table(self, df_diff, n_batch=30, debug=False):
+def upsert_table(self, df_diff, n_batch=5000, debug=False):
 
     n_items = len(df_diff)
     queries = []
     upsert_query = ' '.join(
-        ("INSERT INTO \"{tablename}\"(\"cartodb_id\", \"{colname}\")",
-         "VALUES ({cartodb_id}, {colval})",
-         "ON CONFLICT (\"cartodb_id\")",
-         "DO UPDATE SET \"{colname}\" = {colval}",
-         "WHERE EXCLUDED.\"cartodb_id\" = {cartodb_id};"))
+        ('INSERT INTO "{tablename}"("cartodb_id", "{colname}")',
+         'VALUES ({cartodb_id}, {colval})',
+         'ON CONFLICT ("cartodb_id")',
+         'DO UPDATE SET "{colname}" = {colval}',
+         'WHERE EXCLUDED."cartodb_id" = {cartodb_id};'))
     n_batches = n_items // n_batch
     batch_num = 1
     for row_num, row in enumerate(df_diff.iteritems()):
         # if debug: print(row)
         cartodb_id = row[0][0]
         colname = row[0][1]
-
+        pgtype = dtype_to_pgtype(self[colname].dtype, colname)
         # fill query template
         temp_query = upsert_query.format(
             tablename=self.get_carto_tablename(),
             colname=colname,
-            colval=map_numpy_to_postgres(self.loc[cartodb_id][colname]),
+            colval=numpy_val_to_pg_val(self.loc[cartodb_id][colname],
+                                            pgtype),
             cartodb_id=cartodb_id)
 
         queries.append(temp_query)
@@ -350,7 +376,7 @@ def drop_col(self, colname, n_batch=30, debug=False):
     return None
 
 
-def add_col(self, colname, n_batch=30, debug=False):
+def add_col(self, colname, n_batch=5000, debug=False):
     """
     Alter table by adding a column created from a DataFrame operation
     """
@@ -384,10 +410,11 @@ def add_col(self, colname, n_batch=30, debug=False):
 
     for row_num, item in enumerate(self[colname].iteritems()):
         # if debug: print(item)
+        pgtype = dtype_to_pgtype(self[colname].dtype, colname)
         temp_query = update_query.format(
             tablename=self.get_carto_tablename(),
             colname=colname,
-            colval=map_numpy_to_postgres(item[1]),
+            colval=numpy_val_to_pg_val(item[1], pgtype),
             cartodb_id=item[0]).strip()
         queries.append(temp_query)
         if (len(queries) == n_batch) or (row_num == n_items - 1):
