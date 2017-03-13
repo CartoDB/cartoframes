@@ -252,11 +252,11 @@ def get_geom_type(carto_sql_client, tablename):
     try:
         return geomtypes[result['rows'][0]['geomtype']]
     except (KeyError, IndexError):
-        raise ValueError(("Cannot create a map from `{tablename}` because "
-                          "this table does not have "
-                          "geometries ({geomreported})").format(
+        print(("Cannot create a map from `{tablename}` because this table "
+               "does not have geometries ({geomreported})").format(
                               tablename=tablename,
-                              geomreported=result['rows'][0]['geomtype']))
+                              geomreported=None))
+        return None
     except Exception as err:
         print("ERROR: {}".format(err))
     return None
@@ -292,12 +292,13 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
             'SELECT * FROM {tablename}'.format(tablename=new_tablename))
         if debug: print(table_resp)
         schema = transform_schema(table_resp['fields'])
-        if len(resp['total_rows']) > 0:
+        print(table_resp)
+        if table_resp['total_rows'] > 0:
             return pd.DataFrame(table_resp['rows']).set_index('cartodb_id').astype(schema)
         else:
             return pd.DataFrame(data=table_resp['rows'],
                                 columns=[k for k in table_resp['fields']],
-                                index=[]).astype(schema))
+                                index=[]).astype(schema)
     else:
         resp = carto_sql_client.send(query)
         schema = transform_schema(resp['fields'])

@@ -524,6 +524,9 @@ def carto_map(self, interactive=True, color=None, size=None,
         import urllib
     import IPython
 
+    if self.get_carto_geomtype() is None:
+        raise ValueError("Cannot make a map because geometries are all null.")
+
     if cartocss is None:
         css = styling.CartoCSS(self, size=size,
                                color=color, cartocss=cartocss)
