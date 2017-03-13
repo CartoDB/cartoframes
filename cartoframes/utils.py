@@ -229,7 +229,7 @@ def get_username(baseurl):
     m = re.search('https://(.*?).carto.com/api/', baseurl)
     return m.group(1)
 
-def get_geom_type(sql_auth_client, tablename=None):
+def get_geom_type(carto_sql_client, tablename):
     """
         Get the geometry type in tablename for storing in dataframe metadata
 
@@ -244,19 +244,19 @@ def get_geom_type(sql_auth_client, tablename=None):
                  'ST_MultiPolygon': 'polygon'}
 
     # NOTE: assumes one geometry type per table
-    result = sql_auth_client.send('''
+    result = carto_sql_client.send('''
         SELECT ST_GeometryType(the_geom) As geomtype
         FROM "{tablename}"
         WHERE the_geom IS NOT NULL
         LIMIT 1'''.format(tablename=tablename))
     try:
         return geomtypes[result['rows'][0]['geomtype']]
-    except KeyError:
-        raise TypeError(("Cannot create a map from `{tablename}` because this "
-                        "table does not have "
-                        "geometries ({geomreported})").format(
-                            tablename=tablename,
-                            geomreported=result['rows'][0]['geomtype']))
+    except (KeyError, IndexError):
+        raise ValueError(("Cannot create a map from `{tablename}` because "
+                          "this table does not have "
+                          "geometries ({geomreported})").format(
+                              tablename=tablename,
+                              geomreported=result['rows'][0]['geomtype']))
     except Exception as err:
         print("ERROR: {}".format(err))
     return None

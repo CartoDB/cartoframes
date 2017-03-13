@@ -43,12 +43,12 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
        :type query: string
        :param include_geom: Not implemented
        :type include_geom: boolean
-       :param sync: Create a cartoframe that can later be sync'd (defaut: True) or just pull down data (False)
-       :type sync: boolean
-       :param limit: The maximum number of rows to pull
+       :param is_org_user: (optional) Where `username` is in a multiuser account
+       :type is_org_user: boolean
+       :param limit: (optional) The maximum number of rows to pull
        :type limit: integer
        :param cdb_client: (optional) CARTO Python SDK authentication client object (default None)
-       :type param: object
+       :type cdb_client: object
        :param index: (optional) string Column to use for the index (default `cartodb_id`)
        :type index: string
 
@@ -76,8 +76,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
         if debug: print(tablequery)
         _df = utils.df_from_table(tablequery, sql, index=index)
     elif query:
-        # NOTE: not yet implemented
-        # TODO: this would have to register a table on CARTO if sync=True
+        # NOTE: this registers a carto table if `tablename` is specified
         _df = utils.df_from_query(query, sql, is_org_user, username,
                                   tablename=tablename, debug=debug)
     else:
