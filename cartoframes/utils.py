@@ -30,7 +30,7 @@ def get_auth_client(username=None, api_key=None,
             BASEURL = baseurl
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
-    elif (username is None) and (api_key is None):
+    elif (username is None) or (api_key is None):
         sql = SQLClient(cdb_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
