@@ -210,7 +210,7 @@ def get_named_mapconfig(username, mapname, ):
     return mapconfig
 
 
-def get_basemap(self, inputoption, debug=False):
+def get_basemap(self, options, debug=False):
     """
     {'style': 'dark',
      'labels': True} --> []
@@ -226,33 +226,36 @@ def get_basemap(self, inputoption, debug=False):
                      'dark_nolabels',)
     label_options = ('dark', 'light',)
 
-    if isinstance(inputoption, str):
-        if inputoption[0:4] == 'http':
+    if isinstance(options, str):
+        if options[0:4] == 'http':
             # input is already a basemap
-            return inputoption
-        elif inputoption in style_options:
+            return (options, None)
+        elif options in style_options:
             # choose one of four carto types
-            return template % {'style': inputoption}
+            return (template % {'style': options},
+                    'dark' if 'dark_' in options else 'light')
         else:
             raise ValueError("Text inputs must be an XYZ basemap format, or "
                              "one of: {}.".format(','.join(style_options)))
-    elif (isinstance(inputoption, dict) and
-          'style' in inputoption and
-          inputoption['style'] in label_options):
-        if ('labels' in inputoption and
-                inputoption['labels'] is True):
-            return [template % {'style': inputoption['style'] + '_nolabels'},
-                    template % {'style': inputoption['style'] + '_only_labels'}]
-        elif inputoption['labels'] is False:
-            return template % {'style': inputoption['style'] + '_nolabels'}
+    elif (isinstance(options, dict) and
+          'style' in options and
+          options['style'] in label_options):
+        if ('labels' in options and
+                options['labels'] is True):
+            return ([template % {'style': options['style'] + '_nolabels'},
+                    template % {'style': options['style'] + '_only_labels'}],
+                    options['style'])
+        elif options['labels'] is False:
+            return (template % {'style': options['style'] + '_nolabels'},
+                    options['style'])
         else:
-            return
+            raise NameError('Could not work with basemap parameters.')
     else:
         if self.get_carto_geomtype() in ('point', 'line'):
-            return template % {'style': 'dark_all'}
+            return template % {'style': 'dark_all'}, 'dark'
         elif self.get_carto_geomtype() == 'polygon':
             return [template % {'style': 'dark_all'},
-                    template % {'style': 'dark_only_labels'}]
+                    template % {'style': 'dark_only_labels'}], 'dark'
         else:
-            return template % {'style': 'dark_all'}
+            return template % {'style': 'dark_all'}, 'dark'
     return None
