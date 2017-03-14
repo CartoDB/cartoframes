@@ -198,3 +198,41 @@ def get_named_mapconfig(username, mapname):
       "subdomains": [ "a", "b", "c" ]
       }''' % map_args
     return mapconfig
+
+
+def get_basemap(self, inputoption, debug=False):
+    """
+    {'style': 'dark',
+     'labels': 'bottom'} --> []
+
+
+
+    """
+
+    template = ('http://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                '%(style)s/{z}/{x}/{y}.png')
+    style_options = ('light_all', 'dark_all', 'light_nolabels',
+                     'dark_nolabels',)
+
+    if isinstance(inputoption, str):
+        if inputoption[0:4] == 'http':
+            # input is already a basemap
+            return inputoption
+        elif inputoption in style_options:
+            # choose one of four carto types
+            return template % {'style': inputoption}
+        else:
+            raise ValueError("Text inputs must be an XYZ basemap format, or "
+                             "one of: {}.".format(','.join(style_options)))
+    elif isinstance(inputoption, dict):
+        if 'url' in inputoption:
+            return inputoption['url']
+    else:
+        if self.get_carto_geomtype() in ('point', 'line'):
+            return template % {'style': 'dark_all'}
+        elif self.get_carto_geomtype() == 'polygon':
+            return [template % {'style': 'dark_all'},
+                    template % {'style': 'dark_only_labels'}]
+        else:
+            return template % {'style': 'dark_all'}
+    return None

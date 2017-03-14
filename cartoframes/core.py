@@ -20,6 +20,7 @@ Features to add: see issues in the repository https://github.com/CartoDB/cartofr
 # TODO: hook into pandas.core?
 import pandas as pd
 import cartoframes.utils as utils
+import cartoframes.maps as maps
 import carto
 
 
@@ -543,9 +544,11 @@ def carto_map(self, interactive=True, color=None, size=None,
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
 
+    basemap_url = self.get_basemap(basemap, debug=debug)
+
     if cartocss is None:
-        css = styling.CartoCSS(self, size=size,
-                               color=color, cartocss=cartocss)
+        css = styling.CartoCSS(self, size=size, color=color,
+                               cartocss=cartocss, basemap=basemap)
         cartocss = css.get_cartocss()
 
     if debug: print(cartocss)
@@ -553,7 +556,7 @@ def carto_map(self, interactive=True, color=None, size=None,
     # create static map
     # TODO: use carto-python client to create static map (not yet
     #       implemented)
-    url = self._get_static_snapshot(cartocss, basemap, figsize, debug=False)
+    url = self._get_static_snapshot(cartocss, basemap_url, figsize, debug=False)
     img = '<img src="{url}" />'.format(url=url)
 
     if interactive is False:
@@ -566,7 +569,7 @@ def carto_map(self, interactive=True, color=None, size=None,
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
-                            'basemap': basemap,
+                            'basemap': basemap_url,
                             'bounds': bnd_str}
 
         mapconfig_params['q'] = urllib.quote(
@@ -614,6 +617,7 @@ pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
+pd.DataFrame.get_basemap = maps.get_basemap
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered
