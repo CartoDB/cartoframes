@@ -22,14 +22,16 @@ def create_named_map(username, api_key, tablename):
                                        time=str(time()).replace('.', '_'))
 
     defaults = {'named_map_name': map_name,
-                'basemap': ('https://cartodb-basemaps-{s}.global.ssl.fastly'
-                            '.net/dark_all/{z}/{x}/{y}.png'),
+                'basemap_layer': basemap_config(
+                    'https://cartodb-basemaps-{s}.global'
+                    '.ssl.fastly.net/dark_all/{z}/{x}/{y}.png'),
                 'cartocss': '#layer{ marker-width: 7; marker-fill: #00F; }',
                 'tablename': tablename,
                 'west': -45,
                 'south': -45,
                 'east': 45,
-                'north': 45}
+                'north': 45,
+                'labels': ''}
 
     filled_template = get_named_map_template() % defaults
 
@@ -86,15 +88,17 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     :rtype: string
     """
     import requests
-    if basemap:
-        new_basemap = basemap
+    if isinstance(basemap, list) and len(basemap) == 2:
+        baselayer = basemap[0]
+        labels = basemap[1]
     else:
-        new_basemap = ('https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-                       'dark_all/{z}/{x}/{y}.png')
+        baselayer = basemap
+        labels = None
 
     map_params = {'named_map_name': self.get_carto_namedmap(),
-                  'basemap': new_basemap,
+                  'basemap_layer': basemap_config(baselayer),
                   'tablename': self.get_carto_tablename(),
+                  'labels': (',' + basemap_config(labels)) if labels else '',
                   'cartocss': cartocss}
 
     bounds = self.get_bounds()
@@ -153,6 +157,22 @@ def get_named_map_template():
       "layergroup": {
         "version": "1.3.0",
         "layers": [
+          %(basemap_layer)s,
+          {
+            "type": "mapnik",
+            "options": {
+              "sql": "select * from %(tablename)s",
+              "cartocss": "%(cartocss)s",
+              "cartocss_version": "2.3.0"
+            }
+          }%(labels)s
+        ]
+      }
+    }'''
+    return template
+
+def basemap_config(basemap_url):
+    template = '''
           {
             "type": "http",
             "options": {
@@ -163,22 +183,12 @@ def get_named_map_template():
                 "c"
               ]
             }
-          },
-          {
-            "type": "mapnik",
-            "options": {
-              "sql": "select * from %(tablename)s",
-              "cartocss": "%(cartocss)s",
-              "cartocss_version": "2.3.0"
-            }
           }
-        ]
-      }
-    }'''
-    return template
+    '''
+    return template % {'basemap': basemap_url}
 
 
-def get_named_mapconfig(username, mapname):
+def get_named_mapconfig(username, mapname, ):
     """Named Maps API template for carto.js
 
     :param username: The username of the CARTO account
@@ -203,7 +213,8 @@ def get_named_mapconfig(username, mapname):
 def get_basemap(self, inputoption, debug=False):
     """
     {'style': 'dark',
-     'labels': 'bottom'} --> []
+     'labels': True} --> []
+    {'style': 'dark'}
 
 
 
@@ -213,6 +224,7 @@ def get_basemap(self, inputoption, debug=False):
                 '%(style)s/{z}/{x}/{y}.png')
     style_options = ('light_all', 'dark_all', 'light_nolabels',
                      'dark_nolabels',)
+    label_options = ('dark', 'light',)
 
     if isinstance(inputoption, str):
         if inputoption[0:4] == 'http':
@@ -224,9 +236,17 @@ def get_basemap(self, inputoption, debug=False):
         else:
             raise ValueError("Text inputs must be an XYZ basemap format, or "
                              "one of: {}.".format(','.join(style_options)))
-    elif isinstance(inputoption, dict):
-        if 'url' in inputoption:
-            return inputoption['url']
+    elif (isinstance(inputoption, dict) and
+          'style' in inputoption and
+          inputoption['style'] in label_options):
+        if ('labels' in inputoption and
+                inputoption['labels'] is True):
+            return [template % {'style': inputoption['style'] + '_nolabels'},
+                    template % {'style': inputoption['style'] + '_only_labels'}]
+        elif inputoption['labels'] is False:
+            return template % {'style': inputoption['style'] + '_nolabels'}
+        else:
+            return
     else:
         if self.get_carto_geomtype() in ('point', 'line'):
             return template % {'style': 'dark_all'}
