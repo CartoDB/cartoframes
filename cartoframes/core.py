@@ -494,7 +494,7 @@ def make_cartoframe(self, username, api_key, tablename,
 
 def carto_map(self, interactive=True, color=None, size=None,
               cartocss=None, basemap=None, figsize=(647, 400),
-              center=None, zoom=None, debug=False):
+              center=None, zoom=None, show_position_data=True, debug=False):
     """Produce and return CARTO maps. Can be interactive or static.
 
     :param interactive: (optional) Value on whether to show an interactive map (True) or static map (False)
@@ -583,7 +583,8 @@ def carto_map(self, interactive=True, color=None, size=None,
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
                             'basemap': basemap_url,
-                            'bounds': bnd_str}
+                            'bounds': bnd_str,
+                            'show_position_data': show_position_data}
 
         mapconfig_params['q'] = urllib.quote(
             maps.get_named_mapconfig(self.get_carto_username(),
