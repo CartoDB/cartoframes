@@ -530,22 +530,24 @@ def carto_map(self, interactive=True, color=None, size=None,
     :type cartocss: string
     :param options: This can be one of the following:
 
-    * XYZ URL for a custom basemap. See `this list <https://leaflet-extras.github.io/leaflet-providers/preview/>`__ for examples.
-    * `CARTO basemap <https://carto.com/location-data-services/basemaps/>`__ styles
+        * XYZ URL for a custom basemap. See `this list <https://leaflet-extras.github.io/leaflet-providers/preview/>`__ for examples.
+        * `CARTO basemap <https://carto.com/location-data-services/basemaps/>`__ styles
 
-      - Specific description: `light_all`, `light_nolabels`, `dark_all`, or `dark_nolabels`
-      - General descrption: `light` or `dark`. Specifying one of these results in the best basemap for the map geometries.
+          - Specific description: `light_all`, `light_nolabels`, `dark_all`, or `dark_nolabels`
+          - General descrption: `light` or `dark`. Specifying one of these results in the best basemap for the map geometries.
 
-    * Dictionary with the following keys:
+        * Dictionary with the following keys:
 
-      - `style`: (required) descrption of the map type (`light` or `dark`)
-      - `labels`: (optional) Show labels (`True`) or not (`False`). If this option is not included, the best basemap will be chosen based on what was entered for `style` and the geometry type of the basemap.
+          - `style`: (required) descrption of the map type (`light` or `dark`)
+          - `labels`: (optional) Show labels (`True`) or not (`False`). If this option is not included, the best basemap will be chosen based on what was entered for `style` and the geometry type of the basemap.
 
     :type options: string or dict
     :param figsize: (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).
     :type figsize: tuple
     :param center: (optional) A (longitude, latitude) coordinate pair of the center view of a map
     :type center: tuple
+    :param show_position_data: Whether to show the center and zoom on an interactive map. This can be useful for finding views for static maps.
+    :type show_position_data: boolean
     :returns: an interactive or static CARTO map optionally styled
     :rtype: HTML embed
 
