@@ -74,7 +74,7 @@ def get_bounds(self, debug=False):
 
 
 def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
-                         debug=False):
+                         center=None, zoom=None, debug=False):
     """Update a named map with a new configuration.
 
     :param cartocss: CartoCSS to define new map style
@@ -88,6 +88,11 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     :rtype: string
     """
     import requests
+    try:
+        from urllib.parse import urlencode
+    except ImportError:
+        from urllib import urlencode
+
     if isinstance(basemap, list) and len(basemap) == 2:
         baselayer = basemap[0]
         labels = basemap[1]
@@ -112,19 +117,28 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
 
     resp = requests.put(endpoint,
                         data=new_template,
-                        headers={'content-type': 'application/json'})
-    # print(resp.status_code)
+                        headers={'Content-Type': 'application/json'})
     # TODO: replace with bounding box extent instead
     #       do this in the map creation/updating?
     # https://carto.com/docs/carto-engine/maps-api/named-maps#arguments
-    img = ("http://{username}.carto.com/api/v1/map/static/named/"
-           "{map_name}/{width}/{height}.png")
 
     if resp.status_code == requests.codes.ok:
+        mapview = {}
+        if zoom:
+            mapview['zoom'] = zoom
+        if center:
+            mapview['lon'] = center[0]
+            mapview['lat'] = center[1]
+
+        img = ("http://{username}.carto.com/api/v1/map/static/named/"
+               "{map_name}/{width}/{height}.png"
+               "?{params}")
+
         return img.format(username=self.get_carto_username(),
                           map_name=self.get_carto_namedmap(),
                           width=figsize[0],
-                          height=figsize[1])
+                          height=figsize[1],
+                          params=urlencode(mapview))
     else:
         resp.raise_for_status()
 
@@ -220,8 +234,8 @@ def get_basemap(self, options, debug=False):
 
     """
 
-    template = ('http://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-                '%(style)s/{z}/{x}/{y}.png')
+    template = ('http://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
+                '{style}/{{z}}/{{x}}/{{y}}.png')
     style_options = ('light_all', 'dark_all', 'light_nolabels',
                      'dark_nolabels',)
     label_options = ('dark', 'light',)
@@ -232,7 +246,7 @@ def get_basemap(self, options, debug=False):
             return (options, None)
         elif options in style_options:
             # choose one of four carto types
-            return (template % {'style': options},
+            return (template.format(style=options),
                     'dark' if 'dark_' in options else 'light')
         else:
             raise ValueError("Text inputs must be an XYZ basemap format, or "
@@ -242,20 +256,29 @@ def get_basemap(self, options, debug=False):
           options['style'] in label_options):
         if ('labels' in options and
                 options['labels'] is True):
-            return ([template % {'style': options['style'] + '_nolabels'},
-                    template % {'style': options['style'] + '_only_labels'}],
+            return ([template.format(style=options['style'] + '_nolabels'),
+                     template.format(style=options['style'] + '_only_labels')],
                     options['style'])
-        elif options['labels'] is False:
-            return (template % {'style': options['style'] + '_nolabels'},
+        elif ('labels' in options and options['labels'] is False):
+            return (template.format(style=options['style'] + '_nolabels'),
                     options['style'])
         else:
-            raise NameError('Could not work with basemap parameters.')
+            if self.get_carto_geomtype() in ('point', 'line'):
+                return (template.format(style=options['style'] + '_all'),
+                        options['style'])
+            else:
+                temp = [template.format(style=options['style'] + '_nolabels'),
+                        template.format(style=options['style'] + '_only_labels')], options['style']
+                return temp
     else:
         if self.get_carto_geomtype() in ('point', 'line'):
-            return template % {'style': 'dark_all'}, 'dark'
+            return (template.format(style='dark_all'),
+                    'dark')
         elif self.get_carto_geomtype() == 'polygon':
-            return [template % {'style': 'dark_all'},
-                    template % {'style': 'dark_only_labels'}], 'dark'
+            return ([template.format(style='dark_all'),
+                    template.format(style='dark_only_labels')],
+                    'dark')
         else:
-            return template % {'style': 'dark_all'}, 'dark'
+            return (template.format(style='dark_all'),
+                    'dark')
     return None
