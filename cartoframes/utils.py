@@ -11,7 +11,7 @@ def get_auth_client(username=None, api_key=None,
     :type username: string
     :param api_key: API key of CARTO user ``username``
     :type api_key: string
-    :param baseurl: Base URL for CARTO instance (usually suitable or on prem)
+    :param baseurl: Base URL for CARTO instance (usually suitable for on prem)
     :type baseurl: string
     :param cdb_client: CARTO Python SDK Authentication client
     :type cdb_client: object
@@ -22,7 +22,6 @@ def get_auth_client(username=None, api_key=None,
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
     if cdb_client is None:
-
         if baseurl is None:
             BASEURL = 'https://{username}.carto.com/api/'.format(
                 username=username)
@@ -73,9 +72,12 @@ def create_table_query(tablename, schema, username, is_org_user=False,
 def map_dtypes(pgtype):
     """
     Map PostgreSQL data types (key) to NumPy/pandas dtypes (value)
+
     :param pgtype: string PostgreSQL/CARTO datatype to map to pandas data type
     Output
-    :param : string data type used in pandas
+    :type pgtype: string
+    :returns: pandas data type
+    :rtype: string
     """
     # may not be a complete list, could not find CARTO SQL API documentation
     # about data types
@@ -220,9 +222,12 @@ def transform_schema(pgschema):
 def get_username(baseurl):
     """
     Retrieve the username from the baseurl.
-    :param baseurl: string Must be of format https://{username}.carto.com/api/
-
     NOTE: Not compatible with onprem, etc.
+
+    :param baseurl: string Must be of format https://{username}.carto.com/api/
+    :type baseurl: string
+    :returns: CARTO username
+    :rtype: string
     """
     # TODO: make this more robust
     import re
@@ -235,6 +240,8 @@ def get_geom_type(carto_sql_client, tablename):
 
         :param sql_auth_client: object SQL Auth client from CARTO Python SDK
         :param tablename: string Name of table for cartoframe
+        :returns: Geometry type. One of 'point', 'line', 'polygon', or None
+        :rtype: string
     """
     geomtypes = {'ST_Point': 'point',
                  'ST_MultiPoint': 'point',
@@ -274,6 +281,7 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
         :param username: string CARTO username
 
         :returns: cartoframe created from ``query``
+        :rtype: cartoframe
     """
     if tablename:
         create_table = '''
@@ -310,6 +318,9 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
 def df_from_table(query, carto_sql_client, index=None):
     """
     Create a pandas DataFrame from a CARTO table
+
+    :returns: DataFrame associated with a CARTO table
+    :rtype: cartoframe
     """
     resp = carto_sql_client.send(query)
     schema = transform_schema(resp['fields'])
@@ -319,6 +330,9 @@ def df_from_table(query, carto_sql_client, index=None):
         return pd.DataFrame(resp['rows']).astype(schema)
 
 def upsert_table(self, df_diff, n_batch=5000, debug=False):
+    """
+    Insert or update vales in a database
+    """
 
     n_items = len(df_diff)
     queries = []
