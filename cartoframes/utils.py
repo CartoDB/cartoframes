@@ -300,7 +300,6 @@ def df_from_query(query, carto_sql_client, is_org_user, username,
             'SELECT * FROM {tablename}'.format(tablename=new_tablename))
         if debug: print(table_resp)
         schema = transform_schema(table_resp['fields'])
-        print(table_resp)
         if table_resp['total_rows'] > 0:
             return pd.DataFrame(table_resp['rows']).set_index('cartodb_id').astype(schema)
         else:
