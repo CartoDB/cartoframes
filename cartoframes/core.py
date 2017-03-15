@@ -265,7 +265,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, username=None, api_key=None, requested_tablename=None,
-               n_batch=20, latlng_cols=None, is_org_user=False, debug=False):
+               n_batch=20, lnglat_cols=None, is_org_user=False, debug=False):
     """If an existing cartoframe, this method syncs with the CARTO table a
         cartoframe is associated with. If syncing a DataFrame which has not yet
         been linked with CARTO, it creates a new table if the tablename does
@@ -285,11 +285,11 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
     :param n_batch: Number of queries to include in a batch update to the
         database (experimental).
     :type n_batch: integer
-    :param latlng_cols: Columns which have the latitude and longitude (in that
+    :param lnglat_cols: Columns which have the latitude and longitude (in that
         order) for creating the geometry in the database. Once this cartoframe
         syncs, a new column called `the_geom` will be pulled down that is a
         text representation of the geometry.
-    :type latlng_cols: tuple
+    :type lnglat_cols: tuple
     :param is_org_user: This flag needs to be set if a user is in a
         multiuser account.
     :type is_org_user: boolean
@@ -300,7 +300,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename, debug=debug,
-                          is_org_user=is_org_user, latlng_cols=latlng_cols)
+                          is_org_user=is_org_user, lnglat_cols=lnglat_cols)
         self.set_last_state()
         return None
     elif not self.carto_registered():
@@ -343,7 +343,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
 
 # TODO: add geometry creation (now there is no trigger to fill in `the_geom`
 #       like there is for the import api)
-def carto_create(self, username, api_key, tablename, latlng_cols=None,
+def carto_create(self, username, api_key, tablename, lnglat_cols=None,
                  is_org_user=False, debug=False):
     """Create and populate a table on carto with a dataframe.
     This is a private method, but can be used to create a new table on
@@ -365,7 +365,7 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
                       api_key=api_key,
                       include_geom=None,
                       limit=None,
-                      geomtype='point' if latlng_cols else None)
+                      geomtype='point' if lnglat_cols else None)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
     self._carto_insert_values(debug=debug)
@@ -379,8 +379,8 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
         self.index.name = 'cartodb_id'
 
     # add columns
-    if latlng_cols:
-        self._update_geom_col(latlng_cols)
+    if lnglat_cols:
+        self._update_geom_col(lnglat_cols)
     else:
         # NOTE: carto utility columns are not pulled down. These include:
         #    the_geom, the_geom_webmercator
@@ -392,14 +392,14 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
     return None
 
 
-def _update_geom_col(self, latlng_cols):
-    """Private method. Update the_geom with the given latlng_cols"""
+def _update_geom_col(self, lnglat_cols):
+    """Private method. Update the_geom with the given lnglat_cols"""
     query = '''
         UPDATE "{tablename}"
         SET the_geom = CDB_LatLng({lat}, {lng})
     '''.format(tablename=self.get_carto_tablename(),
-               lat=latlng_cols[0],
-               lng=latlng_cols[1])
+               lng=lnglat_cols[1],
+               lat=lnglat_cols[0])
     self.carto_sql_client.send(query)
     # collect the_geom
     resp = self.carto_sql_client.send('''
@@ -408,6 +408,7 @@ def _update_geom_col(self, latlng_cols):
     '''.format(tablename=self.get_carto_tablename()))
 
     self['the_geom'] = pd.DataFrame(resp['rows'])['the_geom']
+    return None
 
 
 def _carto_create_table(self, tablename, username,
@@ -492,7 +493,8 @@ def make_cartoframe(self, username, api_key, tablename,
 
 
 def carto_map(self, interactive=True, color=None, size=None,
-              cartocss=None, basemap=None, figsize=(647, 400), debug=False):
+              cartocss=None, basemap=None, figsize=(647, 400),
+              center=None, zoom=None, debug=False):
     """Produce and return CARTO maps. Can be interactive or static.
 
     :param interactive: (optional) Value on whether to show an interactive map (True) or static map (False)
@@ -527,6 +529,8 @@ def carto_map(self, interactive=True, color=None, size=None,
     :type basemap: string
     :param figsize: (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).
     :type figsize: tuple
+    :param center: (optional) A (longitude, latitude) coordinate pair of the center view of a map
+    :type center: tuple
     :returns: an interactive or static CARTO map optionally styled
     :rtype: HTML embed
 
@@ -556,8 +560,17 @@ def carto_map(self, interactive=True, color=None, size=None,
     # create static map
     # TODO: use carto-python client to create static map (not yet
     #       implemented)
+    mapview = {}
+    if zoom:
+        mapview['zoom'] = zoom
+    if center:
+        mapview['lon'] = center[0]
+        mapview['lat'] = center[1]
+
     url = self._get_static_snapshot(cartocss, basemap_url, figsize, debug=False)
-    img = '<img src="{url}" />'.format(url=url)
+    img = '<img src="{url}{mapview}" />'.format(
+        url=url,
+        mapview=urllib.urlencode(mapview))
 
     if interactive is False:
         return IPython.display.HTML(img)
@@ -578,7 +591,7 @@ def carto_map(self, interactive=True, color=None, size=None,
 
         baseurl = ('https://cdn.rawgit.com/andy-esch/'
                    '6d993d3f25c5856ea38d1f374e57722e/raw/'
-                   'ce30379f35aafd027816f065b4e5c52f881c4a86/index.html')
+                   '1f1a7f23968f9b8b392b0f6788f63e48797aabdc/index.html')
 
         url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])
