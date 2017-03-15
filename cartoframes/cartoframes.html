@@ -13,11 +13,23 @@
         padding: 0;
         margin: 0;
       }
+      #zoom-center {
+        position: absolute;
+        right: 0;
+        top: 0;
+        background-color: rgba(255, 255, 255, 0.7);
+        width: 200px;
+        z-index: 100;
+        padding: 4px;
+      }
     </style>
 
     <link rel="stylesheet" href="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css" />
   </head>
   <body>
+    <div id="zoom-center">
+      Zoom: <span id="zoom">4</span>, <br />
+      Center: (<span id="lat">38</span>, <span id="lon">-122</span>)</div>
     <div id="map"></div>
     <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
 
@@ -34,13 +46,29 @@
     }
 
     $(function(){
+      function adjustLongitude(val) {
+        if (val > 180) {
+          return (val + 180) % 360 - 180;
+        } else if (val < -180) {
+          return (val + 180) % 360 + 180;
+        } else {
+          return val;
+        }
+      };
+
+      function updateMapInfo(mapobj) {
+          $("#zoom").text(map.getZoom());
+          $("#lat").text(map.getCenter().lat.toFixed(4));
+          $("#lon").text(adjustLongitude(map.getCenter().lng).toFixed(4));
+      };
 
         console.log(window.location);
         var params = getJsonFromUrl();
         var urlsearch = JSON.parse(decodeURIComponent(params.q)),
             username = params.username,
             tablename = params.tablename,
-            bounds = params.bounds;
+            bounds = params.bounds,
+            baseurl = params.baseurl;
         new_bounds = bounds.split(',');
         new_bounds = [[new_bounds[0], new_bounds[1]],
                       [new_bounds[2], new_bounds[3]]];
@@ -58,6 +86,10 @@
           .addTo(map)
           .done(function(layers) {
               map.fitBounds(new_bounds);
+              updateMapInfo(map);
+              map.on('move', function() {
+                updateMapInfo(map);
+              });
           })
           .error(function(err) {
             console.log("ERROR: ", err);
