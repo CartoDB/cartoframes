@@ -227,7 +227,6 @@ def get_carto(self, key):
 
     :param key: key of item to fetch from metadata. One of `carto_named_map`, `carto_geomtype`, `carto_username`, `carto_table`.
     :type key: string
-
     :returns: Value stored in cartoframe metadata
     :rtype: any
     """
@@ -499,34 +498,50 @@ def carto_map(self, interactive=True, color=None, size=None,
 
     :param interactive: (optional) Value on whether to show an interactive map (True) or static map (False)
     :type interactive: boolean
-    :param color: (optional)
+    :param color: (optional) Styles the map by color (e.g., a choropleth for polygon geometries).
 
-        * If color is a string, can be a column name or a hex value (beginning with a ``#``). When a hex value, all geometries are colored the same. If the column name, use CARTO's TurtoCarto to create qualitative or category mapping.
+        * If color is a string, can be one of two options:
+
+            - a column name. With this option, CARTO's `TurtoCarto <https://carto.com/blog/styling-with-turbo-carto>`__ is used to create qualitative or category mapping based on the data type.
+            - a hex value (beginning with a ``#``) or in the set of `CSS3 named colors <https://www.w3schools.com/colors/colors_names.asp>`__. With this option, all geometries are colored the same.
+
         * If color is a dict, parse the parameters to custom style the map. Values are:
 
             - `colname` (required): column name to base the styling on
-            - `ramp` (optional): If text, type of color ramp to use. See https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js for a full list. If list/tuple, set of hex values.
+            - `ramp` (optional): If text, type of color ramp to use. See the `CartoColor repository <https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js>`__ for a full list. If list/tuple, set of hex values.
             - `ramp_provider` (optional): Specify the source of the `ramp` (either `cartocolor` or `colorbrewer`)
             - `num_bins`: Number of divisions for the ramp
             - `quant_method`: Quantification method for dividing the data into classes. Options are `jenks`, `quantiles`, `equal`, or `headtails`. By choosing a custom ramp
 
     :type color: dict, string
-    :param size: (optional) Only works with point geometries. A future version will allow more sizing options for lines.
+    :param size: (optional) Styles point data by size. Only works with point geometries.
 
         * If size is an integer, all points are sized by the same value specified.
-        * If size is a column name, this option sizes points from a default minimum value of 4 pixels to 15 pixels.
+        * If size is a column name, this option sizes points from a default minimum value of 5 pixels to 25 pixels.
         * If size is a dict, size points by the following values if entered. Defaults will be used if they are not requested.
 
-          - colname: column to base the styling off of
-          - max: maximum marker width (default 15)
-          - min: minimum marker width (default 4)
-          - quant_method: type of quantification to use. Options are `jenks`, `quantiles`, `equal`, or `headtails`.
+          - `colname`: column to base the styling off of
+          - `max`: maximum marker width (default 25)
+          - `min`: minimum marker width (default 5)
+          - `quant_method`: type of quantification to use. Options are `jenks`, `quantiles`, `equal`, or `headtails`.
 
     :type size: integer, string, dict
     :param cartocss: Complete CartoCSS style to apply to your map. This will override `size` and `color` attributes if present.
     :type cartocss: string
-    :param basemap: (optional) XYZ URL template for the basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for examples.
-    :type basemap: string
+    :param options: This can be one of the following:
+
+    * XYZ URL for a custom basemap. See `this list <https://leaflet-extras.github.io/leaflet-providers/preview/>`__ for examples.
+    * `CARTO basemap <https://carto.com/location-data-services/basemaps/>`__ styles
+
+      - Specific description: `light_all`, `light_nolabels`, `dark_all`, or `dark_nolabels`
+      - General descrption: `light` or `dark`. Specifying one of these results in the best basemap for the map geometries.
+
+    * Dictionary with the following keys:
+
+      - `style`: (required) descrption of the map type (`light` or `dark`)
+      - `labels`: (optional) Show labels (`True`) or not (`False`). If this option is not included, the best basemap will be chosen based on what was entered for `style` and the geometry type of the basemap.
+
+    :type options: string or dict
     :param figsize: (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).
     :type figsize: tuple
     :param center: (optional) A (longitude, latitude) coordinate pair of the center view of a map
