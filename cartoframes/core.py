@@ -565,7 +565,7 @@ def carto_map(self, interactive=True, color=None, size=None,
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
 
-    basemap_url, basemap_style = self.get_basemap(basemap, debug=debug)
+    basemap_url, basemap_style = self.get_basemap(basemap)
 
     if cartocss is None:
         css = styling.CartoCSS(self, size=size, color=color,
