@@ -20,6 +20,7 @@ Features to add: see issues in the repository https://github.com/CartoDB/cartofr
 # TODO: hook into pandas.core?
 import pandas as pd
 import cartoframes.utils as utils
+import cartoframes.maps as maps
 import carto
 
 
@@ -226,7 +227,6 @@ def get_carto(self, key):
 
     :param key: key of item to fetch from metadata. One of `carto_named_map`, `carto_geomtype`, `carto_username`, `carto_table`.
     :type key: string
-
     :returns: Value stored in cartoframe metadata
     :rtype: any
     """
@@ -264,7 +264,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, username=None, api_key=None, requested_tablename=None,
-               n_batch=20, latlng_cols=None, is_org_user=False, debug=False):
+               n_batch=20, lnglat_cols=None, is_org_user=False, debug=False):
     """If an existing cartoframe, this method syncs with the CARTO table a
         cartoframe is associated with. If syncing a DataFrame which has not yet
         been linked with CARTO, it creates a new table if the tablename does
@@ -284,11 +284,11 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
     :param n_batch: Number of queries to include in a batch update to the
         database (experimental).
     :type n_batch: integer
-    :param latlng_cols: Columns which have the latitude and longitude (in that
+    :param lnglat_cols: Columns which have the latitude and longitude (in that
         order) for creating the geometry in the database. Once this cartoframe
         syncs, a new column called `the_geom` will be pulled down that is a
         text representation of the geometry.
-    :type latlng_cols: tuple
+    :type lnglat_cols: tuple
     :param is_org_user: This flag needs to be set if a user is in a
         multiuser account.
     :type is_org_user: boolean
@@ -299,7 +299,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename, debug=debug,
-                          is_org_user=is_org_user, latlng_cols=latlng_cols)
+                          is_org_user=is_org_user, lnglat_cols=lnglat_cols)
         self.set_last_state()
         return None
     elif not self.carto_registered():
@@ -342,7 +342,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
 
 # TODO: add geometry creation (now there is no trigger to fill in `the_geom`
 #       like there is for the import api)
-def carto_create(self, username, api_key, tablename, latlng_cols=None,
+def carto_create(self, username, api_key, tablename, lnglat_cols=None,
                  is_org_user=False, debug=False):
     """Create and populate a table on carto with a dataframe.
     This is a private method, but can be used to create a new table on
@@ -364,7 +364,7 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
                       api_key=api_key,
                       include_geom=None,
                       limit=None,
-                      geomtype='point' if latlng_cols else None)
+                      geomtype='point' if lnglat_cols else None)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
     self._carto_insert_values(debug=debug)
@@ -378,8 +378,8 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
         self.index.name = 'cartodb_id'
 
     # add columns
-    if latlng_cols:
-        self._update_geom_col(latlng_cols)
+    if lnglat_cols:
+        self._update_geom_col(lnglat_cols)
     else:
         # NOTE: carto utility columns are not pulled down. These include:
         #    the_geom, the_geom_webmercator
@@ -391,14 +391,14 @@ def carto_create(self, username, api_key, tablename, latlng_cols=None,
     return None
 
 
-def _update_geom_col(self, latlng_cols):
-    """Private method. Update the_geom with the given latlng_cols"""
+def _update_geom_col(self, lnglat_cols):
+    """Private method. Update the_geom with the given lnglat_cols"""
     query = '''
         UPDATE "{tablename}"
         SET the_geom = CDB_LatLng({lat}, {lng})
     '''.format(tablename=self.get_carto_tablename(),
-               lat=latlng_cols[0],
-               lng=latlng_cols[1])
+               lng=lnglat_cols[1],
+               lat=lnglat_cols[0])
     self.carto_sql_client.send(query)
     # collect the_geom
     resp = self.carto_sql_client.send('''
@@ -407,6 +407,7 @@ def _update_geom_col(self, latlng_cols):
     '''.format(tablename=self.get_carto_tablename()))
 
     self['the_geom'] = pd.DataFrame(resp['rows'])['the_geom']
+    return None
 
 
 def _carto_create_table(self, tablename, username,
@@ -491,41 +492,62 @@ def make_cartoframe(self, username, api_key, tablename,
 
 
 def carto_map(self, interactive=True, color=None, size=None,
-              cartocss=None, basemap=None, figsize=(647, 400), debug=False):
+              cartocss=None, basemap=None, figsize=(647, 400),
+              center=None, zoom=None, show_position_data=True, debug=False):
     """Produce and return CARTO maps. Can be interactive or static.
 
     :param interactive: (optional) Value on whether to show an interactive map (True) or static map (False)
     :type interactive: boolean
-    :param color: (optional)
+    :param color: (optional) Styles the map by color (e.g., a choropleth for polygon geometries).
 
-        * If color is a string, can be a column name or a hex value (beginning with a ``#``). When a hex value, all geometries are colored the same. If the column name, use CARTO's TurtoCarto to create qualitative or category mapping.
+        * If color is a string, can be one of two options:
+
+            - a column name. With this option, CARTO's `TurtoCarto <https://carto.com/blog/styling-with-turbo-carto>`__ is used to create qualitative or category mapping based on the data type.
+            - a hex value (beginning with a ``#``) or in the set of `CSS3 named colors <https://www.w3schools.com/colors/colors_names.asp>`__. With this option, all geometries are colored the same.
+
         * If color is a dict, parse the parameters to custom style the map. Values are:
 
             - `colname` (required): column name to base the styling on
-            - `ramp` (optional): If text, type of color ramp to use. See https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js for a full list. If list/tuple, set of hex values.
+            - `ramp` (optional): If text, type of color ramp to use. See the `CartoColor repository <https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js>`__ for a full list. If list/tuple, set of hex values.
             - `ramp_provider` (optional): Specify the source of the `ramp` (either `cartocolor` or `colorbrewer`)
             - `num_bins`: Number of divisions for the ramp
             - `quant_method`: Quantification method for dividing the data into classes. Options are `jenks`, `quantiles`, `equal`, or `headtails`. By choosing a custom ramp
 
     :type color: dict, string
-    :param size: (optional) Only works with point geometries. A future version will allow more sizing options for lines.
+    :param size: (optional) Styles point data by size. Only works with point geometries.
 
         * If size is an integer, all points are sized by the same value specified.
-        * If size is a column name, this option sizes points from a default minimum value of 4 pixels to 15 pixels.
+        * If size is a column name, this option sizes points from a default minimum value of 5 pixels to 25 pixels.
         * If size is a dict, size points by the following values if entered. Defaults will be used if they are not requested.
 
-          - colname: column to base the styling off of
-          - max: maximum marker width (default 15)
-          - min: minimum marker width (default 4)
-          - quant_method: type of quantification to use. Options are `jenks`, `quantiles`, `equal`, or `headtails`.
+          - `colname`: column to base the styling off of
+          - `max`: maximum marker width (default 25)
+          - `min`: minimum marker width (default 5)
+          - `quant_method`: type of quantification to use. Options are `jenks`, `quantiles`, `equal`, or `headtails`.
 
     :type size: integer, string, dict
     :param cartocss: Complete CartoCSS style to apply to your map. This will override `size` and `color` attributes if present.
     :type cartocss: string
-    :param basemap: (optional) XYZ URL template for the basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for examples.
-    :type basemap: string
+    :param options: This can be one of the following:
+
+        * XYZ URL for a custom basemap. See `this list <https://leaflet-extras.github.io/leaflet-providers/preview/>`__ for examples.
+        * `CARTO basemap <https://carto.com/location-data-services/basemaps/>`__ styles
+
+          - Specific description: `light_all`, `light_nolabels`, `dark_all`, or `dark_nolabels`
+          - General descrption: `light` or `dark`. Specifying one of these results in the best basemap for the map geometries.
+
+        * Dictionary with the following keys:
+
+          - `style`: (required) descrption of the map type (`light` or `dark`)
+          - `labels`: (optional) Show labels (`True`) or not (`False`). If this option is not included, the best basemap will be chosen based on what was entered for `style` and the geometry type of the basemap.
+
+    :type options: string or dict
     :param figsize: (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).
     :type figsize: tuple
+    :param center: (optional) A (longitude, latitude) coordinate pair of the center view of a map
+    :type center: tuple
+    :param show_position_data: Whether to show the center and zoom on an interactive map. This can be useful for finding views for static maps.
+    :type show_position_data: boolean
     :returns: an interactive or static CARTO map optionally styled
     :rtype: HTML embed
 
@@ -543,9 +565,11 @@ def carto_map(self, interactive=True, color=None, size=None,
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
 
+    basemap_url, basemap_style = self.get_basemap(basemap)
+
     if cartocss is None:
-        css = styling.CartoCSS(self, size=size,
-                               color=color, cartocss=cartocss)
+        css = styling.CartoCSS(self, size=size, color=color,
+                               cartocss=cartocss, basemap=basemap_style)
         cartocss = css.get_cartocss()
 
     if debug: print(cartocss)
@@ -553,8 +577,17 @@ def carto_map(self, interactive=True, color=None, size=None,
     # create static map
     # TODO: use carto-python client to create static map (not yet
     #       implemented)
-    url = self._get_static_snapshot(cartocss, basemap, figsize, debug=False)
-    img = '<img src="{url}" />'.format(url=url)
+    mapview = {}
+    if zoom:
+        mapview['zoom'] = zoom
+    if center:
+        mapview['lon'] = center[0]
+        mapview['lat'] = center[1]
+
+    url = self._get_static_snapshot(cartocss, basemap_url, figsize, debug=False)
+    img = '<img src="{url}{mapview}" />'.format(
+        url=url,
+        mapview=urllib.urlencode(mapview))
 
     if interactive is False:
         return IPython.display.HTML(img)
@@ -566,8 +599,9 @@ def carto_map(self, interactive=True, color=None, size=None,
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
                             'cartocss': cartocss,
-                            'basemap': basemap,
-                            'bounds': bnd_str}
+                            'basemap': basemap_url,
+                            'bounds': bnd_str,
+                            'show_position_data': show_position_data}
 
         mapconfig_params['q'] = urllib.quote(
             maps.get_named_mapconfig(self.get_carto_username(),
@@ -575,7 +609,7 @@ def carto_map(self, interactive=True, color=None, size=None,
 
         baseurl = ('https://cdn.rawgit.com/andy-esch/'
                    '6d993d3f25c5856ea38d1f374e57722e/raw/'
-                   'ce30379f35aafd027816f065b4e5c52f881c4a86/index.html')
+                   '1f1a7f23968f9b8b392b0f6788f63e48797aabdc/index.html')
 
         url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])
@@ -614,6 +648,7 @@ pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
+pd.DataFrame.get_basemap = maps.get_basemap
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered

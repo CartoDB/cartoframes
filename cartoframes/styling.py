@@ -5,13 +5,16 @@ class CartoCSS(object):
     """
         class for constructing CartoCSS
     """
-    def __init__(self, df, size=None, color=None, cartocss=None):
+    # TODO: change language of `ramps` to schemes
+    def __init__(self, df, size=None, color=None, cartocss=None,
+                 basemap='dark'):
         """
         """
         self.df = df
         self.size = size
         self.color = color
         self.cartocss = cartocss
+        self.basemap = basemap
 
     def get_cartocss(self):
         """Given options for CartoCSS styling, return
@@ -21,13 +24,15 @@ class CartoCSS(object):
             # get cartocss by geometry type
             css_template = self.cartocss_by_geom(self.df.get_carto_geomtype())
 
+            linecolor = '#000' if self.basemap == 'dark' else '#FFF'
             # fill in based on user inputs
             css_filled = css_template % {'fillstyle': self.get_color_css(),
-                                         'sizestyle': self.get_size_css()}
+                                         'sizestyle': self.get_size_css(),
+                                         'linecolor': linecolor}
             return css_filled
         else:
             return self.cartocss
-
+    # TODO: match marker line color to basemap color
     def get_markercss(self):
         """Return CartoCSS for points"""
         markercss = ''.join(
@@ -36,8 +41,8 @@ class CartoCSS(object):
              "marker-fill: %(fillstyle)s; ",
              "marker-fill-opacity: 1; ",
              "marker-allow-overlap: true; ",
-             "marker-line-width: 1; ",
-             "marker-line-color: #FFF; ",
+             "marker-line-width: 0.5; ",
+             "marker-line-color: %(linecolor)s; ",
              "marker-line-opacity: 1; ",
              "}"))
         return markercss
@@ -56,9 +61,12 @@ class CartoCSS(object):
         polygoncss = ''.join(
             ("#layer { ",
              "polygon-fill: %(fillstyle)s; ",
-             "line-width: 0.5; ",
-             "line-color: #FFF; ",
-             "line-opacity: 0.5; ",
+             "polygon-opacity: 0.9;",
+             "polygon-gamma: 0.5;",
+             "line-color: #fff;",
+             "line-width: 0.5;",
+             "line-opacity: 0.25;",
+             "line-comp-op: hard-light;",
              "}"))
         return polygoncss
 
@@ -157,8 +165,8 @@ class CartoCSS(object):
         import numbers
 
         if isinstance(self.size, dict):
-            defaults = {'min': 4,
-                        'max': 15,
+            defaults = {'min': 5,
+                        'max': 25,
                         'quant_method': 'quantiles'}
 
             missing_keys = set(defaults) - set(self.size)
@@ -184,18 +192,21 @@ class CartoCSS(object):
             css = str(self.size)
             return css
         else:
-            # return red
+            # return 7
             return "7"
 
     def get_color_css(self):
         """
         """
         import webcolors
+        import random
         if isinstance(self.color, dict):
-
+            # For dark maps: ag_GrnYl, ag_Sunset
+            colors = ('PurpOr', 'BluGrn', 'PinkYl')
+            rint = random.randint(0, len(colors) - 1)
             # choose category or quantitative defaults
             if self.df[self.color['colname']].dtype in ('float64', 'int64'):
-                defaults = {'ramp': 'RedOr',
+                defaults = {'ramp': colors[rint],
                             'ramp_provider': 'cartocolor',
                             'quant_method': 'quantiles',
                             'num_bins': ''}
@@ -215,6 +226,8 @@ class CartoCSS(object):
                 args['ramp'] = ', '.join([str(r) for r in args['ramp']])
 
             # parse dict
+            # ramp([jellybeans], cartocolor(RedOr), quantiles(5))
+            # ramp([city], cartocolor(Bold), category())
             css = ("ramp([{colname}], {ramp_provider}({ramp}), "
                    "{quant_method}({num_bins}))").format(**args)
             return css
@@ -245,5 +258,6 @@ class CartoCSS(object):
                self.color in webcolors.CSS3_NAMES_TO_HEX)):
             return self.color
         else:
-            # return red
-            return "#f00"
+            colors = ('#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',)
+            rint = random.randint(0, len(colors)-1)
+            return colors[rint]
