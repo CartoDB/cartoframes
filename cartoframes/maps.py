@@ -224,14 +224,25 @@ def get_named_mapconfig(username, mapname, ):
     return mapconfig
 
 
-def get_basemap(self, options, debug=False):
+def get_basemap(self, options):
     """
-    {'style': 'dark',
-     'labels': True} --> []
-    {'style': 'dark'}
+    :param options: This can be one of the following:
 
+    * XYZ URL for a custom basemap. See https://leaflet-extras.github.io/leaflet-providers/preview/ for examples.
+    * CARTO basemap style
 
+      - Specific description: `light_all`, `light_nolabels`, `dark_all`, or `dark_nolabels`
+      - General descrption: `light` or `dark`. Specifying one of these results in the best basemap for the map geometries.
 
+    * Dictionary with the following keys:
+
+      - `style`: (required) descrption of the map type (`light` or `dark`)
+      - `labels`: (optional) Show labels (`True`) or not (`False`). If this option is not included, the best basemap will be chosen based on what was entered for `style` and the geometry type of the basemap.
+
+    :type options: string or dict
+
+    :returns: basemap(s) URLs given the input parameters
+    :rtype: string or list
     """
 
     template = ('http://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
@@ -248,6 +259,13 @@ def get_basemap(self, options, debug=False):
             # choose one of four carto types
             return (template.format(style=options),
                     'dark' if 'dark_' in options else 'light')
+        elif options in ('light', 'dark'):
+            if self.get_carto_geomtype() in ('point', 'line'):
+                return (template.format(style=options + '_all'),
+                        options)
+            else:
+                return [template.format(style=options + '_nolabels'),
+                        template.format(style=options + '_only_labels')], options
         else:
             raise ValueError("Text inputs must be an XYZ basemap format, or "
                              "one of: {}.".format(','.join(style_options)))
@@ -267,9 +285,8 @@ def get_basemap(self, options, debug=False):
                 return (template.format(style=options['style'] + '_all'),
                         options['style'])
             else:
-                temp = [template.format(style=options['style'] + '_nolabels'),
+                return [template.format(style=options['style'] + '_nolabels'),
                         template.format(style=options['style'] + '_only_labels')], options['style']
-                return temp
     else:
         if self.get_carto_geomtype() in ('point', 'line'):
             return (template.format(style='dark_all'),
