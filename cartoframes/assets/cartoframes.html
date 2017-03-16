@@ -93,7 +93,8 @@
           .addTo(map)
           .done(function(layers) {
               map.fitBounds(new_bounds);
-              if (show_position_data == true) {
+              if (show_position_data == 'true' ||
+                  show_position_data == 'True') {
                 updateMapInfo(map);
                 map.on('move', function() {
                   updateMapInfo(map);
