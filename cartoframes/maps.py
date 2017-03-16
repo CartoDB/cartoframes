@@ -39,8 +39,7 @@ def create_named_map(baseurl, api_key, tablename):
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
                          data=filled_template,
-                         headers={'Content-Type': 'application/json'},
-                         verify=False)
+                         headers={'Content-Type': 'application/json'})
     if resp.status_code == requests.codes.ok:
         return json.loads(resp.text)['template_id']
     else:
@@ -119,8 +118,7 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
 
     resp = requests.put(endpoint,
                         data=new_template,
-                        headers={'Content-Type': 'application/json'},
-                        verify=False)
+                        headers={'Content-Type': 'application/json'})
     # TODO: replace with bounding box extent instead
     #       do this in the map creation/updating?
     # https://carto.com/docs/carto-engine/maps-api/named-maps#arguments
