@@ -560,7 +560,11 @@ def carto_map(self, interactive=True, color=None, size=None,
     except ImportError:
         # if Python 2
         import urllib
-    import IPython
+    try:
+        import IPython
+    except ImportError:
+        NotImplementedError("Currently cannot use `carto_map` outside of "
+                            "Jupyter notebooks")
 
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
@@ -607,9 +611,8 @@ def carto_map(self, interactive=True, color=None, size=None,
             maps.get_named_mapconfig(self.get_carto_username(),
                                      self.get_carto_namedmap()))
 
-        baseurl = ('https://cdn.rawgit.com/andy-esch/'
-                   '6d993d3f25c5856ea38d1f374e57722e/raw/'
-                   '1f1a7f23968f9b8b392b0f6788f63e48797aabdc/index.html')
+        baseurl = ('https://rawgit.com/CartoDB/cartoframes/master/'
+                   'cartoframes/assets/cartoframes.html')
 
         url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])
