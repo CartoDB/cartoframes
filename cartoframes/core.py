@@ -688,6 +688,10 @@ pd.DataFrame.get_carto_namedmap = get_carto_namedmap
 pd.DataFrame.get_carto_baseurl = get_carto_baseurl
 pd.DataFrame.get_basemap = maps.get_basemap
 
+# map methods
+pd.DataFrame._get_static_snapshot = maps._get_static_snapshot
+pd.DataFrame.get_bounds = maps.get_bounds
+
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered
 pd.DataFrame.carto_insync = carto_insync

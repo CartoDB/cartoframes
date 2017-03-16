@@ -2,7 +2,6 @@
 Functions and methods for interactive and static maps
 """
 
-import pandas as pd
 
 def create_named_map(username, api_key, tablename):
     """Create a default named map for later use
@@ -117,11 +116,6 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
         mapname=self.get_carto_namedmap(),
         api_key=self.get_carto_api_key())
 
-    # endpoint = ("https://{username}.carto.com/api/v1/map/named/"
-    #             "{map_name}").format(
-    #                 username=self.get_carto_username(),
-    #                 map_name=self.get_carto_namedmap())
-
     resp = requests.put(endpoint,
                         data=new_template,
                         headers={'Content-Type': 'application/json'})
@@ -148,9 +142,6 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
                           params=urlencode(mapview))
     else:
         resp.raise_for_status()
-
-pd.DataFrame._get_static_snapshot = _get_static_snapshot
-pd.DataFrame.get_bounds = get_bounds
 
 
 def get_named_map_template():
