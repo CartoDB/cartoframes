@@ -58,7 +58,6 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
        :returns: A pandas DataFrame linked to a CARTO table
        :rtype: cartoframe
     """
-    import cartoframes.maps as maps
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
     sql = utils.get_auth_client(username=username,
@@ -686,6 +685,7 @@ pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
+pd.DataFrame.get_carto_baseurl = get_carto_baseurl
 pd.DataFrame.get_basemap = maps.get_basemap
 
 # internal state methods
