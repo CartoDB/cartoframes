@@ -63,7 +63,9 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
     sql = utils.get_auth_client(username=username,
                                 api_key=api_key,
                                 baseurl=onprem_url,
+                                org=org,
                                 cdb_client=cdb_client)
+    baseurl = utils.get_baseurl(username=username, baseurl=onprem_url)
 
     # construct query
     if tablename is not None and query is None:
@@ -85,10 +87,10 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
         raise ValueError("Either `tablename` or `query` (or both) need to be "
                          "specified.")
 
-    # TODO: find out of there's a max length to clip on
+    # TODO: find out if there's a max length to clip on
     # only make map and set metadata if it's becoming a cartoframe
     if tablename:
-        named_map_name = maps.create_named_map(username, api_key,
+        named_map_name = maps.create_named_map(baseurl, api_key,
                                                tablename=tablename)
         print("Named map name: {}".format(named_map_name))
 
@@ -100,9 +102,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                          limit=limit,
                          geomtype=utils.get_geom_type(sql,
                                                       tablename=tablename),
-                         baseurl=utils.get_baseurl(username=username,
-                                                   org=org,
-                                                   baseurl=onprem_url))
+                         baseurl=baseurl)
 
         # save the state for later use
         # NOTE: this doubles the size of the dataframe
@@ -586,7 +586,6 @@ def carto_map(self, interactive=True, color=None, size=None,
 
     """
     import cartoframes.styling as styling
-    import cartoframes.maps as maps
     try:
         # if Python 3
         import urllib.parse as urllib
@@ -643,7 +642,9 @@ def carto_map(self, interactive=True, color=None, size=None,
 
         mapconfig_params['q'] = urllib.quote(
             maps.get_named_mapconfig(self.get_carto_username(),
-                                     self.get_carto_namedmap()))
+                                     self.get_carto_namedmap(),
+                                     baseurl=self.get_carto_baseurl()))
+        if debug: print(mapconfig_params['q'])
 
         baseurl = ('https://rawgit.com/CartoDB/cartoframes/master/'
                    'cartoframes/assets/cartoframes.html')

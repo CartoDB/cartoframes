@@ -22,7 +22,7 @@ def get_auth_client(username=None, api_key=None, org=None,
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
     if cdb_client is None:
-        BASEURL = get_baseurl(username=username, org=org, baseurl=baseurl)
+        BASEURL = get_baseurl(username=username, baseurl=baseurl)
         auth_client = APIKeyAuthClient(BASEURL, api_key)
         sql = SQLClient(auth_client)
     elif (username is None) or (api_key is None):
@@ -33,20 +33,19 @@ def get_auth_client(username=None, api_key=None, org=None,
     return sql
 
 
-def get_baseurl(username=None, org=None, baseurl=None):
+def get_baseurl(username=None, baseurl=None):
     """"""
-    if baseurl is None and org is None:
+    if baseurl is None:
         if username:
             return 'https://{username}.carto.com/api/'.format(username=username)
         else:
             raise Exception("`username` required if `org` or `baseurl` are not "
-                            " specified")
-    elif baseurl is None:
-        return 'https://{org}.carto.com/u/{username}/api'.format(
-            org=org,
-            username=username)
+                            "specified")
     else:
-        return baseurl
+        outs = '{baseurl}/user/{username}/api/'.format(baseurl=baseurl,
+                                                       username=username)
+        print(outs)
+        return outs
 
     return None
 

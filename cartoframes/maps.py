@@ -3,11 +3,11 @@ Functions and methods for interactive and static maps
 """
 
 
-def create_named_map(username, api_key, tablename):
+def create_named_map(baseurl, api_key, tablename):
     """Create a default named map for later use
 
-    :param username: CARTO username
-    :type username: string
+    :param baseurl: Base URL for API calls
+    :type baseurl: string
     :param api_key: CARTO API key
     :type api_key: string
     :param tablename: Table in user account to create a map from
@@ -34,12 +34,13 @@ def create_named_map(username, api_key, tablename):
 
     filled_template = get_named_map_template() % defaults
 
-    api_endpoint = ('https://{username}.carto.com/api/v1/map/named'
-                    '?api_key={api_key}').format(username=username,
+    api_endpoint = ('{baseurl}v1/map/named'
+                    '?api_key={api_key}').format(baseurl=baseurl,
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
                          data=filled_template,
-                         headers={'content-type': 'application/json'})
+                         headers={'Content-Type': 'application/json'},
+                         verify=False)
     if resp.status_code == requests.codes.ok:
         return json.loads(resp.text)['template_id']
     else:
@@ -118,7 +119,8 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
 
     resp = requests.put(endpoint,
                         data=new_template,
-                        headers={'Content-Type': 'application/json'})
+                        headers={'Content-Type': 'application/json'},
+                        verify=False)
     # TODO: replace with bounding box extent instead
     #       do this in the map creation/updating?
     # https://carto.com/docs/carto-engine/maps-api/named-maps#arguments
@@ -131,15 +133,15 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
             mapview['lon'] = center[0]
             mapview['lat'] = center[1]
 
-        img = ("http://{username}.carto.com/api/v1/map/static/named/"
+        img = ("{baseurl}v1/map/static/named/"
                "{map_name}/{width}/{height}.png"
-               "?{params}")
+               "?{mapview}")
 
-        return img.format(username=self.get_carto_username(),
+        return img.format(baseurl=self.get_carto_baseurl(),
                           map_name=self.get_carto_namedmap(),
                           width=figsize[0],
                           height=figsize[1],
-                          params=urlencode(mapview))
+                          mapview=urlencode(mapview))
     else:
         resp.raise_for_status()
 
@@ -213,30 +215,45 @@ def get_named_mapconfig(username, mapname, baseurl=None):
     :returns: mapconfig object for a named map as serialized JSON
     :rtype: string
     """
+    import sys
+    if sys.version_info[0] == 3:
+        from urllib.parse import urlparse
+    else:
+        from urlparse import urlparse
+
     map_args = {'mapname': mapname,
                 'username': username}
     if baseurl:
-        map_args['baseurl'] = baseurl
+        if baseurl.endswith('/api/'):
+            map_args['baseurl'] = baseurl[:-5]
+        else:
+            map_args['baseurl'] = baseurl
     else:
         map_args['baseurl'] = 'https://{username}.carto.com/'.format(
             username=username)
+
+    if urlparse(baseurl).netloc.endswith('.carto.com/'):
+        map_args['domain'] = 'carto.com'
+    else:
+        map_args['domain'] = urlparse(baseurl).netloc
+
     # questions:
     # 1. should tiler protocol always be http or https? what would require us to change it? on prem vs. carto org user vs. carto single account user vs. ...
     # 2. for the tiler_protocol, can we reuse the format for maps_api_template or do i need to strip out the domains
     # 3. it all should work fine with named maps?
-    mapconfig = '''{
-      "user_name": "%(username)s",
-      "maps_api_template": "%(baseurl)s",
-      "sql_api_template": "%(baseurl)s",
-      "tiler_protocol": "http",
-      "tiler_domain": "%(baseurl)s",
+    mapconfig = '''{{
+      "user_name": "{username}",
+      "maps_api_template": "{baseurl}",
+      "sql_api_template": "{baseurl}",
+      "tiler_protocol": "https",
+      "tiler_domain": "{domain}",
       "tiler_port": "80",
       "type": "namedmap",
-      "named_map": {
-        "name": "%(mapname)s"
-      },
+      "named_map": {{
+        "name": "{mapname}"
+      }},
       "subdomains": [ "a", "b", "c" ]
-      }''' % map_args
+      }}'''.format(**map_args)
     return mapconfig
 
 
