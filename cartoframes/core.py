@@ -192,10 +192,26 @@ def get_carto_datapage(self):
     """
     # TODO: generalize this for onprem
     # e.g., https://eschbacher.carto.com/dataset/research_team
-    url_template = 'https://{username}.carto.com/dataset/{tablename}'
+    import sys
+    if sys.version_info[0] == 3:
+        from urllib.parse import urlparse
+    else:
+        from urlparse import urlparse
 
-    return url_template.format(username=self.get_carto_username(),
-                               tablename=self.get_carto_tablename())
+    parsed_url = urlparse(self.get_carto_baseurl())
+    netloc = parsed_url.netloc
+    scheme = parsed_url.scheme
+    if netloc.endswith('.carto.com'):
+        url_template = '{scheme}://{netloc}/dataset/{tablename}'
+        return url_template.format(scheme=scheme,
+                                   netloc=netloc,
+                                   tablename=self.get_carto_tablename())
+    else:
+        url_template = '{scheme}://{netloc}/user/{user}/dataset/{tablename}'
+        return url_template.format(scheme=scheme,
+                                   netloc=netloc,
+                                   user=self.get_carto_username(),
+                                   tablename=self.get_carto_tablename())
 
 def get_carto_tablename(self):
     """return the username of a cartoframe
@@ -688,6 +704,7 @@ pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
 pd.DataFrame.get_carto_baseurl = get_carto_baseurl
 pd.DataFrame.get_basemap = maps.get_basemap
+pd.DataFrame.get_carto_datapage = get_carto_datapage
 
 # map methods
 pd.DataFrame._get_static_snapshot = maps._get_static_snapshot
