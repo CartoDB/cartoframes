@@ -89,8 +89,10 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     """
     import requests
     try:
+        # if python3
         from urllib.parse import urlencode
     except ImportError:
+        # if python2
         from urllib import urlencode
 
     if isinstance(basemap, list) and len(basemap) == 2:
@@ -110,10 +112,14 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = ("https://eschbacher.carto.com/api/v1/map/named/"
-                "{map_name}?api_key={api_key}").format(
-                    map_name=self.get_carto_namedmap(),
-                    api_key=self.get_carto_api_key())
+    endpoint = "{baseurl}/api/v1/map/named/{mapname}".format(
+        baseurl=self.get_carto_baseurl(),
+        mapname=self.get_carto_namedmap())
+
+    # endpoint = ("https://{username}.carto.com/api/v1/map/named/"
+    #             "{map_name}").format(
+    #                 username=self.get_carto_username(),
+    #                 map_name=self.get_carto_namedmap())
 
     resp = requests.put(endpoint,
                         data=new_template,
@@ -202,19 +208,37 @@ def basemap_config(basemap_url):
     return template % {'basemap': basemap_url}
 
 
-def get_named_mapconfig(username, mapname, ):
+def get_named_mapconfig(username, mapname, baseurl=None):
     """Named Maps API template for carto.js
 
     :param username: The username of the CARTO account
+    :type username: string
     :param mapname: The mapname a cartoframe is associated with CARTO account
+    :type mapname: string
+    :param baseurl: Base URL for API calls
+    :type username: string
 
     :returns: mapconfig object for a named map as serialized JSON
+    :rtype: string
     """
     map_args = {'mapname': mapname,
                 'username': username}
-
+    if baseurl:
+        map_args['baseurl'] = baseurl
+    else:
+        map_args['baseurl'] = 'https://{username}.carto.com/'.format(
+            username=username)
+    # questions:
+    # 1. should tiler protocol always be http or https? what would require us to change it? on prem vs. carto org user vs. carto single account user vs. ...
+    # 2. for the tiler_protocol, can we reuse the format for maps_api_template or do i need to strip out the domains
+    # 3. it all should work fine with named maps?
     mapconfig = '''{
       "user_name": "%(username)s",
+      "maps_api_template": "%(baseurl)s",
+      "sql_api_template": "%(baseurl)s",
+      "tiler_protocol": "http",
+      "tiler_domain": "%(baseurl)s",
+      "tiler_port": "80",
       "type": "namedmap",
       "named_map": {
         "name": "%(mapname)s"

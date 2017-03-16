@@ -26,8 +26,8 @@ import carto
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
-               query=None, include_geom=True, is_org_user=False, limit=None,
-               cdb_client=None, index='cartodb_id', debug=False):
+               query=None, include_geom=True, is_org_user=False, org=None,
+               limit=None, cdb_client=None, index='cartodb_id', debug=False):
     """Create a DataFrame from a CARTO table, storing table information in
        pandas metadata that allows for further cartoframe options like syncing,
        map creation, and augmentation from the Data Observatory.
@@ -46,6 +46,8 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
        :type include_geom: boolean
        :param is_org_user: (optional) Where `username` is in a multiuser account
        :type is_org_user: boolean
+       :param org: (optional) Name of user's organization if user is in a multiuser account
+       :type org: string
        :param limit: (optional) The maximum number of rows to pull
        :type limit: integer
        :param cdb_client: (optional) CARTO Python SDK authentication client object (default None)
@@ -98,7 +100,10 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                          include_geom=include_geom,
                          limit=limit,
                          geomtype=utils.get_geom_type(sql,
-                                                      tablename=tablename))
+                                                      tablename=tablename),
+                         baseurl=utils.get_baseurl(username=username,
+                                                   org=org,
+                                                   baseurl=onprem_url))
 
         # save the state for later use
         # NOTE: this doubles the size of the dataframe
@@ -222,6 +227,14 @@ def get_carto_namedmap(self):
     """
     return self.get_carto('carto_named_map')
 
+def get_carto_baseurl(self):
+    """Return the named map associated with a cartoframe
+
+    :returns: Baseurl for API calls
+    :rtype: string
+    """
+    return self.get_carto('carto_baseurl')
+
 def get_carto(self, key):
     """General get method for reading from cartoframe metadata
 
@@ -236,13 +249,34 @@ def get_carto(self, key):
     except IndexError:
         raise Exception('DataFrame not linked to CARTO. Use '
                         '`DataFrame.sync_carto()` with a new tablename.')
+    except KeyError:
+        print("`{}` is not an element stored in cartoframe "
+              "metadata".format(key))
+        raise
 
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
                  include_geom=None, limit=None, geomtype=None,
-                 named_map_name=None):
+                 named_map_name=None, baseurl=None):
     """
-    Set method for storing metadata in a dataframe
+    Set method for storing metadata in a cartoframe.
+
+    :param tablename: Tablename cartoframe is associated with
+    :type tablename: string
+    :param username: CARTO username
+    :type tablename: string
+    :param api_key: API key of user account
+    :type api_key: string
+    :param include_geom: Whether to work with geometries in cartoframes
+    :type include_geom: boolean
+    :param limit: How much data to pull into dataframe
+    :type limit: int
+    :param geomtype: Geometry type. One of: point, line, polygon, or None
+    :type geomtype: string
+    :param named_map_name: Name of carto map associated with cartoframe
+    :type named_map_name: string
+    :param baseurl: Base URL for API calls (usually, https://{username}.carto.com/)
+    :type baseurl: string
 
     :returns: None
     """
@@ -257,9 +291,9 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                     'carto_named_map': named_map_name,
                     'carto_include_geom': include_geom,
                     'carto_limit': limit,
-                    'carto_geomtype': geomtype}))
+                    'carto_geomtype': geomtype,
+                    'carto_baseurl': baseurl}))
     return None
-
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
@@ -605,7 +639,8 @@ def carto_map(self, interactive=True, color=None, size=None,
                             'cartocss': cartocss,
                             'basemap': basemap_url,
                             'bounds': bnd_str,
-                            'show_position_data': show_position_data}
+                            'show_position_data': show_position_data,
+                            'baseurl': self.get_carto_baseurl()}
 
         mapconfig_params['q'] = urllib.quote(
             maps.get_named_mapconfig(self.get_carto_username(),
