@@ -110,10 +110,11 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = ("https://eschbacher.carto.com/api/v1/map/named/"
+    endpoint = ("https://{username}.carto.com/api/v1/map/named/"
                 "{map_name}?api_key={api_key}").format(
                     map_name=self.get_carto_namedmap(),
-                    api_key=self.get_carto_api_key())
+                    api_key=self.get_carto_api_key(),
+                    username= self.get_carto_username())
 
     resp = requests.put(endpoint,
                         data=new_template,
