@@ -25,9 +25,9 @@ import carto
 
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
-def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
+def carto_read(cdb_client, tablename=None,
                query=None, include_geom=True, is_org_user=False, limit=None,
-               cdb_client=None, index='cartodb_id', debug=False):
+               index='cartodb_id', debug=False):
     """Create a DataFrame from a CARTO table, storing table information in
        pandas metadata that allows for further cartoframe options like syncing,
        map creation, and augmentation from the Data Observatory.
@@ -59,10 +59,10 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
     import cartoframes.maps as maps
     # TODO: if onprem, use the specified template/domain? instead
     # either cdb_client or user credentials have to be specified
-    sql = utils.get_auth_client(username=username,
-                                api_key=api_key,
-                                baseurl=onprem_url,
-                                cdb_client=cdb_client)
+    sql = utils.get_auth_client(cdb_client)
+    base_url = sql.base_url
+    username = sql.username
+    api_key  = sql.api_key
 
     # construct query
     if tablename is not None and query is None:
@@ -91,7 +91,8 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                                                tablename=tablename)
         print("Named map name: {}".format(named_map_name))
 
-        _df.set_metadata(tablename=tablename,
+        _df.set_carto_metadata(tablename=tablename,
+                         base_url=base_url,
                          username=username,
                          api_key=api_key,
                          named_map_name=named_map_name,
@@ -102,7 +103,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
 
         # save the state for later use
         # NOTE: this doubles the size of the dataframe
-        _df.set_last_state()
+        _df.set_carto_last_state()
 
     # store carto sql client for later use
     _df.set_carto_sql_client(sql)
@@ -129,7 +130,7 @@ def carto_insync(self):
     """
     return self.equals(self.carto_last_state)
 
-def set_last_state(self):
+def set_carto_last_state(self):
     """
     Store the state of the cartoframe
 
@@ -163,7 +164,7 @@ def get_carto_api_key(self):
     :rtype: string
     """
     try:
-        return self.get_carto('carto_api_key')
+        return self.get_carto_metadata('carto_api_key')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
@@ -175,7 +176,7 @@ def get_carto_username(self):
     :rtype: string
     """
     try:
-        return self.get_carto('carto_username')
+        return self.get_carto_metadata('carto_username')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
@@ -186,6 +187,7 @@ def get_carto_datapage(self):
     :returns: URL of data page of dataset on CARTO (behind password if private)
     :rtype: string
     """
+
     # TODO: generalize this for onprem
     # e.g., https://eschbacher.carto.com/dataset/research_team
     url_template = 'https://{username}.carto.com/dataset/{tablename}'
@@ -200,7 +202,7 @@ def get_carto_tablename(self):
     :rtype: string
     """
     try:
-        return self.get_carto('carto_table')
+        return self.get_carto_metadata('carto_table')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
@@ -212,7 +214,7 @@ def get_carto_geomtype(self):
     :returns: Geometry type in table (one of 'point', 'line', 'polygon', or 'None')
     :rtype: text
     """
-    return self.get_carto('carto_geomtype')
+    return self.get_carto_metadata('carto_geomtype')
 
 def get_carto_namedmap(self):
     """Return the named map associated with a cartoframe
@@ -220,9 +222,9 @@ def get_carto_namedmap(self):
     :returns: Name of named map
     :rtype: string
     """
-    return self.get_carto('carto_named_map')
+    return self.get_carto_metadata('carto_named_map')
 
-def get_carto(self, key):
+def get_carto_metadata(self, key):
     """General get method for reading from cartoframe metadata
 
     :param key: key of item to fetch from metadata. One of `carto_named_map`, `carto_geomtype`, `carto_username`, `carto_table`.
@@ -235,12 +237,10 @@ def get_carto(self, key):
         return json.loads(self._metadata[-1])[key]
     except IndexError:
         raise Exception('DataFrame not linked to CARTO. Use '
-                        '`DataFrame.sync_carto()` with a new tablename.')
+                        '`DataFrame.carto_sync()` with a new tablename.')
 
 
-def set_metadata(self, tablename=None, username=None, api_key=None,
-                 include_geom=None, limit=None, geomtype=None,
-                 named_map_name=None):
+def set_carto_metadata(self, **kwargs):
     """
     Set method for storing metadata in a dataframe
 
@@ -251,19 +251,15 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
     #       _metadata of a client class' (appending to _metadata only works
     #       with strings, not JSON, so we're serializing here)
     self._metadata.append(
-        json.dumps({'carto_table': tablename,
-                    'carto_username': username,
-                    'carto_api_key': api_key,
-                    'carto_named_map': named_map_name,
-                    'carto_include_geom': include_geom,
-                    'carto_limit': limit,
-                    'carto_geomtype': geomtype}))
+        json.dumps({ ('carto_' + k) : v
+                     for k,v in kwargs.items() })
+    )
     return None
 
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
-def sync_carto(self, username=None, api_key=None, requested_tablename=None,
+def carto_sync(self, cdb_client, requested_tablename=None,
                n_batch=20, lnglat_cols=None, is_org_user=False, debug=False):
     """If an existing cartoframe, this method syncs with the CARTO table a
         cartoframe is associated with. If syncing a DataFrame which has not yet
@@ -272,7 +268,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
 
     :param username: CARTO username credentials. Needed only if the DataFrame
         is not yet linked to CARTO (e.g., it was created with
-        ``pd.DataFrame.read_carto``)
+        ``pd.DataFrame.carto_read``)
     :type username: string
     :param api_key: CARTO API key. Needed only if linking a DataFrame with a
         table on CARTO.
@@ -298,9 +294,9 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
             api_key is not None):
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
-        self.carto_create(username, api_key, requested_tablename, debug=debug,
+        self.carto_create(cdb_client, requested_tablename, debug=debug,
                           is_org_user=is_org_user, lnglat_cols=lnglat_cols)
-        self.set_last_state()
+        self.set_carto_last_state()
         return None
     elif not self.carto_registered():
         raise Exception("Table not registered with CARTO. Set "
@@ -337,12 +333,12 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         utils.upsert_table(self, df_diff, debug=debug)
 
     # update state of dataframe
-    self.set_last_state()
+    self.set_carto_last_state()
     print("Sync completed successfully")
 
 # TODO: add geometry creation (now there is no trigger to fill in `the_geom`
 #       like there is for the import api)
-def carto_create(self, username, api_key, tablename, lnglat_cols=None,
+def carto_create(self, cdb_client, tablename, lnglat_cols=None,
                  is_org_user=False, debug=False):
     """Create and populate a table on carto with a dataframe.
     This is a private method, but can be used to create a new table on
@@ -350,18 +346,20 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
     CARTO table."""
 
     # give dataframe authentication client
-    self.set_carto_sql_client(
-        utils.get_auth_client(username=username,
-                              api_key=api_key))
+    # TODO: This won't persist with non-inplace pandas operations
+    self.set_carto_sql_client(cdb_client)
 
-    final_tablename = self._carto_create_table(tablename, username,
-                            is_org_user=is_org_user, debug=debug)
+    final_tablename = self._carto_create_table(tablename,
+                                               cdb_client.username,
+                                               is_org_user=is_org_user,
+                                               debug=debug)
     if debug: print("final_tablename: {}".format(final_tablename))
     # TODO: fix the geomtype piece, and is_org_user may be important (or some
     #        variation of it) for the onprem-flexible version of this module
-    self.set_metadata(tablename=final_tablename,
-                      username=username,
-                      api_key=api_key,
+    self.set_carto_metadata(tablename=final_tablename,
+                      base_url=cdb_client.base_url,
+                      username=cdb_client.username,
+                      api_key=cdb_client.api_key,
                       include_geom=None,
                       limit=None,
                       geomtype='point' if lnglat_cols else None)
@@ -379,7 +377,7 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
 
     # add columns
     if lnglat_cols:
-        self._update_geom_col(lnglat_cols)
+        self._carto_update_geom_col(lnglat_cols)
     else:
         # NOTE: carto utility columns are not pulled down. These include:
         #    the_geom, the_geom_webmercator
@@ -391,7 +389,7 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
     return None
 
 
-def _update_geom_col(self, lnglat_cols):
+def _carto_update_geom_col(self, lnglat_cols):
     """Private method. Update the_geom with the given lnglat_cols"""
     query = '''
         UPDATE "{tablename}"
@@ -463,7 +461,7 @@ def _carto_insert_values(self, n_batch=10000, debug=False):
     return None
 
 
-def make_cartoframe(self, username, api_key, tablename,
+def make_cartoframe(self, cdb_client, tablename,
                     api_type=None):
     """Placeholder method (not functioning)
 
@@ -569,7 +567,7 @@ def carto_map(self, interactive=True, color=None, size=None,
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
 
-    basemap_url, basemap_style = self.get_basemap(basemap)
+    basemap_url, basemap_style = self.get_carto_basemap(basemap)
 
     if cartocss is None:
         css = styling.CartoCSS(self, size=size, color=color,
@@ -629,29 +627,29 @@ def carto_map(self, interactive=True, color=None, size=None,
 # Monkey patch these methods to pandas
 
 # higher level functions and methods
-pd.read_carto = read_carto
+pd.carto_read = carto_read
 pd.DataFrame.carto_map = carto_map
-pd.DataFrame.sync_carto = sync_carto
+pd.DataFrame.carto_sync = carto_sync
 
 # carto_create methods
 pd.DataFrame.carto_create = carto_create
 pd.DataFrame._carto_create_table = _carto_create_table
 pd.DataFrame._carto_insert_values = _carto_insert_values
-pd.DataFrame._update_geom_col = _update_geom_col
+pd.DataFrame._carto_update_geom_col = _carto_update_geom_col
 
 # set methods
-pd.DataFrame.set_last_state = set_last_state
+pd.DataFrame.set_carto_last_state = set_carto_last_state
 pd.DataFrame.set_carto_sql_client = set_carto_sql_client
-pd.DataFrame.set_metadata = set_metadata
+pd.DataFrame.set_carto_metadata = set_carto_metadata
 
 # get methods
-pd.DataFrame.get_carto = get_carto
+pd.DataFrame.get_carto_metadata = get_carto_metadata
 pd.DataFrame.get_carto_api_key = get_carto_api_key
 pd.DataFrame.get_carto_username = get_carto_username
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
-pd.DataFrame.get_basemap = maps.get_basemap
+pd.DataFrame.get_carto_basemap = maps.get_carto_basemap
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered
