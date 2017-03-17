@@ -87,19 +87,19 @@ def carto_read(cdb_client, tablename=None,
     # TODO: find out of there's a max length to clip on
     # only make map and set metadata if it's becoming a cartoframe
     if tablename:
-        named_map_name = maps.create_named_map(username, api_key,
+        named_map_name = maps.create_named_map(base_url, api_key,
                                                tablename=tablename)
         print("Named map name: {}".format(named_map_name))
 
         _df.set_carto_metadata(tablename=tablename,
-                         base_url=base_url,
-                         username=username,
-                         api_key=api_key,
-                         named_map_name=named_map_name,
-                         include_geom=include_geom,
-                         limit=limit,
-                         geomtype=utils.get_geom_type(sql,
-                                                      tablename=tablename))
+                               base_url=base_url,
+                               username=username,
+                               api_key=api_key,
+                               named_map_name=named_map_name,
+                               include_geom=include_geom,
+                               limit=limit,
+                               geomtype=utils.get_geom_type(sql,
+                                                            tablename=tablename))
 
         # save the state for later use
         # NOTE: this doubles the size of the dataframe
@@ -177,6 +177,18 @@ def get_carto_username(self):
     """
     try:
         return self.get_carto_metadata('carto_username')
+    except KeyError:
+        raise Exception("This cartoframe is not registered. "
+                        "Use `DataFrame.carto_register()`.")
+
+def get_carto_base_url(self):
+    """return the base_url of a cartoframe
+
+    :returns: Base URL associated with cartoframe
+    :rtype: string
+    """
+    try:
+        return self.get_carto_metadata('carto_base_url')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
@@ -646,10 +658,11 @@ pd.DataFrame.set_carto_metadata = set_carto_metadata
 pd.DataFrame.get_carto_metadata = get_carto_metadata
 pd.DataFrame.get_carto_api_key = get_carto_api_key
 pd.DataFrame.get_carto_username = get_carto_username
+pd.DataFrame.get_carto_base_url = get_carto_base_url
 pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
-pd.DataFrame.get_carto_basemap = maps.get_carto_basemap
+pd.DataFrame.get_carto_basemap = maps.get_basemap
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered

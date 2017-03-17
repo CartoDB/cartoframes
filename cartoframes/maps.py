@@ -4,7 +4,7 @@ Functions and methods for interactive and static maps
 
 import pandas as pd
 
-def create_named_map(username, api_key, tablename):
+def create_named_map(base_url, api_key, tablename):
     """Create a default named map for later use
 
     :param username: CARTO username
@@ -35,8 +35,8 @@ def create_named_map(username, api_key, tablename):
 
     filled_template = get_named_map_template() % defaults
 
-    api_endpoint = ('https://{username}.carto.com/api/v1/map/named'
-                    '?api_key={api_key}').format(username=username,
+    api_endpoint = ('{base_url}/api/v1/map/named'
+                    '?api_key={api_key}').format(base_url=base_url,
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
                          data=filled_template,
@@ -110,11 +110,11 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = ("https://{username}.carto.com/api/v1/map/named/"
+    endpoint = ("{base_url}/api/v1/map/named/"
                 "{map_name}?api_key={api_key}").format(
+                    base_url=self.get_carto_base_url(),
                     map_name=self.get_carto_namedmap(),
-                    api_key=self.get_carto_api_key(),
-                    username= self.get_carto_username())
+                    api_key=self.get_carto_api_key())
 
     resp = requests.put(endpoint,
                         data=new_template,
@@ -131,11 +131,11 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
             mapview['lon'] = center[0]
             mapview['lat'] = center[1]
 
-        img = ("http://{username}.carto.com/api/v1/map/static/named/"
+        img = ("{base_url}/api/v1/map/static/named/"
                "{map_name}/{width}/{height}.png"
                "?{params}")
 
-        return img.format(username=self.get_carto_username(),
+        return img.format(base_url=self.get_carto_base_url(),
                           map_name=self.get_carto_namedmap(),
                           width=figsize[0],
                           height=figsize[1],
