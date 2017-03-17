@@ -87,15 +87,15 @@ def carto_read(cdb_client, tablename=None,
     # TODO: find out of there's a max length to clip on
     # only make map and set metadata if it's becoming a cartoframe
     if tablename:
-        named_map_name = maps.create_named_map(base_url, api_key,
+        named_map = maps.create_named_map(base_url, api_key,
                                                tablename=tablename)
-        print("Named map name: {}".format(named_map_name))
+        print("Named map name: {}".format(named_map))
 
         _df.set_carto_metadata(tablename=tablename,
                                base_url=base_url,
                                username=username,
                                api_key=api_key,
-                               named_map_name=named_map_name,
+                               named_map=named_map,
                                include_geom=include_geom,
                                limit=limit,
                                geomtype=utils.get_geom_type(sql,
