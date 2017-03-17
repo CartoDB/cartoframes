@@ -35,7 +35,7 @@ def create_named_map(base_url, api_key, tablename):
 
     filled_template = get_named_map_template() % defaults
 
-    api_endpoint = ('{base_url}/api/v1/map/named'
+    api_endpoint = ('{base_url}api/v1/map/named'
                     '?api_key={api_key}').format(base_url=base_url,
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
@@ -110,7 +110,7 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = ("{base_url}/api/v1/map/named/"
+    endpoint = ("{base_url}api/v1/map/named/"
                 "{map_name}?api_key={api_key}").format(
                     base_url=self.get_carto_base_url(),
                     map_name=self.get_carto_namedmap(),
@@ -131,7 +131,7 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
             mapview['lon'] = center[0]
             mapview['lat'] = center[1]
 
-        img = ("{base_url}/api/v1/map/static/named/"
+        img = ("{base_url}api/v1/map/static/named/"
                "{map_name}/{width}/{height}.png"
                "?{params}")
 
