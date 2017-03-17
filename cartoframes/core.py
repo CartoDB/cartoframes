@@ -214,7 +214,7 @@ def get_carto_tablename(self):
     :rtype: string
     """
     try:
-        return self.get_carto_metadata('carto_table')
+        return self.get_carto_metadata('carto_tablename')
     except KeyError:
         raise Exception("This cartoframe is not registered. "
                         "Use `DataFrame.carto_register()`.")
@@ -369,12 +369,10 @@ def carto_create(self, cdb_client, tablename, lnglat_cols=None,
     # TODO: fix the geomtype piece, and is_org_user may be important (or some
     #        variation of it) for the onprem-flexible version of this module
     self.set_carto_metadata(tablename=final_tablename,
-                      base_url=cdb_client.base_url,
-                      username=cdb_client.username,
-                      api_key=cdb_client.api_key,
-                      include_geom=None,
-                      limit=None,
-                      geomtype='point' if lnglat_cols else None)
+                            base_url=cdb_client.base_url,
+                            username=cdb_client.username,
+                            api_key=cdb_client.api_key,
+                            geomtype='point' if lnglat_cols else None)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
     self._carto_insert_values(debug=debug)
