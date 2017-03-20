@@ -21,12 +21,13 @@ def get_auth_client(username=None, api_key=None, org=None,
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
-    if cdb_client is None:
-        BASEURL = get_baseurl(username=username, baseurl=baseurl)
-        auth_client = APIKeyAuthClient(BASEURL, api_key)
-        sql = SQLClient(auth_client)
-    elif (username is None) or (api_key is None):
+
+    if cdb_client:
         sql = SQLClient(cdb_client)
+    elif username is not None and api_key is not None:
+        BASEURL = get_baseurl(username=username, baseurl=baseurl)
+        auth_client = APIKeyAuthClient(BASEURL, api_key, org=org)
+        sql = SQLClient(auth_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
                         "specified.")
