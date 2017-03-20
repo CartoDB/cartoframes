@@ -602,6 +602,7 @@ def carto_map(self, interactive=True, color=None, size=None,
 
     """
     import cartoframes.styling as styling
+    import random
     try:
         # if Python 3
         import urllib.parse as urllib
@@ -629,7 +630,7 @@ def carto_map(self, interactive=True, color=None, size=None,
     # create static map
     # TODO: use carto-python client to create static map (not yet
     #       implemented)
-    mapview = {}
+    mapview = {'rand': random.random()}
     if zoom:
         mapview['zoom'] = zoom
     if center:
