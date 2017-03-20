@@ -552,13 +552,14 @@ def carto_map(self, interactive=True, color=None, size=None,
     :rtype: HTML embed
 
     """
+    import sys
     import cartoframes.styling as styling
     import cartoframes.maps as maps
-    try:
-        # if Python 3
+
+    if sys.version_info >= (3, 0):
         import urllib.parse as urllib
-    except ImportError:
-        # if Python 2
+    else:
+        # Python 2
         import urllib
     try:
         import IPython
