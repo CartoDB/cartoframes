@@ -118,6 +118,8 @@ def numpy_val_to_pg_val(item, dtype):
       :rtype: string
     """
     import math
+    if item is None:
+        return 'null'
     if dtype == 'text':
         if "'" in item:
             return "'{}'".format(item.replace("'", "\'\'"))
@@ -126,8 +128,6 @@ def numpy_val_to_pg_val(item, dtype):
         if math.isnan(item):
             return 'null'
         return str(item)
-    elif item is None:
-        return 'null'
     return "'{}'".format(str(item).replace("'", "\'\'"))
 
 
@@ -164,7 +164,8 @@ def format_row(rowvals, dtypes):
     """
     mapped_vals = []
     for colnum, val in enumerate(rowvals):
-        pgtype = dtype_to_pgtype(dtypes[colnum], rowvals[1].index[colnum])
+        index = None if rowvals[1] is None else rowvals[1].index[colnum]
+        pgtype = dtype_to_pgtype(dtypes[colnum], index);
         mapped_vals.append(numpy_val_to_pg_val(val, pgtype))
 
     return ','.join(mapped_vals)
