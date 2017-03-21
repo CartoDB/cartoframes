@@ -37,6 +37,19 @@ def get_auth_client(username=None, api_key=None,
     return sql
 
 
+def get_org_user(carto_sql_client):
+    """Retrieve whether user is in an organization or not"""
+    resp = carto_sql_client.send('SHOW search_path')
+    paths = resp['rows'][0]['search_path'].split(',')
+
+    if paths[0] != 'public':
+        return True
+    else:
+        return False
+
+    return None
+
+
 def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):
     """write a create table query from tablename and schema
@@ -378,7 +391,7 @@ def upsert_table(self, df_diff, n_batch=5000, debug=False):
     return None
 
 # TODO: change this to be a list of colnames
-def drop_col(self, colname, n_batch=30, debug=False):
+def drop_col(self, colname, debug=False):
     """
     Drop specified column
     """

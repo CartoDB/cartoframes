@@ -26,8 +26,8 @@ import carto
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
-               query=None, include_geom=True, is_org_user=False, limit=None,
-               cdb_client=None, index='cartodb_id', debug=False):
+               query=None, include_geom=True, limit=None, cdb_client=None,
+               index='cartodb_id', debug=False):
     """Create a DataFrame from a CARTO table, storing table information in
        pandas metadata that allows for further cartoframe options like syncing,
        map creation, and augmentation from the Data Observatory.
@@ -44,8 +44,6 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
        :type query: string
        :param include_geom: Not implemented
        :type include_geom: boolean
-       :param is_org_user: (optional) Where `username` is in a multiuser account
-       :type is_org_user: boolean
        :param limit: (optional) The maximum number of rows to pull
        :type limit: integer
        :param cdb_client: (optional) CARTO Python SDK authentication client object (default None)
@@ -63,6 +61,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                                 api_key=api_key,
                                 baseurl=onprem_url,
                                 cdb_client=cdb_client)
+    is_org_user = utils.get_org_user(sql)
 
     # construct query
     if tablename is not None and query is None:
@@ -97,6 +96,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                          named_map_name=named_map_name,
                          include_geom=include_geom,
                          limit=limit,
+                         is_org_user=is_org_user,
                          geomtype=utils.get_geom_type(sql,
                                                       tablename=tablename))
 
@@ -206,6 +206,12 @@ def get_carto_tablename(self):
                         "Use `DataFrame.carto_register()`.")
 
 
+def get_carto_is_org_user(self):
+    """Return whether carto `username` is in a multiuser account or not
+    """
+    return self.get_carto('carto_is_org_user')
+
+
 def get_carto_geomtype(self):
     """return the geometry type of the cartoframe
 
@@ -239,8 +245,8 @@ def get_carto(self, key):
 
 
 def set_metadata(self, tablename=None, username=None, api_key=None,
-                 include_geom=None, limit=None, geomtype=None,
-                 named_map_name=None):
+                 include_geom=None, limit=None, is_org_user=None,
+                 geomtype=None, named_map_name=None):
     """
     Set method for storing metadata in a dataframe
 
@@ -256,6 +262,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
                     'carto_api_key': api_key,
                     'carto_named_map': named_map_name,
                     'carto_include_geom': include_geom,
+                    'carto_is_org_user': is_org_user,
                     'carto_limit': limit,
                     'carto_geomtype': geomtype}))
     return None
@@ -264,7 +271,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 # TODO: make less buggy about the diff between NaNs and nulls
 def sync_carto(self, username=None, api_key=None, requested_tablename=None,
-               n_batch=20, lnglat_cols=None, is_org_user=False, debug=False):
+               n_batch=20, lnglat_cols=None, debug=False):
     """If an existing cartoframe, this method syncs with the CARTO table a
         cartoframe is associated with. If syncing a DataFrame which has not yet
         been linked with CARTO, it creates a new table if the tablename does
@@ -289,9 +296,6 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         syncs, a new column called `the_geom` will be pulled down that is a
         text representation of the geometry.
     :type lnglat_cols: tuple
-    :param is_org_user: This flag needs to be set if a user is in a
-        multiuser account.
-    :type is_org_user: boolean
     """
 
     if (requested_tablename is not None and username is not None and
@@ -299,7 +303,8 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename, debug=debug,
-                          is_org_user=is_org_user, lnglat_cols=lnglat_cols)
+                          is_org_user=self.get_carto_is_org_user(),
+                          lnglat_cols=lnglat_cols)
         self.set_last_state()
         return None
     elif not self.carto_registered():
@@ -343,7 +348,7 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
 # TODO: add geometry creation (now there is no trigger to fill in `the_geom`
 #       like there is for the import api)
 def carto_create(self, username, api_key, tablename, lnglat_cols=None,
-                 is_org_user=False, debug=False):
+                 debug=False):
     """Create and populate a table on carto with a dataframe.
     This is a private method, but can be used to create a new table on
     CARTO. It is used in carto_sync if a DataFrame is not yet linked to a
@@ -353,14 +358,14 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
     self.set_carto_sql_client(
         utils.get_auth_client(username=username,
                               api_key=api_key))
+    is_org_user = utils.get_org_user(self.carto_sql_client)
 
     final_tablename = self._carto_create_table(tablename, username,
                             is_org_user=is_org_user, debug=debug)
     if debug: print("final_tablename: {}".format(final_tablename))
-    # TODO: fix the geomtype piece, and is_org_user may be important (or some
-    #        variation of it) for the onprem-flexible version of this module
     self.set_metadata(tablename=final_tablename,
                       username=username,
+                      is_org_user=is_org_user,
                       api_key=api_key,
                       include_geom=None,
                       limit=None,
@@ -653,6 +658,7 @@ pd.DataFrame.get_carto_tablename = get_carto_tablename
 pd.DataFrame.get_carto_geomtype = get_carto_geomtype
 pd.DataFrame.get_carto_namedmap = get_carto_namedmap
 pd.DataFrame.get_basemap = maps.get_basemap
+pd.DataFrame.get_carto_is_org_user = get_carto_is_org_user
 
 # internal state methods
 pd.DataFrame.carto_registered = carto_registered
