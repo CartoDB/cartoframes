@@ -37,7 +37,7 @@ def get_auth_client(username=None, api_key=None,
     return sql
 
 
-def get_org_user(carto_sql_client):
+def get_is_org_user(carto_sql_client):
     """Retrieve whether user is in an organization or not"""
     resp = carto_sql_client.send('SHOW search_path')
     paths = resp['rows'][0]['search_path'].split(',')

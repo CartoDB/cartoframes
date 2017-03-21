@@ -61,7 +61,7 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
                                 api_key=api_key,
                                 baseurl=onprem_url,
                                 cdb_client=cdb_client)
-    is_org_user = utils.get_org_user(sql)
+    is_org_user = utils.get_is_org_user(sql)
 
     # construct query
     if tablename is not None and query is None:
@@ -358,7 +358,7 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
     self.set_carto_sql_client(
         utils.get_auth_client(username=username,
                               api_key=api_key))
-    is_org_user = utils.get_org_user(self.carto_sql_client)
+    is_org_user = utils.get_is_org_user(self.carto_sql_client)
 
     final_tablename = self._carto_create_table(tablename, username,
                             is_org_user=is_org_user, debug=debug)
