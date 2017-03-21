@@ -359,7 +359,8 @@ def carto_create(self, cdb_client, tablename, lnglat_cols=None,
 
     # give dataframe authentication client
     # TODO: This won't persist with non-inplace pandas operations
-    self.set_carto_sql_client(cdb_client)
+    sql = utils.get_auth_client(cdb_client)
+    self.set_carto_sql_client(sql)
 
     final_tablename = self._carto_create_table(tablename,
                                                cdb_client.username,
