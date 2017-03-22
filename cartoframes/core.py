@@ -402,8 +402,8 @@ def _update_geom_col(self, lnglat_cols):
         UPDATE "{tablename}"
         SET the_geom = CDB_LatLng({lat}, {lng})
     '''.format(tablename=self.get_carto_tablename(),
-               lng=lnglat_cols[1],
-               lat=lnglat_cols[0])
+               lng=lnglat_cols[0],
+               lat=lnglat_cols[1])
     self.carto_sql_client.send(query)
     # collect the_geom
     resp = self.carto_sql_client.send('''
