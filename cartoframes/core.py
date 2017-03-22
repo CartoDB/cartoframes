@@ -445,10 +445,14 @@ def _carto_insert_values(self, n_batch=10000, debug=False):
     insert_stem = ("INSERT INTO {tablename}({cols}) "
                    "VALUES ").format(tablename=self.get_carto_tablename(),
                                      cols=','.join(self.columns))
+    colnames = list(self.columns)
     if debug: print("insert_stem: {}".format(insert_stem))
 
     for row_num, row in enumerate(self.iterrows()):
-        row_vals.append('({rowitems})'.format(rowitems=utils.format_row(row[1], self.dtypes)))
+        row_vals.append('({rowitems})'.format(
+            rowitems=utils.format_row(row[1],
+                                      self.dtypes,
+                                      colnames)))
         char_count += len(row_vals[-1])
         if debug: print("row_num: {0}, row: {1}".format(row_num, row))
         # run query if at batch size, end of dataframe, or near POST limit
