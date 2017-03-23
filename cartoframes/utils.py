@@ -50,6 +50,19 @@ def get_baseurl(username=None, baseurl=None):
 
     return None
 
+def get_is_org_user(carto_sql_client):
+    """Retrieve whether user is in an organization or not"""
+    resp = carto_sql_client.send('SHOW search_path')
+    paths = resp['rows'][0]['search_path'].split(',')
+
+    if paths[0] != 'public':
+        return True
+    else:
+        return False
+
+    return None
+
+
 def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):
     """write a create table query from tablename and schema
@@ -146,16 +159,17 @@ def numpy_val_to_pg_val(item, dtype):
       :rtype: string
     """
     import math
+    if item is None:
+        return 'null'
+
     if dtype == 'text':
-        if "'" in item:
+        if "'" in str(item):
             return "'{}'".format(item.replace("'", "\'\'"))
         return "'{}'".format(item)
     elif dtype == 'numeric' or dtype == 'int':
         if math.isnan(item):
             return 'null'
         return str(item)
-    elif item is None:
-        return 'null'
     return "'{}'".format(str(item).replace("'", "\'\'"))
 
 
@@ -180,7 +194,7 @@ def datatype_map(dtype):
         return 'text'
 
 
-def format_row(rowvals, dtypes):
+def format_row(rowvals, dtypes, colnames):
     """Transform a DataFrame row into a comma-separated list for use in
         a SQL query.
 
@@ -192,7 +206,7 @@ def format_row(rowvals, dtypes):
     """
     mapped_vals = []
     for colnum, val in enumerate(rowvals):
-        pgtype = dtype_to_pgtype(dtypes[colnum], rowvals[1].index[colnum])
+        pgtype = dtype_to_pgtype(dtypes[colnum], colnames[colnum])
         mapped_vals.append(numpy_val_to_pg_val(val, pgtype))
 
     return ','.join(mapped_vals)
@@ -391,7 +405,7 @@ def upsert_table(self, df_diff, n_batch=5000, debug=False):
     return None
 
 # TODO: change this to be a list of colnames
-def drop_col(self, colname, n_batch=30, debug=False):
+def drop_col(self, colname, debug=False):
     """
     Drop specified column
     """
