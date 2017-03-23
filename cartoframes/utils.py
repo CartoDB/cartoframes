@@ -150,7 +150,7 @@ def numpy_val_to_pg_val(item, dtype):
         return 'null'
 
     if dtype == 'text':
-        if "'" in item:
+        if "'" in str(item):
             return "'{}'".format(item.replace("'", "\'\'"))
         return "'{}'".format(item)
     elif dtype == 'numeric' or dtype == 'int':
