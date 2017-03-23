@@ -270,6 +270,7 @@ def set_metadata(self, tablename=None, username=None, api_key=None,
 
 
 # TODO: make less buggy about the diff between NaNs and nulls
+# NOTE: write
 def sync_carto(self, username=None, api_key=None, requested_tablename=None,
                n_batch=20, lnglat_cols=None, debug=False):
     """If an existing cartoframe, this method syncs with the CARTO table a
@@ -303,7 +304,6 @@ def sync_carto(self, username=None, api_key=None, requested_tablename=None,
         # create table on carto if it doesn't not already exist
         # TODO: make this the main way of intereacting with carto_create
         self.carto_create(username, api_key, requested_tablename, debug=debug,
-                          is_org_user=self.get_carto_is_org_user(),
                           lnglat_cols=lnglat_cols)
         self.set_last_state()
         return None
@@ -362,11 +362,14 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
 
     final_tablename = self._carto_create_table(tablename, username,
                             is_org_user=is_org_user, debug=debug)
+    named_map_name = maps.create_named_map(username, api_key,
+                          tablename=final_tablename)
     if debug: print("final_tablename: {}".format(final_tablename))
     self.set_metadata(tablename=final_tablename,
                       username=username,
                       is_org_user=is_org_user,
                       api_key=api_key,
+                      named_map_name=named_map_name,
                       include_geom=None,
                       limit=None,
                       geomtype='point' if lnglat_cols else None)
