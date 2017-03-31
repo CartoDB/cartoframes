@@ -38,7 +38,7 @@ def get_baseurl(username=None, baseurl=None):
     """"""
     if baseurl is None:
         if username:
-            return 'https://{username}.carto.com/api/'.format(username=username)
+            return 'https://{username}.carto.com/'.format(username=username)
         else:
             raise Exception("`username` required if `org` or `baseurl` are not "
                             "specified")
