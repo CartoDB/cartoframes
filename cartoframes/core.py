@@ -59,7 +59,6 @@ def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
     sql = utils.get_auth_client(username=username,
                                 api_key=api_key,
                                 baseurl=onprem_url,
-                                org=org,
                                 cdb_client=cdb_client)
     baseurl = utils.get_baseurl(username=username, baseurl=onprem_url)
     is_org_user = utils.get_is_org_user(sql)
