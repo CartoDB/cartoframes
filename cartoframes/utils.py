@@ -25,8 +25,8 @@ def get_auth_client(username=None, api_key=None,
     if cdb_client:
         sql = SQLClient(cdb_client)
     elif username is not None and api_key is not None:
-        BASEURL = get_baseurl(username=username, baseurl=baseurl)
-        auth_client = APIKeyAuthClient(BASEURL, api_key)
+        baseurl = get_baseurl(username=username, baseurl=baseurl)
+        auth_client = APIKeyAuthClient(baseurl, api_key)
         sql = SQLClient(auth_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
@@ -43,8 +43,8 @@ def get_baseurl(username=None, baseurl=None):
             raise Exception("`username` required if `org` or `baseurl` are not "
                             "specified")
     else:
-        outs = '{baseurl}/user/{username}/api/'.format(baseurl=baseurl,
-                                                       username=username)
+        outs = '{baseurl}/user/{username}/'.format(baseurl=baseurl,
+                                                   username=username)
         print(outs)
         return outs
 
@@ -55,13 +55,8 @@ def get_is_org_user(carto_sql_client):
     resp = carto_sql_client.send('SHOW search_path')
     paths = resp['rows'][0]['search_path'].split(',')
 
-    if paths[0] != 'public':
-        return True
-    else:
-        return False
-
-    return None
-
+    # if 'public' is first element, user is not in an org
+    return bool(paths[0] != 'public')
 
 def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):

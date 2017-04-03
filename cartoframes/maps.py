@@ -34,7 +34,7 @@ def create_named_map(baseurl, api_key, tablename):
 
     filled_template = get_named_map_template() % defaults
 
-    api_endpoint = ('{baseurl}v1/map/named'
+    api_endpoint = ('{baseurl}api/v1/map/named'
                     '?api_key={api_key}').format(baseurl=baseurl,
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
