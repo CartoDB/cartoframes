@@ -240,22 +240,6 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
-# TODO: not used anywhere
-def get_username(baseurl):
-    """
-    Retrieve the username from the baseurl.
-    NOTE: Not compatible with onprem, etc.
-
-    :param baseurl: string Must be of format https://{username}.carto.com/api/
-    :type baseurl: string
-    :returns: CARTO username
-    :rtype: string
-    """
-    # TODO: make this more robust
-    import re
-    m = re.search('https://(.*?).carto.com/api/', baseurl)
-    return m.group(1)
-
 def get_geom_type(carto_sql_client, tablename):
     """
         Get the geometry type in tablename for storing in dataframe metadata
@@ -283,8 +267,8 @@ def get_geom_type(carto_sql_client, tablename):
     except (KeyError, IndexError):
         print(("Cannot create a map from `{tablename}` because this table "
                "does not have geometries ({geomreported})").format(
-                              tablename=tablename,
-                              geomreported=None))
+                   tablename=tablename,
+                   geomreported=None))
         return None
     except Exception as err:
         print("ERROR: {}".format(err))

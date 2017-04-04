@@ -111,11 +111,10 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = "{baseurl}v1/map/named/{mapname}?api_key={api_key}".format(
+    endpoint = "{baseurl}api/v1/map/named/{mapname}?api_key={api_key}".format(
         baseurl=self.get_carto_baseurl(),
         mapname=self.get_carto_namedmap(),
         api_key=self.get_carto_api_key())
-
     resp = requests.put(endpoint,
                         data=new_template,
                         headers={'Content-Type': 'application/json'})
@@ -131,7 +130,7 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
             mapview['lon'] = center[0]
             mapview['lat'] = center[1]
 
-        img = ("{baseurl}v1/map/static/named/"
+        img = ("{baseurl}api/v1/map/static/named/"
                "{map_name}/{width}/{height}.png"
                "?{mapview}")
 
@@ -214,21 +213,17 @@ def get_named_mapconfig(username, mapname, baseurl=None):
     :rtype: string
     """
     import sys
-    if sys.version_info[0] == 3:
+    if sys.version_info >= (3, 0):
         from urllib.parse import urlparse
     else:
         from urlparse import urlparse
 
     map_args = {'mapname': mapname,
                 'username': username}
-    if baseurl:
-        if baseurl.endswith('/api/'):
-            map_args['baseurl'] = baseurl[:-5]
-        else:
-            map_args['baseurl'] = baseurl
+    if baseurl.endswith('/'):
+        map_args['baseurl'] = baseurl[:-1]
     else:
-        map_args['baseurl'] = 'https://{username}.carto.com/'.format(
-            username=username)
+        map_args['baseurl'] = baseurl
 
     if urlparse(baseurl).netloc.endswith('.carto.com/'):
         map_args['domain'] = 'carto.com'
