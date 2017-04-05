@@ -419,7 +419,8 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
                       named_map_name=named_map_name,
                       include_geom=None,
                       limit=None,
-                      geomtype='point' if lnglat_cols else None)
+                      geomtype='point' if lnglat_cols else None,
+                      baseurl=auth.base_url)
     # TODO: would it be better to cartodbfy after the inserts?
     # TODO: how to ensure some consistency between old index and new one? can cartodb_id be zero-valued?
     self._carto_insert_values(debug=debug)
