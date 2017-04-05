@@ -401,15 +401,16 @@ def carto_create(self, username, api_key, tablename, lnglat_cols=None,
     CARTO table."""
 
     # give dataframe authentication client
-    self.set_carto_sql_client(
-        utils.get_auth_client(username=username,
-                              api_key=api_key))
+    auth = utils.get_auth_client(username=username, api_key=api_key)
+    self.set_carto_sql_client(auth)
     is_org_user = utils.get_is_org_user(self.carto_sql_client)
 
     final_tablename = self._carto_create_table(tablename, username,
-                            is_org_user=is_org_user, debug=debug)
-    named_map_name = maps.create_named_map(username, api_key,
-                          tablename=final_tablename)
+                                               is_org_user=is_org_user,
+                                               debug=debug)
+    named_map_name = maps.create_named_map(auth.base_url, api_key,
+                                           tablename=final_tablename)
+
     if debug: print("final_tablename: {}".format(final_tablename))
     self.set_metadata(tablename=final_tablename,
                       username=username,
