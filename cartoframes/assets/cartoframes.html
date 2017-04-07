@@ -44,6 +44,10 @@
       return result;
     }
 
+    function foo () {
+      console.log('fooo');
+    }
+
     $(function(){
 
      function adjustLongitude(val) {
@@ -87,7 +91,7 @@
           zoom: 3,
           center: [0, 0]
         });
-
+        console.log(urlsearch);
         cartodb.createLayer(map, urlsearch, { filter: ['http', 'mapnik'], https: true })
           .addTo(map)
           .done(function(layers) {

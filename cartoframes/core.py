@@ -22,7 +22,8 @@ import pandas as pd
 import cartoframes.utils as utils
 import cartoframes.maps as maps
 import carto
-
+import os
+import IPython
 
 # NOTE: this is compatible with v1.0.0 of carto-python client
 def read_carto(username=None, api_key=None, onprem_url=None, tablename=None,
@@ -616,17 +617,14 @@ def carto_map(self, interactive=True, color=None, size=None,
     import cartoframes.styling as styling
     import random
     import cartoframes.maps as maps
-
+    import json
+    try:
+        # if Python 3
     if sys.version_info >= (3, 0):
         import urllib.parse as urllib
     else:
         # Python 2
         import urllib
-    try:
-        import IPython
-    except ImportError:
-        NotImplementedError("Currently cannot use `carto_map` outside of "
-                            "Jupyter notebooks")
 
     if self.get_carto_geomtype() is None:
         raise ValueError("Cannot make a map because geometries are all null.")
@@ -664,6 +662,7 @@ def carto_map(self, interactive=True, color=None, size=None,
 
         mapconfig_params = {'username': self.get_carto_username(),
                             'tablename': self.get_carto_tablename(),
+                            'named_map': self.get_carto_namedmap(),
                             'cartocss': cartocss,
                             'basemap': basemap_url,
                             'bounds': bnd_str,
@@ -676,19 +675,24 @@ def carto_map(self, interactive=True, color=None, size=None,
                                      baseurl=self.get_carto_baseurl()))
         if debug: print(mapconfig_params['q'])
 
-        baseurl = ('https://rawgit.com/CartoDB/cartoframes/master/'
+        baseurl = ('/files/'
                    'cartoframes/assets/cartoframes.html')
-
+        if debug: print
         url = '?'.join([baseurl,
                         urllib.urlencode(mapconfig_params)])
 
-        if debug: print(url)
-        iframe = ('<iframe src="{url}" width={width} height={height}>'
-                  'Preview image: {img}</iframe>').format(url=url,
-                                                          width=figsize[0],
-                                                          height=figsize[1],
-                                                          img=img)
-        return IPython.display.HTML(iframe)
+        path = os.path.dirname(os.path.abspath(__file__))
+        html = open(path + "/assets/tangram.html", "r").read()
+        html = "<script> var config = JSON.parse('" + json.dumps(mapconfig_params) + "');</script>" + html
+        if debug: print(html)
+        return IPython.display.HTML(html)
+
+def call_foo(self):
+    path = os.path.dirname(os.path.abspath(__file__))
+    html = open(path + "/assets/tangram.html", "r").read()
+    print("writeIframe('" + html + "')")
+    foo = IPython.display.Javascript("writeIframe(`" + html + "`)")
+    return IPython.display.display_javascript(foo)
 
 
 # Monkey patch these methods to pandas
@@ -696,6 +700,7 @@ def carto_map(self, interactive=True, color=None, size=None,
 # higher level functions and methods
 pd.read_carto = read_carto
 pd.DataFrame.carto_map = carto_map
+pd.DataFrame.call_foo = call_foo
 pd.DataFrame.sync_carto = sync_carto
 
 # carto_create methods
