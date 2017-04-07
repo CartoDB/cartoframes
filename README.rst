@@ -3,14 +3,16 @@ CARTOFrames
 
 A pandas interface for integrating `CARTO <https://carto.com/>`__ into data science workflows.
 
+Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
+
 Install Instructions
 --------------------
 
 `cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and a development version of the CARTO Python SDK (on branch `1.0.0 <https://github.com/CartoDB/carto-python/tree/1.0.0>`__). To install `cartoframes` on your machine, do the following:
 
-Clone this repository.
+1. Clone this repository.
 
-Change your directory to `cartoframes` and run the following:
+2. Change your directory to `cartoframes` and run the following:
 
 .. code:: bash
 

@@ -1,0 +1,30 @@
+<iframe style="width: 100%; height: 800px" id="mapView"></iframe>
+<script>
+  var ifrContent = '<html style="width: 100%; height: 100%;"> <head> <title>cartoframes</title> <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> <meta http-equiv="content-type" content="text/html; charset=UTF-8"/> <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" /> <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" /> </head> <body style="width: 100%; height: 100%;"> <sc'
+  + 'ript src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></sc'
+  + 'ript> <script src="https://mapzen.com/tangram/tangram.min.js"></scr'
+  + 'ipt> <script src="https://rawgit.com/CartoDB/tangram.cartodb/cartoframes/dist/trangram.cartodb.debug.js"></scr'
+  + 'ipt> <h1>Carto Map</h1> '
+   + '<div id="map" style="width: 100%; height: 800px;"></div> <script> window.map = L.map("map"); window.L.tileLayer(  "http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png ", { attribution:  "<a href=\'http://carto.com\'>CARTO</a> © 2016 ", maxZoom: 18 } ).addTo( map ); map.setView([0,0], 1); window.TC = TangramCarto; </scr'
+   + 'ipt> </body> </html>';
+
+  var win = document.getElementById('mapView').contentWindow
+  var ifr = win.document;
+  ifr.open();
+  ifr.write(ifrContent);
+  ifr.close();
+
+  win.addEventListener('load', function () {
+    // var Tangram = win.TC;
+    var map = win.map;
+    var tangram = new win.TC(map, function () {
+      console.log('loaded');
+      var sourceUrl = 'https://' + config.username + '.carto.com/api/v1/map/named/' + config.named_map + '/mapnik/{z}/{x}/{y}.mvt';
+      console.log(config.cartocss);
+      tangram.addDataSource(sourceUrl);
+      tangram.addLayer({meta: {cartocss: config.cartocss}, visible: true, id: 'layer0'});
+      window.tangram = tangram;
+    });
+  });
+
+</script>

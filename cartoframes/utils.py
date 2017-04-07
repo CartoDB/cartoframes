@@ -21,21 +21,42 @@ def get_auth_client(username=None, api_key=None,
     """
     from carto.sql import SQLClient
     from carto.auth import APIKeyAuthClient
-    if cdb_client is None:
-        if baseurl is None:
-            BASEURL = 'https://{username}.carto.com/api/'.format(
-                username=username)
-        else:
-            BASEURL = baseurl
-        auth_client = APIKeyAuthClient(BASEURL, api_key)
-        sql = SQLClient(auth_client)
-    elif (username is None) or (api_key is None):
+
+    if cdb_client:
         sql = SQLClient(cdb_client)
+    elif username is not None and api_key is not None:
+        baseurl = get_baseurl(username=username, baseurl=baseurl)
+        auth_client = APIKeyAuthClient(baseurl, api_key)
+        sql = SQLClient(auth_client)
     else:
         raise Exception("`username` and `api_key` or `cdb_client` has to be "
                         "specified.")
     return sql
 
+
+def get_baseurl(username=None, baseurl=None):
+    """"""
+    if baseurl is None:
+        if username:
+            return 'https://{username}.carto.com/'.format(username=username)
+        else:
+            raise Exception("`username` required if `org` or `baseurl` are not "
+                            "specified")
+    else:
+        outs = '{baseurl}/user/{username}/'.format(baseurl=baseurl,
+                                                   username=username)
+        print(outs)
+        return outs
+
+    return None
+
+def get_is_org_user(carto_sql_client):
+    """Retrieve whether user is in an organization or not"""
+    resp = carto_sql_client.send('SHOW search_path')
+    paths = resp['rows'][0]['search_path'].split(',')
+
+    # if 'public' is first element, user is not in an org
+    return bool(paths[0] != 'public')
 
 def create_table_query(tablename, schema, username, is_org_user=False,
                        debug=False):
@@ -133,16 +154,17 @@ def numpy_val_to_pg_val(item, dtype):
       :rtype: string
     """
     import math
+    if item is None:
+        return 'null'
+
     if dtype == 'text':
-        if "'" in item:
+        if "'" in str(item):
             return "'{}'".format(item.replace("'", "\'\'"))
         return "'{}'".format(item)
     elif dtype == 'numeric' or dtype == 'int':
         if math.isnan(item):
             return 'null'
         return str(item)
-    elif item is None:
-        return 'null'
     return "'{}'".format(str(item).replace("'", "\'\'"))
 
 
@@ -167,7 +189,7 @@ def datatype_map(dtype):
         return 'text'
 
 
-def format_row(rowvals, dtypes):
+def format_row(rowvals, dtypes, colnames):
     """Transform a DataFrame row into a comma-separated list for use in
         a SQL query.
 
@@ -179,7 +201,7 @@ def format_row(rowvals, dtypes):
     """
     mapped_vals = []
     for colnum, val in enumerate(rowvals):
-        pgtype = dtype_to_pgtype(dtypes[colnum], rowvals[1].index[colnum])
+        pgtype = dtype_to_pgtype(dtypes[colnum], colnames[colnum])
         mapped_vals.append(numpy_val_to_pg_val(val, pgtype))
 
     return ','.join(mapped_vals)
@@ -218,22 +240,6 @@ def transform_schema(pgschema):
         datatypes[field] = map_dtypes(pgschema[field]['type'])
     return datatypes
 
-# TODO: not used anywhere
-def get_username(baseurl):
-    """
-    Retrieve the username from the baseurl.
-    NOTE: Not compatible with onprem, etc.
-
-    :param baseurl: string Must be of format https://{username}.carto.com/api/
-    :type baseurl: string
-    :returns: CARTO username
-    :rtype: string
-    """
-    # TODO: make this more robust
-    import re
-    m = re.search('https://(.*?).carto.com/api/', baseurl)
-    return m.group(1)
-
 def get_geom_type(carto_sql_client, tablename):
     """
         Get the geometry type in tablename for storing in dataframe metadata
@@ -261,8 +267,8 @@ def get_geom_type(carto_sql_client, tablename):
     except (KeyError, IndexError):
         print(("Cannot create a map from `{tablename}` because this table "
                "does not have geometries ({geomreported})").format(
-                              tablename=tablename,
-                              geomreported=None))
+                   tablename=tablename,
+                   geomreported=None))
         return None
     except Exception as err:
         print("ERROR: {}".format(err))
@@ -378,7 +384,7 @@ def upsert_table(self, df_diff, n_batch=5000, debug=False):
     return None
 
 # TODO: change this to be a list of colnames
-def drop_col(self, colname, n_batch=30, debug=False):
+def drop_col(self, colname, debug=False):
     """
     Drop specified column
     """

@@ -182,7 +182,7 @@ class CartoCSS(object):
             if self.size in self.df.columns:
                 # if string is a column name
                 # size by 'reasonable' values
-                css = ("ramp([{colname}], range(4, 15), "
+                css = ("ramp([{colname}], range(5, 25), "
                        "quantiles())").format(colname=self.size)
                 return css
             else:

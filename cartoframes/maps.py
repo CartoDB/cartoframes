@@ -2,13 +2,12 @@
 Functions and methods for interactive and static maps
 """
 
-import pandas as pd
 
-def create_named_map(username, api_key, tablename):
+def create_named_map(baseurl, api_key, tablename):
     """Create a default named map for later use
 
-    :param username: CARTO username
-    :type username: string
+    :param baseurl: Base URL for API calls
+    :type baseurl: string
     :param api_key: CARTO API key
     :type api_key: string
     :param tablename: Table in user account to create a map from
@@ -35,12 +34,12 @@ def create_named_map(username, api_key, tablename):
 
     filled_template = get_named_map_template() % defaults
 
-    api_endpoint = ('https://{username}.carto.com/api/v1/map/named'
-                    '?api_key={api_key}').format(username=username,
+    api_endpoint = ('{baseurl}api/v1/map/named'
+                    '?api_key={api_key}').format(baseurl=baseurl,
                                                  api_key=api_key)
     resp = requests.post(api_endpoint,
                          data=filled_template,
-                         headers={'content-type': 'application/json'})
+                         headers={'Content-Type': 'application/json'})
     if resp.status_code == requests.codes.ok:
         return json.loads(resp.text)['template_id']
     else:
@@ -89,8 +88,10 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     """
     import requests
     try:
+        # if python3
         from urllib.parse import urlencode
     except ImportError:
+        # if python2
         from urllib import urlencode
 
     if isinstance(basemap, list) and len(basemap) == 2:
@@ -110,12 +111,10 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
     args = dict(map_params, **bounds)
     new_template = get_named_map_template() % args
     if debug: print(new_template)
-    endpoint = ("https://{username}.carto.com/api/v1/map/named/"
-                "{map_name}?api_key={api_key}").format(
-                    map_name=self.get_carto_namedmap(),
-                    api_key=self.get_carto_api_key(),
-                    username= self.get_carto_username())
-
+    endpoint = "{baseurl}api/v1/map/named/{mapname}?api_key={api_key}".format(
+        baseurl=self.get_carto_baseurl(),
+        mapname=self.get_carto_namedmap(),
+        api_key=self.get_carto_api_key())
     resp = requests.put(endpoint,
                         data=new_template,
                         headers={'Content-Type': 'application/json'})
@@ -131,20 +130,17 @@ def _get_static_snapshot(self, cartocss, basemap, figsize=(647, 400),
             mapview['lon'] = center[0]
             mapview['lat'] = center[1]
 
-        img = ("http://{username}.carto.com/api/v1/map/static/named/"
+        img = ("{baseurl}api/v1/map/static/named/"
                "{map_name}/{width}/{height}.png"
-               "?{params}")
+               "?{mapview}")
 
-        return img.format(username=self.get_carto_username(),
+        return img.format(baseurl=self.get_carto_baseurl(),
                           map_name=self.get_carto_namedmap(),
                           width=figsize[0],
                           height=figsize[1],
-                          params=urlencode(mapview))
+                          mapview=urlencode(mapview))
     else:
         resp.raise_for_status()
-
-pd.DataFrame._get_static_snapshot = _get_static_snapshot
-pd.DataFrame.get_bounds = get_bounds
 
 
 def get_named_map_template():
@@ -203,25 +199,54 @@ def basemap_config(basemap_url):
     return template % {'basemap': basemap_url}
 
 
-def get_named_mapconfig(username, mapname, ):
+def get_named_mapconfig(username, mapname, baseurl=None):
     """Named Maps API template for carto.js
 
     :param username: The username of the CARTO account
+    :type username: string
     :param mapname: The mapname a cartoframe is associated with CARTO account
+    :type mapname: string
+    :param baseurl: Base URL for API calls
+    :type username: string
 
     :returns: mapconfig object for a named map as serialized JSON
+    :rtype: string
     """
+    import sys
+    if sys.version_info >= (3, 0):
+        from urllib.parse import urlparse
+    else:
+        from urlparse import urlparse
+
     map_args = {'mapname': mapname,
                 'username': username}
+    if baseurl.endswith('/'):
+        map_args['baseurl'] = baseurl[:-1]
+    else:
+        map_args['baseurl'] = baseurl
 
-    mapconfig = '''{
-      "user_name": "%(username)s",
+    if urlparse(baseurl).netloc.endswith('.carto.com/'):
+        map_args['domain'] = 'carto.com'
+    else:
+        map_args['domain'] = urlparse(baseurl).netloc
+
+    # questions:
+    # 1. should tiler protocol always be http or https? what would require us to change it? on prem vs. carto org user vs. carto single account user vs. ...
+    # 2. for the tiler_protocol, can we reuse the format for maps_api_template or do i need to strip out the domains
+    # 3. it all should work fine with named maps?
+    mapconfig = '''{{
+      "user_name": "{username}",
+      "maps_api_template": "{baseurl}",
+      "sql_api_template": "{baseurl}",
+      "tiler_protocol": "https",
+      "tiler_domain": "{domain}",
+      "tiler_port": "80",
       "type": "namedmap",
-      "named_map": {
-        "name": "%(mapname)s"
-      },
+      "named_map": {{
+        "name": "{mapname}"
+      }},
       "subdomains": [ "a", "b", "c" ]
-      }''' % map_args
+      }}'''.format(**map_args)
     return mapconfig
 
 
