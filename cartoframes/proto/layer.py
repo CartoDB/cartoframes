@@ -2,7 +2,7 @@ import pandas as pd
 import random
 import webcolors
 from .utils import cssify
-from .styling import BinMethod, mint
+from .styling import BinMethod, mint, get_scheme_cartocss
 
 
 DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
@@ -52,13 +52,12 @@ class QueryLayer(AbstractLayer):
 
         style = style or {}
 
-        color = random.choice(DEFAULT_COLORS)
-
         if (color and
             color[0] != '#' and
             color not in webcolors.CSS3_NAMES_TO_HEX):
             scheme = style.get('scheme', mint(5))
         else:
+            color  = color or random.choice(DEFAULT_COLORS)
             scheme = None
 
         time = None
@@ -76,6 +75,8 @@ class QueryLayer(AbstractLayer):
                                  " have time_column defined")
 
         size = style.get('size', size or 10)
+        if isinstance(size, str):
+            size = {'column': size}
         if isinstance(size, dict):
             if 'column' not in size:
                 raise ValueError("style['size'] must include a 'column' value")
@@ -85,9 +86,9 @@ class QueryLayer(AbstractLayer):
                                   " only be a fixed size").format(time_source))
             old_size = size
             size = {
-                'range' : [5, 25],
-                'bins'  : 10,
-                'method': BinMethod.quantiles,
+                'range'     : [5, 25],
+                'bins'      : 10,
+                'bin_method': BinMethod.quantiles,
             }
             size.update(old_size)
             # Since we're accessing min/max, convert range into a list
@@ -131,15 +132,15 @@ class QueryLayer(AbstractLayer):
             size_style = self.size
         elif isinstance(self.size, dict):
             size_style = ('ramp([{column}],'
-                          ' range({min_range,max_range}),'
-                          ' {bin_method}({bins})').format(column=self.size['column'],
-                                                          min_range=self.size['range'][0],
-                                                          max_range=self.size['range'][1],
-                                                          bin_method=self.size['bin_method'],
-                                                          bins=self.size['bins'])
+                          ' range({min_range},{max_range}),'
+                          ' {bin_method}({bins}))').format(column=self.size['column'],
+                                                           min_range=self.size['range'][0],
+                                                           max_range=self.size['range'][1],
+                                                           bin_method=self.size['bin_method'],
+                                                           bins=self.size['bins'])
 
         if self.scheme:
-            color_style = styling.get_cartocss(self.color, self.scheme)
+            color_style = get_scheme_cartocss(self.color, self.scheme)
         else:
             color_style = self.color
 
