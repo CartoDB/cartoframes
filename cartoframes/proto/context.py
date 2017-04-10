@@ -204,7 +204,7 @@ class CartoContext:
         if len(time_layers) > 1:
             raise ValueError('map can at most take 1 Layer with time column/field')
         if len(time_layers) > 0:
-            if interactive:
+            if not interactive:
                 raise ValueError('map cannot display a static image with a time_column')
             layers.append(layers.pop(time_layers[0]))
 
