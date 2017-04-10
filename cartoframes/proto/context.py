@@ -190,10 +190,6 @@ class CartoContext:
         if any([zoom, lat, lng]) != all([zoom, lat, lng]):
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
-        # Setup layers
-        for layer in layers:
-            layer._setup(self, layers)
-
         # Check basemaps, add one if none exist
         base_layers = [idx for idx, layer in enumerate(layers) if layer.is_basemap]
         if len(base_layers) > 1:
@@ -218,6 +214,10 @@ class CartoContext:
             layers.append(BaseMap(basemap.source,
                                   labels=basemap.labels,
                                   only_labels=True))
+
+        # Setup layers
+        for layer in layers:
+            layer._setup(self, layers)
 
         has_zoom = zoom is not None
 
@@ -285,7 +285,6 @@ class CartoContext:
 
     def _send_map_template(self, layers, *, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
-        print(self._map_templates)
         if map_name not in self._map_templates:
             try:
                 self._auth_send('api/v1/map/named', 'POST',

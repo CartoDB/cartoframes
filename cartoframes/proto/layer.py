@@ -52,9 +52,13 @@ class QueryLayer(AbstractLayer):
 
         style = style or {}
 
-        if (color and
-            color[0] != '#' and
-            color not in webcolors.CSS3_NAMES_TO_HEX):
+        # If column was specified, force a scheme
+        # It could be that there is a column named 'blue' for example
+        if (style.get('column', None) or (
+                color and
+                color[0] != '#' and
+                color not in webcolors.CSS3_NAMES_TO_HEX)):
+            color  = style.get('column', color)
             scheme = style.get('scheme', mint(5))
         else:
             color  = color or random.choice(DEFAULT_COLORS)
@@ -175,11 +179,12 @@ class QueryLayer(AbstractLayer):
 
 
 class Layer(QueryLayer):
-    def __init__(self, table_name, source=None, *, time_column=None, color=None, size=None,
+    def __init__(self, table_name, source=None, *, overwrite=False, time_column=None, color=None, size=None,
                  style=None, tooltip=None, legend=None):
 
-        self.table_name  = table_name
-        self.source      = source
+        self.table_name = table_name
+        self.source     = source
+        self.overwrite  = overwrite
 
         super(Layer, self).__init__('SELECT * FROM {}'.format(table_name),
                                     time_column=time_column,
@@ -191,7 +196,7 @@ class Layer(QueryLayer):
 
     def _setup(self, context, layers):
         if isinstance(self.source, pd.DataFrame):
-            context.write(self.source, table_name)
+            context.write(self.source, self.table_name, overwrite=self.overwrite)
 
         super(Layer, self)._setup(context, layers)
 
