@@ -190,31 +190,27 @@ class CartoContext:
         if any([zoom, lat, lng]) != all([zoom, lat, lng]):
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
-        # Call setup if needed
-        basemap_idx = -1
-        for idx, layer in enumerate(layers):
-            if layer.is_basemap:
-                if basemap_idx >= 0:
-                    raise ValueError('map can at most take 1 BaseMap layer')
-                basemap_idx = idx
+        # Setup layers
+        for layer in layers:
+            layer._setup(self, layers)
 
-        # Move or create BaseMap and move as first layer
-        if basemap_idx < 0:
+        # Check basemaps, add one if none exist
+        base_layers = [idx for idx, layer in enumerate(layers) if layer.is_basemap]
+        if len(base_layers) > 1:
+            raise ValueError('map can at most take 1 BaseMap layer')
+        if len(base_layers) > 0:
+            layers.insert(0, layers.pop(base_layers[0]))
+        else:
             layers.insert(0, BaseMap())
-        elif basemap_idx >= 1:
-            layers.insert(0, layers.pop(basemap_idx))
 
         # Check for a time layer, if it exists move it to the front
-        time_idx = -1
-        for idx, layer in enumerate(layers):
-            layer._setup(self, layers)
-            if not layer.is_basemap and layer.time:
-                if time_idx >= 0:
-                    raise ValueError('map can at most take 1 Layer with time column/field')
-                time_idx = idx
-
-        if time_idx >= 0:
-            layers.append(layers.pop(time_idx))
+        time_layers = [idx for idx, layer in enumerate(layers) if not layer.is_basemap and layer.time]
+        if len(time_layers) > 1:
+            raise ValueError('map can at most take 1 Layer with time column/field')
+        if len(time_layers) > 0:
+            if interactive:
+                raise ValueError('map cannot display a static image with a time_column')
+            layers.append(layers.pop(time_layers[0]))
 
         # If basemap labels are on front, add labels layer
         basemap = layers[0]
@@ -226,11 +222,12 @@ class CartoContext:
         has_zoom = zoom is not None
 
         nb_layers = non_basemap_layers(layers)
-        options = {}
+        options = {'basemap_url': basemap.url}
 
-        for idx, layer in enumerate(nb_layers):
-            options['cartocss_' + str(idx)] = layer.description
-            options['query_' + str(idx)]    = layer.query
+        # Reverse layers to put torque's Map first
+        for idx, layer in enumerate(nb_layers[::-1]):
+            options['cartocss_' + str(idx)] = layer.cartocss
+            options['sql_' + str(idx)]      = layer.query
 
         if has_zoom:
             options['zoom'] = zoom
@@ -242,19 +239,20 @@ class CartoContext:
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
         api_url = '{base_url}api/v1/map'.format(base_url=self.base_url)
 
-        if interactive:
-            map_url = '{api_url}/named/{map_name}'.format(api_url=api_url,
-                                                          map_name=map_name)
-        else:
-            map_url = '{api_url}/static/named/{map_name}'.format(api_url=api_url,
-                                                                 map_name=map_name)
-        map_url += '?' + urlencode({'config': options})
+        static_url = ('{api_url}/static/named/{map_name}'
+                      '/{width}/{height}.png?{params}').format(api_url=api_url,
+                                                               map_name=map_name,
+                                                               width=size[0],
+                                                               height=size[1],
+                                                               params=urlencode({
+                                                                   'config': json.dumps(options)
+                                                               }))
 
-        html = '<img src="{url}" />'.format(url=map_url)
+        html = '<img src="{url}" />'.format(url=static_url)
 
         if interactive:
             html = (
-                '<iframe src="{url}" width={width} height={height}>'
+                '<iframe srcdoc="{content}" width={width} height={height}>'
                 '  Preview image: {img}'
                 '</iframe>'
             ).format(url=map_url,
@@ -278,6 +276,9 @@ class CartoContext:
 
 
     def _auth_send(self, relative_path, http_method, **kwargs):
+        self._debug_print(relative_path=relative_path,
+                          http_method=http_method,
+                          kwargs=kwargs)
         res = self.auth_client.send(relative_path, http_method, **kwargs)
         return json.loads(res.content)
 

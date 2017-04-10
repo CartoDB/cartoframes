@@ -9,9 +9,9 @@ def dict_items(d):
 def cssify(css_dict):
     css = ''
     for key, value in dict_items(css_dict):
-        css += '{key}: {{\n'.format(key=key)
+        css += '{key} {{ '.format(key=key)
         for field, field_value in dict_items(value):
-            css += '  {field}: {field_value};\n'.format(field=field,
-                                                        field_value=field_value)
-        css += '}\n'
+            css += ' {field}: {field_value};'.format(field=field,
+                                                     field_value=field_value)
+        css += '} '
     return css

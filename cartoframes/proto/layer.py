@@ -33,9 +33,11 @@ class BaseMap(AbstractLayer):
                 style = source + ('_all' if labels == 'back' else '_nolabels')
             else:
                 style = source + '_only_labels'
-            self.url = ('http://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
+            self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
         else:
+            # [BUG] Remove this once baselayer urls can be passed in named map config
+            raise ValueError('BaseMap cannot contain a custom url at the moment')
             self.url = source
 
     def is_basic(self):
@@ -100,7 +102,28 @@ class QueryLayer(AbstractLayer):
 
 
     def _setup(self, context, layers):
-        self.description = self.get_description(layers[0])
+        basemap = layers[0]
+        self.cartocss = self.get_cartocss(basemap)
+
+        if self.time:
+            column   = self.time['column']
+            frames   = self.time['frames']
+            method   = self.time['method']
+            duration = self.time['duration']
+            agg_func = "'{method}({time_column})'".format(method=method,
+                                                          time_column=column)
+            self.cartocss += cssify({
+                'Map': {
+                    '-torque-frame-count': frames,
+                    '-torque-animation-duration': duration,
+                    '-torque-time-attribute': "'{}'".format(column),
+                    '-torque-aggregation-function': agg_func,
+                    '-torque-resolution': 1,
+                    '-torque-data-aggregation': ('cumulative'
+                                                 if self.time['cumulative']
+                                                 else 'linear'),
+                },
+            })
 
 
     def get_cartocss(self, basemap):
@@ -133,12 +156,12 @@ class QueryLayer(AbstractLayer):
                 'marker-line-opacity': '1',
             },
             # Line CSS
-            '#layer["mapnik::geometry_type"=2]': {
+            "#layer['mapnik::geometry_type'=2]": {
                 'line-width': '1.5',
                 'line-color': color_style,
             },
             # Polygon CSS
-            '#layer["mapnik::geometry_type"=3]': {
+            "#layer['mapnik::geometry_type'=3]": {
                 'polygon-fill': color_style,
                 'polygon-opacity': '0.9',
                 'polygon-gamma': '0.5',
@@ -148,39 +171,6 @@ class QueryLayer(AbstractLayer):
                 'line-comp-op': 'hard-light',
             }
         })
-
-
-    def get_description(self, basemap):
-        cartocss = self.get_cartocss(basemap)
-
-        if self.time:
-            column   = self.time['column']
-            frames   = self.time['frames']
-            method   = self.time['method']
-            duration = self.time['duration']
-            agg_func = "{method}({time_column})".format(method=method,
-                                                        time_column=column)
-            cartocss += cssify({
-                'Map': {
-                    '-torque-frame-count': frames,
-                    '-torque-animation-duration': duration,
-                    '-torque-time-attribute': column,
-                    '-torque-aggregation-function': agg_func,
-                    '-torque-resolution': 1,
-                    '-torque-data-aggregation': ('cumulative'
-                                                 if self.time['cumulative']
-                                                 else 'linear'),
-                },
-            })
-
-        return {
-            'type': 'torque' if self.time else 'mapnik',
-            'options': {
-                'cartocss_version': '2.3.0',
-                'sql': self.query,
-                'cartocss': cartocss,
-            },
-        }
 
 
 class Layer(QueryLayer):
