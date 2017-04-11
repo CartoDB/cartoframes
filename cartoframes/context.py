@@ -219,7 +219,7 @@ class CartoContext:
         for layer in layers:
             layer._setup(self, layers)
 
-        has_zoom = zoom is not None
+        has_zoom = not interactive and zoom is not None
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
@@ -245,20 +245,39 @@ class CartoContext:
                                                                width=size[0],
                                                                height=size[1],
                                                                params=urlencode({
-                                                                   'config': json.dumps(options)
+                                                                   'config'    : json.dumps(options),
+                                                                   'anti_cache': random.random(),
                                                                }))
 
         html = '<img src="{url}" />'.format(url=static_url)
 
         if interactive:
+            netloc = urlparse(self.base_url).netloc
+            domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
+            config = {
+                'user_name': self.username,
+                'maps_api_template': self.base_url[:-1],
+                'sql_api_template': self.base_url[:-1],
+                'tiler_protocol': 'https',
+                'tiler_domain': domain,
+                'tiler_port': '80',
+                'type': 'namedmap',
+                'named_map': {
+                    'name': map_name,
+                },
+            }
+            bounds = [[options['north'], options['east']],
+                      [options['south'], options['west']]]
+            img_html = html
             html = (
                 '<iframe srcdoc="{content}" width={width} height={height}>'
-                '  Preview image: {img}'
+                '  Preview image: {img_html}'
                 '</iframe>'
-            ).format(url=map_url,
+            ).format(content=self._get_iframe_srcdoc(config=config,
+                                                     bounds=bounds),
                      width=size[0],
                      height=size[1],
-                     img=html)
+                     img_html=img_html)
 
         return IPython.display.HTML(html)
 
@@ -296,6 +315,15 @@ class CartoContext:
             self._map_templates[map_name] = True
         return map_name
 
+
+    def _get_iframe_srcdoc(self, *, config, bounds):
+        if not hasattr(self, '_srcdoc'):
+            with open(os.path.join(os.path.dirname(__file__),
+                                   'assets/cartoframes.html'), 'r') as f:
+                self._srcdoc = f.read().replace('"', '\\"')
+
+        return (self._srcdoc.replace('@@CONFIG@@', str(config))
+                            .replace('@@BOUNDS@@', str(bounds)))
 
     def get_bounds(self, layers):
         extent_query = 'SELECT ST_EXTENT(the_geom) AS the_geom FROM ({query}) as t{idx}\n'

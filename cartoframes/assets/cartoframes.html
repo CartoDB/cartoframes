@@ -1,110 +1,66 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>cartoframes</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+    <title>Carto</title>
+    <meta name='viewport' content='initial-scale=1.0, user-scalable=no' />
+    <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
+    <link rel='shortcut icon' href='http://cartodb.com/assets/favicon.ico' />
 
-    <!-- Map takes up full browser window -->
     <style>
-      html, body, #map {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-      }
-      #zoom-center {
-        position: absolute;
-        right: 0;
-        top: 0;
-        background-color: rgba(255, 255, 255, 0.7);
-        width: 200px;
-        z-index: 100;
-        padding: 4px;
-      }
+     html, body, #map {
+       height: 100%;
+       padding: 0;
+       margin: 0;
+     }
+     #zoom-center {
+       position: absolute;
+       right: 0;
+       top: 0;
+       background-color: rgba(255, 255, 255, 0.7);
+       width: 200px;
+       z-index: 100;
+       padding: 4px;
+     }
     </style>
 
-    <link rel="stylesheet" href="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+    <link rel='stylesheet' href='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css' />
   </head>
   <body>
-    <div id="zoom-center">
-      Zoom: <span id="zoom">4</span>, <br />
-      Center (lon, lat): (<span id="lon">No data</span>, <span id="lat">No data</span>)</div>
-    <div id="map"></div>
-    <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
+    <div id='zoom-center'>
+      Zoom: <span id='zoom'>4</span>, <br />
+      LatLng: (<span id='lon'>No data</span>, <span id='lat'>No data</span>)</div>
+    <div id='map'></div>
+    <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-    function getJsonFromUrl() {
-      var query = location.search.substr(1);
-      var result = {};
-      query.split("&").forEach(function(part) {
-        var item = part.split("=");
-        console.log("ITEM: ", item);
-        result[item[0]] = decodeURIComponent(item[1]);
-      });
-      return result;
-    }
+     const config = @@CONFIG@@;
+     const bounds = @@BOUNDS@@;
 
-    $(function(){
+     const adjustLongitude = (lng) => (
+       lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
+     );
+     const map = L.map('map', {
+       zoom: 3,
+       center: [0, 0],
+     });
+     const updateMapInfo = () => {
+       $('#zoom').text(map.getZoom());
+       $('#lat').text(map.getCenter().lat.toFixed(4));
+       $('#lon').text(adjustLongitude(map.getCenter().lng).toFixed(4));
+     };
 
-     function adjustLongitude(val) {
-        if (val > 180) {
-          return (val + 180) % 360 - 180;
-        } else if (val < -180) {
-          return (val + 180) % 360 + 180;
-        } else {
-          return val;
-        }
-      };
-
-      function updateMapInfo(mapobj) {
-          $("#zoom").text(map.getZoom());
-          $("#lat").text(map.getCenter().lat.toFixed(4));
-          $("#lon").text(adjustLongitude(map.getCenter().lng).toFixed(4));
-      };
-
-        console.log(window.location);
-        var params = getJsonFromUrl();
-        var urlsearch = JSON.parse(decodeURIComponent(params.q)),
-            username = params.username,
-            tablename = params.tablename,
-            bounds = params.bounds,
-            baseurl = params.baseurl,
-            show_position_data = params.show_position_data;
-        new_bounds = bounds.split(',');
-        new_bounds = [[new_bounds[0], new_bounds[1]],
-                      [new_bounds[2], new_bounds[3]]];
-        console.log(show_position_data);
-        console.log(typeof(show_position_data));
-        if (show_position_data == 'False' || show_position_data == 'false') {
-          $("#zoom-center").hide();
-        };
-        // console.log("NEW BOUNDS", new_bounds);
-        // console.log(typeof(new_bounds));
-        // console.log("USERNAME", username);
-        // console.log("TABLENAME", tablename);
-        var map = L.map('map', {
-          // NOTE: map will zoom/center to region after it's instantiated
-          zoom: 3,
-          center: [0, 0]
-        });
-
-        cartodb.createLayer(map, urlsearch, { filter: ['http', 'mapnik'], https: true })
-          .addTo(map)
-          .done(function(layers) {
-              map.fitBounds(new_bounds);
-              if (show_position_data == 'true' ||
-                  show_position_data == 'True') {
-                updateMapInfo(map);
-                map.on('move', function() {
-                  updateMapInfo(map);
-                });
-              };
-          })
-          .error(function(err) {
-            console.log("ERROR: ", err);
-          });
-      });
+     cartodb.createLayer(map, config, { filter: ['http', 'mapnik'], https: true })
+            .addTo(map)
+            .done((layer) => {
+              map.fitBounds(bounds);
+              updateMapInfo();
+              map.on('move', () => {
+                updateMapInfo();
+              });
+            })
+            .error((err) => {
+              console.log('ERROR: ', err);
+            });
     </script>
 
   </body>
