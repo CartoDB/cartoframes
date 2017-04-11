@@ -41,8 +41,8 @@
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
      );
      const map = L.map('map', {
-       zoom: 3,
-       center: [0, 0],
+       zoom: @@ZOOM@@,
+       center: [@@LAT@@, @@LNG@@],
      });
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
@@ -53,7 +53,9 @@
      cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
-              map.fitBounds(bounds);
+              if (bounds.length) {
+                map.fitBounds(bounds);
+              }
               updateMapInfo();
               map.on('move', () => {
                 updateMapInfo();

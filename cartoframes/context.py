@@ -221,7 +221,7 @@ class CartoContext:
         for layer in layers:
             layer._setup(self, layers)
 
-        has_zoom = not interactive and zoom is not None
+        has_zoom = zoom is not None
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
@@ -231,10 +231,15 @@ class CartoContext:
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)]      = layer.query
 
+
+        params = {
+            'config'    : json.dumps(options),
+            'anti_cache': random.random(),
+        }
+
         if has_zoom:
-            options['zoom'] = zoom
-            options['lat']  = lat
-            options['lng']  = lng
+            params.update({'zoom': zoom, 'lat': lat, 'lon': lng})
+            options.update({'zoom': zoom, 'lat': lat, 'lng': lng})
         else:
             options.update(self.get_bounds(nb_layers))
 
@@ -246,10 +251,7 @@ class CartoContext:
                                                                map_name=map_name,
                                                                width=size[0],
                                                                height=size[1],
-                                                               params=urlencode({
-                                                                   'config'    : json.dumps(options),
-                                                                   'anti_cache': random.random(),
-                                                               }))
+                                                               params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
 
@@ -306,12 +308,13 @@ class CartoContext:
                     'loop': True,
                 })
 
-            bounds = [[options['north'], options['east']],
-                      [options['south'], options['west']]]
+            bounds = [] if has_zoom else [[options['north'], options['east']],
+                                          [options['south'], options['west']]]
 
             content = self._get_iframe_srcdoc(config=config,
                                               bounds=bounds,
-                                              options=map_options)
+                                              options=options,
+                                              map_options=map_options)
 
             img_html = html
             html = (
@@ -360,15 +363,20 @@ class CartoContext:
         return map_name
 
 
-    def _get_iframe_srcdoc(self, *, config, bounds, options):
+    def _get_iframe_srcdoc(self, *, config, bounds, options, map_options):
         if not hasattr(self, '_srcdoc'):
             with open(os.path.join(os.path.dirname(__file__),
                                    'assets/cartoframes.html'), 'r') as f:
                 self._srcdoc = f.read()
 
-        return (self._srcdoc.replace('@@CONFIG@@' , str(config))
-                            .replace('@@BOUNDS@@' , str(bounds))
-                            .replace('@@OPTIONS@@', str(options)))
+        return (self._srcdoc
+                .replace('@@CONFIG@@' , str(config))
+                .replace('@@BOUNDS@@' , str(bounds))
+                .replace('@@OPTIONS@@', str(map_options))
+                .replace('@@ZOOM@@', str(options.get('zoom', 3)))
+                .replace('@@LAT@@' , str(options.get('lat' , 0)))
+                .replace('@@LNG@@' , str(options.get('lng' , 0))))
+
 
     def get_bounds(self, layers):
         extent_query = 'SELECT ST_EXTENT(the_geom) AS the_geom FROM ({query}) as t{idx}\n'
