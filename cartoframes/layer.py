@@ -117,7 +117,7 @@ class QueryLayer(AbstractLayer):
             duration = self.time['duration']
             agg_func = "'{method}({time_column})'".format(method=method,
                                                           time_column=column)
-            self.cartocss += cssify({
+            self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
                     '-torque-animation-duration': duration,
@@ -129,6 +129,7 @@ class QueryLayer(AbstractLayer):
                                                  else 'linear'),
                 },
             })
+            self.cartocss += self.torque_cartocss
 
 
     def get_cartocss(self, basemap):

@@ -33,8 +33,9 @@
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config = @@CONFIG@@;
-     const bounds = @@BOUNDS@@;
+     const config  = @@CONFIG@@;
+     const bounds  = @@BOUNDS@@;
+     const options = @@OPTIONS@@;
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -49,7 +50,7 @@
        $('#lon').text(adjustLongitude(map.getCenter().lng).toFixed(4));
      };
 
-     cartodb.createLayer(map, config, { filter: ['http', 'mapnik'], https: true })
+     cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
               map.fitBounds(bounds);

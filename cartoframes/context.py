@@ -201,9 +201,10 @@ class CartoContext:
 
         # Check for a time layer, if it exists move it to the front
         time_layers = [idx for idx, layer in enumerate(layers) if not layer.is_basemap and layer.time]
+        time_layer = layers[time_layers[0]] if len(time_layers) > 0 else None
         if len(time_layers) > 1:
             raise ValueError('map can at most take 1 Layer with time column/field')
-        if len(time_layers) > 0:
+        if time_layer:
             if not interactive:
                 raise ValueError('map cannot display a static image with a time_column')
             layers.append(layers.pop(time_layers[0]))
@@ -260,7 +261,7 @@ class CartoContext:
                     s2 = s.replace('"', "&quot;")
                     if escape_single_quotes:
                         s2 = s2.replace("'","&#92;'")
-                    return s2
+                    return s2.replace('True', 'true')
                 return s
 
             config = {
@@ -270,7 +271,7 @@ class CartoContext:
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',
-                'type': 'namedmap',
+                'type': 'torque' if time_layer else 'namedmap',
                 'named_map': {
                     'name': map_name,
                     'params': {
@@ -280,19 +281,43 @@ class CartoContext:
                 },
             }
 
+            map_options = {
+                'filter': ['http', 'mapnik', 'torque'],
+                'https': True,
+            }
+
+            if time_layer:
+                config.update({
+                    'order': 1,
+                    'options': {
+                        'query': time_layer.query,
+                        'user_name': self.username,
+                        'tile_style': time_layer.torque_cartocss,
+                    }
+                })
+                config['named_map'].update({
+                    'layers': [{
+                        'layer_name': 't',
+                    }],
+                })
+                map_options.update({
+                    'time_slider': True,
+                    'loop': True,
+                })
+
             bounds = [[options['north'], options['east']],
                       [options['south'], options['west']]]
 
             content = self._get_iframe_srcdoc(config=config,
-                                              bounds=bounds)
-            content = safe_quotes(content)
+                                              bounds=bounds,
+                                              options=map_options)
 
             img_html = html
             html = (
                 '<iframe srcdoc="{content}" width={width} height={height}>'
                 '  Preview image: {img_html}'
                 '</iframe>'
-            ).format(content=content,
+            ).format(content=safe_quotes(content),
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
@@ -334,14 +359,15 @@ class CartoContext:
         return map_name
 
 
-    def _get_iframe_srcdoc(self, *, config, bounds):
+    def _get_iframe_srcdoc(self, *, config, bounds, options):
         if not hasattr(self, '_srcdoc'):
             with open(os.path.join(os.path.dirname(__file__),
                                    'assets/cartoframes.html'), 'r') as f:
-                self._srcdoc = f.read().replace('"', '\\"')
+                self._srcdoc = f.read()
 
-        return (self._srcdoc.replace('@@CONFIG@@', str(config))
-                            .replace('@@BOUNDS@@', str(bounds)))
+        return (self._srcdoc.replace('@@CONFIG@@' , str(config))
+                            .replace('@@BOUNDS@@' , str(bounds))
+                            .replace('@@OPTIONS@@', str(options)))
 
     def get_bounds(self, layers):
         extent_query = 'SELECT ST_EXTENT(the_geom) AS the_geom FROM ({query}) as t{idx}\n'
