@@ -254,6 +254,15 @@ class CartoContext:
         if interactive:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
+
+            def safe_quotes(s, *, escape_single_quotes=False):
+                if isinstance(s, str):
+                    s2 = s.replace('"', "&quot;")
+                    if escape_single_quotes:
+                        s2 = s2.replace("'","&#92;'")
+                    return s2
+                return s
+
             config = {
                 'user_name': self.username,
                 'maps_api_template': self.base_url[:-1],
@@ -264,17 +273,26 @@ class CartoContext:
                 'type': 'namedmap',
                 'named_map': {
                     'name': map_name,
+                    'params': {
+                        k: safe_quotes(v, escape_single_quotes=True)
+                        for k,v in dict_items(options)
+                    },
                 },
             }
+
             bounds = [[options['north'], options['east']],
                       [options['south'], options['west']]]
+
+            content = self._get_iframe_srcdoc(config=config,
+                                              bounds=bounds)
+            content = safe_quotes(content)
+
             img_html = html
             html = (
                 '<iframe srcdoc="{content}" width={width} height={height}>'
                 '  Preview image: {img_html}'
                 '</iframe>'
-            ).format(content=self._get_iframe_srcdoc(config=config,
-                                                     bounds=bounds),
+            ).format(content=content,
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
