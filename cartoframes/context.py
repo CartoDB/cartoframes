@@ -25,7 +25,7 @@ else:
     from urllib import urlencode
 
 class CartoContext:
-    def __init__(self, base_url, api_key, *, verbose=0):
+    def __init__(self, base_url, api_key, *, session=None, verbose=0):
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
             base_url += '/'
@@ -43,7 +43,8 @@ class CartoContext:
         self.username = m.group(1)
 
         self.auth_client = APIKeyAuthClient(base_url=base_url,
-                                            api_key=api_key)
+                                            api_key=api_key,
+                                            session=session)
         self.sql_client = SQLClient(self.auth_client)
 
         res = self.sql_client.send('SHOW search_path')
