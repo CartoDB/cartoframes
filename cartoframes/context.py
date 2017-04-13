@@ -191,6 +191,11 @@ class CartoContext:
         if any([zoom, lat, lng]) != all([zoom, lat, lng]):
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
+        # When no layers are passed, set default zoom
+        if len(layers) == 0 and zoom is None:
+            [zoom, lat, lng] = [3, 38, -99]
+        has_zoom = zoom is not None
+
         # Check basemaps, add one if none exist
         base_layers = [idx for idx, layer in enumerate(layers) if layer.is_basemap]
         if len(base_layers) > 1:
@@ -220,8 +225,6 @@ class CartoContext:
         # Setup layers
         for layer in layers:
             layer._setup(self, layers)
-
-        has_zoom = zoom is not None
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
