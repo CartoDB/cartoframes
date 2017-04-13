@@ -349,7 +349,9 @@ class CartoContext:
                           http_method=http_method,
                           kwargs=kwargs)
         res = self.auth_client.send(relative_path, http_method, **kwargs)
-        return json.loads(res.content)
+        if isinstance(res.content, str):
+            return json.loads(res.content)
+        return json.loads(res.content.decode('utf-8'))
 
 
     def _send_map_template(self, layers, *, has_zoom):
