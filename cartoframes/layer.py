@@ -151,16 +151,6 @@ class QueryLayer(AbstractLayer):
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
         return cssify({
-            # Default CSS
-            '#layer': {
-                'marker-width': size_style,
-                'marker-fill': color_style,
-                'marker-fill-opacity': '1',
-                'marker-allow-overlap': 'true',
-                'marker-line-width': '0.5',
-                'marker-line-color': line_color,
-                'marker-line-opacity': '1',
-            },
             # Point CSS
             "#layer['mapnik::geometry_type'=1]": {
                 'marker-width': size_style,
