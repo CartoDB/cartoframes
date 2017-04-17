@@ -18,7 +18,7 @@ from .utils import dict_items
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
-if sys.version_info >= (3,0):
+if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
 else:
     from urlparse import urlparse
@@ -162,6 +162,7 @@ class CartoContext:
         fields = select_res['fields']
         schema = {
             field: pg2dtypes.get(fields[field]['type'], 'object')
+                   if field != 'cartodb_id' else 'int64'
             for field in fields
         }
         self._debug_print(fields=fields, schema=schema)
