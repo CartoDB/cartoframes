@@ -25,7 +25,7 @@ else:
     from urllib import urlencode
 
 class CartoContext:
-    def __init__(self, base_url, api_key, *, session=None, verbose=0):
+    def __init__(self, base_url, api_key, session=None, verbose=0):
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
             base_url += '/'
@@ -56,7 +56,7 @@ class CartoContext:
         self._verbose = verbose
 
 
-    def read(self, table_name, *, limit=None, index='cartodb_id'):
+    def read(self, table_name, limit=None, index='cartodb_id'):
         q = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
         if limit:
             if (limit >= 0) and isinstance(limit, int):
@@ -67,7 +67,7 @@ class CartoContext:
         return self.query(q)
 
 
-    def write(self, df, table_name, *, temp_dir='/tmp', overwrite=False, lnglat=None):
+    def write(self, df, table_name, temp_dir='/tmp', overwrite=False, lnglat=None):
         table_exists = True
         if not overwrite:
             try:
@@ -125,7 +125,7 @@ class CartoContext:
         pass
 
 
-    def query(self, q, *, table_name=None):
+    def query(self, q, table_name=None):
         self._debug_print(query=q)
         if table_name:
             create_table_query = '''
@@ -175,7 +175,7 @@ class CartoContext:
         return df
 
 
-    def map(self, *, layers=None, interactive=True,
+    def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None,
             size=[800,400]):
 
@@ -186,8 +186,8 @@ class CartoContext:
         else:
             layers = list(layers)
 
-        if len(layers) > 4:
-            raise ValueError('map can have at most 4 layers')
+        if len(layers) > 8:
+            raise ValueError('map can have at most 8 layers')
 
         if any([zoom, lat, lng]) != all([zoom, lat, lng]):
             raise ValueError('zoom, lat, and lng must all or none be provided')
@@ -224,8 +224,8 @@ class CartoContext:
                                   only_labels=True))
 
         # Setup layers
-        for layer in layers:
-            layer._setup(self, layers)
+        for idx, layer in enumerate(layers):
+            layer._setup(self, layers, idx)
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
@@ -263,7 +263,7 @@ class CartoContext:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
-            def safe_quotes(s, *, escape_single_quotes=False):
+            def safe_quotes(s, escape_single_quotes=False):
                 if isinstance(s, str):
                     s2 = s.replace('"', "&quot;")
                     if escape_single_quotes:
@@ -333,15 +333,15 @@ class CartoContext:
         return IPython.display.HTML(html)
 
 
-    def data_boundaries(self, *, df=None, table_name=None):
+    def data_boundaries(self, df=None, table_name=None):
         pass
 
 
-    def data_discovery(self, *, keywords=None, regex=None, time=None, boundary=None):
+    def data_discovery(self, keywords=None, regex=None, time=None, boundary=None):
         pass
 
 
-    def data_augment(self, table_name, numer, *, denom=None):
+    def data_augment(self, table_name, numer, denom=None):
         pass
 
 
@@ -355,7 +355,7 @@ class CartoContext:
         return json.loads(res.content.decode('utf-8'))
 
 
-    def _send_map_template(self, layers, *, has_zoom):
+    def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
         if map_name not in self._map_templates:
             try:
@@ -369,7 +369,7 @@ class CartoContext:
         return map_name
 
 
-    def _get_iframe_srcdoc(self, *, config, bounds, options, map_options):
+    def _get_iframe_srcdoc(self, config, bounds, options, map_options):
         if not hasattr(self, '_srcdoc'):
             with open(os.path.join(os.path.dirname(__file__),
                                    'assets/cartoframes.html'), 'r') as f:

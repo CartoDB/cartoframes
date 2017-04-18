@@ -1,3 +1,4 @@
+import itertools
 import pandas as pd
 import random
 import webcolors
@@ -5,7 +6,8 @@ from .utils import cssify
 from .styling import BinMethod, mint, get_scheme_cartocss
 
 
-DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
+DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
+                  '#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
 
 
 class AbstractLayer:
@@ -14,14 +16,14 @@ class AbstractLayer:
     def __init__(self):
         pass
 
-    def _setup(self, context, layers):
+    def _setup(self, context, layers, layer_idx):
         pass
 
 
 class BaseMap(AbstractLayer):
     is_basemap = True
 
-    def __init__(self, source='dark', *, labels='back', only_labels=False):
+    def __init__(self, source='dark', labels='back', only_labels=False):
         if labels not in ['front', 'back', None]:
             raise ValueError("labels must be None, 'front', or 'back'")
 
@@ -45,27 +47,39 @@ class BaseMap(AbstractLayer):
 
 
 class QueryLayer(AbstractLayer):
-    def __init__(self, query, *, time_column=None, color=None, size=None,
-                 style=None, tooltip=None, legend=None):
+    def __init__(self, query, time=None, color=None, size=None,
+                 tooltip=None, legend=None):
 
         self.query = query
 
-        style = style or {}
+        color = color or None
 
         # If column was specified, force a scheme
         # It could be that there is a column named 'blue' for example
-        if (style.get('column', None) or (
-                color and
-                color[0] != '#' and
-                color not in webcolors.CSS3_NAMES_TO_HEX)):
-            color  = style.get('column', color)
-            scheme = style.get('scheme', mint(5))
+        if isinstance(color, dict):
+            if 'column' not in color:
+                raise ValueError("color must include a 'column' value")
+            scheme = color.get('scheme', mint(5))
+            color  = color['column']
+        elif (color and
+              color[0] != '#' and
+              color not in webcolors.CSS3_NAMES_TO_HEX):
+            color  = color
+            scheme = mint(5)
         else:
-            color  = color or random.choice(DEFAULT_COLORS)
+            color  = color
             scheme = None
 
-        time = None
-        if time_column or 'time' in style:
+        if time:
+            if isinstance(time, dict):
+                if 'column' not in time:
+                    raise ValueError("time must include a 'column' value")
+                time_column  = time['column']
+                time_options = time
+            else:
+                time_column  = time
+                time_options = {}
+
             time = {
                 'column'    : time_column,
                 'method'    : 'count',
@@ -73,21 +87,17 @@ class QueryLayer(AbstractLayer):
                 'frames'    : 256,
                 'duration'  : 30,
             }
-            time.update(style.get('time', {}))
-            if time['column'] is None:
-                raise ValueError("style['time'] must include a 'column' value or"
-                                 " have time_column defined")
+            time.update(time_options)
 
-        size = style.get('size', size or 10)
+        size = size or 10
         if isinstance(size, str):
             size = {'column': size}
         if isinstance(size, dict):
             if 'column' not in size:
-                raise ValueError("style['size'] must include a 'column' value")
+                raise ValueError("size must include a 'column' value")
             if time:
-                time_source = 'time_column' if time_column else "style['time']"
-                raise ValueError(("When {} is specified, style['size'] can"
-                                  " only be a fixed size").format(time_source))
+                raise ValueError("When time is specified, size can"
+                                 " only be a fixed size")
             old_size = size
             size = {
                 'range'     : [5, 25],
@@ -106,9 +116,11 @@ class QueryLayer(AbstractLayer):
         self.legend  = legend
 
 
-    def _setup(self, context, layers):
+    def _setup(self, context, layers, layer_idx):
         basemap = layers[0]
         self.cartocss = self.get_cartocss(basemap)
+
+        self.color = self.color or DEFAULT_COLORS[layer_idx]
 
         if self.time:
             column   = self.time['column']
@@ -180,26 +192,25 @@ class QueryLayer(AbstractLayer):
 
 
 class Layer(QueryLayer):
-    def __init__(self, table_name, source=None, *, overwrite=False, time_column=None, color=None, size=None,
-                 style=None, tooltip=None, legend=None):
+    def __init__(self, table_name, source=None, overwrite=False, time=None, color=None, size=None,
+                 tooltip=None, legend=None):
 
         self.table_name = table_name
         self.source     = source
         self.overwrite  = overwrite
 
         super(Layer, self).__init__('SELECT * FROM {}'.format(table_name),
-                                    time_column=time_column,
+                                    time=time,
                                     color=color,
                                     size=size,
-                                    style=style,
                                     tooltip=tooltip,
                                     legend=legend)
 
-    def _setup(self, context, layers):
+    def _setup(self, context, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
             context.write(self.source, self.table_name, overwrite=self.overwrite)
 
-        super(Layer, self)._setup(context, layers)
+        super(Layer, self)._setup(context, layers, layer_idx)
 
 # cdb_context.map([BaseMap('light'),
 #                  BaseMap('dark'),

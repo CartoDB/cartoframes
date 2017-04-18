@@ -9,7 +9,7 @@ def has_time_layer(layers):
     return any(layer.time for layer in layers if not layer.is_basemap)
 
 
-def get_map_name(layers, *, has_zoom):
+def get_map_name(layers, has_zoom):
     version    = '20170406'
     num_layers = len(non_basemap_layers(layers))
     has_labels = len(layers) > 1 and layers[-1].is_basemap
@@ -31,7 +31,7 @@ def get_map_name(layers, *, has_zoom):
             )
 
 
-def get_map_template(layers, *, has_zoom):
+def get_map_template(layers, has_zoom):
     num_layers = len(non_basemap_layers(layers))
     has_time   = has_time_layer(layers)
     name = get_map_name(layers, has_zoom=has_zoom)
