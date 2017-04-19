@@ -10,18 +10,16 @@ Install Instructions
 
 `cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and a development version of the CARTO Python SDK (on branch `1.0.0 <https://github.com/CartoDB/carto-python/tree/1.0.0>`__). To install `cartoframes` on your machine, do the following:
 
-1. Clone this repository.
-
-2. Change your directory to `cartoframes` and run the following:
-
 .. code:: bash
 
+    $ git clone https://github.com/CartoDB/cartoframes.git
+    $ cd cartoframes
     $ pip install -r requirements.txt
-    $ pip install cartoframes
+    $ pip install -e .
 
 Once you've done this, `cartoframes` will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.
 
-Note: Eventually `cartoframes` will be fully installable from `pip`.
+**Note:** Eventually `cartoframes` will be fully installable from `pip`.
 
 
 Example usage
@@ -34,62 +32,51 @@ Get table from carto, make changes in pandas, sync updates with carto:
 
 .. code:: python
 
-    df = pd.read_carto(username=username,
-                       api_key=api_key,
-                       tablename='brooklyn_poverty_census_tracts')
+    import cartoframes
+    cc = cartoframes.CartoContext('https://eschbacher.carto.com/', APIKEY)
+    df = cc.read('brooklyn_poverty_census_tracts')
     # do fancy pandas operations (add/drop columns, change values, etc.)
     df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
 
     # updates carto table with all changes from this session
-    # show all database access with debug=True
-    df.sync_carto()
-
-.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/read_carto.png
-   :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
+    cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
-Associate an existing pandas dataframe with CARTO, and optionally get the geometry.
+Associate an existing pandas dataframe with CARTO.
 
 .. code:: python
 
     import pandas as pd
     import cartoframes
-    import numpy as np
-    arr = np.arange(10)
-    np.random.shuffle(arr)
-    ingest = {'ids': list('abcdefghij'),
-              'scores': np.random.random(10),
-              'other_rank': arr,
-              'lat': 40.7128 + (0.5 - np.random.random(10)),
-              'lon': -74.0059 + (0.5 - np.random.random(10))}
-    df = pd.DataFrame(ingest)
-    df.sync_carto(username=USERNAME,
-                  api_key=APIKEY,
-                  requested_tablename='awesome_new_table',
-                  createtable=True,
-                  is_org_user=True,
-                  latlng_cols=('lat', 'lon'))
-
-.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/create_carto.png
-   :alt: Example of creating a fresh cartoframe, performing an operation, and syncing with carto
+    df = pd.read_csv('acadia_biodiversity.csv')
+    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+    cc.write(df, 'acadia_biodiversity')
 
 
 Map workflow
 ~~~~~~~~~~~~
 
-The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__.
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
 .. code:: python
 
-    df.carto_map(color={'colname': 'net', 'ramp': 'Bold'},
-                 size={'colname': 'depth', 'min': 6, 'max': 20, 'quant_method': 'headtails'},
-                 basemap='http://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png')
+    from cartoframes import Layer, BaseMap
+    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+    cc.map(layers=[BaseMap(),
+                   Layer('acadia_biodiversity',
+                         color={'column': 'simpson_index',
+                                'scheme': 'TealRose'}),
+                   Layer('peregrine_falcon_nest_sites',
+                         size='num_eggs',
+                         color={'column': 'bird_id',
+                                'scheme': 'Vivid')],
+           interactive=True)
 
-.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/carto_map.png
-   :alt: Example of creating a cartoframe map in a Jupyter notebook
 
 Augment from Data Observatory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Note: This feature is not yet implemented**
 
 Interact with CARTO's Data Observatory:
 
