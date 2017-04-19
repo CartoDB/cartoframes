@@ -1,6 +1,7 @@
 # Python / Jupyter
 *.pyc
 .ipynb_checkpoints/
+sandbox/
 
 # Misc
 credentials.json
@@ -31,4 +32,3 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-

@@ -1,263 +1,164 @@
-"""
-"""
-
-class CartoCSS(object):
-    """
-        class for constructing CartoCSS
-    """
-    # TODO: change language of `ramps` to schemes
-    def __init__(self, df, size=None, color=None, cartocss=None,
-                 basemap='dark'):
-        """
-        """
-        self.df = df
-        self.size = size
-        self.color = color
-        self.cartocss = cartocss
-        self.basemap = basemap
-
-    def get_cartocss(self):
-        """Given options for CartoCSS styling, return
-        CartoCSS
-        """
-        if self.cartocss is None:
-            # get cartocss by geometry type
-            css_template = self.cartocss_by_geom(self.df.get_carto_geomtype())
-
-            linecolor = '#000' if self.basemap == 'dark' else '#FFF'
-            # fill in based on user inputs
-            css_filled = css_template % {'fillstyle': self.get_color_css(),
-                                         'sizestyle': self.get_size_css(),
-                                         'linecolor': linecolor}
-            return css_filled
-        else:
-            return self.cartocss
-    # TODO: match marker line color to basemap color
-    def get_markercss(self):
-        """Return CartoCSS for points"""
-        markercss = ''.join(
-            ("#layer { ",
-             "marker-width: %(sizestyle)s; ",
-             "marker-fill: %(fillstyle)s; ",
-             "marker-fill-opacity: 1; ",
-             "marker-allow-overlap: true; ",
-             "marker-line-width: 0.5; ",
-             "marker-line-color: %(linecolor)s; ",
-             "marker-line-opacity: 1; ",
-             "}"))
-        return markercss
-
-    def get_linecss(self):
-        """Return CartoCSS template for lines"""
-        linecss = ''.join(
-            ("#layer { ",
-             "line-width: 1.5; ",
-             "line-color: %(fillstyle)s; ",
-             "}"))
-        return linecss
-
-    def get_polygoncss(self):
-        """Return CartoCSS template for polygons"""
-        polygoncss = ''.join(
-            ("#layer { ",
-             "polygon-fill: %(fillstyle)s; ",
-             "polygon-opacity: 0.9;",
-             "polygon-gamma: 0.5;",
-             "line-color: #fff;",
-             "line-width: 0.5;",
-             "line-opacity: 0.25;",
-             "line-comp-op: hard-light;",
-             "}"))
-        return polygoncss
-
-    def cartocss_by_geom(self, geomtype):
-        """Return CartoCSS template by geometry type"""
-
-        cartocss = {'point': self.get_markercss(),
-                    'line': self.get_linecss(),
-                    'polygon': self.get_polygoncss()}
-
-        try:
-            return cartocss[geomtype]
-        except KeyError:
-            raise ValueError("No CartoCSS for type `{}`".format(geomtype))
-
-        return None
-
-    def check_size_inputs(self, inputs):
-        """Checks whether the inputs are valid
-        """
-        import numbers
-        if isinstance(inputs, dict):
-            if 'colname' not in self.size:
-                raise NameError("Column name not specified.")
-            elif inputs['colname'] not in self.df.columns:
-                raise NameError("Column name `{}` not in "
-                                "cartoframe.".format(inputs['colname']))
-            elif inputs['min'] >= inputs['max']:
-                raise ValueError("Min size must be larger than max size.")
-            elif inputs['min'] < 0 or inputs['max'] < 0:
-                raise ValueError("Min and max sizes must be greater than or "
-                                 "equal to zero.")
-        elif isinstance(inputs, str):
-            if inputs not in self.df.columns:
-                raise NameError("Column name `{}` not in "
-                                "cartoframe.".format(inputs['colname']))
-        elif isinstance(inputs, numbers.Number):
-            if inputs <= 0:
-                raise ValueError("Marker width must be greater than zero. "
-                                 "`{}` was input.".format(inputs))
-
-        if self.df.get_carto_geomtype() != 'point':
-            raise Exception("Cannot style geometry type `{geomtype}` by "
-                            "size.".format(
-                geomtype=self.df.get_carto_geomtype()))
-
-        return None
-
-    def check_color_inputs(self, inputs):
-        """Checks whether the inputs are valid
-        """
-        quant_methods = {'quantiles', 'jenks', 'headtails',
-                         'equal', 'category'}
-        ramp_providers = {'cartocolor', 'colorbrewer'}
-
-        if isinstance(inputs, dict):
-            if 'colname' not in self.color:
-                raise NameError("Column name not specified.")
-            elif inputs['colname'] not in self.df.columns:
-                raise NameError("Column name `{}` not in "
-                                "cartoframe.".format(inputs['colname']))
-            elif inputs['quant_method'] not in quant_methods:
-                raise ValueError(
-                    ("`quant_method` must be one of "
-                     "{methods}. `{provided}` was "
-                     "entered").format(methods=', '.join(quant_methods),
-                                       provided=inputs['quant_method']))
-            elif inputs['ramp_provider'] not in ramp_providers:
-                raise ValueError(
-                    ("`ramp_provider` must be one of "
-                     "{methods}. `{provided}` was "
-                     "entered").format(methods=', '.join(ramp_providers),
-                                       provided=inputs['ramp_provider']))
-            elif (not isinstance(inputs['ramp'], str) and
-                      not isinstance(inputs['ramp'], list) and
-                      not isinstance(inputs['ramp'], tuple)):
-                raise TypeError("`ramp` param must be of type string, list, "
-                                "or tuple.")
-            elif not isinstance(inputs['quant_method'], str):
-                raise TypeError("`quant_method` must be of type string.")
-            elif not isinstance(inputs['ramp_provider'], str):
-                raise TypeError("`ramp_provider` must be of type string.")
-        elif isinstance(inputs, str):
-            if inputs not in self.df.columns and inputs[0] != '#':
-                raise NameError("`{}` is not a valid column name or "
-                                "hex color. Hex values should begin with a " "`#`.".format(inputs['colname']))
-        else:
-            raise TypeError("Expecting a dict or a string.")
-
-        return None
+class BinMethod:
+    quantiles = 'quantiles'
+    jenks     = 'jenks'
+    headtails = 'headtails'
+    equal     = 'equal'
+    category  = 'category'
 
 
-    def get_size_css(self):
-        """
-        """
-        import numbers
+def get_scheme_cartocss(column, scheme_info):
+    if 'colors' in scheme_info:
+        color_scheme = '({})'.format(','.join(scheme_info['colors']))
+    else:
+        color_scheme = 'cartocolor({})'.format(scheme_info['name'])
 
-        if isinstance(self.size, dict):
-            defaults = {'min': 5,
-                        'max': 25,
-                        'quant_method': 'quantiles'}
+    return "ramp([{column}], {color_scheme}, {bin_method}({bins}))".format(
+        column=column,
+        color_scheme=color_scheme,
+        bin_method=scheme_info['bin_method'],
+        bins=scheme_info['bins'],
+    )
 
-            missing_keys = set(defaults) - set(self.size)
-            args = dict(self.size, **{k: defaults[k] for k in missing_keys})
-            self.check_size_inputs(args)
-            # parse dict
-            css = ("ramp([{colname}], range({min}, {max}), "
-                   "{quant_method}())").format(**args)
-            return css
-        elif isinstance(self.size, str):
-            self.check_size_inputs(self.size)
-            # parse string
-            if self.size in self.df.columns:
-                # if string is a column name
-                # size by 'reasonable' values
-                css = ("ramp([{colname}], range(5, 25), "
-                       "quantiles())").format(colname=self.size)
-                return css
-            else:
-                raise Exception('`{}` is not a column name.'.format(self.size))
-        elif isinstance(self.size, numbers.Number):
-            self.check_size_inputs(self.size)
-            css = str(self.size)
-            return css
-        else:
-            # return 7
-            return "7"
 
-    def get_color_css(self):
-        """
-        """
-        import webcolors
-        import random
-        if isinstance(self.color, dict):
-            # For dark maps: ag_GrnYl, ag_Sunset
-            colors = ('PurpOr', 'BluGrn', 'PinkYl')
-            rint = random.randint(0, len(colors) - 1)
-            # choose category or quantitative defaults
-            if self.df[self.color['colname']].dtype in ('float64', 'int64'):
-                defaults = {'ramp': colors[rint],
-                            'ramp_provider': 'cartocolor',
-                            'quant_method': 'quantiles',
-                            'num_bins': ''}
-            else:
-                defaults = {'ramp': 'Bold',
-                            'ramp_provider': 'cartocolor',
-                            'quant_method': 'category',
-                            'num_bins': ''}
+def custom(colors, bins=None, bin_method=BinMethod.quantiles):
+    return {
+        'colors': colors,
+        'bins': bins if bins is not None else len(colors),
+        'bin_method': bin_method,
+    }
 
-            missing_keys = set(defaults) - set(self.color)
-            args = dict(self.color, **{k: defaults[k] for k in missing_keys})
-            self.check_color_inputs(args)
 
-            # convert items to comma-separated list if appropriate
-            if not isinstance(args['ramp'], str):
-                args['num_bins'] = len(args['ramp'])
-                args['ramp'] = ', '.join([str(r) for r in args['ramp']])
+def _scheme(name, bins, bin_method):
+    return {
+        'name': name,
+        'bins': bins,
+        'bin_method': bin_method,
+    }
 
-            # parse dict
-            # ramp([jellybeans], cartocolor(RedOr), quantiles(5))
-            # ramp([city], cartocolor(Bold), category())
-            css = ("ramp([{colname}], {ramp_provider}({ramp}), "
-                   "{quant_method}({num_bins}))").format(**args)
-            return css
-        elif isinstance(self.color, str) and self.color in self.df.columns:
-            self.check_color_inputs(self.color)
-            if self.df[self.color].dtype in ('float64', 'int64'):
-                default_quant = 'quantiles'
-                default_ramp = 'RedOr'
-            else:
-                default_quant = 'category'
-                default_ramp = 'Bold'
-            defaults = {'ramp_provider': 'cartocolor',
-                        'ramp': default_ramp,
-                        'quant_method': default_quant,
-                        'num_bins': 7}
-            args = dict(defaults, **{'colname': self.color})
-            # parse string
-            if self.color in self.df.columns:
-                # if string is a column name
-                css = ("ramp([{colname}], "
-                       "{ramp_provider}({ramp}), "
-                       "{quant_method}({num_bins}))").format(**args)
-                return css
-            else:
-                return self.color
-        elif (isinstance(self.color, str) and
-              (self.color[0] == '#' or
-               self.color in webcolors.CSS3_NAMES_TO_HEX)):
-            return self.color
-        else:
-            colors = ('#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',)
-            rint = random.randint(0, len(colors)-1)
-            return colors[rint]
+
+def burg(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Burg', bins, bin_method)
+
+
+def burgYl(bins, bin_method=BinMethod.quantiles):
+    return _scheme('BurgYl', bins, bin_method)
+
+
+def redOr(bins, bin_method=BinMethod.quantiles):
+    return _scheme('RedOr', bins, bin_method)
+
+
+def orYel(bins, bin_method=BinMethod.quantiles):
+    return _scheme('OrYel', bins, bin_method)
+
+
+def peach(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Peach', bins, bin_method)
+
+
+def pinkYl(bins, bin_method=BinMethod.quantiles):
+    return _scheme('PinkYl', bins, bin_method)
+
+
+def mint(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Mint', bins, bin_method)
+
+
+def bluGrn(bins, bin_method=BinMethod.quantiles):
+    return _scheme('BluGrn', bins, bin_method)
+
+
+def darkMint(bins, bin_method=BinMethod.quantiles):
+    return _scheme('DarkMint', bins, bin_method)
+
+
+def emrld(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Emrld', bins, bin_method)
+
+
+def bluYl(bins, bin_method=BinMethod.quantiles):
+    return _scheme('BluYl', bins, bin_method)
+
+
+def teal(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Teal', bins, bin_method)
+
+
+def tealGrn(bins, bin_method=BinMethod.quantiles):
+    return _scheme('TealGrn', bins, bin_method)
+
+
+def purp(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Purp', bins, bin_method)
+
+
+def purpOr(bins, bin_method=BinMethod.quantiles):
+    return _scheme('PurpOr', bins, bin_method)
+
+
+def sunset(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Sunset', bins, bin_method)
+
+
+def magenta(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Magenta', bins, bin_method)
+
+
+def sunsetDark(bins, bin_method=BinMethod.quantiles):
+    return _scheme('SunsetDark', bins, bin_method)
+
+
+def brwnYl(bins, bin_method=BinMethod.quantiles):
+    return _scheme('BrwnYl', bins, bin_method)
+
+
+def armyRose(bins, bin_method=BinMethod.quantiles):
+    return _scheme('ArmyRose', bins, bin_method)
+
+
+def fall(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Fall', bins, bin_method)
+
+
+def geyser(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Geyser', bins, bin_method)
+
+
+def temps(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Temps', bins, bin_method)
+
+
+def tealRose(bins, bin_method=BinMethod.quantiles):
+    return _scheme('TealRose', bins, bin_method)
+
+
+def tropic(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Tropic', bins, bin_method)
+
+
+def earth(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Earth', bins, bin_method)
+
+
+def antique(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Antique', bins, bin_method)
+
+
+def bold(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Bold', bins, bin_method)
+
+
+def pastel(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Pastel', bins, bin_method)
+
+
+def prism(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Prism', bins, bin_method)
+
+
+def safe(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Safe', bins, bin_method)
+
+
+def vivid(bins, bin_method=BinMethod.quantiles):
+    return _scheme('Vivid', bins, bin_method)
