@@ -53,6 +53,7 @@ class CartoContext:
         self.is_org = (paths[0] != 'public')
 
         self._map_templates = {}
+        self._srcdoc = None
 
         self._verbose = verbose
 
@@ -371,7 +372,7 @@ class CartoContext:
 
 
     def _get_iframe_srcdoc(self, config, bounds, options, map_options):
-        if not hasattr(self, '_srcdoc'):
+        if not hasattr(self, '_srcdoc') or self._srcdoc is None:
             with open(os.path.join(os.path.dirname(__file__),
                                    'assets/cartoframes.html'), 'r') as f:
                 self._srcdoc = f.read()
