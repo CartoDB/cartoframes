@@ -48,8 +48,9 @@ class CartoContext:
         self.sql_client = SQLClient(self.auth_client)
 
         res = self.sql_client.send('SHOW search_path')
-        paths = res['rows'][0]['search_path'].split(',')
-        self.is_org = (paths[0] == 'public')
+        paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
+        # is an org user if first item is not `public`
+        self.is_org = (paths[0] != 'public')
 
         self._map_templates = {}
 
@@ -139,12 +140,12 @@ class CartoContext:
             self._debug_print(create_table_query=create_table_query)
 
             create_table_res = self.sql_client.send(create_table_query)
-            self._debug_print(create_table_res=res)
+            self._debug_print(create_table_res=create_table_res)
 
             new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
             self._debug_print(new_table_name=new_table_name)
 
-            select_res = carto_sql_client.send(
+            select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name))
         else:
             select_res = self.sql_client.send(q)
