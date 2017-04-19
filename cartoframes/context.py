@@ -195,7 +195,8 @@ class CartoContext:
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
-        if len(layers) == 0 and zoom is None:
+        if ((len(layers) == 0 and zoom is None) or
+                (len(layers) == 1 and layers[0].is_basemap)):
             [zoom, lat, lng] = [3, 38, -99]
         has_zoom = zoom is not None
 
