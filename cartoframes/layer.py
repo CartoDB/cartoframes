@@ -2,8 +2,8 @@ import itertools
 import pandas as pd
 import random
 import webcolors
-from .utils import cssify
-from .styling import BinMethod, mint, get_scheme_cartocss
+from cartoframes.utils import cssify
+from cartoframes.styling import BinMethod, mint, get_scheme_cartocss
 
 
 DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
@@ -11,6 +11,7 @@ DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
 
 
 class AbstractLayer:
+    """Abstract Layer object"""
     is_basemap = False
 
     def __init__(self):
@@ -21,6 +22,29 @@ class AbstractLayer:
 
 
 class BaseMap(AbstractLayer):
+    """Layer object for adding basemaps to a cartoframes map.
+
+    Example:
+        Add a custom basemap to a cartoframes map.
+        ::
+
+            import cartoframes
+            from cartoframes import BaseMap, Layer
+            cc = cartoframes.CartoContext(BASEURL, APIKEY)
+            cc.map(layers=[BaseMap(source='light', labels='front'),
+                           Layer('acadia_biodiversity')])
+
+    Args:
+        source (str, optional): One of ``light`` or ``dark``. Defaults to ``dark``.
+            Basemaps come from
+            https://carto.com/location-data-services/basemaps/
+        labels (str, optional): One of ``back``, ``front``, or None. Labels on the
+            front will be above the data layers. Labels on back will be
+            underneath the data layers but on top of the basemap. Setting
+            labels to ``None`` will only show the basemap.
+        only_labels (bool, optional): Whether to show labels or not.
+
+    """
     is_basemap = True
 
     def __init__(self, source='dark', labels='back', only_labels=False):
@@ -37,16 +61,90 @@ class BaseMap(AbstractLayer):
                 style = source + '_only_labels'
             self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
-        else:
+        elif self.source.startswith('http'):
             # [BUG] Remove this once baselayer urls can be passed in named map config
-            raise ValueError('BaseMap cannot contain a custom url at the moment')
-            self.url = source
+            raise ValueError('BaseMap cannot contain a custom url at the '
+                             'moment')
+            # self.url = source
+        else:
+            raise ValueError("`source` must be one of 'dark' or 'light'")
 
     def is_basic(self):
+        """Does BaseMap pull from CARTO default basemaps?"""
         return self.source in ('dark', 'light')
 
 
 class QueryLayer(AbstractLayer):
+    """cartoframes Data Layer based on an arbitrary query to the user's CARTO
+    database. This layer class is useful for offloading processing to the cloud
+    to do some of the following:
+
+    * pull down a snapshot of the data (e.g., selecting only important columns
+    instead of all columns in the dataset)
+    * doing spatial processing using `PostGIS <http://postgis.net/>`__ and
+    `PostgreSQL <https://www.postgresql.org/>`__, which is the database
+    underlying CARTO
+    * performing arbitrary relational database queries (e.g., complex JOINs
+    in SQL instead of in pandas)
+
+    Example:
+    ::
+
+        import cartoframes
+        from cartoframes import QueryLayer
+        cc = cartoframes.CartoContext(BASEURL, APIKEY)
+        cc.map(layers=[QueryLayer('''
+                                  SELECT
+                                      cartodb_id, the_geom,
+                                      the_geom_webmercator,
+                                      abs(i.measure- j.measure) as abs_diff,
+                                  FROM interesting_data AS i
+                                  JOIN awesome_data AS j
+                                    ON i.event_id = j.event_id
+                                  WHERE j.measure IS NOT NULL
+                                    AND i.date > '2017-04-19'
+                                  ''',
+                                  color={'column': 'abs_diff',
+                                         'scheme': 'SunsetDark'}),
+                       Layer('fantastic_sql_table')])
+
+    Args:
+        query (str): Query to create a pandas DataFrame from. At a minimum, all
+            queries need to have the columns `cartodb_id`, `the_geom`, and
+            `the_geom_webmercator`. Read more in
+            `CARTO's docs <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__.
+        time (dict or str): Style to apply to layer.
+            If `time` is a `dict`, the following keys are options:
+            - column (str, required): Column for animating map from. Data must
+            be of type time or float.
+            - method (str, optional): Type of aggregation method for operating
+            on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
+            be one of ``avg``, ``sum``, or another `PostgreSQL aggregate functions
+            <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
+            with a numeric output. Defaults to ``count``.
+            - cumulative (str, optional): Whether to accumulate (``cumulative``)
+            the point data overtime, or show the event at the specified time
+            only (``linear``). Defaults to ``linear``.
+            - frames (int, optional): Number of frames in the animation.
+            Defaults to 256.
+            - duration (int, optional): Number of seconds in the animation.
+            Defaults to 30.
+            If `time` is a ``str``, then it must be a column name available in
+            the query that is of type numeric or datetime.
+        color (dict or str, optional): Color style to apply to map.
+            If `color` is a ``dict``, the following keys are options, with
+            values described:
+            - column (str): Column to base coloring from.
+            - scheme (str, optinal): Color scheme from
+                `CartoColors
+                <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
+                Defaults to `Mint`.
+            - bin_method (str, optional): Quantification method for dividing
+                data range into bins. Must be one of: ``quantiles``, ``equal``,
+                ``headtails`, or ``jenks``. Defaults to ``quantiles``.
+            - bins (int, optional): Number of bins to divide data amongst in
+                the `bin_method`. Defaults to 5.
+    """
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
 
@@ -61,11 +159,11 @@ class QueryLayer(AbstractLayer):
             if 'column' not in color:
                 raise ValueError("color must include a 'column' value")
             scheme = color.get('scheme', mint(5))
-            color  = color['column']
+            color = color['column']
         elif (color and
               color[0] != '#' and
               color not in webcolors.CSS3_NAMES_TO_HEX):
-            color  = color
+            color = color
             scheme = mint(5)
         else:
             color  = color
@@ -75,18 +173,18 @@ class QueryLayer(AbstractLayer):
             if isinstance(time, dict):
                 if 'column' not in time:
                     raise ValueError("time must include a 'column' value")
-                time_column  = time['column']
+                time_column = time['column']
                 time_options = time
             else:
-                time_column  = time
+                time_column = time
                 time_options = {}
 
             time = {
-                'column'    : time_column,
-                'method'    : 'count',
+                'column': time_column,
+                'method': 'count',
                 'cumulative': False,
-                'frames'    : 256,
-                'duration'  : 30,
+                'frames': 256,
+                'duration': 30,
             }
             time.update(time_options)
 
