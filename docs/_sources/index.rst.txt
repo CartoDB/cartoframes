@@ -12,9 +12,11 @@
 cartoframe methods
 ==================
 
-.. automodule:: core
+.. automodule:: context
     :members:
-.. automodule:: data_obs
+.. automodule:: layer
+    :members:
+.. automodule:: maps
     :members:
 
 Indices and tables

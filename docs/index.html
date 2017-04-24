@@ -44,75 +44,63 @@
   <div class="section" id="cartoframes">
 <h1>CARTOFrames<a class="headerlink" href="#cartoframes" title="Permalink to this headline">¶</a></h1>
 <p>A pandas interface for integrating <a class="reference external" href="https://carto.com/">CARTO</a> into data science workflows.</p>
+<p>Python data analysis workflows often rely on the de facto standards <a class="reference external" href="http://pandas.pydata.org/">pandas</a> and <a class="reference external" href="http://jupyter.org/">Jupyter notebooks</a>. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO&#8217;s services like hosted, dynamic or static maps and <a class="reference external" href="https://carto.com/data-observatory/">Data Observatory</a> augmentation.</p>
 <div class="section" id="install-instructions">
 <h2>Install Instructions<a class="headerlink" href="#install-instructions" title="Permalink to this headline">¶</a></h2>
 <p><cite>cartoframes</cite> relies on <a class="reference external" href="http://pandas.pydata.org/">pandas</a> and a development version of the CARTO Python SDK (on branch <a class="reference external" href="https://github.com/CartoDB/carto-python/tree/1.0.0">1.0.0</a>). To install <cite>cartoframes</cite> on your machine, do the following:</p>
-<p>Clone this repository.</p>
-<p>Change your directory to <cite>cartoframes</cite> and run the following:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
-$ pip install cartoframes
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/CartoDB/cartoframes.git
+$ cd cartoframes
+$ pip install -r requirements.txt
+$ pip install -e .
 </pre></div>
 </div>
 <p>Once you&#8217;ve done this, <cite>cartoframes</cite> will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.</p>
-<p>Note: Eventually <cite>cartoframes</cite> will be fully installable from <cite>pip</cite>.</p>
+<p><strong>Note:</strong> Eventually <cite>cartoframes</cite> will be fully installable from <cite>pip</cite>.</p>
 </div>
 <div class="section" id="example-usage">
 <h2>Example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="data-workflow">
 <h3>Data workflow<a class="headerlink" href="#data-workflow" title="Permalink to this headline">¶</a></h3>
-<p>Get table from carto, make changes in pandas, sync updates with carto:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_carto</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
-                   <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
-                   <span class="n">tablename</span><span class="o">=</span><span class="s1">&#39;brooklyn_poverty_census_tracts&#39;</span><span class="p">)</span>
+<p>Get table from CARTO, make changes in pandas, sync updates with CARTO:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="s1">&#39;https://eschbacher.carto.com/&#39;</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;brooklyn_poverty_census_tracts&#39;</span><span class="p">)</span>
 <span class="c1"># do fancy pandas operations (add/drop columns, change values, etc.)</span>
 <span class="n">df</span><span class="p">[</span><span class="s1">&#39;poverty_per_pop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;poverty_count&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;total_population&#39;</span><span class="p">]</span>
 
 <span class="c1"># updates carto table with all changes from this session</span>
-<span class="c1"># show all database access with debug=True</span>
-<span class="n">df</span><span class="o">.</span><span class="n">sync_carto</span><span class="p">()</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty_census_tracts&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="figure">
-<img alt="Example of creating a fresh cartoframe, performing an operation, and syncing with carto" src="https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/read_carto.png" />
-</div>
-<p>Associate an existing pandas dataframe with CARTO, and optionally get the geometry.</p>
+<p>Associate an existing pandas dataframe with CARTO.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
-<span class="n">ingest</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ids&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="s1">&#39;abcdefghij&#39;</span><span class="p">),</span>
-          <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
-          <span class="s1">&#39;other_rank&#39;</span><span class="p">:</span> <span class="n">arr</span><span class="p">,</span>
-          <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mf">40.7128</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">)),</span>
-          <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">74.0059</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">10</span><span class="p">))}</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ingest</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">sync_carto</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">USERNAME</span><span class="p">,</span>
-              <span class="n">api_key</span><span class="o">=</span><span class="n">APIKEY</span><span class="p">,</span>
-              <span class="n">requested_tablename</span><span class="o">=</span><span class="s1">&#39;awesome_new_table&#39;</span><span class="p">,</span>
-              <span class="n">createtable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-              <span class="n">is_org_user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-              <span class="n">latlng_cols</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity.csv&#39;</span><span class="p">)</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
 </pre></div>
-</div>
-<div class="figure">
-<img alt="Example of creating a fresh cartoframe, performing an operation, and syncing with carto" src="https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/create_carto.png" />
 </div>
 </div>
 <div class="section" id="map-workflow">
 <h3>Map workflow<a class="headerlink" href="#map-workflow" title="Permalink to this headline">¶</a></h3>
-<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">Turbo Carto</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CartoColors</a>.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">carto_map</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;colname&#39;</span><span class="p">:</span> <span class="s1">&#39;net&#39;</span><span class="p">,</span> <span class="s1">&#39;ramp&#39;</span><span class="p">:</span> <span class="s1">&#39;Bold&#39;</span><span class="p">},</span>
-             <span class="n">size</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;colname&#39;</span><span class="p">:</span> <span class="s1">&#39;depth&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;quant_method&#39;</span><span class="p">:</span> <span class="s1">&#39;headtails&#39;</span><span class="p">},</span>
-             <span class="n">basemap</span><span class="o">=</span><span class="s1">&#39;http://</span><span class="si">{s}</span><span class="s1">.tile.thunderforest.com/spinal-map/</span><span class="si">{z}</span><span class="s1">/</span><span class="si">{x}</span><span class="s1">/</span><span class="si">{y}</span><span class="s1">.png&#39;</span><span class="p">)</span>
+<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">Turbo Carto</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CartoColors</a>. See the <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColor wiki</a> for a full list of available color schemes.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">BaseMap</span><span class="p">(),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;simpson_index&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;TealRose&#39;</span><span class="p">}),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;peregrine_falcon_nest_sites&#39;</span><span class="p">,</span>
+                     <span class="n">size</span><span class="o">=</span><span class="s1">&#39;num_eggs&#39;</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;Vivid&#39;</span><span class="p">)],</span>
+       <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
-</div>
-<div class="figure">
-<img alt="Example of creating a cartoframe map in a Jupyter notebook" src="https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/carto_map.png" />
 </div>
 </div>
 <div class="section" id="augment-from-data-observatory">
 <h3>Augment from Data Observatory<a class="headerlink" href="#augment-from-data-observatory" title="Permalink to this headline">¶</a></h3>
+<p><strong>Note: This feature is not yet implemented</strong></p>
 <p>Interact with CARTO&#8217;s Data Observatory:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># total pop, high school diploma (normalized), median income, poverty status (normalized)</span>
 <span class="c1"># See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html</span>
@@ -132,357 +120,388 @@ $ pip install cartoframes
 </div>
 </div>
 </div>
-<div class="section" id="module-core">
-<span id="cartoframe-methods"></span><h1>cartoframe methods<a class="headerlink" href="#module-core" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>cartoframe methods<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>A pandas dataframe interface for working with CARTO maps and tables.</p>
-<p>Andy Eschbacher and Stuart Lynn, 2017</p>
-<dl class="docutils">
-<dt>Project goals</dt>
-<dd><ul class="first last simple">
-<li>Interact with a CARTO table fully within a Jupyter notebook/pandas
-workflow (read and sync dataframe changes)</li>
-<li>Like geopandas, have a .carto_map() method which gives back the data
-as a map using carto&#8217;s maps api and TurboCartoCSS on an optional
-attribute</li>
-<li>Add CARTO services like the Data Observatory as methods to a dataframe</li>
-</ul>
-</dd>
-</dl>
-<p>Features to add: see issues in the repository <a class="reference external" href="https://github.com/CartoDB/cartoframes/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement">https://github.com/CartoDB/cartoframes/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement</a></p>
-<dl class="function">
-<dt id="core.carto_create">
-<code class="descclassname">core.</code><code class="descname">carto_create</code><span class="sig-paren">(</span><em>self</em>, <em>username</em>, <em>api_key</em>, <em>tablename</em>, <em>latlng_cols=None</em>, <em>is_org_user=False</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.carto_create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create and populate a table on carto with a dataframe.
-This is a private method, but can be used to create a new table on
-CARTO. It is used in carto_sync if a DataFrame is not yet linked to a
-CARTO table.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.carto_insync">
-<code class="descclassname">core.</code><code class="descname">carto_insync</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.carto_insync" title="Permalink to this definition">¶</a></dt>
-<dd><p>Says whether current cartoframe is in sync with last saved state</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.carto_map">
-<code class="descclassname">core.</code><code class="descname">carto_map</code><span class="sig-paren">(</span><em>self</em>, <em>interactive=True</em>, <em>color=None</em>, <em>size=None</em>, <em>cartocss=None</em>, <em>basemap=None</em>, <em>figsize=(647</em>, <em>400)</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.carto_map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Produce and return CARTO maps. Can be interactive or static.</p>
+<div class="section" id="module-context">
+<span id="cartoframe-methods"></span><h1>cartoframe methods<a class="headerlink" href="#module-context" title="Permalink to this headline">¶</a></h1>
+<p>CartoContext class for authentication with CARTO and high-level operations
+such as reading tables from CARTO into dataframes, writing dataframes to CARTO
+tables, and creating custom maps from dataframes and CARTO tables. Future
+methods interact with CARTO&#8217;s services like
+<a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>, and <a class="reference external" href="https://carto.com/location-data-services/">routing,
+geocoding, and isolines</a>.</p>
+<dl class="class">
+<dt id="context.CartoContext">
+<em class="property">class </em><code class="descclassname">context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url</em>, <em>api_key</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manages connections with CARTO for data and map operations. Modeled
+after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
+<p class="rubric">Example</p>
+<p>Create a CartoContext object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>interactive</strong> (<em>boolean</em>) &#8211; (optional) Value on whether to show an interactive map or static map</li>
-<li><strong>color</strong> (<em>dict</em><em>, </em><em>string</em>) &#8211; <p>(optional)</p>
-<ul>
-<li>If color is a string, can be a column name or a hex value (beginning with a <code class="docutils literal"><span class="pre">#</span></code>). When a hex value, all geometries are colored the same. If the column name, use CARTO&#8217;s TurtoCarto to create qualitative or category mapping.</li>
-<li>If color is a dict, parse the parameters to custom style the map. Values are:<blockquote>
-<div><ul>
-<li>colname (required): column name to base the styling on</li>
-<li>ramp (optional): If text, type of color ramp to use. See <a class="reference external" href="https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js">https://github.com/CartoDB/CartoColor/blob/master/cartocolor.js</a> for a full list. If list/tuple, set of hex values.</li>
-<li>ramp_provider (optional): Specify the source of the <cite>ramp</cite> (either <cite>cartocolor</cite> or <cite>colorbrewer</cite>)</li>
-<li>num_bins: Number of divisions for the ramp</li>
-<li>quant_method: Quantification method for dividing the data into classes. Options are <cite>jenks</cite>, <cite>quantiles</cite>, <cite>equal</cite>, or <cite>headtails</cite>. By choosing a custom ramp</li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-</li>
-<li><strong>size</strong> (<em>integer</em><em>, </em><em>string</em><em>, </em><em>dict</em>) &#8211; <p>(optional) Only works with point geometries. A future version will allow more sizing options for lines.</p>
-<ul>
-<li>If size is an integer, all points are sized by the same value specified.</li>
-<li>If size is a column name, this option sizes points from a default minimum value of 4 pixels to 15 pixels.</li>
-<li>If size is a dict, size points by the following values if entered. Defaults will be used if they are not requested.<ul>
-<li>colname: column to base the styling off of</li>
-<li>max: maximum marker width (default 15)</li>
-<li>min: minimum marker width (default 4)</li>
-<li>quant_method: type of quantification to use. Options are <cite>jenks</cite>, <cite>quantiles</cite>, <cite>equal</cite>, or <cite>headtails</cite>.</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>cartocss</strong> (<em>string</em>) &#8211; Complete CartoCSS style to apply to your map. This will override <cite>size</cite> and <cite>color</cite> attributes if present.</li>
-<li><strong>basemap</strong> (<em>string</em>) &#8211; (optional) XYZ URL template for the basemap. See <a class="reference external" href="https://leaflet-extras.github.io/leaflet-providers/preview/">https://leaflet-extras.github.io/leaflet-providers/preview/</a> for examples.</li>
-<li><strong>figsize</strong> (<em>tuple</em>) &#8211; (optional) Tuple of dimensions (width, height) for output embed or image. Default is (647, 400).</li>
+<li><strong>base_url</strong> (<em>str</em>) &#8211; Base URL of CARTO user account. Cloud-based accounts
+are of the form <code class="docutils literal"><span class="pre">https://{username}.carto.com</span></code> (e.g.,
+<a class="reference external" href="https://eschbacher.carto.com">https://eschbacher.carto.com</a> for user <code class="docutils literal"><span class="pre">eschbacher</span></code>). On-premises
+installation users should ask their admin.</li>
+<li><strong>api_key</strong> (<em>str</em>) &#8211; CARTO API key.</li>
+<li><strong>session</strong> (<em>requests.Session</em><em>, </em><em>optional</em>) &#8211; requests session. See <a class="reference external" href="http://docs.python-requests.org/en/master/user/advanced/">requests
+documentation</a>
+for more information:</li>
+<li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; Output underlying process states (True), or
+suppress (False, default)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an interactive or static CARTO map optionally styled</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A CartoContext object that is authenticated against
+the user&#8217;s CARTO account.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">HTML embed</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#context.CartoContext" title="context.CartoContext"><code class="xref py py-obj docutils literal"><span class="pre">CartoContext</span></code></a></p>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="context.CartoContext.data_augment">
+<code class="descname">data_augment</code><span class="sig-paren">(</span><em>table_name</em>, <em>numer</em>, <em>denom=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_augment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not currently implemented</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="core.carto_registered">
-<code class="descclassname">core.</code><code class="descname">carto_registered</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.carto_registered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Says whether dataframe is registered as a table on CARTO</p>
+<dl class="method">
+<dt id="context.CartoContext.data_boundaries">
+<code class="descname">data_boundaries</code><span class="sig-paren">(</span><em>df=None</em>, <em>table_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not currently implemented</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="core.get_carto">
-<code class="descclassname">core.</code><code class="descname">get_carto</code><span class="sig-paren">(</span><em>self</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto" title="Permalink to this definition">¶</a></dt>
-<dd><p>General get method for reading from cartoframe metadata</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>string</em>) &#8211; key of item to fetch from metadata. One of <cite>carto_named_map</cite>, <cite>carto_geomtype</cite>, <cite>carto_username</cite>, <cite>carto_table</cite>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Value stored in cartoframe metadata</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">any</td>
-</tr>
-</tbody>
-</table>
+<dl class="method">
+<dt id="context.CartoContext.data_discovery">
+<code class="descname">data_discovery</code><span class="sig-paren">(</span><em>keywords=None</em>, <em>regex=None</em>, <em>time=None</em>, <em>boundary=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_discovery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not currently implemented</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="core.get_carto_api_key">
-<code class="descclassname">core.</code><code class="descname">get_carto_api_key</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the username of a cartoframe
-:returns: CARTO API key associated with cartoframe
-:rtype: string</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_datapage">
-<code class="descclassname">core.</code><code class="descname">get_carto_datapage</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_datapage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the CARTO dataset page</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">URL of data page of dataset on CARTO (behind password if private)</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_geomtype">
-<code class="descclassname">core.</code><code class="descname">get_carto_geomtype</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_geomtype" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the geometry type of the cartoframe</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Geometry type in table</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_namedmap">
-<code class="descclassname">core.</code><code class="descname">get_carto_namedmap</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_namedmap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the named map associated with a cartoframe</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Name of named map</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_sql_client">
-<code class="descclassname">core.</code><code class="descname">get_carto_sql_client</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_sql_client" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the internally stored sql client</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">CARTO SQL Auth client object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_tablename">
-<code class="descclassname">core.</code><code class="descname">get_carto_tablename</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_tablename" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the username of a cartoframe</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Table that cartoframe is associated with</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.get_carto_username">
-<code class="descclassname">core.</code><code class="descname">get_carto_username</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.get_carto_username" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the username of a cartoframe
-:returns: CARTO username associated with cartoframe
-:rtype: string</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.make_cartoframe">
-<code class="descclassname">core.</code><code class="descname">make_cartoframe</code><span class="sig-paren">(</span><em>self</em>, <em>username</em>, <em>api_key</em>, <em>tablename</em>, <em>api_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#core.make_cartoframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Placeholder method (not functioning)</p>
-<ol class="arabic simple">
-<li>instantiate sql client</li>
-<li>setup schema on carto</li>
-<li>...</li>
-</ol>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username</li>
-<li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key</li>
-<li><strong>tablename</strong> (<em>string</em>) &#8211; desired tablename</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.read_carto">
-<code class="descclassname">core.</code><code class="descname">read_carto</code><span class="sig-paren">(</span><em>username=None</em>, <em>api_key=None</em>, <em>onprem_url=None</em>, <em>tablename=None</em>, <em>query=None</em>, <em>include_geom=True</em>, <em>is_org_user=False</em>, <em>limit=None</em>, <em>cdb_client=None</em>, <em>index='cartodb_id'</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.read_carto" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a DataFrame from a CARTO table, storing table information in
-pandas metadata that allows for further cartoframe options like syncing,
-map creation, and augmentation from the Data Observatory.</p>
+<dl class="method">
+<dt id="context.CartoContext.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>layers=None</em>, <em>interactive=True</em>, <em>zoom=None</em>, <em>lat=None</em>, <em>lng=None</em>, <em>size=(800</em>, <em>400)</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce a CARTO map visualizing data layers.</p>
+<p class="rubric">Example</p>
+<p>Create a map with two data layers, and one BaseMap layer.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">BaseMap</span><span class="p">(),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;simpson_index&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;TealRose&#39;</span><span class="p">}),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;peregrine_falcon_nest_sites&#39;</span><span class="p">,</span>
+                     <span class="n">size</span><span class="o">=</span><span class="s1">&#39;num_eggs&#39;</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;Vivid&#39;</span><span class="p">)],</span>
+       <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username (default None)</li>
-<li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key</li>
-<li><strong>onprem_url</strong> (<em>string</em>) &#8211; BASEURL for onprem</li>
-<li><strong>tablename</strong> (<em>string</em>) &#8211; Table to create a cartoframe from</li>
-<li><strong>query</strong> (<em>string</em>) &#8211; Query for generating a cartoframe</li>
-<li><strong>include_geom</strong> (<em>boolean</em>) &#8211; Not implemented</li>
-<li><strong>is_org_user</strong> (<em>boolean</em>) &#8211; (optional) Where <cite>username</cite> is in a multiuser account</li>
-<li><strong>limit</strong> (<em>integer</em>) &#8211; (optional) The maximum number of rows to pull</li>
-<li><strong>cdb_client</strong> (<em>object</em>) &#8211; (optional) CARTO Python SDK authentication client object (default None)</li>
-<li><strong>index</strong> (<em>string</em>) &#8211; (optional) string Column to use for the index (default <cite>cartodb_id</cite>)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A pandas DataFrame linked to a CARTO table</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">cartoframe</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.set_carto_sql_client">
-<code class="descclassname">core.</code><code class="descname">set_carto_sql_client</code><span class="sig-paren">(</span><em>self</em>, <em>sql_client</em><span class="sig-paren">)</span><a class="headerlink" href="#core.set_carto_sql_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store the SQL client for later use</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.set_last_state">
-<code class="descclassname">core.</code><code class="descname">set_last_state</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#core.set_last_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store the state of the cartoframe</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.set_metadata">
-<code class="descclassname">core.</code><code class="descname">set_metadata</code><span class="sig-paren">(</span><em>self</em>, <em>tablename=None</em>, <em>username=None</em>, <em>api_key=None</em>, <em>include_geom=None</em>, <em>limit=None</em>, <em>geomtype=None</em>, <em>named_map_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#core.set_metadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set method for storing metadata in a dataframe</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.sync_carto">
-<code class="descclassname">core.</code><code class="descname">sync_carto</code><span class="sig-paren">(</span><em>self</em>, <em>username=None</em>, <em>api_key=None</em>, <em>requested_tablename=None</em>, <em>n_batch=20</em>, <em>latlng_cols=None</em>, <em>is_org_user=False</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#core.sync_carto" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>If an existing cartoframe, this method syncs with the CARTO table a</dt>
-<dd>cartoframe is associated with. If syncing a DataFrame which has not yet
-been linked with CARTO, it creates a new table if the tablename does
-not yet exist and updates the metadata in the DataFrame.</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username credentials. Needed only if the DataFrame
-is not yet linked to CARTO (e.g., it was created with
-<code class="docutils literal"><span class="pre">pd.DataFrame.read_carto</span></code>)</li>
-<li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key. Needed only if linking a DataFrame with a
-table on CARTO.</li>
-<li><strong>requested_tablename</strong> (<em>string</em>) &#8211; if set, creates a new table with name
-<cite>new_tablename</cite> on account connected through the auth_client. If this
-tablename exists on CARTO already, an exception will be thrown.</li>
-<li><strong>n_batch</strong> (<em>integer</em>) &#8211; Number of queries to include in a batch update to the
-database (experimental).</li>
-<li><strong>latlng_cols</strong> (<em>tuple</em>) &#8211; Columns which have the latitude and longitude (in that
-order) for creating the geometry in the database. Once this cartoframe
-syncs, a new column called <cite>the_geom</cite> will be pulled down that is a
-text representation of the geometry.</li>
-<li><strong>is_org_user</strong> (<em>boolean</em>) &#8211; This flag needs to be set if a user is in a
-multiuser account.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<span class="target" id="module-data_obs"></span><div class="section" id="data-observatory-methods">
-<h2>Data Observatory methods<a class="headerlink" href="#data-observatory-methods" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="data_obs.carto_do_augment">
-<code class="descclassname">data_obs.</code><code class="descname">carto_do_augment</code><span class="sig-paren">(</span><em>self</em>, <em>cols_meta</em>, <em>add_geom_id=False</em>, <em>force_sync=False</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#data_obs.carto_do_augment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Augment an existing cartoframe with Data Observatory
-1. check inputs for conflicts
-2. send request to augment carto table: <a class="reference external" href="https://gist.github.com/talos/50000ed856eb688c66b10d1054a9bcc6">https://gist.github.com/talos/50000ed856eb688c66b10d1054a9bcc6</a>
-3. pull down df with only the added columns (with index)
-4. update self to add new columns</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>cols_meta</strong> (<em>list of dicts</em>) &#8211; <p>Data observatory measures. Each dict has the following keys:</p>
+<li><strong>layers</strong> (<em>list</em><em>, </em><em>optional</em>) &#8211; <p>List of one or more of the following:</p>
 <ul>
-<li><code class="docutils literal"><span class="pre">numer_id</span></code>: measure ID from the Data Observatory catalog <a class="reference external" href="https://cartodb.github.io/bigmetadata/index.html">https://cartodb.github.io/bigmetadata/index.html</a></li>
-<li><code class="docutils literal"><span class="pre">denominator</span></code> (optional): if value is <code class="docutils literal"><span class="pre">predenominated</span></code>, then normalize by an appropriate value</li>
-<li><code class="docutils literal"><span class="pre">geom_id</span></code> (optional): geometry level to pull measure information from. TODO: add more to this</li>
+<li>Layer: cartoframes Layer object for visualizing data from a
+CARTO table. See <a class="reference external" href="#layer.Layer">layer.Layer</a> for all
+styling options.</li>
+<li>BaseMap: Basemap for contextualizng data layers. See
+<a class="reference external" href="#layer.BaseMap">layer.BaseMap</a> for all styling options.</li>
+<li>QueryLayer: Layer from an arbitrary query. See
+<a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> for all styling
+options.</li>
 </ul>
 </li>
-<li><strong>add_geom_id</strong> &#8211; Not currently implemented</li>
-<li><strong>force_sync</strong> &#8211; TODO param</li>
+<li><strong>interactive</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; Defaults to <code class="docutils literal"><span class="pre">True</span></code> to show an
+interactive slippy map. Setting to <code class="docutils literal"><span class="pre">False</span></code> creates a static
+map.</li>
+<li><strong>zoom</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; Zoom level of map. Acceptable values are
+usually in the range 0 to 19. 0 has the entire earth on a
+single tile (256px square). Zoom 19 is the size of a city
+block. Must be used in conjunction with <code class="docutils literal"><span class="pre">lng</span></code> and <code class="docutils literal"><span class="pre">lat</span></code>.
+Defaults to a view to have all data layers in view.</li>
+<li><strong>lat</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; Latitude value for the center of the map.
+Must be used in conjunction with <code class="docutils literal"><span class="pre">zoom</span></code> and <code class="docutils literal"><span class="pre">lng</span></code>. Defaults
+to a view to have all data layers in view.</li>
+<li><strong>lng</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; Longitude value for the center of the map.
+Must be used in conjunction with <code class="docutils literal"><span class="pre">zoom</span></code> and <code class="docutils literal"><span class="pre">lat</span></code>. Defaults
+to a view to have all data layers in view.</li>
+<li><strong>size</strong> (<em>tuple</em><em>, </em><em>optional</em>) &#8211; List of pixel dimensions for the map. Format
+is <code class="docutils literal"><span class="pre">(width,</span> <span class="pre">height)</span></code>. Defaults to <code class="docutils literal"><span class="pre">(800,</span> <span class="pre">400)</span></code>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an <code class="docutils literal"><span class="pre">iframe</span></code>,
+while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>query</em>, <em>table_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pull the result from an arbitrary SQL query from a CARTO account
+into a pandas DataFrame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>str</em>) &#8211; Query to run against CARTO user database.</li>
+<li><strong>table_name</strong> (<em>str</em><em>, </em><em>optional</em>) &#8211; If set, this will create a new
+table in the user&#8217;s CARTO account that is the result of the
+query. Defaults to None (no table created).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of query supplied.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index='cartodb_id'</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read tables from CARTO into pandas DataFrames.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table_name</strong> (<em>str</em>) &#8211; Name of table in user&#8217;s CARTO account.</li>
+<li><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) &#8211; Read only <code class="docutils literal"><span class="pre">limit</span></code> lines from
+<code class="docutils literal"><span class="pre">table_name</span></code>. Defaults to <cite>None</cite>, which reads the full table.</li>
+<li><strong>index</strong> (<em>str</em><em>, </em><em>optional</em>) &#8211; Not currently in use.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of <cite>table_name</cite> from
+CARTO.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.sync">
+<code class="descname">sync</code><span class="sig-paren">(</span><em>dataframe</em>, <em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.sync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depending on the size of the DataFrame or CARTO table, perform
+granular operations on a DataFrame to only update the changed cells
+instead of a bulk upload. If on the large side, perform granular
+operations, if on the smaller side use Import API.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Not yet implemented.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/tmp'</em>, <em>overwrite=False</em>, <em>lnglat=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a DataFrame to a CARTO table.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pandas.DataFrame</em>) &#8211; DataFrame to write to <code class="docutils literal"><span class="pre">table_name</span></code> in user
+CARTO account</li>
+<li><strong>table_name</strong> (<em>str</em>) &#8211; Table to write <code class="docutils literal"><span class="pre">df</span></code> to in CARTO.</li>
+<li><strong>temp_dir</strong> (<em>str</em><em>, </em><em>optional</em>) &#8211; Directory for temporary storage of data
+that is sent to CARTO. Defaults to <code class="docutils literal"><span class="pre">/tmp</span></code> (Unix-like systems).</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; Behavior for overwriting <code class="docutils literal"><span class="pre">table_name</span></code>
+if it exits on CARTO. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
+<li><strong>lnglat</strong> (<em>tuple</em><em>, </em><em>optional</em>) &#8211; lng/lat pair that can be used for creating
+a geometry on CARTO. Defaults to <code class="docutils literal"><span class="pre">None</span></code>. In some cases,
+geometry will be created without specifying this. See CARTO&#8217;s
+<a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables">Import API</a>
+for more information.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-layer"></span><p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a>
+and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> for example usage.</p>
+<dl class="class">
+<dt id="layer.AbstractLayer">
+<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">AbstractLayer</code><a class="headerlink" href="#layer.AbstractLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract Layer object</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="layer.BaseMap">
+<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source='dark'</em>, <em>labels='back'</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.BaseMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer object for adding basemaps to a cartoframes map.</p>
+<p class="rubric">Example</p>
+<p>Add a custom basemap to a cartoframes map.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">BaseMap</span><span class="p">,</span> <span class="n">Layer</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">BaseMap</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s1">&#39;light&#39;</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="s1">&#39;front&#39;</span><span class="p">),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) &#8211; One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to <code class="docutils literal"><span class="pre">dark</span></code>.
+Basemaps come from
+<a class="reference external" href="https://carto.com/location-data-services/basemaps/">https://carto.com/location-data-services/basemaps/</a></li>
+<li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) &#8211; One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on the
+front will be above the data layers. Labels on back will be
+underneath the data layers but on top of the basemap. Setting
+labels to <code class="docutils literal"><span class="pre">None</span></code> will only show the basemap.</li>
+<li><strong>only_labels</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; Whether to show labels or not.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="layer.BaseMap.is_basic">
+<code class="descname">is_basic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#layer.BaseMap.is_basic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does BaseMap pull from CARTO default basemaps?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if using a CARTO basemap (Dark Matter or Positron),
+<cite>False</cite> otherwise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="layer.Layer">
+<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">Layer</code><span class="sig-paren">(</span><em>table_name</em>, <em>source=None</em>, <em>overwrite=False</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A cartoframes Data Layer based on a specific table in user&#8217;s CARTO
+database. This layer class is useful for visualizing individual datasets
+with <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">QueryLayer</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;fantastic_sql_table&#39;</span><span class="p">,</span>
+                     <span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;mr_fox_sightings&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;Prism&#39;</span><span class="p">})])</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>table_name</strong> (<em>str</em>) &#8211; Table in user CARTO account that is fed into a
+pandas DataFrame.</li>
+<li><strong>source</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) &#8211; If specified, writes DataFrame
+to the tablename specified (if it does not exist), then creates
+a map layer.</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; If <code class="docutils literal"><span class="pre">table_name</span></code> exists in user&#8217;s CARTO
+account, setting this to <cite>True</cite> will overwrite it. Defaults to
+<cite>False</cite> (do not overwrite).</li>
+<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) &#8211; <p>Style to apply to layer.
+If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
+<ul>
+<li>column (str, required): Column for animating map from. Data must
+be of type time or float.</li>
+<li>method (str, optional): Type of aggregation method for operating
+on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
+be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
+functions</a>
+with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
+<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
+the point data overtime, or show the event at the specified time
+only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
+<li>frames (int, optional): Number of frames in the animation.
+Defaults to 256.</li>
+<li>duration (int, optional): Number of seconds in the animation.
+Defaults to 30.</li>
+</ul>
+<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
+the query that is of type numeric or datetime.</p>
+</li>
+<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) &#8211; <p>Color style to apply to map.
+If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
+values described:</p>
+<ul>
+<li>column (str): Column to base coloring from.</li>
+<li>scheme (str, optinal): Color scheme from
+<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
+Defaults to <cite>Mint</cite>.</li>
+<li>bin_method (str, optional): Quantification method for dividing
+data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
+<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
+<li>bins (int, optional): Number of bins to divide data amongst in
+the <cite>bin_method</cite>. Defaults to 5.</li>
+</ul>
+</li>
+<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) &#8211; <p>Size style to apply to point data.
+If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
+described as:</p>
+<ul>
+<li>column (str): Column to base sizing of points on</li>
+<li>bin_method (str, optional): Quantification method for dividing
+data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
+<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
+<li>bins (int, optional): Number of bins to break data into. Defaults
+to 5.</li>
+<li>max (int, optional): Maximum point width (in pixels). Defaults to
+25.</li>
+<li>min (int, optional): Minimum point width (in pixels). Defaults to
+5.</li>
+</ul>
+</li>
+<li><strong>tooltip</strong> (<em>tuple of str</em><em>, </em><em>optional</em>) &#8211; <strong>Not implemented.</strong></li>
+<li><strong>legend</strong> &#8211; <strong>Not implemented.</strong></li>
 </ul>
 </td>
 </tr>
@@ -490,26 +509,158 @@ multiuser account.</li>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="data_obs.read_data_obs">
-<code class="descclassname">data_obs.</code><code class="descname">read_data_obs</code><span class="sig-paren">(</span><em>self</em>, <em>hints</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#data_obs.read_data_obs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read metadata from the data observatory. Experimental Data Observatory
-exploratory tool</p>
+<dl class="class">
+<dt id="layer.QueryLayer">
+<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">QueryLayer</code><span class="sig-paren">(</span><em>query</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.QueryLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>cartoframes Data Layer based on an arbitrary query to the user&#8217;s CARTO
+database. This layer class is useful for offloading processing to the cloud
+to do some of the following:</p>
+<ul class="simple">
+<li>pull down a snapshot of the data (e.g., selecting only important columns
+instead of all columns in the dataset)</li>
+<li>doing spatial processing using <a class="reference external" href="http://postgis.net/">PostGIS</a> and
+<a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a>, which is the database
+underlying CARTO</li>
+<li>performing arbitrary relational database queries (e.g., complex JOINs
+in SQL instead of in pandas)</li>
+</ul>
+<p>Used in <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
+<p class="rubric">Example</p>
+<p>Underlay a QueryLayer with a complex query below a layer from a table.
+The QueryLayer is colored by the calculated column <code class="docutils literal"><span class="pre">abs_diff</span></code>, and
+points are sized by the column <code class="docutils literal"><span class="pre">i_measure</span></code>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">QueryLayer</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">QueryLayer</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                          WITH i_cte As (</span>
+<span class="s1">                            SELECT</span>
+<span class="s1">                                ST_Buffer(the_geom::geography, 500)::geometry As the_geom,</span>
+<span class="s1">                                cartodb_id,</span>
+<span class="s1">                                measure,</span>
+<span class="s1">                                date</span>
+<span class="s1">                              FROM interesting_data</span>
+<span class="s1">                             WHERE date &gt; &#39;2017-04-19&#39;</span>
+<span class="s1">                          )</span>
+<span class="s1">                          SELECT</span>
+<span class="s1">                             i.cartodb_id, i.the_geom,</span>
+<span class="s1">                             ST_Transform(i.the_geom, 3857) AS the_geom_webmercator,</span>
+<span class="s1">                             abs(i.measure - j.measure) as abs_diff,</span>
+<span class="s1">                             i.measure AS i_measure</span>
+<span class="s1">                            FROM i_cte AS i</span>
+<span class="s1">                            JOIN awesome_data AS j</span>
+<span class="s1">                              ON i.event_id = j.event_id</span>
+<span class="s1">                           WHERE j.measure IS NOT NULL</span>
+<span class="s1">                             AND j.date &lt; &#39;2017-04-29&#39;</span>
+<span class="s1">                          &#39;&#39;&#39;</span><span class="p">,</span>
+                          <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;abs_diff&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;SunsetDark&#39;</span><span class="p">},</span>
+                          <span class="n">size</span><span class="o">=</span><span class="s1">&#39;i_measure&#39;</span><span class="p">),</span>
+               <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;fantastic_sql_table&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hints</strong> &#8211; measure hints that we&#8217;re interested in</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">summary of the metadata given <code class="docutils literal"><span class="pre">hints</span></code></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas.DataFrame</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>query</strong> (<em>str</em>) &#8211; Query that is fed into a pandas DataFrame. At a minimum, all
+queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
+<cite>the_geom_webmercator</cite>. Read more in
+<a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO&#8217;s docs</a>
+for more information.</li>
+<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) &#8211; <p>Style to apply to layer.
+If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
+<ul>
+<li>column (str, required): Column for animating map from. Data must
+be of type time or float.</li>
+<li>method (str, optional): Type of aggregation method for operating
+on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
+be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate functions</a>
+with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
+<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
+the point data overtime, or show the event at the specified time
+only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
+<li>frames (int, optional): Number of frames in the animation.
+Defaults to 256.</li>
+<li>duration (int, optional): Number of seconds in the animation.
+Defaults to 30.</li>
+</ul>
+<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
+the query that is of type numeric or datetime.</p>
+</li>
+<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) &#8211; <p>Color style to apply to map.
+If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
+values described:</p>
+<ul>
+<li>column (str): Column to base coloring from.</li>
+<li>scheme (str, optinal): Color scheme from
+<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
+Defaults to <cite>Mint</cite>.</li>
+<li>bin_method (str, optional): Quantification method for dividing
+data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
+<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
+<li>bins (int, optional): Number of bins to divide data amongst in
+the <cite>bin_method</cite>. Defaults to 5.</li>
+</ul>
+</li>
+<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) &#8211; <p>Size style to apply to point data.
+If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
+described as:</p>
+<ul>
+<li>column (str): Column to base sizing of points on</li>
+<li>bin_method (str, optional): Quantification method for dividing
+data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
+<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
+<li>bins (int, optional): Number of bins to break data into. Defaults
+to 5.</li>
+<li>max (int, optional): Maximum point width (in pixels). Defaults to
+25.</li>
+<li>min (int, optional): Minimum point width (in pixels). Defaults to
+5.</li>
+</ul>
+</li>
+<li><strong>tooltip</strong> (<em>tuple</em><em>, </em><em>optional</em>) &#8211; <strong>Not yet implemented.</strong></li>
+<li><strong>legend</strong> &#8211; <strong>Not yet implemented.</strong></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="layer.QueryLayer.get_cartocss">
+<code class="descname">get_cartocss</code><span class="sig-paren">(</span><em>basemap</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.QueryLayer.get_cartocss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate cartocss for class properties</p>
 </dd></dl>
 
-</div>
+</dd></dl>
+
+<span class="target" id="module-maps"></span><p>Utilities for creating map templates for CARTO&#8217;s Named Maps API</p>
+<dl class="function">
+<dt id="maps.get_map_name">
+<code class="descclassname">maps.</code><code class="descname">get_map_name</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.get_map_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map named based on supplied parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.get_map_template">
+<code class="descclassname">maps.</code><code class="descname">get_map_template</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.get_map_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map template based on custom parameters supplied</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.has_time_layer">
+<code class="descclassname">maps.</code><code class="descname">has_time_layer</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.has_time_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <cite>True</cite> if there is a time/torque layer in <cite>layers.
+Returns `False</cite> otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.non_basemap_layers">
+<code class="descclassname">maps.</code><code class="descname">non_basemap_layers</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.non_basemap_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all map layers which are not basemaps</p>
+</dd></dl>
+
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -538,11 +689,7 @@ exploratory tool</p>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-core">cartoframe methods</a><ul>
-<li><a class="reference internal" href="#id1">cartoframe methods</a></li>
-<li><a class="reference internal" href="#data-observatory-methods">Data Observatory methods</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-context">cartoframe methods</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 <div class="relations">

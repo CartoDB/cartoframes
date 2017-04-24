@@ -1,22 +1,28 @@
+"""CartoContext class for authentication with CARTO and high-level operations
+such as reading tables from CARTO into dataframes, writing dataframes to CARTO
+tables, and creating custom maps from dataframes and CARTO tables. Future
+methods interact with CARTO's services like
+`Data Observatory <https://carto.com/data-observatory>`__, and `routing,
+geocoding, and isolines <https://carto.com/location-data-services/>`__.
+"""
 import json
 import os
 import random
 import re
-import requests
 import sys
-import tempfile
 import time
 import collections
+
+import requests
 import IPython
 import pandas as pd
 
-import carto
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 
-from .utils import dict_items
-from .layer import BaseMap
-from .maps import non_basemap_layers, get_map_name, get_map_template
+from cartoframes.utils import dict_items
+from cartoframes.layer import BaseMap
+from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -25,6 +31,32 @@ else:
     from urllib import urlencode
 
 class CartoContext:
+    """Manages connections with CARTO for data and map operations. Modeled
+    after `SparkContext
+    <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
+
+    Example:
+        Create a CartoContext object::
+
+            import cartoframes
+            cc = cartoframes.CartoContext(BASEURL, APIKEY)
+
+    Args:
+        base_url (str): Base URL of CARTO user account. Cloud-based accounts
+            are of the form ``https://{username}.carto.com`` (e.g.,
+            https://eschbacher.carto.com for user ``eschbacher``). On-premises
+            installation users should ask their admin.
+        api_key (str): CARTO API key.
+        session (requests.Session, optional): requests session. See `requests
+            documentation <http://docs.python-requests.org/en/master/user/advanced/>`__
+            for more information:
+        verbose (bool, optional): Output underlying process states (True), or
+            suppress (False, default)
+
+    Returns:
+        :obj:`CartoContext`: A CartoContext object that is authenticated against
+        the user's CARTO account.
+    """
     def __init__(self, base_url, api_key, session=None, verbose=0):
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
@@ -35,12 +67,12 @@ class CartoContext:
         url_info = urlparse(base_url)
         # On-Prem:
         #   /user/<username>
-        m = re.search('^/user/(.*)/$', url_info.path)
-        if m is None:
+        username = re.search('^/user/(.*)/$', url_info.path)
+        if username is None:
             # Cloud personal account
             # <username>.carto.com
-            m = re.search('^(.*?)\..*', url_info.netloc)
-        self.username = m.group(1)
+            username = re.search(r'^(.*?)\..*', url_info.netloc)
+        self.username = username.group(1)
 
         self.auth_client = APIKeyAuthClient(base_url=base_url,
                                             api_key=api_key,
@@ -48,8 +80,10 @@ class CartoContext:
         self.sql_client = SQLClient(self.auth_client)
 
         res = self.sql_client.send('SHOW search_path')
+
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
+
         self.is_org = (paths[0] != 'public')
 
         self._map_templates = {}
@@ -59,34 +93,82 @@ class CartoContext:
 
 
     def read(self, table_name, limit=None, index='cartodb_id'):
-        q = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
+        """Read tables from CARTO into pandas DataFrames.
+
+        Example:
+        ::
+
+            import cartoframes
+            cc = cartoframes.CartoContext(BASEURL, APIKEY)
+            df = cc.read('acadia_biodiversity')
+
+        Args:
+            table_name (str): Name of table in user's CARTO account.
+            limit (int, optional): Read only ``limit`` lines from
+                ``table_name``. Defaults to `None`, which reads the full table.
+            index (str, optional): Not currently in use.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of `table_name` from
+            CARTO.
+        """
+        query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
         if limit:
             if (limit >= 0) and isinstance(limit, int):
-                q += ' LIMIT {limit}'.format(limit=limit)
+                query += ' LIMIT {limit}'.format(limit=limit)
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(q)
+        return self.query(query)
 
 
-    def write(self, df, table_name, temp_dir='/tmp', overwrite=False, lnglat=None):
+    def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
+              lnglat=None):
+        """Write a DataFrame to a CARTO table.
+
+        Example:
+        ::
+
+            cc.write(df, 'brooklyn_poverty', overwrite=True)
+
+        Args:
+            df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
+                CARTO account
+            table_name (str): Table to write ``df`` to in CARTO.
+            temp_dir (str, optional): Directory for temporary storage of data
+                that is sent to CARTO. Defaults to ``/tmp`` (Unix-like systems).
+            overwrite (bool, optional): Behavior for overwriting ``table_name``
+                if it exits on CARTO. Defaults to ``False``.
+            lnglat (tuple, optional): lng/lat pair that can be used for creating
+                a geometry on CARTO. Defaults to ``None``. In some cases,
+                geometry will be created without specifying this. See CARTO's
+                `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
+                for more information.
+
+        Returns:
+            None
+        """
         table_exists = True
         if not overwrite:
             try:
                 self.query('SELECT * FROM {table_name} limit 0'.format(table_name=table_name))
-            except:
+            except Exception as err:
+                self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
                 table_exists = False
 
             if table_exists:
                 raise AssertionError(
                     ('Table {table_name} already exists. '
-                     'Run with overwrite=True if you wish to replace the table').format(table_name=table_name))
+                     'Run with overwrite=True if you wish to replace the '
+                     'table').format(table_name=table_name))
 
-        tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir, table_name=table_name)
+        tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
+                                                        table_name=table_name)
         self._debug_print(tempfile=tempfile)
 
         def remove_tempfile():
+            """removes temporary file"""
             os.remove(tempfile)
 
         df.to_csv(tempfile)
@@ -103,7 +185,8 @@ class CartoContext:
             import_id = res['item_queue_id']
 
             while True:
-                res = self._auth_send('api/v1/imports/{}'.format(import_id), 'GET')
+                res = self._auth_send('api/v1/imports/{}'.format(import_id),
+                                      'GET')
                 if res['state'] == 'failure':
                     remove_tempfile()
                     raise Exception('Error code: {}'.format(res['error_code']))
@@ -123,12 +206,31 @@ class CartoContext:
                        lat=lnglat[1]))
 
 
-    def sync(self, df, table_name):
+    def sync(self, dataframe, table_name):
+        """Depending on the size of the DataFrame or CARTO table, perform
+        granular operations on a DataFrame to only update the changed cells
+        instead of a bulk upload. If on the large side, perform granular
+        operations, if on the smaller side use Import API.
+
+        Note:
+            Not yet implemented.
+        """
         pass
 
 
-    def query(self, q, table_name=None):
-        self._debug_print(query=q)
+    def query(self, query, table_name=None):
+        """Pull the result from an arbitrary SQL query from a CARTO account
+        into a pandas DataFrame.
+
+        Args:
+            query (str): Query to run against CARTO user database.
+            table_name (str, optional): If set, this will create a new
+                table in the user's CARTO account that is the result of the
+                query. Defaults to None (no table created).
+        Returns:
+            pandas.DataFrame: DataFrame representation of query supplied.
+        """
+        self._debug_print(query=query)
         if table_name:
             create_table_query = '''
                 CREATE TABLE {table_name} As
@@ -136,7 +238,7 @@ class CartoContext:
                   FROM ({query}) As _wrap;
                 SELECT CDB_CartodbfyTable('{org}', '{table_name}');
             '''.format(table_name=table_name,
-                       query=q,
+                       query=query,
                        org=(self.username if self.is_org else 'public'))
             self._debug_print(create_table_query=create_table_query)
 
@@ -149,15 +251,15 @@ class CartoContext:
             select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name))
         else:
-            select_res = self.sql_client.send(q)
+            select_res = self.sql_client.send(query)
 
         self._debug_print(select_res=select_res)
 
         pg2dtypes = {
-            'date'    : 'datetime64',
-            'number'  : 'float64',
-            'string'  : 'object',
-            'boolean' : 'bool',
+            'date': 'datetime64',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
             'geometry': 'object',
         }
 
@@ -178,9 +280,58 @@ class CartoContext:
 
 
     def map(self, layers=None, interactive=True,
-            zoom=None, lat=None, lng=None,
-            size=[800,400]):
+            zoom=None, lat=None, lng=None, size=(800, 400)):
+        """Produce a CARTO map visualizing data layers.
 
+        Example:
+            Create a map with two data layers, and one BaseMap layer.
+            ::
+
+                import cartoframes
+                from cartoframes import Layer, BaseMap
+                cc = cartoframes.CartoContext(BASEURL, APIKEY)
+                cc.map(layers=[BaseMap(),
+                               Layer('acadia_biodiversity',
+                                     color={'column': 'simpson_index',
+                                            'scheme': 'TealRose'}),
+                               Layer('peregrine_falcon_nest_sites',
+                                     size='num_eggs',
+                                     color={'column': 'bird_id',
+                                            'scheme': 'Vivid')],
+                       interactive=True)
+        Args:
+            layers (list, optional): List of one or more of the following:
+
+                - Layer: cartoframes Layer object for visualizing data from a
+                  CARTO table. See `layer.Layer <#layer.Layer>`__ for all
+                  styling options.
+                - BaseMap: Basemap for contextualizng data layers. See
+                  `layer.BaseMap <#layer.BaseMap>`__ for all styling options.
+                - QueryLayer: Layer from an arbitrary query. See
+                  `layer.QueryLayer <#layer.QueryLayer>`__ for all styling
+                  options.
+
+            interactive (bool, optional): Defaults to ``True`` to show an
+                interactive slippy map. Setting to ``False`` creates a static
+                map.
+            zoom (int, optional): Zoom level of map. Acceptable values are
+                usually in the range 0 to 19. 0 has the entire earth on a
+                single tile (256px square). Zoom 19 is the size of a city
+                block. Must be used in conjunction with ``lng`` and ``lat``.
+                Defaults to a view to have all data layers in view.
+            lat (float, optional): Latitude value for the center of the map.
+                Must be used in conjunction with ``zoom`` and ``lng``. Defaults
+                to a view to have all data layers in view.
+            lng (float, optional): Longitude value for the center of the map.
+                Must be used in conjunction with ``zoom`` and ``lat``. Defaults
+                to a view to have all data layers in view.
+            size (tuple, optional): List of pixel dimensions for the map. Format
+                is ``(width, height)``. Defaults to ``(800, 400)``.
+
+        Returns:
+            IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
+            while static maps are rendered in ``img`` tags.
+        """
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
@@ -201,7 +352,8 @@ class CartoContext:
         has_zoom = zoom is not None
 
         # Check basemaps, add one if none exist
-        base_layers = [idx for idx, layer in enumerate(layers) if layer.is_basemap]
+        base_layers = [idx for idx, layer in enumerate(layers)
+                       if layer.is_basemap]
         if len(base_layers) > 1:
             raise ValueError('map can at most take 1 BaseMap layer')
         if len(base_layers) > 0:
@@ -210,7 +362,8 @@ class CartoContext:
             layers.insert(0, BaseMap())
 
         # Check for a time layer, if it exists move it to the front
-        time_layers = [idx for idx, layer in enumerate(layers) if not layer.is_basemap and layer.time]
+        time_layers = [idx for idx, layer in enumerate(layers)
+                       if not layer.is_basemap and layer.time]
         time_layer = layers[time_layers[0]] if len(time_layers) > 0 else None
         if len(time_layers) > 1:
             raise ValueError('map can at most take 1 Layer with time column/field')
@@ -236,11 +389,11 @@ class CartoContext:
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers[::-1]):
             options['cartocss_' + str(idx)] = layer.cartocss
-            options['sql_' + str(idx)]      = layer.query
+            options['sql_' + str(idx)] = layer.query
 
 
         params = {
-            'config'    : json.dumps(options),
+            'config': json.dumps(options),
             'anti_cache': random.random(),
         }
 
@@ -248,17 +401,18 @@ class CartoContext:
             params.update({'zoom': zoom, 'lat': lat, 'lon': lng})
             options.update({'zoom': zoom, 'lat': lat, 'lng': lng})
         else:
-            options.update(self.get_bounds(nb_layers))
+            options.update(self._get_bounds(nb_layers))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
         api_url = '{base_url}api/v1/map'.format(base_url=self.base_url)
 
         static_url = ('{api_url}/static/named/{map_name}'
-                      '/{width}/{height}.png?{params}').format(api_url=api_url,
-                                                               map_name=map_name,
-                                                               width=size[0],
-                                                               height=size[1],
-                                                               params=urlencode(params))
+                      '/{width}/{height}.png?{params}').format(
+                          api_url=api_url,
+                          map_name=map_name,
+                          width=size[0],
+                          height=size[1],
+                          params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
 
@@ -266,13 +420,14 @@ class CartoContext:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
-            def safe_quotes(s, escape_single_quotes=False):
-                if isinstance(s, str):
-                    s2 = s.replace('"', "&quot;")
+            def safe_quotes(text, escape_single_quotes=False):
+                """htmlify string"""
+                if isinstance(text, str):
+                    safe_text = text.replace('"', "&quot;")
                     if escape_single_quotes:
-                        s2 = s2.replace("'","&#92;'")
-                    return s2.replace('True', 'true')
-                return s
+                        safe_text = safe_text.replace("'", "&#92;'")
+                    return safe_text.replace('True', 'true')
+                return text
 
             config = {
                 'user_name': self.username,
@@ -286,7 +441,7 @@ class CartoContext:
                     'name': map_name,
                     'params': {
                         k: safe_quotes(v, escape_single_quotes=True)
-                        for k,v in dict_items(options)
+                        for k, v in dict_items(options)
                     },
                 },
             }
@@ -337,14 +492,18 @@ class CartoContext:
 
 
     def data_boundaries(self, df=None, table_name=None):
+        """Not currently implemented"""
         pass
 
 
-    def data_discovery(self, keywords=None, regex=None, time=None, boundary=None):
+    def data_discovery(self, keywords=None, regex=None, time=None,
+                       boundary=None):
+        """Not currently implemented"""
         pass
 
 
     def data_augment(self, table_name, numer, denom=None):
+        """Not currently implemented"""
         pass
 
 
@@ -365,7 +524,7 @@ class CartoContext:
                 self._auth_send('api/v1/map/named', 'POST',
                                 headers={'Content-Type': 'application/json'},
                                 data=get_map_template(layers, has_zoom=has_zoom))
-            except:
+            except ValueError('map already exists'):
                 pass
 
             self._map_templates[map_name] = True
@@ -379,20 +538,35 @@ class CartoContext:
                 self._srcdoc = f.read()
 
         return (self._srcdoc
-                .replace('@@CONFIG@@' , str(config))
-                .replace('@@BOUNDS@@' , str(bounds))
+                .replace('@@CONFIG@@', str(config))
+                .replace('@@BOUNDS@@', str(bounds))
                 .replace('@@OPTIONS@@', str(map_options))
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
-                .replace('@@LAT@@' , str(options.get('lat' , 0)))
-                .replace('@@LNG@@' , str(options.get('lng' , 0))))
+                .replace('@@LAT@@', str(options.get('lat', 0)))
+                .replace('@@LNG@@', str(options.get('lng', 0))))
 
 
-    def get_bounds(self, layers):
-        extent_query = 'SELECT ST_EXTENT(the_geom) AS the_geom FROM ({query}) as t{idx}\n'
-        union_query  = 'UNION ALL\n'.join(extent_query.format(query=layer.query, idx=idx)
-                                          for idx, layer in enumerate(layers)
-                                          if not layer.is_basemap)
-        df = self.query('''
+    def _get_bounds(self, layers):
+        """Return the bounds of all data layers involved in a cartoframes
+        map.
+
+        Args:
+            layers (list): List of cartoframes layers. See `cartoframes.layers`
+                for all types.
+
+        Returns:
+            dict: Dictionary of northern, southern, eastern, and western bounds
+                of the superset of data layers. Keys are `north`, `south`,
+                `east`, and `west`. Units are in WGS84.
+        """
+        extent_query = ('SELECT ST_EXTENT(the_geom) AS the_geom '
+                        'FROM ({query}) as t{idx}\n')
+        union_query = 'UNION ALL\n'.join(
+            [extent_query.format(query=layer.query, idx=idx)
+             for idx, layer in enumerate(layers)
+             if not layer.is_basemap])
+
+        extent = self.query('''
                SELECT
                  ST_XMIN(ext) AS west,
                  ST_YMIN(ext) AS south,
@@ -403,7 +577,7 @@ class CartoContext:
                    FROM ({union_query}) AS wrap1
                ) AS wrap2'''.format(union_query=union_query))
 
-        west, south, east, north = df.values[0]
+        west, south, east, north = extent.values[0]
 
         return {
             'west' : west,
@@ -418,7 +592,7 @@ class CartoContext:
             return
 
         for key, value in dict_items(kwargs):
-            if type(value) == requests.Response:
+            if isinstance(value, requests.Response):
                 str_value = "status_code: {status_code}, content: {content}".format(
                     status_code=value.status_code, content=value.content)
             else:

@@ -28,7 +28,7 @@ Example usage
 Data workflow
 ~~~~~~~~~~~~~
 
-Get table from carto, make changes in pandas, sync updates with carto:
+Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
 .. code:: python
 

@@ -43,77 +43,30 @@
             
   <div class="section" id="module-cartoframes.maps">
 <span id="cartoframes-maps-module"></span><h1>cartoframes.maps module<a class="headerlink" href="#module-cartoframes.maps" title="Permalink to this headline">¶</a></h1>
-<p>Functions and methods for interactive and static maps</p>
+<p>Utilities for creating map templates for CARTO&#8217;s Named Maps API</p>
 <dl class="function">
-<dt id="cartoframes.maps.create_named_map">
-<code class="descclassname">cartoframes.maps.</code><code class="descname">create_named_map</code><span class="sig-paren">(</span><em>username</em>, <em>api_key</em>, <em>tablename</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.create_named_map" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a default named map for later use</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>username</strong> (<em>string</em>) &#8211; CARTO username</li>
-<li><strong>api_key</strong> (<em>string</em>) &#8211; CARTO API key</li>
-<li><strong>tablename</strong> (<em>string</em>) &#8211; Table in user account to create a map from</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="cartoframes.maps.get_map_name">
+<code class="descclassname">cartoframes.maps.</code><code class="descname">get_map_name</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.get_map_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map named based on supplied parameters</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="cartoframes.maps.get_bounds">
-<code class="descclassname">cartoframes.maps.</code><code class="descname">get_bounds</code><span class="sig-paren">(</span><em>self</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.get_bounds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the southwestern most point, and northeastern most point</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dictionary with the following keys:
-* <code class="docutils literal"><span class="pre">west</span></code>: longitude of the western-most extent
-* <code class="docutils literal"><span class="pre">south</span></code>: latitutde of the southern-most extent
-* <code class="docutils literal"><span class="pre">east</span></code>: longitude of the eastern-most extent
-* <code class="docutils literal"><span class="pre">north</span></code>: latitutde of the northern-most extent</td>
-</tr>
-</tbody>
-</table>
+<dt id="cartoframes.maps.get_map_template">
+<code class="descclassname">cartoframes.maps.</code><code class="descname">get_map_template</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.get_map_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map template based on custom parameters supplied</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="cartoframes.maps.get_named_map_template">
-<code class="descclassname">cartoframes.maps.</code><code class="descname">get_named_map_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.get_named_map_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return named map template. See CARTO&#8217;s Maps API documentation for more information: <a class="reference external" href="https://carto.com/docs/carto-engine/maps-api/named-maps">https://carto.com/docs/carto-engine/maps-api/named-maps</a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">named map template, with values to be filled in</td>
-</tr>
-</tbody>
-</table>
+<dt id="cartoframes.maps.has_time_layer">
+<code class="descclassname">cartoframes.maps.</code><code class="descname">has_time_layer</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.has_time_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <cite>True</cite> if there is a time/torque layer in <cite>layers.
+Returns `False</cite> otherwise</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="cartoframes.maps.get_named_mapconfig">
-<code class="descclassname">cartoframes.maps.</code><code class="descname">get_named_mapconfig</code><span class="sig-paren">(</span><em>username</em>, <em>mapname</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.get_named_mapconfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>Named Maps API template for carto.js</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>username</strong> &#8211; The username of the CARTO account</li>
-<li><strong>mapname</strong> &#8211; The mapname a cartoframe is associated with CARTO account</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">mapconfig object for a named map as serialized JSON</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="cartoframes.maps.non_basemap_layers">
+<code class="descclassname">cartoframes.maps.</code><code class="descname">non_basemap_layers</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.maps.non_basemap_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all map layers which are not basemaps</p>
 </dd></dl>
 
 </div>
