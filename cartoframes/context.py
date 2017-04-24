@@ -1,6 +1,9 @@
 """CartoContext class for authentication with CARTO and high-level operations
-such as reading tables from carto into dataframes, writing dataframes to CARTO
-tables, and creating custom maps from dataframes and CARTO tables.
+such as reading tables from CARTO into dataframes, writing dataframes to CARTO
+tables, and creating custom maps from dataframes and CARTO tables. Future
+methods interact with CARTO's services like
+`Data Observatory <https://carto.com/data-observatory>`__, and `routing,
+geocoding, and isolines <https://carto.com/location-data-services/>`__.
 """
 import json
 import os
@@ -29,7 +32,8 @@ else:
 
 class CartoContext:
     """Manages connections with CARTO for data and map operations. Modeled
-    after `SparkContext <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
+    after `SparkContext
+    <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
     Example:
         Create a CartoContext object::
@@ -48,6 +52,10 @@ class CartoContext:
             for more information:
         verbose (bool, optional): Output underlying process states (True), or
             suppress (False, default)
+
+    Returns:
+        :obj:`CartoContext`: A CartoContext object that is authenticated against
+        the user's CARTO account.
     """
     def __init__(self, base_url, api_key, session=None, verbose=0):
         # Make sure there is a trailing / for urljoin
@@ -141,7 +149,8 @@ class CartoContext:
         if not overwrite:
             try:
                 self.query('SELECT * FROM {table_name} limit 0'.format(table_name=table_name))
-            except ValueError('table does not exist'):
+            except Exception as err:
+                self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
                 table_exists = False
 
@@ -291,11 +300,13 @@ class CartoContext:
             layers (list, optional): List of one or more of the following:
 
                 - Layer: cartoframes Layer object for visualizing data from a
-                  CARTO table. See layers.Layer for all styling options.
+                  CARTO table. See `layer.Layer <#layer.Layer>`__ for all
+                  styling options.
                 - BaseMap: Basemap for contextualizng data layers. See
-                  layers.BaseMap for all styling options.
+                  `layer.BaseMap <#layer.BaseMap>`__ for all styling options.
                 - QueryLayer: Layer from an arbitrary query. See
-                  layers.QueryLayer for all styling options.
+                  `layer.QueryLayer <#layer.QueryLayer>`__ for all styling
+                  options.
 
             interactive (bool, optional): Defaults to ``True`` to show an
                 interactive slippy map. Setting to ``False`` creates a static
