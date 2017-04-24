@@ -80,7 +80,10 @@ class CartoContext:
         self.sql_client = SQLClient(self.auth_client)
 
         res = self.sql_client.send('SHOW search_path')
-        paths = res['rows'][0]['search_path'].split(',')
+
+        paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
+        # is an org user if first item is not `public`
+
         self.is_org = (paths[0] != 'public')
 
         self._map_templates = {}
@@ -343,7 +346,8 @@ class CartoContext:
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
-        if len(layers) == 0 and zoom is None:
+        if ((len(layers) == 0 and zoom is None) or
+                (len(layers) == 1 and layers[0].is_basemap)):
             [zoom, lat, lng] = [3, 38, -99]
         has_zoom = zoom is not None
 
