@@ -326,7 +326,7 @@ class CartoContext:
                 is ``(width, height)``. Defaults to ``(800, 400)``.
 
         Returns:
-            IPython.display.HTML: Interactive maps are rendered in an``iframe``,
+            IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
             while static maps are rendered in ``img`` tags.
         """
         if layers is None:

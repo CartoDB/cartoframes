@@ -240,7 +240,7 @@ is <code class="docutils literal"><span class="pre">(width,</span> <span class="
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an``iframe``,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an <code class="docutils literal"><span class="pre">iframe</span></code>,
 while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
 </td>
 </tr>
@@ -635,7 +635,33 @@ to 5.</li>
 
 </dd></dl>
 
-<span class="target" id="module-maps"></span></div>
+<span class="target" id="module-maps"></span><p>Utilities for creating map templates for CARTO&#8217;s Named Maps API</p>
+<dl class="function">
+<dt id="maps.get_map_name">
+<code class="descclassname">maps.</code><code class="descname">get_map_name</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.get_map_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map named based on supplied parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.get_map_template">
+<code class="descclassname">maps.</code><code class="descname">get_map_template</code><span class="sig-paren">(</span><em>layers</em>, <em>has_zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.get_map_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a map template based on custom parameters supplied</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.has_time_layer">
+<code class="descclassname">maps.</code><code class="descname">has_time_layer</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.has_time_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <cite>True</cite> if there is a time/torque layer in <cite>layers.
+Returns `False</cite> otherwise</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="maps.non_basemap_layers">
+<code class="descclassname">maps.</code><code class="descname">non_basemap_layers</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.non_basemap_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all map layers which are not basemaps</p>
+</dd></dl>
+
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
