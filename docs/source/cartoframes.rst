@@ -6,10 +6,11 @@ Submodules
 
 .. toctree::
 
-   cartoframes.core
-   cartoframes.data_obs
+   cartoframes.context
+   cartoframes.layer
    cartoframes.maps
    cartoframes.styling
+   cartoframes.updates
    cartoframes.utils
 
 Module contents

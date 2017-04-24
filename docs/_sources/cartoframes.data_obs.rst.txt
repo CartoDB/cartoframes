@@ -1,7 +1,0 @@
-cartoframes.data_obs module
-===========================
-
-.. automodule:: cartoframes.data_obs
-    :members:
-    :undoc-members:
-    :show-inheritance:
