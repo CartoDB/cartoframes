@@ -1,19 +1,24 @@
+"""Utilities for creating map templates for CARTO's Named Maps API"""
 import json
 
 
 def non_basemap_layers(layers):
+    """Retrieve all map layers which are not basemaps"""
     return [layer for layer in layers if not layer.is_basemap]
 
 
 def has_time_layer(layers):
+    """Returns `True` if there is a time/torque layer in `layers.
+    Returns `False` otherwise"""
     return any(layer.time for layer in layers if not layer.is_basemap)
 
 
 def get_map_name(layers, has_zoom):
-    version    = '20170406'
+    """Creates a map named based on supplied parameters"""
+    version = '20170406'
     num_layers = len(non_basemap_layers(layers))
     has_labels = len(layers) > 1 and layers[-1].is_basemap
-    has_time   = has_time_layer(layers)
+    has_time = has_time_layer(layers)
 
     return ('cartoframes_ver{version}'
             '_layers{layers}'
@@ -32,8 +37,9 @@ def get_map_name(layers, has_zoom):
 
 
 def get_map_template(layers, has_zoom):
+    """Creates a map template based on custom parameters supplied"""
     num_layers = len(non_basemap_layers(layers))
-    has_time   = has_time_layer(layers)
+    has_time = has_time_layer(layers)
     name = get_map_name(layers, has_zoom=has_zoom)
 
     # Add basemap layer

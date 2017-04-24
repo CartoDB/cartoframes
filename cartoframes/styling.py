@@ -1,12 +1,13 @@
 class BinMethod:
     quantiles = 'quantiles'
-    jenks     = 'jenks'
+    jenks = 'jenks'
     headtails = 'headtails'
-    equal     = 'equal'
-    category  = 'category'
+    equal = 'equal'
+    category = 'category'
 
 
 def get_scheme_cartocss(column, scheme_info):
+    """Get TurboCartoCSS based on input parameters"""
     if 'colors' in scheme_info:
         color_scheme = '({})'.format(','.join(scheme_info['colors']))
     else:
@@ -21,6 +22,7 @@ def get_scheme_cartocss(column, scheme_info):
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles):
+    """Get custom scheme"""
     return {
         'colors': colors,
         'bins': bins if bins is not None else len(colors),
@@ -35,7 +37,7 @@ def _scheme(name, bins, bin_method):
         'bin_method': bin_method,
     }
 
-
+# Get methods for CartoColor schemes
 def burg(bins, bin_method=BinMethod.quantiles):
     return _scheme('Burg', bins, bin_method)
 
