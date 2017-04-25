@@ -76,20 +76,21 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 Augment from Data Observatory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Note: This feature is not yet implemented**
-
 Interact with CARTO's Data Observatory:
 
 .. code:: python
 
+    import cartoframes
+    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+
     # total pop, high school diploma (normalized), median income, poverty status (normalized)
     # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html
     data_obs_measures = [{'numer_id': 'us.census.acs.B01003001'},
-                         {'numer_id': 'us.census.acs.B15003017', 'denominator': 'predenominated'},
+                         {'numer_id': 'us.census.acs.B15003017',
+                          'normalization': 'predenominated'},
                          {'numer_id': 'us.census.acs.B19013001'},
-                         {'numer_id': 'us.census.acs.B17001002', 'denominator': 'predenominated'}]
-    df.carto_do_augment(data_obs_measures)
+                         {'numer_id': 'us.census.acs.B17001002',
+                          'normalization': 'predenominated'},]
+    df = cc.do_augment(data_obs_measures)
     df.head()
 
-.. figure:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/data_obs_augmentation.png
-   :alt: Example of using data observatory augmentation methods
