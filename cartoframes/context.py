@@ -387,7 +387,7 @@ class CartoContext:
         options = {'basemap_url': basemap.url}
 
         # Reverse layers to put torque's Map first
-        for idx, layer in enumerate(nb_layers[::-1]):
+        for idx, layer in enumerate(nb_layers):
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
