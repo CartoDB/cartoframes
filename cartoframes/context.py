@@ -507,7 +507,11 @@ class CartoContext:
         <https://carto.com/data-observatory>`__ measures. See the full `Data
         Observatory catalog
         <https://cartodb.github.io/bigmetadata/index.html>`__ for all available
-        measures.
+        measures. The result of this operation is:
+
+        1. It updates `table_name` by adding columns from the Data Observatory
+        2. It returns a pandas DataFrame representation of that newly augmented
+           table.
 
         Note:
             This method alters `table_name` in the user's CARTO database by
@@ -536,9 +540,9 @@ class CartoContext:
                 `table_name`. Each `dict` has the following keys:
 
                 - `numer_id` (str): The identifier for the desired measurement
-                - `geom_id` (str): Identifier for a desired geographic boundary
-                  level to use when calculating measures. Will be automatically
-                  assigned if undefined
+                - `geom_id` (str, optional): Identifier for a desired
+                  geographic boundary level to use when calculating measures.
+                  Will be automatically assigned if undefined
                 - `normalization` (str, optional): The desired normalization. One
                   of 'area', 'prenormalized', or 'denominated'. 'Area' will
                   normalize the measure per square kilometer, 'prenormalized'
