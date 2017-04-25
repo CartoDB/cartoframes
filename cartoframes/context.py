@@ -502,9 +502,83 @@ class CartoContext:
         pass
 
 
-    def data_augment(self, table_name, numer, denom=None):
-        """Not currently implemented"""
-        pass
+    def data_augment(self, table_name, metadata):
+        """Augment an existing CARTO table with `Data Observatory
+        <https://carto.com/data-observatory>`__ measures. See the full `Data
+        Observatory catalog
+        <https://cartodb.github.io/bigmetadata/index.html>`__ for all available
+        measures.
+
+        Note:
+            This method alters `table_name` in the user's CARTO database by
+            adding additional columns. To avoid this, create a copy of the
+            table first and use the new copy instead.
+
+        Example:
+            Add new measures to a CARTO table and pass it to a pandas DataFrame.
+            Using the "Median Household Income in the past 12 months" measure
+            from the `Data Observatory Catalog
+            <https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months>`__.
+            ::
+
+                import cartoframes
+                cc = cartoframes.CartoContext(BASEURL, APIKEY)
+                median_income = [{'numer_id': 'us.census.acs.B19013001',
+                                  'geom_id': 'us.census.tiger.block_group',
+                                  'numer_timespan': '2011 - 2015'}]
+                df = cc.data_augment('transaction_events',
+                                     median_income)
+
+        Args:
+            table_name (str): Name of table on CARTO account that Data
+                Observatory measures are to be added to.
+            metadata (list of dicts): List of all measures to add to
+                `table_name`. Each `dict` has the following keys:
+
+                - `numer_id` (str): The identifier for the desired measurement
+                - `geom_id` (str): Identifier for a desired geographic boundary
+                  level to use when calculating measures. Will be automatically
+                  assigned if undefined
+                - `normalization` (str, optional): The desired normalization. One
+                  of 'area', 'prenormalized', or 'denominated'. 'Area' will
+                  normalize the measure per square kilometer, 'prenormalized'
+                  will return the original value, and 'denominated' will
+                  normalize by a denominator.
+                - `denom_id` (str, optional): Measure ID from DO catalog
+                - `numer_timespan` (str, optional): The desired timespan for the
+                  measurement. Defaults to most recent timespan available if
+                  left unspecified.
+                - `geom_timespan` (str, optional): The desired timespan for the
+                  geometry. Defaults to timespan matching `numer_timespan` if
+                  left unspecified.
+                - `target_area` (str, optional): Instead of aiming to have
+                  `target_geoms` in the area of the geometry passed as extent,
+                  fill this area. Unit is square degrees WGS84. Set this to
+                  `0` if you want to use the smallest source geometry for this
+                  element of metadata, for example if you're passing in points.
+                - `target_geoms` (str, optional): Override global `target_geoms`
+                  for this element of metadata
+                - `max_timespan_rank` (str, optional): Override global
+                  `max_timespan_rank` for this element of metadata
+                - `max_score_rank` (str, optional): Override global
+                  `max_score_rank` for this element of metadata
+
+        Returns:
+            pandas.DataFrame: A DataFrame representation of `table_name` which
+            has new columns for each measure in `metadata`.
+        """
+
+        # augment with data observatory metadata
+        augment_query = '''
+            select obs_augment_table('{username}.{tablename}',
+                                     '{cols_meta}');
+        '''.format(username=self.username,
+                   tablename=table_name,
+                   cols_meta=json.dumps(metadata))
+        resp = self.sql_client.send(augment_query)
+
+        # read full augmented table
+        return self.read(table_name)
 
 
     def _auth_send(self, relative_path, http_method, **kwargs):
