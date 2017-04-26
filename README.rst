@@ -93,6 +93,6 @@ Interact with CARTO's Data Observatory:
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.do_augment(data_obs_measures)
+    df = cc.do_augment('transactions', data_obs_measures)
     df.head()
 
