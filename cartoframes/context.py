@@ -495,11 +495,69 @@ class CartoContext:
         """Not currently implemented"""
         pass
 
-
-    def data_discovery(self, keywords=None, regex=None, time=None,
+    # TODO: add more flexibility about the source of the extent
+    #       e.g., passing bounding box instead of a tablename
+    # TODO: Add `demon_id` as an option
+    def data_discovery(self, table_name, keywords=None, regex=None, time=None,
                        boundary=None):
-        """Not currently implemented"""
-        pass
+        """Provisional method. This method relies on `GetAvailableNumerators
+        <https://carto.com/docs/carto-engine/data/discovery-functions#obsgetavailablenumeratorsbounds-filtertags-denomid-geomid-timespan>`__ from
+        Data Observatory extension.
+
+        Example:
+            Use an existing CARTO table to define the geographic extent to
+            search for valid measures from the Data Observatory. ::
+
+                df = cc.data_discovery('brooklyn_poverty',
+                                       boundary='us.census.tiger.census_tract',
+                                       keywords=('income', 'poverty'),
+                                       time='2011 - 2015')
+        Args:
+            table_name (str): Name of table in CARTO account to use the
+                geographic extent of for finding available measures.
+            keywords (str or tuple, optional): Keywords for filtering of
+                results.
+            regex (str, optional): Not yet implemented.
+            time (str, optional): Time that measure is available over.
+            boundary (str, optional): Boundary ID from Data Observatory. See the
+                `full list of Boundary IDs
+                <https://carto.com/docs/carto-engine/data/glossary#boundary-ids>`__
+                in the Data Observatory documentation.
+
+        Returns:
+            pandas.DataFrame: Results of query.
+
+        """
+
+        if isinstance(keywords, str):
+            keywords = [keywords]
+
+        kw_filter = ' OR '.join(["numer_name ilike '%{kw}%'".format(kw=kw)
+                                 for kw in keywords])
+
+        def quote_str(s):
+            return "'" + s + "'"
+
+        # TODO: add more support for denom_id (currently null below)
+        # TODO: add more support for tags (currently an empty array {} below)
+        numerator_query = '''
+            SELECT * FROM OBS_GetAvailableNumerators(
+                (SELECT ST_SetSRID(ST_Extent(the_geom), 4326)
+                  FROM "{tablename}"),
+                '{{}}',
+                null,
+                {geom_id},
+                {timespan}
+            ) numers
+            WHERE {kw_filter}'''.format(tablename=table_name,
+                                        kw_filter=kw_filter,
+                                        geom_id=('null' if boundary is None
+                                                 else quote_str(boundary)),
+                                        timespan=('null' if time is None
+                                                  else quote_str(time)))
+
+        self._debug_print(numerator_query=numerator_query)
+        return self.query(numerator_query)
 
 
     def data_augment(self, table_name, metadata):
