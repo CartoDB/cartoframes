@@ -529,37 +529,45 @@ class CartoContext:
 
         """
 
-        if isinstance(keywords, str):
-            keywords = [keywords]
+        if keywords is not None:
+            if isinstance(keywords, str):
+                keywords = [keywords]
+            kw_filter = ' OR '.join(["numer_name ilike '%{kw}%'".format(kw=kw)
+                                     for kw in keywords])
 
-        kw_filter = ' OR '.join(["numer_name ilike '%{kw}%'".format(kw=kw)
-                                 for kw in keywords])
-
-        def quote_str(s):
-            return "'" + s + "'"
+        def quote_str(sql_text):
+            """single quote sql text"""
+            return "'" + sql_text + "'"
 
         # TODO: add more support for denom_id (currently null below)
         # TODO: add more support for tags (currently an empty array {} below)
         numerator_query = '''
-            SELECT * FROM OBS_GetAvailableNumerators(
-                (SELECT ST_SetSRID(ST_Extent(the_geom), 4326)
-                  FROM "{tablename}"),
+            SELECT *
+              FROM OBS_GetAvailableNumerators(
+                (SELECT ST_SetSRID(ST_Extent("the_geom"), 4326)
+                   FROM "{tablename}"),
                 '{{}}',
                 null,
                 {geom_id},
                 {timespan}
             ) numers
-            WHERE {kw_filter}'''.format(tablename=table_name,
-                                        kw_filter=kw_filter,
-                                        geom_id=('null' if boundary is None
-                                                 else quote_str(boundary)),
-                                        timespan=('null' if time is None
-                                                  else quote_str(time)))
+            WHERE valid_timespan IS TRUE AND valid_geom IS TRUE
+              AND ({kw_filter})'''.format(tablename=table_name,
+                                          kw_filter=(True if keywords is None
+                                                     else kw_filter),
+                                          geom_id=('null' if boundary is None
+                                                   else quote_str(boundary)),
+                                          timespan=('null' if time is None
+                                                    else quote_str(time)))
 
         self._debug_print(numerator_query=numerator_query)
-        return self.query(numerator_query)
+        discovery_data = self.query(numerator_query)
+        discovery_data['timespan'] = time
+        discovery_data['geom_id'] = boundary
+        self._debug_print(n_measures=len(discovery_data))
+        return discovery_data
 
-
+    # TODO: what are the limits on number of columns to enrich by?
     def data_augment(self, table_name, metadata):
         """Augment an existing CARTO table with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. See the full `Data
@@ -629,7 +637,10 @@ class CartoContext:
             pandas.DataFrame: A DataFrame representation of `table_name` which
             has new columns for each measure in `metadata`.
         """
-
+        if isinstance(metadata, pd.DataFrame):
+            # for processing a CartoContext.data_discovery dataframe into
+            # a valid metadata object
+            pass
         # augment with data observatory metadata
         augment_query = '''
             select obs_augment_table('{username}.{tablename}',
