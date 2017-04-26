@@ -113,7 +113,7 @@ $ pip install -e .
                      <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">},</span>
                      <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B17001002&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;normalization&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">},]</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">do_augment</span><span class="p">(</span><span class="n">data_obs_measures</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">do_augment</span><span class="p">(</span><span class="s1">&#39;transactions&#39;</span><span class="p">,</span> <span class="n">data_obs_measures</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
