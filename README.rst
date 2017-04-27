@@ -1,7 +1,7 @@
 CARTOFrames
 ===========
 
-A pandas interface for integrating `CARTO <https://carto.com/>`__ into data science workflows.
+A Python package for integrating `CARTO <https://carto.com/>`__ maps and services into data science workflows.
 
 Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
@@ -56,7 +56,7 @@ Associate an existing pandas dataframe with CARTO.
 Map workflow
 ~~~~~~~~~~~~
 
-The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
 .. code:: python
 
