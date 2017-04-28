@@ -598,12 +598,9 @@ class CartoContext:
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
         if map_name not in self._map_templates:
-            try:
-                self._auth_send('api/v1/map/named', 'POST',
-                                headers={'Content-Type': 'application/json'},
-                                data=get_map_template(layers, has_zoom=has_zoom))
-            except ValueError('map already exists'):
-                pass
+            self._auth_send('api/v1/map/named', 'POST',
+                            headers={'Content-Type': 'application/json'},
+                            data=get_map_template(layers, has_zoom=has_zoom))
 
             self._map_templates[map_name] = True
         return map_name
