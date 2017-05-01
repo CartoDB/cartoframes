@@ -57,8 +57,15 @@ class CartoContext:
         :obj:`CartoContext`: A CartoContext object that is authenticated against
         the user's CARTO account.
     """
-    def __init__(self, base_url, api_key, session=None, verbose=0):
+    def __init__(self, base_url, api_key=None, session=None, verbose=0):
         # Make sure there is a trailing / for urljoin
+        if api_key is None:
+            from . import keys
+            api_key = keys.APIKEY()
+            if api_key is None:
+                raise ValueError('API Key was not provided and no'
+                                 ' key is stored. Use cartoframes.keys.set_sitekey'
+                                 ' to set a default key for this installation')
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
