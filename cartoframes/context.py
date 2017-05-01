@@ -151,7 +151,6 @@ class CartoContext:
         """
         if encode_geom:
             df['the_geom'] = df[geom_col].apply(_encode_geom)
-            df.drop(geom_col, axis=1, inplace=True)
         table_exists = True
         if not overwrite:
             try:
@@ -175,7 +174,7 @@ class CartoContext:
             """removes temporary file"""
             os.remove(tempfile)
 
-        df.to_csv(tempfile)
+        df.drop(geom_col,axis=1,errors='ignore').to_csv(tempfile)
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
@@ -660,7 +659,8 @@ class CartoContext:
                FROM (
                    SELECT st_extent(the_geom) AS ext
                    FROM ({union_query}) AS wrap1
-               ) AS wrap2'''.format(union_query=union_query))
+               ) AS wrap2'''.format(union_query=union_query),
+                 decode_geom=False)
 
         west, south, east, north = extent.values[0]
 
