@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import collections
+import binascii as ba
 
 import requests
 import IPython
@@ -92,7 +93,7 @@ class CartoContext:
         self._verbose = verbose
 
 
-    def read(self, table_name, limit=None, index='cartodb_id'):
+    def read(self, table_name, limit=None, index='cartodb_id', decode_geom=True):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
@@ -119,11 +120,11 @@ class CartoContext:
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(query)
+        return self.query(query, decode_geom=decode_geom)
 
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None):
+              lnglat=None, encode_geom=True, geom_col='geometry'):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -148,6 +149,9 @@ class CartoContext:
         Returns:
             None
         """
+        if encode_geom:
+            df['the_geom'] = df[geom_col].apply(_encode_geom)
+            df.drop(geom_col, axis=1, inplace=True)
         table_exists = True
         if not overwrite:
             try:
@@ -218,7 +222,7 @@ class CartoContext:
         pass
 
 
-    def query(self, query, table_name=None):
+    def query(self, query, table_name=None, decode_geom=True):
         """Pull the result from an arbitrary SQL query from a CARTO account
         into a pandas DataFrame.
 
@@ -276,6 +280,9 @@ class CartoContext:
             columns=[k for k in fields]).astype(schema)
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
         return df
 
 
@@ -679,3 +686,18 @@ class CartoContext:
                 str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+
+def _encode_geom(geom):
+    """
+    Encode geometries into hex-encoded wkb 
+    """
+    from shapely import wkb
+    return ba.hexlify(wkb.dumps(geom)).decode()
+
+def _decode_geom(ewkb):
+    """
+    Decode encoded wkb into a shapely geometry
+    """
+    from shapely import wkb
+    return wkb.loads(ba.unhexlify(ewkb))
