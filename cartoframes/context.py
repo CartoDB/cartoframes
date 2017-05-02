@@ -13,6 +13,7 @@ import sys
 import time
 import collections
 import binascii as ba
+from warnings import warn
 
 import requests
 import IPython
@@ -124,7 +125,7 @@ class CartoContext:
 
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None, encode_geom=True, geom_col='geometry'):
+              lnglat=None, encode_geom=True, geom_col=None):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -150,7 +151,22 @@ class CartoContext:
             None
         """
         if encode_geom:
+            is_geopandas = getattr(df, '_geometry_column_name')
+            if is_geopandas is None and geom_col is None:
+                geom_col = df.get('geometry')
+                if geom_col is None:
+                    raise KeyError('Geometries were requested to be encoded'
+                                   ' but no "geom_col" was not found in the' 
+                                   ' dataframe and no default geometry column was set.')
+            elif is_geopandas is not None and geom_col is not None:
+                warn('geometry column of the input dataframe does not '
+                     ' match the geometry column supplied! Using user-supplied column...'
+                     ' \n\tGeopandas geometry column: {}'
+                     ' \n\tSupplied geom_col: {}'.format(is_geopandas, geom_col))
+            elif is_geopandas is not None and geom_col is None:
+                geom_col = is_geopandas
             df['the_geom'] = df[geom_col].apply(_encode_geom)
+
         table_exists = True
         if not overwrite:
             try:
