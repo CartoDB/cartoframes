@@ -58,14 +58,17 @@ class CartoContext:
         the user's CARTO account.
     """
     def __init__(self, base_url, api_key=None, session=None, verbose=0):
-        # Make sure there is a trailing / for urljoin
+
+        # use stored api key (if present)
         if api_key is None:
-            from . import keys
-            api_key = keys.APIKEY()
+            from cartoframes.keys import APIKEY
+            api_key = APIKEY()
             if api_key is None:
-                raise ValueError('API Key was not provided and no'
-                                 ' key is stored. Use cartoframes.keys.set_sitekey'
-                                 ' to set a default key for this installation')
+                raise ValueError('API Key was not provided and no key is '
+                                 'stored. Use `cartoframes.keys.set_sitekey` '
+                                 'to set a default key for this installation')
+
+        # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
             base_url += '/'
         self.base_url = base_url
