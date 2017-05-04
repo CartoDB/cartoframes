@@ -1,17 +1,19 @@
-from unittest import TestCase
-from .. import keys, context
-import os
-import shutil as sh
+"""Unit tests for cartoframes.keys"""
+import unittest
+from cartoframes import keys, context
 
-class TestKeyStore(TestCase):
+class TestKeyStore(unittest.TestCase):
+    """Tests for functions in keys module"""
     def setUp(self):
         self.good_key = 'thisisakey'
 
     def test_key_null(self):
-        keys._clear_sitekey()
+        """Test case where API key does not exist"""
+        keys._clear_key()
         with self.assertRaises(ValueError):
-            context.CartoContext('https://test.carto.com', keys.APIKEY())
+            context.CartoContext('https://test.carto.com', keys.api_key())
 
     def test_key_setting(self):
-        keys.set_sitekey(self.good_key)
+        """Test case where API key is valid"""
+        keys.set_key(self.good_key)
         context.CartoContext('https://test.carto.com')
