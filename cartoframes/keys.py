@@ -1,15 +1,11 @@
 """API key utility functions
 """
 import os
-import six
 import warnings
-
-if not six.PY3:
-    FileNotFoundError = OSError
 
 def set_key(key, overwrite=False):
     """Save the CARTO API key so that users can access it via
-    cartoframes.keys.APIKEY. This lets users bind an API key to a given
+    cartoframes.keys.api_key(). This lets users bind an API key to a given
     installation.
 
     Args:
@@ -33,7 +29,12 @@ def set_key(key, overwrite=False):
 
     return targetpath
 
-def APIKEY():
+def api_key():
+    """Returns stored API key that was set with `cartoframes.keys.set_key`
+
+    Returns:
+        str: CARTO API key
+    """
     return _load_key()
 
 def _load_key():
@@ -41,9 +42,11 @@ def _load_key():
     targetpath = os.path.join(basepath, 'CARTOKEY.txt')
     try:
         with open(targetpath, 'r') as f:
-            s = f.read()
-        return s.strip()
-    except FileNotFoundError:
+            key = f.read()
+
+        return key.strip()
+    except EnvironmentError:
+        warnings.warn('No API key found')
         return None
 
 def _clear_key():
@@ -51,6 +54,5 @@ def _clear_key():
     targetpath = os.path.join(basepath, 'CARTOKEY.txt')
     try:
         os.remove(targetpath)
-    except FileNotFoundError:
-        from warnings import warn
-        warn('No API key found!')
+    except EnvironmentError:
+        warnings.warn('No API key found')

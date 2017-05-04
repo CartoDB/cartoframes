@@ -61,8 +61,8 @@ class CartoContext:
 
         # use stored api key (if present)
         if api_key is None:
-            from cartoframes.keys import APIKEY
-            api_key = APIKEY()
+            from cartoframes import keys 
+            api_key = keys.api_key()
             if api_key is None:
                 raise ValueError('API Key was not provided and no key is '
                                  'stored. Use `cartoframes.keys.set_sitekey` '
