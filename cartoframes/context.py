@@ -57,16 +57,26 @@ class CartoContext:
         :obj:`CartoContext`: A CartoContext object that is authenticated against
         the user's CARTO account.
     """
-    def __init__(self, base_url, api_key=None, session=None, verbose=0):
+    def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
 
         # use stored api key (if present)
-        if api_key is None:
+        if (api_key is None) or (base_url is None):
             from cartoframes import keys 
-            api_key = keys.api_key()
-            if api_key is None:
+            credentials = keys.credentials()
+            api_key = credentials['api_key'] if api_key is None else api_key
+            base_url = credentials['url'] if base_url is None else base_url
+            if (api_key == '') and (base_url == ''):
+                raise ValueError('No credentials are stored on this installation'
+                                 ' and none were provided. Use `cartoframes.keys.set_credentials`'
+                                 ' to store your access url and api key for this installation')
+            if api_key == '':
                 raise ValueError('API Key was not provided and no key is '
-                                 'stored. Use `cartoframes.keys.set_sitekey` '
+                                 'stored. Use `cartoframes.keys.set_key` '
                                  'to set a default key for this installation')
+            if base_url == '':
+                raise ValueError('Base URL was not provided and no url is stored.'
+                                 'Use `cartoframes.keys.set_url` to set a default'
+                                 ' bsae url for this installation')
 
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
