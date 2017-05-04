@@ -32,3 +32,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# project-specific
+CARTOCREDS.json
+SITEKEY.txt
