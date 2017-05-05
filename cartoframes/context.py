@@ -238,7 +238,8 @@ class CartoContext:
 
     def query(self, query, table_name=None):
         """Pull the result from an arbitrary SQL query from a CARTO account
-        into a pandas DataFrame.
+        into a pandas DataFrame. Can also be used to perform database
+        operations (creating/dropping tables, adding columns, updates, etc.).
 
         Args:
             query (str): Query to run against CARTO user database.
@@ -287,6 +288,8 @@ class CartoContext:
                    if field != 'cartodb_id' else 'int64'
             for field in fields
         }
+        if not schema.keys():
+            return None
         self._debug_print(fields=fields, schema=schema)
 
         df = pd.DataFrame(
