@@ -151,7 +151,8 @@ class CartoContext:
         table_exists = True
         if not overwrite:
             try:
-                self.query('SELECT * FROM {table_name} limit 0'.format(table_name=table_name))
+                self.query('SELECT * FROM {table_name} limit 0'.format(
+                    table_name=table_name))
             except Exception as err:
                 self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
@@ -159,9 +160,9 @@ class CartoContext:
 
             if table_exists:
                 raise AssertionError(
-                    ('Table {table_name} already exists. '
-                     'Run with overwrite=True if you wish to replace the '
-                     'table').format(table_name=table_name))
+                    ('Table `{table_name}` already exists. '
+                     'Run with `overwrite=True` if you wish to replace the '
+                     'table.').format(table_name=table_name))
 
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
@@ -191,6 +192,23 @@ class CartoContext:
                     remove_tempfile()
                     raise Exception('Error code: {}'.format(res['error_code']))
                 if res['state'] == 'complete':
+                    self._debug_print(final_table_name=res['table_name'])
+                    if res['table_name'] != table_name:
+                        try:
+                            alter_query = ('DROP TABLE IF EXISTS {orig_table}; '
+                                           'ALTER TABLE {dupe_table} RENAME '
+                                           'TO {orig_table};'.format(
+                                               orig_table=table_name,
+                                               dupe_table=res['table_name']))
+
+                            res = self._auth_send('api/v2/sql', 'GET',
+                                                  params={'q': alter_query})
+                            self._debug_print(res=res)
+                        except Exception as err:
+                            self._debug_print(err=err)
+                            raise Exception(("Cannot overwrite table `{table_name}` "
+                                             "({err}).".format(table_name=table_name,
+                                                               err=err)))
                     break
                 # Wait half a second before doing another request
                 time.sleep(0.5)
