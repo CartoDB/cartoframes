@@ -61,10 +61,10 @@ class CartoContext:
 
         # use stored api key (if present)
         if (api_key is None) or (base_url is None):
-            from cartoframes import keys 
-            credentials = keys.credentials()
-            api_key = credentials['api_key'] if api_key is None else api_key
-            base_url = credentials['base_url'] if base_url is None else base_url
+            from cartoframes import credentials
+            creds = credentials.credentials()
+            api_key = creds['api_key'] if api_key is None else api_key
+            base_url = creds['base_url'] if base_url is None else base_url
             if (api_key == '') and (base_url == ''):
                 raise ValueError('No credentials are stored on this installation'
                                  ' and none were provided. Use `cartoframes.keys.set_credentials`'
