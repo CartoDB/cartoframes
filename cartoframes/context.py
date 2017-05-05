@@ -64,7 +64,7 @@ class CartoContext:
             from cartoframes import keys 
             credentials = keys.credentials()
             api_key = credentials['api_key'] if api_key is None else api_key
-            base_url = credentials['url'] if base_url is None else base_url
+            base_url = credentials['base_url'] if base_url is None else base_url
             if (api_key == '') and (base_url == ''):
                 raise ValueError('No credentials are stored on this installation'
                                  ' and none were provided. Use `cartoframes.keys.set_credentials`'
