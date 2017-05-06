@@ -619,9 +619,7 @@ class CartoContext:
     def _check_query(self, query):
         """Checks if query from Layer or QueryLayer is valid"""
         try:
-            self.sql_client.send(('SELECT * '
-                                  'FROM ({query}) _wrap '
-                                  'LIMIT 0').format(query=query))
+            self.sql_client.send(('EXPLAIN {query};').format(query=query))
         except Exception as err:
             raise ValueError(('Layer query `{query}` is not '
                               'valid: {err}').format(query=query,
