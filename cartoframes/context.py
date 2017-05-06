@@ -409,6 +409,7 @@ class CartoContext:
 
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
+            self._check_query(layer.query)
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
@@ -615,6 +616,14 @@ class CartoContext:
             return json.loads(res.content)
         return json.loads(res.content.decode('utf-8'))
 
+    def _check_query(self, query):
+        """Checks if query from Layer or QueryLayer is valid"""
+        try:
+            self.sql_client.send(('EXPLAIN {query};').format(query=query))
+        except Exception as err:
+            raise ValueError(('Layer query `{query}` is not '
+                              'valid: {err}').format(query=query,
+                                                     err=err))
 
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
