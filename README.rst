@@ -60,16 +60,16 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 
 .. code:: python
 
-    from cartoframes import Layer, BaseMap
+    from cartoframes import Layer, BaseMap, styling
     cc = cartoframes.CartoContext(BASEURL, APIKEY)
-    cc.map(layers=[BaseMap(),
+    cc.map(layers=[BaseMap('light'),
                    Layer('acadia_biodiversity',
                          color={'column': 'simpson_index',
-                                'scheme': 'TealRose'}),
+                                'scheme': styling.tealRose(5)}),
                    Layer('peregrine_falcon_nest_sites',
                          size='num_eggs',
                          color={'column': 'bird_id',
-                                'scheme': 'Vivid')],
+                                'scheme': styling.vivid(10))],
            interactive=True)
 
 
