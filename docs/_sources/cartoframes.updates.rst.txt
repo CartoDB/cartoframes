@@ -1,0 +1,7 @@
+cartoframes.updates module
+==========================
+
+.. automodule:: cartoframes.updates
+    :members:
+    :undoc-members:
+    :show-inheritance:

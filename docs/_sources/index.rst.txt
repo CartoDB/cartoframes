@@ -18,6 +18,8 @@ cartoframe methods
     :members:
 .. automodule:: maps
     :members:
+.. automodule:: credentials
+    :members:
 
 Indices and tables
 ==================

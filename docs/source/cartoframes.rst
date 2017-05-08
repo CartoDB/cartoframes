@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    cartoframes.context
+   cartoframes.credentials
    cartoframes.layer
    cartoframes.maps
    cartoframes.styling
