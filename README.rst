@@ -17,7 +17,7 @@ Install Instructions
     $ pip install -r requirements.txt
     $ pip install -e .
 
-Once you've done this, `cartoframes` will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.
+Once you've done this, `cartoframes` will be installed. See the example usage section below for using `cartoframes` in a Jupyter notebook. **User must have a CARTO API key for writing DataFrames to an account or reading from private tables.**
 
 **Note:** Eventually `cartoframes` will be fully installable from `pip`.
 
@@ -42,7 +42,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
-Associate an existing pandas dataframe with CARTO.
+Associate an existing pandas DataFrame with CARTO.
 
 .. code:: python
 
@@ -78,7 +78,7 @@ Augment from Data Observatory
 
 **Note:** This is a provisional function, so the signature may change.
 
-Interact with CARTO's Data Observatory:
+Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
 .. code:: python
 
