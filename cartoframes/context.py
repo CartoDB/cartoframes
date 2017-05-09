@@ -583,31 +583,61 @@ class CartoContext:
 
         # TODO: add more support for denom_id (currently null below)
         # TODO: add more support for tags (currently an empty array {} below)
-        numerator_query = '''
-            SELECT *
-              FROM OBS_GetAvailableNumerators(
-                (SELECT ST_SetSRID(ST_Extent("the_geom"), 4326)
-                   FROM "{tablename}"),
-                '{{}}',
-                null,
-                {geom_id},
-                {timespan}
-            ) numers
-            WHERE valid_timespan IS TRUE AND valid_geom IS TRUE
-              AND ({kw_filter})'''.format(tablename=table_name,
-                                          kw_filter=(True if keywords is None
-                                                     else kw_filter),
-                                          geom_id=('null' if boundary is None
-                                                   else quote_str(boundary)),
-                                          timespan=('null' if time is None
-                                                    else quote_str(time)))
-
-        self._debug_print(numerator_query=numerator_query)
+        # numerator_query = '''
+        #     SELECT *
+        #       FROM OBS_GetAvailableNumerators(
+        #         (SELECT ST_SetSRID(ST_Extent("the_geom"), 4326)
+        #            FROM "{tablename}"),
+        #         '{{}}',
+        #         null,
+        #         {geom_id},
+        #         {timespan}
+        #     ) numers
+        #     WHERE valid_timespan IS TRUE AND valid_geom IS TRUE
+        #       AND ({kw_filter})'''.format(tablename=table_name,
+        #                                   kw_filter=(True if keywords is None
+        #                                              else kw_filter),
+        #                                   geom_id=('null' if boundary is None
+        #                                            else quote_str(boundary)),
+        #                                   timespan=('null' if time is None
+        #                                             else quote_str(time)))
+        numerator_query = r'''
+        with _extent as (
+            SELECT ST_SetSRID(ST_Extent("the_geom"), 4326) extent
+            FROM "{tablename}"
+        ),
+        _input_meta as (
+         select json_agg(json_build_object(
+           'numer_id', numer_id, 'max_score_rank', 1000)) meta
+         from obs_getavailablenumerators((select extent from _extent))
+         where numer_name ilike '%income%'
+        ),
+        _unfiltered_meta as (
+         select json_array_elements(obs_getmeta(extent, meta, 1000, 1000)) meta
+         from _input_meta, _extent
+        ),
+        _largest_geom_by_id as (
+          select min((meta->>'num_geoms')::numeric) min_numgeoms, meta->>'id' id
+          from _unfiltered_meta
+          group by meta->>'id'
+        ),
+        _earliest_timespan_by_id as (
+          select min(meta->>'numer_timespan') min_timespan, meta->>'id' id
+          from _unfiltered_meta
+          group by meta->>'id'
+        )
+        select array_agg(_unfiltered_meta.meta)
+        from _unfiltered_meta, _largest_geom_by_id, _earliest_timespan_by_id
+        where min_numgeoms = (meta->>'num_geoms')::Numeric
+          and min_timespan = meta->>'numer_timespan'
+          and _largest_geom_by_id.id = (meta->>'id')
+          and _earliest_timespan_by_id.id = (meta->>'id')
+        '''.format(tablename=table_name)
         discovery_data = self.query(numerator_query)
-        discovery_data['timespan'] = time
-        discovery_data['geom_id'] = boundary
+
+        self._debug_print(data=discovery_data)
         self._debug_print(n_measures=len(discovery_data))
-        return discovery_data
+        return pd.DataFrame(discovery_data['array_agg'].values[0])
 
     # TODO: what are the limits on number of columns to enrich by?
     def data_augment(self, table_name, metadata):
