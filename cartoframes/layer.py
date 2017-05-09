@@ -13,7 +13,7 @@ DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
                   '#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
 
 
-class AbstractLayer:
+class AbstractLayer(object):
     """Abstract Layer object"""
     is_basemap = False
 

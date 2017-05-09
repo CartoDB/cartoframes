@@ -43,7 +43,7 @@
             
   <div class="section" id="cartoframes">
 <h1>CARTOFrames<a class="headerlink" href="#cartoframes" title="Permalink to this headline">¶</a></h1>
-<p>A pandas interface for integrating <a class="reference external" href="https://carto.com/">CARTO</a> into data science workflows.</p>
+<p>A Python package for integrating <a class="reference external" href="https://carto.com/">CARTO</a> maps and services into data science workflows.</p>
 <p>Python data analysis workflows often rely on the de facto standards <a class="reference external" href="http://pandas.pydata.org/">pandas</a> and <a class="reference external" href="http://jupyter.org/">Jupyter notebooks</a>. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO&#8217;s services like hosted, dynamic or static maps and <a class="reference external" href="https://carto.com/data-observatory/">Data Observatory</a> augmentation.</p>
 <div class="section" id="install-instructions">
 <h2>Install Instructions<a class="headerlink" href="#install-instructions" title="Permalink to this headline">¶</a></h2>
@@ -54,7 +54,7 @@ $ pip install -r requirements.txt
 $ pip install -e .
 </pre></div>
 </div>
-<p>Once you&#8217;ve done this, <cite>cartoframes</cite> will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.</p>
+<p>Once you&#8217;ve done this, <cite>cartoframes</cite> will be installed. See the example usage section below for using <cite>cartoframes</cite> in a Jupyter notebook. <strong>User must have a CARTO API key for writing DataFrames to an account or reading from private tables.</strong></p>
 <p><strong>Note:</strong> Eventually <cite>cartoframes</cite> will be fully installable from <cite>pip</cite>.</p>
 </div>
 <div class="section" id="example-usage">
@@ -72,7 +72,7 @@ $ pip install -e .
 <span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty_census_tracts&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Associate an existing pandas dataframe with CARTO.</p>
+<p>Associate an existing pandas DataFrame with CARTO.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity.csv&#39;</span><span class="p">)</span>
@@ -83,37 +83,39 @@ $ pip install -e .
 </div>
 <div class="section" id="map-workflow">
 <h3>Map workflow<a class="headerlink" href="#map-workflow" title="Permalink to this headline">¶</a></h3>
-<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driving by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">Turbo Carto</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CartoColors</a>. See the <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColor wiki</a> for a full list of available color schemes.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span>
+<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">Turbo Carto</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CartoColors</a>. See the <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColor wiki</a> for a full list of available color schemes.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span><span class="p">,</span> <span class="n">styling</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">BaseMap</span><span class="p">(),</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">BaseMap</span><span class="p">(</span><span class="s1">&#39;light&#39;</span><span class="p">),</span>
                <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">,</span>
                      <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;simpson_index&#39;</span><span class="p">,</span>
-                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;TealRose&#39;</span><span class="p">}),</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">tealRose</span><span class="p">(</span><span class="mi">5</span><span class="p">)}),</span>
                <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;peregrine_falcon_nest_sites&#39;</span><span class="p">,</span>
                      <span class="n">size</span><span class="o">=</span><span class="s1">&#39;num_eggs&#39;</span><span class="p">,</span>
                      <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
-                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;Vivid&#39;</span><span class="p">)],</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">vivid</span><span class="p">(</span><span class="mi">10</span><span class="p">))],</span>
        <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="augment-from-data-observatory">
 <h3>Augment from Data Observatory<a class="headerlink" href="#augment-from-data-observatory" title="Permalink to this headline">¶</a></h3>
-<p><strong>Note: This feature is not yet implemented</strong></p>
-<p>Interact with CARTO&#8217;s Data Observatory:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># total pop, high school diploma (normalized), median income, poverty status (normalized)</span>
+<p><strong>Note:</strong> This is a provisional function, so the signature may change.</p>
+<p>Interact with CARTO&#8217;s <a class="reference external" href="https://carto.com/docs/carto-engine/data">Data Observatory</a>:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+
+<span class="c1"># total pop, high school diploma (normalized), median income, poverty status (normalized)</span>
 <span class="c1"># See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html</span>
 <span class="n">data_obs_measures</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B01003001&#39;</span><span class="p">},</span>
-                     <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B15003017&#39;</span><span class="p">,</span> <span class="s1">&#39;denominator&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">},</span>
+                     <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B15003017&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;normalization&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">},</span>
                      <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">},</span>
-                     <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B17001002&#39;</span><span class="p">,</span> <span class="s1">&#39;denominator&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">}]</span>
-<span class="n">df</span><span class="o">.</span><span class="n">carto_do_augment</span><span class="p">(</span><span class="n">data_obs_measures</span><span class="p">)</span>
+                     <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B17001002&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;normalization&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">},]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">do_augment</span><span class="p">(</span><span class="s1">&#39;transactions&#39;</span><span class="p">,</span> <span class="n">data_obs_measures</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
-</div>
-<div class="figure">
-<img alt="Example of using data observatory augmentation methods" src="https://raw.githubusercontent.com/CartoDB/cartoframes/master/examples/data_obs_augmentation.png" />
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -130,7 +132,7 @@ methods interact with CARTO&#8217;s services like
 geocoding, and isolines</a>.</p>
 <dl class="class">
 <dt id="context.CartoContext">
-<em class="property">class </em><code class="descclassname">context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url</em>, <em>api_key</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
 <p class="rubric">Example</p>
@@ -168,8 +170,85 @@ the user&#8217;s CARTO account.</p>
 </table>
 <dl class="method">
 <dt id="context.CartoContext.data_augment">
-<code class="descname">data_augment</code><span class="sig-paren">(</span><em>table_name</em>, <em>numer</em>, <em>denom=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_augment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not currently implemented</p>
+<code class="descname">data_augment</code><span class="sig-paren">(</span><em>table_name</em>, <em>metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_augment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Augment an existing CARTO table with <a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a> measures. See the full <a class="reference external" href="https://cartodb.github.io/bigmetadata/index.html">Data
+Observatory catalog</a> for all available
+measures. The result of this operation is:</p>
+<ol class="arabic simple">
+<li>It updates <cite>table_name</cite> by adding columns from the Data Observatory</li>
+<li>It returns a pandas DataFrame representation of that newly augmented
+table.</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This method alters <cite>table_name</cite> in the user&#8217;s CARTO database by
+adding additional columns. To avoid this, create a copy of the
+table first and use the new copy instead.</p>
+</div>
+<p class="rubric">Example</p>
+<p>Add new measures to a CARTO table and pass it to a pandas DataFrame.
+Using the &#8220;Median Household Income in the past 12 months&#8221; measure
+from the <a class="reference external" href="https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months">Data Observatory Catalog</a>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">median_income</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;geom_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.tiger.block_group&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;numer_timespan&#39;</span><span class="p">:</span> <span class="s1">&#39;2011 - 2015&#39;</span><span class="p">}]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data_augment</span><span class="p">(</span><span class="s1">&#39;transaction_events&#39;</span><span class="p">,</span>
+                     <span class="n">median_income</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table_name</strong> (<em>str</em>) &#8211; Name of table on CARTO account that Data
+Observatory measures are to be added to.</li>
+<li><strong>metadata</strong> (<em>list of dicts</em>) &#8211; <p>List of all measures to add to
+<cite>table_name</cite>. Each <cite>dict</cite> has the following keys:</p>
+<ul>
+<li><cite>numer_id</cite> (str): The identifier for the desired measurement</li>
+<li><cite>geom_id</cite> (str, optional): Identifier for a desired
+geographic boundary level to use when calculating measures.
+Will be automatically assigned if undefined</li>
+<li><cite>normalization</cite> (str, optional): The desired normalization. One
+of &#8216;area&#8217;, &#8216;prenormalized&#8217;, or &#8216;denominated&#8217;. &#8216;Area&#8217; will
+normalize the measure per square kilometer, &#8216;prenormalized&#8217;
+will return the original value, and &#8216;denominated&#8217; will
+normalize by a denominator.</li>
+<li><cite>denom_id</cite> (str, optional): Measure ID from DO catalog</li>
+<li><cite>numer_timespan</cite> (str, optional): The desired timespan for the
+measurement. Defaults to most recent timespan available if
+left unspecified.</li>
+<li><cite>geom_timespan</cite> (str, optional): The desired timespan for the
+geometry. Defaults to timespan matching <cite>numer_timespan</cite> if
+left unspecified.</li>
+<li><cite>target_area</cite> (str, optional): Instead of aiming to have
+<cite>target_geoms</cite> in the area of the geometry passed as extent,
+fill this area. Unit is square degrees WGS84. Set this to
+<cite>0</cite> if you want to use the smallest source geometry for this
+element of metadata, for example if you&#8217;re passing in points.</li>
+<li><cite>target_geoms</cite> (str, optional): Override global <cite>target_geoms</cite>
+for this element of metadata</li>
+<li><cite>max_timespan_rank</cite> (str, optional): Override global
+<cite>max_timespan_rank</cite> for this element of metadata</li>
+<li><cite>max_score_rank</cite> (str, optional): Override global
+<cite>max_score_rank</cite> for this element of metadata</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A DataFrame representation of <cite>table_name</cite> which
+has new columns for each measure in <cite>metadata</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -255,7 +334,8 @@ while static maps are rendered in <code class="docutils literal"><span class="pr
 <dt id="context.CartoContext.query">
 <code class="descname">query</code><span class="sig-paren">(</span><em>query</em>, <em>table_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.query" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pull the result from an arbitrary SQL query from a CARTO account
-into a pandas DataFrame.</p>
+into a pandas DataFrame. Can also be used to perform database
+operations (creating/dropping tables, adding columns, updates, etc.).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -659,6 +739,140 @@ Returns `False</cite> otherwise</p>
 <dt id="maps.non_basemap_layers">
 <code class="descclassname">maps.</code><code class="descname">non_basemap_layers</code><span class="sig-paren">(</span><em>layers</em><span class="sig-paren">)</span><a class="headerlink" href="#maps.non_basemap_layers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve all map layers which are not basemaps</p>
+</dd></dl>
+
+<span class="target" id="module-credentials"></span><p>API key utility functions</p>
+<dl class="function">
+<dt id="credentials.api_key">
+<code class="descclassname">credentials.</code><code class="descname">api_key</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.api_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns stored API key that was set with <cite>cartoframes.keys.set_key</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">CARTO API key</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="credentials.base_url">
+<code class="descclassname">credentials.</code><code class="descname">base_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.base_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns stored base_url that was set with <cite>cartoframes.keys.set_base_url</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">CARTO API base URL</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="credentials.credentials">
+<code class="descclassname">credentials.</code><code class="descname">credentials</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns stored credentials that was set with
+<cite>cartoframes.keys.set_credentials</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dictionary containing CARTO API base_url and API key.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="credentials.set_api_key">
+<code class="descclassname">credentials.</code><code class="descname">set_api_key</code><span class="sig-paren">(</span><em>key</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_api_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the CARTO API key so that users can access it via
+<cite>cartoframes.keys.api_key()</cite>. This lets users bind an API key to a given
+installation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> (<em>str</em>) &#8211; CARTO API key</li>
+<li><strong>overwrite</strong> (<em>bool</em>) &#8211; Whether to overwrite existing key. Defaults to False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file. Raises FileError if
+overwriting is prohibited and the file exists.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="credentials.set_base_url">
+<code class="descclassname">credentials.</code><code class="descname">set_base_url</code><span class="sig-paren">(</span><em>base_url</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_base_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the CARTO API base_url so that users can access it via
+cartoframes.keys.access_base_url(). This lets users bind their API base_url
+to a given installation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>base_url</strong> (<em>str</em>) &#8211; CARTO access URL</li>
+<li><strong>overwrite</strong> (<em>bool</em>) &#8211; Whether to overwrite the existing key. Defaults to False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to location of the credentials file. Raises FileError if
+overwriting is prohibited and the file exists.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="credentials.set_credentials">
+<code class="descclassname">credentials.</code><code class="descname">set_credentials</code><span class="sig-paren">(</span><em>base_url=''</em>, <em>api_key=''</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the CARTO API base URL and API key so that users can access it via
+cartoframes.keys.credentials(). This lets users bind their CARTO access
+credentials to a given installation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>base_url</strong> (<em>str</em>) &#8211; CARTO API base URL. Defaults to an empty string. Format
+is <cite>https://{username}.carto.com/</cite> for cloud users.</li>
+<li><strong>api_key</strong> (<em>str</em>) &#8211; CARTO api key. Defaults to an empty string.</li>
+<li><strong>overwrite</strong> (<em>bool</em>) &#8211; Whether to overwrite the existing credentials.
+Defaults to False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file. Raises <cite>EnvironmentError</cite>
+if overwriting is prohibited and the file exists.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

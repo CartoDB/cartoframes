@@ -57,7 +57,27 @@ class CartoContext:
         :obj:`CartoContext`: A CartoContext object that is authenticated against
         the user's CARTO account.
     """
-    def __init__(self, base_url, api_key, session=None, verbose=0):
+    def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
+
+        # use stored api key (if present)
+        if (api_key is None) or (base_url is None):
+            from cartoframes import credentials
+            creds = credentials.credentials()
+            api_key = creds['api_key'] if api_key is None else api_key
+            base_url = creds['base_url'] if base_url is None else base_url
+            if (api_key == '') and (base_url == ''):
+                raise ValueError('No credentials are stored on this installation'
+                                 ' and none were provided. Use `cartoframes.keys.set_credentials`'
+                                 ' to store your access url and api key for this installation')
+            if api_key == '':
+                raise ValueError('API Key was not provided and no key is '
+                                 'stored. Use `cartoframes.keys.set_key` '
+                                 'to set a default key for this installation')
+            if base_url == '':
+                raise ValueError('Base URL was not provided and no url is stored.'
+                                 'Use `cartoframes.keys.set_url` to set a default'
+                                 ' bsae url for this installation')
+
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
             base_url += '/'
@@ -151,7 +171,8 @@ class CartoContext:
         table_exists = True
         if not overwrite:
             try:
-                self.query('SELECT * FROM {table_name} limit 0'.format(table_name=table_name))
+                self.query('SELECT * FROM {table_name} limit 0'.format(
+                    table_name=table_name))
             except Exception as err:
                 self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
@@ -159,9 +180,9 @@ class CartoContext:
 
             if table_exists:
                 raise AssertionError(
-                    ('Table {table_name} already exists. '
-                     'Run with overwrite=True if you wish to replace the '
-                     'table').format(table_name=table_name))
+                    ('Table `{table_name}` already exists. '
+                     'Run with `overwrite=True` if you wish to replace the '
+                     'table.').format(table_name=table_name))
 
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
@@ -191,6 +212,23 @@ class CartoContext:
                     remove_tempfile()
                     raise Exception('Error code: {}'.format(res['error_code']))
                 if res['state'] == 'complete':
+                    self._debug_print(final_table_name=res['table_name'])
+                    if res['table_name'] != table_name:
+                        try:
+                            alter_query = ('DROP TABLE IF EXISTS {orig_table}; '
+                                           'ALTER TABLE {dupe_table} RENAME '
+                                           'TO {orig_table};'.format(
+                                               orig_table=table_name,
+                                               dupe_table=res['table_name']))
+
+                            res = self._auth_send('api/v2/sql', 'GET',
+                                                  params={'q': alter_query})
+                            self._debug_print(res=res)
+                        except Exception as err:
+                            self._debug_print(err=err)
+                            raise Exception(("Cannot overwrite table `{table_name}` "
+                                             "({err}).".format(table_name=table_name,
+                                                               err=err)))
                     break
                 # Wait half a second before doing another request
                 time.sleep(0.5)
@@ -220,7 +258,8 @@ class CartoContext:
 
     def query(self, query, table_name=None):
         """Pull the result from an arbitrary SQL query from a CARTO account
-        into a pandas DataFrame.
+        into a pandas DataFrame. Can also be used to perform database
+        operations (creating/dropping tables, adding columns, updates, etc.).
 
         Args:
             query (str): Query to run against CARTO user database.
@@ -269,6 +308,8 @@ class CartoContext:
                    if field != 'cartodb_id' else 'int64'
             for field in fields
         }
+        if not schema.keys():
+            return None
         self._debug_print(fields=fields, schema=schema)
 
         df = pd.DataFrame(
@@ -388,6 +429,7 @@ class CartoContext:
 
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
+            self._check_query(layer.query)
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
@@ -663,6 +705,14 @@ class CartoContext:
             return json.loads(res.content)
         return json.loads(res.content.decode('utf-8'))
 
+    def _check_query(self, query):
+        """Checks if query from Layer or QueryLayer is valid"""
+        try:
+            self.sql_client.send(('EXPLAIN {query};').format(query=query))
+        except Exception as err:
+            raise ValueError(('Layer query `{query}` is not '
+                              'valid: {err}').format(query=query,
+                                                     err=err))
 
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
