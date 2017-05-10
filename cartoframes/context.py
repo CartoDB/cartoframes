@@ -537,13 +537,109 @@ class CartoContext:
         """Not currently implemented"""
         pass
 
-
-    def data_discovery(self, keywords=None, regex=None, time=None,
+    # TODO: add more flexibility about the source of the extent
+    #       e.g., passing bounding box instead of a tablename
+    # TODO: Add `demon_id` as an option
+    def data_discovery(self, table_name, keywords=None, regex=None, time=None,
                        boundary=None):
-        """Not currently implemented"""
-        pass
+        """Provisional method. This method relies on `GetAvailableNumerators
+        <https://carto.com/docs/carto-engine/data/discovery-functions#obsgetavailablenumeratorsbounds-filtertags-denomid-geomid-timespan>`__ from
+        Data Observatory extension.
 
+        Example:
+            Use an existing CARTO table to define the geographic extent to
+            search for valid measures from the Data Observatory. ::
 
+                df = cc.data_discovery('brooklyn_poverty',
+                                       boundary='us.census.tiger.census_tract',
+                                       keywords=('income', 'poverty'),
+                                       time='2011 - 2015')
+        Args:
+            table_name (str): Name of table in CARTO account to use the
+                geographic extent of for finding available measures.
+            keywords (str or tuple, optional): Keywords for filtering of
+                results.
+            regex (str, optional): Not yet implemented.
+            time (str, optional): Time that measure is available over.
+            boundary (str, optional): Boundary ID from Data Observatory. See the
+                `full list of Boundary IDs
+                <https://carto.com/docs/carto-engine/data/glossary#boundary-ids>`__
+                in the Data Observatory documentation.
+
+        Returns:
+            pandas.DataFrame: Results of query.
+
+        """
+
+        if keywords is not None:
+            if isinstance(keywords, str):
+                keywords = [keywords]
+            kw_filter = ' OR '.join(["numer_name ilike '%{kw}%'".format(kw=kw)
+                                     for kw in keywords])
+
+        def quote_str(sql_text):
+            """single quote sql text"""
+            return "'" + sql_text + "'"
+
+        # TODO: add more support for denom_id (currently null below)
+        # TODO: add more support for tags (currently an empty array {} below)
+        # numerator_query = '''
+        #     SELECT *
+        #       FROM OBS_GetAvailableNumerators(
+        #         (SELECT ST_SetSRID(ST_Extent("the_geom"), 4326)
+        #            FROM "{tablename}"),
+        #         '{{}}',
+        #         null,
+        #         {geom_id},
+        #         {timespan}
+        #     ) numers
+        #     WHERE valid_timespan IS TRUE AND valid_geom IS TRUE
+        #       AND ({kw_filter})'''.format(tablename=table_name,
+        #                                   kw_filter=(True if keywords is None
+        #                                              else kw_filter),
+        #                                   geom_id=('null' if boundary is None
+        #                                            else quote_str(boundary)),
+        #                                   timespan=('null' if time is None
+        #                                             else quote_str(time)))
+        numerator_query = r'''
+        with _extent as (
+            SELECT ST_SetSRID(ST_Extent("the_geom"), 4326) extent
+            FROM "{tablename}"
+        ),
+        _input_meta as (
+         select json_agg(json_build_object(
+           'numer_id', numer_id, 'max_score_rank', 1000)) meta
+         from obs_getavailablenumerators((select extent from _extent))
+         where numer_name ilike '%income%'
+        ),
+        _unfiltered_meta as (
+         select json_array_elements(obs_getmeta(extent, meta, 1000, 1000)) meta
+         from _input_meta, _extent
+        ),
+        _largest_geom_by_id as (
+          select min((meta->>'num_geoms')::numeric) min_numgeoms, meta->>'id' id
+          from _unfiltered_meta
+          group by meta->>'id'
+        ),
+        _earliest_timespan_by_id as (
+          select min(meta->>'numer_timespan') min_timespan, meta->>'id' id
+          from _unfiltered_meta
+          group by meta->>'id'
+        )
+        select array_agg(_unfiltered_meta.meta)
+        from _unfiltered_meta, _largest_geom_by_id, _earliest_timespan_by_id
+        where min_numgeoms = (meta->>'num_geoms')::Numeric
+          and min_timespan = meta->>'numer_timespan'
+          and _largest_geom_by_id.id = (meta->>'id')
+          and _earliest_timespan_by_id.id = (meta->>'id')
+        '''.format(tablename=table_name)
+        discovery_data = self.query(numerator_query)
+
+        self._debug_print(data=discovery_data)
+        self._debug_print(n_measures=len(discovery_data))
+        return pd.DataFrame(discovery_data['array_agg'].values[0])
+
+    # TODO: what are the limits on number of columns to enrich by?
     def data_augment(self, table_name, metadata):
         """Augment an existing CARTO table with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. See the full `Data
@@ -613,7 +709,10 @@ class CartoContext:
             pandas.DataFrame: A DataFrame representation of `table_name` which
             has new columns for each measure in `metadata`.
         """
-
+        if isinstance(metadata, pd.DataFrame):
+            # for processing a CartoContext.data_discovery dataframe into
+            # a valid metadata object
+            pass
         # augment with data observatory metadata
         augment_query = '''
             select obs_augment_table('{username}.{tablename}',
