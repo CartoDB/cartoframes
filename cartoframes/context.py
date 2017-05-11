@@ -614,6 +614,15 @@ class CartoContext:
             has new columns for each measure in `metadata`.
         """
 
+        try:
+            with open(os.path.join(os.path.dirname(__file__),
+                                   'assets/data_obs_augment.sql'), 'r') as f:
+                augment_functions = f.read()
+            self.sql_client.send(augment_functions)
+        except Exception as err:
+            raise Exception("Could not install `obs_augment_table` onto user "
+                            "account ({})".format(err))
+
         # augment with data observatory metadata
         augment_query = '''
             select obs_augment_table('{username}.{tablename}',
