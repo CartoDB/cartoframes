@@ -268,6 +268,8 @@ class CartoContext:
                 query. Defaults to None (no table created).
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
+            Pandas data types are inferred from PostgreSQL data types.
+            In the case of invalid timestamps, the data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -311,10 +313,19 @@ class CartoContext:
         if not schema.keys():
             return None
         self._debug_print(fields=fields, schema=schema)
-
-        df = pd.DataFrame(
-            data=select_res['rows'],
-            columns=[k for k in fields]).astype(schema)
+        try:
+            df = pd.DataFrame(
+                data=select_res['rows'],
+                columns=[k for k in fields]).astype(schema)
+        except pd.tslib.OutOfBoundsDatetime:
+            df = pd.DataFrame(
+                data=select_res['rows'],
+                columns=[k for k in fields])
+            for field, dtype in schema.iteritems():
+                try:
+                    df.astype({field:dtype})
+                except pd.tslib.OutOfBoundsDatetime:
+                    pass
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
         return df
