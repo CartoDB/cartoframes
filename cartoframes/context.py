@@ -61,22 +61,26 @@ class CartoContext:
 
         # use stored api key (if present)
         if (api_key is None) or (base_url is None):
-            from cartoframes import credentials
-            creds = credentials.credentials()
+            from cartoframes import credentials as cfcreds
+            creds = cfcreds.credentials()
             api_key = creds['api_key'] if api_key is None else api_key
             base_url = creds['base_url'] if base_url is None else base_url
             if (api_key == '') and (base_url == ''):
-                raise ValueError('No credentials are stored on this installation'
-                                 ' and none were provided. Use `cartoframes.keys.set_credentials`'
-                                 ' to store your access url and api key for this installation')
+                raise ValueError('No credentials are stored on this '
+                                 'installation and none were provided. Use '
+                                 '`cartoframes.credentials.set_credentials` '
+                                 'to store your access URL and API key for '
+                                 'this installation.')
             if api_key == '':
-                raise ValueError('API Key was not provided and no key is '
-                                 'stored. Use `cartoframes.keys.set_key` '
-                                 'to set a default key for this installation')
+                raise ValueError('API key was not provided and no key is '
+                                 'stored. Use '
+                                 '`cartoframes.credentials.set_key` to set a '
+                                 'default API key for this installation.')
             if base_url == '':
-                raise ValueError('Base URL was not provided and no url is stored.'
-                                 'Use `cartoframes.keys.set_url` to set a default'
-                                 ' bsae url for this installation')
+                raise ValueError('Base URL was not provided and no URL is '
+                                 'stored. Use '
+                                 '`cartoframes.credentials.set_url` to set a '
+                                 'default base URL for this installation.')
 
         # Make sure there is a trailing / for urljoin
         if not base_url.endswith('/'):
