@@ -196,7 +196,7 @@ class QueryLayer(AbstractLayer):
                  tooltip=None, legend=None):
 
         self.query = query
-
+        self.columns = set()
         # redundant?
         color = color or None
 
@@ -207,12 +207,17 @@ class QueryLayer(AbstractLayer):
                 raise ValueError("color must include a 'column' value")
             scheme = color.get('scheme', mint(5))
             color = color['column']
+            self.columns.add(color)
         elif (color and
               color[0] != '#' and
               color not in webcolors.CSS3_NAMES_TO_HEX):
+            # color specified that is not a web color or hex value so its
+            #  assumed to be a column name
             color = color
+            self.columns.add(color)
             scheme = mint(5)
         else:
+            # assume it's a color
             color = color
             scheme = None
 
@@ -226,6 +231,7 @@ class QueryLayer(AbstractLayer):
                 time_column = time
                 time_options = {}
 
+            self.columns.add(time_column)
             time = {
                 'column': time_column,
                 'method': 'count',
@@ -240,20 +246,20 @@ class QueryLayer(AbstractLayer):
             size = {'column': size}
         if isinstance(size, dict):
             if 'column' not in size:
-                raise ValueError("size must include a 'column' value")
+                raise ValueError("Size must include a 'column' key/value")
             if time:
-                raise ValueError("When time is specified, size can"
-                                 " only be a fixed size")
+                raise ValueError("When time is specified, size can "
+                                 "only be a fixed size")
             old_size = size
             size = {
-                'range'     : [5, 25],
-                'bins'      : 10,
+                'range': [5, 25],
+                'bins': 10,
                 'bin_method': BinMethod.quantiles,
             }
             size.update(old_size)
             # Since we're accessing min/max, convert range into a list
             size['range'] = list(size['range'])
-
+            self.columns.add(size['column'])
         self.color = color
         self.scheme = scheme
         self.size = size

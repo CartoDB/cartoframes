@@ -434,7 +434,7 @@ class CartoContext:
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
             self._check_query(layer.query,
-                              [layer.size.get('column'), layer.color])
+                              layer.columns)
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
@@ -650,14 +650,26 @@ class CartoContext:
             return json.loads(res.content)
         return json.loads(res.content.decode('utf-8'))
 
-    def _check_query(self, query, columns=None):
+    def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
         try:
-            self.sql_client.send(('EXPLAIN {query};').format(query=query))
+            self.sql_client.send('''
+                EXPLAIN
+                SELECT
+                  {style_cols}{comma}
+                  the_geom,
+                  the_geom_webmercator
+                FROM ({query}) _wrap;
+                '''.format(query=query,
+                           comma=',' if style_cols else '',
+                           style_cols=','.join(style_cols)))
         except Exception as err:
-            raise ValueError(('Layer query `{query}` is not '
-                              'valid: {err}').format(query=query,
-                                                     err=err))
+            raise ValueError(('Layer query `{query}` and/or style column(s) '
+                              '{cols} are not valid: {err}.'
+                              '').format(query=query,
+                                         cols=', '.join(['`{}`'.format(c)
+                                                         for c in style_cols]),
+                                         err=err))
 
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
