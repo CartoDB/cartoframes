@@ -10,7 +10,7 @@ _TARGETPATH = os.path.join(_FILEPATH, 'CARTOCREDS.json')
 
 def set_credentials(base_url='', api_key='', overwrite=False):
     """Save the CARTO API base URL and API key so that users can access it via
-    cartoframes.keys.credentials(). This lets users bind their CARTO access
+    cartoframes.credentials.credentials(). This lets users bind their CARTO access
     credentials to a given installation.
 
     Args:
@@ -33,7 +33,7 @@ def set_credentials(base_url='', api_key='', overwrite=False):
 
 def set_base_url(base_url, overwrite=False):
     """Save the CARTO API base_url so that users can access it via
-    cartoframes.keys.access_base_url(). This lets users bind their API base_url
+    cartoframes.credentials.access_base_url(). This lets users bind their API base_url
     to a given installation.
 
     Args:
@@ -52,7 +52,7 @@ def set_base_url(base_url, overwrite=False):
 
 def set_api_key(key, overwrite=False):
     """Save the CARTO API key so that users can access it via
-    `cartoframes.keys.api_key()`. This lets users bind an API key to a given
+    `cartoframes.credentials.api_key()`. This lets users bind an API key to a given
     installation.
 
     Args:
@@ -70,7 +70,7 @@ def set_api_key(key, overwrite=False):
     return _TARGETPATH
 
 def api_key():
-    """Returns stored API key that was set with `cartoframes.keys.set_key`
+    """Returns stored API key that was set with `cartoframes.credentials.set_key`
 
     Returns:
         str: CARTO API key
@@ -78,7 +78,7 @@ def api_key():
     return _load_api_key()
 
 def base_url():
-    """Returns stored base_url that was set with `cartoframes.keys.set_base_url`
+    """Returns stored base_url that was set with `cartoframes.credentials.set_base_url`
 
     Returns:
         str: CARTO API base URL
@@ -87,7 +87,7 @@ def base_url():
 
 def credentials():
     """Returns stored credentials that was set with
-    `cartoframes.keys.set_credentials`
+    `cartoframes.credentials.set_credentials`
 
     Returns:
         dict: Dictionary containing CARTO API base_url and API key.
@@ -109,7 +109,7 @@ def _load_creds():
     except EnvironmentError:
         raise EnvironmentError('No credentials are stored with this '
                                'installation.  Set credentials using '
-                               '`cartoframes.keys.set_credentials`.')
+                               '`cartoframes.credentials.set_credentials`.')
 
     return dict(base_url=creds['base_url'].strip(),
                 api_key=creds['api_key'].strip())
