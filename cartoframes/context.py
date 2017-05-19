@@ -12,6 +12,8 @@ import re
 import sys
 import time
 import collections
+import binascii as ba
+from warnings import warn
 
 import requests
 import IPython
@@ -116,7 +118,7 @@ class CartoContext:
         self._verbose = verbose
 
 
-    def read(self, table_name, limit=None, index='cartodb_id'):
+    def read(self, table_name, limit=None, index='cartodb_id', decode_geom=True):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
@@ -143,11 +145,11 @@ class CartoContext:
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(query)
+        return self.query(query, decode_geom=decode_geom)
 
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None):
+              lnglat=None, encode_geom=True, geom_col=None):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -172,6 +174,27 @@ class CartoContext:
         Returns:
             None
         """
+        if encode_geom:
+            # None if not a GeoDataFrame
+            is_geopandas = getattr(df, '_geometry_column_name')
+            if is_geopandas is None and geom_col is None:
+                geom_col = df.get('geometry')
+                if geom_col is None:
+                    raise KeyError('Geometries were requested to be encoded '
+                                   'but `{geom_col}` was not found in the '
+                                   'DataFrame and no default geometry column '
+                                   'was set.'.format(geom_col=geom_col))
+            elif is_geopandas is not None and geom_col is not None:
+                warn('Geometry column of the input DataFrame does not '
+                     'match the geometry column supplied. Using user-supplied '
+                     'column...\n'
+                     '\tGeopandas geometry column: {}\n'
+                     '\tSupplied `geom_col`: {}'.format(is_geopandas,
+                                                        geom_col))
+            elif is_geopandas is not None and geom_col is None:
+                geom_col = is_geopandas
+            df['the_geom'] = df[geom_col].apply(_encode_geom)
+
         table_exists = True
         if not overwrite:
             try:
@@ -196,7 +219,8 @@ class CartoContext:
             """removes temporary file"""
             os.remove(tempfile)
 
-        df.to_csv(tempfile)
+        # reset DataFrame before sending to CARTO
+        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
@@ -260,7 +284,7 @@ class CartoContext:
         pass
 
 
-    def query(self, query, table_name=None):
+    def query(self, query, table_name=None, decode_geom=True):
         """Pull the result from an arbitrary SQL query from a CARTO account
         into a pandas DataFrame. Can also be used to perform database
         operations (creating/dropping tables, adding columns, updates, etc.).
@@ -321,6 +345,9 @@ class CartoContext:
             columns=[k for k in fields]).astype(schema)
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
         return df
 
 
@@ -708,15 +735,17 @@ class CartoContext:
              if not layer.is_basemap])
 
         extent = self.query('''
-               SELECT
-                 ST_XMIN(ext) AS west,
-                 ST_YMIN(ext) AS south,
-                 ST_XMAX(ext) AS east,
-                 ST_YMAX(ext) AS north
-               FROM (
-                   SELECT st_extent(the_geom) AS ext
-                   FROM ({union_query}) AS wrap1
-               ) AS wrap2'''.format(union_query=union_query))
+                       SELECT
+                         ST_XMIN(ext) AS west,
+                         ST_YMIN(ext) AS south,
+                         ST_XMAX(ext) AS east,
+                         ST_YMAX(ext) AS north
+                       FROM (
+                           SELECT st_extent(the_geom) AS ext
+                           FROM ({union_query}) AS _wrap1
+                       ) AS _wrap2
+                            '''.format(union_query=union_query),
+                            decode_geom=False)
 
         west, south, east, north = extent.values[0]
 
@@ -742,3 +771,18 @@ class CartoContext:
                 str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+
+def _encode_geom(geom):
+    """
+    Encode geometries into hex-encoded wkb
+    """
+    from shapely import wkb
+    return ba.hexlify(wkb.dumps(geom)).decode()
+
+def _decode_geom(ewkb):
+    """
+    Decode encoded wkb into a shapely geometry
+    """
+    from shapely import wkb
+    return wkb.loads(ba.unhexlify(ewkb))
