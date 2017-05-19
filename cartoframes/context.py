@@ -735,16 +735,17 @@ class CartoContext:
              if not layer.is_basemap])
 
         extent = self.query('''
-               SELECT
-                 ST_XMIN(ext) AS west,
-                 ST_YMIN(ext) AS south,
-                 ST_XMAX(ext) AS east,
-                 ST_YMAX(ext) AS north
-               FROM (
-                   SELECT st_extent(the_geom) AS ext
-                   FROM ({union_query}) AS wrap1
-               ) AS wrap2'''.format(union_query=union_query),
-                 decode_geom=False)
+                       SELECT
+                         ST_XMIN(ext) AS west,
+                         ST_YMIN(ext) AS south,
+                         ST_XMAX(ext) AS east,
+                         ST_YMAX(ext) AS north
+                       FROM (
+                           SELECT st_extent(the_geom) AS ext
+                           FROM ({union_query}) AS _wrap1
+                       ) AS _wrap2
+                            '''.format(union_query=union_query),
+                            decode_geom=False)
 
         west, south, east, north = extent.values[0]
 
