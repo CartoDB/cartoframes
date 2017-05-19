@@ -142,25 +142,25 @@ def earth(bins, bin_method=BinMethod.quantiles):
     return _scheme('Earth', bins, bin_method)
 
 
-def antique(bins, bin_method=BinMethod.quantiles):
+def antique(bins, bin_method=BinMethod.category):
     return _scheme('Antique', bins, bin_method)
 
 
-def bold(bins, bin_method=BinMethod.quantiles):
+def bold(bins, bin_method=BinMethod.category):
     return _scheme('Bold', bins, bin_method)
 
 
-def pastel(bins, bin_method=BinMethod.quantiles):
+def pastel(bins, bin_method=BinMethod.category):
     return _scheme('Pastel', bins, bin_method)
 
 
-def prism(bins, bin_method=BinMethod.quantiles):
+def prism(bins, bin_method=BinMethod.category):
     return _scheme('Prism', bins, bin_method)
 
 
-def safe(bins, bin_method=BinMethod.quantiles):
+def safe(bins, bin_method=BinMethod.category):
     return _scheme('Safe', bins, bin_method)
 
 
-def vivid(bins, bin_method=BinMethod.quantiles):
+def vivid(bins, bin_method=BinMethod.category):
     return _scheme('Vivid', bins, bin_method)

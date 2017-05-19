@@ -5,6 +5,8 @@ A Python package for integrating `CARTO <https://carto.com/>`__ maps and service
 
 Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
+Complete documentation: https://cartodb.github.io/cartoframes/
+
 Install Instructions
 --------------------
 
@@ -17,7 +19,7 @@ Install Instructions
     $ pip install -r requirements.txt
     $ pip install -e .
 
-Once you've done this, `cartoframes` will be installed. See the example usage section below for using cartoframes in a Jupyter notebook.
+Once you've done this, `cartoframes` will be installed. See the example usage section below for using `cartoframes` in a Jupyter notebook. **User must have a CARTO API key for writing DataFrames to an account or reading from private tables.**
 
 **Note:** Eventually `cartoframes` will be fully installable from `pip`.
 
@@ -42,7 +44,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
-Associate an existing pandas dataframe with CARTO.
+Associate an existing pandas DataFrame with CARTO.
 
 .. code:: python
 
@@ -60,16 +62,16 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 
 .. code:: python
 
-    from cartoframes import Layer, BaseMap
+    from cartoframes import Layer, BaseMap, styling
     cc = cartoframes.CartoContext(BASEURL, APIKEY)
-    cc.map(layers=[BaseMap(),
+    cc.map(layers=[BaseMap('light'),
                    Layer('acadia_biodiversity',
                          color={'column': 'simpson_index',
-                                'scheme': 'TealRose'}),
+                                'scheme': styling.tealRose(5)}),
                    Layer('peregrine_falcon_nest_sites',
                          size='num_eggs',
                          color={'column': 'bird_id',
-                                'scheme': 'Vivid')],
+                                'scheme': styling.vivid(10))],
            interactive=True)
 
 
@@ -78,7 +80,7 @@ Augment from Data Observatory
 
 **Note:** This is a provisional function, so the signature may change.
 
-Interact with CARTO's Data Observatory:
+Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
 .. code:: python
 
