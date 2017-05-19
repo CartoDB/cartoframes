@@ -175,18 +175,22 @@ class CartoContext:
             None
         """
         if encode_geom:
+            # None if not a GeoDataFrame
             is_geopandas = getattr(df, '_geometry_column_name')
             if is_geopandas is None and geom_col is None:
                 geom_col = df.get('geometry')
                 if geom_col is None:
-                    raise KeyError('Geometries were requested to be encoded'
-                                   ' but no "geom_col" was not found in the' 
-                                   ' dataframe and no default geometry column was set.')
+                    raise KeyError('Geometries were requested to be encoded '
+                                   'but `{geom_col}` was not found in the '
+                                   'DataFrame and no default geometry column '
+                                   'was set.'.format(geom_col=geom_col))
             elif is_geopandas is not None and geom_col is not None:
-                warn('geometry column of the input dataframe does not '
-                     ' match the geometry column supplied! Using user-supplied column...'
-                     ' \n\tGeopandas geometry column: {}'
-                     ' \n\tSupplied geom_col: {}'.format(is_geopandas, geom_col))
+                warn('Geometry column of the input DataFrame does not '
+                     'match the geometry column supplied. Using user-supplied '
+                     'column...\n'
+                     '\tGeopandas geometry column: {}\n'
+                     '\tSupplied `geom_col`: {}'.format(is_geopandas,
+                                                        geom_col))
             elif is_geopandas is not None and geom_col is None:
                 geom_col = is_geopandas
             df['the_geom'] = df[geom_col].apply(_encode_geom)
@@ -215,7 +219,8 @@ class CartoContext:
             """removes temporary file"""
             os.remove(tempfile)
 
-        df.drop(geom_col,axis=1,errors='ignore').to_csv(tempfile)
+        # reset DataFrame before sending to CARTO
+        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
@@ -769,7 +774,7 @@ class CartoContext:
 
 def _encode_geom(geom):
     """
-    Encode geometries into hex-encoded wkb 
+    Encode geometries into hex-encoded wkb
     """
     from shapely import wkb
     return ba.hexlify(wkb.dumps(geom)).decode()
