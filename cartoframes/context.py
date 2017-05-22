@@ -434,7 +434,7 @@ class CartoContext:
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
             self._check_query(layer.query,
-                              style_cols=layer.columns)
+                              style_cols=layer.style_cols)
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 

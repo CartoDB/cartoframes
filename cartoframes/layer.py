@@ -196,7 +196,7 @@ class QueryLayer(AbstractLayer):
                  tooltip=None, legend=None):
 
         self.query = query
-        self.columns = set()
+        self.style_cols = set()
         # redundant?
         color = color or None
 
@@ -207,14 +207,14 @@ class QueryLayer(AbstractLayer):
                 raise ValueError("color must include a 'column' value")
             scheme = color.get('scheme', mint(5))
             color = color['column']
-            self.columns.add(color)
+            self.style_cols.add(color)
         elif (color and
               color[0] != '#' and
               color not in webcolors.CSS3_NAMES_TO_HEX):
             # color specified that is not a web color or hex value so its
             #  assumed to be a column name
             color = color
-            self.columns.add(color)
+            self.style_cols.add(color)
             scheme = mint(5)
         else:
             # assume it's a color
@@ -231,7 +231,7 @@ class QueryLayer(AbstractLayer):
                 time_column = time
                 time_options = {}
 
-            self.columns.add(time_column)
+            self.style_cols.add(time_column)
             time = {
                 'column': time_column,
                 'method': 'count',
@@ -259,7 +259,7 @@ class QueryLayer(AbstractLayer):
             size.update(old_size)
             # Since we're accessing min/max, convert range into a list
             size['range'] = list(size['range'])
-            self.columns.add(size['column'])
+            self.style_cols.add(size['column'])
         self.color = color
         self.scheme = scheme
         self.size = size
@@ -270,13 +270,12 @@ class QueryLayer(AbstractLayer):
 
     def _validate_columns(self):
         """Validate the options in the styles
-
         """
         geom_cols = {'the_geom', 'the_geom_webmercator'}
-        if self.columns & geom_cols:
+        if self.style_cols & geom_cols:
             raise ValueError('Style columns cannot be geometry '
                              'columns. `{col}` was chosen.'.format(
-                                 col=','.join(self.columns & geom_cols)))
+                                 col=','.join(self.style_cols & geom_cols)))
 
     def _setup(self, context, layers, layer_idx):
         basemap = layers[0]
