@@ -266,7 +266,17 @@ class QueryLayer(AbstractLayer):
         self.time = time
         self.tooltip = tooltip
         self.legend = legend
+        self._validate_columns()
 
+    def _validate_columns(self):
+        """Validate the options in the styles
+
+        """
+        geom_cols = {'the_geom', 'the_geom_webmercator'}
+        if self.columns & geom_cols:
+            raise ValueError('Style columns cannot be geometry '
+                             'columns. `{col}` was chosen.'.format(
+                                 col=','.join(self.columns & geom_cols)))
 
     def _setup(self, context, layers, layer_idx):
         basemap = layers[0]
