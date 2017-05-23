@@ -238,7 +238,11 @@ class CartoContext:
                                       'GET')
                 if res['state'] == 'failure':
                     remove_tempfile()
-                    raise Exception('Error code: {}'.format(res['error_code']))
+                    raise Exception('Error code: `{}`. See CARTO Import API '
+                                    'error documentation for more information: '
+                                    'https://carto.com/docs/carto-engine/'
+                                    'import-api/import-errors'
+                                    ''.format(res['error_code']))
                 if res['state'] == 'complete':
                     self._debug_print(final_table_name=res['table_name'])
                     if res['table_name'] != table_name:
