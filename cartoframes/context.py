@@ -118,7 +118,8 @@ class CartoContext:
         self._verbose = verbose
 
 
-    def read(self, table_name, limit=None, index='cartodb_id', decode_geom=True):
+    def read(self, table_name, limit=None, index='cartodb_id',
+             decode_geom=False):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
@@ -149,7 +150,7 @@ class CartoContext:
 
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None, encode_geom=True, geom_col=None):
+              lnglat=None, encode_geom=False, geom_col=None):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -288,7 +289,7 @@ class CartoContext:
         pass
 
 
-    def query(self, query, table_name=None, decode_geom=True):
+    def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
         into a pandas DataFrame. Can also be used to perform database
         operations (creating/dropping tables, adding columns, updates, etc.).
@@ -761,8 +762,7 @@ class CartoContext:
                            SELECT st_extent(the_geom) AS ext
                            FROM ({union_query}) AS _wrap1
                        ) AS _wrap2
-                            '''.format(union_query=union_query),
-                            decode_geom=False)
+                            '''.format(union_query=union_query))
 
         west, south, east, north = extent.values[0]
 
