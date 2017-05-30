@@ -195,7 +195,7 @@ class CartoContext:
                      '\tGeopandas geometry column: {}\n'
                      '\tSupplied `geom_col`: {}'.format(is_geopandas,
                                                         geom_col))
-            elif is_geopandas is not None and geom_col:
+            elif is_geopandas and geom_col is None:
                 geom_col = is_geopandas
             df['the_geom'] = df[geom_col].apply(_encode_geom)
 
