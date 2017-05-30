@@ -177,22 +177,25 @@ class CartoContext:
         """
         if encode_geom:
             # None if not a GeoDataFrame
-            is_geopandas = getattr(df, '_geometry_column_name')
+            is_geopandas = getattr(df, '_geometry_column_name', None)
             if is_geopandas is None and geom_col is None:
+                warn('`encode_geom` works best with Geopandas '
+                     '(http://geopandas.org/) and/or shapely '
+                     '(https://pypi.python.org/pypi/Shapely).')
                 geom_col = df.get('geometry')
                 if geom_col is None:
                     raise KeyError('Geometries were requested to be encoded '
                                    'but `{geom_col}` was not found in the '
                                    'DataFrame and no default geometry column '
                                    'was set.'.format(geom_col=geom_col))
-            elif is_geopandas is not None and geom_col is not None:
+            elif is_geopandas and geom_col:
                 warn('Geometry column of the input DataFrame does not '
                      'match the geometry column supplied. Using user-supplied '
                      'column...\n'
                      '\tGeopandas geometry column: {}\n'
                      '\tSupplied `geom_col`: {}'.format(is_geopandas,
                                                         geom_col))
-            elif is_geopandas is not None and geom_col is None:
+            elif is_geopandas and geom_col is None:
                 geom_col = is_geopandas
             df['the_geom'] = df[geom_col].apply(_encode_geom)
 
@@ -789,17 +792,29 @@ class CartoContext:
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
 
+def encode_decode_decorator(func):
+    """decorator for encoding and decoding geoms"""
+    def wrapper(*args):
+        """error catching"""
+        try:
+            processed_geom = func(*args)
+            return processed_geom
+        except ImportError as err:
+            raise ImportError('The Python package `shapely` needs to be '
+                              'installed to encode or decode geometries. '
+                              '({})'.format(err))
+    return wrapper
 
+@encode_decode_decorator
 def _encode_geom(geom):
-    """
-    Encode geometries into hex-encoded wkb
+    """Encode geometries into hex-encoded wkb
     """
     from shapely import wkb
     return ba.hexlify(wkb.dumps(geom)).decode()
 
+@encode_decode_decorator
 def _decode_geom(ewkb):
-    """
-    Decode encoded wkb into a shapely geometry
+    """Decode encoded wkb into a shapely geometry
     """
     from shapely import wkb
     return wkb.loads(ba.unhexlify(ewkb))
