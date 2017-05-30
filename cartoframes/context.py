@@ -278,7 +278,22 @@ class CartoContext:
             '''.format(table_name=table_name,
                        lng=lnglat[0],
                        lat=lnglat[1]))
+        self._column_normalization(df, table_name)
 
+    def _column_normalization(self, dataframe, table_name):
+        """Print a warning if there is a difference between the normalized
+        PostgreSQL column names and the ones in the DataFrame"""
+
+        pgcolumns = self.sql_client.send('''
+            SELECT *
+            FROM "{table_name}"
+            LIMIT 0'''.format(table_name=table_name))['fields'].keys()
+        diff_cols = (set(dataframe.columns) ^ set(pgcolumns)) - {'cartodb_id'}
+        if diff_cols:
+            cols = ', '.join('`{}`'.format(c) for c in diff_cols)
+            warn('The following columns were renamed because of PostgreSQL '
+                 'column normalization requirements: {cols}'.format(cols=cols),
+                 stacklevel=2)
 
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
