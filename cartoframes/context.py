@@ -792,17 +792,29 @@ class CartoContext:
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
 
+def encode_decode_decorator(func):
+    """decorator for encoding and decoding geoms"""
+    def wrapper(*args):
+        """error catching"""
+        try:
+            processed_geom = func(*args)
+            return processed_geom
+        except ImportError as err:
+            raise ImportError('The Python package `shapely` needs to be '
+                              'installed to encode or decode geometries. '
+                              '({})'.format(err))
+    return wrapper
 
+@encode_decode_decorator
 def _encode_geom(geom):
-    """
-    Encode geometries into hex-encoded wkb
+    """Encode geometries into hex-encoded wkb
     """
     from shapely import wkb
     return ba.hexlify(wkb.dumps(geom)).decode()
 
+@encode_decode_decorator
 def _decode_geom(ewkb):
-    """
-    Decode encoded wkb into a shapely geometry
+    """Decode encoded wkb into a shapely geometry
     """
     from shapely import wkb
     return wkb.loads(ba.unhexlify(ewkb))
