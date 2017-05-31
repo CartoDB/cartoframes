@@ -20,6 +20,7 @@ import pandas as pd
 
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from carto.exceptions import CartoException
 
 from cartoframes.utils import dict_items
 from cartoframes.layer import BaseMap
@@ -142,30 +143,8 @@ class CartoContext(object):
         if encode_geom:
             _add_encoded_geom(df, geom_col)
 
-        # TODO: wrap into self._table_exists() method that could probably
-        #       be used elsewhere
-        # TODO: make space for checking if the table_name is a sync table. If
-        #       so, error that overwriting is not possible through cartoframes
-        table_exists = True
         if not overwrite:
-            try:
-                # TODO: replace with an EXPLAIN instead?
-                self.query('SELECT * FROM {table_name} limit 0'.format(
-                    table_name=table_name))
-            # TODO: figure out a better error to raise
-            #       1. see if carto package has an appropriate error to throw
-            #       2. otherwise, create a custom class that's reusable elsewhere
-            # TODO: CartoException?
-            except Exception as err:
-                self._debug_print(err=err)
-                # If table doesn't exist, we get an error from the SQL API
-                table_exists = False
-
-            if table_exists:
-                raise AssertionError(
-                    ('Table `{table_name}` already exists. '
-                     'Run with `overwrite=True` if you wish to replace the '
-                     'table.').format(table_name=table_name))
+            self._table_exists(table_name)
 
         # TODO: this should go with the import api code below
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
@@ -247,6 +226,23 @@ class CartoContext(object):
                        lng=lnglat[0],
                        lat=lnglat[1]))
         self._column_normalization(df, table_name)
+
+    def _table_exists(self, table_name):
+        """Checks to see if table exists"""
+        try:
+            self.sql_client.send('''
+                EXPLAIN SELECT * FROM "{table_name}"
+                '''.format(table_name=table_name))
+            raise NameError(
+                'Table `{table_name}` already exists. '
+                'Run with `overwrite=True` if you wish to replace the '
+                'table.'.format(table_name=table_name))
+        except CartoException as err:
+            # If table doesn't exist, we get an error from the SQL API
+            self._debug_print(err=err)
+            return False
+
+        return False
 
     def _column_normalization(self, dataframe, table_name):
         """Print a warning if there is a difference between the normalized
@@ -808,6 +804,7 @@ def _process_credentials(api_key, base_url):
     if not base_url.endswith('/'):
         base_url += '/'
     return api_key, base_url
+
 
 def _add_encoded_geom(df, geom_col):
     """Add encoded geometry to DataFrame"""
