@@ -742,9 +742,9 @@ class CartoContext:
                 self._srcdoc = f.read()
 
         return (self._srcdoc
-                .replace('@@CONFIG@@', str(config))
-                .replace('@@BOUNDS@@', str(bounds))
-                .replace('@@OPTIONS@@', str(map_options))
+                .replace('@@CONFIG@@', json.dumps(config))
+                .replace('@@BOUNDS@@', json.dumps(bounds))
+                .replace('@@OPTIONS@@', json.dumps(map_options))
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
                 .replace('@@LAT@@', str(options.get('lat', 0)))
                 .replace('@@LNG@@', str(options.get('lng', 0))))
