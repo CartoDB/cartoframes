@@ -32,7 +32,7 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
-class CartoContext:
+class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
@@ -61,63 +61,28 @@ class CartoContext:
     """
     def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
 
-        # use stored api key (if present)
-        if (api_key is None) or (base_url is None):
-            from cartoframes import credentials as cfcreds
-            creds = cfcreds.credentials()
-            api_key = creds['api_key'] if api_key is None else api_key
-            base_url = creds['base_url'] if base_url is None else base_url
-            if (api_key == '') and (base_url == ''):
-                raise ValueError('No credentials are stored on this '
-                                 'installation and none were provided. Use '
-                                 '`cartoframes.credentials.set_credentials` '
-                                 'to store your access URL and API key for '
-                                 'this installation.')
-            if api_key == '':
-                raise ValueError('API key was not provided and no key is '
-                                 'stored. Use '
-                                 '`cartoframes.credentials.set_key` to set a '
-                                 'default API key for this installation.')
-            if base_url == '':
-                raise ValueError('Base URL was not provided and no URL is '
-                                 'stored. Use '
-                                 '`cartoframes.credentials.set_url` to set a '
-                                 'default base URL for this installation.')
-
-        # Make sure there is a trailing / for urljoin
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.base_url = base_url
-        self.api_key = api_key
-
-        url_info = urlparse(base_url)
-        # On-Prem:
-        #   /user/<username>
-        username = re.search('^/user/(.*)/$', url_info.path)
-        if username is None:
-            # Cloud personal account
-            # <username>.carto.com
-            username = re.search(r'^(.*?)\..*', url_info.netloc)
-        self.username = username.group(1)
-
-        self.auth_client = APIKeyAuthClient(base_url=base_url,
-                                            api_key=api_key,
+        self.api_key, self.base_url = _process_credentials(api_key,
+                                                           base_url)
+        self.auth_client = APIKeyAuthClient(base_url=self.base_url,
+                                            api_key=self.api_key,
                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
+        self.username = self.auth_client.username
+        self.is_org = self._is_org_user()
 
+        self._map_templates = {}
+        self._srcdoc = None
+        self._verbose = verbose
+
+    def _is_org_user(self):
+        """Report whether user is in a multiuser CARTO organization or not"""
         res = self.sql_client.send('SHOW search_path')
 
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
+        return paths[0] != 'public'
 
-        self.is_org = (paths[0] != 'public')
-
-        self._map_templates = {}
-        self._srcdoc = None
-
-        self._verbose = verbose
-
-
+    # NOTE: short and sweet, nothing to do here
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False):
         """Read tables from CARTO into pandas DataFrames.
@@ -175,6 +140,7 @@ class CartoContext:
         Returns:
             None
         """
+        # TODO: wrap up in a private method
         if encode_geom:
             # None if not a GeoDataFrame
             is_geopandas = getattr(df, '_geometry_column_name', None)
@@ -199,11 +165,19 @@ class CartoContext:
                 geom_col = is_geopandas
             df['the_geom'] = df[geom_col].apply(_encode_geom)
 
+        # TODO: wrap into self._table_exists() method that could probably
+        #       be used elsewhere
+        # TODO: make space for checking if the table_name is a sync table. If
+        #       so, error that overwriting is not possible through cartoframes
         table_exists = True
         if not overwrite:
             try:
+                # TODO: replace with an EXPLAIN instead?
                 self.query('SELECT * FROM {table_name} limit 0'.format(
                     table_name=table_name))
+            # TODO: figure out a better error to raise
+            #       1. see if carto package has an appropriate error to throw
+            #       2. otherwise, create a custom class that's reusable elsewhere
             except Exception as err:
                 self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
@@ -215,10 +189,12 @@ class CartoContext:
                      'Run with `overwrite=True` if you wish to replace the '
                      'table.').format(table_name=table_name))
 
+        # TODO: this should go with the import api code below
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
 
+        # TODO: this should move with the import api code below
         def remove_tempfile():
             """removes temporary file"""
             os.remove(tempfile)
@@ -226,6 +202,10 @@ class CartoContext:
         # reset DataFrame before sending to CARTO
         df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
+        # TODO: wrap up this into a private method that can be reused if looping
+        #       over multiple chunks of a dataframe if it is over the row import
+        #       limit
+        # TODO: this should return the final table_name
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
@@ -427,6 +407,9 @@ class CartoContext:
             IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
             while static maps are rendered in ``img`` tags.
         """
+        # TODO: add layers preprocessing method like
+        #       layers = process_layers(layers)
+        #       that uses up to layer limit value error
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
@@ -513,6 +496,7 @@ class CartoContext:
 
         html = '<img src="{url}" />'.format(url=static_url)
 
+        # TODO: write this as a private matehod
         if interactive:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
@@ -806,6 +790,38 @@ class CartoContext:
                 str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+def _process_credentials(api_key, base_url):
+    """process credentials"""
+    # use stored api key (if present)
+    if (api_key is None) or (base_url is None):
+        from cartoframes import credentials as cfcreds
+        creds = cfcreds.credentials()
+        api_key = creds['api_key'] if api_key is None else api_key
+        base_url = creds['base_url'] if base_url is None else base_url
+        if (api_key == '') and (base_url == ''):
+            raise ValueError('No credentials are stored on this '
+                             'installation and none were provided. Use '
+                             '`cartoframes.credentials.set_credentials` '
+                             'to store your access URL and API key for '
+                             'this installation.')
+        if api_key == '':
+            raise ValueError('API key was not provided and no key is '
+                             'stored. Use '
+                             '`cartoframes.credentials.set_key` to set a '
+                             'default API key for this installation.')
+        if base_url == '':
+            raise ValueError('Base URL was not provided and no URL is '
+                             'stored. Use '
+                             '`cartoframes.credentials.set_url` to set a '
+                             'default base URL for this installation.')
+
+    # TODO: put self.(base_url, api_key, username, auth_client, and sql_client)
+    #   into a _set_credentials() method?
+    # Make sure there is a trailing / for urljoin
+    if not base_url.endswith('/'):
+        base_url += '/'
+    return api_key, base_url
 
 def encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
