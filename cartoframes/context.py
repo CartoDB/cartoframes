@@ -8,7 +8,6 @@ geocoding, and isolines <https://carto.com/location-data-services/>`__.
 import json
 import os
 import random
-import re
 import sys
 import time
 import collections
@@ -82,7 +81,6 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return paths[0] != 'public'
 
-    # NOTE: short and sweet, nothing to do here
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False):
         """Read tables from CARTO into pandas DataFrames.
@@ -142,28 +140,7 @@ class CartoContext(object):
         """
         # TODO: wrap up in a private method
         if encode_geom:
-            # None if not a GeoDataFrame
-            is_geopandas = getattr(df, '_geometry_column_name', None)
-            if is_geopandas is None and geom_col is None:
-                warn('`encode_geom` works best with Geopandas '
-                     '(http://geopandas.org/) and/or shapely '
-                     '(https://pypi.python.org/pypi/Shapely).')
-                geom_col = df.get('geometry')
-                if geom_col is None:
-                    raise KeyError('Geometries were requested to be encoded '
-                                   'but `{geom_col}` was not found in the '
-                                   'DataFrame and no default geometry column '
-                                   'was set.'.format(geom_col=geom_col))
-            elif is_geopandas and geom_col:
-                warn('Geometry column of the input DataFrame does not '
-                     'match the geometry column supplied. Using user-supplied '
-                     'column...\n'
-                     '\tGeopandas geometry column: {}\n'
-                     '\tSupplied `geom_col`: {}'.format(is_geopandas,
-                                                        geom_col))
-            elif is_geopandas and geom_col is None:
-                geom_col = is_geopandas
-            df['the_geom'] = df[geom_col].apply(_encode_geom)
+            _add_encoded_geom(df, geom_col)
 
         # TODO: wrap into self._table_exists() method that could probably
         #       be used elsewhere
@@ -178,6 +155,7 @@ class CartoContext(object):
             # TODO: figure out a better error to raise
             #       1. see if carto package has an appropriate error to throw
             #       2. otherwise, create a custom class that's reusable elsewhere
+            # TODO: CartoException?
             except Exception as err:
                 self._debug_print(err=err)
                 # If table doesn't exist, we get an error from the SQL API
@@ -207,8 +185,18 @@ class CartoContext(object):
         #       limit
         # TODO: this should return the final table_name
         with open(tempfile, 'rb') as f:
+            # if encode or lnglat chosen, don't automatically geocode
+            # else, use CARTO's default type guessing
+            type_guess = str(not any([encode_geom, lnglat])).lower()
+            if not type_guess:
+                warn('All non-geometry types in the CARTO version of this '
+                     'DataFrame will be cast to strings. Manually update '
+                     'columns in CARTO if you need to map off of numeric '
+                     'columns. See issue #131 for a proposed solution: '
+                     'https://github.com/CartoDB/cartoframes/issues/131')
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
+                                  params={'type_guessing': type_guess},
                                   stream=True)
             self._debug_print(res=res)
 
@@ -816,12 +804,37 @@ def _process_credentials(api_key, base_url):
                              '`cartoframes.credentials.set_url` to set a '
                              'default base URL for this installation.')
 
-    # TODO: put self.(base_url, api_key, username, auth_client, and sql_client)
-    #   into a _set_credentials() method?
     # Make sure there is a trailing / for urljoin
     if not base_url.endswith('/'):
         base_url += '/'
     return api_key, base_url
+
+def _add_encoded_geom(df, geom_col):
+    """Add encoded geometry to DataFrame"""
+    # None if not a GeoDataFrame
+    is_geopandas = getattr(df, '_geometry_column_name', None)
+    if is_geopandas is None and geom_col is None:
+        warn('`encode_geom` works best with Geopandas '
+             '(http://geopandas.org/) and/or shapely '
+             '(https://pypi.python.org/pypi/Shapely).')
+        geom_col = 'geometry' if 'geometry' in df.columns else None
+        if geom_col is None:
+            raise KeyError('Geometries were requested to be encoded '
+                           'but a geometry column was not found in the '
+                           'DataFrame.'.format(geom_col=geom_col))
+    elif is_geopandas and geom_col:
+        warn('Geometry column of the input DataFrame does not '
+             'match the geometry column supplied. Using user-supplied '
+             'column...\n'
+             '\tGeopandas geometry column: {}\n'
+             '\tSupplied `geom_col`: {}'.format(is_geopandas,
+                                                geom_col))
+    elif is_geopandas and geom_col is None:
+        geom_col = is_geopandas
+    # updates in place
+    df['the_geom'] = df[geom_col].apply(_encode_geom)
+    return None
+
 
 def encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
