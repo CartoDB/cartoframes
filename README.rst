@@ -95,6 +95,5 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.do_augment('transactions', data_obs_measures)
+    df = cc.data_augment('transactions', data_obs_measures)
     df.head()
-
