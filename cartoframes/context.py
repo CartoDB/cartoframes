@@ -22,9 +22,9 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
-from cartoframes.utils import dict_items
-from cartoframes.layer import BaseMap
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from .utils import dict_items
+from .layer import BaseMap
+from .maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -169,8 +169,8 @@ class CartoContext(object):
                        lng=lnglat[0],
                        lat=lnglat[1]))
         self._column_normalization(df, table_name)
-        print('Table written to CARTO: {baseurl}dataset/{table_name}'.format(
-            baseurl=self.auth_client.base_url,
+        print('Table written to CARTO: {base_url}dataset/{table_name}'.format(
+            base_url=self.base_url,
             table_name=table_name))
 
     def _table_exists(self, table_name):
@@ -259,9 +259,12 @@ class CartoContext(object):
                     self._debug_print(res=res)
                 except Exception as err:
                     self._debug_print(err=err)
-                    raise Exception(("Cannot overwrite table `{table_name}` "
-                                     "({err}).".format(table_name=table_name,
-                                                       err=err)))
+                    raise Exception('Cannot overwrite table `{table_name}` '
+                                    '({err}). DataFrame was written to '
+                                    '`{new_table}` instead.'.format(
+                                        table_name=table_name,
+                                        err=err,
+                                        new_table=import_job['table_name']))
 
     def _column_normalization(self, dataframe, table_name):
         """Print a warning if there is a difference between the normalized
@@ -499,7 +502,7 @@ class CartoContext(object):
 
         html = '<img src="{url}" />'.format(url=static_url)
 
-        # TODO: write this as a private matehod
+        # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
