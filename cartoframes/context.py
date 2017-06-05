@@ -32,6 +32,8 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
+IMPORT_MAX_ROWS = 150000
+
 class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
@@ -139,84 +141,97 @@ class CartoContext(object):
         Returns:
             None
         """
-        # TODO: wrap up in a private method
         if encode_geom:
             _add_encoded_geom(df, geom_col)
 
         if not overwrite:
+            # error if table exists
             self._table_exists(table_name)
 
-        # TODO: this should go with the import api code below
+        self._send_dataframe(df, table_name, temp_dir, geom_col, encode_geom,
+                             lnglat)
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
-        self._debug_print(tempfile=tempfile)
+        # for chunk_num, df_chunk in df.groupby([i // IMPORT_MAX_ROWS
+        #                                        for i in range(len(df))]):
+        #     print(chunk_num, str(df_chunk.shape))
+        #     # 1. Create a table with the proper schema
+        #     # 2. write chunk to csv with name like `table_name_temp_{chunk_num}`
+        #     # 3. send to carto, retrieving the real table name
+        #     # 4. add real tablename to an array
+        #     # 5. delete csv for this chunk
+        #     # 6. once all chunks have been sent up, do a batch transaction to
+        #     #     * insert all chunk tables into original table
+        #     #     * drop all chunk tables
+        
+        # self._debug_print(tempfile=tempfile)
 
-        # TODO: this should move with the import api code below
-        def remove_tempfile():
-            """removes temporary file"""
-            os.remove(tempfile)
+        # def remove_tempfile():
+        #     """removes temporary file"""
+        #     os.remove(tempfile)
 
         # reset DataFrame before sending to CARTO
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
+        # df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
         # TODO: wrap up this into a private method that can be reused if looping
         #       over multiple chunks of a dataframe if it is over the row import
         #       limit
         # TODO: this should return the final table_name
-        with open(tempfile, 'rb') as f:
-            # if encode or lnglat chosen, don't automatically geocode
-            # else, use CARTO's default type guessing
-            type_guess = str(not any([encode_geom, lnglat])).lower()
-            if not type_guess:
-                warn('All non-geometry types in the CARTO version of this '
-                     'DataFrame will be cast to strings. Manually update '
-                     'columns in CARTO if you need to map off of numeric '
-                     'columns. See issue #131 for a proposed solution: '
-                     'https://github.com/CartoDB/cartoframes/issues/131')
-            res = self._auth_send('api/v1/imports', 'POST',
-                                  files={'file': f},
-                                  params={'type_guessing': type_guess},
-                                  stream=True)
-            self._debug_print(res=res)
+        # with open(tempfile, 'rb') as f:
+        #     # if encode or lnglat chosen, don't automatically geocode
+        #     # else, use CARTO's default type guessing
+        #     # NOTE: CARTO Python SDK wants lowercase text for boolean values
+        #     # type_guess = str(not any([encode_geom, lnglat])).lower()
+        #     # if type_guess == 'false':
+        #     #     warn('All non-geometry types in the CARTO version of this '
+        #     #          'DataFrame will be cast to strings. Manually update '
+        #     #          'columns in CARTO if you need to map off of numeric '
+        #     #          'columns. See issue #131 for a proposed solution: '
+        #     #          'https://github.com/CartoDB/cartoframes/issues/131')
+        #     # res = self._auth_send('api/v1/imports', 'POST',
+        #     #                       files={'file': f},
+        #     #                       params={'type_guessing': type_guess},
+        #     #                       stream=True)
+        #     # self._debug_print(res=res)
 
-            if not res['success']:
-                remove_tempfile()
-                raise Exception('Failed to send')
-            import_id = res['item_queue_id']
+        #     # if not res['success']:
+        #     #     remove_tempfile()
+        #     #     raise Exception('Failed to send')
+        #     # import_id = res['item_queue_id']
 
-            while True:
-                res = self._auth_send('api/v1/imports/{}'.format(import_id),
-                                      'GET')
-                if res['state'] == 'failure':
-                    remove_tempfile()
-                    raise Exception('Error code: `{}`. See CARTO Import API '
-                                    'error documentation for more information: '
-                                    'https://carto.com/docs/carto-engine/'
-                                    'import-api/import-errors'
-                                    ''.format(res['error_code']))
-                if res['state'] == 'complete':
-                    self._debug_print(final_table_name=res['table_name'])
-                    if res['table_name'] != table_name:
-                        try:
-                            alter_query = ('DROP TABLE IF EXISTS {orig_table}; '
-                                           'ALTER TABLE {dupe_table} RENAME '
-                                           'TO {orig_table};'.format(
-                                               orig_table=table_name,
-                                               dupe_table=res['table_name']))
+        #     while True:
+        #         res = self._auth_send('api/v1/imports/{}'.format(import_id),
+        #                               'GET')
+        #         if res['state'] == 'failure':
+        #             remove_tempfile()
+        #             raise Exception('Error code: `{}`. See CARTO Import API '
+        #                             'error documentation for more information: '
+        #                             'https://carto.com/docs/carto-engine/'
+        #                             'import-api/import-errors'
+        #                             ''.format(res['error_code']))
+        #         if res['state'] == 'complete':
+        #             self._debug_print(final_table_name=res['table_name'])
+        #             if res['table_name'] != table_name:
+        #                 try:
+        #                     alter_query = ('DROP TABLE IF EXISTS {orig_table}; '
+        #                                    'ALTER TABLE {dupe_table} RENAME '
+        #                                    'TO {orig_table};'.format(
+        #                                        orig_table=table_name,
+        #                                        dupe_table=res['table_name']))
 
-                            res = self._auth_send('api/v2/sql', 'GET',
-                                                  params={'q': alter_query})
-                            self._debug_print(res=res)
-                        except Exception as err:
-                            self._debug_print(err=err)
-                            raise Exception(("Cannot overwrite table `{table_name}` "
-                                             "({err}).".format(table_name=table_name,
-                                                               err=err)))
-                    break
-                # Wait half a second before doing another request
-                time.sleep(0.5)
+        #                     res = self._auth_send('api/v2/sql', 'GET',
+        #                                           params={'q': alter_query})
+        #                     self._debug_print(res=res)
+        #                 except Exception as err:
+        #                     self._debug_print(err=err)
+        #                     raise Exception(("Cannot overwrite table `{table_name}` "
+        #                                      "({err}).".format(table_name=table_name,
+        #                                                        err=err)))
+        #             break
+        #         # Wait half a second before doing another request
+        #         time.sleep(0.5)
 
-            remove_tempfile()
+        #     remove_tempfile()
 
         if lnglat:
             self.query('''
@@ -243,6 +258,81 @@ class CartoContext(object):
             return False
 
         return False
+
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col, encode_geom,
+                        lnglat):
+        """Send a DataFrame to CARTO to be imported as a SQL table"""
+
+        tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
+                                                        table_name=table_name)
+        self._debug_print(tempfile=tempfile)
+        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
+
+        with open(tempfile, 'rb') as f:
+            type_guess = str(not any([encode_geom, lnglat])).lower()
+            if type_guess == 'false':
+                warn('All non-geometry columns in the CARTO version of this '
+                     'DataFrame will be cast to strings. Manually update '
+                     'columns in CARTO if you need to map off of numeric '
+                     'columns. See issue #131 for a proposed solution: '
+                     'https://github.com/CartoDB/cartoframes/issues/131')
+            res = self._auth_send('api/v1/imports', 'POST',
+                                  files={'file': f},
+                                  params={'type_guessing': type_guess},
+                                  stream=True)
+            self._debug_print(res=res)
+
+            if not res['success']:
+                remove_tempfile(tempfile)
+                raise CartoException('Failed to send DataFrame')
+            import_id = res['item_queue_id']
+
+        remove_tempfile(tempfile)
+        while True:
+            import_job = self._check_import(import_id)
+            self._debug_print(import_job=import_job)
+            self._handle_import(import_job, table_name)
+            if import_job['state'] == 'complete':
+                break
+            # Wait half a second before doing another request
+            time.sleep(0.5)
+
+        return None
+
+    def _check_import(self, import_id):
+        """Check the status of an Import API job"""
+
+        res = self._auth_send('api/v1/imports/{}'.format(import_id),
+                              'GET')
+        return res
+
+    def _handle_import(self, import_job, table_name):
+        """Handle state of import job"""
+        if import_job.get('state') == 'failure':
+            raise CartoException('Error code: `{}`. See CARTO Import '
+                                 'API error documentation for more '
+                                 'information: https://carto.com/docs/'
+                                 'carto-engine/import-api/import-errors'
+                                 ''.format(import_job.get('error_code',
+                                                          'None reported')))
+        elif import_job.get('state') == 'complete':
+            self._debug_print(final_table=import_job.get('table_name'))
+            if import_job.get('table_name') != table_name:
+                try:
+                    res = self.sql_client.send('''
+                        DROP TABLE IF EXISTS {orig_table};
+                        ALTER TABLE {dupe_table}
+                        RENAME TO {orig_table};
+                        '''.format(
+                            orig_table=table_name,
+                            dupe_table=import_job['table_name']))
+
+                    self._debug_print(res=res)
+                except Exception as err:
+                    self._debug_print(err=err)
+                    raise Exception(("Cannot overwrite table `{table_name}` "
+                                     "({err}).".format(table_name=table_name,
+                                                       err=err)))
 
     def _column_normalization(self, dataframe, table_name):
         """Print a warning if there is a difference between the normalized
@@ -859,3 +949,7 @@ def _decode_geom(ewkb):
     """
     from shapely import wkb
     return wkb.loads(ba.unhexlify(ewkb))
+
+def remove_tempfile(filepath):
+    """removes temporary file"""
+    os.remove(filepath)
