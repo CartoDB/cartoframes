@@ -556,7 +556,6 @@ class CartoContext(object):
                     'time_slider': True,
                     'loop': True,
                 })
-
             bounds = [] if has_zoom else [[options['north'], options['east']],
                                           [options['south'], options['west']]]
 
@@ -760,7 +759,7 @@ class CartoContext(object):
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
-        extent = self.query('''
+        extent = self.sql_client.send('''
                        SELECT
                          ST_XMIN(ext) AS west,
                          ST_YMIN(ext) AS south,
@@ -772,15 +771,7 @@ class CartoContext(object):
                        ) AS _wrap2
                             '''.format(union_query=union_query))
 
-        west, south, east, north = extent.values[0]
-
-        return {
-            'west' : west,
-            'south': south,
-            'east' : east,
-            'north': north,
-        }
-
+        return extent['rows'][0]
 
     def _debug_print(self, **kwargs):
         if self._verbose <= 0:
