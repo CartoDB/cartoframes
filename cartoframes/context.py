@@ -162,7 +162,7 @@ class CartoContext(object):
         #     #     * drop all chunk tables
 
         if lnglat:
-            self.query('''
+            self.sql_client.send('''
                 UPDATE "{table_name}"
                 SET the_geom = CDB_LatLng({lat}, {lng})
             '''.format(table_name=table_name,
@@ -664,8 +664,8 @@ class CartoContext(object):
                 augment_functions = f.read()
             self.sql_client.send(augment_functions)
         except Exception as err:
-            raise Exception("Could not install `obs_augment_table` onto user "
-                            "account ({})".format(err))
+            raise CartoException("Could not install `obs_augment_table` onto "
+                                 "user account ({})".format(err))
 
         # augment with data observatory metadata
         augment_query = '''
@@ -696,8 +696,7 @@ class CartoContext(object):
                 EXPLAIN
                 SELECT
                   {style_cols}{comma}
-                  the_geom,
-                  the_geom_webmercator
+                  the_geom, the_geom_webmercator
                 FROM ({query}) _wrap;
                 '''.format(query=query,
                            comma=',' if style_cols else '',
@@ -740,8 +739,7 @@ class CartoContext(object):
 
 
     def _get_bounds(self, layers):
-        """Return the bounds of all data layers involved in a cartoframes
-        map.
+        """Return the bounds of all data layers involved in a cartoframes map.
 
         Args:
             layers (list): List of cartoframes layers. See `cartoframes.layers`
