@@ -32,7 +32,6 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
-IMPORT_MAX_ROWS = 150000
 
 class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
@@ -137,6 +136,10 @@ class CartoContext(object):
                 geometry will be created without specifying this. See CARTO's
                 `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
+            encode_geom (bool, optional): Whether to write `geom_col` to CARTO
+                as `the_geom`.
+            geom_col (str, optional): The name of the column where geometry
+                information is stored. Used in conjunction with `encode_geom`.
 
         Returns:
             None
@@ -149,17 +152,6 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         self._send_dataframe(df, table_name, temp_dir, geom_col, lnglat)
-        # for chunk_num, df_chunk in df.groupby([i // IMPORT_MAX_ROWS
-        #                                        for i in range(len(df))]):
-        #     print(chunk_num, str(df_chunk.shape))
-        #     # 1. Create a table with the proper schema
-        #     # 2. write chunk to csv with name like `table_name_temp_{chunk_num}`
-        #     # 3. send to carto, retrieving the real table name
-        #     # 4. add real tablename to an array
-        #     # 5. delete csv for this chunk
-        #     # 6. once all chunks have been sent up, do a batch transaction to
-        #     #     * insert all chunk tables into original table
-        #     #     * drop all chunk tables
 
         if lnglat:
             self.sql_client.send('''
@@ -169,9 +161,9 @@ class CartoContext(object):
                        lng=lnglat[0],
                        lat=lnglat[1]))
         self._column_normalization(df, table_name)
-        print('Table written to CARTO: {base_url}dataset/{table_name}'.format(
-            base_url=self.base_url,
-            table_name=table_name))
+        print('Table written to CARTO: '
+              '{base_url}dataset/{table_name}'.format(base_url=self.base_url,
+                                                      table_name=table_name))
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
@@ -192,6 +184,9 @@ class CartoContext(object):
 
     def _send_dataframe(self, df, table_name, temp_dir, geom_col, lnglat):
         """Send a DataFrame to CARTO to be imported as a SQL table"""
+        def remove_tempfile(filepath):
+            """removes temporary file"""
+            os.remove(filepath)
 
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
@@ -870,7 +865,3 @@ def _decode_geom(ewkb):
     """
     from shapely import wkb
     return wkb.loads(ba.unhexlify(ewkb))
-
-def remove_tempfile(filepath):
-    """removes temporary file"""
-    os.remove(filepath)
