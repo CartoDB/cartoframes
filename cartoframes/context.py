@@ -151,19 +151,21 @@ class CartoContext(object):
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
 
-        self._send_dataframe(df, table_name, temp_dir, geom_col, lnglat)
+        final_table_name = self._send_dataframe(df, table_name, temp_dir,
+                                                geom_col, lnglat)
 
         if lnglat:
             self.sql_client.send('''
                 UPDATE "{table_name}"
                 SET the_geom = CDB_LatLng({lat}, {lng})
-            '''.format(table_name=table_name,
+            '''.format(table_name=final_table_name,
                        lng=lnglat[0],
                        lat=lnglat[1]))
-        self._column_normalization(df, table_name)
+        self._column_normalization(df, final_table_name)
         print('Table written to CARTO: '
-              '{base_url}dataset/{table_name}'.format(base_url=self.base_url,
-                                                      table_name=table_name))
+              '{base_url}dataset/{table_name}'.format(
+                  base_url=self.base_url,
+                  table_name=final_table_name))
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
@@ -222,7 +224,7 @@ class CartoContext(object):
             # Wait a second before doing another request
             time.sleep(1.0)
 
-        return table_name
+        return import_job['table_name']
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
