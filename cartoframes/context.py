@@ -17,6 +17,7 @@ from warnings import warn
 import requests
 import IPython
 import pandas as pd
+from tqdm import tqdm
 
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
@@ -32,6 +33,7 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
+MAX_IMPORT_ROWS = 500000
 
 class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
@@ -151,9 +153,49 @@ class CartoContext(object):
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
 
-        # send dataframe to carto, report back tablename
-        final_table_name = self._send_dataframe(df, table_name, temp_dir,
-                                                geom_col, lnglat)
+        if df.shape[0] > MAX_IMPORT_ROWS:
+            subtables = []
+            # send dataframe chunks to carto
+            for chunk_num, df_chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
+                                                        for i in range(df.shape[0])])):
+                temp_table = '{orig}_temp_{chunk}'.format(orig=table_name,
+                                                          chunk=chunk_num)
+                # send dataframe chunk
+                temp_table = self._send_dataframe(df_chunk, temp_table,
+                                                  temp_dir, geom_col, lnglat)
+                subtables.append(temp_table)
+                self._debug_print(chunk_num=chunk_num,
+                                  chunk_shape=str(df_chunk.shape),
+                                  temp_table=temp_table)
+
+            unioned_tables = '\n UNION ALL \n'.join(['SELECT * FROM {}'.format(t)
+                                                     for t in subtables])
+            drop_tables = '\n'.join(['DROP TABLE IF EXISTS {};'.format(t)
+                                     for t in subtables])
+            try:
+                query = '''
+                    DROP TABLE IF EXISTS {table_name};
+                    CREATE TABLE {table_name} As
+                    {unioned_tables};
+                    ALTER TABLE {table_name} DROP COLUMN IF EXISTS cartodb_id;
+                    {drop_tables}
+                    SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
+                    '''.format(table_name=table_name,
+                               unioned_tables=unioned_tables,
+                               org=self.username if self.is_org else 'public',
+                               drop_tables=drop_tables)
+                self._debug_print(query=query)
+                resp = self.sql_client.send(query)
+            except Exception as err:
+                print(err)
+                print(resp)
+                raise Exception("Failed to upload dataframe")
+
+            final_table_name = table_name
+        else:
+            # send dataframe to carto, report back tablename
+            final_table_name = self._send_dataframe(df, table_name, temp_dir,
+                                                    geom_col, lnglat)
 
         if lnglat:
             self.sql_client.send('''
@@ -216,6 +258,7 @@ class CartoContext(object):
             import_id = res['item_queue_id']
 
         remove_tempfile(tempfile)
+        final_table_name = table_name
         while True:
             import_job = self._check_import(import_id)
             self._debug_print(import_job=import_job)
@@ -263,7 +306,7 @@ class CartoContext(object):
                                         table_name=table_name,
                                         err=err,
                                         new_table=import_job['table_name']))
-                return table_name
+            return table_name
 
     def _column_normalization(self, dataframe, table_name, geom_col):
         """Print a warning if there is a difference between the normalized

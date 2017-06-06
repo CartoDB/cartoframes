@@ -39,7 +39,8 @@ setup(
     packages=['cartoframes'],
     install_requires=['pandas>=0.20.1',
                       'webcolors>=1.7.0',
-                      'pyrestcli>=0.6.3',],
+                      'pyrestcli>=0.6.3',
+                      'tqdm>=4.14.0',],
     package_data={
         '': ['LICENSE', 'CONTRIBUTORS',],
     },
