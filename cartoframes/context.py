@@ -151,6 +151,7 @@ class CartoContext(object):
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
 
+        # send dataframe to carto, report back tablename
         final_table_name = self._send_dataframe(df, table_name, temp_dir,
                                                 geom_col, lnglat)
 
@@ -161,7 +162,7 @@ class CartoContext(object):
             '''.format(table_name=final_table_name,
                        lng=lnglat[0],
                        lat=lnglat[1]))
-        self._column_normalization(df, final_table_name)
+        self._column_normalization(df, final_table_name, geom_col)
         print('Table written to CARTO: '
               '{base_url}dataset/{table_name}'.format(
                   base_url=self.base_url,
@@ -218,13 +219,13 @@ class CartoContext(object):
         while True:
             import_job = self._check_import(import_id)
             self._debug_print(import_job=import_job)
-            self._handle_import(import_job, table_name)
+            final_table_name = self._handle_import(import_job, table_name)
             if import_job['state'] == 'complete':
                 break
             # Wait a second before doing another request
             time.sleep(1.0)
 
-        return import_job['table_name']
+        return final_table_name
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
@@ -262,8 +263,9 @@ class CartoContext(object):
                                         table_name=table_name,
                                         err=err,
                                         new_table=import_job['table_name']))
+                return table_name
 
-    def _column_normalization(self, dataframe, table_name):
+    def _column_normalization(self, dataframe, table_name, geom_col):
         """Print a warning if there is a difference between the normalized
         PostgreSQL column names and the ones in the DataFrame"""
 
@@ -271,7 +273,8 @@ class CartoContext(object):
             SELECT *
             FROM "{table_name}"
             LIMIT 0'''.format(table_name=table_name))['fields'].keys()
-        diff_cols = (set(dataframe.columns) ^ set(pgcolumns)) - {'cartodb_id'}
+        diff_cols = (set(dataframe.columns) ^ set(pgcolumns)) - {'cartodb_id',
+                                                                 geom_col}
         if diff_cols:
             cols = ', '.join('`{}`'.format(c) for c in diff_cols)
             warn('The following columns were renamed because of PostgreSQL '
