@@ -154,7 +154,6 @@ class CartoContext(object):
         # send dataframe to carto, report back tablename
         final_table_name = self._send_dataframe(df, table_name, temp_dir,
                                                 geom_col, lnglat)
-
         if lnglat:
             self.sql_client.send('''
                 UPDATE "{table_name}"
@@ -263,7 +262,7 @@ class CartoContext(object):
                                         table_name=table_name,
                                         err=err,
                                         new_table=import_job['table_name']))
-                return table_name
+        return table_name
 
     def _column_normalization(self, dataframe, table_name, geom_col):
         """Print a warning if there is a difference between the normalized
@@ -862,11 +861,17 @@ def _encode_geom(geom):
     """Encode geometries into hex-encoded wkb
     """
     from shapely import wkb
-    return ba.hexlify(wkb.dumps(geom)).decode()
+    if (geom is None):
+        return None
+    else:
+        return ba.hexlify(wkb.dumps(geom)).decode()
 
 @encode_decode_decorator
 def _decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
     from shapely import wkb
-    return wkb.loads(ba.unhexlify(ewkb))
+    if (ewkb is None):
+        pass
+    else:
+        return wkb.loads(ba.unhexlify(ewkb))
