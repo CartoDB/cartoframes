@@ -196,8 +196,9 @@ class CartoContext(object):
         # send dataframe chunks to carto
         for chunk_num, df_chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
                                                     for i in range(df.shape[0])])):
-            temp_table = '{orig}_temp_{chunk}'.format(orig=table_name,
-                                                      chunk=chunk_num)
+            temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
+                orig=table_name[:40],
+                chunk=chunk_num)
             # send dataframe chunk
             temp_table = self._send_dataframe(df_chunk, temp_table,
                                               temp_dir, geom_col, lnglat)
