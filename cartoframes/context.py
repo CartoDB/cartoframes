@@ -915,11 +915,17 @@ def _encode_geom(geom):
     """Encode geometries into hex-encoded wkb
     """
     from shapely import wkb
-    return ba.hexlify(wkb.dumps(geom)).decode()
+    if geom:
+        return ba.hexlify(wkb.dumps(geom)).decode()
+    else:
+        return None
 
 @encode_decode_decorator
 def _decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
     from shapely import wkb
-    return wkb.loads(ba.unhexlify(ewkb))
+    if ewkb:
+        return wkb.loads(ba.unhexlify(ewkb))
+    else:
+        return None
