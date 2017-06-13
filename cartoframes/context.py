@@ -193,29 +193,37 @@ class CartoContext(object):
     def _send_batches(self, df, table_name, temp_dir, geom_col, lnglat):
         """Batch sending a dataframe"""
         subtables = []
+
         # send dataframe chunks to carto
         for chunk_num, df_chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
                                                     for i in range(df.shape[0])])):
             temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
                 orig=table_name[:40],
                 chunk=chunk_num)
-            # send dataframe chunk
-            temp_table = self._send_dataframe(df_chunk, temp_table,
-                                              temp_dir, geom_col, lnglat)
-            subtables.append(temp_table)
+            try:
+                # send dataframe chunk, get new name if collision
+                temp_table = self._send_dataframe(df_chunk, temp_table,
+                                                  temp_dir, geom_col, lnglat)
+            except CartoException as err:
+                _ = self.sql_client.send('\n'.join(
+                    'DROP TABLE IF EXISTS {};'.format(t)
+                    for t in subtables))
+                raise CartoException(err)
+
+            if temp_table:
+                subtables.append(temp_table)
             self._debug_print(chunk_num=chunk_num,
                               chunk_shape=str(df_chunk.shape),
                               temp_table=temp_table)
 
-        unioned_tables = '\n UNION ALL \n'.join(['SELECT * FROM {}'.format(t)
-                                                 for t in subtables])
-        drop_tables = '\n'.join(['DROP TABLE IF EXISTS {};'.format(t)
-                                 for t in subtables])
         try:
+            unioned_tables = '\nUNION ALL\n'.join(['SELECT * FROM {}'.format(t)
+                                                   for t in subtables])
+            drop_tables = '\n'.join(['DROP TABLE IF EXISTS {};'.format(t)
+                                   for t in subtables])
             query = '''
                 DROP TABLE IF EXISTS {table_name};
-                CREATE TABLE {table_name} As
-                {unioned_tables};
+                CREATE TABLE {table_name} As {unioned_tables};
                 ALTER TABLE {table_name} DROP COLUMN IF EXISTS cartodb_id;
                 {drop_tables}
                 SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
