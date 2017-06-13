@@ -477,6 +477,10 @@ class CartoContext(object):
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
         #       that uses up to layer limit value error
+        if not hasattr(IPython, 'display'):
+            raise NotImplementedError('Nope, cannot display maps at the '
+                                      'command line.')
+
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
