@@ -13,7 +13,7 @@ Complete documentation: https://cartodb.github.io/cartoframes/
 Install Instructions
 --------------------
 
-`cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and a development version of the CARTO Python SDK (on branch `1.0.0 <https://github.com/CartoDB/carto-python/tree/1.0.0>`__). To install `cartoframes` on your machine, do the following:
+`cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and the `CARTO Python SDK <https://github.com/CartoDB/carto-python/>`__). To install `cartoframes` on your machine, do the following:
 
 .. code:: bash
 
@@ -38,23 +38,29 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 .. code:: python
 
     import cartoframes
-    cc = cartoframes.CartoContext('https://eschbacher.carto.com/', APIKEY)
+    # `base_url`s are of the form `http://{username}.carto.com/` for most users
+    cc = cartoframes.CartoContext(base_url='https://eschbacher.carto.com/',
+                                  api_key=APIKEY)
+
+    # read a table from your CARTO account to a DataFrame
     df = cc.read('brooklyn_poverty_census_tracts')
+
     # do fancy pandas operations (add/drop columns, change values, etc.)
     df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
 
-    # updates carto table with all changes from this session
+    # updates CARTO table with all changes from this session
     cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
-Associate an existing pandas DataFrame with CARTO.
+Write an existing pandas DataFrame to CARTO.
 
 .. code:: python
 
     import pandas as pd
     import cartoframes
     df = pd.read_csv('acadia_biodiversity.csv')
-    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+    cc = cartoframes.CartoContext(base_url=BASEURL,
+                                  api_key=APIKEY)
     cc.write(df, 'acadia_biodiversity')
 
 
@@ -66,7 +72,8 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 .. code:: python
 
     from cartoframes import Layer, BaseMap, styling
-    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+    cc = cartoframes.CartoContext(base_url=BASEURL,
+                                  api_key=APIKEY)
     cc.map(layers=[BaseMap('light'),
                    Layer('acadia_biodiversity',
                          color={'column': 'simpson_index',
