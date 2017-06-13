@@ -239,9 +239,10 @@ class CartoContext(object):
                                   for t in subtables)
                 _ = self.sql_client.send(drops)
             except CartoException as err:
-                raise CartoException('Failed to drop all subtables: '
-                                     '{}'.format(', '.join(subtables)))
-            raise Exception('Failed to upload dataframe: {}'.format(err))
+                warn('Failed to drop the following subtables from CARTO '
+                     'account: {}'.format(', '.join(subtables)))
+            finally:
+                raise Exception('Failed to upload dataframe: {}'.format(err))
 
         return table_name
 
