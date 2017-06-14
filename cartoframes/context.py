@@ -299,11 +299,21 @@ class CartoContext(object):
     def _handle_import(self, import_job, table_name):
         """Handle state of import job"""
         if import_job['state'] == 'failure':
-            raise CartoException('Error code: `{}`. See CARTO Import '
-                                 'API error documentation for more '
-                                 'information: https://carto.com/docs/'
-                                 'carto-engine/import-api/import-errors'
-                                 ''.format(import_job['error_code']))
+            if import_job['error_code'] == 8001:
+                raise CartoException('Over CARTO account storage limit for '
+                                     'user `{}`. Try subsetting your '
+                                     'DataFrame or dropping columns to reduce '
+                                     'the data size.'.format(self.username))
+            elif import_job['error_code'] == 6668:
+                raise CartoException('Too many rows in DataFrame. Try '
+                                     'subsetting DataFrame before writing to '
+                                     'CARTO.')
+            else:
+                raise CartoException('Error code: `{}`. See CARTO Import '
+                                     'API error documentation for more '
+                                     'information: https://carto.com/docs/'
+                                     'carto-engine/import-api/import-errors'
+                                     ''.format(import_job['error_code']))
         elif import_job['state'] == 'complete':
             self._debug_print(final_table=import_job['table_name'])
             if import_job['table_name'] != table_name:
