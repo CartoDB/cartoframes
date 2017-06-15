@@ -155,23 +155,35 @@ class CartoContext(object):
 
         if df.shape[0] > MAX_IMPORT_ROWS:
             final_table_name = self._send_batches(df, table_name, temp_dir,
-                                                  geom_col, lnglat)
+                                                  geom_col)
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
-                                                    geom_col, lnglat)
+                                                    geom_col)
+            try:
+                self._set_schema(df, final_table_name)
+            except CartoException as err:
+                warn('Could not update `{table}`\'s schema to match the '
+                     'input dataframe: {err}'.format(table=table_name,
+                                                     err=err))
 
         if lnglat:
+            # TODO: make this a batch job if it is a large dataframe
+            tqdm.write('Creating geometry out of {lng}/{lat}'.format(
+                lng=lnglat[0],
+                lat=lnglat[1]))
             self.sql_client.send('''
                 UPDATE "{table_name}"
-                SET the_geom = CDB_LatLng({lat}, {lng})
+                SET the_geom = CDB_LatLng("{lat}"::numeric,
+                                          "{lng}"::numeric)
             '''.format(table_name=final_table_name,
                        lng=lnglat[0],
                        lat=lnglat[1]))
+
         self._column_normalization(df, final_table_name, geom_col)
-        print('Table written to CARTO: '
-              '{base_url}dataset/{table_name}'.format(
-                  base_url=self.base_url,
-                  table_name=final_table_name))
+        tqdm.write('Table written to CARTO: '
+                   '{base_url}dataset/{table_name}'.format(
+                       base_url=self.base_url,
+                       table_name=final_table_name))
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
@@ -190,54 +202,51 @@ class CartoContext(object):
 
         return False
 
-    def _send_batches(self, df, table_name, temp_dir, geom_col, lnglat):
+    def _send_batches(self, df, table_name, temp_dir, geom_col):
         """Batch sending a dataframe"""
         subtables = []
-
         # send dataframe chunks to carto
-        for chunk_num, df_chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
-                                                    for i in range(df.shape[0])])):
+        for chunk_num, chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
+                                                 for i in range(df.shape[0])]),
+                                     desc='Uploading'):
             temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
                 orig=table_name[:40],
                 chunk=chunk_num)
             try:
                 # send dataframe chunk, get new name if collision
-                temp_table = self._send_dataframe(df_chunk, temp_table,
-                                                  temp_dir, geom_col, lnglat)
+                temp_table = self._send_dataframe(chunk, temp_table,
+                                                  temp_dir, geom_col)
             except CartoException as err:
-                _ = self.sql_client.send('\n'.join(
-                    'DROP TABLE IF EXISTS {};'.format(t)
-                    for t in subtables))
+                self._drop_tables(subtables)
                 raise CartoException(err)
 
             if temp_table:
                 subtables.append(temp_table)
             self._debug_print(chunk_num=chunk_num,
-                              chunk_shape=str(df_chunk.shape),
+                              chunk_shape=str(chunk.shape),
                               temp_table=temp_table)
 
+        # combine chunks into final table
         try:
-            unioned_tables = '\nUNION ALL\n'.join(['SELECT * FROM {}'.format(t)
+            select_base = ('SELECT %(schema)s '
+                           'FROM "{table}"') % dict(schema=df2pg_columns(df))
+            unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
-            drop_tables = '\n'.join(['DROP TABLE IF EXISTS {};'.format(t)
-                                   for t in subtables])
             query = '''
-                DROP TABLE IF EXISTS {table_name};
-                CREATE TABLE {table_name} As {unioned_tables};
+                DROP TABLE IF EXISTS "{table_name}";
+                CREATE TABLE "{table_name}" As {unioned_tables};
                 ALTER TABLE {table_name} DROP COLUMN IF EXISTS cartodb_id;
                 {drop_tables}
                 SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
                 '''.format(table_name=table_name,
                            unioned_tables=unioned_tables,
                            org=self.username if self.is_org else 'public',
-                           drop_tables=drop_tables)
+                           drop_tables=_drop_tables_query(subtables))
             self._debug_print(query=query)
             _ = self.sql_client.send(query)
         except CartoException as err:
             try:
-                drops = '\n'.join('DROP TABLE IF EXISTS {}'.format(t)
-                                  for t in subtables)
-                _ = self.sql_client.send(drops)
+                self._drop_tables(subtables)
             except CartoException as err:
                 warn('Failed to drop the following subtables from CARTO '
                      'account: {}'.format(', '.join(subtables)))
@@ -246,7 +255,18 @@ class CartoContext(object):
 
         return table_name
 
-    def _send_dataframe(self, df, table_name, temp_dir, geom_col, lnglat):
+    def _drop_tables(self, tables):
+        """Drop all tables in tables list
+        Args:
+            tables (list): list of table names
+        Returns:
+            None
+        """
+        query = _drop_tables_query(tables)
+        _ = self.sql_client.send(query)
+        return None
+
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col):
         """Send a DataFrame to CARTO to be imported as a SQL table"""
         def remove_tempfile(filepath):
             """removes temporary file"""
@@ -258,16 +278,9 @@ class CartoContext(object):
         df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
         with open(tempfile, 'rb') as f:
-            type_guess = str(not any([geom_col, lnglat])).lower()
-            if type_guess == 'false':
-                warn('All non-geometry columns in the CARTO version of this '
-                     'DataFrame will be cast to strings. Manually update '
-                     'columns in CARTO if you need to map off of numeric '
-                     'columns. See issue #131 for a proposed solution: '
-                     'https://github.com/CartoDB/cartoframes/issues/131')
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
-                                  params={'type_guessing': type_guess},
+                                  params={'type_guessing': 'false'},
                                   stream=True)
             self._debug_print(res=res)
 
@@ -288,6 +301,23 @@ class CartoContext(object):
             time.sleep(1.0)
 
         return final_table_name
+
+    def _set_schema(self, dataframe, table_name):
+        """Update a table associated with a dataframe to have the equivalent
+        schema"""
+        alter_temp = 'ALTER COLUMN "{col}" TYPE {ctype} USING "{col}"::{ctype}'
+        alter_cols = ', '.join(alter_temp.format(col=c, ctype=dtypes2pg(t))
+                               for c, t in zip(dataframe.columns,
+                                               dataframe.dtypes))
+        alter_query = 'ALTER TABLE {table} {alter_cols};'.format(
+            table=table_name,
+            alter_cols=alter_cols)
+        self._debug_print(alter_query=alter_query)
+        try:
+            _ = self.sql_client.send(alter_query)
+        except CartoException as err:
+            raise CartoException('DataFrame written to CARTO but table schema '
+                                 'failed to update: {err}'.format(err=err))
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
@@ -403,6 +433,7 @@ class CartoContext(object):
 
         self._debug_print(select_res=select_res)
 
+        # TODO: replace this with a function
         pg2dtypes = {
             'date': 'datetime64[ns]',
             'number': 'float64',
@@ -940,8 +971,7 @@ def _encode_geom(geom):
     from shapely import wkb
     if geom:
         return ba.hexlify(wkb.dumps(geom)).decode()
-    else:
-        return None
+    return None
 
 @encode_decode_decorator
 def _decode_geom(ewkb):
@@ -950,5 +980,27 @@ def _decode_geom(ewkb):
     from shapely import wkb
     if ewkb:
         return wkb.loads(ba.unhexlify(ewkb))
-    else:
-        return None
+    return None
+
+def dtypes2pg(dtype):
+    """returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {'float64': 'numeric',
+               'int64': 'numeric',
+               'float32': 'numeric',
+               'int32': 'numeric',
+               'object': 'text',
+               'bool': 'boolean',
+               'datetime64[ns]': 'text'}
+    return mapping.get(str(dtype), 'text')
+
+def df2pg_columns(dataframe):
+    """Print column names with PostgreSQL schema for the SELECT statement of
+    a SQL query"""
+
+    return ', '.join(['"{0}"::{1}'.format(c, dtypes2pg(t))
+                      for c, t in zip(dataframe.columns, dataframe.dtypes)])
+
+def _drop_tables_query(tables):
+    """Generate drop tables query for all tables in list `tables`"""
+    return '\n'.join('DROP TABLE IF EXISTS {};'.format(t)
+                     for t in tables)
