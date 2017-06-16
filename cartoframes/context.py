@@ -166,11 +166,13 @@ class CartoContext(object):
                      'input dataframe: {err}'.format(table=table_name,
                                                      err=err))
 
+        # create geometry column from lat/longs if requested
         if lnglat:
-            # TODO: make this a batch job if it is a large dataframe
-            tqdm.write('Creating geometry out of {lng}/{lat}'.format(
-                lng=lnglat[0],
-                lat=lnglat[1]))
+            # TODO: make this a batch job if it is a large dataframe or move
+            #       inside of _send_dataframe and/or batch
+            tqdm.write('Creating geometry out of columns '
+                       '`{lng}`/`{lat}`'.format(lng=lnglat[0],
+                                                lat=lnglat[1]))
             self.sql_client.send('''
                 UPDATE "{table_name}"
                 SET the_geom = CDB_LatLng("{lat}"::numeric,
@@ -203,7 +205,24 @@ class CartoContext(object):
         return False
 
     def _send_batches(self, df, table_name, temp_dir, geom_col):
-        """Batch sending a dataframe"""
+        """Batch sending a dataframe
+
+        Args:
+            df (pandas.DataFrame): DataFrame that will be batched up for
+                sending to CARTO
+            table_name (str): Name of table to send DataFrame to
+            temp_dir (str): Local directory for temporary storage of DataFrame
+                written to file that will be sent to CARTO
+            geom_col (str): Name of encoded geometry column (if any) that will
+                be dropped or converted to `the_geom` column
+
+        Returns:
+            final_table_name (str): Final table name on CARTO that the
+            DataFrame is stored in
+
+        Exceptions:
+            * TODO: add more (Out of storage)
+        """
         subtables = []
         # send dataframe chunks to carto
         for chunk_num, chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
@@ -257,8 +276,10 @@ class CartoContext(object):
 
     def _drop_tables(self, tables):
         """Drop all tables in tables list
+
         Args:
-            tables (list): list of table names
+            tables (list of str): list of table names
+
         Returns:
             None
         """
@@ -267,7 +288,20 @@ class CartoContext(object):
         return None
 
     def _send_dataframe(self, df, table_name, temp_dir, geom_col):
-        """Send a DataFrame to CARTO to be imported as a SQL table"""
+        """Send a DataFrame to CARTO to be imported as a SQL table
+
+        Args:
+            df (pandas.DataFrame): DataFrame that is will be sent to CARTO
+            table_name (str): Name on CARTO for the table that will have the
+                data from ``df``
+            temp_dir (str): Name of directory used for temporarily storing the
+                DataFrame file to sent to CARTO
+            geom_col (str): Name of geometry column
+
+        Returns:
+            final_table_name (str): Name of final table. This method will
+            overwrite the table `table_name` if it already exists.
+        """
         def remove_tempfile(filepath):
             """removes temporary file"""
             os.remove(filepath)
@@ -379,9 +413,9 @@ class CartoContext(object):
                                                                  geom_col}
         if diff_cols:
             cols = ', '.join('`{}`'.format(c) for c in diff_cols)
-            warn('The following columns were renamed because of PostgreSQL '
-                 'column normalization requirements: {cols}'.format(cols=cols),
-                 stacklevel=2)
+            tqdm.write('The following columns were renamed because of '
+                       'PostgreSQL column normalization requirements: '
+                       '{cols}'.format(cols=cols))
 
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
