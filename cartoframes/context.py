@@ -33,7 +33,9 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
-MAX_IMPORT_ROWS = 500000
+# Choose constant to avoid overview generation which are triggered at a
+# half million rows
+MAX_IMPORT_ROWS = 499999
 
 class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
@@ -222,7 +224,7 @@ class CartoContext(object):
         # send dataframe chunks to carto
         for chunk_num, chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
                                                  for i in range(df.shape[0])]),
-                                     desc='Uploading'):
+                                     desc='Uploading in batches: '):
             temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
                 orig=table_name[:40],
                 chunk=chunk_num)
@@ -246,7 +248,6 @@ class CartoContext(object):
                            'FROM "{table}"') % dict(schema=df2pg_schema(df))
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
-            print(unioned_tables)
             self._debug_print(unioned=unioned_tables)
             query = '''
                 DROP TABLE IF EXISTS "{table_name}";
@@ -1039,7 +1040,7 @@ def df2pg_schema(dataframe):
                         if c not in ('the_geom', 'the_geom_webmercator',
                                      'cartodb_id')])
     if 'the_geom' in dataframe.columns:
-        return 'the_geom, ' + schema
+        return '"the_geom", ' + schema
     return schema
 
 def _drop_tables_query(tables):
