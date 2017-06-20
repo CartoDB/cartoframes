@@ -17,7 +17,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
 
 setup(
     name='cartoframes',
-    version='0.2.1-beta',
+    version='0.2.1-beta.1',
     description='An experimental Python pandas interface for using CARTO',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/CartoDB/cartoframes',
@@ -25,8 +25,8 @@ setup(
     author_email='andy@carto.com',
     license='BSD',
     classifiers=[
-        'Development Status :: 3 - Beta',
-        'Intended Audience :: Data Scientists',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',

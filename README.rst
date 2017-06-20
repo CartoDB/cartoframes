@@ -17,10 +17,7 @@ Install Instructions
 
 .. code:: bash
 
-    $ git clone https://github.com/CartoDB/cartoframes.git
-    $ cd cartoframes
-    $ pip install -r requirements.txt
-    $ pip install -e .
+    $ pip install cartoframes
 
 Once you've done this, `cartoframes` will be installed. See the example usage section below for using `cartoframes` in a Jupyter notebook. **User must have a CARTO API key for writing DataFrames to an account or reading from private tables.**
 
