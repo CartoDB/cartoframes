@@ -269,7 +269,7 @@ class CartoContext:
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of timestamps, the data type 'object' is used.
+            In the case of PostgreSQL date types, the data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
