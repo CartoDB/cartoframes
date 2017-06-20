@@ -159,12 +159,7 @@ class CartoContext(object):
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
                                                     geom_col)
-            try:
-                self._set_schema(df, final_table_name)
-            except CartoException as err:
-                warn('Could not update `{table}`\'s schema to match the '
-                     'input dataframe: {err}'.format(table=table_name,
-                                                     err=err))
+            self._set_schema(df, final_table_name)
 
         # create geometry column from lat/longs if requested
         if lnglat:
@@ -248,9 +243,11 @@ class CartoContext(object):
         # combine chunks into final table
         try:
             select_base = ('SELECT %(schema)s '
-                           'FROM "{table}"') % dict(schema=df2pg_columns(df))
+                           'FROM "{table}"') % dict(schema=df2pg_schema(df))
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
+            print(unioned_tables)
+            self._debug_print(unioned=unioned_tables)
             query = '''
                 DROP TABLE IF EXISTS "{table_name}";
                 CREATE TABLE "{table_name}" As {unioned_tables};
@@ -339,19 +336,25 @@ class CartoContext(object):
     def _set_schema(self, dataframe, table_name):
         """Update a table associated with a dataframe to have the equivalent
         schema"""
-        alter_temp = 'ALTER COLUMN "{col}" TYPE {ctype} USING "{col}"::{ctype}'
+        utility_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
+        alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
+                      'NULLIF("{col}", \'\')::{ctype}')
         alter_cols = ', '.join(alter_temp.format(col=c, ctype=dtypes2pg(t))
                                for c, t in zip(dataframe.columns,
-                                               dataframe.dtypes))
-        alter_query = 'ALTER TABLE {table} {alter_cols};'.format(
+                                               dataframe.dtypes)
+                               if c not in utility_cols)
+        alter_query = 'ALTER TABLE "{table}" {alter_cols};'.format(
             table=table_name,
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
             _ = self.sql_client.send(alter_query)
         except CartoException as err:
-            raise CartoException('DataFrame written to CARTO but table schema '
-                                 'failed to update: {err}'.format(err=err))
+            warn('DataFrame written to CARTO but table schema failed to '
+                 'update to match DataFrame. All columns have data type '
+                 '`text`. CARTO error: `{err}`. Query: {query}'.format(
+                     err=err,
+                     query=alter_query))
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
@@ -1027,12 +1030,17 @@ def dtypes2pg(dtype):
                'datetime64[ns]': 'text'}
     return mapping.get(str(dtype), 'text')
 
-def df2pg_columns(dataframe):
+def df2pg_schema(dataframe):
     """Print column names with PostgreSQL schema for the SELECT statement of
     a SQL query"""
-
-    return ', '.join(['"{0}"::{1}'.format(c, dtypes2pg(t))
-                      for c, t in zip(dataframe.columns, dataframe.dtypes)])
+    schema = ', '.join(['NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
+                                                                     t=dtypes2pg(t))
+                        for c, t in zip(dataframe.columns, dataframe.dtypes)
+                        if c not in ('the_geom', 'the_geom_webmercator',
+                                     'cartodb_id')])
+    if 'the_geom' in dataframe.columns:
+        return 'the_geom, ' + schema
+    return schema
 
 def _drop_tables_query(tables):
     """Generate drop tables query for all tables in list `tables`"""
