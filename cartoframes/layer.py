@@ -51,17 +51,17 @@ class BaseMap(AbstractLayer):
     is_basemap = True
 
     def __init__(self, source='dark', labels='back', only_labels=False):
-        if labels not in ['front', 'back', None]:
+        if labels not in ('front', 'back', None):
             raise ValueError("labels must be None, 'front', or 'back'")
 
         self.source = source
         self.labels = labels
 
         if self.is_basic():
-            if not only_labels:
-                style = source + ('_all' if labels == 'back' else '_nolabels')
-            else:
+            if only_labels:
                 style = source + '_only_labels'
+            else:
+                style = source + ('_all' if labels == 'back' else '_nolabels')
 
             self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
