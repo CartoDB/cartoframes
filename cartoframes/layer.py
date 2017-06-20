@@ -20,7 +20,7 @@ class AbstractLayer(object):
     def __init__(self):
         pass
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         pass
 
 
@@ -62,6 +62,7 @@ class BaseMap(AbstractLayer):
                 style = source + ('_all' if labels == 'back' else '_nolabels')
             else:
                 style = source + '_only_labels'
+
             self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
         elif self.source.startswith('http'):
@@ -277,7 +278,7 @@ class QueryLayer(AbstractLayer):
                              'columns. `{col}` was chosen.'.format(
                                  col=','.join(self.style_cols & geom_cols)))
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
         self.color = self.color or DEFAULT_COLORS[layer_idx]
@@ -442,12 +443,12 @@ class Layer(QueryLayer):
                                     tooltip=tooltip,
                                     legend=legend)
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
             context.write(self.source,
                           self.table_name,
                           overwrite=self.overwrite)
-        super(Layer, self)._setup(context, layers, layer_idx)
+        super(Layer, self)._setup(layers, layer_idx)
 
 # cdb_context.map([BaseMap('light'),
 #                  BaseMap('dark'),

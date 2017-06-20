@@ -468,7 +468,7 @@ class CartoContext(object):
 
         # Setup layers
         for idx, layer in enumerate(layers):
-            layer._setup(self, layers, idx)
+            layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
