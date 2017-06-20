@@ -8,10 +8,11 @@ import webcolors
 from cartoframes.utils import cssify
 from cartoframes.styling import BinMethod, mint, get_scheme_cartocss
 
-# TODO: add categorical colors from  a cartocolor ramp instead of these
-DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
-                  '#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
-
+# colors map data layers without color specified
+# from cartocolor vivid scheme
+DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
+                  '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
+                  '#CC3A8E', '#A5AA99')
 
 class AbstractLayer(object):
     """Abstract Layer object"""
