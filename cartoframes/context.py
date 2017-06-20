@@ -8,21 +8,24 @@ geocoding, and isolines <https://carto.com/location-data-services/>`__.
 import json
 import os
 import random
-import re
 import sys
 import time
 import collections
+import binascii as ba
+from warnings import warn
 
 import requests
 import IPython
 import pandas as pd
+from tqdm import tqdm
 
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from carto.exceptions import CartoException
 
-from cartoframes.utils import dict_items
-from cartoframes.layer import BaseMap
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from .utils import dict_items
+from .layer import BaseMap
+from .maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -30,7 +33,11 @@ else:
     from urlparse import urlparse
     from urllib import urlencode
 
-class CartoContext:
+# Choose constant to avoid overview generation which are triggered at a
+# half million rows
+MAX_IMPORT_ROWS = 499999
+
+class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
@@ -59,60 +66,29 @@ class CartoContext:
     """
     def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
 
-        # use stored api key (if present)
-        if (api_key is None) or (base_url is None):
-            from cartoframes import credentials
-            creds = credentials.credentials()
-            api_key = creds['api_key'] if api_key is None else api_key
-            base_url = creds['base_url'] if base_url is None else base_url
-            if (api_key == '') and (base_url == ''):
-                raise ValueError('No credentials are stored on this installation'
-                                 ' and none were provided. Use `cartoframes.keys.set_credentials`'
-                                 ' to store your access url and api key for this installation')
-            if api_key == '':
-                raise ValueError('API Key was not provided and no key is '
-                                 'stored. Use `cartoframes.keys.set_key` '
-                                 'to set a default key for this installation')
-            if base_url == '':
-                raise ValueError('Base URL was not provided and no url is stored.'
-                                 'Use `cartoframes.keys.set_url` to set a default'
-                                 ' bsae url for this installation')
-
-        # Make sure there is a trailing / for urljoin
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.base_url = base_url
-        self.api_key = api_key
-
-        url_info = urlparse(base_url)
-        # On-Prem:
-        #   /user/<username>
-        username = re.search('^/user/(.*)/$', url_info.path)
-        if username is None:
-            # Cloud personal account
-            # <username>.carto.com
-            username = re.search(r'^(.*?)\..*', url_info.netloc)
-        self.username = username.group(1)
-
-        self.auth_client = APIKeyAuthClient(base_url=base_url,
-                                            api_key=api_key,
+        self.api_key, self.base_url = _process_credentials(api_key,
+                                                           base_url)
+        self.auth_client = APIKeyAuthClient(base_url=self.base_url,
+                                            api_key=self.api_key,
                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
+        self.username = self.auth_client.username
+        self.is_org = self._is_org_user()
 
+        self._map_templates = {}
+        self._srcdoc = None
+        self._verbose = verbose
+
+    def _is_org_user(self):
+        """Report whether user is in a multiuser CARTO organization or not"""
         res = self.sql_client.send('SHOW search_path')
 
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
+        return paths[0] != 'public'
 
-        self.is_org = (paths[0] != 'public')
-
-        self._map_templates = {}
-        self._srcdoc = None
-
-        self._verbose = verbose
-
-
-    def read(self, table_name, limit=None, index='cartodb_id'):
+    def read(self, table_name, limit=None, index='cartodb_id',
+             decode_geom=False):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
@@ -139,11 +115,11 @@ class CartoContext:
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(query)
+        return self.query(query, decode_geom=decode_geom)
 
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None):
+              lnglat=None, encode_geom=False, geom_col=None):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -164,85 +140,286 @@ class CartoContext:
                 geometry will be created without specifying this. See CARTO's
                 `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
+            encode_geom (bool, optional): Whether to write `geom_col` to CARTO
+                as `the_geom`.
+            geom_col (str, optional): The name of the column where geometry
+                information is stored. Used in conjunction with `encode_geom`.
 
         Returns:
             None
         """
-        table_exists = True
-        if not overwrite:
-            try:
-                self.query('SELECT * FROM {table_name} limit 0'.format(
-                    table_name=table_name))
-            except Exception as err:
-                self._debug_print(err=err)
-                # If table doesn't exist, we get an error from the SQL API
-                table_exists = False
+        if encode_geom:
+            _add_encoded_geom(df, geom_col)
 
-            if table_exists:
-                raise AssertionError(
-                    ('Table `{table_name}` already exists. '
-                     'Run with `overwrite=True` if you wish to replace the '
-                     'table.').format(table_name=table_name))
+        if not overwrite:
+            # error if table exists and user does not want to overwrite
+            self._table_exists(table_name)
+
+        if df.shape[0] > MAX_IMPORT_ROWS:
+            final_table_name = self._send_batches(df, table_name, temp_dir,
+                                                  geom_col)
+        else:
+            final_table_name = self._send_dataframe(df, table_name, temp_dir,
+                                                    geom_col)
+            self._set_schema(df, final_table_name)
+
+        # create geometry column from lat/longs if requested
+        if lnglat:
+            # TODO: make this a batch job if it is a large dataframe or move
+            #       inside of _send_dataframe and/or batch
+            tqdm.write('Creating geometry out of columns '
+                       '`{lng}`/`{lat}`'.format(lng=lnglat[0],
+                                                lat=lnglat[1]))
+            self.sql_client.send('''
+                UPDATE "{table_name}"
+                SET the_geom = CDB_LatLng("{lat}"::numeric,
+                                          "{lng}"::numeric)
+            '''.format(table_name=final_table_name,
+                       lng=lnglat[0],
+                       lat=lnglat[1]))
+
+        self._column_normalization(df, final_table_name, geom_col)
+        tqdm.write('Table written to CARTO: '
+                   '{base_url}dataset/{table_name}'.format(
+                       base_url=self.base_url,
+                       table_name=final_table_name))
+
+    def _table_exists(self, table_name):
+        """Checks to see if table exists"""
+        try:
+            self.sql_client.send('''
+                EXPLAIN SELECT * FROM "{table_name}"
+                '''.format(table_name=table_name))
+            raise NameError(
+                'Table `{table_name}` already exists. '
+                'Run with `overwrite=True` if you wish to replace the '
+                'table.'.format(table_name=table_name))
+        except CartoException as err:
+            # If table doesn't exist, we get an error from the SQL API
+            self._debug_print(err=err)
+            return False
+
+        return False
+
+    def _send_batches(self, df, table_name, temp_dir, geom_col):
+        """Batch sending a dataframe
+
+        Args:
+            df (pandas.DataFrame): DataFrame that will be batched up for
+                sending to CARTO
+            table_name (str): Name of table to send DataFrame to
+            temp_dir (str): Local directory for temporary storage of DataFrame
+                written to file that will be sent to CARTO
+            geom_col (str): Name of encoded geometry column (if any) that will
+                be dropped or converted to `the_geom` column
+
+        Returns:
+            final_table_name (str): Final table name on CARTO that the
+            DataFrame is stored in
+
+        Exceptions:
+            * TODO: add more (Out of storage)
+        """
+        subtables = []
+        # send dataframe chunks to carto
+        for chunk_num, chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
+                                                 for i in range(df.shape[0])]),
+                                     desc='Uploading in batches: '):
+            temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
+                orig=table_name[:40],
+                chunk=chunk_num)
+            try:
+                # send dataframe chunk, get new name if collision
+                temp_table = self._send_dataframe(chunk, temp_table,
+                                                  temp_dir, geom_col)
+            except CartoException as err:
+                self._drop_tables(subtables)
+                raise CartoException(err)
+
+            if temp_table:
+                subtables.append(temp_table)
+            self._debug_print(chunk_num=chunk_num,
+                              chunk_shape=str(chunk.shape),
+                              temp_table=temp_table)
+
+        # combine chunks into final table
+        try:
+            select_base = ('SELECT %(schema)s '
+                           'FROM "{table}"') % dict(schema=df2pg_schema(df))
+            unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
+                                                   for t in subtables])
+            self._debug_print(unioned=unioned_tables)
+            query = '''
+                DROP TABLE IF EXISTS "{table_name}";
+                CREATE TABLE "{table_name}" As {unioned_tables};
+                ALTER TABLE {table_name} DROP COLUMN IF EXISTS cartodb_id;
+                {drop_tables}
+                SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
+                '''.format(table_name=table_name,
+                           unioned_tables=unioned_tables,
+                           org=self.username if self.is_org else 'public',
+                           drop_tables=_drop_tables_query(subtables))
+            self._debug_print(query=query)
+            _ = self.sql_client.send(query)
+        except CartoException as err:
+            try:
+                self._drop_tables(subtables)
+            except CartoException as err:
+                warn('Failed to drop the following subtables from CARTO '
+                     'account: {}'.format(', '.join(subtables)))
+            finally:
+                raise Exception('Failed to upload dataframe: {}'.format(err))
+
+        return table_name
+
+    def _drop_tables(self, tables):
+        """Drop all tables in tables list
+
+        Args:
+            tables (list of str): list of table names
+
+        Returns:
+            None
+        """
+        query = _drop_tables_query(tables)
+        _ = self.sql_client.send(query)
+        return None
+
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col):
+        """Send a DataFrame to CARTO to be imported as a SQL table
+
+        Args:
+            df (pandas.DataFrame): DataFrame that is will be sent to CARTO
+            table_name (str): Name on CARTO for the table that will have the
+                data from ``df``
+            temp_dir (str): Name of directory used for temporarily storing the
+                DataFrame file to sent to CARTO
+            geom_col (str): Name of geometry column
+
+        Returns:
+            final_table_name (str): Name of final table. This method will
+            overwrite the table `table_name` if it already exists.
+        """
+        def remove_tempfile(filepath):
+            """removes temporary file"""
+            os.remove(filepath)
 
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-
-        def remove_tempfile():
-            """removes temporary file"""
-            os.remove(tempfile)
-
-        df.to_csv(tempfile)
+        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
+                                  params={'type_guessing': 'false'},
                                   stream=True)
             self._debug_print(res=res)
 
             if not res['success']:
-                remove_tempfile()
-                raise Exception('Failed to send')
+                remove_tempfile(tempfile)
+                raise CartoException('Failed to send DataFrame')
             import_id = res['item_queue_id']
 
-            while True:
-                res = self._auth_send('api/v1/imports/{}'.format(import_id),
-                                      'GET')
-                if res['state'] == 'failure':
-                    remove_tempfile()
-                    raise Exception('Error code: {}'.format(res['error_code']))
-                if res['state'] == 'complete':
-                    self._debug_print(final_table_name=res['table_name'])
-                    if res['table_name'] != table_name:
-                        try:
-                            alter_query = ('DROP TABLE IF EXISTS {orig_table}; '
-                                           'ALTER TABLE {dupe_table} RENAME '
-                                           'TO {orig_table};'.format(
-                                               orig_table=table_name,
-                                               dupe_table=res['table_name']))
+        remove_tempfile(tempfile)
+        final_table_name = table_name
+        while True:
+            import_job = self._check_import(import_id)
+            self._debug_print(import_job=import_job)
+            final_table_name = self._handle_import(import_job, table_name)
+            if import_job['state'] == 'complete':
+                break
+            # Wait a second before doing another request
+            time.sleep(1.0)
 
-                            res = self._auth_send('api/v2/sql', 'GET',
-                                                  params={'q': alter_query})
-                            self._debug_print(res=res)
-                        except Exception as err:
-                            self._debug_print(err=err)
-                            raise Exception(("Cannot overwrite table `{table_name}` "
-                                             "({err}).".format(table_name=table_name,
-                                                               err=err)))
-                    break
-                # Wait half a second before doing another request
-                time.sleep(0.5)
+        return final_table_name
 
-            remove_tempfile()
+    def _set_schema(self, dataframe, table_name):
+        """Update a table associated with a dataframe to have the equivalent
+        schema"""
+        utility_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
+        alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
+                      'NULLIF("{col}", \'\')::{ctype}')
+        alter_cols = ', '.join(alter_temp.format(col=c, ctype=dtypes2pg(t))
+                               for c, t in zip(dataframe.columns,
+                                               dataframe.dtypes)
+                               if c not in utility_cols)
+        alter_query = 'ALTER TABLE "{table}" {alter_cols};'.format(
+            table=table_name,
+            alter_cols=alter_cols)
+        self._debug_print(alter_query=alter_query)
+        try:
+            _ = self.sql_client.send(alter_query)
+        except CartoException as err:
+            warn('DataFrame written to CARTO but table schema failed to '
+                 'update to match DataFrame. All columns have data type '
+                 '`text`. CARTO error: `{err}`. Query: {query}'.format(
+                     err=err,
+                     query=alter_query))
 
-        if lnglat:
-            self.query('''
-                UPDATE "{table_name}"
-                SET the_geom = CDB_LatLng({lat}, {lng})
-            '''.format(table_name=table_name,
-                       lng=lnglat[0],
-                       lat=lnglat[1]))
+    def _check_import(self, import_id):
+        """Check the status of an Import API job"""
 
+        res = self._auth_send('api/v1/imports/{}'.format(import_id),
+                              'GET')
+        return res
+
+    def _handle_import(self, import_job, table_name):
+        """Handle state of import job"""
+        if import_job['state'] == 'failure':
+            if import_job['error_code'] == 8001:
+                raise CartoException('Over CARTO account storage limit for '
+                                     'user `{}`. Try subsetting your '
+                                     'DataFrame or dropping columns to reduce '
+                                     'the data size.'.format(self.username))
+            elif import_job['error_code'] == 6668:
+                raise CartoException('Too many rows in DataFrame. Try '
+                                     'subsetting DataFrame before writing to '
+                                     'CARTO.')
+            else:
+                raise CartoException('Error code: `{}`. See CARTO Import '
+                                     'API error documentation for more '
+                                     'information: https://carto.com/docs/'
+                                     'carto-engine/import-api/import-errors'
+                                     ''.format(import_job['error_code']))
+        elif import_job['state'] == 'complete':
+            self._debug_print(final_table=import_job['table_name'])
+            if import_job['table_name'] != table_name:
+                try:
+                    res = self.sql_client.send('''
+                        DROP TABLE IF EXISTS {orig_table};
+                        ALTER TABLE {dupe_table}
+                        RENAME TO {orig_table};
+                        '''.format(
+                            orig_table=table_name,
+                            dupe_table=import_job['table_name']))
+
+                    self._debug_print(res=res)
+                except Exception as err:
+                    self._debug_print(err=err)
+                    raise Exception('Cannot overwrite table `{table_name}` '
+                                    '({err}). DataFrame was written to '
+                                    '`{new_table}` instead.'.format(
+                                        table_name=table_name,
+                                        err=err,
+                                        new_table=import_job['table_name']))
+        return table_name
+
+    def _column_normalization(self, dataframe, table_name, geom_col):
+        """Print a warning if there is a difference between the normalized
+        PostgreSQL column names and the ones in the DataFrame"""
+
+        pgcolumns = self.sql_client.send('''
+            SELECT *
+            FROM "{table_name}"
+            LIMIT 0'''.format(table_name=table_name))['fields'].keys()
+        diff_cols = (set(dataframe.columns) ^ set(pgcolumns)) - {'cartodb_id',
+                                                                 geom_col}
+        if diff_cols:
+            cols = ', '.join('`{}`'.format(c) for c in diff_cols)
+            tqdm.write('The following columns were renamed because of '
+                       'PostgreSQL column normalization requirements: '
+                       '{cols}'.format(cols=cols))
 
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
@@ -256,7 +433,7 @@ class CartoContext:
         pass
 
 
-    def query(self, query, table_name=None):
+    def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
         into a pandas DataFrame. Can also be used to perform database
         operations (creating/dropping tables, adding columns, updates, etc.).
@@ -296,6 +473,7 @@ class CartoContext:
 
         self._debug_print(select_res=select_res)
 
+        # TODO: replace this with a function
         pg2dtypes = {
             'date': 'object',
             'number': 'float64',
@@ -320,6 +498,9 @@ class CartoContext:
 
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
         return df
 
 
@@ -376,6 +557,13 @@ class CartoContext:
             IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
             while static maps are rendered in ``img`` tags.
         """
+        # TODO: add layers preprocessing method like
+        #       layers = process_layers(layers)
+        #       that uses up to layer limit value error
+        if not hasattr(IPython, 'display'):
+            raise NotImplementedError('Nope, cannot display maps at the '
+                                      'command line.')
+
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
@@ -425,14 +613,15 @@ class CartoContext:
 
         # Setup layers
         for idx, layer in enumerate(layers):
-            layer._setup(self, layers, idx)
+            layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
 
         # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
-            self._check_query(layer.query)
+            self._check_query(layer.query,
+                              style_cols=layer.style_cols)
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
@@ -461,6 +650,7 @@ class CartoContext:
 
         html = '<img src="{url}" />'.format(url=static_url)
 
+        # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
@@ -514,7 +704,6 @@ class CartoContext:
                     'time_slider': True,
                     'loop': True,
                 })
-
             bounds = [] if has_zoom else [[options['north'], options['east']],
                                           [options['south'], options['west']]]
 
@@ -623,8 +812,8 @@ class CartoContext:
                 augment_functions = f.read()
             self.sql_client.send(augment_functions)
         except Exception as err:
-            raise Exception("Could not install `obs_augment_table` onto user "
-                            "account ({})".format(err))
+            raise CartoException("Could not install `obs_augment_table` onto "
+                                 "user account ({})".format(err))
 
         # augment with data observatory metadata
         augment_query = '''
@@ -648,14 +837,25 @@ class CartoContext:
             return json.loads(res.content)
         return json.loads(res.content.decode('utf-8'))
 
-    def _check_query(self, query):
+    def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
         try:
-            self.sql_client.send(('EXPLAIN {query};').format(query=query))
+            self.sql_client.send('''
+                EXPLAIN
+                SELECT
+                  {style_cols}{comma}
+                  the_geom, the_geom_webmercator
+                FROM ({query}) _wrap;
+                '''.format(query=query,
+                           comma=',' if style_cols else '',
+                           style_cols=','.join(style_cols)))
         except Exception as err:
-            raise ValueError(('Layer query `{query}` is not '
-                              'valid: {err}').format(query=query,
-                                                     err=err))
+            raise ValueError(('Layer query `{query}` and/or style column(s) '
+                              '{cols} are not valid: {err}.'
+                              '').format(query=query,
+                                         cols=', '.join(['`{}`'.format(c)
+                                                         for c in style_cols]),
+                                         err=err))
 
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
@@ -678,17 +878,16 @@ class CartoContext:
                 self._srcdoc = f.read()
 
         return (self._srcdoc
-                .replace('@@CONFIG@@', str(config))
-                .replace('@@BOUNDS@@', str(bounds))
-                .replace('@@OPTIONS@@', str(map_options))
+                .replace('@@CONFIG@@', json.dumps(config))
+                .replace('@@BOUNDS@@', json.dumps(bounds))
+                .replace('@@OPTIONS@@', json.dumps(map_options))
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
                 .replace('@@LAT@@', str(options.get('lat', 0)))
                 .replace('@@LNG@@', str(options.get('lng', 0))))
 
 
     def _get_bounds(self, layers):
-        """Return the bounds of all data layers involved in a cartoframes
-        map.
+        """Return the bounds of all data layers involved in a cartoframes map.
 
         Args:
             layers (list): List of cartoframes layers. See `cartoframes.layers`
@@ -706,26 +905,19 @@ class CartoContext:
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
-        extent = self.query('''
-               SELECT
-                 ST_XMIN(ext) AS west,
-                 ST_YMIN(ext) AS south,
-                 ST_XMAX(ext) AS east,
-                 ST_YMAX(ext) AS north
-               FROM (
-                   SELECT st_extent(the_geom) AS ext
-                   FROM ({union_query}) AS wrap1
-               ) AS wrap2'''.format(union_query=union_query))
+        extent = self.sql_client.send('''
+                       SELECT
+                         ST_XMIN(ext) AS west,
+                         ST_YMIN(ext) AS south,
+                         ST_XMAX(ext) AS east,
+                         ST_YMAX(ext) AS north
+                       FROM (
+                           SELECT st_extent(the_geom) AS ext
+                           FROM ({union_query}) AS _wrap1
+                       ) AS _wrap2
+                            '''.format(union_query=union_query))
 
-        west, south, east, north = extent.values[0]
-
-        return {
-            'west' : west,
-            'south': south,
-            'east' : east,
-            'north': north,
-        }
-
+        return extent['rows'][0]
 
     def _debug_print(self, **kwargs):
         if self._verbose <= 0:
@@ -741,3 +933,120 @@ class CartoContext:
                 str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+def _process_credentials(api_key, base_url):
+    """process credentials"""
+    # use stored api key (if present)
+    if (api_key is None) or (base_url is None):
+        from cartoframes import credentials as cfcreds
+        creds = cfcreds.credentials()
+        api_key = creds['api_key'] if api_key is None else api_key
+        base_url = creds['base_url'] if base_url is None else base_url
+        if (api_key == '') and (base_url == ''):
+            raise ValueError('No credentials are stored on this '
+                             'installation and none were provided. Use '
+                             '`cartoframes.credentials.set_credentials` '
+                             'to store your access URL and API key for '
+                             'this installation.')
+        if api_key == '':
+            raise ValueError('API key was not provided and no key is '
+                             'stored. Use '
+                             '`cartoframes.credentials.set_key` to set a '
+                             'default API key for this installation.')
+        if base_url == '':
+            raise ValueError('Base URL was not provided and no URL is '
+                             'stored. Use '
+                             '`cartoframes.credentials.set_url` to set a '
+                             'default base URL for this installation.')
+
+    # Make sure there is a trailing / for urljoin
+    if not base_url.endswith('/'):
+        base_url += '/'
+    return api_key, base_url
+
+
+def _add_encoded_geom(df, geom_col):
+    """Add encoded geometry to DataFrame"""
+    # None if not a GeoDataFrame
+    is_geopandas = getattr(df, '_geometry_column_name', None)
+    if is_geopandas is None and geom_col is None:
+        warn('`encode_geom` works best with Geopandas '
+             '(http://geopandas.org/) and/or shapely '
+             '(https://pypi.python.org/pypi/Shapely).')
+        geom_col = 'geometry' if 'geometry' in df.columns else None
+        if geom_col is None:
+            raise KeyError('Geometries were requested to be encoded '
+                           'but a geometry column was not found in the '
+                           'DataFrame.'.format(geom_col=geom_col))
+    elif is_geopandas and geom_col:
+        warn('Geometry column of the input DataFrame does not '
+             'match the geometry column supplied. Using user-supplied '
+             'column...\n'
+             '\tGeopandas geometry column: {}\n'
+             '\tSupplied `geom_col`: {}'.format(is_geopandas,
+                                                geom_col))
+    elif is_geopandas and geom_col is None:
+        geom_col = is_geopandas
+    # updates in place
+    df['the_geom'] = df[geom_col].apply(_encode_geom)
+    return None
+
+
+def encode_decode_decorator(func):
+    """decorator for encoding and decoding geoms"""
+    def wrapper(*args):
+        """error catching"""
+        try:
+            processed_geom = func(*args)
+            return processed_geom
+        except ImportError as err:
+            raise ImportError('The Python package `shapely` needs to be '
+                              'installed to encode or decode geometries. '
+                              '({})'.format(err))
+    return wrapper
+
+@encode_decode_decorator
+def _encode_geom(geom):
+    """Encode geometries into hex-encoded wkb
+    """
+    from shapely import wkb
+    if geom:
+        return ba.hexlify(wkb.dumps(geom)).decode()
+    return None
+
+@encode_decode_decorator
+def _decode_geom(ewkb):
+    """Decode encoded wkb into a shapely geometry
+    """
+    from shapely import wkb
+    if ewkb:
+        return wkb.loads(ba.unhexlify(ewkb))
+    return None
+
+def dtypes2pg(dtype):
+    """returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {'float64': 'numeric',
+               'int64': 'numeric',
+               'float32': 'numeric',
+               'int32': 'numeric',
+               'object': 'text',
+               'bool': 'boolean',
+               'datetime64[ns]': 'text'}
+    return mapping.get(str(dtype), 'text')
+
+def df2pg_schema(dataframe):
+    """Print column names with PostgreSQL schema for the SELECT statement of
+    a SQL query"""
+    schema = ', '.join(['NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
+                                                                     t=dtypes2pg(t))
+                        for c, t in zip(dataframe.columns, dataframe.dtypes)
+                        if c not in ('the_geom', 'the_geom_webmercator',
+                                     'cartodb_id')])
+    if 'the_geom' in dataframe.columns:
+        return '"the_geom", ' + schema
+    return schema
+
+def _drop_tables_query(tables):
+    """Generate drop tables query for all tables in list `tables`"""
+    return '\n'.join('DROP TABLE IF EXISTS {};'.format(t)
+                     for t in tables)
