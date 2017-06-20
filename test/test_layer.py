@@ -37,6 +37,7 @@ class TestBaseMap(unittest.TestCase):
             BaseMap(source='gulab_jamon')
 
         # ensure correct BaseMap urls are created
+        # See URLs here: https://carto.com/location-data-services/basemaps/
         self.assertEqual(dark_map_all.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'dark_all/{z}/{x}/{y}.png')
@@ -60,6 +61,17 @@ class TestBaseMap(unittest.TestCase):
         self.assertTrue(light_map_all.is_basic())
         self.assertTrue(dark_map_all.is_basic())
 
+    def test_querylayer(self):
+        """layer.QueryLayer test"""
+        query = 'select * from watermelon'
+        basic = QueryLayer(query)
+        self.assertTrue(basic.query, query)
+        self.assertEqual(basic.color, None)
+
+        with self.assertRaises(ValueError):
+            QueryLayer(query, color='the_geom')
+
+        # basic._setup()
     # def test_key_setting(self):
     #     """Test case where API key is valid"""
     #     credentials._remove_creds()
