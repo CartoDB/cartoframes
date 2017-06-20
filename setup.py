@@ -39,7 +39,8 @@ setup(
     packages=['cartoframes'],
     install_requires=['pandas>=0.20.1',
                       'webcolors>=1.7.0',
-                      'carto>=1.0.1',],
+                      'carto>=1.0.1',
+                      'tqdm>=4.14.0',],
     package_dir={'cartoframes': 'cartoframes'},
     package_data={
         '': ['LICENSE',
