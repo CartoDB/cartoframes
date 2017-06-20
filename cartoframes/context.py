@@ -445,6 +445,8 @@ class CartoContext(object):
                 query. Defaults to None (no table created).
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
+            Pandas data types are inferred from PostgreSQL data types.
+            In the case of PostgreSQL date types, the data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -473,7 +475,7 @@ class CartoContext(object):
 
         # TODO: replace this with a function
         pg2dtypes = {
-            'date': 'datetime64[ns]',
+            'date': 'object',
             'number': 'float64',
             'string': 'object',
             'boolean': 'bool',
@@ -493,6 +495,7 @@ class CartoContext(object):
         df = pd.DataFrame(
             data=select_res['rows'],
             columns=[k for k in fields]).astype(schema)
+
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
 
