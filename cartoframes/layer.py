@@ -8,10 +8,11 @@ import webcolors
 from cartoframes.utils import cssify
 from cartoframes.styling import BinMethod, mint, get_scheme_cartocss
 
-# TODO: add categorical colors from  a cartocolor ramp instead of these
-DEFAULT_COLORS = ['#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26',
-                  '#F9CA34', '#4ABD9A', '#4A5798', '#DF5E26']
-
+# colors map data layers without color specified
+# from cartocolor vivid scheme
+DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
+                  '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
+                  '#CC3A8E', '#A5AA99')
 
 class AbstractLayer(object):
     """Abstract Layer object"""
@@ -20,7 +21,7 @@ class AbstractLayer(object):
     def __init__(self):
         pass
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         pass
 
 
@@ -51,17 +52,18 @@ class BaseMap(AbstractLayer):
     is_basemap = True
 
     def __init__(self, source='dark', labels='back', only_labels=False):
-        if labels not in ['front', 'back', None]:
+        if labels not in ('front', 'back', None):
             raise ValueError("labels must be None, 'front', or 'back'")
 
         self.source = source
         self.labels = labels
 
         if self.is_basic():
-            if not only_labels:
-                style = source + ('_all' if labels == 'back' else '_nolabels')
-            else:
+            if only_labels:
                 style = source + '_only_labels'
+            else:
+                style = source + ('_all' if labels == 'back' else '_nolabels')
+
             self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
         elif self.source.startswith('http'):
@@ -277,7 +279,7 @@ class QueryLayer(AbstractLayer):
                              'columns. `{col}` was chosen.'.format(
                                  col=','.join(self.style_cols & geom_cols)))
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
         self.color = self.color or DEFAULT_COLORS[layer_idx]
@@ -442,12 +444,12 @@ class Layer(QueryLayer):
                                     tooltip=tooltip,
                                     legend=legend)
 
-    def _setup(self, context, layers, layer_idx):
+    def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
             context.write(self.source,
                           self.table_name,
                           overwrite=self.overwrite)
-        super(Layer, self)._setup(context, layers, layer_idx)
+        super(Layer, self)._setup(layers, layer_idx)
 
 # cdb_context.map([BaseMap('light'),
 #                  BaseMap('dark'),
