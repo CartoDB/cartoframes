@@ -145,8 +145,10 @@ $ source venv/bin/activate
 </div>
 </div>
 </div>
+<div class="section" id="cartoframe-methods">
+<h2>CARTOFrame Methods<a class="headerlink" href="#cartoframe-methods" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-context">
-<span id="cartoframe-methods"></span><h2>cartoframe methods<a class="headerlink" href="#module-context" title="Permalink to this headline">¶</a></h2>
+<span id="cartocontext-class"></span><h3>CartoContext Class<a class="headerlink" href="#module-context" title="Permalink to this headline">¶</a></h3>
 <p>CartoContext class for authentication with CARTO and high-level operations
 such as reading tables from CARTO into dataframes, writing dataframes to CARTO
 tables, and creating custom maps from dataframes and CARTO tables. Future
@@ -159,11 +161,11 @@ geocoding, and isolines</a>.</p>
 <dd><p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
 <p class="rubric">Example</p>
-<p>Create a CartoContext object:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>Create a CartoContext object
+.. code:: python</p>
+<blockquote>
+<div>import cartoframes
+cc = cartoframes.CartoContext(BASEURL, APIKEY)</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -388,11 +390,11 @@ In the case of PostgreSQL date types, the data type ‘object’ is used.</p>
 <code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index=’cartodb_id’</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read tables from CARTO into pandas DataFrames.</p>
 <p class="rubric">Example</p>
-<p>code:: python</p>
-<blockquote>
-<div>import cartoframes
-cc = cartoframes.CartoContext(BASEURL, APIKEY)
-df = cc.read(‘acadia_biodiversity’)</div></blockquote>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -470,7 +472,10 @@ information is stored. Used in conjunction with <cite>encode_geom</cite>.</li>
 
 </dd></dl>
 
-<span class="target" id="module-layer"></span><p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a>
+</div>
+<div class="section" id="module-layer">
+<span id="map-layer-classes"></span><h3>Map Layer Classes<a class="headerlink" href="#module-layer" title="Permalink to this headline">¶</a></h3>
+<p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a>
 and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> for example usage.</p>
 <dl class="class">
 <dt id="layer.AbstractLayer">
@@ -736,15 +741,253 @@ to 5.</li>
 </tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="layer.QueryLayer.get_cartocss">
-<code class="descname">get_cartocss</code><span class="sig-paren">(</span><em>basemap</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.QueryLayer.get_cartocss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate cartocss for class properties</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-styling">
+<span id="map-styling-functions"></span><h3>Map Styling Functions<a class="headerlink" href="#module-styling" title="Permalink to this headline">¶</a></h3>
+<p>Styling module that exposes CartoColor schemes. Read more about CartoColor in its <a class="reference external" href="https://github.com/Carto-color/">GitHub repository</a>.</p>
+<a class="reference internal image-reference" href="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png"><img alt="CartoColors" src="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png" style="width: 700px;" /></a>
+<dl class="function">
+<dt id="styling.antique">
+<code class="descclassname">styling.</code><code class="descname">antique</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.antique" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Antique qualitative scheme</p>
+<img alt="./img/cartocolor/Antique.png" src="./img/cartocolor/Antique.png" />
 </dd></dl>
 
-<span class="target" id="module-credentials"></span><p>API key utility functions</p>
+<dl class="function">
+<dt id="styling.armyRose">
+<code class="descclassname">styling.</code><code class="descname">armyRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.armyRose" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor ArmyRose divergent quantitative scheme</p>
+<img alt="./img/cartocolor/ArmyRose.png" src="./img/cartocolor/ArmyRose.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.bluGrn">
+<code class="descclassname">styling.</code><code class="descname">bluGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluGrn" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor BluGrn quantitative scheme</p>
+<img alt="./img/cartocolor/BluGrn.png" src="./img/cartocolor/BluGrn.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.bluYl">
+<code class="descclassname">styling.</code><code class="descname">bluYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor BluYl quantitative scheme</p>
+<img alt="./img/cartocolor/BluYl.png" src="./img/cartocolor/BluYl.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.bold">
+<code class="descclassname">styling.</code><code class="descname">bold</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bold" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Bold qualitative scheme</p>
+<img alt="./img/cartocolor/Bold.png" src="./img/cartocolor/Bold.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.brwnYl">
+<code class="descclassname">styling.</code><code class="descname">brwnYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.brwnYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor BrwnYl quantitative scheme</p>
+<img alt="./img/cartocolor/BrwnYl.png" src="./img/cartocolor/BrwnYl.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.burg">
+<code class="descclassname">styling.</code><code class="descname">burg</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burg" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Burg quantitative scheme</p>
+<img alt="./img/cartocolor/Burg.png" src="./img/cartocolor/Burg.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.burgYl">
+<code class="descclassname">styling.</code><code class="descname">burgYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burgYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor BurgYl quantitative scheme</p>
+<img alt="./img/cartocolor/BurgYl.png" src="./img/cartocolor/BurgYl.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.custom">
+<code class="descclassname">styling.</code><code class="descname">custom</code><span class="sig-paren">(</span><em>colors</em>, <em>bins=None</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.custom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get custom scheme</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.darkMint">
+<code class="descclassname">styling.</code><code class="descname">darkMint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.darkMint" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor DarkMint quantitative scheme</p>
+<img alt="./img/cartocolor/DarkMint.png" src="./img/cartocolor/DarkMint.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.earth">
+<code class="descclassname">styling.</code><code class="descname">earth</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.earth" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Earth divergent quantitative scheme</p>
+<img alt="./img/cartocolor/Earth.png" src="./img/cartocolor/Earth.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.emrld">
+<code class="descclassname">styling.</code><code class="descname">emrld</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.emrld" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Emrld quantitative scheme</p>
+<img alt="./img/cartocolor/Emrld.png" src="./img/cartocolor/Emrld.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.fall">
+<code class="descclassname">styling.</code><code class="descname">fall</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.fall" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Fall divergent quantitative scheme</p>
+<img alt="./img/cartocolor/Fall.png" src="./img/cartocolor/Fall.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.get_scheme_cartocss">
+<code class="descclassname">styling.</code><code class="descname">get_scheme_cartocss</code><span class="sig-paren">(</span><em>column</em>, <em>scheme_info</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.get_scheme_cartocss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get TurboCartoCSS based on input parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.geyser">
+<code class="descclassname">styling.</code><code class="descname">geyser</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.geyser" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Geyser divergent quantitative scheme</p>
+<img alt="./img/cartocolor/Geyser.png" src="./img/cartocolor/Geyser.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.magenta">
+<code class="descclassname">styling.</code><code class="descname">magenta</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.magenta" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Magenta quantitative scheme</p>
+<img alt="./img/cartocolor/Magenta.png" src="./img/cartocolor/Magenta.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.mint">
+<code class="descclassname">styling.</code><code class="descname">mint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.mint" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Mint quantitative scheme</p>
+<img alt="./img/cartocolor/Mint.png" src="./img/cartocolor/Mint.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.orYel">
+<code class="descclassname">styling.</code><code class="descname">orYel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.orYel" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor OrYel quantitative scheme</p>
+<img alt="./img/cartocolor/OrYel.png" src="./img/cartocolor/OrYel.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.pastel">
+<code class="descclassname">styling.</code><code class="descname">pastel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pastel" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Pastel qualitative scheme</p>
+<img alt="./img/cartocolor/Pastel.png" src="./img/cartocolor/Pastel.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.peach">
+<code class="descclassname">styling.</code><code class="descname">peach</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.peach" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Peach quantitative scheme</p>
+<img alt="./img/cartocolor/Peach.png" src="./img/cartocolor/Peach.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.pinkYl">
+<code class="descclassname">styling.</code><code class="descname">pinkYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pinkYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor PinkYl quantitative scheme</p>
+<img alt="./img/cartocolor/PinkYl.png" src="./img/cartocolor/PinkYl.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.prism">
+<code class="descclassname">styling.</code><code class="descname">prism</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.prism" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Prism qualitative scheme</p>
+<img alt="./img/cartocolor/Prism.png" src="./img/cartocolor/Prism.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.purp">
+<code class="descclassname">styling.</code><code class="descname">purp</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purp" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Purp quantitative scheme</p>
+<img alt="./img/cartocolor/Purp.png" src="./img/cartocolor/Purp.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.purpOr">
+<code class="descclassname">styling.</code><code class="descname">purpOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purpOr" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor PurpOr quantitative scheme</p>
+<img alt="./img/cartocolor/PurpOr.png" src="./img/cartocolor/PurpOr.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.redOr">
+<code class="descclassname">styling.</code><code class="descname">redOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.redOr" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor RedOr quantitative scheme</p>
+<img alt="./img/cartocolor/RedOr.png" src="./img/cartocolor/RedOr.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.safe">
+<code class="descclassname">styling.</code><code class="descname">safe</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Safe qualitative scheme</p>
+<img alt="./img/cartocolor/Safe.png" src="./img/cartocolor/Safe.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.sunset">
+<code class="descclassname">styling.</code><code class="descname">sunset</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunset" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Sunset quantitative scheme</p>
+<img alt="./img/cartocolor/Sunset.png" src="./img/cartocolor/Sunset.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.sunsetDark">
+<code class="descclassname">styling.</code><code class="descname">sunsetDark</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunsetDark" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor SunsetDark quantitative scheme</p>
+<img alt="./img/cartocolor/SunsetDark.png" src="./img/cartocolor/SunsetDark.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.teal">
+<code class="descclassname">styling.</code><code class="descname">teal</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.teal" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Teal quantitative scheme</p>
+<img alt="./img/cartocolor/Teal.png" src="./img/cartocolor/Teal.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.tealGrn">
+<code class="descclassname">styling.</code><code class="descname">tealGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealGrn" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor TealGrn quantitative scheme</p>
+<img alt="./img/cartocolor/TealGrn.png" src="./img/cartocolor/TealGrn.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.tealRose">
+<code class="descclassname">styling.</code><code class="descname">tealRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealRose" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor TealRose divergent quantitative scheme</p>
+<img alt="./img/cartocolor/TealRose.png" src="./img/cartocolor/TealRose.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.temps">
+<code class="descclassname">styling.</code><code class="descname">temps</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.temps" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Temps divergent quantitative scheme</p>
+<img alt="./img/cartocolor/Temps.png" src="./img/cartocolor/Temps.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.tropic">
+<code class="descclassname">styling.</code><code class="descname">tropic</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tropic" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Tropic divergent quantitative scheme</p>
+<img alt="./img/cartocolor/Tropic.png" src="./img/cartocolor/Tropic.png" />
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.vivid">
+<code class="descclassname">styling.</code><code class="descname">vivid</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.vivid" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoColor Vivid qualitative scheme</p>
+<img alt="./img/cartocolor/Vivid.png" src="./img/cartocolor/Vivid.png" />
+</dd></dl>
+
+</div>
+<div class="section" id="module-credentials">
+<span id="credentials-management"></span><h3>Credentials Management<a class="headerlink" href="#module-credentials" title="Permalink to this headline">¶</a></h3>
+<p>API key utility functions</p>
 <dl class="function">
 <dt id="credentials.api_key">
 <code class="descclassname">credentials.</code><code class="descname">api_key</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.api_key" title="Permalink to this definition">¶</a></dt>
@@ -867,17 +1110,20 @@ Defaults to False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file. Raises <cite>EnvironmentError</cite>
-if overwriting is prohibited and the file exists.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">EnvironmentError</span></code> – if overwriting is prohibited and the file exists</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -908,7 +1154,13 @@ if overwriting is prohibited and the file exists.</p>
 <li><a class="reference internal" href="#augment-from-data-observatory">Augment from Data Observatory</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-context">cartoframe methods</a></li>
+<li><a class="reference internal" href="#cartoframe-methods">CARTOFrame Methods</a><ul>
+<li><a class="reference internal" href="#module-context">CartoContext Class</a></li>
+<li><a class="reference internal" href="#module-layer">Map Layer Classes</a></li>
+<li><a class="reference internal" href="#module-styling">Map Styling Functions</a></li>
+<li><a class="reference internal" href="#module-credentials">Credentials Management</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>

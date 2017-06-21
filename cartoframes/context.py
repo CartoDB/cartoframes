@@ -43,7 +43,8 @@ class CartoContext(object):
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
     Example:
-        Create a CartoContext object::
+        Create a CartoContext object
+        .. code:: python
 
             import cartoframes
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
@@ -92,7 +93,7 @@ class CartoContext(object):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
-             code:: python
+            .. code:: python
 
                 import cartoframes
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)

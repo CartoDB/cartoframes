@@ -283,7 +283,7 @@ class QueryLayer(AbstractLayer):
         basemap = layers[0]
 
         self.color = self.color or DEFAULT_COLORS[layer_idx]
-        self.cartocss = self.get_cartocss(basemap)
+        self.cartocss = self._get_cartocss(basemap)
 
         if self.time:
             column = self.time['column']
@@ -307,7 +307,7 @@ class QueryLayer(AbstractLayer):
             self.cartocss += self.torque_cartocss
 
 
-    def get_cartocss(self, basemap):
+    def _get_cartocss(self, basemap):
         """Generate cartocss for class properties"""
         if isinstance(self.size, int):
             size_style = self.size

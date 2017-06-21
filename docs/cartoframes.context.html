@@ -56,11 +56,11 @@ geocoding, and isolines</a>.</p>
 <p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
 <p class="rubric">Example</p>
-<p>Create a CartoContext object:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>Create a CartoContext object
+.. code:: python</p>
+<blockquote>
+<div>import cartoframes
+cc = cartoframes.CartoContext(BASEURL, APIKEY)</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -285,11 +285,11 @@ In the case of PostgreSQL date types, the data type ‘object’ is used.</p>
 <code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index=’cartodb_id’</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read tables from CARTO into pandas DataFrames.</p>
 <p class="rubric">Example</p>
-<p>code:: python</p>
-<blockquote>
-<div>import cartoframes
-cc = cartoframes.CartoContext(BASEURL, APIKEY)
-df = cc.read(‘acadia_biodiversity’)</div></blockquote>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
