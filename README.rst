@@ -1,34 +1,52 @@
+===========
 CARTOFrames
 ===========
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
     :target: https://travis-ci.org/CartoDB/cartoframes
 
-A Python package for integrating `CARTO <https://carto.com/>`__ maps and services into data science workflows.
+A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
 Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
-Complete documentation: https://cartodb.github.io/cartoframes/
+- Complete documentation: https://cartodb.github.io/cartoframes
+- Source code: https://github.com/CartoDB/cartoframes
+- bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
+
+.. note::
+
+    cartoframes users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
 
 Install Instructions
---------------------
+====================
 
-`cartoframes` relies on `pandas <http://pandas.pydata.org/>`__ and the `CARTO Python SDK <https://github.com/CartoDB/carto-python/>`__). To install `cartoframes` on your machine, do the following:
+To install `cartoframes` on your machine, do the following:
 
 .. code:: bash
 
     $ pip install cartoframes
 
-Once you've done this, `cartoframes` will be installed. See the example usage section below for using `cartoframes` in a Jupyter notebook. **User must have a CARTO API key for writing DataFrames to an account or reading from private tables.**
+It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
-**Note:** Eventually `cartoframes` will be fully installable from `pip`.
+Virtual Environment
+-------------------
 
+To setup `cartoframes` and `jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
+
+.. code:: bash
+
+    $ virtualenv venv
+    $ source venv/bin/activate
+    (venv) $ pip install cartoframes jupyter
+    (venv) $ jupyter notebook
+
+Then create a new notebook and try the example code snippets below with tables that are in your CARTO account.
 
 Example usage
--------------
+=============
 
 Data workflow
-~~~~~~~~~~~~~
+-------------
 
 Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
@@ -62,7 +80,7 @@ Write an existing pandas DataFrame to CARTO.
 
 
 Map workflow
-~~~~~~~~~~~~
+------------
 
 The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
@@ -83,7 +101,7 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 
 
 Augment from Data Observatory
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 **Note:** This is a provisional function, so the signature may change.
 

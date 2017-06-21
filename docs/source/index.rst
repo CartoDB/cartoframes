@@ -16,8 +16,6 @@ cartoframe methods
     :members:
 .. automodule:: layer
     :members:
-.. automodule:: maps
-    :members:
 .. automodule:: credentials
     :members:
 

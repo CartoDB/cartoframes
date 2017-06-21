@@ -23,9 +23,9 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
-from .utils import dict_items
-from .layer import BaseMap
-from .maps import non_basemap_layers, get_map_name, get_map_template
+from cartoframes.utils import dict_items
+from cartoframes.layer import BaseMap
+from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -92,11 +92,11 @@ class CartoContext(object):
         """Read tables from CARTO into pandas DataFrames.
 
         Example:
-        ::
+             code:: python
 
-            import cartoframes
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
-            df = cc.read('acadia_biodiversity')
+                import cartoframes
+                cc = cartoframes.CartoContext(BASEURL, APIKEY)
+                df = cc.read('acadia_biodiversity')
 
         Args:
             table_name (str): Name of table in user's CARTO account.
@@ -123,9 +123,9 @@ class CartoContext(object):
         """Write a DataFrame to a CARTO table.
 
         Example:
-        ::
+            .. code:: python
 
-            cc.write(df, 'brooklyn_poverty', overwrite=True)
+                cc.write(df, 'brooklyn_poverty', overwrite=True)
 
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
@@ -245,7 +245,7 @@ class CartoContext(object):
         # combine chunks into final table
         try:
             select_base = ('SELECT %(schema)s '
-                           'FROM "{table}"') % dict(schema=df2pg_schema(df))
+                           'FROM "{table}"') % dict(schema=_df2pg_schema(df))
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
@@ -340,7 +340,7 @@ class CartoContext(object):
         utility_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
         alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
                       'NULLIF("{col}", \'\')::{ctype}')
-        alter_cols = ', '.join(alter_temp.format(col=c, ctype=dtypes2pg(t))
+        alter_cols = ', '.join(alter_temp.format(col=c, ctype=_dtypes2pg(t))
                                for c, t in zip(dataframe.columns,
                                                dataframe.dtypes)
                                if c not in utility_cols)
@@ -513,16 +513,16 @@ class CartoContext(object):
             ::
 
                 import cartoframes
-                from cartoframes import Layer, BaseMap
+                from cartoframes import Layer, BaseMap, styling
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 cc.map(layers=[BaseMap(),
                                Layer('acadia_biodiversity',
                                      color={'column': 'simpson_index',
-                                            'scheme': 'TealRose'}),
+                                            'scheme': styling.tealRose(7)}),
                                Layer('peregrine_falcon_nest_sites',
                                      size='num_eggs',
                                      color={'column': 'bird_id',
-                                            'scheme': 'Vivid')],
+                                            'scheme': styling.vivid(10))],
                        interactive=True)
         Args:
             layers (list, optional): List of one or more of the following:
@@ -992,7 +992,7 @@ def _add_encoded_geom(df, geom_col):
     return None
 
 
-def encode_decode_decorator(func):
+def _encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
     def wrapper(*args):
         """error catching"""
@@ -1005,7 +1005,7 @@ def encode_decode_decorator(func):
                               '({})'.format(err))
     return wrapper
 
-@encode_decode_decorator
+@_encode_decode_decorator
 def _encode_geom(geom):
     """Encode geometries into hex-encoded wkb
     """
@@ -1014,7 +1014,7 @@ def _encode_geom(geom):
         return ba.hexlify(wkb.dumps(geom)).decode()
     return None
 
-@encode_decode_decorator
+@_encode_decode_decorator
 def _decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
@@ -1023,7 +1023,7 @@ def _decode_geom(ewkb):
         return wkb.loads(ba.unhexlify(ewkb))
     return None
 
-def dtypes2pg(dtype):
+def _dtypes2pg(dtype):
     """returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {'float64': 'numeric',
                'int64': 'numeric',
@@ -1034,11 +1034,11 @@ def dtypes2pg(dtype):
                'datetime64[ns]': 'text'}
     return mapping.get(str(dtype), 'text')
 
-def df2pg_schema(dataframe):
+def _df2pg_schema(dataframe):
     """Print column names with PostgreSQL schema for the SELECT statement of
     a SQL query"""
     schema = ', '.join(['NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
-                                                                     t=dtypes2pg(t))
+                                                                     t=_dtypes2pg(t))
                         for c, t in zip(dataframe.columns, dataframe.dtypes)
                         if c not in ('the_geom', 'the_geom_webmercator',
                                      'cartodb_id')])

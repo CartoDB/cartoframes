@@ -30,13 +30,13 @@ class BaseMap(AbstractLayer):
 
     Example:
         Add a custom basemap to a cartoframes map.
-        ::
+    .. code:: python
 
-            import cartoframes
-            from cartoframes import BaseMap, Layer
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
-            cc.map(layers=[BaseMap(source='light', labels='front'),
-                           Layer('acadia_biodiversity')])
+        import cartoframes
+        from cartoframes import BaseMap, Layer
+        cc = cartoframes.CartoContext(BASEURL, APIKEY)
+        cc.map(layers=[BaseMap(source='light', labels='front'),
+                       Layer('acadia_biodiversity')])
 
     Args:
         source (str, optional): One of ``light`` or ``dark``. Defaults to ``dark``.
@@ -97,16 +97,16 @@ class QueryLayer(AbstractLayer):
     * performing arbitrary relational database queries (e.g., complex JOINs
       in SQL instead of in pandas)
 
-    Used in `CartoContext.map() <#context.CartoContext.map>`__.
+    Used in the `layers` keyword in `CartoContext.map() <#context.CartoContext.map>`__.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
         The QueryLayer is colored by the calculated column ``abs_diff``, and
         points are sized by the column ``i_measure``.
-    ::
+    .. code:: python
 
         import cartoframes
-        from cartoframes import QueryLayer
+        from cartoframes import QueryLayer, styling
         cc = cartoframes.CartoContext(BASEURL, APIKEY)
         cc.map(layers=[QueryLayer('''
                                   WITH i_cte As (
@@ -121,7 +121,7 @@ class QueryLayer(AbstractLayer):
                                   SELECT
                                      i.cartodb_id, i.the_geom,
                                      ST_Transform(i.the_geom, 3857) AS the_geom_webmercator,
-                                     abs(i.measure - j.measure) as abs_diff,
+                                     abs(i.measure - j.measure) AS abs_diff,
                                      i.measure AS i_measure
                                     FROM i_cte AS i
                                     JOIN awesome_data AS j
@@ -130,7 +130,7 @@ class QueryLayer(AbstractLayer):
                                      AND j.date < '2017-04-29'
                                   ''',
                                   color={'column': 'abs_diff',
-                                         'scheme': 'SunsetDark'},
+                                         'scheme': styling.sunsetDark(7)},
                                   size='i_measure'),
                        Layer('fantastic_sql_table')])
 
@@ -361,15 +361,15 @@ class Layer(QueryLayer):
     with `CartoContext.map() <#context.CartoContext.map>`__.
 
     Example:
-        ::
+        .. code:: python
 
             import cartoframes
-            from cartoframes import QueryLayer
+            from cartoframes import QueryLayer, styling
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
             cc.map(layers=[Layer('fantastic_sql_table',
                                  size=7,
                                  color={'column': 'mr_fox_sightings',
-                                        'scheme': 'Prism'})])
+                                        'scheme': styling.prism(10)})])
 
     Args:
         table_name (str): Table in user CARTO account that is fed into a

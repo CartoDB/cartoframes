@@ -1,5 +1,5 @@
-cartoframes.maps module
-=======================
+cartoframes\.maps module
+========================
 
 .. automodule:: cartoframes.maps
     :members:
