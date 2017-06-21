@@ -1,6 +1,7 @@
 """Unit tests for cartoframes.layers"""
 import unittest
 from cartoframes.layer import BaseMap, Layer, QueryLayer
+from cartoframes import styling
 
 class TestBaseMap(unittest.TestCase):
     """Tests for functions in keys module"""
@@ -61,15 +62,79 @@ class TestBaseMap(unittest.TestCase):
         self.assertTrue(light_map_all.is_basic())
         self.assertTrue(dark_map_all.is_basic())
 
-    def test_querylayer(self):
-        """layer.QueryLayer test"""
+    def test_querylayer_colors(self):
+        """layer.QueryLayer color options tests"""
         query = 'select * from watermelon'
+
+        # no color options passed
         basic = QueryLayer(query)
-        self.assertTrue(basic.query, query)
         self.assertEqual(basic.color, None)
 
+        # check valid dict color options
+        dict_colors = [{'column': 'mandrill', 'scheme': styling.armyRose(7)},
+                       {'column': 'mercxx', 'scheme': {'bin_method': 'equal',
+                                                       'bins': 7,
+                                                       'name': 'Temps'}},
+                       {'column': 'elephant',
+                        'scheme': styling.redOr(10, bin_method='jenks')}]
+        dict_colors_ans = ['mandrill', 'mercxx', 'elephant']
+        dict_colors_scheme = [{'name': 'ArmyRose', 'bins': 7, 'bin_method': 'quantiles'},
+                              {'name': 'Temps', 'bins': 7, 'bin_method': 'equal'},
+                              {'name': 'RedOr', 'bins': 10, 'bin_method': 'jenks'}]
+        for idx, val in enumerate(dict_colors):
+            ql = QueryLayer(query, color=val)
+            self.assertEqual(ql.color, dict_colors_ans[idx])
+            self.assertEqual(ql.scheme, dict_colors_scheme[idx])
+
+        # check valid string color options
+        str_colors = ['#FF0000', 'aliceblue', 'cookie_monster']
+        str_colors_ans = ['#FF0000', 'aliceblue', 'cookie_monster']
+        str_scheme_ans = [None, None, styling.mint(5)]
+
+        for idx, color in enumerate(str_colors):
+            ql = QueryLayer(query, color=color)
+            print(ql.color)
+            self.assertEqual(ql.color, str_colors_ans[idx])
+            self.assertEqual(ql.scheme, str_scheme_ans[idx])
+
+        # Exception testing
+        # color column cannot be a geometry column
         with self.assertRaises(ValueError):
             QueryLayer(query, color='the_geom')
+
+        # color dict must have a 'column' key
+        with self.assertRaises(ValueError):
+            QueryLayer(query, color={'scheme': styling.vivid(10)})
+
+        # time dict cannot be a geometry column
+        with self.assertRaises(ValueError):
+            QueryLayer(query, time='the_geom')
+
+        # time dict must have a 'column' key
+        with self.assertRaises(ValueError):
+            QueryLayer(query, time={'scheme': styling.armyRose(10)})
+
+        # size dict must have a 'column' key
+        with self.assertRaises(ValueError):
+            QueryLayer(query, size={'scheme': styling.temps(10)})
+
+        # size and time cannot be specified at the same time if size is
+        #  styled by value
+        with self.assertRaises(ValueError, msg='time key should not be present'):
+            QueryLayer(query,
+                       size={'column': 'mag',
+                             'scheme': styling.temps(10)},
+                       time='date_col')
+        with self.assertRaises(ValueError, msg=('size dict style should '
+                                                'contain a `name` key')):
+            QueryLayer(query,
+                       size={'col': 'mag'})
+
+    def test_querylayer_time(self):
+        query = 'select * from watermelon'
+        with self.assertRaises(ValueError,
+                               msg='`time` key has to be a str or dict'):
+            QueryLayer(query, time=7)
 
         # basic._setup()
     # def test_key_setting(self):
