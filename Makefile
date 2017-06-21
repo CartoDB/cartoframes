@@ -3,6 +3,8 @@ init:
 
 docs:
 	cd docs && make html
+	rm -r docs/_sources/ docs/_static
+	mv -f docs/html/* docs/
 
 test:
 	nosetests -v test/
