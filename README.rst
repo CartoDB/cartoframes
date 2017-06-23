@@ -24,7 +24,7 @@ More info
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
 .. note::
-    cartoframes users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
+    `cartoframes` users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
 
 Install Instructions
 ====================
@@ -40,7 +40,7 @@ It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyte
 Virtual Environment
 -------------------
 
-To setup `cartoframes` and `jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
+To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
 
 .. code:: bash
 
