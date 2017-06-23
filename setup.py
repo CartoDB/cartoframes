@@ -49,6 +49,12 @@ setup(
         ':python_version == "2.7"': [
             'IPython>=5.0.0,<6.0.0',
             ],
+        ':python_version == "3.3"': [
+            'IPython>=6.0.0'
+            ],
+        ':python_version == "3.4"': [
+            'IPython>=6.0.0'
+            ],
         ':python_version == "3.5"': [
             'IPython>=6.0.0'
             ],
