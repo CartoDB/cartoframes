@@ -1,5 +1,5 @@
-cartoframes.updates module
-==========================
+cartoframes\.updates module
+===========================
 
 .. automodule:: cartoframes.updates
     :members:

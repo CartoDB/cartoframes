@@ -9,15 +9,26 @@
    :maxdepth: 2
    :caption: Contents:
 
-cartoframe methods
-==================
+CARTOFrames Methods
+===================
 
+CartoContext Class
+------------------
 .. automodule:: context
     :members:
+
+Map Layer Classes
+-----------------
 .. automodule:: layer
     :members:
-.. automodule:: maps
+
+Map Styling Functions
+---------------------
+.. automodule:: styling
     :members:
+
+Credentials Management
+----------------------
 .. automodule:: credentials
     :members:
 
