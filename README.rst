@@ -9,12 +9,21 @@ A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, 
 
 Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
+Features
+
+- Write pandas DataFrames to CARTO tables
+- Read CARTO tables and queries into pandas DataFrames
+- Create customizable, interactive CARTO maps in a Jupyter notebook
+- Interact with CARTO's Data Observatory
+- Use CARTO's spatially-enabled database for analysis
+
+More info
+
 - Complete documentation: https://cartodb.github.io/cartoframes
 - Source code: https://github.com/CartoDB/cartoframes
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
 .. note::
-
     cartoframes users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
 
 Install Instructions
