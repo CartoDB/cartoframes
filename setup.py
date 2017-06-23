@@ -30,9 +30,9 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'
     ],
@@ -43,14 +43,8 @@ setup(
                       'carto>=1.0.1',
                       'tqdm>=4.14.0',],
     extras_require={
-        ':python_version == "2.6"': [
-            'IPython>=5.0.0,<6.0.0',
-            ],
         ':python_version == "2.7"': [
             'IPython>=5.0.0,<6.0.0',
-            ],
-        ':python_version == "3.3"': [
-            'IPython>=6.0.0'
             ],
         ':python_version == "3.4"': [
             'IPython>=6.0.0'
