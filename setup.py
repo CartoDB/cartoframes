@@ -43,10 +43,16 @@ setup(
                       'carto>=1.0.1',
                       'tqdm>=4.14.0',],
     extras_require={
-        ':python_version <= "2.7"': [
+        ':python_version == "2.6"': [
             'IPython>=5.0.0,<6.0.0',
             ],
-        ':python_version >= "3.0"': [
+        ':python_version == "2.7"': [
+            'IPython>=5.0.0,<6.0.0',
+            ],
+        ':python_version == "3.5"': [
+            'IPython>=6.0.0'
+            ],
+        ':python_version == "3.6"': [
             'IPython>=6.0.0'
             ]},
     package_dir={'cartoframes': 'cartoframes'},
