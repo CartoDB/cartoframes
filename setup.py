@@ -17,7 +17,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
 
 setup(
     name='cartoframes',
-    version='0.2.1-beta.1',
+    version='0.2.1b2',
     description='An experimental Python pandas interface for using CARTO',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/CartoDB/cartoframes',
@@ -29,6 +29,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
@@ -41,6 +42,19 @@ setup(
                       'webcolors>=1.7.0',
                       'carto>=1.0.1',
                       'tqdm>=4.14.0',],
+    extras_require={
+        ':python_version == "2.6"': [
+            'IPython>=5.0.0,<6.0.0',
+            ],
+        ':python_version == "2.7"': [
+            'IPython>=5.0.0,<6.0.0',
+            ],
+        ':python_version == "3.5"': [
+            'IPython>=6.0.0'
+            ],
+        ':python_version == "3.6"': [
+            'IPython>=6.0.0'
+            ]},
     package_dir={'cartoframes': 'cartoframes'},
     package_data={
         '': ['LICENSE',
