@@ -9,8 +9,8 @@
    :maxdepth: 2
    :caption: Contents:
 
-CARTOFrame Methods
-==================
+CARTOFrames Methods
+===================
 
 CartoContext Class
 ------------------
