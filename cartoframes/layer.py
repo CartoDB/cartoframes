@@ -199,9 +199,10 @@ class QueryLayer(AbstractLayer):
 
         self.query = query
         self.style_cols = set()
-        # redundant?
-        color = color or None
 
+        # color, scheme = self._get_colorscheme()
+        # time = self._get_timescheme()
+        # size = self._get_sizescheme()
         # If column was specified, force a scheme
         # It could be that there is a column named 'blue' for example
         if isinstance(color, dict):
@@ -229,9 +230,12 @@ class QueryLayer(AbstractLayer):
                     raise ValueError("time must include a 'column' value")
                 time_column = time['column']
                 time_options = time
-            else:
+            elif isinstance(time, str):
                 time_column = time
                 time_options = {}
+            else:
+                raise ValueError('`time` should be a column name or '
+                                 'dictionary of styling options.')
 
             self.style_cols.add(time_column)
             time = {
@@ -262,6 +266,7 @@ class QueryLayer(AbstractLayer):
             # Since we're accessing min/max, convert range into a list
             size['range'] = list(size['range'])
             self.style_cols.add(size['column'])
+
         self.color = color
         self.scheme = scheme
         self.size = size
