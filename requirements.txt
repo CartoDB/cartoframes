@@ -3,4 +3,6 @@ pyrestcli>=0.6.3
 pandas>=0.19.2
 webcolors==1.7
 shapely>=1.5.0
-IPython>=5.0.0
+tqdm>=4.14.0
+IPython>=5.0.0,<6.0.0;python_version<="2.7"
+IPython>=6.0.0;python_version>="3.0"
