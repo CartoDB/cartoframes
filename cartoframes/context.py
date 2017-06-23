@@ -599,10 +599,13 @@ class CartoContext(object):
                        if not layer.is_basemap and layer.time]
         time_layer = layers[time_layers[0]] if len(time_layers) > 0 else None
         if len(time_layers) > 1:
-            raise ValueError('map can at most take 1 Layer with time column/field')
+            raise ValueError('Map can at most take 1 Layer with time '
+                             'column/field')
         if time_layer:
+            raise NotImplementedError('Animated maps are not yet supported')
             if not interactive:
-                raise ValueError('map cannot display a static image with a time_column')
+                raise ValueError('map cannot display a static image with a '
+                                 'time_column')
             layers.append(layers.pop(time_layers[0]))
 
         # If basemap labels are on front, add labels layer
@@ -619,7 +622,6 @@ class CartoContext(object):
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
 
-        # Reverse layers to put torque's Map first
         for idx, layer in enumerate(nb_layers):
             self._check_query(layer.query,
                               style_cols=layer.style_cols)
