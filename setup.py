@@ -17,7 +17,7 @@ with open(os.path.join(os.path.abspath(os.path.dirname(__file__)),
 
 setup(
     name='cartoframes',
-    version='0.2.1b2',
+    version='0.2.2b2',
     description='An experimental Python pandas interface for using CARTO',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/CartoDB/cartoframes',
