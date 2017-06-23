@@ -1,5 +1,5 @@
-cartoframes.context module
-==========================
+cartoframes\.context module
+===========================
 
 .. automodule:: cartoframes.context
     :members:

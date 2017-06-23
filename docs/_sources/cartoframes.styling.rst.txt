@@ -1,5 +1,5 @@
-cartoframes.styling module
-==========================
+cartoframes\.styling module
+===========================
 
 .. automodule:: cartoframes.styling
     :members:

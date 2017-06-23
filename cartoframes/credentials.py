@@ -19,9 +19,12 @@ def set_credentials(base_url='', api_key='', overwrite=False):
         api_key (str): CARTO api key. Defaults to an empty string.
         overwrite (bool): Whether to overwrite the existing credentials.
             Defaults to False.
+
     Returns:
-        str: Path to the location of the API key file. Raises `EnvironmentError`
-        if overwriting is prohibited and the file exists.
+        str: Path to the location of the API key file.
+
+    Raises:
+        EnvironmentError: if overwriting is prohibited and the file exists
     """
     __ = _check_overwrite('base_url', overwrite)
     stored = _check_overwrite('api_key', overwrite)
