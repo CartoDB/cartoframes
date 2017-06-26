@@ -1,0 +1,2 @@
+# include the license and readme files
+include LICENSE README.rst
