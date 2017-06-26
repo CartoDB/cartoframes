@@ -4,6 +4,8 @@ CARTOFrames
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
     :target: https://travis-ci.org/CartoDB/cartoframes
+.. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg
+    :target: https://coveralls.io/github/CartoDB/cartoframes
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
@@ -29,11 +31,11 @@ More info
 Install Instructions
 ====================
 
-To install `cartoframes` on your machine, do the following:
+To install `cartoframes` (currently in beta) on your machine, do the following to install the latest pre-release version:
 
 .. code:: bash
 
-    $ pip install cartoframes
+    $ pip install --pre cartoframes
 
 It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
@@ -46,7 +48,8 @@ To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-gu
 
     $ virtualenv venv
     $ source venv/bin/activate
-    (venv) $ pip install cartoframes jupyter
+    (venv) $ pip install --pre cartoframes
+    (venv) $ pip install jupyter
     (venv) $ jupyter notebook
 
 Then create a new notebook and try the example code snippets below with tables that are in your CARTO account.
