@@ -32,6 +32,13 @@ if sys.version_info >= (3, 0):
 else:
     from urlparse import urlparse
     from urllib import urlencode
+try:
+    import matplotlib.image as mpi
+    import matplotlib.pyplot as plt
+except ImportError:
+    mpi = None
+    plt = None
+HAS_MATPLOTLIB = plt is not None
 
 # Choose constant to avoid overview generation which are triggered at a
 # half million rows
@@ -554,6 +561,8 @@ class CartoContext(object):
                 to a view to have all data layers in view.
             size (tuple, optional): List of pixel dimensions for the map. Format
                 is ``(width, height)``. Defaults to ``(800, 400)``.
+            ax: matplotlib axis on which to draw the image. Only used when 
+                ``interactive`` is ``False``.
 
         Returns:
             IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
@@ -653,7 +662,7 @@ class CartoContext(object):
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
-
+        return static_url
         # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
@@ -726,20 +735,22 @@ class CartoContext(object):
                      height=size[1],
                      img_html=img_html)
             return IPython.display.HTML(html)
-        else:
-            try:
-                import matplotlib.image as mpi
-                import matplotlib.pyplot as plt
-            except ImportError:
-                warn('Matplotlib not detected. Saving image directly to disk')
-                raise NotImplementedError
+        elif HAS_MATPLOTLIB:
             raw_data = mpi.imread(static_url)
             if ax is None:
+                w,h = size
+                dpi = plt.rcParams['figure.dpi']
+                mpl_size = w/dpi, h/dpi # divide by arbitrary dpi to set figure size
+                # mpl_size = w, h 
+                # dpi = 1
+                fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
+                fig.subplots_adjust(left=0,right=1, top=1, bottom=0)
                 ax = plt.gca()
             ax.imshow(raw_data)
             ax.axis('off')
             return ax
-
+        else:
+            warn('Matplotlib not detected. Saving image directly to disk')
 
 
     def data_boundaries(self, df=None, table_name=None):
