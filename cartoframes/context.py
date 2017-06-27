@@ -506,7 +506,8 @@ class CartoContext(object):
 
 
     def map(self, layers=None, interactive=True,
-            zoom=None, lat=None, lng=None, size=(800, 400)):
+            zoom=None, lat=None, lng=None, size=(800, 400),
+            ax=None):
         """Produce a CARTO map visualizing data layers.
 
         Example:
@@ -724,8 +725,21 @@ class CartoContext(object):
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
+            return IPython.display.HTML(html)
+        else:
+            try:
+                import matplotlib.image as mpi
+                import matplotlib.pyplot as plt
+            except ImportError:
+                warn('Matplotlib not detected. Saving image directly to disk')
+                raise NotImplementedError
+            raw_data = mpi.imread(static_url)
+            if ax is None:
+                ax = plt.gca()
+            ax.imshow(raw_data)
+            ax.axis('off')
+            return ax
 
-        return IPython.display.HTML(html)
 
 
     def data_boundaries(self, df=None, table_name=None):
