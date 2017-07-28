@@ -10,9 +10,19 @@ from carto.sql import SQLClient
 class TestCartoContext(unittest.TestCase):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
-        creds = json.loads(open('test/secret.json').read())
-        self.apikey = os.environ.get('APIKEY', creds['APIKEY'])
-        self.username = os.environ.get('USERNAME', creds['USERNAME'])
+        if os.environ.get('APIKEY') is None:
+            try:
+                creds = json.loads(open('test/secret.json').read())
+            except FileNotFoundError:
+                print("Create a `secret.json` file by renaming "
+                      "`secret.json.sample` to `secret.json` and updating "
+                      "the credentials to match your environment.")
+                raise
+            self.apikey = creds['APIKEY']
+            self.username = creds['USERNAME']
+        else:
+            self.apikey = os.environ['APIKEY']
+            self.username = os.environ['USERNAME']
         self.baseurl = 'https://{username}.carto.com/'.format(username=self.username)
         self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
                                   'name10', 'geoid10', 'affgeoid10', 'pumace10',
@@ -38,6 +48,15 @@ class TestCartoContext(unittest.TestCase):
         """cartoframes.CartoContext.read basic usage"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
+        # fails if limit is smaller than zero
+        with self.assertRaises(ValueError):
+            df = cc.read('sea_horses', limit=-10)
+        # fails if not an int
+        with self.assertRaises(ValueError):
+            df = cc.read('sea_horses', limit=3.14159)
+        with self.assertRaises(ValueError):
+            df = cc.read('sea_horses', limit='acadia')
+
         # fails on non-existent table
         with self.assertRaises(CartoException):
             df = cc.read('non_existent_table')
