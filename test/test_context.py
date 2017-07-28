@@ -10,7 +10,7 @@ class TestCartoContext(unittest.TestCase):
     def setUp(self):
         self.apikey = os.environ["APIKEY"]
         self.username = os.environ["USERNAME"]
-        self.baseurl = 'https://{username}.carto.com/'.format(username=USERNAME)
+        self.baseurl = 'https://{username}.carto.com/'.format(username=self.username)
         self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
                                   'name10', 'geoid10', 'affgeoid10', 'pumace10',
                                   'statefp10', 'awater10', 'aland10','updated_at',
