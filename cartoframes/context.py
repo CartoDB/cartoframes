@@ -111,7 +111,7 @@ class CartoContext(object):
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
         if limit:
-            if (limit >= 0) and isinstance(limit, int):
+            if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
