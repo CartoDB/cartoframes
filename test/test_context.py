@@ -7,13 +7,14 @@ from carto.exceptions import CartoException
 
 class TestCartoContext(unittest.TestCase):
     """Tests for cartoframes.CartoContext"""
-    self.apikey = os.environ["APIKEY"]
-    self.username = os.environ["USERNAME"]
-    self.baseurl = 'https://{username}.carto.com/'.format(username=USERNAME)
-    self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
-                              'name10', 'geoid10', 'affgeoid10', 'pumace10',
-                              'statefp10', 'awater10', 'aland10','updated_at',
-                              'created_at'])
+    def setUp(self):
+        self.apikey = os.environ["APIKEY"]
+        self.username = os.environ["USERNAME"]
+        self.baseurl = 'https://{username}.carto.com/'.format(username=USERNAME)
+        self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
+                                  'name10', 'geoid10', 'affgeoid10', 'pumace10',
+                                  'statefp10', 'awater10', 'aland10','updated_at',
+                                  'created_at'])
 
     def test_cartocontext_read(self):
         """cartoframes.CartoContext.read basic usage"""
