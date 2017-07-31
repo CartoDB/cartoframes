@@ -11,4 +11,4 @@ install:
 script:
     - nosetests --verbose --with-coverage --cover-package=cartoframes
 after_success:
-      coveralls
+    - coveralls
