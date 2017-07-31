@@ -902,7 +902,7 @@ class CartoContext(object):
                 `east`, and `west`. Units are in WGS84.
         """
         extent_query = ('SELECT ST_EXTENT(the_geom) AS the_geom '
-                        'FROM ({query}) as t{idx}\n')
+                        'FROM ({query}) AS t{idx}\n')
         union_query = 'UNION ALL\n'.join(
             [extent_query.format(query=layer.query, idx=idx)
              for idx, layer in enumerate(layers)
@@ -915,7 +915,7 @@ class CartoContext(object):
                          ST_XMAX(ext) AS east,
                          ST_YMAX(ext) AS north
                        FROM (
-                           SELECT st_extent(the_geom) AS ext
+                           SELECT ST_Extent(the_geom) AS ext
                            FROM ({union_query}) AS _wrap1
                        ) AS _wrap2
                             '''.format(union_query=union_query))
