@@ -72,11 +72,8 @@ class TestColorScheme(unittest.TestCase):
 
         self.vivid = styling.vivid(bins=4)
 
-    def test_colorscheme_invalid(self):
-        """styling.name exceptions on invalid name"""
-
-    def test_basemap_source(self):
-        """layer.BaseMap with different sources and labels"""
+    def test_styling_name(self):
+        """styling.name with different sources"""
 
         # ensure correct color schemes are created
         # See more CARTO color schemes here: https://carto.com/carto-colors/
