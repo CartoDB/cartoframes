@@ -1,4 +1,4 @@
-"""Unit tests for cartoframes.layers"""
+"""Unit tests for cartoframes.styling"""
 import unittest
 from cartoframes.styling import BinMethod, get_scheme_cartocss
 from cartoframes import styling
