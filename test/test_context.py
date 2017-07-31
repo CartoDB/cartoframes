@@ -1,6 +1,7 @@
 """Unit tests for cartoframes.layers"""
 import unittest
 import os
+import sys
 import json
 import random
 import cartoframes
@@ -12,7 +13,8 @@ import pandas as pd
 class TestCartoContext(unittest.TestCase):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
-        if os.environ.get('APIKEY') is None:
+        if (os.environ.get('APIKEY') is None or
+            os.environ.get('USERNAME') is None):
             try:
                 creds = json.loads(open('test/secret.json').read())
             except FileNotFoundError:
@@ -34,11 +36,14 @@ class TestCartoContext(unittest.TestCase):
                                             api_key=self.apikey)
         self.sql_client = SQLClient(self.auth_client)
         self.test_read_table = 'cb_2013_puma10_500k'
-        self.test_write_table = 'cartoframes_test_table'
+        self.test_write_table = 'cartoframes_test_table_{ver}'.format(
+            ver=sys.version[0:3].replace('.', '_'))
 
     def tearDown(self):
         """restore to original state"""
-        self.sql_client.send('drop table if exists "{}"'.format(self.test_write_table))
+        self.sql_client.send('''
+            DROP TABLE IF EXISTS "{}"
+            '''.format(self.test_write_table))
 
     def test_cartocontext(self):
         """cartoframes.CartoContext properties"""
