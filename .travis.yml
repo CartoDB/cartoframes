@@ -9,7 +9,6 @@ install:
     - pip install -r requirements.txt
     - pip install coverage
 script:
-    - coverage run --source=cartoframes make test 
-      # - python setup.py nosetests --with-coverage --cover-package pypiview
+    - nosetests --verbose --with-coverage --cover-package=cartoframes
 after_sucess:
       coveralls
