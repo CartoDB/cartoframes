@@ -109,3 +109,15 @@ class TestColorScheme(unittest.TestCase):
         self.assertEqual(self.prism['name'], 'Prism')
         self.assertEqual(self.safe['name'], 'Safe')
         self.assertEqual(self.vivid['name'], 'Vivid')
+
+    def test_styling_values(self):
+        # Raise AttributeError if invalid name is entered
+        with self.assertRaises(AttributeError):
+            styling.apple(bins=4, BinMethod=BinMethod.quantiles)
+
+        # checks the number of bins for styling
+        self.assertEqual(styling.vivid(bins=5)['bins'], 5)
+
+        # check that bin method is as defined
+        self.assertEqual(styling.vivid(bins=4, bin_method='category')['bin_method'],
+                         'category')
