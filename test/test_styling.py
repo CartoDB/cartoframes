@@ -9,67 +9,36 @@ class TestColorScheme(unittest.TestCase):
     def setUp(self):
         # color schemes with all different names
         self.burg = styling.burg(bins=4)
-
         self.burgYl = styling.burgYl(bins=4)
-
         self.redOr = styling.redOr(bins=4)
-
         self.orYel = styling.orYel(bins=4)
-
         self.peach = styling.peach(bins=4)
-
         self.pinkYl = styling.pinkYl(bins=4)
-
         self.mint = styling.mint(bins=4)
-
         self.bluGrn = styling.bluGrn(bins=4)
-
         self.darkMint = styling.darkMint(bins=4)
-
         self.emrld = styling.emrld(bins=4)
-
         self.bluYl = styling.bluYl(bins=4)
-
         self.teal = styling.teal(bins=4)
-
         self.tealGrn = styling.tealGrn(bins=4)
-
         self.purp = styling.purp(bins=4)
-
         self.purpOr = styling.purpOr(bins=4)
-
         self.sunset = styling.sunset(bins=4)
-
         self.magenta = styling.magenta(bins=4)
-
         self.sunsetDark = styling.sunsetDark(bins=4)
-
         self.brwnYl = styling.brwnYl(bins=4)
-
         self.armyRose = styling.armyRose(bins=4)
-
         self.fall = styling.fall(bins=4)
-
         self.geyser = styling.geyser(bins=4)
-
         self.temps = styling.temps(bins=4)
-
         self.tealRose = styling.tealRose(bins=4)
-
         self.tropic = styling.tropic(bins=4)
-
         self.earth = styling.earth(bins=4)
-
         self.antique = styling.antique(bins=4)
-
         self.bold = styling.bold(bins=4)
-
         self.pastel = styling.pastel(bins=4)
-
         self.prism = styling.prism(bins=4)
-
         self.safe = styling.safe(bins=4)
-
         self.vivid = styling.vivid(bins=4)
 
     def test_styling_name(self):
@@ -110,6 +79,10 @@ class TestColorScheme(unittest.TestCase):
         self.assertEqual(self.safe['name'], 'Safe')
         self.assertEqual(self.vivid['name'], 'Vivid')
 
+        # basic properties
+        self.assertEqual(self.prism['bins'], 4)
+        self.assertEqual(self.temps['bin_method'], 'quantiles')
+
     def test_styling_values(self):
         # Raise AttributeError if invalid name is entered
         with self.assertRaises(AttributeError):
@@ -121,3 +94,18 @@ class TestColorScheme(unittest.TestCase):
         # check that bin method is as defined
         self.assertEqual(styling.vivid(bins=4, bin_method='category')['bin_method'],
                          'category')
+
+    def test_get_scheme_cartocss(self):
+        """styling.get_scheme_cartocss"""
+        # test on category
+        self.assertEqual(get_scheme_cartocss('acadia', self.vivid),
+                         'ramp([acadia], cartocolor(Vivid), category(4))')
+        # test on quantative
+        self.assertEqual(get_scheme_cartocss('acadia', self.purp),
+                         'ramp([acadia], cartocolor(Purp), quantiles(4))')
+        # test on custom
+        self.assertEqual(get_scheme_cartocss('acadia',
+                                             styling.custom(('#FFF', '#888', '#000'),
+                                                            bins=3,
+                                                            bin_method='equal')),
+                         'ramp([acadia], (#FFF,#888,#000), equal(3))')
