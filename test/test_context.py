@@ -85,6 +85,10 @@ class TestCartoContext(unittest.TestCase):
         self.assertTrue(set(df.columns) == self.valid_columns)
         self.assertTrue(len(df) == 2379)
 
+        # read with limit
+        df = cc.read(self.test_read_table, limit=10)
+        self.assertEqual(len(df), 10)
+        self.assertIsInstance(df, pd.DataFrame)
 
     def test_cartocontext_write(self):
         """cartoframes.CartoContext.write"""
