@@ -195,6 +195,46 @@ class TestCartoContext(unittest.TestCase):
                              'the_geom', 'the_geom_webmercator'},
                             set(df.columns),
                             msg='Should have the columns requested')
+    def test_get_bounds(self):
+        """cartoframes._get_bounds"""
+        from cartoframes.layer import Layer, QueryLayer
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        vals1 = {'minx': 0,
+                 'maxx': 1,
+                 'miny': 0,
+                 'maxy': 2}
+
+        vals2 = {'minx': 0,
+                 'maxx': 1.5,
+                 'miny': -0.5,
+                 'maxy': 1.5}
+        ans = {'west': 0,
+               'east': 1.5,
+               'south': -0.5,
+               'north': 2}
+        # (MINX, MINY), (MINX, MAXY), (MAXX, MAXY), (MAXX, MINY), (MINX, MINY)
+        # https://postgis.net/docs/ST_Envelope.html
+        query = '''
+            WITH cte AS (
+                SELECT
+                  'SRID=4326;POLYGON(({minx} {miny},
+                                      {minx} {maxy},
+                                      {maxx} {maxy},
+                                      {maxx} {miny},
+                                      {minx} {miny}))'::geometry AS the_geom
+              )
+            SELECT
+              1 AS cartodb_id,
+              the_geom,
+              ST_Transform(the_geom, 3857) AS the_geom_webmercator
+            FROM cte
+        '''
+        layers = [QueryLayer(query.format(**vals1)),
+                  QueryLayer(query.format(**vals2))]
+        extent_ans = cc._get_bounds(layers)
+
+        self.assertDictEqual(extent_ans, ans)
 
     def test_df2pg_schema(self):
         """cartoframes._df2pg_schema"""
