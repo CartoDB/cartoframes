@@ -196,7 +196,7 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
     def test_get_bounds(self):
-        """cartoframes._get_bounds"""
+        """cartoframes.CartoContext._get_bounds"""
         from cartoframes.layer import Layer, QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
