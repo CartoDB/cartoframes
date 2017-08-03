@@ -178,18 +178,30 @@ class TestCartoContext(unittest.TestCase):
                 ''',
                 table_name='tweets_obama')
 
+        # create a table from a query
         _ = cc.query('''
             SELECT link, body, displayname, friendscount
             FROM tweets_obama
             LIMIT 100
             ''',
             table_name=self.test_query_table)
+
+        # read newly created table into a dataframe
         df = cc.read(self.test_query_table)
+        # should be specified length
         self.assertEqual(len(df), 100)
-        print(set(df.columns))
-        # same column names
+        # should have requested columns + utility columns from CARTO
         self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
                              'the_geom', 'the_geom_webmercator'},
                             set(df.columns),
                             msg='Should have the columns requested')
 
+
+    def test_drop_tables_query(self):
+        """cartoframes.CartoContext._drop_tables_query"""
+        from cartoframes.context import _drop_tables_query
+        tables = ['table1', 'table2', 'table3']
+        ans = ('DROP TABLE IF EXISTS table1;\n'
+               'DROP TABLE IF EXISTS table2;\n'
+               'DROP TABLE IF EXISTS table3;')
+        self.assertEqual(ans, _drop_tables_query(tables))
