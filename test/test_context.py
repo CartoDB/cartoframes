@@ -196,9 +196,27 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
 
+    def test_df2pg_schema(self):
+        """cartoframes._df2pg_schema"""
+        from cartoframes.context import _df2pg_schema
+        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
+                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
+                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
+        df = pd.DataFrame(data).astype({'id': 'object',
+                                        'val': float,
+                                        'truth': bool,
+                                        'idnum': int})
+        # specify order of columns
+        df = df[['id', 'val', 'truth', 'idnum']]
+        ans = ('NULLIF("id", \'\')::text AS id, '
+               'NULLIF("val", \'\')::numeric AS val, '
+               'NULLIF("truth", \'\')::boolean AS truth, '
+               'NULLIF("idnum", \'\')::numeric AS idnum')
+
+        self.assertEqual(ans, _df2pg_schema(df))
 
     def test_drop_tables_query(self):
-        """cartoframes.CartoContext._drop_tables_query"""
+        """cartoframes._drop_tables_query"""
         from cartoframes.context import _drop_tables_query
         tables = ['table1', 'table2', 'table3']
         ans = ('DROP TABLE IF EXISTS table1;\n'
