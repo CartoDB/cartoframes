@@ -215,6 +215,11 @@ class TestCartoContext(unittest.TestCase):
 
         self.assertEqual(ans, _df2pg_schema(df))
 
+        # add the_geom
+        df['the_geom'] = 'Point(0 0)'
+        ans = '\"the_geom\", ' + ans
+        self.assertEqual(ans, _df2pg_schema(df))
+
     def test_drop_tables_query(self):
         """cartoframes._drop_tables_query"""
         from cartoframes.context import _drop_tables_query
