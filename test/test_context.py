@@ -38,12 +38,18 @@ class TestCartoContext(unittest.TestCase):
         self.test_read_table = 'cb_2013_puma10_500k'
         self.test_write_table = 'cartoframes_test_table_{ver}'.format(
             ver=sys.version[0:3].replace('.', '_'))
+        self.test_query_table = 'cartoframes_test_query_table_{ver}'.format(
+            ver=sys.version[0:3].replace('.', '_'))
+
 
     def tearDown(self):
         """restore to original state"""
         self.sql_client.send('''
             DROP TABLE IF EXISTS "{}"
             '''.format(self.test_write_table))
+        self.sql_client.send('''
+            DROP TABLE IF EXISTS "{}"
+            '''.format(self.test_query_table))
 
     def test_cartocontext(self):
         """cartoframes.CartoContext properties"""
@@ -136,3 +142,54 @@ class TestCartoContext(unittest.TestCase):
         # number of geoms should equal number of rows
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
+        
+    def test_sync(self):
+        """cartoframes.CartoContext.sync"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        self.assertIsNone(cc.sync(pd.DataFrame(), 'acadia'))
+
+    def test_query(self):
+        """cartoframes.CartoContext.query"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        df = cc.query('''
+            SELECT link, body, displayname, friendscount
+            FROM tweets_obama
+            LIMIT 100
+            ''')
+        # same number of rows
+        self.assertEqual(len(df), 100,
+                         msg='Expected number or rows')
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount'},
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # table already exists, should throw CartoException
+        with self.assertRaises(CartoException):
+            df_create_table = cc.query('''
+                SELECT link, body, displayname, friendscount
+                FROM tweets_obama
+                LIMIT 100
+                ''',
+                table_name='tweets_obama')
+
+        _ = cc.query('''
+            SELECT link, body, displayname, friendscount
+            FROM tweets_obama
+            LIMIT 100
+            ''',
+            table_name=self.test_query_table)
+        df = cc.read(self.test_query_table)
+        self.assertEqual(len(df), 100)
+        print(set(df.columns))
+        # same column names
+        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
+                             'the_geom', 'the_geom_webmercator'},
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
