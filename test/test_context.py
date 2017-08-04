@@ -221,14 +221,17 @@ class TestCartoContext(unittest.TestCase):
         import IPython
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
+
         # test with no layers - should produce basemap
         basemap_only_static = cc.map(interactive=False)
         basemap_only_interactive = cc.map(interactive=True)
+
         # are of instance of IPython HTML class
         self.assertIsInstance(basemap_only_static,
                               IPython.core.display.HTML)
         self.assertIsInstance(basemap_only_interactive,
                               IPython.core.display.HTML)
+
         # have the HTML innards that are to be expected
         if sys.version[0] == 3:
             self.assertRegex(basemap_only_static.data,
@@ -242,6 +245,10 @@ class TestCartoContext(unittest.TestCase):
             self.assertRegexMatches(
                 basemap_only_interactive.data,
                 '^<iframe srcdoc="<!DOCTYPE html>.*')
+
+        # test with labels on front
+        labels_front = cc.map(layers=BaseMap('light', labels='front'))
+        self.assertIsInstance(labels_front, IPython.core.display.HTML)
 
         # test with one Layer
         one_layer = cc.map(layers=Layer('tweets_obama')) 
