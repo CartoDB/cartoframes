@@ -149,6 +149,15 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
 
+    def test_cartocontext_table_exists(self):
+        """CartoContext._table_exists"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        self.assertFalse(cc._table_exists('acadia_biodiversity'))
+        with self.assertRaises(NameError):
+            cc._table_exists(self.test_read_table)
+
+
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
         pass
