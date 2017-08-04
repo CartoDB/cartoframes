@@ -417,8 +417,18 @@ class TestCartoContext(unittest.TestCase):
         _add_encoded_geom(df, 'geometry')
 
         # geometry column should equal the_geom after function call
-        print(df['the_geom'])
-        print(df['geometry'].apply(_encode_geom))
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+
+        # try another way
+        df = cc.read(self.test_read_table, limit=5,
+                     decode_geom=True)
+
+        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.2))
+
+        # the_geom should reflect encoded 'geometry' column
+        _add_encoded_geom(df, None)
+
+        # geometry column should equal the_geom after function call
         self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
     def test_decode_geom(self):
