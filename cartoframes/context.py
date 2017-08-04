@@ -851,7 +851,7 @@ class CartoContext(object):
                 FROM ({query}) _wrap;
                 '''.format(query=query,
                            comma=',' if style_cols else '',
-                           style_cols=','.join(style_cols)))
+                           style_cols=','.join(style_cols) if style_cols else ''))
         except Exception as err:
             raise ValueError(('Layer query `{query}` and/or style column(s) '
                               '{cols} are not valid: {err}.'
