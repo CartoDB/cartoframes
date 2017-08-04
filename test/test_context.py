@@ -52,7 +52,7 @@ class TestCartoContext(unittest.TestCase):
             '''.format(self.test_query_table))
 
     def test_cartocontext(self):
-        """cartoframes.CartoContext properties"""
+        """CartoContext.__init__"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertTrue(cc.api_key == self.apikey)
@@ -64,13 +64,13 @@ class TestCartoContext(unittest.TestCase):
         # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
 
     def test_cartocontext_isorguser(self):
-        """cartoframes.CartoContext._is_org_user"""
+        """CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                               api_key=self.apikey)
         self.assertTrue(not cc._is_org_user())
 
     def test_cartocontext_read(self):
-        """cartoframes.CartoContext.read basic usage"""
+        """CartoContext.read"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         # fails if limit is smaller than zero
@@ -97,7 +97,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
 
     def test_cartocontext_write(self):
-        """cartoframes.CartoContext.write"""
+        """CartoContext.write"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         data = {'nums': list(range(100, 0, -1)),
@@ -142,14 +142,18 @@ class TestCartoContext(unittest.TestCase):
         # number of geoms should equal number of rows
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
-        
-    def test_sync(self):
+
+    def test_cartocontext_send_dataframe(self):
+        """CartoContext._send_dataframe"""
+        pass
+
+    def test_cartoframes_sync(self):
         """cartoframes.CartoContext.sync"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertIsNone(cc.sync(pd.DataFrame(), 'acadia'))
 
-    def test_query(self):
+    def test_cartoframes_query(self):
         """cartoframes.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -195,8 +199,37 @@ class TestCartoContext(unittest.TestCase):
                              'the_geom', 'the_geom_webmercator'},
                             set(df.columns),
                             msg='Should have the columns requested')
+
+    def test_cartoframes_map(self):
+        """CartoContext.map"""
+        from cartoframes import Layer
+        import IPython
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        # test with no layers - should produce basemap
+        basemap_only_static = cc.map(interactive=False)
+        basemap_only_interactive = cc.map(interactive=True)
+        # are of instance of IPython HTML class
+        self.assertIsInstance(basemap_only_static,
+                              IPython.core.display.HTML)
+        self.assertIsInstance(basemap_only_interactive,
+                              IPython.core.display.HTML)
+        # have the HTML innards that are to be expected
+        self.assertRegex(basemap_only_static.data,
+                '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+        self.assertRegex(basemap_only_interactive.data,
+                         '^<iframe srcdoc="<!DOCTYPE html>.*')
+
+        # test with one Layer
+
+        # test with two Layers
+
+        # test with one Layer, one QueryLayer
+
+        # test with BaseMap, Layer, QueryLayer
+
     def test_get_bounds(self):
-        """cartoframes.CartoContext._get_bounds"""
+        """CartoContext._get_bounds"""
         from cartoframes.layer import Layer, QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
