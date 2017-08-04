@@ -51,6 +51,12 @@ class TestCartoContext(unittest.TestCase):
             DROP TABLE IF EXISTS "{}"
             '''.format(self.test_query_table))
 
+        # TODO: remove the named map templates
+
+    def add_map_template(self):
+        """Add generated named map templates to class"""
+        pass
+
     def test_cartocontext(self):
         """CartoContext.__init__"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -200,9 +206,9 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
 
-    def test_cartoframes_map(self):
+    def test_cartocontext_map(self):
         """CartoContext.map"""
-        from cartoframes import Layer
+        from cartoframes import Layer, QueryLayer, BaseMap
         import IPython
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -229,12 +235,55 @@ class TestCartoContext(unittest.TestCase):
                 '^<iframe srcdoc="<!DOCTYPE html>.*')
 
         # test with one Layer
+        one_layer = cc.map(layers=Layer('tweets_obama')) 
+        self.assertIsInstance(one_layer, IPython.core.display.HTML)
 
         # test with two Layers
+        two_layers = cc.map(layers=[Layer('tweets_obama'),
+                                    Layer(self.test_read_table)])
+
+        self.assertIsInstance(two_layers, IPython.core.display.HTML)
 
         # test with one Layer, one QueryLayer
+        onelayer_onequery = cc.map(layers=[QueryLayer('''
+                                                SELECT *
+                                                FROM tweets_obama
+                                                LIMIT 100'''),
+                                            Layer(self.test_read_table)])
+
+        self.assertIsInstance(onelayer_onequery, IPython.core.display.HTML)
 
         # test with BaseMap, Layer, QueryLayer
+        oneeach = cc.map(layers=[BaseMap('light'),
+                                 QueryLayer('''
+                                     SELECT *
+                                     FROM tweets_obama
+                                     LIMIT 100''', color='favoritescount'),
+                                 Layer(self.test_read_table)])
+
+        # Errors
+        # too many layers
+        with self.assertRaises(ValueError):
+            layers = [Layer('tweets_obama')] * 9
+            cc.map(layers=layers)
+
+        # zoom needs to be specified with lng/lat
+        with self.assertRaises(ValueError):
+            cc.map(lng=44.3386, lat=68.2733)
+
+        # only one basemap layer can be added
+        with self.assertRaises(ValueError):
+            cc.map(layers=[BaseMap('dark'), BaseMap('light')])
+
+        # only one time layer can be added
+        with self.assertRaises(ValueError):
+            cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
+                           Layer(self.test_read_table, time='cartodb_id')])
+
+        # time layers are not implemented yet
+        with self.assertRaises(NotImplementedError):
+            cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
+
 
     def test_get_bounds(self):
         """CartoContext._get_bounds"""
