@@ -342,8 +342,32 @@ class TestCartoContext(unittest.TestCase):
 
         self.assertDictEqual(extent_ans, ans)
 
+    def test_cartocontext_check_query(self):
+        """CartoContext._check_query"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        # this table does not exist in this account
+        fail_query = '''
+            SELECT *
+              FROM cyclists
+              '''
+        fail_cols = ['merckx', 'moser', 'gimondi']
+        with self.assertRaises(ValueError):
+            cc._check_query(fail_query, style_cols=fail_cols)
+
+        # table exists
+        success_query = '''
+            SELECT *
+              FROM {}
+              '''.format(self.test_read_table)
+        self.assertIsNone(cc._check_query(success_query))
+
+        # table exists but columns don't
+        with self.assertRaises(ValueError):
+            cc._check_query(success_query, style_cols=fail_cols)
+
     def test_df2pg_schema(self):
-        """cartoframes._df2pg_schema"""
+        """context._df2pg_schema"""
         from cartoframes.context import _df2pg_schema
         data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
                 {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
@@ -367,10 +391,63 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(ans, _df2pg_schema(df))
 
     def test_drop_tables_query(self):
-        """cartoframes._drop_tables_query"""
+        """context._drop_tables_query"""
         from cartoframes.context import _drop_tables_query
         tables = ['table1', 'table2', 'table3']
         ans = ('DROP TABLE IF EXISTS table1;\n'
                'DROP TABLE IF EXISTS table2;\n'
                'DROP TABLE IF EXISTS table3;')
         self.assertEqual(ans, _drop_tables_query(tables))
+
+    def test_add_encoded_geom(self):
+        """context._add_encoded_geom"""
+        from cartoframes.context import _add_encoded_geom, _encode_geom
+        # import shapely
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # encode_geom=True adds a column called 'geometry'
+        df = cc.read(self.test_read_table, limit=5,
+                     decode_geom=True)
+
+        # alter the geometry
+        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.1))
+
+        # the_geom should reflect encoded 'geometry' column
+        _add_encoded_geom(df, 'geometry')
+
+        # geometry column should equal the_geom after function call
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+
+        # try another way
+        df = cc.read(self.test_read_table, limit=5,
+                     decode_geom=True)
+
+        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.2))
+
+        # the_geom should reflect encoded 'geometry' column
+        _add_encoded_geom(df, None)
+
+        # geometry column should equal the_geom after function call
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+
+    def test_decode_geom(self):
+        """context._decode_geom"""
+        from cartoframes.context import _decode_geom
+        # Point (0, 0) without SRID
+        ewkb = '010100000000000000000000000000000000000000'
+        decoded_geom = _decode_geom(ewkb)
+        self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
+        self.assertIsNone(_decode_geom(None))
+
+    def test_encode_geom(self):
+        """context._encode_geom"""
+        from cartoframes.context import _encode_geom
+        from shapely import wkb
+        import binascii as ba
+        # Point (0 0) without SRID
+        ewkb = '010100000000000000000000000000000000000000'
+        geom = wkb.loads(ba.unhexlify(ewkb))
+        ewkb_resp = _encode_geom(geom)
+        self.assertEqual(ewkb_resp, ewkb)
+        self.assertIsNone(_encode_geom(None))
