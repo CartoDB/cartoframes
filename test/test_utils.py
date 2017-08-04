@@ -20,9 +20,6 @@ class TestUtils(unittest.TestCase):
                             )])
         self.point_style_dict = dict_items(self.point_style)
         self.point_stylecss = cssify(self.point_style)
-        self.point_values = []
-        for value in self.point_style_dict:
-            self.point_values.append(value)
         self.polygon_style = OrderedDict([(
                                 "#layer['mapnik::geometry_type'=3]", OrderedDict([
                                     ('polygon-fill', 'ramp([column], (#ffc6c4, #ee919b, #cc607d, #9e3963, #672044), quantiles)'),
@@ -34,10 +31,6 @@ class TestUtils(unittest.TestCase):
                                     ('line-comp-op', 'hard-light')])
                                 )])
         self.polygon_style_dict = dict_items(self.polygon_style)
-        self.polygon_values = []
-        for value in self.polygon_style_dict:
-            self.polygon_values.append(value)
-
         self.polygon_stylecss = cssify(self.polygon_style)
 
         self.complex_style = OrderedDict([
@@ -63,21 +56,17 @@ class TestUtils(unittest.TestCase):
         ])
 
         self.complex_style_dict = dict_items(self.complex_style)
-        self.complex_values = []
-        for value in self.complex_style_dict:
-            self.complex_values.append(value)
-
         self.complex_stylecss = cssify(self.complex_style)
 
     def test_dict_items(self):
         """utils.dict_items"""
         # ensure correct formation of dict items from provided styling
-        self.assertEqual(self.polygon_values,
-                         self.polygon_style.items())
-        self.assertEqual(self.point_values,
-                         self.point_style.items())
-        self.assertEqual(self.complex_values,
-                         self.complex_style.items())
+        self.assertEqual(OrderedDict(self.polygon_style_dict),
+                         self.polygon_style)
+        self.assertEqual(OrderedDict(self.point_style_dict),
+                         self.point_style)
+        self.assertEqual(OrderedDict(self.complex_style_dict),
+                         self.complex_style)
 
     def test_cssify(self):
         """utils.cssify"""
