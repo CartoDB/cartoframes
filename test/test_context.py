@@ -377,13 +377,25 @@ class TestCartoContext(unittest.TestCase):
 
     def test_add_encoded_geom(self):
         """context._add_encoded_geom"""
-        from cartoframes.context import _add_encoded_geom
+        from cartoframes.context import _add_encoded_geom, _encode_geom
         # import shapely
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        # df = cc.read(self.test_read_table, limit=10)
-        # _add_encoded_geom(df, geom_col=None)
-        # self.assertIsInstance(df['the_geom'][1], shapely.geometry.point.Point)
+
+        # encode_geom=True adds a column called 'geometry'
+        df = cc.read(self.test_read_table, limit=5,
+                     decode_geom=True)
+
+        # alter the geometry
+        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.1))
+
+        # the_geom should reflect encoded 'geometry' column
+        _add_encoded_geom(df, 'geometry')
+
+        # geometry column should equal the_geom after function call
+        print(df['the_geom'])
+        print(df['geometry'].apply(_encode_geom))
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
     def test_decode_geom(self):
         """context._decode_geom"""
@@ -392,6 +404,7 @@ class TestCartoContext(unittest.TestCase):
         ewkb = '010100000000000000000000000000000000000000'
         decoded_geom = _decode_geom(ewkb)
         self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
+        self.assertIsNone(_decode_geom(None))
 
     def test_encode_geom(self):
         """context._encode_geom"""
@@ -403,3 +416,4 @@ class TestCartoContext(unittest.TestCase):
         geom = wkb.loads(ba.unhexlify(ewkb))
         ewkb_resp = _encode_geom(geom)
         self.assertEqual(ewkb_resp, ewkb)
+        self.assertIsNone(_encode_geom(None))
