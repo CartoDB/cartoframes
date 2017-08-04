@@ -215,10 +215,18 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(basemap_only_interactive,
                               IPython.core.display.HTML)
         # have the HTML innards that are to be expected
-        self.assertRegex(basemap_only_static.data,
+        if sys.version[0] == 3:
+            self.assertRegex(basemap_only_static.data,
+                    '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+            self.assertRegex(basemap_only_interactive.data,
+                             '^<iframe srcdoc="<!DOCTYPE html>.*')
+        elif sys.version[0] == 2:
+            self.assertRegexMatches(
+                basemap_only_static.data,
                 '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
-        self.assertRegex(basemap_only_interactive.data,
-                         '^<iframe srcdoc="<!DOCTYPE html>.*')
+            self.assertRegexMatches(
+                basemap_only_interactive.data,
+                '^<iframe srcdoc="<!DOCTYPE html>.*')
 
         # test with one Layer
 
