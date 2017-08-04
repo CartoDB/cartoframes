@@ -374,3 +374,32 @@ class TestCartoContext(unittest.TestCase):
                'DROP TABLE IF EXISTS table2;\n'
                'DROP TABLE IF EXISTS table3;')
         self.assertEqual(ans, _drop_tables_query(tables))
+
+    def test_add_encoded_geom(self):
+        """context._add_encoded_geom"""
+        from cartoframes.context import _add_encoded_geom
+        # import shapely
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        # df = cc.read(self.test_read_table, limit=10)
+        # _add_encoded_geom(df, geom_col=None)
+        # self.assertIsInstance(df['the_geom'][1], shapely.geometry.point.Point)
+
+    def test_decode_geom(self):
+        """context._decode_geom"""
+        from cartoframes.context import _decode_geom
+        # Point (0, 0) without SRID
+        ewkb = '010100000000000000000000000000000000000000'
+        decoded_geom = _decode_geom(ewkb)
+        self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
+
+    def test_encode_geom(self):
+        """context._encode_geom"""
+        from cartoframes.context import _encode_geom
+        from shapely import wkb
+        import binascii as ba
+        # Point (0 0) without SRID
+        ewkb = '010100000000000000000000000000000000000000'
+        geom = wkb.loads(ba.unhexlify(ewkb))
+        ewkb_resp = _encode_geom(geom)
+        self.assertEqual(ewkb_resp, ewkb)
