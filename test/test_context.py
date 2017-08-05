@@ -17,7 +17,7 @@ class TestCartoContext(unittest.TestCase):
             os.environ.get('USERNAME') is None):
             try:
                 creds = json.loads(open('test/secret.json').read())
-            except FileNotFoundError:
+            except OSError:
                 print("Create a `secret.json` file by renaming "
                       "`secret.json.sample` to `secret.json` and updating "
                       "the credentials to match your environment.")
@@ -120,7 +120,7 @@ class TestCartoContext(unittest.TestCase):
 
         # check if table exists
         resp = self.sql_client.send('''
-            SELECT * 
+            SELECT *
             FROM {table}
             LIMIT 0
             '''.format(table=self.test_write_table))
