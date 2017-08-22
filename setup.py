@@ -41,7 +41,8 @@ setup(
     install_requires=['pandas>=0.20.1',
                       'webcolors>=1.7.0',
                       'carto>=1.0.1',
-                      'tqdm>=4.14.0',],
+                      'tqdm>=4.14.0',
+                      'palettable>=3.0.0',],
     extras_require={
         ':python_version == "2.7"': [
             'IPython>=5.0.0,<6.0.0',
