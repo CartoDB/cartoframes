@@ -268,7 +268,7 @@ class QueryLayer(AbstractLayer):
             self.style_cols.add(size['column'])
 
         self.color = color
-        self.scheme = scheme
+        self.scheme = scheme or {}
         self.size = size
         self.time = time
         self.tooltip = tooltip
@@ -285,9 +285,11 @@ class QueryLayer(AbstractLayer):
                                  col=','.join(self.style_cols & geom_cols)))
 
     def _setup(self, layers, layer_idx):
+        """generate cartocss for each layer"""
         basemap = layers[0]
 
         self.color = self.color or DEFAULT_COLORS[layer_idx]
+        # TODO: this might be where to adjust the styling based on basemap
         self.cartocss = self._get_cartocss(basemap)
 
         if self.time:
