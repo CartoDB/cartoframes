@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from cartoframes.styling import get_scheme
 from carto.exceptions import CartoException
-
+plt.style.use('ggplot')
 
 def draw_legend(edges, colname, scheme={'name': 'Blues', 'bins': 5}):
     """Create a matplotlib legend"""
