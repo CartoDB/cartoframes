@@ -748,8 +748,7 @@ class CartoContext(object):
             ax.axis('off')
             return ax
         else:
-            warn('Matplotlib not detected. Saving image directly to disk')
-
+            return IPython.display.HTML(html)
 
     def data_boundaries(self, df=None, table_name=None):
         """Not currently implemented"""
