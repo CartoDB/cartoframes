@@ -662,7 +662,7 @@ class CartoContext(object):
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
-        return static_url
+        #return static_url
         # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
@@ -739,10 +739,8 @@ class CartoContext(object):
             raw_data = mpi.imread(static_url)
             if ax is None:
                 w,h = size
-                dpi = plt.rcParams['figure.dpi']
+                dpi = 1
                 mpl_size = w/dpi, h/dpi # divide by arbitrary dpi to set figure size
-                # mpl_size = w, h 
-                # dpi = 1
                 fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
                 fig.subplots_adjust(left=0,right=1, top=1, bottom=0)
                 ax = plt.gca()
