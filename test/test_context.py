@@ -218,15 +218,22 @@ class TestCartoContext(unittest.TestCase):
     def test_cartocontext_map(self):
         """CartoContext.map"""
         from cartoframes import Layer, QueryLayer, BaseMap
+        import matplotlib
+        matplotlib.use('agg')
+        import matplotlib.pyplot as plt
         import IPython
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
         # test with no layers - should produce basemap
+        basemap_only_static_mpl = cc.map(interactive=False)
+        cartoframes.context.HAS_MATPLOTLIB = False
         basemap_only_static = cc.map(interactive=False)
         basemap_only_interactive = cc.map(interactive=True)
 
-        # are of instance of IPython HTML class
+        # are of the correct type instances
+        self.assertIsInstance(basemap_only_static_mpl,
+                              plt.Axes)
         self.assertIsInstance(basemap_only_static,
                               IPython.core.display.HTML)
         self.assertIsInstance(basemap_only_interactive,
