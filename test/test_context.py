@@ -235,7 +235,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(basemap_only_static_mpl,
                               plt.Axes)
         self.assertIsInstance(basemap_only_static,
-                              IPython.core.display.HTML)
+                              IPython.core.display.Image)
         self.assertIsInstance(basemap_only_interactive,
                               IPython.core.display.HTML)
 
