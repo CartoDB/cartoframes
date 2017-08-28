@@ -1,15 +1,17 @@
 language: python
 env:
     - MPLBACKEND='agg'
+    - MPLBACKEND=''
 python:
     - '2.7'
     - '3.4'
     - '3.5'
     - '3.6'
 install:
-    - pip install . # intsall package
+    - pip install . # install package
     - pip install -r requirements.txt # install requires
-    - pip install shapely coveralls matplotlib # only for testing
+    - if [ $MPLBACKEND = "agg" ]; then pip install matplotlib; fi
+    - pip install shapely coveralls # only for testing
 script:
     - nosetests --verbose --with-coverage --cover-package=cartoframes
 after_success:
