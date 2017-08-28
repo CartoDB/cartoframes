@@ -35,6 +35,8 @@ else:
 try:
     import matplotlib.image as mpi
     import matplotlib.pyplot as plt
+    # set dpi based on CARTO Static Maps API dpi
+    mpi.rcParams['figure.dpi'] = 72.0
 except ImportError:
     mpi = None
     plt = None
@@ -738,11 +740,10 @@ class CartoContext(object):
         elif HAS_MATPLOTLIB:
             raw_data = mpi.imread(static_url)
             if ax is None:
-                w,h = size
-                dpi = 1
-                mpl_size = w/dpi, h/dpi # divide by arbitrary dpi to set figure size
+                dpi = mpi.rcParams['figure.dpi']
+                mpl_size = (size[0] / dpi, size[1] / dpi)
                 fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
-                fig.subplots_adjust(left=0,right=1, top=1, bottom=0)
+                fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
                 ax = plt.gca()
             ax.imshow(raw_data)
             ax.axis('off')
