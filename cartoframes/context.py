@@ -749,7 +749,12 @@ class CartoContext(object):
             ax.axis('off')
             return ax
         else:
-            return IPython.display.HTML(html)
+            return IPython.display.Image(url=static_url,
+                                         embed=True,
+                                         format='png',
+                                         width=size[0],
+                                         height=size[1],
+                                         metadata=dict(origin_url=static_url))
 
     def data_boundaries(self, df=None, table_name=None):
         """Not currently implemented"""
