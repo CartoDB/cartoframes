@@ -1,6 +1,6 @@
 """Unit tests for cartoframes.utils"""
 import unittest
-from cartoframes.utils import dict_items, cssify
+from cartoframes.utils import dict_items, cssify, norm_colname
 from collections import OrderedDict
 
 class TestUtils(unittest.TestCase):
@@ -86,3 +86,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(complex_stylecss,
                          "#layer['mapnik::geometry_type'=1] {  marker-width: 5; marker-fill: yellow; marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: black; marker-line-opacity: 1;} #layer['mapnik::geometry_type'=2] {  line-width: 1.5; line-color: black;} #layer['mapnik::geometry_type'=3] {  polygon-fill: blue; polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ",
                          msg="multi-layer styling")
+
+    def test_norm_colname(self):
+        """utils.norm_colname"""
+        cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3', 'old_soaker',
+                '_testingTesting',]
+        ans = ['unnamed_0', '_201moore', 'acadia_1_2_3', 'old_soaker',
+                '_testingtesting',]
+        for c, a in zip(cols, ans):
+            self.assertEqual(norm_colname(c), a)
