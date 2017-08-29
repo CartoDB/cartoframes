@@ -32,6 +32,15 @@ if sys.version_info >= (3, 0):
 else:
     from urlparse import urlparse
     from urllib import urlencode
+try:
+    import matplotlib.image as mpi
+    import matplotlib.pyplot as plt
+    # set dpi based on CARTO Static Maps API dpi
+    mpi.rcParams['figure.dpi'] = 72.0
+except ImportError:
+    mpi = None
+    plt = None
+HAS_MATPLOTLIB = plt is not None
 
 # Choose constant to avoid overview generation which are triggered at a
 # half million rows
@@ -506,7 +515,8 @@ class CartoContext(object):
 
 
     def map(self, layers=None, interactive=True,
-            zoom=None, lat=None, lng=None, size=(800, 400)):
+            zoom=None, lat=None, lng=None, size=(800, 400),
+            ax=None):
         """Produce a CARTO map visualizing data layers.
 
         Example:
@@ -553,6 +563,8 @@ class CartoContext(object):
                 to a view to have all data layers in view.
             size (tuple, optional): List of pixel dimensions for the map. Format
                 is ``(width, height)``. Defaults to ``(800, 400)``.
+            ax: matplotlib axis on which to draw the image. Only used when 
+                ``interactive`` is ``False``.
 
         Returns:
             IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
@@ -652,7 +664,7 @@ class CartoContext(object):
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
-
+        #return static_url
         # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
@@ -724,9 +736,25 @@ class CartoContext(object):
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
-
-        return IPython.display.HTML(html)
-
+            return IPython.display.HTML(html)
+        elif HAS_MATPLOTLIB:
+            raw_data = mpi.imread(static_url)
+            if ax is None:
+                dpi = mpi.rcParams['figure.dpi']
+                mpl_size = (size[0] / dpi, size[1] / dpi)
+                fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
+                fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
+                ax = plt.gca()
+            ax.imshow(raw_data)
+            ax.axis('off')
+            return ax
+        else:
+            return IPython.display.Image(url=static_url,
+                                         embed=True,
+                                         format='png',
+                                         width=size[0],
+                                         height=size[1],
+                                         metadata=dict(origin_url=static_url))
 
     def data_boundaries(self, df=None, table_name=None):
         """Not currently implemented"""
