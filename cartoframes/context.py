@@ -23,7 +23,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
-from cartoframes.utils import dict_items
+from cartoframes.utils import dict_items, norm_colname
 from cartoframes.layer import BaseMap
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -341,7 +341,8 @@ class CartoContext(object):
         utility_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
         alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
                       'NULLIF("{col}", \'\')::{ctype}')
-        alter_cols = ', '.join(alter_temp.format(col=c, ctype=_dtypes2pg(t))
+        alter_cols = ', '.join(alter_temp.format(col=norm_colname(c),
+                                                 ctype=_dtypes2pg(t))
                                for c, t in zip(dataframe.columns,
                                                dataframe.dtypes)
                                if c not in utility_cols)
