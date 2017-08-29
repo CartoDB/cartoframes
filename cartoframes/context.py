@@ -179,7 +179,6 @@ class CartoContext(object):
                        lng=lnglat[0],
                        lat=lnglat[1]))
 
-        self._column_normalization(df, final_table_name, geom_col)
         tqdm.write('Table written to CARTO: '
                    '{base_url}dataset/{table_name}'.format(
                        base_url=self.base_url,
@@ -352,6 +351,13 @@ class CartoContext(object):
         self._debug_print(alter_query=alter_query)
         try:
             _ = self.sql_client.send(alter_query)
+            changed_cols = ', '.join([
+                '\033[1m{0} -> {1}\033[0m'.format(c, norm_colname(c))
+                for c in dataframe.columns
+                if c != norm_colname(c)])
+            if changed_cols != '':
+                tqdm.write('The following columns were changed in the CARTO '
+                           'copy of this data: {0}'.format(changed_cols))
         except CartoException as err:
             warn('DataFrame written to CARTO but table schema failed to '
                  'update to match DataFrame. All columns have data type '
@@ -407,21 +413,6 @@ class CartoContext(object):
                                         new_table=import_job['table_name']))
         return table_name
 
-    def _column_normalization(self, dataframe, table_name, geom_col):
-        """Print a warning if there is a difference between the normalized
-        PostgreSQL column names and the ones in the DataFrame"""
-
-        pgcolumns = self.sql_client.send('''
-            SELECT *
-            FROM "{table_name}"
-            LIMIT 0'''.format(table_name=table_name))['fields'].keys()
-        diff_cols = (set(dataframe.columns) ^ set(pgcolumns)) - {'cartodb_id',
-                                                                 geom_col}
-        if diff_cols:
-            cols = ', '.join('`{}`'.format(c) for c in diff_cols)
-            tqdm.write('The following columns were renamed because of '
-                       'PostgreSQL column normalization requirements: '
-                       '{cols}'.format(cols=cols))
 
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
