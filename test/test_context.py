@@ -378,17 +378,19 @@ class TestCartoContext(unittest.TestCase):
                                         'idnum': int})
         # specify order of columns
         df = df[['id', 'val', 'truth', 'idnum']]
+        pgcols = ['id', 'val', 'truth', 'idnum']
         ans = ('NULLIF("id", \'\')::text AS id, '
                'NULLIF("val", \'\')::numeric AS val, '
                'NULLIF("truth", \'\')::boolean AS truth, '
                'NULLIF("idnum", \'\')::numeric AS idnum')
 
-        self.assertEqual(ans, _df2pg_schema(df))
+        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
         # add the_geom
         df['the_geom'] = 'Point(0 0)'
         ans = '\"the_geom\", ' + ans
-        self.assertEqual(ans, _df2pg_schema(df))
+        pgcols.append('the_geom')
+        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
     def test_drop_tables_query(self):
         """context._drop_tables_query"""

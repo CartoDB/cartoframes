@@ -245,8 +245,8 @@ class CartoContext(object):
 
         # combine chunks into final table
         try:
-            select_base = ('SELECT %(schema)s '
-                           'FROM "{table}"') % dict(schema=_df2pg_schema(df))
+            select_base = 'SELECT {schema} FROM "{{table}}"'.format(
+                schema=_df2pg_schema(df, pgcolnames))
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
