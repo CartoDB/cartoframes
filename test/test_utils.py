@@ -119,3 +119,5 @@ class TestUtils(unittest.TestCase):
         for c, a in zip(cols, ans):
             # changed cols should match answers
             self.assertEqual(norm_colname(c), a)
+            # already sql-normed cols should match themselves
+            self.assertEqual(norm_colname(a), a)
