@@ -179,7 +179,7 @@ class CartoContext(object):
                        lng=lnglat[0],
                        lat=lnglat[1]))
 
-        tqdm.write('Table written to CARTO: '
+        tqdm.write('Table successfully written to CARTO: '
                    '{base_url}dataset/{table_name}'.format(
                        base_url=self.base_url,
                        table_name=final_table_name))

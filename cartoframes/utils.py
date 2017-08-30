@@ -37,7 +37,7 @@ def normalize_colnames(columns):
         if c != normalized_columns[i]])
     if changed_cols != '':
         tqdm.write('The following columns were changed in the CARTO '
-                   'copy of this data:\n{0}'.format(changed_cols))
+                   'copy of this dataframe:\n{0}'.format(changed_cols))
 
     return normalized_columns
 
