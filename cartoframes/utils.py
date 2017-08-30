@@ -1,4 +1,5 @@
 import sys
+from tqdm import tqdm
 
 def dict_items(d):
     if sys.version_info >= (3,0):
@@ -15,6 +16,31 @@ def cssify(css_dict):
                                                      field_value=field_value)
         css += '} '
     return css
+
+
+def normalize_colnames(columns):
+    """SQL-normalize columns in `dataframe` to reflect changes made through
+    CARTO's SQL API.
+
+    Args:
+        columns (list of str): List of column names
+
+    Returns:
+        list of str: Normalized column names
+    """
+    normalized_columns = [norm_colname(c) for c in columns]
+    changed_cols = ',\n'.join([
+        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
+            orig=c,
+            new=normalized_columns[i])
+        for i, c in enumerate(columns)
+        if c != normalized_columns[i]])
+    if changed_cols != '':
+        tqdm.write('The following columns were changed in the CARTO '
+                   'copy of this data:\n{0}'.format(changed_cols))
+
+    return normalized_columns
+
 
 def norm_colname(colname):
     """Given an arbitrary column name, translate to a SQL-normalized column

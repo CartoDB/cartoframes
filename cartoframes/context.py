@@ -23,7 +23,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
-from cartoframes.utils import dict_items, norm_colname
+from cartoframes.utils import dict_items, normalize_colnames
 from cartoframes.layer import BaseMap
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -118,7 +118,6 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None):
         """Write a DataFrame to a CARTO table.
@@ -133,13 +132,13 @@ class CartoContext(object):
                 CARTO account
             table_name (str): Table to write ``df`` to in CARTO.
             temp_dir (str, optional): Directory for temporary storage of data
-                that is sent to CARTO. Defaults to ``/tmp`` (Unix-like systems).
+                that is sent to CARTO. Default is ``/tmp`` (Unix-like systems).
             overwrite (bool, optional): Behavior for overwriting ``table_name``
                 if it exits on CARTO. Defaults to ``False``.
-            lnglat (tuple, optional): lng/lat pair that can be used for creating
-                a geometry on CARTO. Defaults to ``None``. In some cases,
-                geometry will be created without specifying this. See CARTO's
-                `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
+            lnglat (tuple, optional): lng/lat pair that can be used for
+                creating a geometry on CARTO. Defaults to ``None``. In some
+                cases, geometry will be created without specifying this. See
+                CARTO's `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
                 as `the_geom`.
@@ -155,14 +154,15 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
-
+        pgcolnames = normalize_colnames(df.columns)
         if df.shape[0] > MAX_IMPORT_ROWS:
+            # NOTE: schema is set using different method than in _set_schema
             final_table_name = self._send_batches(df, table_name, temp_dir,
-                                                  geom_col)
+                                                  geom_col, pgcolnames)
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
-                                                    geom_col)
-            self._set_schema(df, final_table_name)
+                                                    geom_col, pgcolnames)
+            self._set_schema(df, final_table_name, pgcolnames)
 
         # create geometry column from lat/longs if requested
         if lnglat:
@@ -201,7 +201,7 @@ class CartoContext(object):
 
         return False
 
-    def _send_batches(self, df, table_name, temp_dir, geom_col):
+    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
         """Batch sending a dataframe
 
         Args:
@@ -212,6 +212,7 @@ class CartoContext(object):
                 written to file that will be sent to CARTO
             geom_col (str): Name of encoded geometry column (if any) that will
                 be dropped or converted to `the_geom` column
+            pgcolnames (list of str): List of SQL-normalized column names
 
         Returns:
             final_table_name (str): Final table name on CARTO that the
@@ -230,8 +231,8 @@ class CartoContext(object):
                 chunk=chunk_num)
             try:
                 # send dataframe chunk, get new name if collision
-                temp_table = self._send_dataframe(chunk, temp_table,
-                                                  temp_dir, geom_col)
+                temp_table = self._send_dataframe(chunk, temp_table, temp_dir,
+                                                  geom_col, pgcolnames)
             except CartoException as err:
                 self._drop_tables(subtables)
                 raise CartoException(err)
@@ -285,8 +286,12 @@ class CartoContext(object):
         _ = self.sql_client.send(query)
         return None
 
-    def _send_dataframe(self, df, table_name, temp_dir, geom_col):
-        """Send a DataFrame to CARTO to be imported as a SQL table
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames):
+        """Send a DataFrame to CARTO to be imported as a SQL table.
+
+        Note:
+            Schema from ``df`` is not enforced with this method. Use
+            ``self._set_schema`` to enforce the schema.
 
         Args:
             df (pandas.DataFrame): DataFrame that is will be sent to CARTO
@@ -307,7 +312,9 @@ class CartoContext(object):
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(tempfile)
+        df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
+                                                          na_rep='',
+                                                          header=pgcolnames)
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
@@ -334,34 +341,38 @@ class CartoContext(object):
 
         return final_table_name
 
-    def _set_schema(self, dataframe, table_name):
+    def _set_schema(self, dataframe, table_name, pgcolnames):
         """Update a table associated with a dataframe to have the equivalent
-        schema"""
-        utility_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
+        schema
+
+        Args:
+            dataframe (pandas.DataFrame): Dataframe that CARTO table is cloned
+                from
+            table_name (str): Table name where schema is being altered
+            pgcolnames (list of str): List of column names from ``dataframe``
+                as they appear on the database
+        Returns:
+            None
+        """
+        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
         alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
                       'NULLIF("{col}", \'\')::{ctype}')
-        alter_cols = ', '.join(alter_temp.format(col=norm_colname(c),
+        # alter non-util columns that are not text type
+        alter_cols = ', '.join(alter_temp.format(col=c,
                                                  ctype=_dtypes2pg(t))
-                               for c, t in zip(dataframe.columns,
+                               for c, t in zip(pgcolnames,
                                                dataframe.dtypes)
-                               if c not in utility_cols)
+                               if c not in util_cols and t != 'object')
         alter_query = 'ALTER TABLE "{table}" {alter_cols};'.format(
             table=table_name,
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
             _ = self.sql_client.send(alter_query)
-            changed_cols = ', '.join([
-                '\033[1m{0} -> {1}\033[0m'.format(c, norm_colname(c))
-                for c in dataframe.columns
-                if c != norm_colname(c)])
-            if changed_cols != '':
-                tqdm.write('The following columns were changed in the CARTO '
-                           'copy of this data: {0}'.format(changed_cols))
         except CartoException as err:
-            warn('DataFrame written to CARTO but table schema failed to '
-                 'update to match DataFrame. All columns have data type '
-                 '`text`. CARTO error: `{err}`. Query: {query}'.format(
+            warn('DataFrame written to CARTO but the table schema failed to '
+                 'update to match DataFrame. All columns in CARTO table have '
+                 'data type `text`. CARTO error: `{err}`.'.format(
                      err=err,
                      query=alter_query))
 
@@ -1018,6 +1029,7 @@ def _decode_geom(ewkb):
         return wkb.loads(ba.unhexlify(ewkb))
     return None
 
+
 def _dtypes2pg(dtype):
     """returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {'float64': 'numeric',
@@ -1029,17 +1041,19 @@ def _dtypes2pg(dtype):
                'datetime64[ns]': 'text'}
     return mapping.get(str(dtype), 'text')
 
-def _df2pg_schema(dataframe):
+
+def _df2pg_schema(dataframe, pgcolnames):
     """Print column names with PostgreSQL schema for the SELECT statement of
     a SQL query"""
-    schema = ', '.join(['NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
-                                                                     t=_dtypes2pg(t))
-                        for c, t in zip(dataframe.columns, dataframe.dtypes)
-                        if c not in ('the_geom', 'the_geom_webmercator',
-                                     'cartodb_id')])
-    if 'the_geom' in dataframe.columns:
+    schema = ', '.join([
+        'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
+                                                     t=_dtypes2pg(t))
+        for c, t in zip(pgcolnames, dataframe.dtypes)
+        if c not in ('the_geom', 'the_geom_webmercator', 'cartodb_id')])
+    if 'the_geom' in pgcolnames:
         return '"the_geom", ' + schema
     return schema
+
 
 def _drop_tables_query(tables):
     """Generate drop tables query for all tables in list `tables`"""
