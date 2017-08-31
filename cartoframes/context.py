@@ -509,9 +509,8 @@ class CartoContext(object):
             zoom=None, lat=None, lng=None, size=(800, 400)):
         """Produce a CARTO map visualizing data layers.
 
-        Example:
-            Create a map with two data layers, and one BaseMap layer.
-            ::
+        Examples:
+            Create a map with two data layers, and one BaseMap layer::
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
@@ -525,6 +524,15 @@ class CartoContext(object):
                                      color={'column': 'bird_id',
                                             'scheme': styling.vivid(10))],
                        interactive=True)
+
+            Create a snapshot of a map at a specific zoom and center::
+
+                cc.map(layers=Layer('acadia_biodiversity',
+                                    color='simpson_index'),
+                       interactive=False,
+                       zoom=14,
+                       lng=-68.3823549,
+                       lat=44.3036906)
         Args:
             layers (list, optional): List of one or more of the following:
 
