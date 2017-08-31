@@ -1,6 +1,7 @@
 """Unit tests for cartoframes.utils"""
 import unittest
-from cartoframes.utils import dict_items, cssify, norm_colname
+from cartoframes.utils import (dict_items, cssify, norm_colname,
+                               normalize_colnames)
 from collections import OrderedDict
 
 
@@ -51,6 +52,11 @@ class TestUtils(unittest.TestCase):
                 ('line-opacity', '0.25'),
                 ('line-comp-op', 'hard-light')]))
         ])
+
+        self.cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3',
+                     'old_soaker', '_testingTesting', ]
+        self.cols_ans = ['unnamed_0', '_201moore', 'acadia_1_2_3',
+                         'old_soaker', '_testingtesting', ]
 
     def test_dict_items(self):
         """utils.dict_items"""
@@ -112,12 +118,17 @@ class TestUtils(unittest.TestCase):
 
     def test_norm_colname(self):
         """utils.norm_colname"""
-        cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3', 'old_soaker',
-                '_testingTesting', ]
-        ans = ['unnamed_0', '_201moore', 'acadia_1_2_3', 'old_soaker',
-               '_testingtesting', ]
-        for c, a in zip(cols, ans):
+        for c, a in zip(self.cols, self.cols_ans):
             # changed cols should match answers
             self.assertEqual(norm_colname(c), a)
             # already sql-normed cols should match themselves
             self.assertEqual(norm_colname(a), a)
+
+    def test_normalize_colnames(self):
+        """utils.normalize_colnames"""
+        self.assertListEqual(normalize_colnames(self.cols),
+                             self.cols_ans,
+                             msg='unnormalized should be SQL-normalized')
+        self.assertListEqual(normalize_colnames(self.cols_ans),
+                             self.cols_ans,
+                             msg='already normalize columns should not change')
