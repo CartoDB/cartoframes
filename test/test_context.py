@@ -10,11 +10,12 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
 
+
 class TestCartoContext(unittest.TestCase):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
-            os.environ.get('USERNAME') is None):
+                os.environ.get('USERNAME') is None):
             try:
                 creds = json.loads(open('test/secret.json').read())
             except OSError:
@@ -27,20 +28,23 @@ class TestCartoContext(unittest.TestCase):
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
-        self.baseurl = 'https://{username}.carto.com/'.format(username=self.username)
+        self.baseurl = 'https://{username}.carto.com/'.format(
+            username=self.username)
         self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
-                                  'name10', 'geoid10', 'affgeoid10', 'pumace10',
-                                  'statefp10', 'awater10', 'aland10','updated_at',
-                                  'created_at'])
+                                  'name10', 'geoid10', 'affgeoid10',
+                                  'pumace10', 'statefp10', 'awater10',
+                                  'aland10', 'updated_at', 'created_at'])
         self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                             api_key=self.apikey)
         self.sql_client = SQLClient(self.auth_client)
         self.test_read_table = 'cb_2013_puma10_500k'
         self.test_write_table = 'cartoframes_test_table_{ver}'.format(
             ver=sys.version[0:3].replace('.', '_'))
+        self.test_write_batch_table = (
+            'cartoframes_test_batch_table_{ver}'.format(
+                ver=sys.version[0:3].replace('.', '_')))
         self.test_query_table = 'cartoframes_test_query_table_{ver}'.format(
             ver=sys.version[0:3].replace('.', '_'))
-
 
     def tearDown(self):
         """restore to original state"""
@@ -50,7 +54,9 @@ class TestCartoContext(unittest.TestCase):
         self.sql_client.send('''
             DROP TABLE IF EXISTS "{}"
             '''.format(self.test_query_table))
-
+        self.sql_client.send('''
+            DROP TABLE IF EXISTS "{}"
+        '''.format(self.test_write_batch_table))
         # TODO: remove the named map templates
 
     def add_map_template(self):
@@ -148,6 +154,29 @@ class TestCartoContext(unittest.TestCase):
         # number of geoms should equal number of rows
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
+
+        # test batch writes
+        n_rows = 550000
+        df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
+
+        cc.write(df, self.test_write_batch_table)
+
+        resp = self.sql_client.send('''
+            SELECT count(*) AS num_rows FROM {table}
+            '''.format(table=self.test_write_batch_table))
+        # number of rows same in dataframe and carto table
+        self.assertEqual(n_rows, resp['rows'][0]['num_rows'])
+
+        cols = self.sql_client.send('''
+            SELECT * FROM {table} LIMIT 1
+        '''.format(table=self.test_write_batch_table))
+        expected_schema = {'vals': {'type': 'number'},
+                           'the_geom': {'type': 'geometry'},
+                           'the_geom_webmercator': {'type': 'geometry'},
+                           'cartodb_id': {'type': 'number'}}
+        # table should be properly created
+        # util columns + new column of type number
+        self.assertDictEqual(cols['fields'], expected_schema)
 
     def test_cartocontext_table_exists(self):
         """CartoContext._table_exists"""
@@ -390,17 +419,19 @@ class TestCartoContext(unittest.TestCase):
                                         'idnum': int})
         # specify order of columns
         df = df[['id', 'val', 'truth', 'idnum']]
+        pgcols = ['id', 'val', 'truth', 'idnum']
         ans = ('NULLIF("id", \'\')::text AS id, '
                'NULLIF("val", \'\')::numeric AS val, '
                'NULLIF("truth", \'\')::boolean AS truth, '
                'NULLIF("idnum", \'\')::numeric AS idnum')
 
-        self.assertEqual(ans, _df2pg_schema(df))
+        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
         # add the_geom
         df['the_geom'] = 'Point(0 0)'
         ans = '\"the_geom\", ' + ans
-        self.assertEqual(ans, _df2pg_schema(df))
+        pgcols.append('the_geom')
+        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
     def test_drop_tables_query(self):
         """context._drop_tables_query"""
