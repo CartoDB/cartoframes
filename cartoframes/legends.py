@@ -45,7 +45,7 @@ def get_legend(sql_client, layer):
             SELECT {bin_query} AS bin_edges
               FROM ({query}) AS _wrap
               WHERE "{col}" is not null
-               AND "{col}" != 'nan'
+               AND "{col}"::float != 'nan'
         '''.format(
             bin_query=bin_query,
             query=layer.query,
@@ -53,7 +53,7 @@ def get_legend(sql_client, layer):
         edges = bin_edges['rows'][0]['bin_edges']
     except CartoException as err:
         raise CartoException(err)
-    
+
     return draw_legend(edges, layer.color, layer.scheme)
 
 

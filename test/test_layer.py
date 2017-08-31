@@ -80,24 +80,39 @@ class TestQueryLayer(unittest.TestCase):
 
         # check valid dict color options
         dict_colors = [{'column': 'mandrill', 'scheme': styling.armyRose(7)},
-                       {'column': 'mercxx', 'scheme': {'bin_method': 'equal',
-                                                       'bins': 7,
-                                                       'name': 'Temps'}},
+                       {'column': 'mercxx',
+                        'scheme': {'bin_method': 'equal',
+                                   'bins': 7,
+                                   'name': 'Temps',
+                                   'provider': 'cartocolors',
+                                   'type': 'sequential'}},
                        {'column': 'elephant',
                         'scheme': styling.redOr(10, bin_method='jenks')}]
         dict_colors_ans = ['mandrill', 'mercxx', 'elephant']
-        dict_colors_scheme = [{'name': 'ArmyRose', 'bins': 7, 'bin_method': 'quantiles'},
-                              {'name': 'Temps', 'bins': 7, 'bin_method': 'equal'},
-                              {'name': 'RedOr', 'bins': 10, 'bin_method': 'jenks'}]
+        dict_colors_scheme = [{'name': 'ArmyRose',
+                               'bins': 7,
+                               'bin_method': 'quantiles',
+                               'provider': 'cartocolors',
+                               'type': 'divergent'},
+                              {'name': 'Temps',
+                               'bins': 7,
+                               'bin_method': 'equal',
+                               'provider': 'cartocolors',
+                               'type': 'sequential'},
+                              {'name': 'RedOr',
+                               'bins': 10,
+                               'bin_method': 'jenks',
+                               'provider': 'cartocolors',
+                               'type': 'sequential'}]
         for idx, val in enumerate(dict_colors):
             qlayer = QueryLayer(self.query, color=val)
             self.assertEqual(qlayer.color, dict_colors_ans[idx])
-            self.assertEqual(qlayer.scheme, dict_colors_scheme[idx])
+            self.assertDictEqual(qlayer.scheme, dict_colors_scheme[idx])
 
         # check valid string color options
         str_colors = ['#FF0000', 'aliceblue', 'cookie_monster']
         str_colors_ans = ['#FF0000', 'aliceblue', 'cookie_monster']
-        str_scheme_ans = [None, None, styling.mint(5)]
+        str_scheme_ans = [{}, {}, styling.mint(5)]
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
@@ -115,8 +130,6 @@ class TestQueryLayer(unittest.TestCase):
         with self.assertRaises(ValueError,
                                msg='color dict must have a `column` key'):
             QueryLayer(self.query, color={'scheme': styling.vivid(10)})
-
-
 
     def test_querylayer_time_errors(self):
         """layer.QueryLayer time option exceptions"""
