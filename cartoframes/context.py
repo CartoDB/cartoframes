@@ -193,6 +193,23 @@ class CartoContext(object):
                        base_url=self.base_url,
                        table_name=final_table_name))
 
+    def delete(self, table_name):
+        """Delete table
+
+        Args:
+            table_name (str): Table name to delete
+
+        Returns:
+            None
+        """
+        try:
+            self.auth_client.send('api/v1/viz/{table_name}'.format(table_name=table_name),
+                                  http_method='DELETE')
+        except CartoException as err:
+            warn('Failed to delete the following table from CARTO '
+                 'account: {table_name}'.format(table_name=table_name))
+        return None
+
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
         try:
@@ -243,7 +260,8 @@ class CartoContext(object):
                 temp_table = self._send_dataframe(chunk, temp_table, temp_dir,
                                                   geom_col, pgcolnames)
             except CartoException as err:
-                self._drop_tables(subtables)
+                for table in subtables:
+                    self.delete(table)
                 raise CartoException(err)
 
             if temp_table:
@@ -259,6 +277,8 @@ class CartoContext(object):
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
+            drop_tables = '\n'.join('DROP TABLE IF EXISTS {table};'.format(table=table)
+                                    for table in subtables)
             query = '''
                 DROP TABLE IF EXISTS "{table_name}";
                 CREATE TABLE "{table_name}" As {unioned_tables};
@@ -268,32 +288,15 @@ class CartoContext(object):
                 '''.format(table_name=table_name,
                            unioned_tables=unioned_tables,
                            org=self.username if self.is_org else 'public',
-                           drop_tables=_drop_tables_query(subtables))
+                           drop_tables=drop_tables)
             self._debug_print(query=query)
             _ = self.sql_client.send(query)
         except CartoException as err:
-            try:
-                self._drop_tables(subtables)
-            except CartoException as err:
-                warn('Failed to drop the following subtables from CARTO '
-                     'account: {}'.format(', '.join(subtables)))
-            finally:
-                raise Exception('Failed to upload dataframe: {}'.format(err))
+            for table in subtables:
+                self.delete(table)
+            raise Exception('Failed to upload dataframe: {}'.format(err))
 
         return table_name
-
-    def _drop_tables(self, tables):
-        """Drop all tables in tables list
-
-        Args:
-            tables (list of str): list of table names
-
-        Returns:
-            None
-        """
-        query = _drop_tables_query(tables)
-        _ = self.sql_client.send(query)
-        return None
 
     def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames):
         """Send a DataFrame to CARTO to be imported as a SQL table.
@@ -566,7 +569,7 @@ class CartoContext(object):
                 to a view to have all data layers in view.
             size (tuple, optional): List of pixel dimensions for the map. Format
                 is ``(width, height)``. Defaults to ``(800, 400)``.
-            ax: matplotlib axis on which to draw the image. Only used when 
+            ax: matplotlib axis on which to draw the image. Only used when
                 ``interactive`` is ``False``.
 
         Returns:
@@ -1081,9 +1084,3 @@ def _df2pg_schema(dataframe, pgcolnames):
     if 'the_geom' in pgcolnames:
         return '"the_geom", ' + schema
     return schema
-
-
-def _drop_tables_query(tables):
-    """Generate drop tables query for all tables in list `tables`"""
-    return '\n'.join('DROP TABLE IF EXISTS {};'.format(t)
-                     for t in tables)
