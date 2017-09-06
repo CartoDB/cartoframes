@@ -353,6 +353,13 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(ValueError):
             cc.map(lng=44.3386, lat=68.2733)
 
+        # zoom needs to be specified with lng/lat
+        with self.assertRaises(ValueError):
+            cc.map(lat=68.2733)
+
+        # zero-valued is not None-valued
+        cc.map(lng=0, lat=0, zoom=0)
+
         # only one basemap layer can be added
         with self.assertRaises(ValueError):
             cc.map(layers=[BaseMap('dark'), BaseMap('light')])
