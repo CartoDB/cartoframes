@@ -595,8 +595,9 @@ class CartoContext(object):
 
         if len(layers) > 8:
             raise ValueError('map can have at most 8 layers')
-
-        if any([zoom, lat, lng]) != all([zoom, lat, lng]):
+        
+        nullity = [zoom is None, lat is None, lng is None]
+        if any(nullity) and not all(nullity):
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
