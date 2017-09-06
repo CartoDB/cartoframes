@@ -203,11 +203,15 @@ class CartoContext(object):
             None
         """
         try:
-            self.auth_client.send('api/v1/viz/{table_name}'.format(table_name=table_name),
-                                  http_method='DELETE')
+            self.auth_client.send(
+                'api/v1/viz/{table_name}'.format(table_name=table_name),
+                http_method='DELETE'
+            )
         except CartoException as err:
             warn('Failed to delete the following table from CARTO '
-                 'account: {table_name}'.format(table_name=table_name))
+                 'account: `{table_name}`. ({err})'.format(
+                     table_name=table_name,
+                     err=err))
         return None
 
     def _table_exists(self, table_name):
@@ -277,8 +281,9 @@ class CartoContext(object):
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
-            drop_tables = '\n'.join('DROP TABLE IF EXISTS {table};'.format(table=table)
-                                    for table in subtables)
+            drop_tables = '\n'.join(
+                    'DROP TABLE IF EXISTS {table};'.format(table=table)
+                    for table in subtables)
             query = '''
                 DROP TABLE IF EXISTS "{table_name}";
                 CREATE TABLE "{table_name}" As {unioned_tables};
