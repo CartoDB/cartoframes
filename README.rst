@@ -4,8 +4,8 @@ CARTOFrames
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
     :target: https://travis-ci.org/CartoDB/cartoframes
-.. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg
-    :target: https://coveralls.io/github/CartoDB/cartoframes
+.. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
+    :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
