@@ -433,15 +433,6 @@ class TestCartoContext(unittest.TestCase):
         pgcols.append('the_geom')
         self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
-    def test_drop_tables_query(self):
-        """context._drop_tables_query"""
-        from cartoframes.context import _drop_tables_query
-        tables = ['table1', 'table2', 'table3']
-        ans = ('DROP TABLE IF EXISTS table1;\n'
-               'DROP TABLE IF EXISTS table2;\n'
-               'DROP TABLE IF EXISTS table3;')
-        self.assertEqual(ans, _drop_tables_query(tables))
-
     def test_add_encoded_geom(self):
         """context._add_encoded_geom"""
         from cartoframes.context import _add_encoded_geom, _encode_geom
