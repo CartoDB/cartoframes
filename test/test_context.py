@@ -28,35 +28,41 @@ class TestCartoContext(unittest.TestCase):
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+
         self.baseurl = 'https://{username}.carto.com/'.format(
             username=self.username)
-        self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
-                                  'name10', 'geoid10', 'affgeoid10',
-                                  'pumace10', 'statefp10', 'awater10',
-                                  'aland10', 'updated_at', 'created_at'])
+        self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
+                                  'csafp', 'geoid', 'lsad', 'name', 'the_geom',
+                                  'the_geom_webmercator', 'updated_at'])
         self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                             api_key=self.apikey)
         self.sql_client = SQLClient(self.auth_client)
-        self.test_read_table = 'cb_2013_puma10_500k'
-        self.test_write_table = 'cartoframes_test_table_{ver}'.format(
-            ver=sys.version[0:3].replace('.', '_'))
+
+        # test tables
+        has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        pyver = sys.version[0:3].replace('.', '_')
+        self.test_read_table = 'cb_2013_us_csa_500k'
+        self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
+            ver=pyver,
+            mpl=has_mpl)
         self.test_write_batch_table = (
-            'cartoframes_test_batch_table_{ver}'.format(
-                ver=sys.version[0:3].replace('.', '_')))
-        self.test_query_table = 'cartoframes_test_query_table_{ver}'.format(
-            ver=sys.version[0:3].replace('.', '_'))
+            'cartoframes_test_batch_table_{ver}_{mpl}'.format(
+                ver=pyver,
+                mpl=has_mpl))
+        self.test_query_table = ('cartoframes_test_query_'
+                                 'table_{ver}_{mpl}'.format(
+                                    ver=pyver,
+                                    mpl=has_mpl))
 
     def tearDown(self):
         """restore to original state"""
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-            '''.format(self.test_write_table))
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-            '''.format(self.test_query_table))
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-        '''.format(self.test_write_batch_table))
+        tables = (self.test_write_table,
+                  self.test_write_batch_table,
+                  self.test_query_table)
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        for table in tables:
+            cc.delete(table)
         # TODO: remove the named map templates
 
     def add_map_template(self):
@@ -101,7 +107,7 @@ class TestCartoContext(unittest.TestCase):
         # normal table
         df = cc.read(self.test_read_table)
         self.assertTrue(set(df.columns) == self.valid_columns)
-        self.assertTrue(len(df) == 2379)
+        self.assertTrue(len(df) == 169)
 
         # read with limit
         df = cc.read(self.test_read_table, limit=10)
