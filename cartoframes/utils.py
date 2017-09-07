@@ -1,11 +1,13 @@
 import sys
 from tqdm import tqdm
 
+
 def dict_items(d):
-    if sys.version_info >= (3,0):
+    if sys.version_info >= (3, 0):
         return d.items()
     else:
         return d.iteritems()
+
 
 def cssify(css_dict):
     css = ''

@@ -1,10 +1,12 @@
-"""Styling module that exposes CartoColor schemes. Read more about CartoColor in its `GitHub repository <https://github.com/Carto-color/>`__.
+"""Styling module that exposes CartoColor schemes. Read more about CartoColor
+in its `GitHub repository <https://github.com/Carto-color/>`__.
 
 .. image:: https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png
     :width: 700px
     :alt: CartoColors
-
 """
+
+
 class BinMethod:
     quantiles = 'quantiles'
     jenks = 'jenks'
@@ -43,6 +45,7 @@ def _scheme(name, bins, bin_method):
         'bins': bins,
         'bin_method': bin_method,
     }
+
 
 # Get methods for CartoColor schemes
 def burg(bins, bin_method=BinMethod.quantiles):

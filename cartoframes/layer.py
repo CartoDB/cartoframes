@@ -1,5 +1,6 @@
-"""Layer classes for map creation. See examples in `layer.Layer <#layer.Layer>`__
-and `layer.QueryLayer <#layer.QueryLayer>`__ for example usage.
+"""Layer classes for map creation. See examples in `layer.Layer
+<#layer.Layer>`__ and `layer.QueryLayer <#layer.QueryLayer>`__
+for example usage.
 """
 
 import pandas as pd
@@ -13,6 +14,7 @@ from cartoframes.styling import BinMethod, mint, get_scheme_cartocss
 DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
                   '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
                   '#CC3A8E', '#A5AA99')
+
 
 class AbstractLayer(object):
     """Abstract Layer object"""
@@ -39,11 +41,11 @@ class BaseMap(AbstractLayer):
                        Layer('acadia_biodiversity')])
 
     Args:
-        source (str, optional): One of ``light`` or ``dark``. Defaults to ``dark``.
-            Basemaps come from
+        source (str, optional): One of ``light`` or ``dark``. Defaults to
+            ``dark``. Basemaps come from
             https://carto.com/location-data-services/basemaps/
-        labels (str, optional): One of ``back``, ``front``, or None. Labels on the
-            front will be above the data layers. Labels on back will be
+        labels (str, optional): One of ``back``, ``front``, or None. Labels on
+            the front will be above the data layers. Labels on back will be
             underneath the data layers but on top of the basemap. Setting
             labels to ``None`` will only show the basemap.
         only_labels (bool, optional): Whether to show labels or not.
@@ -67,7 +69,8 @@ class BaseMap(AbstractLayer):
             self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
                         '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
         elif self.source.startswith('http'):
-            # [BUG] Remove this once baselayer urls can be passed in named map config
+            # TODO: Remove this once baselayer urls can be passed in named
+            # map config
             raise ValueError('BaseMap cannot contain a custom url at the '
                              'moment')
             # self.url = source
@@ -97,7 +100,8 @@ class QueryLayer(AbstractLayer):
     * performing arbitrary relational database queries (e.g., complex JOINs
       in SQL instead of in pandas)
 
-    Used in the `layers` keyword in `CartoContext.map() <#context.CartoContext.map>`__.
+    Used in the `layers` keyword in `CartoContext.map()
+        <#context.CartoContext.map>`__.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
@@ -135,10 +139,11 @@ class QueryLayer(AbstractLayer):
                        Layer('fantastic_sql_table')])
 
     Args:
-        query (str): Query that is fed into a pandas DataFrame. At a minimum, all
-            queries need to have the columns `cartodb_id`, `the_geom`, and
+        query (str): Query that is fed into a pandas DataFrame. At a minimum,
+            all queries need to have the columns `cartodb_id`, `the_geom`, and
             `the_geom_webmercator`. Read more in
-            `CARTO's docs <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__
+            `CARTO's docs
+            <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__
             for more information.
         time (dict or str, optional): Style to apply to layer.
             If `time` is a `dict`, the following keys are options:
@@ -147,10 +152,12 @@ class QueryLayer(AbstractLayer):
               be of type time or float.
             - method (str, optional): Type of aggregation method for operating
               on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
-              be one of ``avg``, ``sum``, or another `PostgreSQL aggregate functions
+              be one of ``avg``, ``sum``, or another `PostgreSQL aggregate
+              functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate (``cumulative``)
+            - cumulative (str, optional): Whether to accumulate
+              (``cumulative``)
               the point data overtime, or show the event at the specified time
               only (``linear``). Defaults to ``linear``.
             - frames (int, optional): Number of frames in the animation.
@@ -311,7 +318,6 @@ class QueryLayer(AbstractLayer):
             })
             self.cartocss += self.torque_cartocss
 
-
     def _get_cartocss(self, basemap):
         """Generate cartocss for class properties"""
         if isinstance(self.size, int):
@@ -360,6 +366,7 @@ class QueryLayer(AbstractLayer):
             }
         })
 
+
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is useful for visualizing individual datasets
@@ -393,11 +400,12 @@ class Layer(QueryLayer):
             - method (str, optional): Type of aggregation method for operating
               on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
               be one of ``avg``, ``sum``, or another `PostgreSQL aggregate
-              functions <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
+              functions
+              <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate (``cumulative``)
-              the point data overtime, or show the event at the specified time
-              only (``linear``). Defaults to ``linear``.
+            - cumulative (str, optional): Whether to accumulate
+              (``cumulative``) the point data overtime, or show the event at
+              the specified time only (``linear``). Defaults to ``linear``.
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
@@ -411,7 +419,8 @@ class Layer(QueryLayer):
 
             - column (str): Column to base coloring from.
             - scheme (str, optinal): Color scheme from
-              `CartoColors <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
+              `CartoColors
+              <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
               Defaults to `Mint`.
             - bin_method (str, optional): Quantification method for dividing
               data range into bins. Must be one of: ``quantiles``, ``equal``,
@@ -451,6 +460,7 @@ class Layer(QueryLayer):
 
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
+            # TODO: error on this as NotImplementedError
             context.write(self.source,
                           self.table_name,
                           overwrite=self.overwrite)
@@ -459,7 +469,8 @@ class Layer(QueryLayer):
 # cdb_context.map([BaseMap('light'),
 #                  BaseMap('dark'),
 #                  BaseMap('https://{x}/{y}/{z}'),
-#                  BaseMap('light', labels=[default: 'back', 'front', 'back', None]),
+#                  BaseMap('light', labels=[default: 'back', 'front', 'back',
+#                                           None]),
 #                  Layer('mydata',
 #                        time_column='timestamp'),
 #                  Layer('foo', df,
@@ -474,7 +485,8 @@ class Layer(QueryLayer):
 #                            'column': 'col1',
 #                            'scheme': cartoframes.styling.mint(5),
 #                            'size': 10, # Option 1, fixed size
-#                            'size': 'col2', # Option 2, by value Error if using time_column
+#                            'size': 'col2', # Option 2, by value Error if
+#                                              using time_column
 #                            'size': {
 #                                'column': 'col2', # Error if using time_column
 #                                'range': (1, 10),
@@ -495,7 +507,8 @@ class Layer(QueryLayer):
 #                            'widgets': 'col1',
 #                            'widgets': ['col1', 'col2'],
 #                            'widgets': {
-#                                'col1': cartoframes.widgets.Histogram(use_global=True),
+#                                'col1':
+#                                 cartoframes.widgets.Histogram(use_global=True),
 #                                'col2': cartoframes.widgets.Category(),
 #                                'col3': cartoframes.widgets.Min(),
 #                                'col4': cartoframes.widgets.Max(),
