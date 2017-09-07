@@ -59,6 +59,9 @@ class TestCartoContext(unittest.TestCase):
         self.sql_client.send('''
             DROP TABLE IF EXISTS "{}"
         '''.format(self.test_write_batch_table))
+        self.sql_client.send('''
+            DROP TABLE IF EXISTS "{}"
+        '''.format(self.test_delete_table))
         # TODO: remove the named map templates
 
     def add_map_template(self):
