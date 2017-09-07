@@ -45,6 +45,8 @@ class TestCartoContext(unittest.TestCase):
                 ver=sys.version[0:3].replace('.', '_')))
         self.test_query_table = 'cartoframes_test_query_table_{ver}'.format(
             ver=sys.version[0:3].replace('.', '_'))
+        self.test_delete_table = 'cartoframes_test_delete_table_{ver}'.format(
+            ver=sys.version[0:3].replace('.', '_'))
 
     def tearDown(self):
         """restore to original state"""
@@ -186,6 +188,23 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
 
+    def test_cartocontext_delete(self):
+        """CartoContext.delete"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = {'col1': [1,2,3],
+                'col2': ['a','b','c']}
+        schema = {'col1': int,
+                  'col2': 'object'}
+        df = pd.DataFrame(data).astype(schema)
+
+        cc.write(df, self.test_delete_table)
+        resp = cc.delete(self.test_delete_table)
+        self.assertIsNone(resp)
+
+        #try to delete a table that does not exists
+        resp = delete('non_existent_table')
+        self.assertWarns(resp)
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
@@ -292,7 +311,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(labels_front, IPython.core.display.HTML)
 
         # test with one Layer
-        one_layer = cc.map(layers=Layer('tweets_obama')) 
+        one_layer = cc.map(layers=Layer('tweets_obama'))
         self.assertIsInstance(one_layer, IPython.core.display.HTML)
 
         # test with two Layers
