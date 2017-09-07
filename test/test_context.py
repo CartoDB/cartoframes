@@ -78,7 +78,7 @@ class TestCartoContext(unittest.TestCase):
     def test_cartocontext_isorguser(self):
         """CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                              api_key=self.apikey)
+                                      api_key=self.apikey)
         self.assertTrue(not cc._is_org_user())
 
     def test_cartocontext_read(self):
@@ -301,13 +301,15 @@ class TestCartoContext(unittest.TestCase):
         # have the HTML innards that are to be expected
         if sys.version[0] == 3:
             self.assertRegex(basemap_only_static.data,
-                    '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+                             ('^<img src="https://.*api/v1/map/static/named/'
+                              'cartoframes_ver.*" />$'))
             self.assertRegex(basemap_only_interactive.data,
                              '^<iframe srcdoc="<!DOCTYPE html>.*')
         elif sys.version[0] == 2:
             self.assertRegexMatches(
                 basemap_only_static.data,
-                '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+                ('^<img src="https://.*api/v1/map/static/named/'
+                 'cartoframes_ver.*" />$'))
             self.assertRegexMatches(
                 basemap_only_interactive.data,
                 '^<iframe srcdoc="<!DOCTYPE html>.*')
@@ -317,7 +319,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(labels_front, IPython.core.display.HTML)
 
         # test with one Layer
-        one_layer = cc.map(layers=Layer('tweets_obama')) 
+        one_layer = cc.map(layers=Layer('tweets_obama'))
         self.assertIsInstance(one_layer, IPython.core.display.HTML)
 
         # test with two Layers
@@ -331,17 +333,17 @@ class TestCartoContext(unittest.TestCase):
                                                 SELECT *
                                                 FROM tweets_obama
                                                 LIMIT 100'''),
-                                            Layer(self.test_read_table)])
+                                           Layer(self.test_read_table)])
 
         self.assertIsInstance(onelayer_onequery, IPython.core.display.HTML)
 
         # test with BaseMap, Layer, QueryLayer
-        oneeach = cc.map(layers=[BaseMap('light'),
-                                 QueryLayer('''
-                                     SELECT *
-                                     FROM tweets_obama
-                                     LIMIT 100''', color='favoritescount'),
-                                 Layer(self.test_read_table)])
+        _ = cc.map(layers=[BaseMap('light'),
+                           QueryLayer('''
+                               SELECT *
+                               FROM tweets_obama
+                               LIMIT 100''', color='favoritescount'),
+                           Layer(self.test_read_table)])
 
         # Errors
         # too many layers
@@ -373,10 +375,9 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
 
-
     def test_get_bounds(self):
         """CartoContext._get_bounds"""
-        from cartoframes.layer import Layer, QueryLayer
+        from cartoframes.layer import QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         vals1 = {'minx': 0,
@@ -482,7 +483,8 @@ class TestCartoContext(unittest.TestCase):
         _add_encoded_geom(df, 'geometry')
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(
+                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         # don't specify geometry column (should exist since decode_geom==True)
         df = cc.read(self.test_read_table, limit=5,
@@ -493,7 +495,8 @@ class TestCartoContext(unittest.TestCase):
         _add_encoded_geom(df, None)
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(
+                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         df = cc.read(self.test_read_table, limit=5)
 
