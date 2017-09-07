@@ -203,8 +203,8 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsNone(resp)
 
         #try to delete a table that does not exists
-        resp = delete('non_existent_table')
-        self.assertWarns(resp)
+        with self.assertWarns(UserWarning):
+            cc.delete('non_existent_table')
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
