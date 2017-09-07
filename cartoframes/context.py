@@ -495,24 +495,34 @@ class CartoContext(object):
 
         self._debug_print(select_res=select_res)
 
+        # TODO: replace this with a function
+        pg2dtypes = {
+            'date': 'object',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+        }
+
         fields = select_res['fields']
-        if not len(fields):
-            return pd.DataFrame()
+        schema = {
+            field: pg2dtypes.get(fields[field]['type'], 'object')
+                   if field != 'cartodb_id' else 'int64'
+            for field in fields
+        }
+        if not schema.keys():
+            return None
+        self._debug_print(fields=fields, schema=schema)
 
-        df = pd.DataFrame(data=select_res['rows'])
-        for field in fields:
-            if fields[field]['type'] == 'date':
-                df[field] = pd.to_datetime(df[field], errors='ignore')
-
-        self._debug_print(columns=df.columns,
-                          dtypes=df.dtypes)
+        df = pd.DataFrame(
+            data=select_res['rows'],
+            columns=[k for k in fields]).astype(schema)
 
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
 
         if decode_geom:
             df['geometry'] = df.the_geom.apply(_decode_geom)
-
         return df
 
     def map(self, layers=None, interactive=True,
@@ -1068,29 +1078,15 @@ def _decode_geom(ewkb):
 
 
 def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'numeric',
-        'float32': 'numeric',
-        'int32': 'numeric',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'date',
-    }
+    """returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {'float64': 'numeric',
+               'int64': 'numeric',
+               'float32': 'numeric',
+               'int32': 'numeric',
+               'object': 'text',
+               'bool': 'boolean',
+               'datetime64[ns]': 'text'}
     return mapping.get(str(dtype), 'text')
-
-
-def _pg2dtypes(pgtype):
-    """Returns equivalent dtype for input `pgtype`."""
-    mapping = {
-        'date': 'datetime64[ns]',
-        'number': 'float64',
-        'string': 'object',
-        'boolean': 'bool',
-        'geometry': 'object',
-    }
-    return mapping.get(str(pgtype), 'object')
 
 
 def _df2pg_schema(dataframe, pgcolnames):

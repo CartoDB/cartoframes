@@ -59,7 +59,7 @@ def norm_colname(colname):
     """
     last_char_special = False
     char_list = []
-    for e in colname:
+    for e in str(colname):
         if e.isalnum():
             char_list.append(e.lower())
             last_char_special = False
