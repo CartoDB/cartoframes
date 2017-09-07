@@ -54,9 +54,9 @@ class TestUtils(unittest.TestCase):
         ])
 
         self.cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3',
-                     'old_soaker', '_testingTesting', ]
+                     'old_soaker', '_testingTesting', 1, 1.0]
         self.cols_ans = ['unnamed_0', '_201moore', 'acadia_1_2_3',
-                         'old_soaker', '_testingtesting', ]
+                         'old_soaker', '_testingtesting', '_1', '_1_0']
 
     def test_dict_items(self):
         """utils.dict_items"""
