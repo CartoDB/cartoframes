@@ -114,6 +114,11 @@ class CartoContext(object):
             limit (int, optional): Read only ``limit`` lines from
                 ``table_name``. Defaults to `None`, which reads the full table.
             index (str, optional): Not currently in use.
+            decode_geom (bool, optional): Defaults to `False`, which reads the
+                table into a pandas DataFrame as is. If `True`, reads table into
+                a pandas DataFrame with wkb geometries found in column
+                `the_geom` decoded as shapely geometries in column named
+                `geometry`.
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -464,11 +469,14 @@ class CartoContext(object):
             table_name (str, optional): If set, this will create a new
                 table in the user's CARTO account that is the result of the
                 query. Defaults to None (no table created).
+            decode_geom (bool, optional): Defaults to `False`, which does not
+                decode geometries. If set to `True`, this will decode wkb
+                geometries into shapely geometries.
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of PostgreSQL date types, the data type 'object' is
-            used.
+            In the case of invalid PostgreSQL date types, the data type 'object'
+            is used.
         """
         self._debug_print(query=query)
         if table_name:
