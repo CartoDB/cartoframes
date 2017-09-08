@@ -9,6 +9,7 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
+import warnings
 
 
 class TestCartoContext(unittest.TestCase):
@@ -204,14 +205,24 @@ class TestCartoContext(unittest.TestCase):
         cc.write(df, self.test_delete_table)
         cc.delete(self.test_delete_table)
 
-        # check that deleted table raises an exception
+        # check that querying recently deleted table raises an exception
         with self.assertRaises(CartoException):
             cc.sql_client.send('select * from {}'.format(self.test_delete_table))
 
         # try to delete a table that does not exists
-        with self.assertWarns(UserWarning):
+        def fxn():
             cc.delete('non_existent_table')
 
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            fxn()
+            # Verify one warning, subclass is UserWarning, and expected message
+            # is in warning
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "Failed to delete" in str(w[-1].message)
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
