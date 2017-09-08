@@ -54,6 +54,9 @@ class TestCartoContext(unittest.TestCase):
                                  'table_{ver}_{mpl}'.format(
                                     ver=pyver,
                                     mpl=has_mpl))
+        self.test_delete_table = 'cartoframes_test_delete_table_{ver}_{mpl}'.format(
+            ver=pyver,
+            mpl=has_mpl)
 
     def tearDown(self):
         """restore to original state"""
@@ -530,3 +533,19 @@ class TestCartoContext(unittest.TestCase):
         ewkb_resp = _encode_geom(geom)
         self.assertEqual(ewkb_resp, ewkb)
         self.assertIsNone(_encode_geom(None))
+
+    def test_dtypes2pg(self):
+        """context._dtypes2pg"""
+        from cartoframes.context import _dtypes2pg
+        results = {
+            'float64': 'numeric',
+            'int64': 'numeric',
+            'float32': 'numeric',
+            'int32': 'numeric',
+            'object': 'text',
+            'bool': 'boolean',
+            'datetime64[ns]': 'date',
+        }
+        for i in results:
+            result = _dtypes2pg(i)
+            self.assertEqual (result, results[i])
