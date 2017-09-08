@@ -23,9 +23,9 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
-from cartoframes.utils import dict_items, normalize_colnames
-from cartoframes.layer import BaseMap
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from .utils import dict_items, normalize_colnames
+from .layer import BaseMap
+from .maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -37,7 +37,7 @@ try:
     import matplotlib.pyplot as plt
     # set dpi based on CARTO Static Maps API dpi
     mpi.rcParams['figure.dpi'] = 72.0
-except ImportError:
+except (ImportError, RuntimeError):
     mpi = None
     plt = None
 HAS_MATPLOTLIB = plt is not None
@@ -46,14 +46,14 @@ HAS_MATPLOTLIB = plt is not None
 # half million rows
 MAX_IMPORT_ROWS = 499999
 
+
 class CartoContext(object):
     """Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
     Example:
-        Create a CartoContext object
-        .. code:: python
+        Create a CartoContext object::
 
             import cartoframes
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
@@ -65,14 +65,15 @@ class CartoContext(object):
             installation users should ask their admin.
         api_key (str): CARTO API key.
         session (requests.Session, optional): requests session. See `requests
-            documentation <http://docs.python-requests.org/en/master/user/advanced/>`__
+            documentation
+            <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information:
         verbose (bool, optional): Output underlying process states (True), or
             suppress (False, default)
 
     Returns:
-        :obj:`CartoContext`: A CartoContext object that is authenticated against
-        the user's CARTO account.
+        :obj:`CartoContext`: A CartoContext object that is authenticated
+        against the user's CARTO account.
     """
     def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
 
@@ -147,7 +148,8 @@ class CartoContext(object):
             lnglat (tuple, optional): lng/lat pair that can be used for
                 creating a geometry on CARTO. Defaults to ``None``. In some
                 cases, geometry will be created without specifying this. See
-                CARTO's `Import API <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
+                CARTO's `Import API
+                <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
                 as `the_geom`.
@@ -442,7 +444,6 @@ class CartoContext(object):
                                         new_table=import_job['table_name']))
         return table_name
 
-
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
         granular operations on a DataFrame to only update the changed cells
@@ -453,7 +454,6 @@ class CartoContext(object):
             Not yet implemented.
         """
         pass
-
 
     def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
@@ -468,7 +468,8 @@ class CartoContext(object):
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of PostgreSQL date types, the data type 'object' is used.
+            In the case of PostgreSQL date types, the data type 'object' is
+            used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -495,36 +496,25 @@ class CartoContext(object):
 
         self._debug_print(select_res=select_res)
 
-        # TODO: replace this with a function
-        pg2dtypes = {
-            'date': 'object',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-        }
-
         fields = select_res['fields']
-        schema = {
-            field: pg2dtypes.get(fields[field]['type'], 'object')
-                   if field != 'cartodb_id' else 'int64'
-            for field in fields
-        }
-        if not schema.keys():
-            return None
-        self._debug_print(fields=fields, schema=schema)
+        if not len(fields):
+            return pd.DataFrame()
 
-        df = pd.DataFrame(
-            data=select_res['rows'],
-            columns=[k for k in fields]).astype(schema)
+        df = pd.DataFrame(data=select_res['rows'])
+        for field in fields:
+            if fields[field]['type'] == 'date':
+                df[field] = pd.to_datetime(df[field], errors='ignore')
+
+        self._debug_print(columns=df.columns,
+                          dtypes=df.dtypes)
 
         if 'cartodb_id' in fields:
             df.set_index('cartodb_id', inplace=True)
 
         if decode_geom:
             df['geometry'] = df.the_geom.apply(_decode_geom)
-        return df
 
+        return df
 
     def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None, size=(800, 400),
@@ -581,14 +571,14 @@ class CartoContext(object):
             lng (float, optional): Longitude value for the center of the map.
                 Must be used in conjunction with ``zoom`` and ``lat``. Defaults
                 to a view to have all data layers in view.
-            size (tuple, optional): List of pixel dimensions for the map. Format
-                is ``(width, height)``. Defaults to ``(800, 400)``.
+            size (tuple, optional): List of pixel dimensions for the map.
+                Format is ``(width, height)``. Defaults to ``(800, 400)``.
             ax: matplotlib axis on which to draw the image. Only used when
                 ``interactive`` is ``False``.
 
         Returns:
-            IPython.display.HTML: Interactive maps are rendered in an ``iframe``,
-            while static maps are rendered in ``img`` tags.
+            IPython.display.HTML: Interactive maps are rendered in an
+            ``iframe``, while static maps are rendered in ``img`` tags.
         """
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
@@ -607,7 +597,8 @@ class CartoContext(object):
         if len(layers) > 8:
             raise ValueError('map can have at most 8 layers')
 
-        if any([zoom, lat, lng]) != all([zoom, lat, lng]):
+        nullity = [zoom is None, lat is None, lng is None]
+        if any(nullity) and not all(nullity):
             raise ValueError('zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
@@ -660,7 +651,6 @@ class CartoContext(object):
             options['cartocss_' + str(idx)] = layer.cartocss
             options['sql_' + str(idx)] = layer.query
 
-
         params = {
             'config': json.dumps(options),
             'anti_cache': random.random(),
@@ -684,7 +674,7 @@ class CartoContext(object):
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
-        #return static_url
+
         # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
@@ -780,12 +770,10 @@ class CartoContext(object):
         """Not currently implemented"""
         pass
 
-
     def data_discovery(self, keywords=None, regex=None, time=None,
                        boundary=None):
         """Not currently implemented"""
         pass
-
 
     def data_augment(self, table_name, metadata):
         """Augment an existing CARTO table with `Data Observatory
@@ -804,9 +792,9 @@ class CartoContext(object):
             table first and use the new copy instead.
 
         Example:
-            Add new measures to a CARTO table and pass it to a pandas DataFrame.
-            Using the "Median Household Income in the past 12 months" measure
-            from the `Data Observatory Catalog
+            Add new measures to a CARTO table and pass it to a pandas
+            DataFrame. Using the "Median Household Income in the past 12
+            months" measure from the `Data Observatory Catalog
             <https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months>`__.
             ::
 
@@ -828,15 +816,15 @@ class CartoContext(object):
                 - `geom_id` (str, optional): Identifier for a desired
                   geographic boundary level to use when calculating measures.
                   Will be automatically assigned if undefined
-                - `normalization` (str, optional): The desired normalization. One
-                  of 'area', 'prenormalized', or 'denominated'. 'Area' will
+                - `normalization` (str, optional): The desired normalization.
+                  One of 'area', 'prenormalized', or 'denominated'. 'Area' will
                   normalize the measure per square kilometer, 'prenormalized'
                   will return the original value, and 'denominated' will
                   normalize by a denominator.
                 - `denom_id` (str, optional): Measure ID from DO catalog
-                - `numer_timespan` (str, optional): The desired timespan for the
-                  measurement. Defaults to most recent timespan available if
-                  left unspecified.
+                - `numer_timespan` (str, optional): The desired timespan for
+                  the measurement. Defaults to most recent timespan available
+                  if left unspecified.
                 - `geom_timespan` (str, optional): The desired timespan for the
                   geometry. Defaults to timespan matching `numer_timespan` if
                   left unspecified.
@@ -845,8 +833,8 @@ class CartoContext(object):
                   fill this area. Unit is square degrees WGS84. Set this to
                   `0` if you want to use the smallest source geometry for this
                   element of metadata, for example if you're passing in points.
-                - `target_geoms` (str, optional): Override global `target_geoms`
-                  for this element of metadata
+                - `target_geoms` (str, optional): Override global
+                  `target_geoms` for this element of metadata
                 - `max_timespan_rank` (str, optional): Override global
                   `max_timespan_rank` for this element of metadata
                 - `max_score_rank` (str, optional): Override global
@@ -873,11 +861,10 @@ class CartoContext(object):
         '''.format(username=self.username,
                    tablename=table_name,
                    cols_meta=json.dumps(metadata))
-        resp = self.sql_client.send(augment_query)
+        _ = self.sql_client.send(augment_query)
 
         # read full augmented table
         return self.read(table_name)
-
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
@@ -899,7 +886,8 @@ class CartoContext(object):
                 FROM ({query}) _wrap;
                 '''.format(query=query,
                            comma=',' if style_cols else '',
-                           style_cols=','.join(style_cols) if style_cols else ''))
+                           style_cols=(','.join(style_cols)
+                                       if style_cols else '')))
         except Exception as err:
             raise ValueError(('Layer query `{query}` and/or style column(s) '
                               '{cols} are not valid: {err}.'
@@ -914,13 +902,13 @@ class CartoContext(object):
             try:
                 self._auth_send('api/v1/map/named', 'POST',
                                 headers={'Content-Type': 'application/json'},
-                                data=get_map_template(layers, has_zoom=has_zoom))
+                                data=get_map_template(layers,
+                                                      has_zoom=has_zoom))
             except ValueError('map already exists'):
                 pass
 
             self._map_templates[map_name] = True
         return map_name
-
 
     def _get_iframe_srcdoc(self, config, bounds, options, map_options):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
@@ -935,7 +923,6 @@ class CartoContext(object):
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
                 .replace('@@LAT@@', str(options.get('lat', 0)))
                 .replace('@@LNG@@', str(options.get('lng', 0))))
-
 
     def _get_bounds(self, layers):
         """Return the bounds of all data layers involved in a cartoframes map.
@@ -976,14 +963,18 @@ class CartoContext(object):
 
         for key, value in dict_items(kwargs):
             if isinstance(value, requests.Response):
-                str_value = "status_code: {status_code}, content: {content}".format(
-                    status_code=value.status_code, content=value.content)
+                str_value = ("status_code: {status_code}, "
+                             "content: {content}").format(
+                                 status_code=value.status_code,
+                                 content=value.content)
             else:
                 str_value = str(value)
             if self._verbose < 2 and len(str_value) > 300:
-                str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
+                str_value = '{}\n\n...\n\n{}'.format(str_value[:250],
+                                                     str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
 
 def _process_credentials(api_key, base_url):
     """process credentials"""
@@ -1056,6 +1047,7 @@ def _encode_decode_decorator(func):
                               '({})'.format(err))
     return wrapper
 
+
 @_encode_decode_decorator
 def _encode_geom(geom):
     """Encode geometries into hex-encoded wkb
@@ -1064,6 +1056,7 @@ def _encode_geom(geom):
     if geom:
         return ba.hexlify(wkb.dumps(geom)).decode()
     return None
+
 
 @_encode_decode_decorator
 def _decode_geom(ewkb):
@@ -1076,15 +1069,29 @@ def _decode_geom(ewkb):
 
 
 def _dtypes2pg(dtype):
-    """returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {'float64': 'numeric',
-               'int64': 'numeric',
-               'float32': 'numeric',
-               'int32': 'numeric',
-               'object': 'text',
-               'bool': 'boolean',
-               'datetime64[ns]': 'text'}
+    """Returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {
+        'float64': 'numeric',
+        'int64': 'numeric',
+        'float32': 'numeric',
+        'int32': 'numeric',
+        'object': 'text',
+        'bool': 'boolean',
+        'datetime64[ns]': 'date',
+    }
     return mapping.get(str(dtype), 'text')
+
+
+def _pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'date': 'datetime64[ns]',
+        'number': 'float64',
+        'string': 'object',
+        'boolean': 'bool',
+        'geometry': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')
 
 
 def _df2pg_schema(dataframe, pgcolnames):

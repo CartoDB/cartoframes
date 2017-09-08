@@ -2,6 +2,7 @@
 import unittest
 from cartoframes import credentials, context
 
+
 class TestKeyStore(unittest.TestCase):
     """Tests for functions in keys module"""
     def setUp(self):
@@ -31,7 +32,6 @@ class TestKeyStore(unittest.TestCase):
         credentials.set_api_key(self.key[::-1], overwrite=True)
         self.assertEqual(credentials.api_key(), self.key[::-1])
 
-
     def test_base_url_setting(self):
         """Test case where API base url is valid"""
         credentials._remove_creds()
@@ -49,7 +49,8 @@ class TestKeyStore(unittest.TestCase):
         context.CartoContext()
         with self.assertRaises(TypeError):
             credentials.set_credentials(base_url=self.base_url[::-1],
-                                        api_key=self.key[::-1], overwrite=False)
+                                        api_key=self.key[::-1],
+                                        overwrite=False)
         credentials.set_credentials(base_url=self.base_url[::-1],
                                     api_key=self.key[::-1], overwrite=True)
         self.assertEqual(credentials.credentials(),

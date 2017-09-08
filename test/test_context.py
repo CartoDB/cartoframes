@@ -29,40 +29,41 @@ class TestCartoContext(unittest.TestCase):
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+
         self.baseurl = 'https://{username}.carto.com/'.format(
             username=self.username)
-        self.valid_columns = set(['the_geom', 'the_geom_webmercator', 'lsad10',
-                                  'name10', 'geoid10', 'affgeoid10',
-                                  'pumace10', 'statefp10', 'awater10',
-                                  'aland10', 'updated_at', 'created_at'])
+        self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
+                                  'csafp', 'geoid', 'lsad', 'name', 'the_geom',
+                                  'the_geom_webmercator', 'updated_at'])
         self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                             api_key=self.apikey)
         self.sql_client = SQLClient(self.auth_client)
-        self.test_read_table = 'cb_2013_puma10_500k'
-        self.test_write_table = 'cartoframes_test_table_{ver}'.format(
-            ver=sys.version[0:3].replace('.', '_'))
+
+        # test tables
+        has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        pyver = sys.version[0:3].replace('.', '_')
+        self.test_read_table = 'cb_2013_us_csa_500k'
+        self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
+            ver=pyver,
+            mpl=has_mpl)
         self.test_write_batch_table = (
-            'cartoframes_test_batch_table_{ver}'.format(
-                ver=sys.version[0:3].replace('.', '_')))
-        self.test_query_table = 'cartoframes_test_query_table_{ver}'.format(
-            ver=sys.version[0:3].replace('.', '_'))
-        self.test_delete_table = 'cartoframes_test_delete_table_{ver}'.format(
-            ver=sys.version[0:3].replace('.', '_'))
+            'cartoframes_test_batch_table_{ver}_{mpl}'.format(
+                ver=pyver,
+                mpl=has_mpl))
+        self.test_query_table = ('cartoframes_test_query_'
+                                 'table_{ver}_{mpl}'.format(
+                                    ver=pyver,
+                                    mpl=has_mpl))
 
     def tearDown(self):
         """restore to original state"""
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-            '''.format(self.test_write_table))
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-            '''.format(self.test_query_table))
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-        '''.format(self.test_write_batch_table))
-        self.sql_client.send('''
-            DROP TABLE IF EXISTS "{}"
-        '''.format(self.test_delete_table))
+        tables = (self.test_write_table,
+                  self.test_write_batch_table,
+                  self.test_query_table)
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        for table in tables:
+            cc.delete(table)
         # TODO: remove the named map templates
 
     def add_map_template(self):
@@ -84,7 +85,7 @@ class TestCartoContext(unittest.TestCase):
     def test_cartocontext_isorguser(self):
         """CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                              api_key=self.apikey)
+                                      api_key=self.apikey)
         self.assertTrue(not cc._is_org_user())
 
     def test_cartocontext_read(self):
@@ -107,7 +108,7 @@ class TestCartoContext(unittest.TestCase):
         # normal table
         df = cc.read(self.test_read_table)
         self.assertTrue(set(df.columns) == self.valid_columns)
-        self.assertTrue(len(df) == 2379)
+        self.assertTrue(len(df) == 169)
 
         # read with limit
         df = cc.read(self.test_read_table, limit=10)
@@ -313,13 +314,15 @@ class TestCartoContext(unittest.TestCase):
         # have the HTML innards that are to be expected
         if sys.version[0] == 3:
             self.assertRegex(basemap_only_static.data,
-                    '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+                             ('^<img src="https://.*api/v1/map/static/named/'
+                              'cartoframes_ver.*" />$'))
             self.assertRegex(basemap_only_interactive.data,
                              '^<iframe srcdoc="<!DOCTYPE html>.*')
         elif sys.version[0] == 2:
             self.assertRegexMatches(
                 basemap_only_static.data,
-                '^<img src="https://.*api/v1/map/static/named/cartoframes_ver.*" />$')
+                ('^<img src="https://.*api/v1/map/static/named/'
+                 'cartoframes_ver.*" />$'))
             self.assertRegexMatches(
                 basemap_only_interactive.data,
                 '^<iframe srcdoc="<!DOCTYPE html>.*')
@@ -343,17 +346,17 @@ class TestCartoContext(unittest.TestCase):
                                                 SELECT *
                                                 FROM tweets_obama
                                                 LIMIT 100'''),
-                                            Layer(self.test_read_table)])
+                                           Layer(self.test_read_table)])
 
         self.assertIsInstance(onelayer_onequery, IPython.core.display.HTML)
 
         # test with BaseMap, Layer, QueryLayer
-        oneeach = cc.map(layers=[BaseMap('light'),
-                                 QueryLayer('''
-                                     SELECT *
-                                     FROM tweets_obama
-                                     LIMIT 100''', color='favoritescount'),
-                                 Layer(self.test_read_table)])
+        _ = cc.map(layers=[BaseMap('light'),
+                           QueryLayer('''
+                               SELECT *
+                               FROM tweets_obama
+                               LIMIT 100''', color='favoritescount'),
+                           Layer(self.test_read_table)])
 
         # Errors
         # too many layers
@@ -378,10 +381,9 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
 
-
     def test_get_bounds(self):
         """CartoContext._get_bounds"""
-        from cartoframes.layer import Layer, QueryLayer
+        from cartoframes.layer import QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         vals1 = {'minx': 0,
@@ -487,7 +489,8 @@ class TestCartoContext(unittest.TestCase):
         _add_encoded_geom(df, 'geometry')
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(
+                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         # don't specify geometry column (should exist since decode_geom==True)
         df = cc.read(self.test_read_table, limit=5,
@@ -498,7 +501,8 @@ class TestCartoContext(unittest.TestCase):
         _add_encoded_geom(df, None)
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(
+                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         df = cc.read(self.test_read_table, limit=5)
 
