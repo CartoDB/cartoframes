@@ -26,7 +26,7 @@ from carto.exceptions import CartoException
 from cartoframes.utils import dict_items, normalize_colnames
 from cartoframes.layer import BaseMap
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
-from cartoframes.legends import get_legend
+from cartoframes.legends import Legend
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -673,7 +673,7 @@ class CartoContext(object):
         if (len(nb_layers) > 0 and
                 nb_layers[0].scheme.get('bin_method') and
                 nb_layers[0].scheme.get('bin_method') != 'category'):
-            get_legend(self.sql_client, nb_layers[0])
+            legend_ax = Legend(self.sql_client, nb_layers[0])
 
         # TODO: write this as a private method
         if interactive:

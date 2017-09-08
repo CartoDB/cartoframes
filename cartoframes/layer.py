@@ -14,6 +14,7 @@ DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
                   '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
                   '#CC3A8E', '#A5AA99')
 
+
 class AbstractLayer(object):
     """Abstract Layer object"""
     is_basemap = False
@@ -191,8 +192,8 @@ class QueryLayer(AbstractLayer):
             - min (int, optional): Minimum point width (in pixels). Defaults to
               5.
 
+        legend (matplotlib.colorbar): matplotlib ColorBar
         tooltip (tuple, optional): **Not yet implemented.**
-        legend: **Not yet implemented.**
     """
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
@@ -291,6 +292,7 @@ class QueryLayer(AbstractLayer):
         self.color = self.color or DEFAULT_COLORS[layer_idx]
         # TODO: this might be where to adjust the styling based on basemap
         self.cartocss = self._get_cartocss(basemap)
+        # self.legend = legends.get_legend()
 
         if self.time:
             column = self.time['column']
@@ -312,7 +314,6 @@ class QueryLayer(AbstractLayer):
                 },
             })
             self.cartocss += self.torque_cartocss
-
 
     def _get_cartocss(self, basemap):
         """Generate cartocss for class properties"""
@@ -361,6 +362,7 @@ class QueryLayer(AbstractLayer):
                 'line-comp-op': 'hard-light',
             }
         })
+
 
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
@@ -452,6 +454,7 @@ class Layer(QueryLayer):
                                     legend=legend)
 
     def _setup(self, layers, layer_idx):
+        # TODO: enable dataframe write if it is passed as a layer
         if isinstance(self.source, pd.DataFrame):
             context.write(self.source,
                           self.table_name,

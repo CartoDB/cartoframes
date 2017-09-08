@@ -1,67 +1,82 @@
 """legend generation functions
 """
-import matplotlib.pyplot as plt
-import matplotlib as mpl
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+except ImportError:
+    raise ImportError('Cannot create legends without `matplotlib` installed')
 from cartoframes.styling import get_scheme
 from carto.exceptions import CartoException
 plt.style.use('ggplot')
 
-def draw_legend(edges, colname, scheme={'name': 'Blues', 'bins': 5}):
-    """Create a matplotlib legend"""
-    # Make a figure and axes with dimensions as desired.
-    if 'colors' in scheme:
-        cmap = mpl.colors.ListedColormap(scheme['colors'])
-    else:
-        cmap = get_scheme(scheme, 'mpl_colormap')
-    fig = plt.figure(figsize=(8, 3))
-    ax1 = fig.add_axes([0.05, 0.80, 0.9, 0.15])
-    cmap.set_over('0.25')
-    cmap.set_under('0.75')
-    # length of bounds array must be one greater than length of color list
-    bounds = edges
-    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-    cb2 = mpl.colorbar.ColorbarBase(ax1, cmap=cmap,
-                                    norm=norm,
-                                    # to use 'extend', you must
-                                    # specify two extra boundaries:
-                                    boundaries=list(map(lambda x: round(x, 2), bounds)),
-                                    ticks=list(map(lambda x: round(x, 2), bounds)),
-                                    # ticks=list(map(lambda x: round(x, 2), bounds)),
-                                    spacing='proportional',
-                                    orientation='horizontal')
-    cb2.set_label(colname)
-    plt.show(cb2)
-    return fig
 
-def get_legend(sql_client, layer):
-    """Create a legend given the properties of `layer`
-    """
-    bin_query = 'min("{col}")::numeric || {method}(array_agg("{col}"::numeric), {n_bins})'.format(
-        method=bin_method_map(layer.scheme.get('bin_method', 'quantiles')),
-        col=layer.color,
-        n_bins=layer.scheme['bins'])
+def get_legend(sql, layer):
+    pass
+
+
+class Legend(object):
+    def __init__(self, sql_client, layer, ax=None):
+        self.edges = get_edges(sql_client, layer)
+        self.legend = None
+        self.layer = layer
+        self.ax = ax
+
+    def draw_legend(self):
+        """Create a matplotlib legend"""
+        # Make a figure and axes with dimensions as desired.
+        if 'colors' in self.layer.scheme:
+            cmap = mpl.colors.ListedColormap(self.layer.scheme['colors'])
+        else:
+            cmap = get_scheme(self.layer.scheme, 'mpl_colormap')
+        fig = plt.figure(figsize=(8, 3))
+        if self.ax is None:
+            self.ax = fig.add_axes([0.05, 0.80, 0.9, 0.15])
+        cmap.set_over('0.25')
+        cmap.set_under('0.75')
+        # length of bounds array must be one greater than length of color list
+        norm = mpl.colors.BoundaryNorm(self.edges, cmap.N)
+        cb = mpl.colorbar.ColorbarBase(
+                self.ax,
+                cmap=cmap,
+                norm=norm,
+                # to use 'extend', you must
+                # specify two extra boundaries:
+                boundaries=list(map(lambda x: round(x, 2), self.edges)),
+                ticks=list(map(lambda x: round(x, 2), self.edges)),
+                # ticks=list(map(lambda x: round(x, 2), self.edges)),
+                spacing='proportional',
+                orientation='horizontal')
+        cb.set_label(self.layer.color)
+        return cb
+
+
+def get_edges(sql_client, layer):
+    """Calculate bin edges for quantitative legend"""
+    bin_method = bin_method_map(layer.scheme.get('bin_method', 'quantiles'))
+    bin_query = ('min("{col}")::numeric || '
+                 '{method}(array_agg("{col}"::numeric), '
+                 '{n_bins})').format(method=bin_method,
+                                     col=layer.color,
+                                     n_bins=layer.scheme['bins'])
     try:
         bin_edges = sql_client.send('''
             SELECT {bin_query} AS bin_edges
               FROM ({query}) AS _wrap
               WHERE "{col}" is not null
                AND "{col}"::float != 'nan'
-        '''.format(
-            bin_query=bin_query,
-            query=layer.query,
-            col=layer.color))
-        edges = bin_edges['rows'][0]['bin_edges']
+        '''.format(bin_query=bin_query,
+                   query=layer.query,
+                   col=layer.color))
+        return bin_edges['rows'][0]['bin_edges']
     except CartoException as err:
         raise CartoException(err)
-
-    return draw_legend(edges, layer.color, layer.scheme)
 
 
 def bin_method_map(bin_method):
     """Given a `bin_method`, return the equivalent CARTO PostgreSQL bin
     function:
     https://github.com/CartoDB/cartodb-postgresql/tree/master/scripts-available
-    
+
     Args:
         bin_method (str): Bin method. One of 'quantiles', 'equal', 'headtails',
           'jenks', or 'category'
