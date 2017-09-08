@@ -202,12 +202,16 @@ class TestCartoContext(unittest.TestCase):
         df = pd.DataFrame(data).astype(schema)
 
         cc.write(df, self.test_delete_table)
-        resp = cc.delete(self.test_delete_table)
-        self.assertIsNone(resp)
+        cc.delete(self.test_delete_table)
 
-        #try to delete a table that does not exists
+        # check that deleted table raises an exception
+        with self.assertRaises(CartoException):
+            cc.sql_client.send('select * from {}'.format(self.test_delete_table))
+
+        # try to delete a table that does not exists
         with self.assertWarns(UserWarning):
             cc.delete('non_existent_table')
+
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
