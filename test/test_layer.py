@@ -1,7 +1,8 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, Layer, QueryLayer
+from cartoframes.layer import BaseMap, QueryLayer
 from cartoframes import styling
+
 
 class TestBaseMap(unittest.TestCase):
     """Tests for functions in keys module"""
@@ -86,9 +87,15 @@ class TestQueryLayer(unittest.TestCase):
                        {'column': 'elephant',
                         'scheme': styling.redOr(10, bin_method='jenks')}]
         dict_colors_ans = ['mandrill', 'mercxx', 'elephant']
-        dict_colors_scheme = [{'name': 'ArmyRose', 'bins': 7, 'bin_method': 'quantiles'},
-                              {'name': 'Temps', 'bins': 7, 'bin_method': 'equal'},
-                              {'name': 'RedOr', 'bins': 10, 'bin_method': 'jenks'}]
+        dict_colors_scheme = [{'name': 'ArmyRose',
+                               'bins': 7,
+                               'bin_method': 'quantiles'},
+                              {'name': 'Temps',
+                               'bins': 7,
+                               'bin_method': 'equal'},
+                              {'name': 'RedOr',
+                               'bins': 10,
+                               'bin_method': 'jenks'}]
         for idx, val in enumerate(dict_colors):
             qlayer = QueryLayer(self.query, color=val)
             self.assertEqual(qlayer.color, dict_colors_ans[idx])
@@ -115,8 +122,6 @@ class TestQueryLayer(unittest.TestCase):
         with self.assertRaises(ValueError,
                                msg='color dict must have a `column` key'):
             QueryLayer(self.query, color={'scheme': styling.vivid(10)})
-
-
 
     def test_querylayer_time_errors(self):
         """layer.QueryLayer time option exceptions"""
@@ -171,7 +176,8 @@ class TestQueryLayer(unittest.TestCase):
         """layer.QueryLayer size and time cannot be used together"""
         # size and time cannot be specified at the same time if size is
         #  styled by value
-        with self.assertRaises(ValueError, msg='time key should not be present'):
+        with self.assertRaises(ValueError,
+                               msg='time key should not be present'):
             QueryLayer(self.query,
                        size={'column': 'mag',
                              'scheme': styling.temps(10)},
@@ -201,40 +207,5 @@ class TestQueryLayer(unittest.TestCase):
                'bins': 10,
                'bin_method': 'equal'}
         self.assertEqual(qlayer.size, ans,
-                         msg='size dict should receive defaults if not provied')
-
-        # basic._setup()
-    # def test_key_setting(self):
-    #     """Test case where API key is valid"""
-    #     credentials._remove_creds()
-    #     credentials.set_api_key(self.key)
-    #     context.CartoContext(base_url=self.base_url)
-    #     with self.assertRaises(TypeError):
-    #         credentials.set_api_key(self.key, overwrite=False)
-    #     credentials.set_api_key(self.key[::-1], overwrite=True)
-    #     self.assertEqual(credentials.api_key(), self.key[::-1])
-
-
-    # def test_base_url_setting(self):
-    #     """Test case where API base url is valid"""
-    #     credentials._remove_creds()
-    #     credentials.set_base_url(self.base_url)
-    #     context.CartoContext(api_key=self.key)
-    #     with self.assertRaises(TypeError):
-    #         credentials.set_base_url(self.base_url, overwrite=False)
-    #     credentials.set_base_url(self.base_url[::-1], overwrite=True)
-    #     self.assertEqual(credentials.base_url(), self.base_url[::-1])
-
-    # def test_set_credentials(self):
-    #     """Test case where API url is valid"""
-    #     credentials._remove_creds()
-    #     credentials.set_credentials(base_url=self.base_url, api_key=self.key)
-    #     context.CartoContext()
-    #     with self.assertRaises(TypeError):
-    #         credentials.set_credentials(base_url=self.base_url[::-1],
-    #                                     api_key=self.key[::-1], overwrite=False)
-    #     credentials.set_credentials(base_url=self.base_url[::-1],
-    #                                 api_key=self.key[::-1], overwrite=True)
-    #     self.assertEqual(credentials.credentials(),
-    #                      dict(api_key=self.key[::-1],
-    #                           base_url=self.base_url[::-1]))
+                         msg=('size dict should receive defaults if not '
+                              'provided'))

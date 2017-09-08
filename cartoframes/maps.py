@@ -29,7 +29,8 @@ def get_map_name(layers, has_zoom):
                 version=version,
                 layers=num_layers,
                 has_time=('1' if has_time else '0'),
-                # [BUG] Remove this once baselayer urls can be passed in named map config
+                # TODO: Remove this once baselayer urls can be passed in named
+                #       map config
                 baseid=('1' if layers[0].source == 'dark' else '0'),
                 has_labels=('1' if has_labels else '0'),
                 has_zoom=('1' if has_zoom else '0')
@@ -46,7 +47,8 @@ def get_map_template(layers, has_zoom):
     layers_field = [{
         'type': 'http',
         'options': {
-            # [BUG] Remove this once baselayer urls can be passed in named map config
+            # TODO: Remove this once baselayer urls can be passed in named map
+            #       config
             'urlTemplate': layers[0].url,
             # 'urlTemplate': '<%= basemap_url %>',
             'subdomains': "abcd",
@@ -65,13 +67,15 @@ def get_map_template(layers, has_zoom):
 
     for idx in range(num_layers):
         layers_field.extend([{
-            'type': 'torque' if (has_time and idx == (num_layers - 1)) else 'mapnik',
+            'type': ('torque' if (has_time and idx == (num_layers - 1))
+                     else 'mapnik'),
             'options': {
                 'cartocss_version': '2.1.1',
                 'cartocss': '<%= cartocss_{idx} %>'.format(idx=idx),
                 'sql': '<%= sql_{idx} %>'.format(idx=idx),
                 # [BUG] No [] for templating
-                # 'interactivity': '<%= interactivity_{idx} %>'.format(idx=idx),
+                # 'interactivity': '<%= interactivity_{idx} %>'.format(
+                #                                                 idx=idx),
             }
         }])
         placeholders.update({
@@ -85,9 +89,13 @@ def get_map_template(layers, has_zoom):
             },
             'sql_{idx}'.format(idx=idx): {
                 'type': 'sql_ident',
-                'default': ("SELECT ST_PointFromText('POINT(0 0)', 4326) as the_geom,"
-                            " 1 as cartodb_id,"
-                            " ST_PointFromText('Point(0 0)', 3857) as the_geom_webmercator"),
+                'default': (
+                        "SELECT "
+                        "ST_PointFromText('POINT(0 0)', 4326) AS the_geom, "
+                        "1 AS cartodb_id, "
+                        "ST_PointFromText('Point(0 0)', 3857) AS "
+                        "the_geom_webmercator"
+                    ),
             },
             # [BUG] No [] for templating
             # 'interactivity_{idx}'.format(idx=idx): {
@@ -101,7 +109,8 @@ def get_map_template(layers, has_zoom):
         layers_field.extend([{
             'type': 'http',
             'options': {
-                # [BUG] Remove this once baselayer urls can be passed in named map config
+                # TODO: Remove this once baselayer urls can be passed in named
+                #       map config
                 'urlTemplate': layers[-1].url,
                 # 'urlTemplate': '<%= basemap_url %>',
                 'subdomains': "abcd",
@@ -133,9 +142,9 @@ def get_map_template(layers, has_zoom):
     else:
         view = {
             'bounds': {
-                'west' : '<%= west %>',
+                'west': '<%= west %>',
                 'south': '<%= south %>',
-                'east' : '<%= east %>',
+                'east': '<%= east %>',
                 'north': '<%= north %>',
             },
         }
