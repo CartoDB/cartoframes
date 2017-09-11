@@ -117,7 +117,7 @@ class CartoContext(object):
             decode_geom (bool, optional): Defaults to `False`, which reads the
                 table into a pandas DataFrame as is. If `True`, reads table into
                 a pandas DataFrame with wkb geometries found in column
-                `the_geom` decoded as shapely geometries in column named
+                `the_geom` decoded as shapely geometries in new column named
                 `geometry`.
 
         Returns:
@@ -157,7 +157,7 @@ class CartoContext(object):
                 <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
-                as `the_geom`.
+                and the dataframe as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
 
@@ -170,7 +170,11 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
-        pgcolnames = normalize_colnames(df.columns)
+        if geom_col:
+            pgcolnames = normalize_colnames(set(df.columns)-{geom_col})
+        elif not geom_col:
+            pgcolnames = normalize_colnames(df.columns)
+
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             final_table_name = self._send_batches(df, table_name, temp_dir,
@@ -324,6 +328,7 @@ class CartoContext(object):
             temp_dir (str): Name of directory used for temporarily storing the
                 DataFrame file to sent to CARTO
             geom_col (str): Name of geometry column
+            pgcolnames (list of str): List of SQL-normalized column names
 
         Returns:
             final_table_name (str): Name of final table. This method will
@@ -1027,9 +1032,9 @@ def _add_encoded_geom(df, geom_col):
             raise KeyError('Geometries were requested to be encoded '
                            'but a geometry column was not found in the '
                            'DataFrame.'.format(geom_col=geom_col))
-    elif is_geopandas and geom_col:
+    elif is_geopandas and geom_col and (is_geopandas != geom_col):
         warn('Geometry column of the input DataFrame does not '
-             'match the geometry column supplied. Using user-supplied '
+             'match the geometry column supplied. Using usera-supplied '
              'column...\n'
              '\tGeopandas geometry column: {}\n'
              '\tSupplied `geom_col`: {}'.format(is_geopandas,
