@@ -203,7 +203,7 @@ class TestCartoContext(unittest.TestCase):
         data = {'col1': [1,2,3],
                 'col2': ['a','b','c']}
         df = pd.DataFrame(data)
-        
+
         cc.write(df, self.test_delete_table)
         cc.delete(self.test_delete_table)
 
@@ -540,7 +540,7 @@ class TestCartoContext(unittest.TestCase):
             'object': 'text',
             'bool': 'boolean',
             'datetime64[ns]': 'date',
-            ''
+            'unknown_dtype': 'text'
         }
         for i in results:
             result = _dtypes2pg(i)
