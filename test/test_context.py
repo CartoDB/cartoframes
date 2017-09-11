@@ -11,6 +11,7 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
+import warnings
 
 WILL_SKIP = False
 
@@ -71,6 +72,9 @@ class TestCartoContext(unittest.TestCase):
                                  'table_{ver}_{mpl}'.format(
                                     ver=pyver,
                                     mpl=has_mpl))
+        self.test_delete_table = 'cartoframes_test_delete_table_{ver}_{mpl}'.format(
+            ver=pyver,
+            mpl=has_mpl)
 
     def tearDown(self):
         """restore to original state"""
@@ -216,6 +220,33 @@ class TestCartoContext(unittest.TestCase):
         self.assertFalse(cc._table_exists('acadia_biodiversity'))
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
+
+    def test_cartocontext_delete(self):
+        """CartoContext.delete"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = {'col1': [1,2,3],
+                'col2': ['a','b','c']}
+        df = pd.DataFrame(data)
+
+        cc.write(df, self.test_delete_table)
+        cc.delete(self.test_delete_table)
+
+        # check that querying recently deleted table raises an exception
+        with self.assertRaises(CartoException):
+            cc.sql_client.send('select * from {}'.format(self.test_delete_table))
+
+        # try to delete a table that does not exists
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            cc.delete('non_existent_table')
+            # Verify one warning, subclass is UserWarning, and expected message
+            # is in warning
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "Failed to delete" in str(w[-1].message)
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
@@ -573,3 +604,35 @@ class TestCartoContext(unittest.TestCase):
         ewkb_resp = _encode_geom(geom)
         self.assertEqual(ewkb_resp, ewkb)
         self.assertIsNone(_encode_geom(None))
+
+    def test_dtypes2pg(self):
+        """context._dtypes2pg"""
+        from cartoframes.context import _dtypes2pg
+        results = {
+            'float64': 'numeric',
+            'int64': 'numeric',
+            'float32': 'numeric',
+            'int32': 'numeric',
+            'object': 'text',
+            'bool': 'boolean',
+            'datetime64[ns]': 'date',
+            'unknown_dtype': 'text'
+        }
+        for i in results:
+            result = _dtypes2pg(i)
+            self.assertEqual (result, results[i])
+
+    def test_pg2dtypes(self):
+        """context._pg2dtypes"""
+        from cartoframes.context import _pg2dtypes
+        results = {
+            'date': 'datetime64[ns]',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+            'unknown_pgdata': 'object'
+        }
+        for i in results:
+            result = _pg2dtypes(i)
+            self.assertEqual (result, results[i])
