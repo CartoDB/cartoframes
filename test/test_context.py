@@ -128,6 +128,7 @@ class TestCartoContext(unittest.TestCase):
                   'lat': float,
                   'long': float}
         df = pd.DataFrame(data).astype(schema)
+
         cc.write(df, self.test_write_table)
 
         # check if table exists
@@ -157,6 +158,7 @@ class TestCartoContext(unittest.TestCase):
             SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
             FROM {table}
             '''.format(table=self.test_write_table))
+
         # number of geoms should equal number of rows
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
@@ -184,6 +186,10 @@ class TestCartoContext(unittest.TestCase):
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
 
+        # request encoded geometries without a geometry column
+        with self.assertRaisesRegexp(KeyError,'Geometries were requested'):
+            cc.write(df, self.test_write_table, encode_geom=True)
+
     def test_cartocontext_table_exists(self):
         """CartoContext._table_exists"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -191,7 +197,6 @@ class TestCartoContext(unittest.TestCase):
         self.assertFalse(cc._table_exists('acadia_biodiversity'))
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
-
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
