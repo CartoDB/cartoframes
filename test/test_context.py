@@ -233,38 +233,63 @@ class TestCartoContext(unittest.TestCase):
         """cartoframes.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
+        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
         df = cc.query('''
-            SELECT link, body, displayname, friendscount
+            SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
             LIMIT 100
-            ''')
+            '''.format(cols=','.join(cols)))
+
+        # ensure columns are in expected order
+        df = df[list(cols) + ['invalid_df_date']]
+
         # same number of rows
         self.assertEqual(len(df), 100,
                          msg='Expected number or rows')
+
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
                               'Should be a pandas DataFrame')
         # same column names
-        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount'},
+        requested_cols = {'link', 'body', 'displayname', 'friendscount',
+                          'postedtime', 'invalid_df_date', }
+        self.assertSetEqual(requested_cols,
                             set(df.columns),
                             msg='Should have the columns requested')
 
+        # should have exected schema
+        expected_dtypes = ('object', 'object', 'object', 'int64',
+                           'datetime64[ns]', 'object', )
+        self.assertTupleEqual(expected_dtypes,
+                              tuple(str(d) for d in df.dtypes),
+                              msg='Should have expected schema')
+
+        # empty response
+        df_empty = cc.query('''
+            SELECT 1
+            LIMIT 0
+            ''')
+
+        # no rows or columns
+        self.assertTupleEqual(df_empty.shape, (0, 0))
+
+        # is a DataFrame
+        self.assertIsInstance(df_empty, pd.DataFrame)
+
         # table already exists, should throw CartoException
         with self.assertRaises(CartoException):
-            df_create_table = cc.query('''
+            _ = cc.query('''
                 SELECT link, body, displayname, friendscount
                 FROM tweets_obama
                 LIMIT 100
-                ''',
-                table_name='tweets_obama')
+                ''', table_name='tweets_obama')
 
         # create a table from a query
         _ = cc.query('''
             SELECT link, body, displayname, friendscount
             FROM tweets_obama
             LIMIT 100
-            ''',
-            table_name=self.test_query_table)
+            ''', table_name=self.test_query_table)
 
         # read newly created table into a dataframe
         df = cc.read(self.test_query_table)
