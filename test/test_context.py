@@ -4,11 +4,15 @@ import os
 import sys
 import json
 import random
+import warnings
+
 import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
+
+WILL_SKIP = False
 
 
 class TestCartoContext(unittest.TestCase):
@@ -18,37 +22,51 @@ class TestCartoContext(unittest.TestCase):
                 os.environ.get('USERNAME') is None):
             try:
                 creds = json.loads(open('test/secret.json').read())
-            except OSError:
-                print("Create a `secret.json` file by renaming "
-                      "`secret.json.sample` to `secret.json` and updating "
-                      "the credentials to match your environment.")
-                raise
-            self.apikey = creds['APIKEY']
-            self.username = creds['USERNAME']
+                self.apikey = creds['APIKEY']
+                self.username = creds['USERNAME']
+            except:
+                warnings.warn("Skipping CartoContext tests. To test it, "
+                              "create a `secret.json` file in test/ by "
+                              "renaming `secret.json.sample` to `secret.json` "
+                              "and updating the credentials to match your "
+                              "environment.")
+                self.apikey = None
+                self.username = None
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
-        self.baseurl = 'https://{username}.carto.com/'.format(
-            username=self.username)
+        if self.username and self.apikey:
+            self.baseurl = 'https://{username}.carto.com/'.format(
+                    username=self.username)
+            self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
+                                                api_key=self.apikey)
+            self.sql_client = SQLClient(self.auth_client)
+
+        # sets skip value
+        WILL_SKIP = self.apikey is None or self.username is None
+
+        # table naming info
+        has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        pyver = sys.version[0:3].replace('.', '_')
+
+        # test tables
+        self.test_read_table = 'cb_2013_us_csa_500k'
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'the_geom_webmercator', 'updated_at'])
-        self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
-                                            api_key=self.apikey)
-        self.sql_client = SQLClient(self.auth_client)
-
-        # test tables
-        has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
-        pyver = sys.version[0:3].replace('.', '_')
-        self.test_read_table = 'cb_2013_us_csa_500k'
+        # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
             mpl=has_mpl)
+
+        # for batch writing to carto
         self.test_write_batch_table = (
             'cartoframes_test_batch_table_{ver}_{mpl}'.format(
                 ver=pyver,
                 mpl=has_mpl))
+
+        # for queries
         self.test_query_table = ('cartoframes_test_query_'
                                  'table_{ver}_{mpl}'.format(
                                     ver=pyver,
@@ -59,16 +77,19 @@ class TestCartoContext(unittest.TestCase):
         tables = (self.test_write_table,
                   self.test_write_batch_table,
                   self.test_query_table)
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        for table in tables:
-            cc.delete(table)
+
+        if self.apikey and self.baseurl:
+            cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                          api_key=self.apikey)
+            for table in tables:
+                cc.delete(table)
         # TODO: remove the named map templates
 
     def add_map_template(self):
         """Add generated named map templates to class"""
         pass
 
+    @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
     def test_cartocontext(self):
         """CartoContext.__init__"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -81,12 +102,14 @@ class TestCartoContext(unittest.TestCase):
         # self.assertTrue(cc.auth_client.__dict__ == self.auth_client.__dict__)
         # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
         """CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertTrue(not cc._is_org_user())
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_read(self):
         """CartoContext.read"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -114,6 +137,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(len(df), 10)
         self.assertIsInstance(df, pd.DataFrame)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
         """CartoContext.write"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -184,6 +208,7 @@ class TestCartoContext(unittest.TestCase):
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):
         """CartoContext._table_exists"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -192,53 +217,99 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
 
-
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
         pass
 
+    def test_cartocontext_handle_import(self):
+        """CartoContext._handle_import"""
+
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        import_failures = (
+            dict(error_code=8001, state='failure'),
+            dict(error_code=6668, state='failure'),
+            dict(error_code=1234, state='failure'),
+        )
+
+        for import_job in import_failures:
+            with self.assertRaises(CartoException):
+                cc._handle_import(import_job, 'foo')
+
+        diff_table_err = dict(state='complete',
+                              table_name='bar')
+        with self.assertRaises(Exception):
+            cc._handle_import(diff_table_err, 'foo')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_sync(self):
         """cartoframes.CartoContext.sync"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertIsNone(cc.sync(pd.DataFrame(), 'acadia'))
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_query(self):
         """cartoframes.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
+        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
         df = cc.query('''
-            SELECT link, body, displayname, friendscount
+            SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
             LIMIT 100
-            ''')
+            '''.format(cols=','.join(cols)))
+
+        # ensure columns are in expected order
+        df = df[list(cols) + ['invalid_df_date']]
+
         # same number of rows
         self.assertEqual(len(df), 100,
                          msg='Expected number or rows')
+
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
                               'Should be a pandas DataFrame')
         # same column names
-        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount'},
+        requested_cols = {'link', 'body', 'displayname', 'friendscount',
+                          'postedtime', 'invalid_df_date', }
+        self.assertSetEqual(requested_cols,
                             set(df.columns),
                             msg='Should have the columns requested')
 
+        # should have exected schema
+        expected_dtypes = ('object', 'object', 'object', 'int64',
+                           'datetime64[ns]', 'object', )
+        self.assertTupleEqual(expected_dtypes,
+                              tuple(str(d) for d in df.dtypes),
+                              msg='Should have expected schema')
+
+        # empty response
+        df_empty = cc.query('''
+            SELECT 1
+            LIMIT 0
+            ''')
+
+        # no rows or columns
+        self.assertTupleEqual(df_empty.shape, (0, 0))
+
+        # is a DataFrame
+        self.assertIsInstance(df_empty, pd.DataFrame)
+
         # table already exists, should throw CartoException
         with self.assertRaises(CartoException):
-            df_create_table = cc.query('''
+            _ = cc.query('''
                 SELECT link, body, displayname, friendscount
                 FROM tweets_obama
                 LIMIT 100
-                ''',
-                table_name='tweets_obama')
+                ''', table_name='tweets_obama')
 
         # create a table from a query
         _ = cc.query('''
             SELECT link, body, displayname, friendscount
             FROM tweets_obama
             LIMIT 100
-            ''',
-            table_name=self.test_query_table)
+            ''', table_name=self.test_query_table)
 
         # read newly created table into a dataframe
         df = cc.read(self.test_query_table)
@@ -250,6 +321,7 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map(self):
         """CartoContext.map"""
         from cartoframes import Layer, QueryLayer, BaseMap
@@ -349,6 +421,7 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
         """CartoContext._get_bounds"""
         from cartoframes.layer import QueryLayer
@@ -390,6 +463,7 @@ class TestCartoContext(unittest.TestCase):
 
         self.assertDictEqual(extent_ans, ans)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_check_query(self):
         """CartoContext._check_query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -440,6 +514,7 @@ class TestCartoContext(unittest.TestCase):
         pgcols.append('the_geom')
         self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_add_encoded_geom(self):
         """context._add_encoded_geom"""
         from cartoframes.context import _add_encoded_geom, _encode_geom
