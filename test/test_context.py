@@ -545,3 +545,18 @@ class TestCartoContext(unittest.TestCase):
         for i in results:
             result = _dtypes2pg(i)
             self.assertEqual (result, results[i])
+
+    def test_pg2dtypes(self):
+        """context._pg2dtypes"""
+        from cartoframes.context import _pg2dtypes
+        results = {
+            'date': 'datetime64[ns]',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+            'unknown_pgdata': 'object'
+        }
+        for i in results:
+            result = _pg2dtypes(i)
+            self.assertEqual (result, results[i])
