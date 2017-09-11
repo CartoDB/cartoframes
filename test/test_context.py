@@ -202,10 +202,8 @@ class TestCartoContext(unittest.TestCase):
                                       api_key=self.apikey)
         data = {'col1': [1,2,3],
                 'col2': ['a','b','c']}
-        schema = {'col1': int,
-                  'col2': 'object'}
-        df = pd.DataFrame(data).astype(schema)
-
+        df = pd.DataFrame(data)
+        
         cc.write(df, self.test_delete_table)
         cc.delete(self.test_delete_table)
 
@@ -214,14 +212,11 @@ class TestCartoContext(unittest.TestCase):
             cc.sql_client.send('select * from {}'.format(self.test_delete_table))
 
         # try to delete a table that does not exists
-        def fxn():
-            cc.delete('non_existent_table')
-
         with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger a warning.
-            fxn()
+            cc.delete('non_existent_table')
             # Verify one warning, subclass is UserWarning, and expected message
             # is in warning
             assert len(w) == 1
@@ -545,6 +540,7 @@ class TestCartoContext(unittest.TestCase):
             'object': 'text',
             'bool': 'boolean',
             'datetime64[ns]': 'date',
+            ''
         }
         for i in results:
             result = _dtypes2pg(i)
