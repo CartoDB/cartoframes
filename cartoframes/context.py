@@ -1034,7 +1034,7 @@ def _add_encoded_geom(df, geom_col):
                            'DataFrame.'.format(geom_col=geom_col))
     elif is_geopandas and geom_col and (is_geopandas != geom_col):
         warn('Geometry column of the input DataFrame does not '
-             'match the geometry column supplied. Using usera-supplied '
+             'match the geometry column supplied. Using user-supplied '
              'column...\n'
              '\tGeopandas geometry column: {}\n'
              '\tSupplied `geom_col`: {}'.format(is_geopandas,
