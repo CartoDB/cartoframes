@@ -66,19 +66,26 @@ class TestCartoContext(unittest.TestCase):
                 ver=pyver,
                 mpl=has_mpl))
 
+        self.test_write_lnglat_table = (
+            'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
+                ver=pyver,
+                mpl=has_mpl))
+
         # for queries
         self.test_query_table = ('cartoframes_test_query_'
                                  'table_{ver}_{mpl}'.format(
                                     ver=pyver,
                                     mpl=has_mpl))
-        self.test_delete_table = 'cartoframes_test_delete_table_{ver}_{mpl}'.format(
-            ver=pyver,
-            mpl=has_mpl)
+        self.test_delete_table = ('cartoframes_test_delete_'
+                                  'table_{ver}_{mpl}').format(
+                                      ver=pyver,
+                                      mpl=has_mpl)
 
     def tearDown(self):
         """restore to original state"""
         tables = (self.test_write_table,
                   self.test_write_batch_table,
+                  self.test_write_lnglat_table,
                   self.test_query_table)
 
         if self.apikey and self.baseurl:
@@ -187,6 +194,16 @@ class TestCartoContext(unittest.TestCase):
         # number of geoms should equal number of rows
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
+
+        # test batch lnglat behavior
+        n_rows = 100001
+        df = pd.DataFrame({
+            'latvals': [random.random() for r in range(n_rows)],
+            'lngvals': [random.random() for r in range(n_rows)]
+            })
+        job = cc.write(df, self.test_write_lnglat_table,
+                       lnglat=('lngvals', 'latvals'))
+        self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
 
         # test batch writes
         n_rows = 550000
@@ -331,14 +348,14 @@ class TestCartoContext(unittest.TestCase):
 
         # table already exists, should throw CartoException
         with self.assertRaises(CartoException):
-            _ = cc.query('''
+            cc.query('''
                 SELECT link, body, displayname, friendscount
                 FROM tweets_obama
                 LIMIT 100
                 ''', table_name='tweets_obama')
 
         # create a table from a query
-        _ = cc.query('''
+        cc.query('''
             SELECT link, body, displayname, friendscount
             FROM tweets_obama
             LIMIT 100
@@ -424,12 +441,12 @@ class TestCartoContext(unittest.TestCase):
         self.assertIsInstance(onelayer_onequery, IPython.core.display.HTML)
 
         # test with BaseMap, Layer, QueryLayer
-        _ = cc.map(layers=[BaseMap('light'),
-                           QueryLayer('''
+        cc.map(layers=[BaseMap('light'),
+                       QueryLayer('''
                                SELECT *
                                FROM tweets_obama
                                LIMIT 100''', color='favoritescount'),
-                           Layer(self.test_read_table)])
+                       Layer(self.test_read_table)])
 
         # Errors
         # too many layers
@@ -622,7 +639,7 @@ class TestCartoContext(unittest.TestCase):
         }
         for i in results:
             result = _dtypes2pg(i)
-            self.assertEqual (result, results[i])
+            self.assertEqual(result, results[i])
 
     def test_pg2dtypes(self):
         """context._pg2dtypes"""
@@ -637,4 +654,77 @@ class TestCartoContext(unittest.TestCase):
         }
         for i in results:
             result = _pg2dtypes(i)
-            self.assertEqual (result, results[i])
+            self.assertEqual(result, results[i])
+
+
+class TestBatchJobStatus(unittest.TestCase):
+    """Tests for cartoframes.BatchJobStatus"""
+    def setUp(self):
+        if (os.environ.get('APIKEY') is None or
+                os.environ.get('USERNAME') is None):
+            try:
+                creds = json.loads(open('test/secret.json').read())
+                self.apikey = creds['APIKEY']
+                self.username = creds['USERNAME']
+            except:
+                warnings.warn("Skipping CartoContext tests. To test it, "
+                              "create a `secret.json` file in test/ by "
+                              "renaming `secret.json.sample` to `secret.json` "
+                              "and updating the credentials to match your "
+                              "environment.")
+                self.apikey = None
+                self.username = None
+        else:
+            self.apikey = os.environ['APIKEY']
+            self.username = os.environ['USERNAME']
+
+        if self.username and self.apikey:
+            self.baseurl = 'https://{username}.carto.com/'.format(
+                    username=self.username)
+            self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
+                                                api_key=self.apikey)
+            self.sql_client = SQLClient(self.auth_client)
+
+        # sets skip value
+        WILL_SKIP = self.apikey is None or self.username is None
+        has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        pyver = sys.version[0:3].replace('.', '_')
+
+        # for writing to carto
+        self.test_write_lnglat_table = (
+            'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
+                ver=pyver,
+                mpl=has_mpl))
+
+    def tearDown(self):
+        """restore to original state"""
+        tables = (self.test_write_lnglat_table, )
+
+        if self.apikey and self.baseurl:
+            cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                          api_key=self.apikey)
+            for table in tables:
+                cc.delete(table)
+
+    @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
+    def test_batchjobstatus(self):
+        """context.BatchJobStatus"""
+        from cartoframes.context import BatchJobStatus
+        from carto.sql import BatchSQLClient
+
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        batch_sql = BatchSQLClient(self.auth_client)
+        n_vals = 100001
+        df = pd.DataFrame({
+            'lngvals': [random.random() for r in range(n_vals)],
+            'latvals': [random.random() for r in range(n_vals)]
+            })
+        job = cc.write(df, self.test_write_lnglat_table,
+                       lnglat=('lngvals', 'latvals'))
+
+        self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
+
+        bjs = BatchJobStatus(batch_sql, dict(job_id='foo', status='unknown'))
+        with self.assertRaises(CartoException):
+            bjs.status()
