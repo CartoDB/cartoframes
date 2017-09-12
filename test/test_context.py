@@ -163,6 +163,15 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
 
+        # try writing encoded geometries without a geometry column
+        with self.assertRaisesRegexp(KeyError,'Geometries were requested'):
+            cc.write(df, self.test_write_table, encode_geom=True)
+
+        # try writing encoded geometries with a non-geometry 'geometry' column
+        with self.assertRaises(AttributeError):
+            df['geometry'] = df['nums']
+            cc.write(df, self.test_write_table, encode_geom=True, )
+
         # test batch writes
         n_rows = 550000
         df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
@@ -185,10 +194,6 @@ class TestCartoContext(unittest.TestCase):
         # table should be properly created
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
-
-        # request encoded geometries without a geometry column
-        with self.assertRaisesRegexp(KeyError,'Geometries were requested'):
-            cc.write(df, self.test_write_table, encode_geom=True)
 
     def test_cartocontext_table_exists(self):
         """CartoContext._table_exists"""
