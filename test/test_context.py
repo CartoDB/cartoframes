@@ -728,3 +728,13 @@ class TestBatchJobStatus(unittest.TestCase):
         bjs = BatchJobStatus(batch_sql, dict(job_id='foo', status='unknown'))
         with self.assertRaises(CartoException):
             bjs.status()
+
+    def test_batchjobstatus_repr(self):
+        """context.BatchJobStatus.__repr__"""
+        from cartoframes.context import BatchJobStatus
+        from carto.sql import BatchSQLClient
+        batch_sql = BatchSQLClient(self.auth_client)
+        bjs = BatchJobStatus(batch_sql, dict(job_id='foo', status='unknown'))
+        self.assertMultiLineEqual(bjs.__repr__(),
+                                  ("BatchJobStatus(job_id='foo', "
+                                   "last_status='unknown')"))
