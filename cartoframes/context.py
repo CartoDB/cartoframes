@@ -158,7 +158,8 @@ class CartoContext(object):
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set, a
-            :obj:`BatchJobStatus` instance is returned. Otherwise, None.
+            :obj:`BatchJobStatus` instance is returned for DataFrames with more
+            than 100,000 rows. Otherwise, None.
         """
         if encode_geom:
             _add_encoded_geom(df, geom_col)

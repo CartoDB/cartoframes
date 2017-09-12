@@ -11,7 +11,6 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
-import warnings
 
 WILL_SKIP = False
 
@@ -164,7 +163,7 @@ class TestCartoContext(unittest.TestCase):
             FROM {table}
             LIMIT 0
             '''.format(table=self.test_write_table))
-        self.assertTrue(resp is not None)
+        self.assertIsNotNone(resp)
 
         # check that table has same number of rows
         resp = self.sql_client.send('''
@@ -225,8 +224,8 @@ class TestCartoContext(unittest.TestCase):
         """CartoContext.delete"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        data = {'col1': [1,2,3],
-                'col2': ['a','b','c']}
+        data = {'col1': [1, 2, 3],
+                'col2': ['a', 'b', 'c']}
         df = pd.DataFrame(data)
 
         cc.write(df, self.test_delete_table)
@@ -234,7 +233,10 @@ class TestCartoContext(unittest.TestCase):
 
         # check that querying recently deleted table raises an exception
         with self.assertRaises(CartoException):
-            cc.sql_client.send('select * from {}'.format(self.test_delete_table))
+            cc.sql_client.send('''
+                SELECT *
+                FROM {}
+                '''.format(self.test_delete_table))
 
         # try to delete a table that does not exists
         with warnings.catch_warnings(record=True) as w:
