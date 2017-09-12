@@ -20,7 +20,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from carto.auth import APIKeyAuthClient
-from carto.sql import SQLClient
+from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .utils import dict_items, normalize_colnames
@@ -157,7 +157,8 @@ class CartoContext(object):
                 information is stored. Used in conjunction with `encode_geom`.
 
         Returns:
-            None
+            :obj:`BatchJobStatus` or None: If `lnglat` flag is set, a
+            :obj:`BatchJobStatus` instance is returned. Otherwise, None.
         """
         if encode_geom:
             _add_encoded_geom(df, geom_col)
@@ -165,6 +166,7 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
+
         pgcolnames = normalize_colnames(df.columns)
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
@@ -175,20 +177,30 @@ class CartoContext(object):
                                                     geom_col, pgcolnames)
             self._set_schema(df, final_table_name, pgcolnames)
 
-        # create geometry column from lat/longs if requested
+        # create geometry column from long/lats if requested
         if lnglat:
-            # TODO: make this a batch job if it is a large dataframe or move
-            #       inside of _send_dataframe and/or batch
             tqdm.write('Creating geometry out of columns '
                        '`{lng}`/`{lat}`'.format(lng=lnglat[0],
                                                 lat=lnglat[1]))
-            self.sql_client.send('''
-                UPDATE "{table_name}"
-                SET the_geom = CDB_LatLng("{lat}"::numeric,
-                                          "{lng}"::numeric)
-            '''.format(table_name=final_table_name,
-                       lng=lnglat[0],
-                       lat=lnglat[1]))
+            query = '''
+                    UPDATE "{table_name}"
+                    SET the_geom = CDB_LatLng("{lat}"::numeric,
+                                              "{lng}"::numeric)
+                    '''.format(table_name=final_table_name,
+                               lng=lnglat[0],
+                               lat=lnglat[1])
+            if df.shape[0] > 100000:
+                batch_client = BatchSQLClient(self.auth_client)
+                status = batch_client.create([query, ])
+                tqdm.write('Table successfully written to CARTO: '
+                           '{base_url}dataset/{table_name} . `the_geom` '
+                           'column is being populated from `{lnglat}`'.format(
+                               base_url=self.base_url,
+                               table_name=final_table_name,
+                               lnglat=str(lnglat)))
+                return BatchJobStatus(batch_client, status)
+            else:
+                self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: '
                    '{base_url}dataset/{table_name}'.format(
@@ -1105,3 +1117,47 @@ def _df2pg_schema(dataframe, pgcolnames):
     if 'the_geom' in pgcolnames:
         return '"the_geom", ' + schema
     return schema
+
+
+class BatchJobStatus(object):
+    """Batch SQL API job status. Read more at `Batch SQL API docs
+    <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__.
+
+    Example:
+
+        .. code:: python
+
+            import time
+            job = cc.write(df, 'new_table',
+                           lnglat=('lng_col', 'lat_col'))
+            while True:
+                curr_status = job.status()['status']
+                if curr_status in ('done', 'failed', 'canceled', 'unknown', ):
+                    print(curr_status)
+                    break
+                time.sleep(5)
+
+    Args:
+        batch_client (carto.sql.BatchSQLClient): Batch SQL API client
+        job (dict): Job status dict returned after sending a Batch SQL API job
+
+    Returns:
+        :obj:`BatchJobStatus`: Instance of BatchJobStatus
+    """
+    def __init__(self, batch_client, job):
+        self.job_id = job['job_id']
+        self.last_status = job['status']
+        self.batch_client = batch_client
+
+    def __repr__(self):
+        return ('BatchJobStatus(job_id=\'{job_id}\', '
+                'last_status=\'{status}\')'.format(job_id=self.job_id,
+                                                   status=self.last_status))
+
+    def status(self):
+        """Checks the current status of job ``job_id``
+
+        Returns:
+            dict: Status of Batch SQL API job
+        """
+        return self.batch_client.read(self.job_id)
