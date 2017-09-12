@@ -709,13 +709,13 @@ class TestBatchJobStatus(unittest.TestCase):
     @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
     def test_batchjobstatus(self):
         """context.BatchJobStatus"""
-        from cartoframes.context import BatchJobStatus
+        from cartoframes.context import BatchJobStatus, MAX_ROWS_LNGLAT
         from carto.sql import BatchSQLClient
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         batch_sql = BatchSQLClient(self.auth_client)
-        n_vals = 100001
+        n_vals = MAX_ROWS_LNGLAT + 1
         df = pd.DataFrame({
             'lngvals': [random.random() for r in range(n_vals)],
             'latvals': [random.random() for r in range(n_vals)]

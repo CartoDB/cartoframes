@@ -45,6 +45,7 @@ HAS_MATPLOTLIB = plt is not None
 # Choose constant to avoid overview generation which are triggered at a
 # half million rows
 MAX_IMPORT_ROWS = 499999
+MAX_ROWS_LNGLAT = 100000
 
 
 class CartoContext(object):
@@ -190,14 +191,15 @@ class CartoContext(object):
                     '''.format(table_name=final_table_name,
                                lng=lnglat[0],
                                lat=lnglat[1])
-            if df.shape[0] > 100000:
+            if df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
                 tqdm.write('Table successfully written to CARTO: '
-                           '{base_url}dataset/{table_name} . `the_geom` '
-                           'column is being populated from `{lnglat}`'.format(
-                               base_url=self.base_url,
-                               table_name=final_table_name,
+                           '{table_url} . `the_geom` column is being '
+                           'populated from `{lnglat}`'.format(
+                               table_url=os.path.join(self.base_url,
+                                                      'dataset',
+                                                      final_table_name),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(batch_client, status)
             else:
