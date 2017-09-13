@@ -150,6 +150,7 @@ class TestCartoContext(unittest.TestCase):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
         """CartoContext.write"""
+        from cartoframes.context import MAX_ROWS_LNGLAT
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         data = {'nums': list(range(100, 0, -1)),
@@ -196,7 +197,7 @@ class TestCartoContext(unittest.TestCase):
                          resp['rows'][0]['num_geoms'])
 
         # test batch lnglat behavior
-        n_rows = 100001
+        n_rows = MAX_ROWS_LNGLAT + 1
         df = pd.DataFrame({
             'latvals': [random.random() for r in range(n_rows)],
             'lngvals': [random.random() for r in range(n_rows)]

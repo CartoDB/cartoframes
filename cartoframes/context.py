@@ -45,6 +45,8 @@ HAS_MATPLOTLIB = plt is not None
 # Choose constant to avoid overview generation which are triggered at a
 # half million rows
 MAX_IMPORT_ROWS = 499999
+
+# threshold for using batch sql api or not for geometry creation
 MAX_ROWS_LNGLAT = 100000
 
 
