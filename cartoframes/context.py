@@ -1125,8 +1125,9 @@ def _df2pg_schema(dataframe, pgcolnames):
 
 
 class BatchJobStatus(object):
-    """Batch SQL API job status. Read more at `Batch SQL API docs
-    <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__.
+    """Status of a write or query operation. Read more at `Batch SQL API docs
+    <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__ about
+    responses.
 
     Example:
 
@@ -1142,27 +1143,44 @@ class BatchJobStatus(object):
                     break
                 time.sleep(5)
 
+    Attributes:
+        job_id (str): Job ID of the Batch SQL API job
+        last_status (str): Status of ``job_id`` job when last polled
+        created_at (str): Time and date when job was created
+
     Args:
         batch_client (carto.sql.BatchSQLClient): Batch SQL API client
         job (dict): Job status dict returned after sending a Batch SQL API job
-
-    Returns:
-        :obj:`BatchJobStatus`: Instance of BatchJobStatus
     """
     def __init__(self, batch_client, job):
-        self.job_id = job['job_id']
-        self.last_status = job['status']
-        self.batch_client = batch_client
+        self.job_id = job.get('job_id')
+        self.last_status = job.get('status')
+        self.created_at = job.get('created_at')
+        self._batch_client = batch_client
 
     def __repr__(self):
         return ('BatchJobStatus(job_id=\'{job_id}\', '
-                'last_status=\'{status}\')'.format(job_id=self.job_id,
-                                                   status=self.last_status))
+                'last_status=\'{status}\', '
+                'created_at=\'{created_at}\')'.format(
+                    job_id=self.job_id,
+                    status=self.last_status,
+                    created_at=self.created_at
+                    )
+                )
+
+    def set_status(self, curr_status):
+        self.last_status = curr_status
+
+    def get_status(self):
+        return self.last_status
 
     def status(self):
         """Checks the current status of job ``job_id``
 
         Returns:
-            dict: Status of Batch SQL API job
+            dict: Status and time it was updated
         """
-        return self.batch_client.read(self.job_id)
+        resp = self._batch_client.read(self.job_id)
+        self.set_status(resp.get('status'))
+        return dict(status=resp.get('status'),
+                    updated_at=resp.get('updated_at'))
