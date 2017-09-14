@@ -138,7 +138,6 @@ class TestCartoContext(unittest.TestCase):
             LIMIT 0
             '''.format(table=self.test_write_table))
         self.assertTrue(resp is not None)
-
         # check that table has same number of rows
         resp = self.sql_client.send('''
             SELECT count(*)
@@ -153,7 +152,6 @@ class TestCartoContext(unittest.TestCase):
         cc.write(df, self.test_write_table,
                  overwrite=True,
                  lnglat=('long', 'lat'))
-
         resp = self.sql_client.send('''
             SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
             FROM {table}
@@ -164,13 +162,13 @@ class TestCartoContext(unittest.TestCase):
                          resp['rows'][0]['num_geoms'])
 
         # try writing encoded geometries without a geometry column
-        with self.assertRaisesRegexp(KeyError,'Geometries were requested'):
+        with self.assertEqual(KeyError, 'Geometries were requested'):
             cc.write(df, self.test_write_table, encode_geom=True)
 
         # try writing encoded geometries with a non-geometry 'geometry' column
         with self.assertRaises(AttributeError):
             df['geometry'] = df['nums']
-            cc.write(df, self.test_write_table, encode_geom=True, )
+            cc.write(df, self.test_write_table, encode_geom=True)
 
         # test batch writes
         n_rows = 550000

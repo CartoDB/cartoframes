@@ -172,7 +172,7 @@ class CartoContext(object):
             self._table_exists(table_name)
         if geom_col:
             pgcolnames = normalize_colnames(set(df.columns)-{geom_col})
-        elif not geom_col:
+        else:
             pgcolnames = normalize_colnames(df.columns)
 
         if df.shape[0] > MAX_IMPORT_ROWS:
