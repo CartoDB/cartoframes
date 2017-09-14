@@ -176,7 +176,6 @@ class CartoContext(object):
             _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
-        print(pgcolnames)
 
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
@@ -206,6 +205,7 @@ class CartoContext(object):
                    '{base_url}dataset/{table_name}'.format(
                        base_url=self.base_url,
                        table_name=final_table_name))
+
         # If geometries were encoded, drop the_geom column in dataframe
         df.drop('the_geom', axis=1, errors='ignore', inplace=True)
 
