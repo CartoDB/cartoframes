@@ -156,8 +156,9 @@ class CartoContext(object):
                 CARTO's `Import API
                 <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
                 for more information.
-            encode_geom (bool, optional): Whether to write `geom_col` to CARTO
-                and the dataframe as `the_geom`.
+            encode_geom (bool, optional): Whether to encode `geom_col` into
+                hex-encoded wkb and add as new column "the_geom" to
+                to CARTO.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
 
@@ -173,7 +174,9 @@ class CartoContext(object):
 
         if encode_geom:
             _add_encoded_geom(df, geom_col)
-            pgcolnames.append(geom_col)
+            pgcolnames.append('the_geom')
+            pgcolnames.remove(geom_col)
+        print(pgcolnames)
 
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
@@ -203,6 +206,8 @@ class CartoContext(object):
                    '{base_url}dataset/{table_name}'.format(
                        base_url=self.base_url,
                        table_name=final_table_name))
+        # If geometries were encoded, drop the_geom column in dataframe
+        df.drop('the_geom', axis=1, errors='ignore', inplace=True)
 
     def delete(self, table_name):
         """Delete table
