@@ -37,11 +37,16 @@ setup(
         'Programming Language :: Python :: 3.6'
     ],
     keywords='carto data science maps spatial pandas',
-    packages=['cartoframes'],
-    install_requires=['pandas>=0.20.1',
-                      'webcolors>=1.7.0',
-                      'carto>=1.0.1',
-                      'tqdm>=4.14.0',],
+    packages=[
+        'cartoframes',
+        ],
+    install_requires=[
+        'pandas>=0.20.1',
+        'webcolors>=1.7.0',
+        'carto>=1.0.1',
+        'tqdm>=4.14.0',
+        'appsdir>=1.4.3',
+        ],
     extras_require={
         ':python_version == "2.7"': [
             'IPython>=5.0.0,<6.0.0',
@@ -57,8 +62,12 @@ setup(
             ]},
     package_dir={'cartoframes': 'cartoframes'},
     package_data={
-        '': ['LICENSE',
-             'CONTRIBUTORS',],
-        'cartoframes': ['assets/*',],
+        '': [
+            'LICENSE',
+            'CONTRIBUTORS',
+            ],
+        'cartoframes': [
+            'assets/*',
+            ],
     },
 )
