@@ -164,16 +164,16 @@ class CartoContext(object):
         Returns:
             None
         """
-        if encode_geom:
-            _add_encoded_geom(df, geom_col)
+
+        pgcolnames = normalize_colnames(df.columns)
 
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
-        if geom_col:
-            pgcolnames = normalize_colnames(set(df.columns)-{geom_col})
-        else:
-            pgcolnames = normalize_colnames(df.columns)
+
+        if encode_geom:
+            _add_encoded_geom(df, geom_col)
+            pgcolnames.append(geom_col)
 
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
