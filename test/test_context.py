@@ -272,21 +272,29 @@ class TestCartoContext(unittest.TestCase):
 
         # try writing geodataframe with multiple geometry columns, specifying
         # geom_col different from geometry of geodataframe
-            # warning message about user-supplied column
         null_islands = [0 for i in range(100)]
         null_island_points = [Point(xy) for xy in zip(null_islands, null_islands)]
         geo_df['null_islands'] = null_island_points
         with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                cc.write(geo_df, self.test_write_table, overwrite=True,
-                         encode_geom=True, geom_col='null_islands')
-                assert len(w) == 1
-                assert issubclass(w[-1].category, UserWarning)
-                assert "user-supplied" in str(w[-1].message)
+            warnings.simplefilter("always")
+            cc.write(geo_df, self.test_write_table, overwrite=True,
+                     encode_geom=True, geom_col='null_islands')
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "user-supplied" in str(w[-1].message)
 
         # try writing geodataframe with multiple geometry columns, without
         # specifying geom_col
             # no warning message, geometry used is geom_col = is_geopandas
+        cc.write(geo_df, self.test_write_table, overwrite=True,
+                 encode_geom=True)
+        resp = self.sql_client.send('''
+            SELECT the_geom
+            FROM {table}
+            LIMIT 1
+            '''.format(table=self.test_write_table))
+        self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
+                        (geo_df.iloc[0].lat_long))
 
         # try writing geodataframe with multiple geometry columns, without
         # specifying geom_col
