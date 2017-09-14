@@ -214,11 +214,12 @@ class CartoContext(object):
             None
         """
         try:
-            self.auth_client.send(
+            resp = self.auth_client.send(
                 'api/v1/viz/{table_name}'.format(table_name=table_name),
                 http_method='DELETE'
             )
-        except CartoException as err:
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as err:
             warn('Failed to delete the following table from CARTO '
                  'account: `{table_name}`. ({err})'.format(
                      table_name=table_name,
