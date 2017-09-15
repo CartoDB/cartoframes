@@ -110,6 +110,13 @@ class TestCredentials(unittest.TestCase):
                 }
         self.default_cred.set(**new_creds)
 
+    def test_credentials_key(self):
+        """credentials.Credentials.key"""
+
+        creds = Credentials(key='abcdefg', username='andy')
+        creds.key('hijklmop')
+        self.assertEqual(creds.key(), 'hijklmnop')
+
     def test_credentials_retrieve(self):
         """credentials.Credentials.retrieve"""
         local_cred_file = './test_cred_file_{}.json'.format(
