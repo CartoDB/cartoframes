@@ -174,7 +174,7 @@ class CartoContext(object):
 
         if encode_geom:
             # enforce that geodataframe CRS is 4326
-            df = df.to_crs({'init':'epsg:4326'})
+            df.crs = {'init':'epsg:4326'}
             geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
