@@ -345,7 +345,7 @@ class CartoContext(object):
                                   stream=True)
             self._debug_print(res=res)
 
-            if not res['success']:
+            if not res.get('success'):
                 remove_tempfile(tempfile)
                 raise CartoException('Failed to send DataFrame')
             import_id = res['item_queue_id']
