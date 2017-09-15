@@ -45,7 +45,7 @@ setup(
         'webcolors>=1.7.0',
         'carto>=1.0.1',
         'tqdm>=4.14.0',
-        'appsdir>=1.4.3',
+        'appdirs>=1.4.3',
         ],
     extras_require={
         ':python_version == "2.7"': [
