@@ -254,8 +254,6 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
 
-<<<<<<< HEAD
-=======
     def test_cartocontext_delete(self):
         """CartoContext.delete"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -284,7 +282,6 @@ class TestCartoContext(unittest.TestCase):
             assert issubclass(w[-1].category, UserWarning)
             assert "Failed to delete" in str(w[-1].message)
 
->>>>>>> 39c53b8d4c2e90e5a5ce94bd1916034c3d66dd50
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
         pass
