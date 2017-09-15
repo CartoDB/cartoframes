@@ -114,7 +114,7 @@ class TestCredentials(unittest.TestCase):
         """credentials.Credentials.key"""
 
         creds = Credentials(key='abcdefg', username='andy')
-        creds.key('hijklmop')
+        creds.key('hijklmnop')
         self.assertEqual(creds.key(), 'hijklmnop')
 
     def test_credentials_retrieve(self):
