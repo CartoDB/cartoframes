@@ -13,7 +13,6 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
-import warnings
 
 WILL_SKIP = False
 
@@ -103,13 +102,31 @@ class TestCartoContext(unittest.TestCase):
         """CartoContext.__init__"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        self.assertTrue(cc.api_key == self.apikey)
-        self.assertTrue(cc.base_url == self.baseurl)
-        self.assertTrue(cc.username == self.username)
+        self.assertTrue(cc.creds.key() == self.apikey)
+        self.assertTrue(cc.creds.base_url() == self.baseurl)
+        self.assertTrue(cc.creds.username() == self.username)
         self.assertTrue(not cc.is_org)
         # TODO: how to test instances of a class?
         # self.assertTrue(cc.auth_client.__dict__ == self.auth_client.__dict__)
         # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_credentials(self):
+        """CartoContext.__init__ Credentials argument"""
+        creds = cartoframes.Credentials(username=self.username,
+                                        key=self.apikey)
+        cc = cartoframes.CartoContext(creds=creds)
+        self.assertIsInstance(cc, cartoframes.CartoContext)
+        self.assertEqual(cc.creds.username(), self.username)
+        self.assertEqual(cc.creds.key(), self.apikey)
+
+        # CartoContext pulls from saved credentials
+        saved_creds = cartoframes.Credentials(username=self.username,
+                                              key=self.apikey)
+        saved_creds.save()
+        cc_saved = cartoframes.CartoContext()
+        self.assertEqual(cc_saved.creds.key(), self.apikey)
+
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
@@ -237,6 +254,37 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(NameError):
             cc._table_exists(self.test_read_table)
 
+<<<<<<< HEAD
+=======
+    def test_cartocontext_delete(self):
+        """CartoContext.delete"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = {'col1': [1, 2, 3],
+                'col2': ['a', 'b', 'c']}
+        df = pd.DataFrame(data)
+
+        cc.write(df, self.test_delete_table)
+        cc.delete(self.test_delete_table)
+
+        # check that querying recently deleted table raises an exception
+        with self.assertRaises(CartoException):
+            cc.sql_client.send('select * from {}'.format(
+                self.test_delete_table))
+
+        # try to delete a table that does not exists
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            cc.delete('non_existent_table')
+            # Verify one warning, subclass is UserWarning, and expected message
+            # is in warning
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "Failed to delete" in str(w[-1].message)
+
+>>>>>>> 39c53b8d4c2e90e5a5ce94bd1916034c3d66dd50
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
         pass

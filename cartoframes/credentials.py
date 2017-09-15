@@ -1,208 +1,240 @@
-"""API key utility functions
-"""
+"""Credentials management for cartoframes usage."""
 import os
 import json
 import warnings
+import appdirs
 
+_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
+_DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR,
+                             'cartocreds.json')
 
-_FILEPATH = os.path.dirname(os.path.abspath(__file__))
-_TARGETPATH = os.path.join(_FILEPATH, 'CARTOCREDS.json')
-
-
-def set_credentials(base_url='', api_key='', overwrite=False):
-    """Save the CARTO API base URL and API key so that users can access it via
-    cartoframes.credentials.credentials(). This lets users bind their CARTO
-    access credentials to a given installation.
+class Credentials(object):
+    """Credentials class for managing and storing user CARTO credentials. The
+    arguments are listed in order of precedence: :obj:`Credentials` instances
+    are first, `key` and `base_url`/`username` are taken next, and `config_file`
+    (if given) is taken last. If no arguments are passed, then there will be an
+    attempt to retrieve credentials from a previously saved session. One of the
+    above scenarios needs to be met to successfully instantiate a
+    :obj:`Credentials` object.
 
     Args:
-        base_url (str): CARTO API base URL. Defaults to an empty string. Format
-            is `https://{username}.carto.com/` for cloud users.
-        api_key (str): CARTO api key. Defaults to an empty string.
-        overwrite (bool): Whether to overwrite the existing credentials.
-            Defaults to False.
-
-    Returns:
-        str: Path to the location of the API key file.
+        creds (:obj:`cartoframes.Credentials`, optional): Credentials instance
+        key (str, optional): API key of user's CARTO account
+        username (str, optional): Username of CARTO account
+        base_url (str, optional): Base URL used for API calls. This is usually
+            of the form `https://eschbacher.carto.com/` for user `eschbacher`.
+            On premises installations (and others) have a different URL
+            pattern.
+        cred_file (str, optional): Pull credentials from a stored file. If this
+            and all other args are not entered, Credentials will attempt to
+            load a user config credentials file that was previously set with
+            Credentials(...).save().
 
     Raises:
-        EnvironmentError: if overwriting is prohibited and the file exists
+        RuntimeError: If not enough credential information is passed and no
+            stored credentials file is found, this error will be raised.
+
+    Example:
+
+        .. code::
+
+            from cartoframes import Credentials, CartoContext
+            creds = Credentials(key='abcdefg', username='eschbacher')
+            cc = CartoContext(creds=creds)
+
     """
-    _ = _check_overwrite('base_url', overwrite)
-    stored = _check_overwrite('api_key', overwrite)
-    stored['base_url'] = base_url
-    stored['api_key'] = api_key
-    with open(_TARGETPATH, 'w') as outfile:
-        json.dump(stored, outfile)
-    return _TARGETPATH
+    def __init__(self, creds=None, key=None, username=None, base_url=None,
+                 cred_file=None):
+        if creds and isinstance(creds, Credentials):
+            self._key = creds.key()
+            self._username = creds.username()
+            self._base_url = creds.base_url()
+        elif (key and username) or (key and base_url):
+            self._key = key
+            self._username = username
+            if base_url:
+                self._base_url = base_url
+            else:
+                self._base_url = 'https://{}.carto.com/'.format(self._username)
+        elif cred_file:
+            self._retrieve(cred_file)
+        else:
+            try:
+                self._retrieve(_DEFAULT_PATH)
+            except:
+                raise RuntimeError('Could not load CARTO credentials. Try '
+                                   'setting them with the `key` and '
+                                   '`username` arguments.')
 
+    def __repr__(self):
+        return ('Credentials(username={username}, '
+                'key={key}, '
+                'base_url={base_url})').format(username=self._username,
+                                               key=self._key,
+                                               base_url=self._base_url)
 
-def set_base_url(base_url, overwrite=False):
-    """Save the CARTO API base_url so that users can access it via
-    cartoframes.credentials.access_base_url(). This lets users bind their API
-    base_url to a given installation.
+    def save(self, config_loc=None):
+        """Saves current user credentials to user directory.
 
-    Args:
-        base_url (str): CARTO access URL
-        overwrite (bool): Whether to overwrite the existing key. Defaults to
-        False.
+        Args:
+            config_loc (str, optional):
 
-    Returns:
-        str: Path to location of the credentials file. Raises FileError if
-        overwriting is prohibited and the file exists.
-    """
-    stored = _check_overwrite('base_url', overwrite)
-    stored['base_url'] = base_url
-    with open(_TARGETPATH, 'w') as outfile:
-        json.dump(stored, outfile)
-    return _TARGETPATH
+        Example:
 
+            .. code::
 
-def set_api_key(key, overwrite=False):
-    """Save the CARTO API key so that users can access it via
-    `cartoframes.credentials.api_key()`. This lets users bind an API key to a
-    given installation.
+                from cartoframes import Credentials
+                creds = Credentials(username='eschbacher', key='abcdefg')
+                creds.save()  # save to default location
 
-    Args:
-        key (str): CARTO API key
-        overwrite (bool): Whether to overwrite existing key. Defaults to False.
+        """
+        if not os.path.exists(_USER_CONFIG_DIR):
+            """create directory if not exists"""
+            os.makedirs(_USER_CONFIG_DIR)
+        with open(_DEFAULT_PATH, 'w') as f:
+            json.dump({'key': self._key, 'base_url': self._base_url,
+                       'username': self._username}, f)
 
-    Returns:
-        str: Path to the location of the API key file. Raises FileError if
-        overwriting is prohibited and the file exists.
-    """
-    stored = _check_overwrite('api_key', overwrite)
-    stored['api_key'] = key
-    with open(_TARGETPATH, 'w') as outfile:
-        json.dump(stored, outfile)
-    return _TARGETPATH
-
-
-def api_key():
-    """Returns stored API key that was set with `cartoframes.credentials.set_key`
-
-    Returns:
-        str: CARTO API key
-    """
-    return _load_api_key()
-
-
-def base_url():
-    """Returns stored base_url that was set with
-    `cartoframes.credentials.set_base_url`
-
-    Returns:
-        str: CARTO API base URL
-    """
-    return _load_base_url()
-
-
-def credentials():
-    """Returns stored credentials that was set with
-    `cartoframes.credentials.set_credentials`
-
-    Returns:
-        dict: Dictionary containing CARTO API base_url and API key.
-    """
-
-    return _load_creds()
-
-
-def _load_creds():
-    """Load both URL and api_key from the credentials file
-
-    Returns:
-        dict: Dictionary containing keys `base_url` and `api_key`, values are
-        strings. If the credential is not set, the value may be an empty
-        string.
-    """
-    try:
-        with open(_TARGETPATH, 'r') as f:
+    def _retrieve(self, config_file=None):
+        """Retrives credentials from a file. Defaults to the user config
+        directory"""
+        with open(config_file or _DEFAULT_PATH, 'r') as f:
             creds = json.load(f)
-    except EnvironmentError:
-        raise EnvironmentError('No credentials are stored with this '
-                               'installation.  Set credentials using '
-                               '`cartoframes.credentials.set_credentials`.')
+        self._key = creds.get('key')
+        self._base_url = creds.get('base_url')
+        self._username = creds.get('username')
 
-    return dict(base_url=creds['base_url'].strip(),
-                api_key=creds['api_key'].strip())
+    def delete(self, config_file=None):
+        """Deletes the credentials file specified in `config_file`. If no
+        file is specified, it deletes the default user credential file.
 
+        Args:
+            config_file (str): Path to configuration file. Defaults to delete
+                the user default location if `None`.
 
-def _load_api_key():
-    """Load API key from the credentials file
+        .. Tip::
 
-    Returns:
-        str: The api key for the site. If the credential is not set, the string
-            may be an empty string.
-    """
-    return _load_creds()['api_key']
+            To see if there is a default user credential file stored, do the
+            following::
 
+                >>> creds = Credentials()
+                >>> print(creds)
+                Credentials(username=eschbacher, key=abcdefg, base_url=https://eschbacher.carto.com/)
 
-def _load_base_url():
-    """Load base_url from the credentials file
+        """
+        path_to_remove = config_file or _DEFAULT_PATH
+        try:
+            os.remove(path_to_remove)
+            print('Credentials at {} successfully removed.'.format(
+                path_to_remove))
+        except OSError as err:
+            warnings.warn('No credential file found at {}.'.format(
+                path_to_remove))
 
-    Returns:
-        str: The base_url for CARTO API access. If the credential is not set,
-            the string may be an empty string.
-    """
-    return _load_creds()['base_url']
+    def set(self, key=None, username=None, base_url=None):
+        """Update the credentials of a Credentials instance instead with new
+        values.
 
+        Args:
+            key (str): API key of user account. Defaults to previous value if
+                not specified.
+            username (str): User name of account. This parameter is optional if
+                `base_url` is not specified, but defaults to the previous
+                value if not set.
+            base_url (str): Base URL of user account. This parameter is
+                optional if `username` is specified and on CARTO's
+                cloud-based account. Generally of the form
+                ``https://your_user_name.carto.com/`` for cloud-based accounts.
+                If on-prem or otherwise, contact your admin.
 
-def _remove_creds():
-    """Remove the credential file."""
-    try:
-        os.remove(_TARGETPATH)
-    except EnvironmentError:
-        warnings.warn('No credential file found')
+        Example:
 
+            .. code::
 
-def _clear_attribute(name):
-    """Unsets an arbitrary attribute from the credential file.
+                from cartoframes import Credentials
+                creds = Credentials()  # load credentials saved in previous session
+                creds.set(key='new_api_key')  # set new API key
+                creds.save()  # save new creds to default user config directory
 
-    Args:
-        name (str): name of the credential to remove from the credential file.
-            Can be one of `api_key` or `base_url`.
-    """
-    with open(_TARGETPATH, 'r') as f:
-        creds = json.load(f)
-    if name not in creds:
-        raise KeyError('`{}` not found in stored credentials.'.format(name))
-    creds[name] = ''
-    with open(_TARGETPATH, 'w') as f:
-        json.dump(creds, f)
+        Note:
+            If the `username` is specified but the `base_url` is not, the
+            `base_url` will be updated to ``https://<username>.carto.com/``.
+        """
+        self.__init__(key=(key or self._key),
+                      username=(username or self._username),
+                      base_url=base_url)
 
+    def key(self, key=None):
+        """Return or set API `key`.
 
-def _clear_base_url():
-    """Unsets the base_url attribute of the credential file."""
-    return _clear_attribute('base_url')
+        Args:
+            key (str, optional): If set, updates the API key, otherwise returns
+                current API key.
 
+        Example:
 
-def _clear_api_key():
-    """Unsets the api_key attribute of the credential file"""
-    return _clear_attribute('api_key')
+            .. code::
 
+                >>> from cartoframes import Credentials
+                >>> creds = Credentials()  # load credentials saved in previous session
+                >>> creds.key()  # returns current API key
+                'abcdefg'
+                >>> creds.key('new_api_key')  # updates API key with new value
+        """
+        if key:
+            self._key = key
+        else:
+            return self._key
 
-def _check_overwrite(attribute, overwrite, path=_TARGETPATH):
-    """Checks if an attribute is present in the credential file. If it is
-    present and the overwrite flag is not set, raises an EnvironmentError.
-    Otherwise, returns the stored credentials.
+    def username(self, username=None):
+        """Return or set `username`.
 
-    Args:
-        attribute (str): The name of the attribute in the credential file to
-            verify
-        overwrite (bool): A flag denoting whether overwriting a set attribute
-            is allowed. If False and the attribute is not empty, a TypeError is
-            raised.
-        path (str): The path to the credential file.
+        Args:
+            username (str, optional): If set, updates the `username`. Otherwise
+                returns current `username`.
 
-    Returns:
-        dict: the dictionary of stored credentials
-    """
-    if os.path.isfile(path):
-        with open(path, 'r') as infile:
-            stored = json.load(infile)
-        if stored[attribute] != '' and not overwrite:
-            raise TypeError('CARTO `{}` already set and overwrite flag is '
-                            'not set'.format(attribute))
-        return stored
-    else:
-        return dict(api_key='', base_url='')
+        Note:
+            This does not update the `base_url` attribute. Use
+            `Credentials.set` to have that updated with `username`.
+
+        Example:
+
+            .. code::
+
+                >>> from cartoframes import Credentials
+                >>> creds = Credentials()  # load credentials saved in previous session
+                >>> creds.username()  # returns current username
+                'eschbacher'
+                >>> creds.username('new_username')  # updates username with new value
+        """
+        if username:
+            self._username = username
+        else:
+            return self._username
+
+    def base_url(self, base_url=None):
+        """Return or set `base_url`.
+
+        Args:
+            base_url (str, optional): If set, updates the `base_url`. Otherwise
+                returns current `base_url`.
+
+        Note:
+            This does not update the `username` attribute. Separately update
+            the username with ``Credentials.username`` or update `base_url` and
+            `username` at the same time with ``Credentials.set``.
+
+        Example:
+
+            .. code::
+
+                >>> from cartoframes import Credentials
+                >>> creds = Credentials()  # load credentials saved in previous session
+                >>> creds.base_url()  # returns current base_url
+                'https://eschbacher.carto.com/'
+                >>> creds.base_url('new_base_url')  # updates base_url with new value
+        """
+        if base_url:
+            self._base_url = base_url
+        else:
+            return self._base_url
