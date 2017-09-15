@@ -10,7 +10,8 @@ from cartoframes.credentials import _USER_CONFIG_DIR
 class TestCredentials(unittest.TestCase):
     """Tests for functions in keys module"""
     def setUp(self):
-        os.rmdir(_USER_CONFIG_DIR)
+        if os.path.exists(_USER_CONFIG_DIR):
+            os.rmdir(_USER_CONFIG_DIR)
         self.key = 'seaturtlexyz'
         self.username = 'loggerhead'
         self.base_url = 'https://loggerhead.carto.com/'
