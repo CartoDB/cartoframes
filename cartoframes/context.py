@@ -173,7 +173,9 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         if encode_geom:
-            _add_encoded_geom(df, geom_col)
+            # enforce that geodataframe CRS is 4326
+            df = df.to_crs({'init':'epsg:4326'})
+            geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
 
@@ -1049,7 +1051,7 @@ def _add_encoded_geom(df, geom_col):
         geom_col = is_geopandas
     # updates in place
     df['the_geom'] = df[geom_col].apply(_encode_geom)
-    return None
+    return geom_col
 
 
 def _encode_decode_decorator(func):
