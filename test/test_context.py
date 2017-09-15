@@ -277,6 +277,7 @@ class TestCartoContext(unittest.TestCase):
         geo_df['null_islands'] = null_island_points
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
+            # Trigger warning
             cc.write(geo_df, self.test_write_table, overwrite=True,
                      encode_geom=True, geom_col='null_islands')
             assert len(w) == 1
@@ -285,23 +286,29 @@ class TestCartoContext(unittest.TestCase):
 
         # try writing geodataframe with multiple geometry columns, without
         # specifying geom_col
-            # no warning message, geometry used is geom_col = is_geopandas
         cc.write(geo_df, self.test_write_table, overwrite=True,
                  encode_geom=True)
+        is_geopandas = getattr(geo_df, '_geometry_column_name', None)
         resp = self.sql_client.send('''
             SELECT the_geom
             FROM {table}
             LIMIT 1
             '''.format(table=self.test_write_table))
         self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
-                        (geo_df.iloc[0].lat_long))
-
-        # try writing geodataframe with multiple geometry columns, without
-        # specifying geom_col
-            # no warning message, geometry used is geom_col = is_geopandas
+                         (geo_df.iloc[0][is_geopandas]))
 
         # try encoding geometry AND specifying lnglat pair
             # lnglat pair will override encoded geometry as "the_geom" in CARTO
+        cc.write(geo_df, self.test_write_table, overwrite=True,
+                 lnglat=('long', 'lat'), encode_geom=True, geom_col='null_islands')
+        is_geopandas = getattr(geo_df, '_geometry_column_name', None)
+        resp = self.sql_client.send('''
+            SELECT the_geom
+            FROM {table}
+            LIMIT 1
+            '''.format(table=self.test_write_table))
+        self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
+                         (geo_df.iloc[0][is_geopandas]))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):
