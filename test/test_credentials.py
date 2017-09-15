@@ -43,6 +43,16 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(creds.username(), self.username)
         self.assertEqual(creds.base_url(), self.base_url)
 
+    def test_credentials_constructor(self):
+        """credentials.Credentials object constructor"""
+        creds1 = Credentials(key='abc123', username='jackson-5')
+        creds2 = Credentials(creds=creds1)
+
+        self.assertEqual(creds1.key(), creds2.key())
+        self.assertEqual(creds1.username(), creds2.username())
+        self.assertEqual(creds1.base_url(), creds2.base_url())
+
+
     def test_credentials_baseurl(self):
         """credentials.Credentials carto.com base_url"""
         creds = Credentials(key=self.key,

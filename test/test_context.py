@@ -106,6 +106,24 @@ class TestCartoContext(unittest.TestCase):
         # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_credentials(self):
+        """CartoContext.__init__ Credentials argument"""
+        creds = cartoframes.Credentials(username=self.username,
+                                        key=self.apikey)
+        cc = cartoframes.CartoContext(creds=creds)
+        self.assertIsInstance(cc, cartoframes.CartoContext)
+        self.assertEqual(cc.creds.username(), self.username)
+        self.assertEqual(cc.creds.key(), self.apikey)
+
+        # CartoContext pulls from saved credentials
+        saved_creds = cartoframes.Credentials(username=self.username,
+                                              key=self.apikey)
+        saved_creds.save()
+        cc_saved = cartoframes.CartoContext()
+        self.assertEqual(cc_saved.creds.key(), self.apikey)
+
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
         """CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,

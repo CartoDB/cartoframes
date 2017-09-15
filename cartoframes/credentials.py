@@ -9,11 +9,18 @@ _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR,
                              'cartocreds.json')
 
 class Credentials(object):
-    """Credentials class for managing and storing user CARTO credentials.
+    """Credentials class for managing and storing user CARTO credentials. The
+    arguments are listed in order of precedence: :obj:`Credentials` instances
+    are first, `key` and `base_url`/`username` are taken next, and `config_file`
+    (if given) is taken last. If no arguments are passed, then there will be an
+    attempt to retrieve credentials from a previously saved session. One of the
+    above scenarios needs to be met to successfully instantiate a
+    :obj:`Credentials` object.
 
     Args:
-        key (str): API key of user's CARTO account
-        username (str): Username of CARTO account
+        creds (:obj:`cartoframes.Credentials`, optional): Credentials instance
+        key (str, optional): API key of user's CARTO account
+        username (str, optional): Username of CARTO account
         base_url (str, optional): Base URL used for API calls. This is usually
             of the form `https://eschbacher.carto.com/` for user `eschbacher`.
             On premises installations (and others) have a different URL
@@ -36,8 +43,13 @@ class Credentials(object):
             cc = CartoContext(creds=creds)
 
     """
-    def __init__(self, key=None, username=None, base_url=None, cred_file=None):
-        if (key and username) or (key and base_url):
+    def __init__(self, creds=None, key=None, username=None, base_url=None,
+                 cred_file=None):
+        if creds and isinstance(creds, Credentials):
+            self._key = creds.key()
+            self._username = creds.username()
+            self._base_url = creds.base_url()
+        elif (key and username) or (key and base_url):
             self._key = key
             self._username = username
             if base_url:
