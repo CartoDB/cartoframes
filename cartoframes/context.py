@@ -23,6 +23,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from carto.exceptions import CartoException
 
+from .credentials import Credentials
 from .utils import dict_items, normalize_colnames
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
@@ -75,15 +76,15 @@ class CartoContext(object):
         :obj:`CartoContext`: A CartoContext object that is authenticated
         against the user's CARTO account.
     """
-    def __init__(self, base_url=None, api_key=None, session=None, verbose=0):
+    def __init__(self, base_url=None, api_key=None, creds=None, session=None,
+                 verbose=0):
 
-        self.api_key, self.base_url = _process_credentials(api_key,
-                                                           base_url)
-        self.auth_client = APIKeyAuthClient(base_url=self.base_url,
-                                            api_key=self.api_key,
+        self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
+        self.auth_client = APIKeyAuthClient(base_url=self.creds.base_url(),
+                                            api_key=self.creds.key(),
                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
-        self.username = self.auth_client.username
+        self.creds.username(self.auth_client.username)
         self.is_org = self._is_org_user()
 
         self._map_templates = {}
@@ -192,7 +193,7 @@ class CartoContext(object):
 
         tqdm.write('Table successfully written to CARTO: '
                    '{base_url}dataset/{table_name}'.format(
-                       base_url=self.base_url,
+                       base_url=self.creds.base_url(),
                        table_name=final_table_name))
 
     def delete(self, table_name):
@@ -295,7 +296,8 @@ class CartoContext(object):
                 SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
                 '''.format(table_name=table_name,
                            unioned_tables=unioned_tables,
-                           org=self.username if self.is_org else 'public',
+                           org=(self.creds.username()
+                                if self.is_org else 'public'),
                            drop_tables=drop_tables)
             self._debug_print(query=query)
             _ = self.sql_client.send(query)
@@ -410,7 +412,8 @@ class CartoContext(object):
                 raise CartoException('Over CARTO account storage limit for '
                                      'user `{}`. Try subsetting your '
                                      'DataFrame or dropping columns to reduce '
-                                     'the data size.'.format(self.username))
+                                     'the data size.'.format(
+                                         self.creds.username()))
             elif import_job['error_code'] == 6668:
                 raise CartoException('Too many rows in DataFrame. Try '
                                      'subsetting DataFrame before writing to '
@@ -480,7 +483,8 @@ class CartoContext(object):
                 SELECT CDB_CartodbfyTable('{org}', '{table_name}');
             '''.format(table_name=table_name,
                        query=query,
-                       org=(self.username if self.is_org else 'public'))
+                       org=(self.creds.username()
+                            if self.is_org else 'public'))
             self._debug_print(create_table_query=create_table_query)
 
             create_table_res = self.sql_client.send(create_table_query)
@@ -663,7 +667,7 @@ class CartoContext(object):
             options.update(self._get_bounds(nb_layers))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = '{base_url}api/v1/map'.format(base_url=self.base_url)
+        api_url = '{base_url}api/v1/map'.format(base_url=self.creds.base_url())
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(
@@ -677,7 +681,7 @@ class CartoContext(object):
 
         # TODO: write this as a private method
         if interactive:
-            netloc = urlparse(self.base_url).netloc
+            netloc = urlparse(self.creds.base_url()).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
             def safe_quotes(text, escape_single_quotes=False):
@@ -690,9 +694,9 @@ class CartoContext(object):
                 return text
 
             config = {
-                'user_name': self.username,
-                'maps_api_template': self.base_url[:-1],
-                'sql_api_template': self.base_url[:-1],
+                'user_name': self.creds.username(),
+                'maps_api_template': self.creds.base_url()[:-1],
+                'sql_api_template': self.creds.base_url()[:-1],
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',
@@ -716,7 +720,7 @@ class CartoContext(object):
                     'order': 1,
                     'options': {
                         'query': time_layer.query,
-                        'user_name': self.username,
+                        'user_name': self.creds.username(),
                         'tile_style': time_layer.torque_cartocss,
                     }
                 })
@@ -748,7 +752,7 @@ class CartoContext(object):
                      img_html=img_html)
             return IPython.display.HTML(html)
         elif HAS_MATPLOTLIB:
-            raw_data = mpi.imread(static_url)
+            raw_data = mpi.imread(static_url, format='png')
             if ax is None:
                 dpi = mpi.rcParams['figure.dpi']
                 mpl_size = (size[0] / dpi, size[1] / dpi)
@@ -858,7 +862,7 @@ class CartoContext(object):
         augment_query = '''
             select obs_augment_table('{username}.{tablename}',
                                      '{cols_meta}');
-        '''.format(username=self.username,
+        '''.format(username=self.creds.username(),
                    tablename=table_name,
                    cols_meta=json.dumps(metadata))
         _ = self.sql_client.send(augment_query)
@@ -974,37 +978,6 @@ class CartoContext(object):
                                                      str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
-
-
-def _process_credentials(api_key, base_url):
-    """process credentials"""
-    # use stored api key (if present)
-    if (api_key is None) or (base_url is None):
-        from cartoframes import credentials as cfcreds
-        creds = cfcreds.credentials()
-        api_key = creds['api_key'] if api_key is None else api_key
-        base_url = creds['base_url'] if base_url is None else base_url
-        if (api_key == '') and (base_url == ''):
-            raise ValueError('No credentials are stored on this '
-                             'installation and none were provided. Use '
-                             '`cartoframes.credentials.set_credentials` '
-                             'to store your access URL and API key for '
-                             'this installation.')
-        if api_key == '':
-            raise ValueError('API key was not provided and no key is '
-                             'stored. Use '
-                             '`cartoframes.credentials.set_key` to set a '
-                             'default API key for this installation.')
-        if base_url == '':
-            raise ValueError('Base URL was not provided and no URL is '
-                             'stored. Use '
-                             '`cartoframes.credentials.set_url` to set a '
-                             'default base URL for this installation.')
-
-    # Make sure there is a trailing / for urljoin
-    if not base_url.endswith('/'):
-        base_url += '/'
-    return api_key, base_url
 
 
 def _add_encoded_geom(df, geom_col):
