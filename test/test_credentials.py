@@ -4,12 +4,16 @@ import json
 import os
 import time
 from cartoframes import Credentials
-from cartoframes.credentials import _USER_CONFIG_DIR
+from cartoframes.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
 
 
 class TestCredentials(unittest.TestCase):
     """Tests for functions in keys module"""
     def setUp(self):
+        # remove default credential file
+        if os.path.exists(_DEFAULT_PATH):
+            os.remove(_DEFAULT_PATH)
+        # delete path for user config data
         if os.path.exists(_USER_CONFIG_DIR):
             os.rmdir(_USER_CONFIG_DIR)
         self.key = 'seaturtlexyz'
@@ -27,6 +31,8 @@ class TestCredentials(unittest.TestCase):
 
     def tearDown(self):
         self.default_cred.delete()
+        if os.path.exists(_USER_CONFIG_DIR):
+            os.rmdir(_USER_CONFIG_DIR)
 
     def test_credentials(self):
         """credentials.Credentials common usage"""
