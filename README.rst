@@ -134,3 +134,22 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                           'normalization': 'predenominated'},]
     df = cc.data_augment('transactions', data_obs_measures)
     df.head()
+
+
+CARTO Credential Management
+---------------------------
+
+Save and update your CARTO credentials for later use.
+
+.. code:: python
+
+    from cartoframes import Credentials, CartoContext
+    creds = Credentials(username='eschbacher', key='abcdefg')
+    creds.save()  # save credentials for later use (not dependent on Python session)
+
+Once you save your credentials, you can get started in future sessions more quickly:
+
+.. code:: python
+
+    from cartoframes import CartoContext
+    cc = CartoContext()  # automatically loads credentials if previously saved
