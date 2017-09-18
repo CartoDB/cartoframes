@@ -673,6 +673,13 @@ class TestCartoContext(unittest.TestCase):
 
     def test_cartocontext_write_geopandas(self):
         """CartoContext.write with geodataframe"""
+        try:
+            import geopandas
+            import shapely
+        except ImportError:
+            HAS_GEOPANDAS = False
+        else:
+            HAS_GEOPANDAS = True
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -687,68 +694,69 @@ class TestCartoContext(unittest.TestCase):
                   'long': float}
         df = pd.DataFrame(data).astype(schema)
 
-        # Create a geodataframe
-        geometry = [Point(xy) for xy in zip(df.long, df.lat)]
-        df['lat_long'] = geometry
-        geo_df = gpd.GeoDataFrame(df, geometry='lat_long')
+        if HAS_GEOPANDAS:
+            # Create a geodataframe
+            geometry = [Point(xy) for xy in zip(df.long, df.lat)]
+            df['lat_long'] = geometry
+            geo_df = gpd.GeoDataFrame(df, geometry='lat_long')
 
-        # try writing geodataframe with encoding and geom_col specified
-        cc.write(geo_df, self.test_write_table, overwrite=True,
-                encode_geom=True, geom_col='lat_long')
-        resp = self.sql_client.send('''
-            SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
-            FROM {table}
-            '''.format(table=self.test_write_table))
-
-        # number of geoms should equal number of rows
-        self.assertEqual(resp['rows'][0]['num_rows'],
-                         resp['rows'][0]['num_geoms'])
-
-        # try writing geodataframe without encoding
-        cc.write(geo_df, self.test_write_table, overwrite=True)
-        resp = self.sql_client.send('''
-            SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
-            FROM {table}
-            '''.format(table=self.test_write_table))
-        # number of geoms should zero
-        self.assertEqual(resp['rows'][0]['num_geoms'], 0)
-
-        # try writing geodataframe with multiple geometry columns, specifying
-        # geom_col different from geometry of geodataframe
-        null_islands = [0 for i in range(100)]
-        null_island_points = [Point(xy) for xy in zip(null_islands, null_islands)]
-        geo_df['null_islands'] = null_island_points
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            # Trigger warning
+            # try writing geodataframe with encoding and geom_col specified
             cc.write(geo_df, self.test_write_table, overwrite=True,
-                     encode_geom=True, geom_col='null_islands')
-            assert len(w) == 1
-            assert issubclass(w[-1].category, UserWarning)
-            assert "user-supplied" in str(w[-1].message)
+                    encode_geom=True, geom_col='lat_long')
+            resp = self.sql_client.send('''
+                SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
+                FROM {table}
+                '''.format(table=self.test_write_table))
 
-        # try writing geodataframe with multiple geometry columns, without
-        # specifying geom_col
-        cc.write(geo_df, self.test_write_table, overwrite=True,
-                 encode_geom=True)
-        is_geopandas = getattr(geo_df, '_geometry_column_name', None)
-        resp = self.sql_client.send('''
-            SELECT the_geom
-            FROM {table}
-            LIMIT 1
-            '''.format(table=self.test_write_table))
-        self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
-                         (geo_df.iloc[0][is_geopandas]))
+            # number of geoms should equal number of rows
+            self.assertEqual(resp['rows'][0]['num_rows'],
+                             resp['rows'][0]['num_geoms'])
 
-        # try encoding geometry AND specifying lnglat pair
-            # lnglat pair will override encoded geometry as "the_geom" in CARTO
-        cc.write(geo_df, self.test_write_table, overwrite=True,
-                 lnglat=('long', 'lat'), encode_geom=True, geom_col='null_islands')
-        is_geopandas = getattr(geo_df, '_geometry_column_name', None)
-        resp = self.sql_client.send('''
-            SELECT the_geom
-            FROM {table}
-            LIMIT 1
-            '''.format(table=self.test_write_table))
-        self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
-                         (geo_df.iloc[0][is_geopandas]))
+            # try writing geodataframe without encoding
+            cc.write(geo_df, self.test_write_table, overwrite=True)
+            resp = self.sql_client.send('''
+                SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
+                FROM {table}
+                '''.format(table=self.test_write_table))
+            # number of geoms should zero
+            self.assertEqual(resp['rows'][0]['num_geoms'], 0)
+
+            # try writing geodataframe with multiple geometry columns, specifying
+            # geom_col different from geometry of geodataframe
+            null_islands = [0 for i in range(100)]
+            null_island_points = [Point(xy) for xy in zip(null_islands, null_islands)]
+            geo_df['null_islands'] = null_island_points
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                # Trigger warning
+                cc.write(geo_df, self.test_write_table, overwrite=True,
+                         encode_geom=True, geom_col='null_islands')
+                assert len(w) == 1
+                assert issubclass(w[-1].category, UserWarning)
+                assert "user-supplied" in str(w[-1].message)
+
+            # try writing geodataframe with multiple geometry columns, without
+            # specifying geom_col
+            cc.write(geo_df, self.test_write_table, overwrite=True,
+                     encode_geom=True)
+            is_geopandas = getattr(geo_df, '_geometry_column_name', None)
+            resp = self.sql_client.send('''
+                SELECT the_geom
+                FROM {table}
+                LIMIT 1
+                '''.format(table=self.test_write_table))
+            self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
+                             (geo_df.iloc[0][is_geopandas]))
+
+            # try encoding geometry AND specifying lnglat pair
+                # lnglat pair will override encoded geometry as "the_geom" in CARTO
+            cc.write(geo_df, self.test_write_table, overwrite=True,
+                     lnglat=('long', 'lat'), encode_geom=True, geom_col='null_islands')
+            is_geopandas = getattr(geo_df, '_geometry_column_name', None)
+            resp = self.sql_client.send('''
+                SELECT the_geom
+                FROM {table}
+                LIMIT 1
+                '''.format(table=self.test_write_table))
+            self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
+                             (geo_df.iloc[0][is_geopandas]))

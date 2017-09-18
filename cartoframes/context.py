@@ -42,6 +42,13 @@ except (ImportError, RuntimeError):
     mpi = None
     plt = None
 HAS_MATPLOTLIB = plt is not None
+try:
+    import geopandas
+    import shapely
+except ImportError:
+    HAS_GEOPANDAS = False
+else:
+    HAS_GEOPANDAS = True
 
 # Choose constant to avoid overview generation which are triggered at a
 # half million rows
@@ -174,6 +181,8 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         if encode_geom:
+            if not HAS_GEOPANDAS:
+                raise RuntimeError('geopandas needs to be installed to use this option')
             # enforce that geodataframe CRS is 4326
             df.crs = {'init':'epsg:4326'}
             geom_col = _add_encoded_geom(df, geom_col)
