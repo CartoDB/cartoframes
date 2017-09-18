@@ -68,7 +68,7 @@ class CartoContext(object):
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
-            for more information:
+            for more information.
         verbose (bool, optional): Output underlying process states (True), or
             suppress (False, default)
 
@@ -197,7 +197,7 @@ class CartoContext(object):
                        table_name=final_table_name))
 
     def delete(self, table_name):
-        """Delete table
+        """Delete a table in user's CARTO account.
 
         Args:
             table_name (str): Table name to delete
