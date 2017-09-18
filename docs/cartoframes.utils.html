@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>cartoframes.utils module &#8212; cartoframes 0.0.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -51,24 +48,52 @@
 <dl class="function">
 <dt id="cartoframes.utils.dict_items">
 <code class="descclassname">cartoframes.utils.</code><code class="descname">dict_items</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.dict_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>Description</p>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cartoframes.utils.norm_colname">
+<code class="descclassname">cartoframes.utils.</code><code class="descname">norm_colname</code><span class="sig-paren">(</span><em>colname</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.norm_colname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an arbitrary column name, translate to a SQL-normalized column
+name a la CARTO’s Import API will translate to</p>
+<dl class="docutils">
+<dt>Examples</dt>
+<dd><ul class="first last simple">
+<li>‘Field: 2’ -&gt; ‘field_2’</li>
+<li>‘2 Items’ -&gt; ‘_2_items’</li>
+</ul>
+</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>d</strong> (<em>dict</em>) – dictionary</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>colname</strong> (<em>str</em>) – Column name that will be SQL normalized</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list?</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SQL-normalized column name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="cartoframes.utils.norm_column">
-<code class="descclassname">cartoframes.utils.</code><code class="descname">norm_column</code><span class="sig-paren">(</span><em>colname</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.norm_column" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a valid pandas DataFrame column name into a CARTO-supported
-PostgreSQL name</p>
+<dt id="cartoframes.utils.normalize_colnames">
+<code class="descclassname">cartoframes.utils.</code><code class="descname">normalize_colnames</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.utils.normalize_colnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>SQL-normalize columns in <cite>dataframe</cite> to reflect changes made through
+CARTO’s SQL API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>columns</strong> (<em>list of str</em>) – List of column names</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Normalized column names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -110,7 +135,7 @@ PostgreSQL name</p>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

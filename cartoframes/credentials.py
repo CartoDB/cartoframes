@@ -8,14 +8,15 @@ _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR,
                              'cartocreds.json')
 
+
 class Credentials(object):
     """Credentials class for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
-    are first, `key` and `base_url`/`username` are taken next, and `config_file`
-    (if given) is taken last. If no arguments are passed, then there will be an
-    attempt to retrieve credentials from a previously saved session. One of the
-    above scenarios needs to be met to successfully instantiate a
-    :obj:`Credentials` object.
+    are first, `key` and `base_url`/`username` are taken next, and
+    `config_file` (if given) is taken last. If no arguments are passed, then
+    there will be an attempt to retrieve credentials from a previously saved
+    session. One of the above scenarios needs to be met to successfully
+    instantiate a :obj:`Credentials` object.
 
     Args:
         creds (:obj:`cartoframes.Credentials`, optional): Credentials instance
@@ -77,7 +78,9 @@ class Credentials(object):
         """Saves current user credentials to user directory.
 
         Args:
-            config_loc (str, optional):
+            config_loc (str, optional): Location where credentials are to be
+                stored. If no argument is provided, it will be send to the
+                default location.
 
         Example:
 
@@ -119,7 +122,8 @@ class Credentials(object):
 
                 >>> creds = Credentials()
                 >>> print(creds)
-                Credentials(username=eschbacher, key=abcdefg, base_url=https://eschbacher.carto.com/)
+                Credentials(username=eschbacher, key=abcdefg,
+                        base_url=https://eschbacher.carto.com/)
 
         """
         path_to_remove = config_file or _DEFAULT_PATH
@@ -152,9 +156,12 @@ class Credentials(object):
             .. code::
 
                 from cartoframes import Credentials
-                creds = Credentials()  # load credentials saved in previous session
-                creds.set(key='new_api_key')  # set new API key
-                creds.save()  # save new creds to default user config directory
+                # load credentials saved in previous session
+                creds = Credentials()
+                # set new API key
+                creds.set(key='new_api_key')
+                # save new creds to default user config directory
+                creds.save()
 
         Note:
             If the `username` is specified but the `base_url` is not, the
@@ -176,10 +183,13 @@ class Credentials(object):
             .. code::
 
                 >>> from cartoframes import Credentials
-                >>> creds = Credentials()  # load credentials saved in previous session
-                >>> creds.key()  # returns current API key
+                # load credentials saved in previous session
+                >>> creds = Credentials()
+                # returns current API key
+                >>> creds.key()
                 'abcdefg'
-                >>> creds.key('new_api_key')  # updates API key with new value
+                # updates API key with new value
+                >>> creds.key('new_api_key')
         """
         if key:
             self._key = key
@@ -202,10 +212,13 @@ class Credentials(object):
             .. code::
 
                 >>> from cartoframes import Credentials
-                >>> creds = Credentials()  # load credentials saved in previous session
-                >>> creds.username()  # returns current username
+                # load credentials saved in previous session
+                >>> creds = Credentials()
+                # returns current username
+                >>> creds.username()
                 'eschbacher'
-                >>> creds.username('new_username')  # updates username with new value
+                # updates username with new value
+                >>> creds.username('new_username')
         """
         if username:
             self._username = username
@@ -229,10 +242,13 @@ class Credentials(object):
             .. code::
 
                 >>> from cartoframes import Credentials
-                >>> creds = Credentials()  # load credentials saved in previous session
-                >>> creds.base_url()  # returns current base_url
+                # load credentials saved in previous session
+                >>> creds = Credentials()
+                # returns current base_url
+                >>> creds.base_url()
                 'https://eschbacher.carto.com/'
-                >>> creds.base_url('new_base_url')  # updates base_url with new value
+                # updates base_url with new value
+                >>> creds.base_url('new_base_url')
         """
         if base_url:
             self._base_url = base_url
