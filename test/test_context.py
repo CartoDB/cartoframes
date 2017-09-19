@@ -769,6 +769,11 @@ class TestCartoContext(unittest.TestCase):
         # test writing geodataframe with different coordinate reference system
         world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
         world_mercator = world.to_crs({'init': 'epsg:3395'})
-        with self.assertRaises(RuntimeError):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            # Trigger warning
             cc.write(world_mercator, self.test_write_table, overwrite=True,
                      encode_geom=True)
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "projection" in str(w[-1].message)

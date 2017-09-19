@@ -183,9 +183,6 @@ class CartoContext(object):
         if encode_geom:
             if not HAS_GEOPANDAS:
                 raise RuntimeError('geopandas needs to be installed to use this option')
-            # check that geodataframe CRS is 4326
-            if df.crs != {'init':'epsg:4326'}:
-                raise RuntimeError('geodataframe must be projected to epsg:4326')
             geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
@@ -1032,6 +1029,12 @@ def _add_encoded_geom(df, geom_col):
                                                 geom_col))
     elif is_geopandas and geom_col is None:
         geom_col = is_geopandas
+
+    # check that geodataframe CRS is 4326
+    if is_geopandas and df.crs != {'init':'epsg:4326'}:
+        warn('Geodataframe does not have an assigned coordinate system. '
+             'Assign WGS84 latitude-longitude projection to '
+             'your geodataframe `crs` to ensure proper projection')
     # updates in place
     df['the_geom'] = df[geom_col].apply(_encode_geom)
     return geom_col
