@@ -5,7 +5,7 @@ import sys
 import json
 import random
 import warnings
-from shapely.geometry import Point, multipolygon
+from shapely.geometry import Point
 import geopandas as gpd
 
 import cartoframes
@@ -675,7 +675,7 @@ class TestCartoContext(unittest.TestCase):
         """CartoContext.write__with__geopandas"""
         try:
             import geopandas
-            import shapely
+            from shapely.geometry import Point
         except ImportError:
             HAS_GEOPANDAS = False
         else:
@@ -777,3 +777,7 @@ class TestCartoContext(unittest.TestCase):
             assert len(w) == 1
             assert issubclass(w[-1].category, UserWarning)
             assert "projection" in str(w[-1].message)
+        # should raise RuntimeError
+        if not HAS_GEOPANDAS:
+            with self.assertRaises(RuntimeError):
+                cc.write(df, encode_geom=True)

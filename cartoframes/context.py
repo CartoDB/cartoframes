@@ -44,7 +44,7 @@ except (ImportError, RuntimeError):
 HAS_MATPLOTLIB = plt is not None
 try:
     import geopandas
-    import shapely
+    from shapely.geometry import Point
 except ImportError:
     HAS_GEOPANDAS = False
 else:
@@ -182,7 +182,7 @@ class CartoContext(object):
 
         if encode_geom:
             if not HAS_GEOPANDAS:
-                raise RuntimeError('geopandas needs to be installed to use this option')
+                raise RuntimeError('geopandas and shapely needs to be installed to use this option')
             geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
