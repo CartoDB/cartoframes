@@ -5,8 +5,6 @@ import sys
 import json
 import random
 import warnings
-from shapely.geometry import Point
-import geopandas as gpd
 
 import cartoframes
 from carto.exceptions import CartoException
