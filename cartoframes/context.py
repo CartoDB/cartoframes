@@ -183,8 +183,9 @@ class CartoContext(object):
         if encode_geom:
             if not HAS_GEOPANDAS:
                 raise RuntimeError('geopandas needs to be installed to use this option')
-            # enforce that geodataframe CRS is 4326
-            df.crs = {'init':'epsg:4326'}
+            # check that geodataframe CRS is 4326
+            if df.crs != {'init':'epsg:4326'}:
+                raise RuntimeError('geodataframe must be projected to epsg:4326')
             geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
@@ -214,7 +215,7 @@ class CartoContext(object):
                        lat=lnglat[1]))
 
         tqdm.write('Table successfully written to CARTO: '
-                   '{base_url}dataset/{table_name}'.format(
+                   '{base_url}/dataset/{table_name}'.format(
                        base_url=self.creds.base_url(),
                        table_name=final_table_name))
 

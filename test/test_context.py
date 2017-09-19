@@ -5,7 +5,7 @@ import sys
 import json
 import random
 import warnings
-from shapely.geometry import Point
+from shapely.geometry import Point, multipolygon
 import geopandas as gpd
 
 import cartoframes
@@ -672,7 +672,7 @@ class TestCartoContext(unittest.TestCase):
             self.assertEqual (result, results[i])
 
     def test_cartocontext_write_geopandas(self):
-        """CartoContext.write with geodataframe"""
+        """CartoContext.write__with__geopandas"""
         try:
             import geopandas
             import shapely
@@ -698,7 +698,7 @@ class TestCartoContext(unittest.TestCase):
             # Create a geodataframe
             geometry = [Point(xy) for xy in zip(df.long, df.lat)]
             df['lat_long'] = geometry
-            geo_df = gpd.GeoDataFrame(df, geometry='lat_long')
+            geo_df = gpd.GeoDataFrame(df, geometry='lat_long',crs={'init':'epsg:4326'})
 
             # try writing geodataframe with encoding and geom_col specified
             cc.write(geo_df, self.test_write_table, overwrite=True,
@@ -721,7 +721,7 @@ class TestCartoContext(unittest.TestCase):
             # number of geoms should zero
             self.assertEqual(resp['rows'][0]['num_geoms'], 0)
 
-            # try writing geodataframe with multiple geometry columns, specifying
+            # test writing geodataframe with multiple geometry columns, specifying
             # geom_col different from geometry of geodataframe
             null_islands = [0 for i in range(100)]
             null_island_points = [Point(xy) for xy in zip(null_islands, null_islands)]
@@ -735,7 +735,7 @@ class TestCartoContext(unittest.TestCase):
                 assert issubclass(w[-1].category, UserWarning)
                 assert "user-supplied" in str(w[-1].message)
 
-            # try writing geodataframe with multiple geometry columns, without
+            # test writing geodataframe with multiple geometry columns, without
             # specifying geom_col
             cc.write(geo_df, self.test_write_table, overwrite=True,
                      encode_geom=True)
@@ -748,7 +748,7 @@ class TestCartoContext(unittest.TestCase):
             self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
                              (geo_df.iloc[0][is_geopandas]))
 
-            # try encoding geometry AND specifying lnglat pair
+            # test encoding geometry AND specifying lnglat pair
                 # lnglat pair will override encoded geometry as "the_geom" in CARTO
             cc.write(geo_df, self.test_write_table, overwrite=True,
                      lnglat=('long', 'lat'), encode_geom=True, geom_col='null_islands')
@@ -760,3 +760,15 @@ class TestCartoContext(unittest.TestCase):
                 '''.format(table=self.test_write_table))
             self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
                              (geo_df.iloc[0][is_geopandas]))
+        # try to encode_geom without importing geopandas
+        elif HAS_GEOPANDAS is False:
+            with self.assertRaises(RuntimeError):
+                cc.write(df, self.test_write_table, overwrite=True,
+                         encode_geom=True, geom_col='null_islands')
+
+        # test writing geodataframe with different coordinate reference system
+        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+        world_mercator = world.to_crs({'init': 'epsg:3395'})
+        with self.assertRaises(RuntimeError):
+            cc.write(world_mercator, self.test_write_table, overwrite=True,
+                     encode_geom=True)
