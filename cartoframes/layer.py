@@ -201,7 +201,12 @@ class QueryLayer(AbstractLayer):
         self.query = query
         self.style_cols = set()
 
-        # color, scheme = self._get_colorscheme()
+        self.legend = {
+                'color': (color.get('legend')
+                          if isinstance(color, dict) else None),
+                'size': (size.get('legend')
+                         if isinstance(size, dict) else None),
+                }        # color, scheme = self._get_colorscheme()
         # time = self._get_timescheme()
         # size = self._get_sizescheme()
         # If column was specified, force a scheme
@@ -268,12 +273,12 @@ class QueryLayer(AbstractLayer):
             size['range'] = list(size['range'])
             self.style_cols.add(size['column'])
 
+        print(self.legend)
         self.color = color
         self.scheme = scheme or {}
         self.size = size
         self.time = time
         self.tooltip = tooltip
-        self.legend = legend
         self._validate_columns()
 
     def _validate_columns(self):
@@ -292,7 +297,6 @@ class QueryLayer(AbstractLayer):
         self.color = self.color or DEFAULT_COLORS[layer_idx]
         # TODO: this might be where to adjust the styling based on basemap
         self.cartocss = self._get_cartocss(basemap)
-        # self.legend = legends.get_legend()
 
         if self.time:
             column = self.time['column']

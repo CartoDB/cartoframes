@@ -21,14 +21,14 @@ class Legend(object):
         self.layer = layer
         self.ax = ax
 
-    def draw_legend(self):
+    def draw_legend(self, fig):
         """Create a matplotlib legend"""
         # Make a figure and axes with dimensions as desired.
         if 'colors' in self.layer.scheme:
             cmap = mpl.colors.ListedColormap(self.layer.scheme['colors'])
         else:
             cmap = get_scheme(self.layer.scheme, 'mpl_colormap')
-        fig = plt.figure(figsize=(8, 3))
+        # fig = plt.figure(figsize=(8, 3))
         if self.ax is None:
             self.ax = fig.add_axes([0.05, 0.80, 0.9, 0.15])
         cmap.set_over('0.25')
@@ -46,7 +46,8 @@ class Legend(object):
                 # ticks=list(map(lambda x: round(x, 2), self.edges)),
                 spacing='proportional',
                 orientation='horizontal')
-        cb.set_label(self.layer.color)
+        print(self.layer.legend)
+        cb.set_label(self.layer.legend['color'] or self.layer.color)
         return cb
 
 

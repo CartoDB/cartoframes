@@ -18,6 +18,7 @@ import requests
 import IPython
 import pandas as pd
 from tqdm import tqdm
+from seaborn.utils import despine
 
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
@@ -669,12 +670,6 @@ class CartoContext(object):
 
         html = '<img src="{url}" />'.format(url=static_url)
 
-        # TODO: extend this to draw legends for multiple layers
-        if (len(nb_layers) > 0 and
-                nb_layers[0].scheme.get('bin_method') and
-                nb_layers[0].scheme.get('bin_method') != 'category'):
-            legend_ax = Legend(self.sql_client, nb_layers[0])
-
         # TODO: write this as a private method
         if interactive:
             netloc = urlparse(self.base_url).netloc
@@ -752,12 +747,20 @@ class CartoContext(object):
             if ax is None:
                 dpi = mpi.rcParams['figure.dpi']
                 mpl_size = (size[0] / dpi, size[1] / dpi)
-                fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
+                # fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
+                fig, ax = plt.subplots(1, 1, figsize=mpl_size, dpi=dpi,
+                                       frameon=False)
                 fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
-                ax = plt.gca()
-            ax.imshow(raw_data)
+                # ax = plt.gca()
+                # TODO: extend this to draw legends for multiple layers
+                if (len(nb_layers) > 0 and
+                        nb_layers[0].scheme.get('bin_method') and
+                        nb_layers[0].scheme.get('bin_method') != 'category'):
+                    legend_ax = Legend(self.sql_client, nb_layers[0]).draw_legend(fig)
+            im = ax.imshow(raw_data)
             ax.axis('off')
-            return ax
+            # despine(ax=ax)
+            return im, legend_ax
         else:
             return IPython.display.Image(url=static_url,
                                          embed=True,
