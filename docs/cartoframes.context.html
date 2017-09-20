@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>cartoframes.context module &#8212; cartoframes 0.0.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -51,16 +48,16 @@ methods interact with CARTO’s services like
 geocoding, and isolines</a>.</p>
 <dl class="class">
 <dt id="cartoframes.context.CartoContext">
-<em class="property">class </em><code class="descclassname">cartoframes.context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cartoframes.context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>creds=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
 <p class="rubric">Example</p>
-<p>Create a CartoContext object
-.. code:: python</p>
-<blockquote>
-<div>import cartoframes
-cc = cartoframes.CartoContext(BASEURL, APIKEY)</div></blockquote>
+<p>Create a CartoContext object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -79,8 +76,8 @@ suppress (False, default)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A CartoContext object that is authenticated against
-the user’s CARTO account.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A CartoContext object that is authenticated
+against the user’s CARTO account.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cartoframes.context.CartoContext" title="cartoframes.context.CartoContext"><code class="xref py py-obj docutils literal"><span class="pre">CartoContext</span></code></a></p>
@@ -106,9 +103,9 @@ adding additional columns. To avoid this, create a copy of the
 table first and use the new copy instead.</p>
 </div>
 <p class="rubric">Example</p>
-<p>Add new measures to a CARTO table and pass it to a pandas DataFrame.
-Using the “Median Household Income in the past 12 months” measure
-from the <a class="reference external" href="https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months">Data Observatory Catalog</a>.</p>
+<p>Add new measures to a CARTO table and pass it to a pandas
+DataFrame. Using the “Median Household Income in the past 12
+months” measure from the <a class="reference external" href="https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months">Data Observatory Catalog</a>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
 <span class="n">median_income</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">,</span>
@@ -132,15 +129,15 @@ Observatory measures are to be added to.</li>
 <li><cite>geom_id</cite> (str, optional): Identifier for a desired
 geographic boundary level to use when calculating measures.
 Will be automatically assigned if undefined</li>
-<li><cite>normalization</cite> (str, optional): The desired normalization. One
-of ‘area’, ‘prenormalized’, or ‘denominated’. ‘Area’ will
+<li><cite>normalization</cite> (str, optional): The desired normalization.
+One of ‘area’, ‘prenormalized’, or ‘denominated’. ‘Area’ will
 normalize the measure per square kilometer, ‘prenormalized’
 will return the original value, and ‘denominated’ will
 normalize by a denominator.</li>
 <li><cite>denom_id</cite> (str, optional): Measure ID from DO catalog</li>
-<li><cite>numer_timespan</cite> (str, optional): The desired timespan for the
-measurement. Defaults to most recent timespan available if
-left unspecified.</li>
+<li><cite>numer_timespan</cite> (str, optional): The desired timespan for
+the measurement. Defaults to most recent timespan available
+if left unspecified.</li>
 <li><cite>geom_timespan</cite> (str, optional): The desired timespan for the
 geometry. Defaults to timespan matching <cite>numer_timespan</cite> if
 left unspecified.</li>
@@ -149,8 +146,8 @@ left unspecified.</li>
 fill this area. Unit is square degrees WGS84. Set this to
 <cite>0</cite> if you want to use the smallest source geometry for this
 element of metadata, for example if you’re passing in points.</li>
-<li><cite>target_geoms</cite> (str, optional): Override global <cite>target_geoms</cite>
-for this element of metadata</li>
+<li><cite>target_geoms</cite> (str, optional): Override global
+<cite>target_geoms</cite> for this element of metadata</li>
 <li><cite>max_timespan_rank</cite> (str, optional): Override global
 <cite>max_timespan_rank</cite> for this element of metadata</li>
 <li><cite>max_score_rank</cite> (str, optional): Override global
@@ -184,11 +181,27 @@ has new columns for each measure in <cite>metadata</cite>.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="cartoframes.context.CartoContext.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>table_name</strong> (<em>str</em>) – Table name to delete</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="cartoframes.context.CartoContext.map">
-<code class="descname">map</code><span class="sig-paren">(</span><em>layers=None</em>, <em>interactive=True</em>, <em>zoom=None</em>, <em>lat=None</em>, <em>lng=None</em>, <em>size=(800</em>, <em>400)</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">map</code><span class="sig-paren">(</span><em>layers=None</em>, <em>interactive=True</em>, <em>zoom=None</em>, <em>lat=None</em>, <em>lng=None</em>, <em>size=(800</em>, <em>400)</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produce a CARTO map visualizing data layers.</p>
-<p class="rubric">Example</p>
-<p>Create a map with two data layers, and one BaseMap layer.</p>
+<p class="rubric">Examples</p>
+<p>Create a map with two data layers, and one BaseMap layer:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span><span class="p">,</span> <span class="n">styling</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
@@ -201,6 +214,15 @@ has new columns for each measure in <cite>metadata</cite>.</p>
                      <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
                             <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">vivid</span><span class="p">(</span><span class="mi">10</span><span class="p">))],</span>
        <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a snapshot of a map at a specific zoom and center:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;simpson_index&#39;</span><span class="p">),</span>
+       <span class="n">interactive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+       <span class="n">zoom</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+       <span class="n">lng</span><span class="o">=-</span><span class="mf">68.3823549</span><span class="p">,</span>
+       <span class="n">lat</span><span class="o">=</span><span class="mf">44.3036906</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -234,13 +256,15 @@ to a view to have all data layers in view.</li>
 <li><strong>lng</strong> (<em>float</em><em>, </em><em>optional</em>) – Longitude value for the center of the map.
 Must be used in conjunction with <code class="docutils literal"><span class="pre">zoom</span></code> and <code class="docutils literal"><span class="pre">lat</span></code>. Defaults
 to a view to have all data layers in view.</li>
-<li><strong>size</strong> (<em>tuple</em><em>, </em><em>optional</em>) – List of pixel dimensions for the map. Format
-is <code class="docutils literal"><span class="pre">(width,</span> <span class="pre">height)</span></code>. Defaults to <code class="docutils literal"><span class="pre">(800,</span> <span class="pre">400)</span></code>.</li>
+<li><strong>size</strong> (<em>tuple</em><em>, </em><em>optional</em>) – List of pixel dimensions for the map.
+Format is <code class="docutils literal"><span class="pre">(width,</span> <span class="pre">height)</span></code>. Defaults to <code class="docutils literal"><span class="pre">(800,</span> <span class="pre">400)</span></code>.</li>
+<li><strong>ax</strong> – matplotlib axis on which to draw the image. Only used when
+<code class="docutils literal"><span class="pre">interactive</span></code> is <code class="docutils literal"><span class="pre">False</span></code>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an <code class="docutils literal"><span class="pre">iframe</span></code>,
-while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an
+<code class="docutils literal"><span class="pre">iframe</span></code>, while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML</p>
@@ -270,7 +294,8 @@ query. Defaults to None (no table created).</li>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of query supplied.
 Pandas data types are inferred from PostgreSQL data types.
-In the case of PostgreSQL date types, the data type ‘object’ is used.</p>
+In the case of PostgreSQL date types, the data type ‘object’ is
+used.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
@@ -282,7 +307,7 @@ In the case of PostgreSQL date types, the data type ‘object’ is used.</p>
 
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.read">
-<code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index=’cartodb_id’</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index='cartodb_id'</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read tables from CARTO into pandas DataFrames.</p>
 <p class="rubric">Example</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
@@ -328,7 +353,7 @@ operations, if on the smaller side use Import API.</p>
 
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir=’/tmp’</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/tmp'</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a DataFrame to a CARTO table.</p>
 <p class="rubric">Example</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -343,13 +368,13 @@ operations, if on the smaller side use Import API.</p>
 CARTO account</li>
 <li><strong>table_name</strong> (<em>str</em>) – Table to write <code class="docutils literal"><span class="pre">df</span></code> to in CARTO.</li>
 <li><strong>temp_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory for temporary storage of data
-that is sent to CARTO. Defaults to <code class="docutils literal"><span class="pre">/tmp</span></code> (Unix-like systems).</li>
+that is sent to CARTO. Default is <code class="docutils literal"><span class="pre">/tmp</span></code> (Unix-like systems).</li>
 <li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Behavior for overwriting <code class="docutils literal"><span class="pre">table_name</span></code>
 if it exits on CARTO. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
-<li><strong>lnglat</strong> (<em>tuple</em><em>, </em><em>optional</em>) – lng/lat pair that can be used for creating
-a geometry on CARTO. Defaults to <code class="docutils literal"><span class="pre">None</span></code>. In some cases,
-geometry will be created without specifying this. See CARTO’s
-<a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables">Import API</a>
+<li><strong>lnglat</strong> (<em>tuple</em><em>, </em><em>optional</em>) – lng/lat pair that can be used for
+creating a geometry on CARTO. Defaults to <code class="docutils literal"><span class="pre">None</span></code>. In some
+cases, geometry will be created without specifying this. See
+CARTO’s <a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables">Import API</a>
 for more information.</li>
 <li><strong>encode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to write <cite>geom_col</cite> to CARTO
 as <cite>the_geom</cite>.</li>
@@ -406,7 +431,7 @@ information is stored. Used in conjunction with <cite>encode_geom</cite>.</li>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

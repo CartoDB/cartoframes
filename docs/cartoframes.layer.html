@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>cartoframes.layer module &#8212; cartoframes 0.0.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -43,8 +40,8 @@
             
   <div class="section" id="module-cartoframes.layer">
 <span id="cartoframes-layer-module"></span><h1>cartoframes.layer module<a class="headerlink" href="#module-cartoframes.layer" title="Permalink to this headline">¶</a></h1>
-<p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a>
-and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> for example usage.</p>
+<p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a> and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a>
+for example usage.</p>
 <dl class="class">
 <dt id="cartoframes.layer.AbstractLayer">
 <em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">AbstractLayer</code><a class="headerlink" href="#cartoframes.layer.AbstractLayer" title="Permalink to this definition">¶</a></dt>
@@ -59,7 +56,7 @@ and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> 
 
 <dl class="class">
 <dt id="cartoframes.layer.BaseMap">
-<em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source=’dark’</em>, <em>labels=’back’</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.BaseMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source='dark'</em>, <em>labels='back'</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.BaseMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cartoframes.layer.AbstractLayer" title="cartoframes.layer.AbstractLayer"><code class="xref py py-class docutils literal"><span class="pre">cartoframes.layer.AbstractLayer</span></code></a></p>
 <p>Layer object for adding basemaps to a cartoframes map.</p>
 <p class="rubric">Example</p>
@@ -76,11 +73,11 @@ and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to <code class="docutils literal"><span class="pre">dark</span></code>.
-Basemaps come from
+<li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to
+<code class="docutils literal"><span class="pre">dark</span></code>. Basemaps come from
 <a class="reference external" href="https://carto.com/location-data-services/basemaps/">https://carto.com/location-data-services/basemaps/</a></li>
-<li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on the
-front will be above the data layers. Labels on back will be
+<li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on
+the front will be above the data layers. Labels on back will be
 underneath the data layers but on top of the basemap. Setting
 labels to <code class="docutils literal"><span class="pre">None</span></code> will only show the basemap.</li>
 <li><strong>only_labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to show labels or not.</li>
@@ -153,9 +150,9 @@ on <a class="reference external" href="https://github.com/CartoDB/torque">Torque
 be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
 functions</a>
 with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
-the point data overtime, or show the event at the specified time
-only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
+<li>cumulative (str, optional): Whether to accumulate
+(<code class="docutils literal"><span class="pre">cumulative</span></code>) the point data overtime, or show the event at
+the specified time only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
 <li>frames (int, optional): Number of frames in the animation.
 Defaults to 256.</li>
 <li>duration (int, optional): Number of seconds in the animation.
@@ -260,8 +257,8 @@ points are sized by the column <code class="docutils literal"><span class="pre">
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>query</strong> (<em>str</em>) – Query that is fed into a pandas DataFrame. At a minimum, all
-queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
+<li><strong>query</strong> (<em>str</em>) – Query that is fed into a pandas DataFrame. At a minimum,
+all queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
 <cite>the_geom_webmercator</cite>. Read more in
 <a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>
 for more information.</li>
@@ -272,9 +269,11 @@ If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
 be of type time or float.</li>
 <li>method (str, optional): Type of aggregation method for operating
 on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
-be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate functions</a>
+be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
+functions</a>
 with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
+<li>cumulative (str, optional): Whether to accumulate
+(<code class="docutils literal"><span class="pre">cumulative</span></code>)
 the point data overtime, or show the event at the specified time
 only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
 <li>frames (int, optional): Number of frames in the animation.
@@ -364,7 +363,7 @@ to 5.</li>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

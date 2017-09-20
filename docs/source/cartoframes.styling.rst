@@ -1,7 +1,7 @@
-cartoframes\.updates module
+cartoframes\.styling module
 ===========================
 
-.. automodule:: cartoframes.updates
+.. automodule:: cartoframes.styling
     :members:
     :undoc-members:
     :show-inheritance:

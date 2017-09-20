@@ -101,12 +101,13 @@ class QueryLayer(AbstractLayer):
       in SQL instead of in pandas)
 
     Used in the `layers` keyword in `CartoContext.map()
-        <#context.CartoContext.map>`__.
+    <#context.CartoContext.map>`__.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
         The QueryLayer is colored by the calculated column ``abs_diff``, and
         points are sized by the column ``i_measure``.
+
     .. code:: python
 
         import cartoframes
