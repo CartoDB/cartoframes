@@ -774,6 +774,6 @@ class TestCartoContext(unittest.TestCase):
 
         # try to encode_geom without importing geopandas
         elif not HAS_GEOPANDAS:
-            with self.assertRaises(RuntimeError, 'geopandas and shapely'):
+            with self.assertRaisesRegexp(RuntimeError, 'geopandas and shapely'):
                 cc.write(df, self.test_write_table, overwrite=True,
                          encode_geom=True)
