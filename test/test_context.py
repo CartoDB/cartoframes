@@ -71,6 +71,7 @@ class TestCartoContext(unittest.TestCase):
                                  'table_{ver}_{mpl}'.format(
                                     ver=pyver,
                                     mpl=has_mpl))
+
         self.test_delete_table = 'cartoframes_test_delete_table_{ver}_{mpl}'.format(
             ver=pyver,
             mpl=has_mpl)
@@ -79,16 +80,16 @@ class TestCartoContext(unittest.TestCase):
         """restore to original state"""
         tables = (self.test_write_table,
                   self.test_write_batch_table,
-                  self.test_query_table)
+                  self.test_query_table,
+                  self.test_delete_table)
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
                                           api_key=self.apikey)
             for table in tables:
-                try:
-                    cc.delete(table)
-                except:
-                    pass
+                self.sql_client.send('''
+                DROP TABLE IF EXISTS "{}"
+                '''.format(table))
         # TODO: remove the named map templates
 
     def add_map_template(self):
