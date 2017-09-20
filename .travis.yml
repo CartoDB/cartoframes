@@ -1,7 +1,6 @@
 language: python
 env:
     - MPLBACKEND='agg'
-    - GEOPANDAS='True'
     - GEOPANDAS='True'; MPLBACKEND='agg'
 python:
     - '2.7'
@@ -12,7 +11,7 @@ install:
     - pip install . # install package
     - pip install -r requirements.txt # install requires
     - if [[ -n $MPLBACKEND ]]; then pip install matplotlib; fi
-    - if [[ -n $GEOPANDAS ]];  then pip install geopandas; fi
+    - if [[ -n $GEOPANDAS ]]; then pip install geopandas; fi
     - pip install shapely coveralls # only for testing
 script:
     - nosetests --verbose --with-coverage --cover-package=cartoframes
