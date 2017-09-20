@@ -711,11 +711,9 @@ class TestBatchJobStatus(unittest.TestCase):
     def test_batchjobstatus(self):
         """context.BatchJobStatus"""
         from cartoframes.context import BatchJobStatus, MAX_ROWS_LNGLAT
-        from carto.sql import BatchSQLClient
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        batch_sql = BatchSQLClient(self.auth_client)
         n_vals = MAX_ROWS_LNGLAT + 1
         df = pd.DataFrame({
             'lngvals': [random.random() for r in range(n_vals)],
@@ -726,16 +724,19 @@ class TestBatchJobStatus(unittest.TestCase):
 
         self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
 
-        bjs = BatchJobStatus(batch_sql, dict(job_id='foo', status='unknown'))
+        # no job exists for job_id 'foo'
+        bjs = BatchJobStatus(cc, dict(job_id='foo', status='unknown'))
         with self.assertRaises(CartoException):
             bjs.status()
 
     def test_batchjobstatus_repr(self):
         """context.BatchJobStatus.__repr__"""
         from cartoframes.context import BatchJobStatus
-        from carto.sql import BatchSQLClient
-        batch_sql = BatchSQLClient(self.auth_client)
-        bjs = BatchJobStatus(batch_sql, dict(job_id='foo', status='unknown'))
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        bjs = BatchJobStatus(cc, dict(job_id='foo', status='unknown',
+                                      created_at=None))
         self.assertMultiLineEqual(bjs.__repr__(),
                                   ("BatchJobStatus(job_id='foo', "
-                                   "last_status='unknown')"))
+                                   "last_status='unknown', "
+                                   "created_at='None')"))

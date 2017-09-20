@@ -23,7 +23,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
-from .utils import dict_items, normalize_colnames
+from .utils import dict_items, normalize_colnames, norm_colname
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -174,6 +174,11 @@ class CartoContext(object):
         pgcolnames = normalize_colnames(df.columns)
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
+            # send placeholder table
+            final_table_name = self._send_dataframe(df.iloc[0:0], table_name,
+                                                    temp_dir, geom_col,
+                                                    pgcolnames)
+            # send dataframe in batches, combine into placeholder table
             final_table_name = self._send_batches(df, table_name, temp_dir,
                                                   geom_col, pgcolnames)
         else:
@@ -183,29 +188,29 @@ class CartoContext(object):
 
         # create geometry column from long/lats if requested
         if lnglat:
-            tqdm.write('Creating geometry out of columns '
-                       '`{lng}`/`{lat}`'.format(lng=lnglat[0],
-                                                lat=lnglat[1]))
             query = '''
                     UPDATE "{table_name}"
                     SET the_geom = CDB_LatLng("{lat}"::numeric,
                                               "{lng}"::numeric)
                     '''.format(table_name=final_table_name,
-                               lng=lnglat[0],
-                               lat=lnglat[1])
+                               lng=norm_colname(lnglat[0]),
+                               lat=norm_colname(lnglat[1]))
             if df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
                 tqdm.write('Table successfully written to CARTO: '
                            '{table_url} . `the_geom` column is being '
-                           'populated from `{lnglat}`'.format(
+                           'populated from `{lnglat}`. Check the status of '
+                           'the operation with '
+                           '``BatchJobStatus(...).status()`` or try reading '
+                           'table from CARTO in a couple of minutes.'.format(
                                table_url=os.path.join(self.base_url,
                                                       'dataset',
                                                       final_table_name),
                                lnglat=str(lnglat)))
-                return BatchJobStatus(batch_client, status)
-            else:
-                self.sql_client.send(query)
+                return BatchJobStatus(self, status)
+
+            self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: '
                    '{base_url}dataset/{table_name}'.format(
@@ -286,6 +291,7 @@ class CartoContext(object):
             except CartoException as err:
                 for table in subtables:
                     self.delete(table)
+                self.delete(table_name)
                 raise CartoException(err)
 
             if temp_table:
@@ -302,23 +308,30 @@ class CartoContext(object):
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
             drop_tables = '\n'.join(
-                    'DROP TABLE IF EXISTS {table};'.format(table=table)
+                    'DROP TABLE IF EXISTS "{table}";'.format(table=table)
                     for table in subtables)
+            # 1. create temp table for all the data
+            # 2. drop all previous temp tables
+            # 3. drop placeholder table and move temp table into it's place
+            # 4. cartodb-fy table
             query = '''
-                DROP TABLE IF EXISTS "{table_name}";
-                CREATE TABLE "{table_name}" As {unioned_tables};
-                ALTER TABLE {table_name} DROP COLUMN IF EXISTS cartodb_id;
+                CREATE TABLE "{table_name}_temp" As {unioned_tables};
+                ALTER TABLE "{table_name}_temp"
+                      DROP COLUMN IF EXISTS cartodb_id;
                 {drop_tables}
+                DROP TABLE IF EXISTS "{table_name}";
+                ALTER TABLE "{table_name}_temp" RENAME TO "{table_name}";
                 SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
                 '''.format(table_name=table_name,
                            unioned_tables=unioned_tables,
                            org=self.username if self.is_org else 'public',
                            drop_tables=drop_tables)
             self._debug_print(query=query)
-            _ = self.sql_client.send(query)
+            self.sql_client.send(query)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
+            self.delete(table_name)
             raise Exception('Failed to upload dataframe: {}'.format(err))
 
         return table_name
@@ -1131,6 +1144,8 @@ class BatchJobStatus(object):
 
     Example:
 
+        Poll for a job's status if you've caught the BatchJobStatus instance.
+
         .. code:: python
 
             import time
@@ -1143,20 +1158,31 @@ class BatchJobStatus(object):
                     break
                 time.sleep(5)
 
+        Create a :obj:`BatchJobStatus` instance if you have a `job_id` output
+        from a `cc.write` operation.
+
+        .. code:: python
+
+            >>> from cartoframes import CartoContext, BatchJobStatus
+            >>> cc = CartoContext(username='...', api_key='...')
+            >>> cc.write(df, 'new_table', lnglat=('lng', 'lat'))
+            'BatchJobStatus(job_id='job-id-string', ...)'
+            >>> batch_job = BatchJobStatus(cc, 'job-id-string')
+
     Attributes:
         job_id (str): Job ID of the Batch SQL API job
         last_status (str): Status of ``job_id`` job when last polled
         created_at (str): Time and date when job was created
 
     Args:
-        batch_client (carto.sql.BatchSQLClient): Batch SQL API client
+        carto_context (carto.CartoContext): CartoContext instance
         job (dict): Job status dict returned after sending a Batch SQL API job
     """
-    def __init__(self, batch_client, job):
+    def __init__(self, carto_context, job):
         self.job_id = job.get('job_id')
         self.last_status = job.get('status')
         self.created_at = job.get('created_at')
-        self._batch_client = batch_client
+        self._batch_client = BatchSQLClient(carto_context.auth_client)
 
     def __repr__(self):
         return ('BatchJobStatus(job_id=\'{job_id}\', '
