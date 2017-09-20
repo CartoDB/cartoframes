@@ -209,17 +209,6 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
 
-        # try encoding geometries without a geometry column or geodataframe
-        with self.assertRaisesRegexp(KeyError, 'Geometries were requested'):
-            cc.write(df, self.test_write_table, overwrite=True,
-                     encode_geom=True)
-
-        # try writing encoded geometries with a non-geometry 'geometry' column
-        with self.assertRaises(AttributeError):
-            df['geometry'] = df['nums']
-            cc.write(df, self.test_write_table, overwrite=True,
-                     encode_geom=True)
-
         # test batch writes
         n_rows = 550000
         df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
@@ -672,7 +661,7 @@ class TestCartoContext(unittest.TestCase):
     def test_cartocontext_write_geopandas(self):
         """CartoContext.write__with__geopandas"""
         try:
-            import geopandas
+            import geopandas as gpd
             from shapely.geometry import Point
         except ImportError:
             HAS_GEOPANDAS = False
@@ -758,24 +747,33 @@ class TestCartoContext(unittest.TestCase):
                 '''.format(table=self.test_write_table))
             self.assertEqual(cartoframes.context._decode_geom(resp['rows'][0]['the_geom']),
                              (geo_df.iloc[0][is_geopandas]))
-        # try to encode_geom without importing geopandas
-        elif HAS_GEOPANDAS is False:
-            with self.assertRaises(RuntimeError):
-                cc.write(df, self.test_write_table, overwrite=True,
-                         encode_geom=True, geom_col='null_islands')
 
-        # test writing geodataframe with different coordinate reference system
-        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-        world_mercator = world.to_crs({'init': 'epsg:3395'})
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            # Trigger warning
-            cc.write(world_mercator, self.test_write_table, overwrite=True,
-                     encode_geom=True)
-            assert len(w) == 1
-            assert issubclass(w[-1].category, UserWarning)
-            assert "projection" in str(w[-1].message)
-        # should raise RuntimeError
-        if not HAS_GEOPANDAS:
-            with self.assertRaises(RuntimeError):
-                cc.write(df, encode_geom=True)
+            # try encoding geometries without a geometry column or geodataframe
+            with self.assertRaisesRegexp(KeyError, 'Geometries were requested'):
+                cc.write(df, self.test_write_table, overwrite=True,
+                         encode_geom=True)
+
+            # try writing encoded geometries with a non-geometry 'geometry' column
+            with self.assertRaises(AttributeError):
+                df['geometry'] = df['nums']
+                cc.write(df, self.test_write_table, overwrite=True,
+                         encode_geom=True)
+
+            # test writing geodataframe with different coordinate reference system
+            world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+            world_mercator = world.to_crs({'init': 'epsg:3395'})
+
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                # Trigger warning
+                cc.write(world_mercator, self.test_write_table, overwrite=True,
+                         encode_geom=True)
+                assert len(w) == 1
+                assert issubclass(w[-1].category, UserWarning)
+                assert "projection" in str(w[-1].message)
+
+        # try to encode_geom without importing geopandas
+        elif not HAS_GEOPANDAS:
+            with self.assertRaises(RuntimeError, 'geopandas and shapely'):
+                cc.write(df, self.test_write_table, overwrite=True,
+                         encode_geom=True)
