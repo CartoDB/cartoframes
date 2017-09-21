@@ -204,7 +204,10 @@ class CartoContext(object):
                            'populated from `{lnglat}`. Check the status of '
                            'the operation with '
                            '``BatchJobStatus(...).status()`` or try reading '
-                           'table from CARTO in a couple of minutes.'.format(
+                           'the table from CARTO in a couple of minutes.\n'
+                           '**Note:** `CartoContext.map` will not work on '
+                           'this table until its geometries are '
+                           'created.'.format(
                                table_url=os.path.join(self.creds.base_url(),
                                                       'dataset',
                                                       final_table_name),
@@ -213,10 +216,10 @@ class CartoContext(object):
 
             self.sql_client.send(query)
 
-        tqdm.write('Table successfully written to CARTO: '
-                   '{base_url}dataset/{table_name}'.format(
-                       base_url=self.creds.base_url(),
-                       table_name=final_table_name))
+        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
+                       table_url=os.path.join(self.creds.base_url(),
+                                              'dataset',
+                                              final_table_name)))
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -258,7 +261,7 @@ class CartoContext(object):
         return False
 
     def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
-        """Batch sending a dataframe
+        """Batch sending a dataframe in chunks that are then recombined.
 
         Args:
             df (pandas.DataFrame): DataFrame that will be batched up for
@@ -278,10 +281,12 @@ class CartoContext(object):
             * TODO: add more (Out of storage)
         """
         subtables = []
-        # send dataframe chunks to carto
-        for chunk_num, chunk in tqdm(df.groupby([i // MAX_IMPORT_ROWS
-                                                 for i in range(df.shape[0])]),
-                                     desc='Uploading in batches: '):
+        # generator for accessing chunks of original dataframe
+        df_gen = df.groupby(list(i // MAX_IMPORT_ROWS
+                                 for i in range(df.shape[0])))
+        for chunk_num, chunk in tqdm(df_gen.__iter__(),
+                                     total=df.shape[0] // MAX_IMPORT_ROWS + 1,
+                                     desc='Uploading in batches'):
             temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
                 orig=table_name[:40],
                 chunk=chunk_num)
