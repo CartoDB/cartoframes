@@ -781,3 +781,8 @@ class TestBatchJobStatus(unittest.TestCase):
         new_status = job_status.status()
         self.assertSetEqual(set(new_status.keys()),
                             {'status', 'updated_at', 'created_at'})
+
+        # job_id as str
+        str_bjs = BatchJobStatus(cc, 'foo')
+        self.assertIsNone(str_bjs.get_status())
+        self.assertEqual(str_bjs.job_id, 'foo')

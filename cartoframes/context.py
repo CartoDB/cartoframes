@@ -1,5 +1,4 @@
-"""
-"""
+"""CartoContext and BatchJobStatus classes"""
 import json
 import os
 import random
@@ -63,6 +62,9 @@ class CartoContext(object):
 
             import cartoframes
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
+
+    Attrs:
+        creds (cartoframes.Credentials): :obj:`Credentials` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -194,25 +196,28 @@ class CartoContext(object):
             query = '''
                     UPDATE "{table_name}"
                     SET the_geom = CDB_LatLng("{lat}"::numeric,
-                                              "{lng}"::numeric)
+                                              "{lng}"::numeric);
+                    SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
                     '''.format(table_name=final_table_name,
                                lng=norm_colname(lnglat[0]),
                                lat=norm_colname(lnglat[1]))
             if df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
-                tqdm.write('Table successfully written to CARTO: '
-                           '{table_url} . `the_geom` column is being '
-                           'populated from `{lnglat}`. Check the status of '
-                           'the operation with '
-                           '``BatchJobStatus(...).status()`` or try reading '
-                           'the table from CARTO in a couple of minutes.\n'
-                           '**Note:** `CartoContext.map` will not work on '
-                           'this table until its geometries are '
-                           'created.'.format(
+                tqdm.write(
+                    'Table successfully written to CARTO: {table_url}\n'
+                    '`the_geom` column is being populated from `{lnglat}`. '
+                    'Check the status of the operation with:\n'
+                    '    \033[1mBatchJobStatus(CartoContext(), \'{job_id}\''
+                    ').status()\033[0m\n'
+                    'or try reading the table from CARTO in a couple of '
+                    'minutes.\n'
+                    '\033[1mNote:\033[0m `CartoContext.map` will not work on '
+                    'this table until its geometries are created.'.format(
                                table_url=os.path.join(self.creds.base_url(),
                                                       'dataset',
                                                       final_table_name),
+                               job_id=status.get('job_id'),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
 
@@ -321,7 +326,7 @@ class CartoContext(object):
             # 1. create temp table for all the data
             # 2. drop all previous temp tables
             # 3. drop placeholder table and move temp table into it's place
-            # 4. cartodb-fy table
+            # 4. cartodb-fy table, register it with metadata
             query = '''
                 CREATE TABLE "{table_name}_temp" As {unioned_tables};
                 ALTER TABLE "{table_name}_temp"
@@ -330,6 +335,7 @@ class CartoContext(object):
                 DROP TABLE IF EXISTS "{table_name}";
                 ALTER TABLE "{table_name}_temp" RENAME TO "{table_name}";
                 SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
+                SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
                 '''.format(table_name=table_name,
                            unioned_tables=unioned_tables,
                            org=(self.creds.username()
@@ -427,7 +433,7 @@ class CartoContext(object):
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
-            _ = self.sql_client.send(alter_query)
+            self.sql_client.send(alter_query)
         except CartoException as err:
             warn('DataFrame written to CARTO but the table schema failed to '
                  'update to match DataFrame. All columns in CARTO table have '
@@ -902,7 +908,7 @@ class CartoContext(object):
         '''.format(username=self.creds.username(),
                    tablename=table_name,
                    cols_meta=json.dumps(metadata))
-        _ = self.sql_client.send(augment_query)
+        self.sql_client.send(augment_query)
 
         # read full augmented table
         return self.read(table_name)
@@ -1150,19 +1156,26 @@ class BatchJobStatus(object):
             'BatchJobStatus(job_id='job-id-string', ...)'
             >>> batch_job = BatchJobStatus(cc, 'job-id-string')
 
-    Attributes:
+    Attrs:
         job_id (str): Job ID of the Batch SQL API job
         last_status (str): Status of ``job_id`` job when last polled
         created_at (str): Time and date when job was created
 
     Args:
         carto_context (carto.CartoContext): CartoContext instance
-        job (dict): Job status dict returned after sending a Batch SQL API job
+        job (dict or str): If a dict, job status dict returned after sending
+            a Batch SQL API request. If str, a Batch SQL API job id.
     """
     def __init__(self, carto_context, job):
-        self.job_id = job.get('job_id')
-        self.last_status = job.get('status')
-        self.created_at = job.get('created_at')
+        if isinstance(job, dict):
+            self.job_id = job.get('job_id')
+            self.last_status = job.get('status')
+            self.created_at = job.get('created_at')
+        elif isinstance(job, str):
+            self.job_id = job
+            self.last_status = None
+            self.created_at = None
+
         self._batch_client = BatchSQLClient(carto_context.auth_client)
 
     def __repr__(self):
