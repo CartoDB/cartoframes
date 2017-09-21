@@ -1,9 +1,4 @@
-"""CartoContext class for authentication with CARTO and high-level operations
-such as reading tables from CARTO into dataframes, writing dataframes to CARTO
-tables, and creating custom maps from dataframes and CARTO tables. Future
-methods interact with CARTO's services like
-`Data Observatory <https://carto.com/data-observatory>`__, and `routing,
-geocoding, and isolines <https://carto.com/location-data-services/>`__.
+"""
 """
 import json
 import os
@@ -52,7 +47,14 @@ MAX_ROWS_LNGLAT = 100000
 
 
 class CartoContext(object):
-    """Manages connections with CARTO for data and map operations. Modeled
+    """CartoContext class for authentication with CARTO and high-level operations
+    such as reading tables from CARTO into dataframes, writing dataframes to
+    CARTO tables, and creating custom maps from dataframes and CARTO tables.
+    Future methods interact with CARTO's services like
+    `Data Observatory <https://carto.com/data-observatory>`__, and `routing,
+    geocoding, and isolines <https://carto.com/location-data-services/>`__.
+
+    Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
@@ -161,9 +163,9 @@ class CartoContext(object):
                 information is stored. Used in conjunction with `encode_geom`.
 
         Returns:
-            :obj:`BatchJobStatus` or None: If `lnglat` flag is set, a
-            :obj:`BatchJobStatus` instance is returned for DataFrames with more
-            than 100,000 rows. Otherwise, None.
+            :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
+            DataFarme has more than 100,000 rows, a :obj:`BatchJobStatus`
+            instance is returned. Otherwise, None.
         """
         if encode_geom:
             _add_encoded_geom(df, geom_col)
@@ -1118,11 +1120,12 @@ def _df2pg_schema(dataframe, pgcolnames):
 class BatchJobStatus(object):
     """Status of a write or query operation. Read more at `Batch SQL API docs
     <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__ about
-    responses.
+    responses and how to interpret them.
 
     Example:
 
-        Poll for a job's status if you've caught the BatchJobStatus instance.
+        Poll for a job's status if you've caught the :obj:`BatchJobStatus`
+        instance.
 
         .. code:: python
 
@@ -1172,10 +1175,11 @@ class BatchJobStatus(object):
                     )
                 )
 
-    def set_status(self, curr_status):
+    def _set_status(self, curr_status):
         self.last_status = curr_status
 
     def get_status(self):
+        """return current status of job"""
         return self.last_status
 
     def status(self):
@@ -1183,8 +1187,15 @@ class BatchJobStatus(object):
 
         Returns:
             dict: Status and time it was updated
+
+        Warns:
+            UserWarning: If the job failed, a warning is raised with
+                information about the failure
         """
         resp = self._batch_client.read(self.job_id)
-        self.set_status(resp.get('status'))
+        if 'failed_reason' in resp:
+            warn('Job failed: {}'.format(resp.get('failed_reason')))
+        self._set_status(resp.get('status'))
         return dict(status=resp.get('status'),
-                    updated_at=resp.get('updated_at'))
+                    updated_at=resp.get('updated_at'),
+                    created_at=resp.get('created_at'))

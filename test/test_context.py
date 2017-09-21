@@ -684,11 +684,11 @@ class TestBatchJobStatus(unittest.TestCase):
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except:
-                warnings.warn("Skipping CartoContext tests. To test it, "
-                              "create a `secret.json` file in test/ by "
-                              "renaming `secret.json.sample` to `secret.json` "
-                              "and updating the credentials to match your "
-                              "environment.")
+                warnings.warn('Skipping CartoContext tests. To test it, '
+                              'create a `secret.json` file in test/ by '
+                              'renaming `secret.json.sample` to `secret.json` '
+                              'and updating the credentials to match your '
+                              'environment.')
                 self.apikey = None
                 self.username = None
         else:
@@ -745,6 +745,7 @@ class TestBatchJobStatus(unittest.TestCase):
         with self.assertRaises(CartoException):
             bjs.status()
 
+    @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
     def test_batchjobstatus_repr(self):
         """context.BatchJobStatus.__repr__"""
         from cartoframes.context import BatchJobStatus
@@ -756,3 +757,27 @@ class TestBatchJobStatus(unittest.TestCase):
                                   ("BatchJobStatus(job_id='foo', "
                                    "last_status='unknown', "
                                    "created_at='None')"))
+
+    @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
+    def test_batchjobstatus_methods(self):
+        """context.BatchJobStatus methods"""
+        from cartoframes.context import BatchJobStatus
+        from carto.sql import BatchSQLClient
+
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        batch_client = BatchSQLClient(cc.auth_client)
+        job_response = batch_client.create(['select 1', ])
+        job_status = BatchJobStatus(cc, job_response)
+
+        possible_status = ('pending', 'running', 'done',
+                           'canceled', 'unknown', )
+        self.assertTrue(job_status.get_status() in possible_status)
+        job_status._set_status('foo')
+
+        self.assertEqual(job_status.get_status(), 'foo')
+
+        new_status = job_status.status()
+        self.assertSetEqual(set(new_status.keys()),
+                            {'status', 'updated_at', 'created_at'})
