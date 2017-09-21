@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Unit tests for cartoframes.layers"""
 import unittest
 import os
