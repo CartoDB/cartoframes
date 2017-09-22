@@ -5,6 +5,7 @@ import sys
 import json
 import random
 import warnings
+import requests
 
 import cartoframes
 from carto.exceptions import CartoException
@@ -672,6 +673,28 @@ class TestCartoContext(unittest.TestCase):
         for i in results:
             result = _pg2dtypes(i)
             self.assertEqual(result, results[i])
+
+    def test_debug_print(self):
+        """context._debug_print"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey,
+                                      verbose=True)
+        # request-response usage
+        resp = requests.get('http://httpbin.org/get')
+        cc._debug_print(resp=resp)
+        cc._debug_print(resp=resp.text)
+
+        # non-requests-response usage
+        test_str = 'this is a test'
+        long_test_str = ', '.join([test_str] * 100)
+        self.assertIsNone(cc._debug_print(test_str=test_str))
+        self.assertIsNone(cc._debug_print(long_str=long_test_str))
+
+        # verbose = False test
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey,
+                                      verbose=False)
+        self.assertIsNone(cc._debug_print(resp=test_str))
 
 
 class TestBatchJobStatus(unittest.TestCase):
