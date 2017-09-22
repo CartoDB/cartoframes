@@ -31,7 +31,7 @@ def normalize_colnames(columns):
         list of str: Normalized column names
     """
     normalized_columns = [norm_colname(c) for c in columns]
-    changed_cols = ',\n'.join([
+    changed_cols = '\n'.join([
         '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
             orig=c,
             new=normalized_columns[i])
