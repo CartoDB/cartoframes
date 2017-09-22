@@ -191,7 +191,7 @@ class CartoContext(object):
 
         if encode_geom:
             if not HAS_GEOPANDAS:
-                raise RuntimeError('geopandas and shapely needs to be installed to use this option')
+                raise RuntimeError('geopandas and shapely needs to be installed to use `encode_geom`')
             geom_col = _add_encoded_geom(df, geom_col)
             pgcolnames.append('the_geom')
             pgcolnames.remove(geom_col)
