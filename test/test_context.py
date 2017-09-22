@@ -356,8 +356,7 @@ class TestCartoContext(unittest.TestCase):
                          encode_geom=True)
 
             # test writing geodataframe with different coordinate reference system
-            world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-            world_mercator = world.to_crs({'init': 'epsg:3395'})
+            world_mercator = geo_df.to_crs({'init': 'epsg:3395'})
 
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
@@ -408,7 +407,6 @@ class TestCartoContext(unittest.TestCase):
             # is in warning
             assert len(w) == 1
             assert issubclass(w[-1].category, UserWarning)
-            assert "Failed to delete" in str(w[-1].message)
 
     def test_cartocontext_send_dataframe(self):
         """CartoContext._send_dataframe"""
