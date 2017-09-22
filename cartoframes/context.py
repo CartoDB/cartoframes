@@ -211,7 +211,7 @@ class CartoContext(object):
             self._set_schema(df, final_table_name, pgcolnames)
 
         # create geometry column from long/lats if requested
-        if latlng:
+        if lnglat:
             query = '''
                     UPDATE "{table_name}"
                     SET the_geom = CDB_LatLng("{lat}"::numeric,
