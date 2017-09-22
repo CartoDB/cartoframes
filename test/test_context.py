@@ -366,7 +366,6 @@ class TestCartoContext(unittest.TestCase):
                          encode_geom=True)
                 assert len(w) == 1
                 assert issubclass(w[-1].category, UserWarning)
-                assert "projection" in str(w[-1].message)
 
         # try to encode_geom without importing geopandas
         elif not HAS_GEOPANDAS:
