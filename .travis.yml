@@ -2,9 +2,9 @@ language: python
 env:
     - MPLBACKEND='agg'
     - GEOPANDAS='True'; MPLBACKEND='agg'
+    -
 python:
     - '2.7'
-    - '3.4'
     - '3.5'
     - '3.6'
 install:
