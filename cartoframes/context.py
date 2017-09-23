@@ -539,7 +539,9 @@ class CartoContext(object):
             select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name))
         else:
-            select_res = self.sql_client.send(query)
+            skipfields=('the_geom_webmercator'
+                        if 'the_geom_webmercator' not in query else None)
+            select_res = self.sql_client.send(query, skipfields=skipfields)
 
         self._debug_print(select_res=select_res)
 

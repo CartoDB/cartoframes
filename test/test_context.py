@@ -55,7 +55,7 @@ class TestCartoContext(unittest.TestCase):
         self.test_read_table = 'cb_2013_us_csa_500k'
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
-                                  'the_geom_webmercator', 'updated_at'])
+                                  'updated_at'])
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
@@ -385,7 +385,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(len(df), 100)
         # should have requested columns + utility columns from CARTO
         self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
-                             'the_geom', 'the_geom_webmercator'},
+                             'the_geom', },
                             set(df.columns),
                             msg='Should have the columns requested')
 
