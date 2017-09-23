@@ -128,7 +128,7 @@ class CartoContext(object):
             CARTO.
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
-        if limit:
+        if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
@@ -264,8 +264,6 @@ class CartoContext(object):
             # If table doesn't exist, we get an error from the SQL API
             self._debug_print(err=err)
             return False
-
-        return False
 
     def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
         """Batch sending a dataframe in chunks that are then recombined.
@@ -539,13 +537,15 @@ class CartoContext(object):
             select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name))
         else:
-            select_res = self.sql_client.send(query)
+            skipfields = ('the_geom_webmercator'
+                          if 'the_geom_webmercator' not in query else None)
+            select_res = self.sql_client.send(query, skipfields=skipfields)
 
         self._debug_print(select_res=select_res)
 
         fields = select_res['fields']
-        if not len(fields):
-            return pd.DataFrame()
+        if select_res['total_rows'] == 0:
+            return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
 
         df = pd.DataFrame(data=select_res['rows'])
         for field in fields:
@@ -630,10 +630,6 @@ class CartoContext(object):
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
         #       that uses up to layer limit value error
-        if not hasattr(IPython, 'display'):
-            raise NotImplementedError('Nope, cannot display maps at the '
-                                      'command line.')
-
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
@@ -946,13 +942,9 @@ class CartoContext(object):
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
         if map_name not in self._map_templates:
-            try:
-                self._auth_send('api/v1/map/named', 'POST',
-                                headers={'Content-Type': 'application/json'},
-                                data=get_map_template(layers,
-                                                      has_zoom=has_zoom))
-            except ValueError('map already exists'):
-                pass
+            self._auth_send('api/v1/map/named', 'POST',
+                            headers={'Content-Type': 'application/json'},
+                            data=get_map_template(layers, has_zoom=has_zoom))
 
             self._map_templates[map_name] = True
         return map_name
