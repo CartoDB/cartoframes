@@ -547,7 +547,7 @@ class CartoContext(object):
 
         fields = select_res['fields']
         if select_res['total_rows'] == 0:
-            return pd.DataFrame(columns=fields.keys() - {'cartodb_id'})
+            return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
 
         df = pd.DataFrame(data=select_res['rows'])
         for field in fields:

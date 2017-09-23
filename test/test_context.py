@@ -364,8 +364,8 @@ class TestCartoContext(unittest.TestCase):
             LIMIT 0
             ''')
 
-        # no rows or columns
-        self.assertTupleEqual(df_empty.shape, (0, 0))
+        # no rows, one column
+        self.assertTupleEqual(df_empty.shape, (0, 1))
 
         # is a DataFrame
         self.assertIsInstance(df_empty, pd.DataFrame)
