@@ -702,6 +702,14 @@ class TestCartoContext(unittest.TestCase):
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
 
+    def test_data_obs_functions(self):
+        """context.data_x"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        self.assertIsNone(cc.data_boundaries())
+        self.assertIsNone(cc.data_discovery())
+
 
 class TestBatchJobStatus(unittest.TestCase):
     """Tests for cartoframes.BatchJobStatus"""
