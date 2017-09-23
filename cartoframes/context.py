@@ -128,7 +128,7 @@ class CartoContext(object):
             CARTO.
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
-        if limit:
+        if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
@@ -546,8 +546,8 @@ class CartoContext(object):
         self._debug_print(select_res=select_res)
 
         fields = select_res['fields']
-        if not len(fields):
-            return pd.DataFrame()
+        if select_res['total_rows'] == 0:
+            return pd.DataFrame(columns=fields.keys() - {'cartodb_id'})
 
         df = pd.DataFrame(data=select_res['rows'])
         for field in fields:

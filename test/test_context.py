@@ -158,12 +158,18 @@ class TestCartoContext(unittest.TestCase):
 
         # normal table
         df = cc.read(self.test_read_table)
-        self.assertTrue(set(df.columns) == self.valid_columns)
+        self.assertSetEqual(set(df.columns), self.valid_columns)
         self.assertTrue(len(df) == 169)
 
         # read with limit
         df = cc.read(self.test_read_table, limit=10)
         self.assertEqual(len(df), 10)
+        self.assertIsInstance(df, pd.DataFrame)
+
+        # read empty table/dataframe
+        df = cc.read(self.test_read_table, limit=0)
+        self.assertSetEqual(set(df.columns), self.valid_columns)
+        self.assertEqual(len(df), 0)
         self.assertIsInstance(df, pd.DataFrame)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
