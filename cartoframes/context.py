@@ -642,23 +642,23 @@ class CartoContext(object):
             layers = list(layers)
 
         if len(layers) > 8:
-            raise ValueError('map can have at most 8 layers')
+            raise ValueError('Map can have at most 8 layers')
 
         nullity = [zoom is None, lat is None, lng is None]
         if any(nullity) and not all(nullity):
-            raise ValueError('zoom, lat, and lng must all or none be provided')
+            raise ValueError('Zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
         if ((len(layers) == 0 and zoom is None) or
                 (len(layers) == 1 and layers[0].is_basemap)):
-            [zoom, lat, lng] = [3, 38, -99]
+            [zoom, lat, lng] = [1, 0, 0]
         has_zoom = zoom is not None
 
         # Check basemaps, add one if none exist
         base_layers = [idx for idx, layer in enumerate(layers)
                        if layer.is_basemap]
         if len(base_layers) > 1:
-            raise ValueError('map can at most take 1 BaseMap layer')
+            raise ValueError('Map can at most take 1 `BaseMap` layer')
         if len(base_layers) > 0:
             layers.insert(0, layers.pop(base_layers[0]))
         else:
@@ -672,10 +672,9 @@ class CartoContext(object):
             raise ValueError('Map can at most take 1 Layer with time '
                              'column/field')
         if time_layer:
-            raise NotImplementedError('Animated maps are not yet supported')
             if not interactive:
-                raise ValueError('map cannot display a static image with a '
-                                 'time_column')
+                raise ValueError('Map cannot display a static image with a '
+                                 'time column')
             layers.append(layers.pop(time_layers[0]))
 
         # If basemap labels are on front, add labels layer
@@ -690,6 +689,10 @@ class CartoContext(object):
             layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)
+        if time_layer and len(nb_layers) > 1:
+            raise ValueError('Maps with a time element can only consist of a '
+                             'time layer and a basemap. This constraint will '
+                             'be removed in the future.')
         options = {'basemap_url': basemap.url}
 
         for idx, layer in enumerate(nb_layers):
@@ -764,7 +767,7 @@ class CartoContext(object):
                     'options': {
                         'query': time_layer.query,
                         'user_name': self.creds.username(),
-                        'tile_style': time_layer.torque_cartocss,
+                        'tile_style': layer.cartocss
                     }
                 })
                 config['named_map'].update({
@@ -946,13 +949,16 @@ class CartoContext(object):
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
         if map_name not in self._map_templates:
-            try:
-                self._auth_send('api/v1/map/named', 'POST',
-                                headers={'Content-Type': 'application/json'},
-                                data=get_map_template(layers,
-                                                      has_zoom=has_zoom))
-            except ValueError('map already exists'):
-                pass
+            resp = self._auth_send(
+                    'api/v1/map/named', 'POST',
+                    headers={'Content-Type': 'application/json'},
+                    data=get_map_template(layers, has_zoom=has_zoom))
+            if 'errors' in resp:
+                resp = self._auth_send(
+                        'api/v1/map/named/{}'.format(map_name),
+                        'PUT',
+                        headers={'Content-Type': 'application/json'},
+                        data=get_map_template(layers, has_zoom=has_zoom))
 
             self._map_templates[map_name] = True
         return map_name

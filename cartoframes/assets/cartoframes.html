@@ -44,6 +44,11 @@
        zoom: @@ZOOM@@,
        center: [@@LAT@@, @@LNG@@],
      });
+     if (config.type === 'torque') {
+         L.tileLayer(config.named_map.params.basemap_url, {
+             attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         }).addTo(map);
+     };
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));

@@ -157,10 +157,8 @@ class QueryLayer(AbstractLayer):
               functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate
-              (``cumulative``)
-              the point data overtime, or show the event at the specified time
-              only (``linear``). Defaults to ``linear``.
+            - cumulative (bool, optional): Whether to accumulate points over
+              time (True) or not (False, default)
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
@@ -255,7 +253,10 @@ class QueryLayer(AbstractLayer):
             }
             time.update(time_options)
 
-        size = size or 10
+        if time:
+            size = size or 4
+        else:
+            size = size or 10
         if isinstance(size, str):
             size = {'column': size}
         if isinstance(size, dict):
@@ -295,7 +296,11 @@ class QueryLayer(AbstractLayer):
     def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
-        self.color = self.color or DEFAULT_COLORS[layer_idx]
+        if self.time:
+            # default torque
+            self.color = self.color or '#2752ff'
+        else:
+            self.color = self.color or DEFAULT_COLORS[layer_idx]
         self.cartocss = self._get_cartocss(basemap)
 
         if self.time:
@@ -317,12 +322,12 @@ class QueryLayer(AbstractLayer):
                                                  else 'linear'),
                 },
             })
-            self.cartocss += self.torque_cartocss
+            self.cartocss = self.torque_cartocss + self.cartocss
 
     def _get_cartocss(self, basemap):
         """Generate cartocss for class properties"""
         if isinstance(self.size, int):
-            size_style = self.size
+            size_style = self.size or 4
         elif isinstance(self.size, dict):
             size_style = ('ramp([{column}],'
                           ' range({min_range},{max_range}),'
@@ -339,33 +344,48 @@ class QueryLayer(AbstractLayer):
             color_style = self.color
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
-        return cssify({
-            # Point CSS
-            "#layer['mapnik::geometry_type'=1]": {
-                'marker-width': size_style,
-                'marker-fill': color_style,
-                'marker-fill-opacity': '1',
-                'marker-allow-overlap': 'true',
-                'marker-line-width': '0.5',
-                'marker-line-color': line_color,
-                'marker-line-opacity': '1',
-            },
-            # Line CSS
-            "#layer['mapnik::geometry_type'=2]": {
-                'line-width': '1.5',
-                'line-color': color_style,
-            },
-            # Polygon CSS
-            "#layer['mapnik::geometry_type'=3]": {
-                'polygon-fill': color_style,
-                'polygon-opacity': '0.9',
-                'polygon-gamma': '0.5',
-                'line-color': '#FFF',
-                'line-width': '0.5',
-                'line-opacity': '0.25',
-                'line-comp-op': 'hard-light',
-            }
-        })
+        if self.time:
+            return cssify({
+                # Torque Point CSS
+                "#layer": {
+                    'marker-width': size_style,
+                    'marker-fill': color_style,
+                    'marker-fill-opacity': '0.9',
+                    'marker-allow-overlap': 'true',
+                    'marker-line-width': '0',
+                    'marker-line-color': line_color,
+                    'marker-line-opacity': '1',
+                    'comp-op': 'source-over',
+                }
+            })
+        else:
+            return cssify({
+                # Point CSS
+                "#layer['mapnik::geometry_type'=1]": {
+                    'marker-width': size_style,
+                    'marker-fill': color_style,
+                    'marker-fill-opacity': '1',
+                    'marker-allow-overlap': 'true',
+                    'marker-line-width': '0.5',
+                    'marker-line-color': line_color,
+                    'marker-line-opacity': '1',
+                },
+                # Line CSS
+                "#layer['mapnik::geometry_type'=2]": {
+                    'line-width': '1.5',
+                    'line-color': color_style,
+                },
+                # Polygon CSS
+                "#layer['mapnik::geometry_type'=3]": {
+                    'polygon-fill': color_style,
+                    'polygon-opacity': '0.9',
+                    'polygon-gamma': '0.5',
+                    'line-color': '#FFF',
+                    'line-width': '0.5',
+                    'line-opacity': '0.25',
+                    'line-comp-op': 'hard-light',
+                }
+            })
 
 
 class Layer(QueryLayer):
@@ -404,9 +424,8 @@ class Layer(QueryLayer):
               functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate
-              (``cumulative``) the point data overtime, or show the event at
-              the specified time only (``linear``). Defaults to ``linear``.
+            - cumulative (bool, optional): Whether to accumulate points over
+              time (True) or not (False, default)
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
