@@ -377,7 +377,8 @@ class CartoContext(object):
         self._debug_print(tempfile=tempfile)
         df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
                                                           na_rep='',
-                                                          header=pgcolnames)
+                                                          header=pgcolnames,
+                                                          encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
             res = self._auth_send('api/v1/imports', 'POST',
