@@ -108,6 +108,9 @@ class TestQueryLayer(unittest.TestCase):
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
+            if color == str_colors[-1]:
+                qlayer.style_cols['cookie_monster'] = 'number'
+                qlayer._setup([BaseMap(), qlayer], 1)
             print(qlayer.color)
             self.assertEqual(qlayer.color, str_colors_ans[idx])
             self.assertEqual(qlayer.scheme, str_scheme_ans[idx])
