@@ -1,7 +1,12 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer
 from cartoframes import styling
+
+
+class TestAbstractLayer(unittest.TestCase):
+    def test_class(self):
+        self.assertIsNone(AbstractLayer().__init__())
 
 
 class TestBaseMap(unittest.TestCase):
