@@ -688,13 +688,19 @@ class CartoContext(object):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
-                    SELECT {cols} FROM ({query}) AS _wrap LIMIT 0
+                    SELECT
+                      {cols}{comma}
+                      ST_GeometryType(the_geom) as the_geom
+                    FROM ({query}) AS _wrap
+                    LIMIT 1
                 '''.format(cols=','.join(layer.style_cols),
+                           comma=',' if layer.style_cols else '',
                            query=layer.query))
                 self._debug_print(layer_fields=resp)
                 # update local style schema to help build proper defaults
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
+                layer.geom_type = resp['rows'][0]['the_geom']
             layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)

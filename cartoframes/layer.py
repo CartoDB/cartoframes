@@ -163,6 +163,8 @@ class QueryLayer(AbstractLayer):
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
               Defaults to 30.
+            - trails (int, optional): Number of trails after the incidence of
+              a point. Defaults to 2.
 
             If `time` is a ``str``, then it must be a column name available in
             the query that is of type numeric or datetime.
@@ -206,6 +208,7 @@ class QueryLayer(AbstractLayer):
         self.query = query
         # style columns as keys, data types as values
         self.style_cols = dict()
+        self.geom_type = None
 
         # TODO: move these if/else branches to individual methods
         # color, scheme = self._get_colorscheme()
@@ -253,6 +256,7 @@ class QueryLayer(AbstractLayer):
                 'cumulative': False,
                 'frames': 256,
                 'duration': 30,
+                'trails': 2,
             }
             time.update(time_options)
 
@@ -363,19 +367,29 @@ class QueryLayer(AbstractLayer):
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
         if self.time:
-            return cssify({
+            css = cssify({
                 # Torque Point CSS
                 "#layer": {
                     'marker-width': size_style,
                     'marker-fill': color_style,
-                    'marker-fill-opacity': '0.9',
+                    'marker-fill-opacity': 0.9,
                     'marker-allow-overlap': 'true',
-                    'marker-line-width': '0',
+                    'marker-line-width': 0,
                     'marker-line-color': line_color,
-                    'marker-line-opacity': '1',
+                    'marker-line-opacity': 1,
                     'comp-op': 'source-over',
                 }
             })
+            for t in range(1, self.time['trails'] + 1):
+                # Trails decay as 1/2^n, and grow 30% at each step
+                trail_temp = cssify({
+                        '#layer[frame-offset={}]'.format(t): {
+                            'marker-width': size_style * (1.0 + t * 0.3),
+                            'marker-opacity': 0.9 / 2.0**t,
+                        }
+                    })
+                css += trail_temp
+            return css
         else:
             return cssify({
                 # Point CSS
