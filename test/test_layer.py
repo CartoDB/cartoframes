@@ -162,7 +162,8 @@ class TestQueryLayer(unittest.TestCase):
                     'method': 'count',
                     'cumulative': False,
                     'frames': 256,
-                    'duration': 30}
+                    'duration': 30,
+                    'trails': 2}
         # pass a valid column name
         qlayer = QueryLayer(self.query, time='time_col')
         self.assertEqual(qlayer.time, time_ans)
@@ -175,7 +176,8 @@ class TestQueryLayer(unittest.TestCase):
                     'method': 'avg',
                     'frames': 256,
                     'duration': 10,
-                    'cumulative': False}
+                    'cumulative': False,
+                    'trails': 2}
 
         self.assertEqual(qlayer.time, time_ans)
 
