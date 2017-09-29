@@ -57,6 +57,9 @@ class TestCartoContext(unittest.TestCase):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
+        # torque table
+        self.torque_table = 'tweets_obama'
+
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
@@ -507,9 +510,17 @@ class TestCartoContext(unittest.TestCase):
         from cartoframes import Layer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        html_map = cc.map(layers=Layer(self.test_read_table,
+        html_map = cc.map(layers=Layer(self.torque_table,
                                        time='cartodb_id'))
         self.assertIsInstance(html_map, IPython.core.display.HTML)
+
+        with self.assertRaises(ValueError):
+            cc.map(layers=Layer(self.torque_table, time='cartodb_id'),
+                   interactive=False)
+
+        with self.assertRaises(ValueError):
+            cc.map(layers=[Layer(self.torque_table, time='cartodb_id'),
+                           Layer(self.torque_table, color='cartodb_id')])
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
