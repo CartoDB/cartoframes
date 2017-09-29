@@ -102,19 +102,26 @@ class TestQueryLayer(unittest.TestCase):
             self.assertEqual(qlayer.scheme, dict_colors_scheme[idx])
 
         # check valid string color options
-        str_colors = ['#FF0000', 'aliceblue', 'cookie_monster']
-        str_colors_ans = ['#FF0000', 'aliceblue', 'cookie_monster']
-        str_scheme_ans = [None, None, styling.mint(5)]
+        str_colors = ('#FF0000', 'aliceblue', 'cookie_monster', 'big_bird')
+        str_colors_ans = ('#FF0000', 'aliceblue', 'cookie_monster', 'big_bird')
+        str_scheme_ans = (None, None, styling.mint(5), styling.antique(10))
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
-            if color == str_colors[-1]:
-                qlayer.style_cols['cookie_monster'] = 'number'
+            if color == 'cookie_monster':
+                qlayer.style_cols[color] = 'number'
                 qlayer._setup([BaseMap(), qlayer], 1)
-            print(qlayer.color)
+            elif color == 'big_bird':
+                qlayer.style_cols[color] = 'string'
+                qlayer._setup([BaseMap(), qlayer], 1)
             self.assertEqual(qlayer.color, str_colors_ans[idx])
             self.assertEqual(qlayer.scheme, str_scheme_ans[idx])
 
+        with self.assertRaises(ValueError,
+                               msg='styling value cannot be a date'):
+            qlayer = QueryLayer(self.query, color='datetime_column')
+            qlayer.style_cols['datetime_column'] = 'date'
+            qlayer._setup([BaseMap(), qlayer], 1)
         # Exception testing
         # color column cannot be a geometry column
         with self.assertRaises(ValueError,
