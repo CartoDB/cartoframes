@@ -260,6 +260,8 @@ class TestCartoContext(unittest.TestCase):
     def test_cartocontext_mixed_case(self):
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
+        data = pd.DataFrame({'a': [1, 2, 3],
+                             'B': list('abc')})
         cc.write(pd.DataFrame(data), self.mixed_case_table)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
