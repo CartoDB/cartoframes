@@ -90,7 +90,7 @@ class TestCartoContext(unittest.TestCase):
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
                   self.test_query_table,
-                  self.mixed_case_table, )
+                  self.mixed_case_table.lower(), )
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
