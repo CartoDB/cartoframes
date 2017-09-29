@@ -15,7 +15,7 @@ def has_time_layer(layers):
 
 def get_map_name(layers, has_zoom):
     """Creates a map named based on supplied parameters"""
-    version = '20170922_dev'
+    version = '20170406'
     num_layers = len(non_basemap_layers(layers))
     has_labels = len(layers) > 1 and layers[-1].is_basemap
     has_time = has_time_layer(layers)
@@ -51,7 +51,7 @@ def get_map_template(layers, has_zoom):
             #       config
             'urlTemplate': layers[0].url,
             # 'urlTemplate': '<%= basemap_url %>',
-            'subdomains': ['a', 'b', 'c', 'd'],
+            'subdomains': "abcd",
         },
     }]
 
