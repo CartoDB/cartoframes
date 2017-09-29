@@ -60,6 +60,7 @@ class TestCartoContext(unittest.TestCase):
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
             mpl=has_mpl)
+        self.mixed_case_table = 'AbCdEfG_{0}_{1}'.format(pyver, has_mpl)
 
         # for batch writing to carto
         self.test_write_batch_table = (
@@ -87,7 +88,8 @@ class TestCartoContext(unittest.TestCase):
         tables = (self.test_write_table,
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
-                  self.test_query_table)
+                  self.test_query_table,
+                  self.mixed_case_table, )
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -253,6 +255,14 @@ class TestCartoContext(unittest.TestCase):
         # table should be properly created
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_mixed_case(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = pd.DataFrame({'a': [1, 2, 3],
+                             'B': list('abc')})
+        cc.write(pd.DataFrame(data), self.mixed_case_table)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):

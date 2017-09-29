@@ -177,6 +177,9 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         pgcolnames = normalize_colnames(df.columns)
+        if table_name != norm_colname(table_name):
+            table_name = norm_colname(table_name)
+            warn('Table will be named `{}`'.format(table_name))
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
