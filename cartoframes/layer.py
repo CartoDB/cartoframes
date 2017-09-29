@@ -303,6 +303,11 @@ class QueryLayer(AbstractLayer):
     def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
+        if self.time and self.geom_type != 'point':
+            raise ValueError('Cannot do time-based maps with data in '
+                             '`{query}` since this table does not contain '
+                             'point geometries'.format(query=self.query))
+
         if self.time:
             # default torque color
             self.color = self.color or '#2752ff'
@@ -316,7 +321,7 @@ class QueryLayer(AbstractLayer):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
                 raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, string, or '
+                                 '`{type}`. It must be numeric, text, or '
                                  'boolean.'.format(
                                      col=self.color,
                                      type=self.style_cols[self.color]))

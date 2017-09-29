@@ -18,7 +18,7 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
-from .utils import dict_items, normalize_colnames, norm_colname
+from .utils import dict_items, normalize_colnames, norm_colname, geom_conv
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -700,7 +700,7 @@ class CartoContext(object):
                 # update local style schema to help build proper defaults
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
-                layer.geom_type = resp['rows'][0]['the_geom']
+                layer.geom_type = geom_conv(resp['rows'][0]['the_geom'])
             layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)

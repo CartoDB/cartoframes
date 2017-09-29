@@ -73,3 +73,15 @@ def norm_colname(colname):
     if final_name[0].isdigit():
         return '_' + final_name
     return final_name
+
+
+def geom_conv(pggeom):
+    pgtypes = {
+        'ST_Point': 'point',
+        'ST_MultiPoint': 'point',
+        'ST_LineString': 'line',
+        'ST_MultiLineString': 'line',
+        'ST_MultiPolygon': 'polygon',
+        'ST_Polygon': 'polygon'
+        }
+    return pgtypes.get(pggeom)
