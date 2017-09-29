@@ -128,7 +128,7 @@ class CartoContext(object):
             CARTO.
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
-        if limit:
+        if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
@@ -177,6 +177,9 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         pgcolnames = normalize_colnames(df.columns)
+        if table_name != norm_colname(table_name):
+            table_name = norm_colname(table_name)
+            warn('Table will be named `{}`'.format(table_name))
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
@@ -264,8 +267,6 @@ class CartoContext(object):
             # If table doesn't exist, we get an error from the SQL API
             self._debug_print(err=err)
             return False
-
-        return False
 
     def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
         """Batch sending a dataframe in chunks that are then recombined.
@@ -539,13 +540,15 @@ class CartoContext(object):
             select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name))
         else:
-            select_res = self.sql_client.send(query)
+            skipfields = ('the_geom_webmercator'
+                          if 'the_geom_webmercator' not in query else None)
+            select_res = self.sql_client.send(query, skipfields=skipfields)
 
         self._debug_print(select_res=select_res)
 
         fields = select_res['fields']
-        if not len(fields):
-            return pd.DataFrame()
+        if select_res['total_rows'] == 0:
+            return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
 
         df = pd.DataFrame(data=select_res['rows'])
         for field in fields:
@@ -630,10 +633,6 @@ class CartoContext(object):
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
         #       that uses up to layer limit value error
-        if not hasattr(IPython, 'display'):
-            raise NotImplementedError('Nope, cannot display maps at the '
-                                      'command line.')
-
         if layers is None:
             layers = []
         elif not isinstance(layers, collections.Iterable):
@@ -686,6 +685,16 @@ class CartoContext(object):
 
         # Setup layers
         for idx, layer in enumerate(layers):
+            if not layer.is_basemap:
+                # get schema of style columns
+                resp = self.sql_client.send('''
+                    SELECT {cols} FROM ({query}) AS _wrap LIMIT 0
+                '''.format(cols=','.join(layer.style_cols),
+                           query=layer.query))
+                self._debug_print(layer_fields=resp)
+                # update local style schema to help build proper defaults
+                for k, v in dict_items(resp['fields']):
+                    layer.style_cols[k] = v['type']
             layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)
@@ -953,6 +962,7 @@ class CartoContext(object):
                     'api/v1/map/named', 'POST',
                     headers={'Content-Type': 'application/json'},
                     data=get_map_template(layers, has_zoom=has_zoom))
+            # TODO: remove this after testing
             if 'errors' in resp:
                 resp = self._auth_send(
                         'api/v1/map/named/{}'.format(map_name),

@@ -7,7 +7,7 @@ import pandas as pd
 import webcolors
 
 from cartoframes.utils import cssify
-from cartoframes.styling import BinMethod, mint, get_scheme_cartocss
+from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
 # from cartocolor vivid scheme
@@ -204,8 +204,10 @@ class QueryLayer(AbstractLayer):
                  tooltip=None, legend=None):
 
         self.query = query
-        self.style_cols = set()
+        # style columns as keys, data types as values
+        self.style_cols = dict()
 
+        # TODO: move these if/else branches to individual methods
         # color, scheme = self._get_colorscheme()
         # time = self._get_timescheme()
         # size = self._get_sizescheme()
@@ -213,18 +215,19 @@ class QueryLayer(AbstractLayer):
         # It could be that there is a column named 'blue' for example
         if isinstance(color, dict):
             if 'column' not in color:
-                raise ValueError("color must include a 'column' value")
-            scheme = color.get('scheme', mint(5))
+                raise ValueError("Color must include a 'column' value")
+            # get scheme if exists. if not, one will be chosen later if needed
+            scheme = color.get('scheme')
             color = color['column']
-            self.style_cols.add(color)
+            self.style_cols[color] = None
         elif (color and
               color[0] != '#' and
               color not in webcolors.CSS3_NAMES_TO_HEX):
             # color specified that is not a web color or hex value so its
             #  assumed to be a column name
             color = color
-            self.style_cols.add(color)
-            scheme = mint(5)
+            self.style_cols[color] = None
+            scheme = None
         else:
             # assume it's a color
             color = color
@@ -243,7 +246,7 @@ class QueryLayer(AbstractLayer):
                 raise ValueError('`time` should be a column name or '
                                  'dictionary of styling options.')
 
-            self.style_cols.add(time_column)
+            self.style_cols[time_column] = None
             time = {
                 'column': time_column,
                 'method': 'count',
@@ -274,7 +277,7 @@ class QueryLayer(AbstractLayer):
             size.update(old_size)
             # Since we're accessing min/max, convert range into a list
             size['range'] = list(size['range'])
-            self.style_cols.add(size['column'])
+            self.style_cols[size['column']] = None
 
         self.color = color
         self.scheme = scheme
@@ -285,22 +288,37 @@ class QueryLayer(AbstractLayer):
         self._validate_columns()
 
     def _validate_columns(self):
-        """Validate the options in the styles
-        """
-        geom_cols = {'the_geom', 'the_geom_webmercator'}
-        if self.style_cols & geom_cols:
+        """Validate the options in the styles"""
+        geom_cols = {'the_geom', 'the_geom_webmercator', }
+        if set(self.style_cols) & geom_cols:
             raise ValueError('Style columns cannot be geometry '
                              'columns. `{col}` was chosen.'.format(
-                                 col=','.join(self.style_cols & geom_cols)))
+                                 col=','.join(set(self.style_cols.keys())
+                                              & geom_cols)))
 
     def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
         if self.time:
-            # default torque
+            # default torque color
             self.color = self.color or '#2752ff'
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
+        # choose appropriate scheme if not already specified
+        if (self.scheme is None) and (self.color in self.style_cols):
+            if self.style_cols[self.color] in ('string', 'boolean', ):
+                self.scheme = antique(10)
+            elif self.style_cols[self.color] in ('number', ):
+                self.scheme = mint(5)
+            elif self.style_cols[self.color] in ('date', 'geometry', ):
+                raise ValueError('Cannot style column `{col}` of type '
+                                 '`{type}`. It must be numeric, string, or '
+                                 'boolean.'.format(
+                                     col=self.color,
+                                     type=self.style_cols[self.color]))
+
+        # if color not specified, choose a default
+        # self.color = self.color or DEFAULT_COLORS[layer_idx]
         self.cartocss = self._get_cartocss(basemap)
 
         if self.time:

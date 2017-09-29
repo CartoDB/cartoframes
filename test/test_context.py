@@ -55,11 +55,12 @@ class TestCartoContext(unittest.TestCase):
         self.test_read_table = 'cb_2013_us_csa_500k'
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
-                                  'the_geom_webmercator', 'updated_at'])
+                                  'updated_at'])
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
             mpl=has_mpl)
+        self.mixed_case_table = 'AbCdEfG_{0}_{1}'.format(pyver, has_mpl)
 
         # for batch writing to carto
         self.test_write_batch_table = (
@@ -87,7 +88,8 @@ class TestCartoContext(unittest.TestCase):
         tables = (self.test_write_table,
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
-                  self.test_query_table)
+                  self.test_query_table,
+                  self.mixed_case_table, )
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -158,12 +160,18 @@ class TestCartoContext(unittest.TestCase):
 
         # normal table
         df = cc.read(self.test_read_table)
-        self.assertTrue(set(df.columns) == self.valid_columns)
+        self.assertSetEqual(set(df.columns), self.valid_columns)
         self.assertTrue(len(df) == 169)
 
         # read with limit
         df = cc.read(self.test_read_table, limit=10)
         self.assertEqual(len(df), 10)
+        self.assertIsInstance(df, pd.DataFrame)
+
+        # read empty table/dataframe
+        df = cc.read(self.test_read_table, limit=0)
+        self.assertSetEqual(set(df.columns), self.valid_columns)
+        self.assertEqual(len(df), 0)
         self.assertIsInstance(df, pd.DataFrame)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -247,6 +255,14 @@ class TestCartoContext(unittest.TestCase):
         # table should be properly created
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_mixed_case(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = pd.DataFrame({'a': [1, 2, 3],
+                             'B': list('abc')})
+        cc.write(pd.DataFrame(data), self.mixed_case_table)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):
@@ -358,8 +374,8 @@ class TestCartoContext(unittest.TestCase):
             LIMIT 0
             ''')
 
-        # no rows or columns
-        self.assertTupleEqual(df_empty.shape, (0, 0))
+        # no rows, one column
+        self.assertTupleEqual(df_empty.shape, (0, 1))
 
         # is a DataFrame
         self.assertIsInstance(df_empty, pd.DataFrame)
@@ -385,7 +401,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(len(df), 100)
         # should have requested columns + utility columns from CARTO
         self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
-                             'the_geom', 'the_geom_webmercator'},
+                             'the_geom', },
                             set(df.columns),
                             msg='Should have the columns requested')
 
@@ -695,6 +711,14 @@ class TestCartoContext(unittest.TestCase):
                                       api_key=self.apikey,
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
+
+    def test_data_obs_functions(self):
+        """context.data_x"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        self.assertIsNone(cc.data_boundaries())
+        self.assertIsNone(cc.data_discovery())
 
 
 class TestBatchJobStatus(unittest.TestCase):
