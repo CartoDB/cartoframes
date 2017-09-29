@@ -12,6 +12,7 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
+import IPython
 
 WILL_SKIP = False
 
@@ -415,7 +416,6 @@ class TestCartoContext(unittest.TestCase):
             import matplotlib.pyplot as plt
         except ImportError:
             plt = None
-        import IPython
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
@@ -501,9 +501,15 @@ class TestCartoContext(unittest.TestCase):
             cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
                            Layer(self.test_read_table, time='cartodb_id')])
 
-        # time layers are not implemented yet
-        with self.assertRaises(NotImplementedError):
-            cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
+    @unittest.skipIf(WILL_SKIP, 'no cartocredentials, skipping')
+    def test_cartocontext_map_time(self):
+        """CartoContext.map time options"""
+        from cartoframes import Layer
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        html_map = cc.map(layers=Layer(self.test_read_table,
+                                       time='cartodb_id'))
+        self.assertIsInstance(html_map, IPython.core.display.HTML)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
