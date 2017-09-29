@@ -522,6 +522,9 @@ class TestCartoContext(unittest.TestCase):
             cc.map(layers=[Layer(self.torque_table, time='cartodb_id'),
                            Layer(self.torque_table, color='cartodb_id')])
 
+        with self.assertRaises(ValueError):
+            cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
         """CartoContext._get_bounds"""
