@@ -254,6 +254,18 @@ class TestCartoContext(unittest.TestCase):
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
 
+        # test properly encoding
+        df = pd.DataFrame({'vals':[1,2,3],'strings':['a','\xf4','ô']})
+        cc.write(df, self.test_write_table, overwrite=True)
+
+        # check if table exists
+        resp = self.sql_client.send('''
+            SELECT *
+            FROM {table}
+            LIMIT 0
+            '''.format(table=self.test_write_table))
+        self.assertIsNotNone(resp)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):
         """CartoContext._table_exists"""
