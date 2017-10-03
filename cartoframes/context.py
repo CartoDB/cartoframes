@@ -177,6 +177,9 @@ class CartoContext(object):
             self._table_exists(table_name)
 
         pgcolnames = normalize_colnames(df.columns)
+        if table_name != norm_colname(table_name):
+            table_name = norm_colname(table_name)
+            warn('Table will be named `{}`'.format(table_name))
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
@@ -684,6 +687,16 @@ class CartoContext(object):
 
         # Setup layers
         for idx, layer in enumerate(layers):
+            if not layer.is_basemap:
+                # get schema of style columns
+                resp = self.sql_client.send('''
+                    SELECT {cols} FROM ({query}) AS _wrap LIMIT 0
+                '''.format(cols=','.join(layer.style_cols),
+                           query=layer.query))
+                self._debug_print(layer_fields=resp)
+                # update local style schema to help build proper defaults
+                for k, v in dict_items(resp['fields']):
+                    layer.style_cols[k] = v['type']
             layer._setup(layers, idx)
 
         nb_layers = non_basemap_layers(layers)
