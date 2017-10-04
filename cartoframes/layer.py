@@ -343,9 +343,9 @@ class QueryLayer(AbstractLayer):
                     '    orig.*, __wrap.cf_value_{col}',
                     'FROM ({query}) AS orig, (',
                     '    SELECT',
-                    '        row_number() OVER (',
-                    '            ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
-                    '        {col}',
+                    '      row_number() OVER (',
+                    '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
+                    '      {col}',
                     '    FROM (',
                     '        SELECT {col}, count({col}) AS val_{col}_cnt',
                     '        FROM ({query}) as orig',
@@ -363,11 +363,11 @@ class QueryLayer(AbstractLayer):
                         'bin_method': '',
                         }
             elif (self.color in self.style_cols and
-                      self.style_cols[self.color] in ('number', )):
-                self.query = '''
-                SELECT *, {col} as value
-                FROM ({query}) as _wrap
-                '''.format(col=self.color, query=self.query)
+                  self.style_cols[self.color] in ('number', )):
+                self.query = ' '.join([
+                    'SELECT *, {col} as value',
+                    'FROM ({query}) as _wrap'
+                ]).format(col=self.color, query=self.query)
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(

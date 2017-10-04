@@ -514,15 +514,29 @@ class TestCartoContext(unittest.TestCase):
                                        time='cartodb_id'))
         self.assertIsInstance(html_map, IPython.core.display.HTML)
 
-        with self.assertRaises(ValueError):
+        # category map
+        cat_map = cc.map(layers=Layer(self.torque_table,
+                                      time='actor_postedtime',
+                                      color='twitter_lang'))
+        self.assertRegexpMatches(
+                cat_map.__html__(),
+                '.*CDB_Math_Mode\(cf_value_twitter_lang\).*')
+
+        with self.assertRaises(
+                ValueError,
+                msg='cannot create static torque maps currently'):
             cc.map(layers=Layer(self.torque_table, time='cartodb_id'),
                    interactive=False)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(
+                ValueError,
+                msg='cannot have more than one torque layer'):
             cc.map(layers=[Layer(self.torque_table, time='cartodb_id'),
                            Layer(self.torque_table, color='cartodb_id')])
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(
+                ValueError,
+                msg='cannot do a torque map off a polygon dataset'):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
