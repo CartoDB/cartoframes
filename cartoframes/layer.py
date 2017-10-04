@@ -297,11 +297,11 @@ class QueryLayer(AbstractLayer):
     def _validate_columns(self):
         """Validate the options in the styles"""
         geom_cols = {'the_geom', 'the_geom_webmercator', }
-        if set(self.style_cols) & geom_cols:
+        col_overlap = set(self.style_cols) & geom_cols
+        if col_overlap:
             raise ValueError('Style columns cannot be geometry '
                              'columns. `{col}` was chosen.'.format(
-                                 col=','.join(set(self.style_cols.keys())
-                                              & geom_cols)))
+                                 col=','.join(col_overlap)))
 
     def _setup(self, layers, layer_idx):
         basemap = layers[0]

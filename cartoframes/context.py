@@ -679,9 +679,13 @@ class CartoContext(object):
         # If basemap labels are on front, add labels layer
         basemap = layers[0]
         if basemap.is_basic() and basemap.labels == 'front':
-            layers.append(BaseMap(basemap.source,
-                                  labels=basemap.labels,
-                                  only_labels=True))
+            if time:
+                warn('Basemap labels on top are not currently supported for '
+                     'animated maps')
+            else:
+                layers.append(BaseMap(basemap.source,
+                                      labels=basemap.labels,
+                                      only_labels=True))
 
         # Setup layers
         for idx, layer in enumerate(layers):
