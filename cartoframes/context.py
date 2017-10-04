@@ -777,6 +777,18 @@ class CartoContext(object):
             }
 
             if time_layer:
+                # get turbo-carto processed cartocss
+                params.update(dict(callback='cartoframes'))
+                resp = requests.get(
+                        os.path.join(self.creds.base_url(),
+                                     'api/v1/map/named', map_name, 'jsonp'),
+                        params=params,
+                        headers={'Content-Type': 'application/json'})
+
+                # replace previous cartocss with turbo-carto processed version
+                layer.cartocss = json.loads(
+                        resp.text.split('&& cartoframes(')[1]
+                            .strip(');'))['metadata']['layers'][1]['meta']['cartocss']
                 config.update({
                     'order': 1,
                     'options': {

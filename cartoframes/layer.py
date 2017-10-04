@@ -206,6 +206,7 @@ class QueryLayer(AbstractLayer):
                  tooltip=None, legend=None):
 
         self.query = query
+        # style_cols and geom_type are updated right before layer is `_setup`
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
@@ -232,14 +233,15 @@ class QueryLayer(AbstractLayer):
             self.style_cols[color] = None
             scheme = None
         else:
-            # assume it's a color
+            # assume it's a color (hex, rgb(...),  or webcolor name)
             color = color
             scheme = None
 
         if time:
             if isinstance(time, dict):
                 if 'column' not in time:
-                    raise ValueError("time must include a 'column' value")
+                    raise ValueError("`time` must include a 'column' "
+                                     "key/value")
                 time_column = time['column']
                 time_options = time
             elif isinstance(time, str):
@@ -260,6 +262,7 @@ class QueryLayer(AbstractLayer):
             }
             time.update(time_options)
 
+        # assign size defaults if size is not specified
         if time:
             size = size or 4
         else:
@@ -268,7 +271,7 @@ class QueryLayer(AbstractLayer):
             size = {'column': size}
         if isinstance(size, dict):
             if 'column' not in size:
-                raise ValueError("Size must include a 'column' key/value")
+                raise ValueError("`size` must include a 'column' key/value")
             if time:
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
@@ -308,6 +311,7 @@ class QueryLayer(AbstractLayer):
                              '`{query}` since this table does not contain '
                              'point geometries'.format(query=self.query))
 
+        # if color not specified, choose a default
         if self.time:
             # default torque color
             self.color = self.color or '#2752ff'
@@ -326,17 +330,48 @@ class QueryLayer(AbstractLayer):
                                      col=self.color,
                                      type=self.style_cols[self.color]))
 
-        # if color not specified, choose a default
-        # self.color = self.color or DEFAULT_COLORS[layer_idx]
-        self.cartocss = self._get_cartocss(basemap)
-
         if self.time:
+            # don't use turbo-carto for animated maps
             column = self.time['column']
             frames = self.time['frames']
             method = self.time['method']
             duration = self.time['duration']
-            agg_func = "'{method}({time_column})'".format(method=method,
-                                                          time_column=column)
+            if (self.color in self.style_cols and
+                    self.style_cols[self.color] in ('string', 'boolean', )):
+                self.query = ' '.join([s.strip() for s in [
+                    'SELECT',
+                    '    orig.*, __wrap.cf_value_{col}',
+                    'FROM ({query}) AS orig, (',
+                    '    SELECT',
+                    '        row_number() OVER (',
+                    '            ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
+                    '        {col}',
+                    '    FROM (',
+                    '        SELECT {col}, count({col}) AS val_{col}_cnt',
+                    '        FROM ({query}) as orig',
+                    '        GROUP BY {col}',
+                    '        ORDER BY 2 DESC',
+                    '    ) AS _wrap',
+                    ') AS __wrap',
+                    'WHERE __wrap.{col} = orig.{col}',
+                ]]).format(col=self.color, query=self.query)
+                agg_func = '\'CDB_Math_Mode({})\''.format(
+                        'cf_value_{}'.format(self.color))
+                self.scheme = {
+                        'bins': ','.join(str(i) for i in range(1, 11)),
+                        'name': 'Bold',
+                        'bin_method': '',
+                        }
+            elif (self.color in self.style_cols and
+                      self.style_cols[self.color] in ('number', )):
+                self.query = '''
+                SELECT *, {col} as value
+                FROM ({query}) as _wrap
+                '''.format(col=self.color, query=self.query)
+                agg_func = '\'avg({})\''.format(self.color)
+            else:
+                agg_func = "'{method}(cartodb_id)'".format(
+                        method=method)
             self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
@@ -349,9 +384,13 @@ class QueryLayer(AbstractLayer):
                                                  else 'linear'),
                 },
             })
-            self.cartocss = self.torque_cartocss + self.cartocss
+            self.cartocss = (self.torque_cartocss
+                             + self._get_cartocss(basemap, has_time=True))
+        else:
+            # use turbo-carto for non-animated maps
+            self.cartocss = self._get_cartocss(basemap)
 
-    def _get_cartocss(self, basemap):
+    def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
         if isinstance(self.size, int):
             size_style = self.size or 4
@@ -366,7 +405,9 @@ class QueryLayer(AbstractLayer):
                               bins=self.size['bins'])
 
         if self.scheme:
-            color_style = get_scheme_cartocss(self.color, self.scheme)
+            color_style = get_scheme_cartocss(
+                    'value' if has_time else self.color,
+                    self.scheme)
         else:
             color_style = self.color
 
@@ -518,9 +559,10 @@ class Layer(QueryLayer):
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
             # TODO: error on this as NotImplementedError
-            context.write(self.source,
-                          self.table_name,
-                          overwrite=self.overwrite)
+            raise NotImplementedError('Not currently implemented')
+            # context.write(self.source,
+            #               self.table_name,
+            #               overwrite=self.overwrite)
         super(Layer, self)._setup(layers, layer_idx)
 
 # cdb_context.map([BaseMap('light'),

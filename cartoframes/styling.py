@@ -22,7 +22,7 @@ def get_scheme_cartocss(column, scheme_info):
     else:
         color_scheme = 'cartocolor({})'.format(scheme_info['name'])
 
-    return "ramp([{column}], {color_scheme}, {bin_method}({bins}))".format(
+    return "ramp([{column}], {color_scheme}, {bin_method}({bins}), <=)".format(
         column=column,
         color_scheme=color_scheme,
         bin_method=scheme_info['bin_method'],
