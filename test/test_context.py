@@ -257,7 +257,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertDictEqual(cols['fields'], expected_schema)
 
         # test properly encoding
-        df = pd.DataFrame({'vals':[1,2],'strings':['a','\xf4']})
+        df = pd.DataFrame({'vals':[1,2],'strings':['a','ô']})
         cc.write(df, self.test_write_table, overwrite=True)
 
         # check if table exists
