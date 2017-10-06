@@ -673,19 +673,22 @@ class CartoContext(object):
         # Check basemaps, add one if none exist
         if len(base_layers) > 1:
             raise ValueError('Map can at most take one BaseMap layer')
-        if len(base_layers) > 0:
+        elif len(base_layers) == 1:
             layers.insert(0, layers.pop(base_layers[0]))
-        else:
-            layers.insert(0, BaseMap(labels='back'))
+        elif not base_layers:
+            # default basemap is dark with labels in back
+            # labels will be changed if all geoms are non-point
+            layers.insert(0, BaseMap(source='dark', labels='back'))
+            geoms = set()
 
         # Setup layers
-        geoms = set()
         for idx, layer in enumerate(layers):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
                     SELECT {cols}
-                    FROM ({query}) AS _wrap LIMIT 0
+                    FROM ({query}) AS _wrap
+                    LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            query=layer.query))
                 self._debug_print(layer_fields=resp)
@@ -697,7 +700,9 @@ class CartoContext(object):
                 # update local style schema to help build proper defaults
             layer._setup(layers, idx)
 
-        if len(base_layers) == 0 and 'point' not in geoms:
+        # set labels on top if there are no point geometries and a basemap
+        #  is not specified
+        if not base_layers and 'point' not in geoms:
             layers[0] = BaseMap(labels='front')
 
         # If basemap labels are on front, add labels layer
