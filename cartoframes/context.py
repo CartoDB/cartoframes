@@ -217,9 +217,9 @@ class CartoContext(object):
                     'minutes.\n'
                     '\033[1mNote:\033[0m `CartoContext.map` will not work on '
                     'this table until its geometries are created.'.format(
-                               table_url=os.path.join(self.creds.base_url(),
-                                                      'dataset',
-                                                      final_table_name),
+                               table_url='/'.join((self.creds.base_url(),
+                                                   'dataset',
+                                                   final_table_name, )),
                                job_id=status.get('job_id'),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
@@ -227,9 +227,9 @@ class CartoContext(object):
             self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-                       table_url=os.path.join(self.creds.base_url(),
-                                              'dataset',
-                                              final_table_name)))
+                       table_url='/'.join((self.creds.base_url(),
+                                           'dataset',
+                                           final_table_name, ))))
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -719,7 +719,7 @@ class CartoContext(object):
             options.update(self._get_bounds(nb_layers))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = '{base_url}api/v1/map'.format(base_url=self.creds.base_url())
+        api_url = '/'.join((self.creds.base_url(), 'api/v1/map', ))
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(
@@ -747,8 +747,8 @@ class CartoContext(object):
 
             config = {
                 'user_name': self.creds.username(),
-                'maps_api_template': self.creds.base_url()[:-1],
-                'sql_api_template': self.creds.base_url()[:-1],
+                'maps_api_template': self.creds.base_url(),
+                'sql_api_template': self.creds.base_url(),
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',
