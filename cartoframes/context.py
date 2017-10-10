@@ -679,7 +679,7 @@ class CartoContext(object):
         elif not base_layers:
             # default basemap is dark with labels in back
             # labels will be changed if all geoms are non-point
-            layers.insert(0, BaseMap(source='dark', labels='back'))
+            layers.insert(0, BaseMap())
             geoms = set()
 
         # Setup layers

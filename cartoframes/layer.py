@@ -53,21 +53,31 @@ class BaseMap(AbstractLayer):
     """
     is_basemap = True
 
-    def __init__(self, source='dark', labels='back', only_labels=False):
+    def __init__(self, source='voyager', labels='back', only_labels=False):
         if labels not in ('front', 'back', None):
             raise ValueError("labels must be None, 'front', or 'back'")
 
         self.source = source
         self.labels = labels
+        stem = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+        if source == 'voyager':
+            stem += 'rastertiles'
 
         if self.is_basic():
             if only_labels:
                 style = source + '_only_labels'
             else:
-                style = source + ('_all' if labels == 'back' else '_nolabels')
-
-            self.url = ('https://cartodb-basemaps-{{s}}.global.ssl.fastly.net/'
-                        '{style}/{{z}}/{{x}}/{{y}}.png').format(style=style)
+                if source in ('dark', 'light', ):
+                    label_type = '_all'
+                else:
+                    label_type = '_labels_under'
+                style = source + (label_type if labels == 'back'
+                                  else '_nolabels')
+            self.url = '/'.join(s.strip('/') for s in
+                                (stem,
+                                 '{style}/{{z}}/{{x}}/{{y}}.png'.format(
+                                     style=style)
+                                 ))
         elif self.source.startswith('http'):
             # TODO: Remove this once baselayer urls can be passed in named
             # map config
@@ -75,16 +85,17 @@ class BaseMap(AbstractLayer):
                              'moment')
             # self.url = source
         else:
-            raise ValueError("`source` must be one of 'dark' or 'light'")
+            raise ValueError("`source` must be one of 'dark', 'light', or "
+                             "voyager")
 
     def is_basic(self):
         """Does BaseMap pull from CARTO default basemaps?
 
         Returns:
-            bool: `True` if using a CARTO basemap (Dark Matter or Positron),
-            `False` otherwise.
+            bool: `True` if using a CARTO basemap (Dark Matter, Positron or
+            Voyager), `False` otherwise.
         """
-        return self.source in ('dark', 'light')
+        return self.source in ('dark', 'light', 'voyager', )
 
 
 class QueryLayer(AbstractLayer):
