@@ -747,8 +747,8 @@ class CartoContext(object):
 
             config = {
                 'user_name': self.creds.username(),
-                'maps_api_template': self.creds.base_url()[:-1],
-                'sql_api_template': self.creds.base_url()[:-1],
+                'maps_api_template': self.creds.base_url(),
+                'sql_api_template': self.creds.base_url(),
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',

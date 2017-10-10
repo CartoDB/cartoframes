@@ -66,6 +66,7 @@ class Credentials(object):
                 raise RuntimeError('Could not load CARTO credentials. Try '
                                    'setting them with the `key` and '
                                    '`username` arguments.')
+        self._norm_creds()
 
     def __repr__(self):
         return ('Credentials(username={username}, '
@@ -73,6 +74,10 @@ class Credentials(object):
                 'base_url={base_url})').format(username=self._username,
                                                key=self._key,
                                                base_url=self._base_url)
+
+    def _norm_creds(self):
+        """Standardize credentials"""
+        self._base_url = self._base_url.strip('/')
 
     def save(self, config_loc=None):
         """Saves current user credentials to user directory.
