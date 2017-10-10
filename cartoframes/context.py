@@ -137,7 +137,7 @@ class CartoContext(object):
         return self.query(query, decode_geom=decode_geom)
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None, encode_geom=False, geom_col=None):
+              lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -191,7 +191,8 @@ class CartoContext(object):
                                                   geom_col, pgcolnames)
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
-                                                    geom_col, pgcolnames)
+                                                    geom_col, pgcolnames,
+                                                    kwargs)
             self._set_schema(df, final_table_name, pgcolnames)
 
         # create geometry column from long/lats if requested
@@ -352,7 +353,8 @@ class CartoContext(object):
 
         return table_name
 
-    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames):
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames,
+                        kwargs):
         """Send a DataFrame to CARTO to be imported as a SQL table.
 
         Note:
@@ -384,9 +386,11 @@ class CartoContext(object):
                                                           encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
+            params = {'type_guessing': 'false'}
+            params.update(kwargs)
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
-                                  params={'type_guessing': 'false'},
+                                  params=params,
                                   stream=True)
             self._debug_print(res=res)
 
