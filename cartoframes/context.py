@@ -653,16 +653,6 @@ class CartoContext(object):
             [zoom, lat, lng] = [3, 38, -99]
         has_zoom = zoom is not None
 
-        # Check basemaps, add one if none exist
-        base_layers = [idx for idx, layer in enumerate(layers)
-                       if layer.is_basemap]
-        if len(base_layers) > 1:
-            raise ValueError('map can at most take 1 BaseMap layer')
-        if len(base_layers) > 0:
-            layers.insert(0, layers.pop(base_layers[0]))
-        else:
-            layers.insert(0, BaseMap())
-
         # Check for a time layer, if it exists move it to the front
         time_layers = [idx for idx, layer in enumerate(layers)
                        if not layer.is_basemap and layer.time]
@@ -677,26 +667,50 @@ class CartoContext(object):
                                  'time_column')
             layers.append(layers.pop(time_layers[0]))
 
-        # If basemap labels are on front, add labels layer
-        basemap = layers[0]
-        if basemap.is_basic() and basemap.labels == 'front':
-            layers.append(BaseMap(basemap.source,
-                                  labels=basemap.labels,
-                                  only_labels=True))
+        base_layers = [idx for idx, layer in enumerate(layers)
+                       if layer.is_basemap]
+
+        # Check basemaps, add one if none exist
+        if len(base_layers) > 1:
+            raise ValueError('Map can at most take one BaseMap layer')
+        elif len(base_layers) == 1:
+            layers.insert(0, layers.pop(base_layers[0]))
+        elif not base_layers:
+            # default basemap is dark with labels in back
+            # labels will be changed if all geoms are non-point
+            layers.insert(0, BaseMap(source='dark', labels='back'))
+            geoms = set()
 
         # Setup layers
         for idx, layer in enumerate(layers):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
-                    SELECT {cols} FROM ({query}) AS _wrap LIMIT 0
+                    SELECT {cols}
+                    FROM ({query}) AS _wrap
+                    LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            query=layer.query))
                 self._debug_print(layer_fields=resp)
-                # update local style schema to help build proper defaults
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
+                if not base_layers:
+                    layer.geom_type = self._geom_type(layer)
+                    geoms.add(layer.geom_type)
+                # update local style schema to help build proper defaults
             layer._setup(layers, idx)
+
+        # set labels on top if there are no point geometries and a basemap
+        #  is not specified
+        if not base_layers and 'point' not in geoms:
+            layers[0] = BaseMap(labels='front')
+
+        # If basemap labels are on front, add labels layer
+        basemap = layers[0]
+        if basemap.is_basic() and basemap.labels == 'front':
+            layers.append(BaseMap(basemap.source,
+                                  labels=basemap.labels,
+                                  only_labels=True))
 
         nb_layers = non_basemap_layers(layers)
         options = {'basemap_url': basemap.url}
@@ -821,6 +835,34 @@ class CartoContext(object):
                                          width=size[0],
                                          height=size[1],
                                          metadata=dict(origin_url=static_url))
+
+    def _geom_type(self, layer):
+        """gets geometry type(s) of specified layer"""
+        resp = self.sql_client.send('''
+            SELECT
+                CASE WHEN ST_GeometryType(the_geom) in ('ST_Point',
+                                                        'ST_MultiPoint')
+                     THEN 'point'
+                     WHEN ST_GeometryType(the_geom) in ('ST_LineString',
+                                                        'ST_MultiLineString')
+                     THEN 'line'
+                     WHEN ST_GeometryType(the_geom) in ('ST_Polygon',
+                                                        'ST_MultiPolygon')
+                     THEN 'polygon'
+                     ELSE null END AS geom_type,
+                count(*) as cnt
+            FROM ({query}) AS _wrap
+            WHERE the_geom IS NOT NULL
+            GROUP BY 1
+            ORDER BY 2 DESC
+        '''.format(query=layer.query))
+        if len(resp['rows']) > 1:
+            warn('There are multiple geometry types in {query}: '
+                 '{geoms}. Styling by `{common_geom}`, the most common'.format(
+                    query=layer.query,
+                    geoms=','.join(g['geom_type'] for g in resp['rows']),
+                    common_geom=resp['rows'][0]['geom_type']))
+        return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, df=None, table_name=None):
         """Not currently implemented"""

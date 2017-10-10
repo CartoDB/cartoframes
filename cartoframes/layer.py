@@ -208,6 +208,7 @@ class QueryLayer(AbstractLayer):
         self.query = query
         # style columns as keys, data types as values
         self.style_cols = dict()
+        self.geom_type = None
 
         # TODO: move these if/else branches to individual methods
         # color, scheme = self._get_colorscheme()

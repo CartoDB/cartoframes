@@ -56,6 +56,8 @@ class TestCartoContext(unittest.TestCase):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
+        self.test_point_table = 'tweets_obama'
+
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
             ver=pyver,
@@ -506,6 +508,53 @@ class TestCartoContext(unittest.TestCase):
         # time layers are not implemented yet
         with self.assertRaises(NotImplementedError):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_map_geom_type(self):
+        """CartoContext.map basemap geometry type defaults"""
+        from cartoframes import Layer, QueryLayer
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # baseid1 = dark, labels1 = labels on top in named map name
+        labels_polygon = cc.map(layers=Layer(self.test_read_table))
+        self.assertRegexpMatches(labels_polygon.__html__(),
+                                 '.*baseid1_labels1.*',
+                                 msg='labels should be on top since only a '
+                                     'polygon layer is present')
+
+        # baseid1 = dark, labels0 = labels on bottom
+        labels_point = cc.map(layers=Layer(self.test_point_table))
+        self.assertRegexpMatches(labels_point.__html__(),
+                                 '.*baseid1_labels0.*',
+                                 msg='labels should be on bottom because a '
+                                     'point layer is present')
+
+        labels_multi = cc.map(layers=[Layer(self.test_point_table),
+                                      Layer(self.test_read_table)])
+        self.assertRegexpMatches(labels_multi.__html__(),
+                                 '.*baseid1_labels0.*',
+                                 msg='labels should be on bottom because a '
+                                     'point layer is present')
+        # create a layer with points and polys, but with more polys
+        # should default to poly layer (labels on top)
+        multi_geom_layer = QueryLayer('''
+            (SELECT
+                the_geom, the_geom_webmercator,
+                row_number() OVER () AS cartodb_id
+              FROM "{polys}" WHERE the_geom IS NOT null LIMIT 10)
+            UNION ALL
+            (SELECT
+                the_geom, the_geom_webmercator,
+                (row_number() OVER ()) + 10 AS cartodb_id
+              FROM "{points}" WHERE the_geom IS NOT null LIMIT 5)
+        '''.format(polys=self.test_read_table,
+                   points=self.test_point_table))
+        multi_geom = cc.map(layers=multi_geom_layer)
+        self.assertRegexpMatches(multi_geom.__html__(),
+                                 '.*baseid1_labels1.*',
+                                 msg='layer has more polys than points, so it '
+                                     'should default to polys labels (on top)')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
