@@ -858,7 +858,7 @@ class CartoContext(object):
         '''.format(query=layer.query))
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
-                 '{geoms}. Styling by `{common_geom}`'.format(
+                 '{geoms}. Styling by `{common_geom}`, the most common'.format(
                     query=layer.query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
