@@ -89,13 +89,15 @@ class TestCartoContext(unittest.TestCase):
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
                   self.test_query_table,
-                  self.mixed_case_table, )
+                  self.mixed_case_table.lower(), )
+        sql_drop = 'DROP TABLE IF EXISTS {};'
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
                                           api_key=self.apikey)
             for table in tables:
                 cc.delete(table)
+                cc.sql_client.send(sql_drop.format(table))
         # TODO: remove the named map templates
 
     def add_map_template(self):
