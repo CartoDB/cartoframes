@@ -75,6 +75,13 @@ def norm_colname(colname):
     return final_name
 
 
+def importify_params(param_arg):
+    """Convert parameter arguments to what CARTO's Import API expects"""
+    if isinstance(param_arg, bool):
+        return str(param_arg).lower()
+    return param_arg
+  
+  
 def join_url(parts):
     """join parts of URL into complete url"""
     return '/'.join(s.strip('/') for s in parts)
