@@ -755,7 +755,11 @@ class CartoContext(object):
             params.update({'zoom': zoom, 'lat': lat, 'lon': lng})
             options.update({'zoom': zoom, 'lat': lat, 'lng': lng})
         else:
-            options.update(self._get_bounds(nb_layers))
+            bounds = self._get_bounds(nb_layers)
+            options.update(bounds)
+            bbox = '{west},{south},{east},{north}'.format(**bounds)
+            print(bbox)
+            params.update(dict(bbox=bbox))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
         api_url = join_url((self.creds.base_url(), 'api/v1/map', ))
