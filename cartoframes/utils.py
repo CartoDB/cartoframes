@@ -75,18 +75,6 @@ def norm_colname(colname):
     return final_name
 
 
-def geom_conv(pggeom):
-    pgtypes = {
-        'ST_Point': 'point',
-        'ST_MultiPoint': 'point',
-        'ST_LineString': 'line',
-        'ST_MultiLineString': 'line',
-        'ST_MultiPolygon': 'polygon',
-        'ST_Polygon': 'polygon'
-        }
-    return pgtypes.get(pggeom)
-
-
 def importify_params(param_arg):
     """Convert parameter arguments to what CARTO's Import API expects"""
     if isinstance(param_arg, bool):
