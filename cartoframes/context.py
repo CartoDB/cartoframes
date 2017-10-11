@@ -700,7 +700,7 @@ class CartoContext(object):
         elif len(base_layers) == 1:
             layers.insert(0, layers.pop(base_layers[0]))
             if layers[0].is_basic() and layers[0].labels == 'front':
-                if time:
+                if time_layers:
                     warn('Basemap labels on top are not currently supported '
                          'for animated maps')
                 else:
@@ -727,8 +727,8 @@ class CartoContext(object):
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
+                layer.geom_type = self._geom_type(layer)
                 if not base_layers:
-                    layer.geom_type = self._geom_type(layer)
                     geoms.add(layer.geom_type)
                 # update local style schema to help build proper defaults
             layer._setup(layers, idx)
