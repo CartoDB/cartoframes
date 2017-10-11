@@ -16,6 +16,7 @@ from carto.sql import SQLClient
 import pandas as pd
 
 WILL_SKIP = False
+warnings.simplefilter('ignore')
 
 
 class TestCartoContext(unittest.TestCase):

@@ -18,7 +18,8 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
-from .utils import dict_items, normalize_colnames, norm_colname
+from .utils import (dict_items, normalize_colnames, norm_colname,
+                    importify_params)
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -141,9 +142,21 @@ class CartoContext(object):
         """Write a DataFrame to a CARTO table.
 
         Example:
+            Write a pandas DataFrame to CARTO.
+
             .. code:: python
 
                 cc.write(df, 'brooklyn_poverty', overwrite=True)
+
+            Scrape an HTML table from Wikipedia and send to CARTO with content
+            guessing to create a geometry from the country column. This uses
+            a CARTO Import API param `content_guessing` parameter.
+
+            .. code:: python
+
+                url = 'https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy'
+                df = pd.read_html(url, header=0)[0]
+                cc.write(df, 'life_expectancy', content_guessing=True)
 
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
@@ -163,10 +176,18 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
+            kwargs: Keyword arguments from CARTO's Import API. See the `params
+                listed in the documentation
+                <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
+                for more information. For example, when using
+                `content_guessing='true'`, a column named 'countries' with
+                country names will be used to generate polygons for each
+                country. To avoid unintended consequences, avoid `file`, `url`,
+                and other similar arguments.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFarme has more than 100,000 rows, a :obj:`BatchJobStatus`
+            DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
         """
         if encode_geom:
@@ -185,10 +206,10 @@ class CartoContext(object):
             # send placeholder table
             final_table_name = self._send_dataframe(df.iloc[0:0], table_name,
                                                     temp_dir, geom_col,
-                                                    pgcolnames)
+                                                    pgcolnames, kwargs)
             # send dataframe in batches, combine into placeholder table
             final_table_name = self._send_batches(df, table_name, temp_dir,
-                                                  geom_col, pgcolnames)
+                                                  geom_col, pgcolnames, kwargs)
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
                                                     geom_col, pgcolnames,
@@ -269,7 +290,8 @@ class CartoContext(object):
             self._debug_print(err=err)
             return False
 
-    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
+    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames,
+                      kwargs):
         """Batch sending a dataframe in chunks that are then recombined.
 
         Args:
@@ -285,9 +307,6 @@ class CartoContext(object):
         Returns:
             final_table_name (str): Final table name on CARTO that the
             DataFrame is stored in
-
-        Exceptions:
-            * TODO: add more (Out of storage)
         """
         subtables = []
         # generator for accessing chunks of original dataframe
@@ -302,7 +321,7 @@ class CartoContext(object):
             try:
                 # send dataframe chunk, get new name if collision
                 temp_table = self._send_dataframe(chunk, temp_table, temp_dir,
-                                                  geom_col, pgcolnames)
+                                                  geom_col, pgcolnames, kwargs)
             except CartoException as err:
                 for table in subtables:
                     self.delete(table)
@@ -386,8 +405,9 @@ class CartoContext(object):
                                                           encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
-            params = {'type_guessing': 'false'}
+            params = {'type_guessing': False}
             params.update(kwargs)
+            params = {k: importify_params(v) for k, v in dict_items(params)}
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
                                   params=params,

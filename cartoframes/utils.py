@@ -73,3 +73,10 @@ def norm_colname(colname):
     if final_name[0].isdigit():
         return '_' + final_name
     return final_name
+
+
+def importify_params(param_arg):
+    """Convert parameter arguments to what CARTO's Import API expects"""
+    if isinstance(param_arg, bool):
+        return str(param_arg).lower()
+    return param_arg
