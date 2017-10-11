@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Unit tests for cartoframes.layers"""
 import unittest
 import os
@@ -15,6 +17,7 @@ import pandas as pd
 import IPython
 
 WILL_SKIP = False
+warnings.filterwarnings("ignore")
 
 
 class TestCartoContext(unittest.TestCase):
@@ -58,7 +61,7 @@ class TestCartoContext(unittest.TestCase):
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
         # torque table
-        self.torque_table = 'tweets_obama'
+        self.test_point_table = 'tweets_obama'
 
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
@@ -94,12 +97,14 @@ class TestCartoContext(unittest.TestCase):
                   self.test_write_lnglat_table,
                   self.test_query_table,
                   self.mixed_case_table.lower(), )
+        sql_drop = 'DROP TABLE IF EXISTS {};'
 
         if self.apikey and self.baseurl:
             cc = cartoframes.CartoContext(base_url=self.baseurl,
                                           api_key=self.apikey)
             for table in tables:
                 cc.delete(table)
+                cc.sql_client.send(sql_drop.format(table))
         # TODO: remove the named map templates
 
     def add_map_template(self):
@@ -111,9 +116,9 @@ class TestCartoContext(unittest.TestCase):
         """CartoContext.__init__"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        self.assertTrue(cc.creds.key() == self.apikey)
-        self.assertTrue(cc.creds.base_url() == self.baseurl)
-        self.assertTrue(cc.creds.username() == self.username)
+        self.assertEqual(cc.creds.key(), self.apikey)
+        self.assertEqual(cc.creds.base_url(), self.baseurl.strip('/'))
+        self.assertEqual(cc.creds.username(), self.username)
         self.assertTrue(not cc.is_org)
         # TODO: how to test instances of a class?
         # self.assertTrue(cc.auth_client.__dict__ == self.auth_client.__dict__)
@@ -259,6 +264,18 @@ class TestCartoContext(unittest.TestCase):
         # table should be properly created
         # util columns + new column of type number
         self.assertDictEqual(cols['fields'], expected_schema)
+
+        # test properly encoding
+        df = pd.DataFrame({'vals':[1,2],'strings':['a','ô']})
+        cc.write(df, self.test_write_table, overwrite=True)
+
+        # check if table exists
+        resp = self.sql_client.send('''
+            SELECT *
+            FROM {table}
+            LIMIT 0
+            '''.format(table=self.test_write_table))
+        self.assertIsNotNone(resp)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_mixed_case(self):
@@ -510,12 +527,12 @@ class TestCartoContext(unittest.TestCase):
         from cartoframes import Layer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        html_map = cc.map(layers=Layer(self.torque_table,
+        html_map = cc.map(layers=Layer(self.test_point_table,
                                        time='cartodb_id'))
         self.assertIsInstance(html_map, IPython.core.display.HTML)
 
         # category map
-        cat_map = cc.map(layers=Layer(self.torque_table,
+        cat_map = cc.map(layers=Layer(self.test_point_table,
                                       time='actor_postedtime',
                                       color='twitter_lang'))
         self.assertRegexpMatches(
@@ -525,19 +542,66 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(
                 ValueError,
                 msg='cannot create static torque maps currently'):
-            cc.map(layers=Layer(self.torque_table, time='cartodb_id'),
+            cc.map(layers=Layer(self.test_point_table, time='cartodb_id'),
                    interactive=False)
 
         with self.assertRaises(
                 ValueError,
                 msg='cannot have more than one torque layer'):
-            cc.map(layers=[Layer(self.torque_table, time='cartodb_id'),
-                           Layer(self.torque_table, color='cartodb_id')])
+            cc.map(layers=[Layer(self.test_point_table, time='cartodb_id'),
+                           Layer(self.test_point_table, color='cartodb_id')])
 
         with self.assertRaises(
                 ValueError,
                 msg='cannot do a torque map off a polygon dataset'):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_map_geom_type(self):
+        """CartoContext.map basemap geometry type defaults"""
+        from cartoframes import Layer, QueryLayer
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # baseid1 = dark, labels1 = labels on top in named map name
+        labels_polygon = cc.map(layers=Layer(self.test_read_table))
+        self.assertRegexpMatches(labels_polygon.__html__(),
+                                 '.*baseid2_labels1.*',
+                                 msg='labels should be on top since only a '
+                                     'polygon layer is present')
+
+        # baseid2 = voyager, labels0 = labels on bottom
+        labels_point = cc.map(layers=Layer(self.test_point_table))
+        self.assertRegexpMatches(labels_point.__html__(),
+                                 '.*baseid2_labels0.*',
+                                 msg='labels should be on bottom because a '
+                                     'point layer is present')
+
+        labels_multi = cc.map(layers=[Layer(self.test_point_table),
+                                      Layer(self.test_read_table)])
+        self.assertRegexpMatches(labels_multi.__html__(),
+                                 '.*baseid2_labels0.*',
+                                 msg='labels should be on bottom because a '
+                                     'point layer is present')
+        # create a layer with points and polys, but with more polys
+        # should default to poly layer (labels on top)
+        multi_geom_layer = QueryLayer('''
+            (SELECT
+                the_geom, the_geom_webmercator,
+                row_number() OVER () AS cartodb_id
+              FROM "{polys}" WHERE the_geom IS NOT null LIMIT 10)
+            UNION ALL
+            (SELECT
+                the_geom, the_geom_webmercator,
+                (row_number() OVER ()) + 10 AS cartodb_id
+              FROM "{points}" WHERE the_geom IS NOT null LIMIT 5)
+        '''.format(polys=self.test_read_table,
+                   points=self.test_point_table))
+        multi_geom = cc.map(layers=multi_geom_layer)
+        self.assertRegexpMatches(multi_geom.__html__(),
+                                 '.*baseid2_labels1.*',
+                                 msg='layer has more polys than points, so it '
+                                     'should default to polys labels (on top)')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):

@@ -18,7 +18,8 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
-from .utils import dict_items, normalize_colnames, norm_colname, geom_conv
+from .utils import (dict_items, normalize_colnames, norm_colname,
+                    importify_params, join_url)
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -137,13 +138,25 @@ class CartoContext(object):
         return self.query(query, decode_geom=decode_geom)
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None, encode_geom=False, geom_col=None):
+              lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
         Example:
+            Write a pandas DataFrame to CARTO.
+
             .. code:: python
 
                 cc.write(df, 'brooklyn_poverty', overwrite=True)
+
+            Scrape an HTML table from Wikipedia and send to CARTO with content
+            guessing to create a geometry from the country column. This uses
+            a CARTO Import API param `content_guessing` parameter.
+
+            .. code:: python
+
+                url = 'https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy'
+                df = pd.read_html(url, header=0)[0]
+                cc.write(df, 'life_expectancy', content_guessing=True)
 
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
@@ -163,10 +176,18 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
+            kwargs: Keyword arguments from CARTO's Import API. See the `params
+                listed in the documentation
+                <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
+                for more information. For example, when using
+                `content_guessing='true'`, a column named 'countries' with
+                country names will be used to generate polygons for each
+                country. To avoid unintended consequences, avoid `file`, `url`,
+                and other similar arguments.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFarme has more than 100,000 rows, a :obj:`BatchJobStatus`
+            DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
         """
         if encode_geom:
@@ -185,13 +206,14 @@ class CartoContext(object):
             # send placeholder table
             final_table_name = self._send_dataframe(df.iloc[0:0], table_name,
                                                     temp_dir, geom_col,
-                                                    pgcolnames)
+                                                    pgcolnames, kwargs)
             # send dataframe in batches, combine into placeholder table
             final_table_name = self._send_batches(df, table_name, temp_dir,
-                                                  geom_col, pgcolnames)
+                                                  geom_col, pgcolnames, kwargs)
         else:
             final_table_name = self._send_dataframe(df, table_name, temp_dir,
-                                                    geom_col, pgcolnames)
+                                                    geom_col, pgcolnames,
+                                                    kwargs)
             self._set_schema(df, final_table_name, pgcolnames)
 
         # create geometry column from long/lats if requested
@@ -217,9 +239,9 @@ class CartoContext(object):
                     'minutes.\n'
                     '\033[1mNote:\033[0m `CartoContext.map` will not work on '
                     'this table until its geometries are created.'.format(
-                               table_url=os.path.join(self.creds.base_url(),
-                                                      'dataset',
-                                                      final_table_name),
+                               table_url=join_url((self.creds.base_url(),
+                                                   'dataset',
+                                                   final_table_name, )),
                                job_id=status.get('job_id'),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
@@ -227,9 +249,9 @@ class CartoContext(object):
             self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-                       table_url=os.path.join(self.creds.base_url(),
-                                              'dataset',
-                                              final_table_name)))
+                       table_url=join_url((self.creds.base_url(),
+                                           'dataset',
+                                           final_table_name, ))))
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -268,7 +290,8 @@ class CartoContext(object):
             self._debug_print(err=err)
             return False
 
-    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames):
+    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames,
+                      kwargs):
         """Batch sending a dataframe in chunks that are then recombined.
 
         Args:
@@ -284,9 +307,6 @@ class CartoContext(object):
         Returns:
             final_table_name (str): Final table name on CARTO that the
             DataFrame is stored in
-
-        Exceptions:
-            * TODO: add more (Out of storage)
         """
         subtables = []
         # generator for accessing chunks of original dataframe
@@ -301,7 +321,7 @@ class CartoContext(object):
             try:
                 # send dataframe chunk, get new name if collision
                 temp_table = self._send_dataframe(chunk, temp_table, temp_dir,
-                                                  geom_col, pgcolnames)
+                                                  geom_col, pgcolnames, kwargs)
             except CartoException as err:
                 for table in subtables:
                     self.delete(table)
@@ -352,7 +372,8 @@ class CartoContext(object):
 
         return table_name
 
-    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames):
+    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames,
+                        kwargs):
         """Send a DataFrame to CARTO to be imported as a SQL table.
 
         Note:
@@ -380,12 +401,16 @@ class CartoContext(object):
         self._debug_print(tempfile=tempfile)
         df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
                                                           na_rep='',
-                                                          header=pgcolnames)
+                                                          header=pgcolnames,
+                                                          encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
+            params = {'type_guessing': False}
+            params.update(kwargs)
+            params = {k: importify_params(v) for k, v in dict_items(params)}
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
-                                  params={'type_guessing': 'false'},
+                                  params=params,
                                   stream=True)
             self._debug_print(res=res)
 
@@ -653,16 +678,6 @@ class CartoContext(object):
             [zoom, lat, lng] = [1, 0, 0]
         has_zoom = zoom is not None
 
-        # Check basemaps, add one if none exist
-        base_layers = [idx for idx, layer in enumerate(layers)
-                       if layer.is_basemap]
-        if len(base_layers) > 1:
-            raise ValueError('Map can at most take 1 `BaseMap` layer')
-        if len(base_layers) > 0:
-            layers.insert(0, layers.pop(base_layers[0]))
-        else:
-            layers.insert(0, BaseMap())
-
         # Check for a time layer, if it exists move it to the front
         time_layers = [idx for idx, layer in enumerate(layers)
                        if not layer.is_basemap and layer.time]
@@ -676,36 +691,59 @@ class CartoContext(object):
                                  'time column')
             layers.append(layers.pop(time_layers[0]))
 
-        # If basemap labels are on front, add labels layer
-        basemap = layers[0]
-        if basemap.is_basic() and basemap.labels == 'front':
-            if time:
-                warn('Basemap labels on top are not currently supported for '
-                     'animated maps')
-            else:
-                layers.append(BaseMap(basemap.source,
-                                      labels=basemap.labels,
-                                      only_labels=True))
+        base_layers = [idx for idx, layer in enumerate(layers)
+                       if layer.is_basemap]
+
+        # Check basemaps, add one if none exist
+        if len(base_layers) > 1:
+            raise ValueError('Map can at most take one BaseMap layer')
+        elif len(base_layers) == 1:
+            layers.insert(0, layers.pop(base_layers[0]))
+            if layers[0].is_basic() and layers[0].labels == 'front':
+                if time:
+                    warn('Basemap labels on top are not currently supported '
+                         'for animated maps')
+                else:
+                    layers.append(BaseMap(layers[0].source,
+                                          labels=layers[0].labels,
+                                          only_labels=True))
+        elif not base_layers:
+            # default basemap is dark with labels in back
+            # labels will be changed if all geoms are non-point
+            layers.insert(0, BaseMap())
+            geoms = set()
 
         # Setup layers
         for idx, layer in enumerate(layers):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
-                    SELECT
-                      {cols}{comma}
-                      ST_GeometryType(the_geom) as the_geom
+                    SELECT {cols}
                     FROM ({query}) AS _wrap
-                    LIMIT 1
+                    LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            comma=',' if layer.style_cols else '',
                            query=layer.query))
                 self._debug_print(layer_fields=resp)
-                # update local style schema to help build proper defaults
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
-                layer.geom_type = geom_conv(resp['rows'][0]['the_geom'])
+                if not base_layers:
+                    layer.geom_type = self._geom_type(layer)
+                    geoms.add(layer.geom_type)
+                # update local style schema to help build proper defaults
             layer._setup(layers, idx)
+
+        # set labels on top if there are no point geometries and a basemap
+        #  is not specified
+        if not base_layers and 'point' not in geoms:
+            layers[0] = BaseMap(labels='front')
+
+        # If basemap labels are on front, add labels layer
+        basemap = layers[0]
+        if basemap.is_basic() and basemap.labels == 'front':
+            layers.append(BaseMap(basemap.source,
+                                  labels=basemap.labels,
+                                  only_labels=True))
 
         nb_layers = non_basemap_layers(layers)
         if time_layer and len(nb_layers) > 1:
@@ -732,7 +770,7 @@ class CartoContext(object):
             options.update(self._get_bounds(nb_layers))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = '{base_url}api/v1/map'.format(base_url=self.creds.base_url())
+        api_url = join_url((self.creds.base_url(), 'api/v1/map', ))
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(
@@ -760,8 +798,8 @@ class CartoContext(object):
 
             config = {
                 'user_name': self.creds.username(),
-                'maps_api_template': self.creds.base_url()[:-1],
-                'sql_api_template': self.creds.base_url()[:-1],
+                'maps_api_template': self.creds.base_url(),
+                'sql_api_template': self.creds.base_url(),
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',
@@ -846,6 +884,34 @@ class CartoContext(object):
                                          width=size[0],
                                          height=size[1],
                                          metadata=dict(origin_url=static_url))
+
+    def _geom_type(self, layer):
+        """gets geometry type(s) of specified layer"""
+        resp = self.sql_client.send('''
+            SELECT
+                CASE WHEN ST_GeometryType(the_geom) in ('ST_Point',
+                                                        'ST_MultiPoint')
+                     THEN 'point'
+                     WHEN ST_GeometryType(the_geom) in ('ST_LineString',
+                                                        'ST_MultiLineString')
+                     THEN 'line'
+                     WHEN ST_GeometryType(the_geom) in ('ST_Polygon',
+                                                        'ST_MultiPolygon')
+                     THEN 'polygon'
+                     ELSE null END AS geom_type,
+                count(*) as cnt
+            FROM ({query}) AS _wrap
+            WHERE the_geom IS NOT NULL
+            GROUP BY 1
+            ORDER BY 2 DESC
+        '''.format(query=layer.query))
+        if len(resp['rows']) > 1:
+            warn('There are multiple geometry types in {query}: '
+                 '{geoms}. Styling by `{common_geom}`, the most common'.format(
+                    query=layer.query,
+                    geoms=','.join(g['geom_type'] for g in resp['rows']),
+                    common_geom=resp['rows'][0]['geom_type']))
+        return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, df=None, table_name=None):
         """Not currently implemented"""

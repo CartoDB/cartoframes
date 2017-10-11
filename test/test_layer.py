@@ -15,18 +15,23 @@ class TestBaseMap(unittest.TestCase):
         # basemaps with baked-in labels
         self.dark_map_all = BaseMap(source='dark')
         self.light_map_all = BaseMap(source='light')
+        self.voyager_labels_under = BaseMap(source='voyager')
 
         # basemaps with no labels
         self.dark_map_no_labels = BaseMap(source='dark',
                                           labels=None)
         self.light_map_no_labels = BaseMap(source='light',
                                            labels=None)
+        self.voyager_map_no_labels = BaseMap(source='voyager',
+                                             labels=None)
 
         # labels with no basemaps
         self.dark_only_labels = BaseMap(source='dark',
                                         only_labels=True)
         self.light_only_labels = BaseMap(source='light',
                                          only_labels=True)
+        self.voyager_only_labels = BaseMap(source='voyager',
+                                           only_labels=True)
 
     def test_basemap_invalid(self):
         """layer.Basemap exceptions on invalid source"""
@@ -53,23 +58,34 @@ class TestBaseMap(unittest.TestCase):
         self.assertEqual(self.light_map_all.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_all/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_labels_under.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_labels_under/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_map_no_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'dark_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_map_no_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_nolabels/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_map_no_labels.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_only_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_only_labels/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_only_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'dark_only_labels/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_only_labels.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_only_labels/{z}/{x}/{y}.png')
 
         # ensure self.is_basic() works as intended
         self.assertTrue(self.light_map_all.is_basic(),
                         msg='is a basic carto basemap')
         self.assertTrue(self.dark_map_all.is_basic())
+        self.assertTrue(self.voyager_labels_under.is_basic(),
+                        msg='is a basic carto basemap')
 
 
 class TestQueryLayer(unittest.TestCase):

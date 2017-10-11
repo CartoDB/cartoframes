@@ -41,7 +41,7 @@ class TestCredentials(unittest.TestCase):
 
         self.assertEqual(creds.key(), self.key)
         self.assertEqual(creds.username(), self.username)
-        self.assertEqual(creds.base_url(), self.base_url)
+        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
 
     def test_credentials_constructor(self):
         """credentials.Credentials object constructor"""
@@ -52,7 +52,6 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(creds1.username(), creds2.username())
         self.assertEqual(creds1.base_url(), creds2.base_url())
 
-
     def test_credentials_baseurl(self):
         """credentials.Credentials carto.com base_url"""
         creds = Credentials(key=self.key,
@@ -60,7 +59,7 @@ class TestCredentials(unittest.TestCase):
 
         self.assertEqual(creds.key(), self.key)
         self.assertEqual(creds.username(), None)
-        self.assertEqual(creds.base_url(), self.base_url)
+        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
 
     def test_credentials_onprem_baseurl(self):
         """credentials.Credentials on-prem-style base_url"""
@@ -70,7 +69,7 @@ class TestCredentials(unittest.TestCase):
 
         self.assertEqual(creds.key(), self.key)
         self.assertEqual(creds.username(), self.username)
-        self.assertEqual(creds.base_url(), self.onprem_base_url)
+        self.assertEqual(creds.base_url(), self.onprem_base_url.strip('/'))
 
     def test_credentials_no_args(self):
         """credentials.Creentials load default cred file"""
@@ -78,7 +77,7 @@ class TestCredentials(unittest.TestCase):
 
         self.assertEqual(creds.key(), self.default['key'])
         self.assertEqual(creds.username(), self.default['username'])
-        self.assertEqual(creds.base_url(), self.default['base_url'])
+        self.assertEqual(creds.base_url(), self.default['base_url'].strip('/'))
 
     def test_credentials_invalid_key(self):
         """credentials.Credentials invalid key"""
@@ -99,7 +98,7 @@ class TestCredentials(unittest.TestCase):
                       f)
         creds = Credentials(cred_file=local_cred_file)
         self.assertEqual(creds.key(), self.key)
-        self.assertEqual(creds.base_url(), self.base_url)
+        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
         creds.delete(local_cred_file)
 
     def test_credentials_set(self):
@@ -175,5 +174,5 @@ class TestCredentials(unittest.TestCase):
         """credentials.Credentials.__repr__"""
         ans = ('Credentials(username=default_username, '
                'key=default_key, '
-               'base_url=https://default_username.carto.com/)')
+               'base_url=https://default_username.carto.com)')
         self.assertEqual(str(self.default_cred), ans)
