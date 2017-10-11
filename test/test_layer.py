@@ -156,7 +156,7 @@ class TestQueryLayer(unittest.TestCase):
         # normal behavior for point geometries
         ql._setup([BaseMap(), ql], 1)
         self.assertDictEqual(ql.scheme,
-                             dict(name='Bold', bin_method='',
+                             dict(name='Antique', bin_method='',
                                   bins=','.join(str(i) for i in range(1, 11))))
         # expect category maps query
         self.assertRegexpMatches(ql.query,
