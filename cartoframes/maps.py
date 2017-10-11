@@ -19,6 +19,7 @@ def get_map_name(layers, has_zoom):
     num_layers = len(non_basemap_layers(layers))
     has_labels = len(layers) > 1 and layers[-1].is_basemap
     has_time = has_time_layer(layers)
+    basemap_id = dict(light=0, dark=1, voyager=2)[layers[0].source]
 
     return ('cartoframes_ver{version}'
             '_layers{layers}'
@@ -31,7 +32,7 @@ def get_map_name(layers, has_zoom):
                 has_time=('1' if has_time else '0'),
                 # TODO: Remove this once baselayer urls can be passed in named
                 #       map config
-                baseid=('1' if layers[0].source == 'dark' else '0'),
+                baseid=basemap_id,
                 has_labels=('1' if has_labels else '0'),
                 has_zoom=('1' if has_zoom else '0')
             )

@@ -16,6 +16,7 @@ from carto.sql import SQLClient
 import pandas as pd
 
 WILL_SKIP = False
+warnings.filterwarnings("ignore")
 
 
 class TestCartoContext(unittest.TestCase):
@@ -533,21 +534,21 @@ class TestCartoContext(unittest.TestCase):
         # baseid1 = dark, labels1 = labels on top in named map name
         labels_polygon = cc.map(layers=Layer(self.test_read_table))
         self.assertRegexpMatches(labels_polygon.__html__(),
-                                 '.*baseid1_labels1.*',
+                                 '.*baseid2_labels1.*',
                                  msg='labels should be on top since only a '
                                      'polygon layer is present')
 
-        # baseid1 = dark, labels0 = labels on bottom
+        # baseid2 = voyager, labels0 = labels on bottom
         labels_point = cc.map(layers=Layer(self.test_point_table))
         self.assertRegexpMatches(labels_point.__html__(),
-                                 '.*baseid1_labels0.*',
+                                 '.*baseid2_labels0.*',
                                  msg='labels should be on bottom because a '
                                      'point layer is present')
 
         labels_multi = cc.map(layers=[Layer(self.test_point_table),
                                       Layer(self.test_read_table)])
         self.assertRegexpMatches(labels_multi.__html__(),
-                                 '.*baseid1_labels0.*',
+                                 '.*baseid2_labels0.*',
                                  msg='labels should be on bottom because a '
                                      'point layer is present')
         # create a layer with points and polys, but with more polys
@@ -566,7 +567,7 @@ class TestCartoContext(unittest.TestCase):
                    points=self.test_point_table))
         multi_geom = cc.map(layers=multi_geom_layer)
         self.assertRegexpMatches(multi_geom.__html__(),
-                                 '.*baseid1_labels1.*',
+                                 '.*baseid2_labels1.*',
                                  msg='layer has more polys than points, so it '
                                      'should default to polys labels (on top)')
 
