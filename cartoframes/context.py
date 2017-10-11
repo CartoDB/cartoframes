@@ -18,7 +18,7 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
-from .utils import dict_items, normalize_colnames, norm_colname
+from .utils import dict_items, normalize_colnames, norm_colname, join_url
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 
@@ -217,7 +217,7 @@ class CartoContext(object):
                     'minutes.\n'
                     '\033[1mNote:\033[0m `CartoContext.map` will not work on '
                     'this table until its geometries are created.'.format(
-                               table_url='/'.join((self.creds.base_url(),
+                               table_url=join_url((self.creds.base_url(),
                                                    'dataset',
                                                    final_table_name, )),
                                job_id=status.get('job_id'),
@@ -227,7 +227,7 @@ class CartoContext(object):
             self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-                       table_url='/'.join((self.creds.base_url(),
+                       table_url=join_url((self.creds.base_url(),
                                            'dataset',
                                            final_table_name, ))))
 
@@ -734,7 +734,7 @@ class CartoContext(object):
             options.update(self._get_bounds(nb_layers))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = '/'.join((self.creds.base_url(), 'api/v1/map', ))
+        api_url = join_url((self.creds.base_url(), 'api/v1/map', ))
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(

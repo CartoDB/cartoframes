@@ -6,7 +6,7 @@ for example usage.
 import pandas as pd
 import webcolors
 
-from cartoframes.utils import cssify
+from cartoframes.utils import cssify, join_url
 from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
@@ -73,8 +73,7 @@ class BaseMap(AbstractLayer):
                     label_type = '_labels_under'
                 style = source + (label_type if labels == 'back'
                                   else '_nolabels')
-            self.url = '/'.join(s.strip('/') for s in
-                                (stem,
+            self.url = join_url((stem,
                                  '{style}/{{z}}/{{x}}/{{y}}.png'.format(
                                      style=style)
                                  ))
@@ -86,7 +85,7 @@ class BaseMap(AbstractLayer):
             # self.url = source
         else:
             raise ValueError("`source` must be one of 'dark', 'light', or "
-                             "voyager")
+                             "'voyager'")
 
     def is_basic(self):
         """Does BaseMap pull from CARTO default basemaps?

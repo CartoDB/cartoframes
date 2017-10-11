@@ -73,3 +73,8 @@ def norm_colname(colname):
     if final_name[0].isdigit():
         return '_' + final_name
     return final_name
+
+
+def join_url(parts):
+    """join parts of URL into complete url"""
+    return '/'.join(s.strip('/') for s in parts)
