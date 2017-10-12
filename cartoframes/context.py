@@ -758,7 +758,6 @@ class CartoContext(object):
             bounds = self._get_bounds(nb_layers)
             options.update(bounds)
             bbox = '{west},{south},{east},{north}'.format(**bounds)
-            print(bbox)
             params.update(dict(bbox=bbox))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
