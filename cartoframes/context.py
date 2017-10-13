@@ -666,16 +666,16 @@ class CartoContext(object):
             layers = list(layers)
 
         if len(layers) > 8:
-            raise ValueError('map can have at most 8 layers')
+            raise ValueError('Map can have at most 8 layers')
 
         nullity = [zoom is None, lat is None, lng is None]
         if any(nullity) and not all(nullity):
-            raise ValueError('zoom, lat, and lng must all or none be provided')
+            raise ValueError('Zoom, lat, and lng must all or none be provided')
 
         # When no layers are passed, set default zoom
         if ((len(layers) == 0 and zoom is None) or
                 (len(layers) == 1 and layers[0].is_basemap)):
-            [zoom, lat, lng] = [3, 38, -99]
+            [zoom, lat, lng] = [1, 0, 0]
         has_zoom = zoom is not None
 
         # Check for a time layer, if it exists move it to the front
@@ -686,10 +686,9 @@ class CartoContext(object):
             raise ValueError('Map can at most take 1 Layer with time '
                              'column/field')
         if time_layer:
-            raise NotImplementedError('Animated maps are not yet supported')
             if not interactive:
-                raise ValueError('map cannot display a static image with a '
-                                 'time_column')
+                raise ValueError('Map cannot display a static image with a '
+                                 'time column')
             layers.append(layers.pop(time_layers[0]))
 
         base_layers = [idx for idx, layer in enumerate(layers)
@@ -700,6 +699,14 @@ class CartoContext(object):
             raise ValueError('Map can at most take one BaseMap layer')
         elif len(base_layers) == 1:
             layers.insert(0, layers.pop(base_layers[0]))
+            if layers[0].is_basic() and layers[0].labels == 'front':
+                if time_layers:
+                    warn('Basemap labels on top are not currently supported '
+                         'for animated maps')
+                else:
+                    layers.append(BaseMap(layers[0].source,
+                                          labels=layers[0].labels,
+                                          only_labels=True))
         elif not base_layers:
             # default basemap is dark with labels in back
             # labels will be changed if all geoms are non-point
@@ -715,12 +722,13 @@ class CartoContext(object):
                     FROM ({query}) AS _wrap
                     LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
+                           comma=',' if layer.style_cols else '',
                            query=layer.query))
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
+                layer.geom_type = self._geom_type(layer)
                 if not base_layers:
-                    layer.geom_type = self._geom_type(layer)
                     geoms.add(layer.geom_type)
                 # update local style schema to help build proper defaults
             layer._setup(layers, idx)
@@ -738,6 +746,10 @@ class CartoContext(object):
                                   only_labels=True))
 
         nb_layers = non_basemap_layers(layers)
+        if time_layer and len(nb_layers) > 1:
+            raise ValueError('Maps with a time element can only consist of a '
+                             'time layer and a basemap. This constraint will '
+                             'be removed in the future.')
         options = {'basemap_url': basemap.url}
 
         for idx, layer in enumerate(nb_layers):
@@ -810,12 +822,24 @@ class CartoContext(object):
             }
 
             if time_layer:
+                # get turbo-carto processed cartocss
+                params.update(dict(callback='cartoframes'))
+                resp = requests.get(
+                        os.path.join(self.creds.base_url(),
+                                     'api/v1/map/named', map_name, 'jsonp'),
+                        params=params,
+                        headers={'Content-Type': 'application/json'})
+
+                # replace previous cartocss with turbo-carto processed version
+                layer.cartocss = json.loads(
+                        resp.text.split('&& cartoframes(')[1]
+                            .strip(');'))['metadata']['layers'][1]['meta']['cartocss']
                 config.update({
                     'order': 1,
                     'options': {
                         'query': time_layer.query,
                         'user_name': self.creds.username(),
-                        'tile_style': time_layer.torque_cartocss,
+                        'tile_style': layer.cartocss
                     }
                 })
                 config['named_map'].update({
@@ -1025,9 +1049,17 @@ class CartoContext(object):
     def _send_map_template(self, layers, has_zoom):
         map_name = get_map_name(layers, has_zoom=has_zoom)
         if map_name not in self._map_templates:
-            self._auth_send('api/v1/map/named', 'POST',
-                            headers={'Content-Type': 'application/json'},
-                            data=get_map_template(layers, has_zoom=has_zoom))
+            resp = self._auth_send(
+                    'api/v1/map/named', 'POST',
+                    headers={'Content-Type': 'application/json'},
+                    data=get_map_template(layers, has_zoom=has_zoom))
+            # TODO: remove this after testing
+            if 'errors' in resp:
+                resp = self._auth_send(
+                        'api/v1/map/named/{}'.format(map_name),
+                        'PUT',
+                        headers={'Content-Type': 'application/json'},
+                        data=get_map_template(layers, has_zoom=has_zoom))
 
             self._map_templates[map_name] = True
         return map_name

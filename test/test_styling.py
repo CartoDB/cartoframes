@@ -100,17 +100,17 @@ class TestColorScheme(unittest.TestCase):
         """styling.get_scheme_cartocss"""
         # test on category
         self.assertEqual(get_scheme_cartocss('acadia', self.vivid),
-                         'ramp([acadia], cartocolor(Vivid), category(4))')
+                         'ramp([acadia], cartocolor(Vivid), category(4), <=)')
         # test on quantative
         self.assertEqual(get_scheme_cartocss('acadia', self.purp),
-                         'ramp([acadia], cartocolor(Purp), quantiles(4))')
+                         'ramp([acadia], cartocolor(Purp), quantiles(4), <=)')
         # test on custom
         self.assertEqual(
                 get_scheme_cartocss('acadia',
                                     styling.custom(('#FFF', '#888', '#000'),
                                                    bins=3,
                                                    bin_method='equal')),
-                'ramp([acadia], (#FFF,#888,#000), equal(3))')
+                'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
 
     def test_scheme(self):
         """styling._scheme"""

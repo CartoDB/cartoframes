@@ -14,6 +14,7 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
+import IPython
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -59,6 +60,7 @@ class TestCartoContext(unittest.TestCase):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
+        # torque table
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
@@ -434,7 +436,6 @@ class TestCartoContext(unittest.TestCase):
             import matplotlib.pyplot as plt
         except ImportError:
             plt = None
-        import IPython
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
@@ -520,8 +521,39 @@ class TestCartoContext(unittest.TestCase):
             cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
                            Layer(self.test_read_table, time='cartodb_id')])
 
-        # time layers are not implemented yet
-        with self.assertRaises(NotImplementedError):
+    @unittest.skipIf(WILL_SKIP, 'no cartocredentials, skipping')
+    def test_cartocontext_map_time(self):
+        """CartoContext.map time options"""
+        from cartoframes import Layer
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        html_map = cc.map(layers=Layer(self.test_point_table,
+                                       time='cartodb_id'))
+        self.assertIsInstance(html_map, IPython.core.display.HTML)
+
+        # category map
+        cat_map = cc.map(layers=Layer(self.test_point_table,
+                                      time='actor_postedtime',
+                                      color='twitter_lang'))
+        self.assertRegexpMatches(
+                cat_map.__html__(),
+                '.*CDB_Math_Mode\(cf_value_twitter_lang\).*')
+
+        with self.assertRaises(
+                ValueError,
+                msg='cannot create static torque maps currently'):
+            cc.map(layers=Layer(self.test_point_table, time='cartodb_id'),
+                   interactive=False)
+
+        with self.assertRaises(
+                ValueError,
+                msg='cannot have more than one torque layer'):
+            cc.map(layers=[Layer(self.test_point_table, time='cartodb_id'),
+                           Layer(self.test_point_table, color='cartodb_id')])
+
+        with self.assertRaises(
+                ValueError,
+                msg='cannot do a torque map off a polygon dataset'):
             cc.map(layers=Layer(self.test_read_table, time='cartodb_id'))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')

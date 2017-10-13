@@ -154,6 +154,58 @@ class TestQueryLayer(unittest.TestCase):
                                msg='color dict must have a `column` key'):
             QueryLayer(self.query, color={'scheme': styling.vivid(10)})
 
+    def test_querylayer_time_category(self):
+        """layer.QueryLayer time with categories"""
+        ql = QueryLayer(self.query,
+                        time='timecol',
+                        color='colorcol')
+        # category type
+        ql.style_cols['colorcol'] = 'string'
+        ql.style_cols['timecol'] = 'date'
+
+        # if non-point geoms are present (or None), raise an error
+        with self.assertRaises(
+                ValueError,
+                msg='cannot make torque map with non-point geometries'):
+            ql._setup([BaseMap(), ql], 1)
+
+        ql.geom_type = 'point'
+        # normal behavior for point geometries
+        ql._setup([BaseMap(), ql], 1)
+        self.assertDictEqual(ql.scheme,
+                             dict(name='Antique', bin_method='',
+                                  bins=','.join(str(i) for i in range(1, 11))))
+        # expect category maps query
+        self.assertRegexpMatches(ql.query,
+                                 '^SELECT orig\.\*, '
+                                 '__wrap.cf_value_colorcol.* '
+                                 'GROUP BY.*orig\.colorcol$')
+        # cartocss should have cdb math mode
+        self.assertRegexpMatches(ql.cartocss,
+                                 '.*CDB_Math_Mode\(cf_value_colorcol\).*')
+
+    def test_querylayer_time_numeric(self):
+        """layer.QueryLayer time with quantitative classification"""
+        ql = QueryLayer(self.query,
+                        time='timecol',
+                        color='colorcol')
+        # category type
+        ql.style_cols['colorcol'] = 'number'
+        ql.style_cols['timecol'] = 'date'
+        ql.geom_type = 'point'
+
+        # normal behavior for point geometries
+        ql._setup([BaseMap(), ql], 1)
+        self.assertDictEqual(ql.scheme,
+                             styling.mint(5))
+        # expect category maps query
+        self.assertRegexpMatches(ql.query.strip(),
+                                 '^SELECT \*, colorcol as value '
+                                 '.*_wrap$')
+        # cartocss should have cdb math mode
+        self.assertRegexpMatches(ql.cartocss,
+                                 '.*avg\(colorcol\).*')
+
     def test_querylayer_time_errors(self):
         """layer.QueryLayer time option exceptions"""
 
@@ -172,13 +224,26 @@ class TestQueryLayer(unittest.TestCase):
                                msg='`time` key has to be a str or dict'):
             QueryLayer(self.query, time=7)
 
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'string'
+            ql.geom_type = 'point'
+            ql._setup([BaseMap(), ql], 1)
+
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'date'
+            ql.geom_type = 'polygon'
+            ql._setup([BaseMap(), ql], 1)
+
     def test_querylayer_time_default(self):
         """layer.QueryLayer time defaults"""
         time_ans = {'column': 'time_col',
                     'method': 'count',
                     'cumulative': False,
                     'frames': 256,
-                    'duration': 30}
+                    'duration': 30,
+                    'trails': 2}
         # pass a valid column name
         qlayer = QueryLayer(self.query, time='time_col')
         self.assertEqual(qlayer.time, time_ans)
@@ -191,7 +256,8 @@ class TestQueryLayer(unittest.TestCase):
                     'method': 'avg',
                     'frames': 256,
                     'duration': 10,
-                    'cumulative': False}
+                    'cumulative': False,
+                    'trails': 2}
 
         self.assertEqual(qlayer.time, time_ans)
 

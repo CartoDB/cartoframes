@@ -167,14 +167,14 @@ class QueryLayer(AbstractLayer):
               functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate
-              (``cumulative``)
-              the point data overtime, or show the event at the specified time
-              only (``linear``). Defaults to ``linear``.
+            - cumulative (bool, optional): Whether to accumulate points over
+              time (True) or not (False, default)
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
               Defaults to 30.
+            - trails (int, optional): Number of trails after the incidence of
+              a point. Defaults to 2.
 
             If `time` is a ``str``, then it must be a column name available in
             the query that is of type numeric or datetime.
@@ -216,6 +216,7 @@ class QueryLayer(AbstractLayer):
                  tooltip=None, legend=None):
 
         self.query = query
+        # style_cols and geom_type are updated right before layer is `_setup`
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
@@ -242,14 +243,15 @@ class QueryLayer(AbstractLayer):
             self.style_cols[color] = None
             scheme = None
         else:
-            # assume it's a color
+            # assume it's a color (hex, rgb(...),  or webcolor name)
             color = color
             scheme = None
 
         if time:
             if isinstance(time, dict):
                 if 'column' not in time:
-                    raise ValueError("time must include a 'column' value")
+                    raise ValueError("`time` must include a 'column' "
+                                     "key/value")
                 time_column = time['column']
                 time_options = time
             elif isinstance(time, str):
@@ -266,15 +268,20 @@ class QueryLayer(AbstractLayer):
                 'cumulative': False,
                 'frames': 256,
                 'duration': 30,
+                'trails': 2,
             }
             time.update(time_options)
 
-        size = size or 10
+        # assign size defaults if size is not specified
+        if time:
+            size = size or 4
+        else:
+            size = size or 10
         if isinstance(size, str):
             size = {'column': size}
         if isinstance(size, dict):
             if 'column' not in size:
-                raise ValueError("Size must include a 'column' key/value")
+                raise ValueError("`size` must include a 'column' key/value")
             if time:
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
@@ -300,14 +307,22 @@ class QueryLayer(AbstractLayer):
     def _validate_columns(self):
         """Validate the options in the styles"""
         geom_cols = {'the_geom', 'the_geom_webmercator', }
-        if set(self.style_cols) & geom_cols:
+        col_overlap = set(self.style_cols) & geom_cols
+        if col_overlap:
             raise ValueError('Style columns cannot be geometry '
                              'columns. `{col}` was chosen.'.format(
-                                 col=','.join(set(self.style_cols.keys())
-                                              & geom_cols)))
+                                 col=','.join(col_overlap)))
 
     def _setup(self, layers, layer_idx):
         basemap = layers[0]
+
+        # if color not specified, choose a default
+        # choose color time default
+        if self.time:
+            # default torque color
+            self.color = self.color or '#2752ff'
+        else:
+            self.color = self.color or DEFAULT_COLORS[layer_idx]
         # choose appropriate scheme if not already specified
         if (self.scheme is None) and (self.color in self.style_cols):
             if self.style_cols[self.color] in ('string', 'boolean', ):
@@ -316,22 +331,66 @@ class QueryLayer(AbstractLayer):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
                 raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, string, or '
+                                 '`{type}`. It must be numeric, text, or '
                                  'boolean.'.format(
                                      col=self.color,
                                      type=self.style_cols[self.color]))
 
-        # if color not specified, choose a default
-        self.color = self.color or DEFAULT_COLORS[layer_idx]
-        self.cartocss = self._get_cartocss(basemap)
-
         if self.time:
+            # validate time column information
+            if self.geom_type != 'point':
+                raise ValueError('Cannot do time-based maps with data in '
+                                 '`{query}` since this table does not contain '
+                                 'point geometries'.format(query=self.query))
+            elif self.style_cols[self.time['column']] not in (
+                    'number', 'date', ):
+                raise ValueError('Cannot create an animated map from column '
+                                 '`{col}` because it is of type {t1}. It must '
+                                 'be of type number or date.'.format(
+                                     col=self.time['column'],
+                                     t1=self.style_cols[self.time['column']]))
+
+            # don't use turbo-carto for animated maps
             column = self.time['column']
             frames = self.time['frames']
             method = self.time['method']
             duration = self.time['duration']
-            agg_func = "'{method}({time_column})'".format(method=method,
-                                                          time_column=column)
+            if (self.color in self.style_cols and
+                    self.style_cols[self.color] in ('string', 'boolean', )):
+                self.query = ' '.join([s.strip() for s in [
+                    'SELECT',
+                    '    orig.*, __wrap.cf_value_{col}',
+                    'FROM ({query}) AS orig, (',
+                    '    SELECT',
+                    '      row_number() OVER (',
+                    '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
+                    '      {col}',
+                    '    FROM (',
+                    '        SELECT {col}, count({col}) AS val_{col}_cnt',
+                    '        FROM ({query}) as orig',
+                    '        GROUP BY {col}',
+                    '        ORDER BY 2 DESC',
+                    '    ) AS _wrap',
+                    ') AS __wrap',
+                    'WHERE __wrap.{col} = orig.{col}',
+                ]]).format(col=self.color, query=self.query)
+                agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
+                self.scheme = {
+                        'bins': ','.join(str(i) for i in range(1, 11)),
+                        'name': (self.scheme.get('name') if self.scheme
+                                 else 'Bold'),
+                        'bin_method': '',
+                        }
+            elif (self.color in self.style_cols and
+                  self.style_cols[self.color] in ('number', )):
+                self.query = ' '.join([
+                    'SELECT *, {col} as value',
+                    'FROM ({query}) as _wrap'
+                ]).format(col=self.color, query=self.query)
+                agg_func = '\'avg({})\''.format(self.color)
+            else:
+                agg_func = "'{method}(cartodb_id)'".format(
+                        method=method)
             self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
@@ -344,12 +403,16 @@ class QueryLayer(AbstractLayer):
                                                  else 'linear'),
                 },
             })
-            self.cartocss += self.torque_cartocss
+            self.cartocss = (self.torque_cartocss
+                             + self._get_cartocss(basemap, has_time=True))
+        else:
+            # use turbo-carto for non-animated maps
+            self.cartocss = self._get_cartocss(basemap)
 
-    def _get_cartocss(self, basemap):
+    def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
         if isinstance(self.size, int):
-            size_style = self.size
+            size_style = self.size or 4
         elif isinstance(self.size, dict):
             size_style = ('ramp([{column}],'
                           ' range({min_range},{max_range}),'
@@ -361,38 +424,65 @@ class QueryLayer(AbstractLayer):
                               bins=self.size['bins'])
 
         if self.scheme:
-            color_style = get_scheme_cartocss(self.color, self.scheme)
+            color_style = get_scheme_cartocss(
+                    'value' if has_time else self.color,
+                    self.scheme)
         else:
             color_style = self.color
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
-        return cssify({
-            # Point CSS
-            "#layer['mapnik::geometry_type'=1]": {
-                'marker-width': size_style,
-                'marker-fill': color_style,
-                'marker-fill-opacity': '1',
-                'marker-allow-overlap': 'true',
-                'marker-line-width': '0.5',
-                'marker-line-color': line_color,
-                'marker-line-opacity': '1',
-            },
-            # Line CSS
-            "#layer['mapnik::geometry_type'=2]": {
-                'line-width': '1.5',
-                'line-color': color_style,
-            },
-            # Polygon CSS
-            "#layer['mapnik::geometry_type'=3]": {
-                'polygon-fill': color_style,
-                'polygon-opacity': '0.9',
-                'polygon-gamma': '0.5',
-                'line-color': '#FFF',
-                'line-width': '0.5',
-                'line-opacity': '0.25',
-                'line-comp-op': 'hard-light',
-            }
-        })
+        if self.time:
+            css = cssify({
+                # Torque Point CSS
+                "#layer": {
+                    'marker-width': size_style,
+                    'marker-fill': color_style,
+                    'marker-fill-opacity': 0.9,
+                    'marker-allow-overlap': 'true',
+                    'marker-line-width': 0,
+                    'marker-line-color': line_color,
+                    'marker-line-opacity': 1,
+                    'comp-op': 'source-over',
+                }
+            })
+            for t in range(1, self.time['trails'] + 1):
+                # Trails decay as 1/2^n, and grow 30% at each step
+                trail_temp = cssify({
+                        '#layer[frame-offset={}]'.format(t): {
+                            'marker-width': size_style * (1.0 + t * 0.3),
+                            'marker-opacity': 0.9 / 2.0**t,
+                        }
+                    })
+                css += trail_temp
+            return css
+        else:
+            return cssify({
+                # Point CSS
+                "#layer['mapnik::geometry_type'=1]": {
+                    'marker-width': size_style,
+                    'marker-fill': color_style,
+                    'marker-fill-opacity': '1',
+                    'marker-allow-overlap': 'true',
+                    'marker-line-width': '0.5',
+                    'marker-line-color': line_color,
+                    'marker-line-opacity': '1',
+                },
+                # Line CSS
+                "#layer['mapnik::geometry_type'=2]": {
+                    'line-width': '1.5',
+                    'line-color': color_style,
+                },
+                # Polygon CSS
+                "#layer['mapnik::geometry_type'=3]": {
+                    'polygon-fill': color_style,
+                    'polygon-opacity': '0.9',
+                    'polygon-gamma': '0.5',
+                    'line-color': '#FFF',
+                    'line-width': '0.5',
+                    'line-opacity': '0.25',
+                    'line-comp-op': 'hard-light',
+                }
+            })
 
 
 class Layer(QueryLayer):
@@ -431,9 +521,8 @@ class Layer(QueryLayer):
               functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (str, optional): Whether to accumulate
-              (``cumulative``) the point data overtime, or show the event at
-              the specified time only (``linear``). Defaults to ``linear``.
+            - cumulative (bool, optional): Whether to accumulate points over
+              time (True) or not (False, default)
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
@@ -489,9 +578,10 @@ class Layer(QueryLayer):
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
             # TODO: error on this as NotImplementedError
-            context.write(self.source,
-                          self.table_name,
-                          overwrite=self.overwrite)
+            raise NotImplementedError('Not currently implemented')
+            # context.write(self.source,
+            #               self.table_name,
+            #               overwrite=self.overwrite)
         super(Layer, self)._setup(layers, layer_idx)
 
 # cdb_context.map([BaseMap('light'),
