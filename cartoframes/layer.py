@@ -184,10 +184,10 @@ class QueryLayer(AbstractLayer):
             values described:
 
             - column (str): Column to base coloring from.
-            - scheme (str, optinal): Color scheme from
-              `CartoColors
+            - scheme (dict, optional): Dictionary definition of color scheme from
+              styling module of cartoframes that exposes `CartoColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
-              Defaults to `Mint`.
+              Defaults to mint scheme.
             - bin_method (str, optional): Quantification method for dividing
               data range into bins. Must be one of: ``quantiles``, ``equal``,
               ``headtails``, or ``jenks``. Defaults to ``quantiles``.
