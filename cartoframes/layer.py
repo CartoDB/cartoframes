@@ -42,7 +42,7 @@ class BaseMap(AbstractLayer):
 
     Args:
         source (str, optional): One of ``light`` or ``dark``. Defaults to
-            ``dark``. Basemaps come from
+            ``voyager``. Basemaps come from
             https://carto.com/location-data-services/basemaps/
         labels (str, optional): One of ``back``, ``front``, or None. Labels on
             the front will be above the data layers. Labels on back will be
@@ -157,10 +157,10 @@ class QueryLayer(AbstractLayer):
             <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__
             for more information.
         time (dict or str, optional): Style to apply to layer.
-            If `time` is a `dict`, the following keys are options:
+            If `time` is a :obj:`dict`, the following keys are options:
 
             - column (str, required): Column for animating map from. Data must
-              be of type time or float.
+              be of type `datetime` or `float`.
             - method (str, optional): Type of aggregation method for operating
               on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
               be one of ``avg``, ``sum``, or another `PostgreSQL aggregate
@@ -168,7 +168,7 @@ class QueryLayer(AbstractLayer):
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
             - cumulative (bool, optional): Whether to accumulate points over
-              time (True) or not (False, default)
+              time (``True``) or not (``False``, default)
             - frames (int, optional): Number of frames in the animation.
               Defaults to 256.
             - duration (int, optional): Number of seconds in the animation.
@@ -176,11 +176,11 @@ class QueryLayer(AbstractLayer):
             - trails (int, optional): Number of trails after the incidence of
               a point. Defaults to 2.
 
-            If `time` is a ``str``, then it must be a column name available in
+            If `time` is a :obj:`str`, then it must be a column name available in
             the query that is of type numeric or datetime.
 
         color (dict or str, optional): Color style to apply to map.
-            If `color` is a ``dict``, the following keys are options, with
+            If `color` is a :obj:`dict`, the following keys are options, with
             values described:
 
             - column (str): Column to base coloring from.
@@ -195,7 +195,7 @@ class QueryLayer(AbstractLayer):
               the `bin_method`. Defaults to 5.
 
         size (dict or int, optional): Size style to apply to point data.
-            If `size` is a ``dict``, the follow keys are options, with values
+            If `size` is a :obj:`dict`, the follow keys are options, with values
             described as:
 
             - column (str): Column to base sizing of points on
@@ -501,65 +501,7 @@ class Layer(QueryLayer):
                                  color={'column': 'mr_fox_sightings',
                                         'scheme': styling.prism(10)})])
 
-    Args:
-        table_name (str): Table in user CARTO account that is fed into a
-            pandas DataFrame.
-        source (pandas.DataFrame, optional): If specified, writes DataFrame
-            to the tablename specified (if it does not exist), then creates
-            a map layer.
-        overwrite (bool, optional): If ``table_name`` exists in user's CARTO
-            account, setting this to `True` will overwrite it. Defaults to
-            `False` (do not overwrite).
-        time (dict or str, optional): Style to apply to layer.
-            If `time` is a `dict`, the following keys are options:
-
-            - column (str, required): Column for animating map from. Data must
-              be of type time or float.
-            - method (str, optional): Type of aggregation method for operating
-              on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
-              be one of ``avg``, ``sum``, or another `PostgreSQL aggregate
-              functions
-              <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
-              with a numeric output. Defaults to ``count``.
-            - cumulative (bool, optional): Whether to accumulate points over
-              time (True) or not (False, default)
-            - frames (int, optional): Number of frames in the animation.
-              Defaults to 256.
-            - duration (int, optional): Number of seconds in the animation.
-              Defaults to 30.
-
-            If `time` is a ``str``, then it must be a column name available in
-            the query that is of type numeric or datetime.
-        color (dict or str, optional): Color style to apply to map.
-            If `color` is a ``dict``, the following keys are options, with
-            values described:
-
-            - column (str): Column to base coloring from.
-            - scheme (str, optinal): Color scheme from
-              `CartoColors
-              <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
-              Defaults to `Mint`.
-            - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
-            - bins (int, optional): Number of bins to divide data amongst in
-              the `bin_method`. Defaults to 5.
-        size (dict or int, optional): Size style to apply to point data.
-            If `size` is a ``dict``, the follow keys are options, with values
-            described as:
-
-            - column (str): Column to base sizing of points on
-            - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
-            - bins (int, optional): Number of bins to break data into. Defaults
-              to 5.
-            - max (int, optional): Maximum point width (in pixels). Defaults to
-              25.
-            - min (int, optional): Minimum point width (in pixels). Defaults to
-              5.
-        tooltip (tuple of str, optional): **Not implemented.**
-        legend: **Not implemented.**
+    **Parameters:** See :obj:`QueryLayer` for a full list of arguments.
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
                  color=None, size=None, tooltip=None, legend=None):
