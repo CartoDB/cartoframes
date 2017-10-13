@@ -56,7 +56,7 @@ for example usage.</p>
 
 <dl class="class">
 <dt id="cartoframes.layer.BaseMap">
-<em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source='dark'</em>, <em>labels='back'</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.BaseMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source='voyager'</em>, <em>labels='back'</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.BaseMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cartoframes.layer.AbstractLayer" title="cartoframes.layer.AbstractLayer"><code class="xref py py-class docutils literal"><span class="pre">cartoframes.layer.AbstractLayer</span></code></a></p>
 <p>Layer object for adding basemaps to a cartoframes map.</p>
 <p class="rubric">Example</p>
@@ -74,7 +74,7 @@ for example usage.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to
-<code class="docutils literal"><span class="pre">dark</span></code>. Basemaps come from
+<code class="docutils literal"><span class="pre">voyager</span></code>. Basemaps come from
 <a class="reference external" href="https://carto.com/location-data-services/basemaps/">https://carto.com/location-data-services/basemaps/</a></li>
 <li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on
 the front will be above the data layers. Labels on back will be
@@ -99,8 +99,8 @@ labels to <code class="docutils literal"><span class="pre">None</span></code> wi
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if using a CARTO basemap (Dark Matter or Positron),
-<cite>False</cite> otherwise.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if using a CARTO basemap (Dark Matter, Positron or
+Voyager), <cite>False</cite> otherwise.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
@@ -127,78 +127,7 @@ with <a class="reference external" href="#context.CartoContext.map">CartoContext
                             <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">prism</span><span class="p">(</span><span class="mi">10</span><span class="p">)})])</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>table_name</strong> (<em>str</em>) – Table in user CARTO account that is fed into a
-pandas DataFrame.</li>
-<li><strong>source</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – If specified, writes DataFrame
-to the tablename specified (if it does not exist), then creates
-a map layer.</li>
-<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal"><span class="pre">table_name</span></code> exists in user’s CARTO
-account, setting this to <cite>True</cite> will overwrite it. Defaults to
-<cite>False</cite> (do not overwrite).</li>
-<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Style to apply to layer.
-If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
-<ul>
-<li>column (str, required): Column for animating map from. Data must
-be of type time or float.</li>
-<li>method (str, optional): Type of aggregation method for operating
-on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
-be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
-functions</a>
-with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate
-(<code class="docutils literal"><span class="pre">cumulative</span></code>) the point data overtime, or show the event at
-the specified time only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
-<li>frames (int, optional): Number of frames in the animation.
-Defaults to 256.</li>
-<li>duration (int, optional): Number of seconds in the animation.
-Defaults to 30.</li>
-</ul>
-<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
-the query that is of type numeric or datetime.</p>
-</li>
-<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map.
-If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
-values described:</p>
-<ul>
-<li>column (str): Column to base coloring from.</li>
-<li>scheme (str, optinal): Color scheme from
-<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
-Defaults to <cite>Mint</cite>.</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to divide data amongst in
-the <cite>bin_method</cite>. Defaults to 5.</li>
-</ul>
-</li>
-<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.
-If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
-described as:</p>
-<ul>
-<li>column (str): Column to base sizing of points on</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to break data into. Defaults
-to 5.</li>
-<li>max (int, optional): Maximum point width (in pixels). Defaults to
-25.</li>
-<li>min (int, optional): Minimum point width (in pixels). Defaults to
-5.</li>
-</ul>
-</li>
-<li><strong>tooltip</strong> (<em>tuple of str</em><em>, </em><em>optional</em>) – <strong>Not implemented.</strong></li>
-<li><strong>legend</strong> – <strong>Not implemented.</strong></li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Parameters:</strong> See <a class="reference internal" href="#cartoframes.layer.QueryLayer" title="cartoframes.layer.QueryLayer"><code class="xref py py-obj docutils literal"><span class="pre">QueryLayer</span></code></a> for a full list of arguments.</p>
 </dd></dl>
 
 <dl class="class">
@@ -263,29 +192,29 @@ all queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</ci
 <a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>
 for more information.</li>
 <li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Style to apply to layer.
-If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
+If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options:</p>
 <ul>
 <li>column (str, required): Column for animating map from. Data must
-be of type time or float.</li>
+be of type <cite>datetime</cite> or <cite>float</cite>.</li>
 <li>method (str, optional): Type of aggregation method for operating
 on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
 be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
 functions</a>
 with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate
-(<code class="docutils literal"><span class="pre">cumulative</span></code>)
-the point data overtime, or show the event at the specified time
-only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
+<li>cumulative (bool, optional): Whether to accumulate points over
+time (<code class="docutils literal"><span class="pre">True</span></code>) or not (<code class="docutils literal"><span class="pre">False</span></code>, default)</li>
 <li>frames (int, optional): Number of frames in the animation.
 Defaults to 256.</li>
 <li>duration (int, optional): Number of seconds in the animation.
 Defaults to 30.</li>
+<li>trails (int, optional): Number of trails after the incidence of
+a point. Defaults to 2.</li>
 </ul>
-<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
+<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
 the query that is of type numeric or datetime.</p>
 </li>
 <li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map.
-If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
+If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
 values described:</p>
 <ul>
 <li>column (str): Column to base coloring from.</li>
@@ -300,7 +229,7 @@ the <cite>bin_method</cite>. Defaults to 5.</li>
 </ul>
 </li>
 <li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.
-If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
+If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
 described as:</p>
 <ul>
 <li>column (str): Column to base sizing of points on</li>

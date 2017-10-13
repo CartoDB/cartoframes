@@ -9,12 +9,12 @@
    :maxdepth: 2
    :caption: Contents:
 
-CARTOFrames Methods
-===================
+CARTOFrames Functionality
+=========================
 
-CartoContext Class
-------------------
-.. automodule:: context
+CartoContext
+------------
+.. autoclass:: context.CartoContext
     :members:
 
 Map Layer Classes
@@ -25,6 +25,11 @@ Map Layer Classes
 Map Styling Functions
 ---------------------
 .. automodule:: styling
+    :members:
+
+BatchJobStatus
+--------------
+.. autoclass:: context.BatchJobStatus
     :members:
 
 Credentials Management

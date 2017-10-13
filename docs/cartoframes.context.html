@@ -40,16 +40,92 @@
             
   <div class="section" id="module-cartoframes.context">
 <span id="cartoframes-context-module"></span><h1>cartoframes.context module<a class="headerlink" href="#module-cartoframes.context" title="Permalink to this headline">¶</a></h1>
-<p>CartoContext class for authentication with CARTO and high-level operations
-such as reading tables from CARTO into dataframes, writing dataframes to CARTO
-tables, and creating custom maps from dataframes and CARTO tables. Future
-methods interact with CARTO’s services like
-<a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>, and <a class="reference external" href="https://carto.com/location-data-services/">routing,
-geocoding, and isolines</a>.</p>
+<p>CartoContext and BatchJobStatus classes</p>
+<dl class="class">
+<dt id="cartoframes.context.BatchJobStatus">
+<em class="property">class </em><code class="descclassname">cartoframes.context.</code><code class="descname">BatchJobStatus</code><span class="sig-paren">(</span><em>carto_context</em>, <em>job</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.BatchJobStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Status of a write or query operation. Read more at <a class="reference external" href="https://carto.com/docs/carto-engine/sql-api/batch-queries/">Batch SQL API docs</a> about
+responses and how to interpret them.</p>
+<p class="rubric">Example</p>
+<p>Poll for a job’s status if you’ve caught the <a class="reference internal" href="#cartoframes.context.BatchJobStatus" title="cartoframes.context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a>
+instance.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;new_table&#39;</span><span class="p">,</span>
+               <span class="n">lnglat</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;lng_col&#39;</span><span class="p">,</span> <span class="s1">&#39;lat_col&#39;</span><span class="p">))</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">curr_status</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">()[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">curr_status</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">,</span> <span class="s1">&#39;failed&#39;</span><span class="p">,</span> <span class="s1">&#39;canceled&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">curr_status</span><span class="p">)</span>
+        <span class="k">break</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a <a class="reference internal" href="#cartoframes.context.BatchJobStatus" title="cartoframes.context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a> instance if you have a <cite>job_id</cite> output
+from a <cite>cc.write</cite> operation.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">CartoContext</span><span class="p">,</span> <span class="n">BatchJobStatus</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cc</span> <span class="o">=</span> <span class="n">CartoContext</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;new_table&#39;</span><span class="p">,</span> <span class="n">lnglat</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;lng&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span><span class="p">))</span>
+<span class="go">&#39;BatchJobStatus(job_id=&#39;job-id-string&#39;, ...)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">batch_job</span> <span class="o">=</span> <span class="n">BatchJobStatus</span><span class="p">(</span><span class="n">cc</span><span class="p">,</span> <span class="s1">&#39;job-id-string&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Attrs:</dt>
+<dd>job_id (str): Job ID of the Batch SQL API job
+last_status (str): Status of <code class="docutils literal"><span class="pre">job_id</span></code> job when last polled
+created_at (str): Time and date when job was created</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>carto_context</strong> (<em>carto.CartoContext</em>) – CartoContext instance</li>
+<li><strong>job</strong> (<em>dict</em><em> or </em><em>str</em>) – If a dict, job status dict returned after sending
+a Batch SQL API request. If str, a Batch SQL API job id.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="cartoframes.context.BatchJobStatus.get_status">
+<code class="descname">get_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.BatchJobStatus.get_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>return current status of job</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cartoframes.context.BatchJobStatus.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.BatchJobStatus.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the current status of job <code class="docutils literal"><span class="pre">job_id</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Status and time it was updated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Warns:</th><td class="field-body"><strong>UserWarning</strong> – If the job failed, a warning is raised with
+information about the failure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="cartoframes.context.CartoContext">
 <em class="property">class </em><code class="descclassname">cartoframes.context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>creds=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>CartoContext class for authentication with CARTO and high-level operations
+such as reading tables from CARTO into dataframes, writing dataframes to
+CARTO tables, and creating custom maps from dataframes and CARTO tables.
+Future methods interact with CARTO’s services like
+<a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>, and <a class="reference external" href="https://carto.com/location-data-services/">routing,
+geocoding, and isolines</a>.</p>
 <p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
 <p class="rubric">Example</p>
@@ -58,6 +134,10 @@ after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mas
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
 </pre></div>
 </div>
+<dl class="docutils">
+<dt>Attrs:</dt>
+<dd>creds (cartoframes.Credentials): <code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code> instance</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -70,7 +150,7 @@ installation users should ask their admin.</li>
 <li><strong>api_key</strong> (<em>str</em>) – CARTO API key.</li>
 <li><strong>session</strong> (<em>requests.Session</em><em>, </em><em>optional</em>) – requests session. See <a class="reference external" href="http://docs.python-requests.org/en/master/user/advanced/">requests
 documentation</a>
-for more information:</li>
+for more information.</li>
 <li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Output underlying process states (True), or
 suppress (False, default)</li>
 </ul>
@@ -183,7 +263,7 @@ has new columns for each measure in <cite>metadata</cite>.</p>
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.delete">
 <code class="descname">delete</code><span class="sig-paren">(</span><em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete table</p>
+<dd><p>Delete a table in user’s CARTO account.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -353,10 +433,19 @@ operations, if on the smaller side use Import API.</p>
 
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/tmp'</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/tmp'</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a DataFrame to a CARTO table.</p>
 <p class="rubric">Example</p>
+<p>Write a pandas DataFrame to CARTO.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Scrape an HTML table from Wikipedia and send to CARTO with content
+guessing to create a geometry from the country column. This uses
+a CARTO Import API param <cite>content_guessing</cite> parameter.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy&#39;</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span> <span class="n">content_guessing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -380,10 +469,22 @@ for more information.</li>
 as <cite>the_geom</cite>.</li>
 <li><strong>geom_col</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column where geometry
 information is stored. Used in conjunction with <cite>encode_geom</cite>.</li>
+<li><strong>kwargs</strong> – Keyword arguments from CARTO’s Import API. See the <a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables/#params">params
+listed in the documentation</a>
+for more information. For example, when using
+<cite>content_guessing=’true’</cite>, a column named ‘countries’ with
+country names will be used to generate polygons for each
+country. To avoid unintended consequences, avoid <cite>file</cite>, <cite>url</cite>,
+and other similar arguments.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If <cite>lnglat</cite> flag is set and the
+DataFrame has more than 100,000 rows, a <a class="reference internal" href="#cartoframes.context.BatchJobStatus" title="cartoframes.context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a>
+instance is returned. Otherwise, None.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cartoframes.context.BatchJobStatus" title="cartoframes.context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a> or None</p>
 </td>
 </tr>
 </tbody>
