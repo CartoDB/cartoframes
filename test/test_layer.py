@@ -161,6 +161,7 @@ class TestQueryLayer(unittest.TestCase):
                         color='colorcol')
         # category type
         ql.style_cols['colorcol'] = 'string'
+        ql.style_cols['timecol'] = 'date'
 
         # if non-point geoms are present (or None), raise an error
         with self.assertRaises(
@@ -190,6 +191,7 @@ class TestQueryLayer(unittest.TestCase):
                         color='colorcol')
         # category type
         ql.style_cols['colorcol'] = 'number'
+        ql.style_cols['timecol'] = 'date'
         ql.geom_type = 'point'
 
         # normal behavior for point geometries
@@ -221,6 +223,18 @@ class TestQueryLayer(unittest.TestCase):
         with self.assertRaises(ValueError,
                                msg='`time` key has to be a str or dict'):
             QueryLayer(self.query, time=7)
+
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'string'
+            ql.geom_type = 'point'
+            ql._setup([BaseMap(), ql], 1)
+
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'date'
+            ql.geom_type = 'polygon'
+            ql._setup([BaseMap(), ql], 1)
 
     def test_querylayer_time_default(self):
         """layer.QueryLayer time defaults"""

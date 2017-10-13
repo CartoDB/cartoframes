@@ -316,12 +316,8 @@ class QueryLayer(AbstractLayer):
     def _setup(self, layers, layer_idx):
         basemap = layers[0]
 
-        if self.time and self.geom_type != 'point':
-            raise ValueError('Cannot do time-based maps with data in '
-                             '`{query}` since this table does not contain '
-                             'point geometries'.format(query=self.query))
-
         # if color not specified, choose a default
+        # choose color time default
         if self.time:
             # default torque color
             self.color = self.color or '#2752ff'
@@ -341,6 +337,19 @@ class QueryLayer(AbstractLayer):
                                      type=self.style_cols[self.color]))
 
         if self.time:
+            # validate time column information
+            if self.geom_type != 'point':
+                raise ValueError('Cannot do time-based maps with data in '
+                                 '`{query}` since this table does not contain '
+                                 'point geometries'.format(query=self.query))
+            elif self.style_cols[self.time['column']] not in (
+                    'number', 'date', ):
+                raise ValueError('Cannot create an animated map from column '
+                                 '`{col}` because it is of type {t1}. It must '
+                                 'be of type number or date.'.format(
+                                     col=self.time['column'],
+                                     t1=self.style_cols[self.time['column']]))
+
             # don't use turbo-carto for animated maps
             column = self.time['column']
             frames = self.time['frames']
@@ -365,8 +374,7 @@ class QueryLayer(AbstractLayer):
                     ') AS __wrap',
                     'WHERE __wrap.{col} = orig.{col}',
                 ]]).format(col=self.color, query=self.query)
-                agg_func = '\'CDB_Math_Mode({})\''.format(
-                        'cf_value_{}'.format(self.color))
+                agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
                         'bins': ','.join(str(i) for i in range(1, 11)),
                         'name': (self.scheme.get('name') if self.scheme
