@@ -188,11 +188,6 @@ class QueryLayer(AbstractLayer):
               styling module of cartoframes that exposes `CartoColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
               Defaults to mint scheme.
-            - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
-            - bins (int, optional): Number of bins to divide data amongst in
-              the `bin_method`. Defaults to 5.
 
         size (dict or int, optional): Size style to apply to point data.
             If `size` is a :obj:`dict`, the follow keys are options, with values
