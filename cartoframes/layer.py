@@ -182,7 +182,6 @@ class QueryLayer(AbstractLayer):
         color (dict or str, optional): Color style to apply to map.
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
-
             - column (str): Column to base coloring from.
             - scheme (str, optinal): Color scheme from
               `CartoColors
@@ -286,15 +285,19 @@ class QueryLayer(AbstractLayer):
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
             old_size = size
+            # Default size range, bins, and bin_method
             size = {
                 'range': [5, 25],
-                'bins': 10,
+                'bins': 5,
                 'bin_method': BinMethod.quantiles,
             }
+            # Input default range and update if min/max given
+            old_size['range'] = size['range']
+            if 'min' in old_size.keys():
+                old_size['range'][0] = old_size['min']
+            if 'max' in old_size.keys():
+                old_size['range'][1] = old_size['max']
             size.update(old_size)
-            # Since we're accessing min/max, convert range into a list
-            size['range'] = list(size['range'])
-            self.style_cols[size['column']] = None
 
         self.color = color
         self.scheme = scheme
