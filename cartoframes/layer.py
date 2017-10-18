@@ -184,7 +184,8 @@ class QueryLayer(AbstractLayer):
             values described:
 
             - column (str): Column to base coloring from.
-            - scheme (dict, optional): Dictionary definition of color scheme from
+            - scheme (dict, optional): Dictionary definition of color scheme,
+              or a scheme such as `styling.sunset(7)` from the
               styling module of cartoframes that exposes `CartoColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
               Defaults to mint scheme.
