@@ -12,6 +12,7 @@ import requests
 import IPython
 import pandas as pd
 from tqdm import tqdm
+from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
@@ -44,6 +45,9 @@ MAX_IMPORT_ROWS = 499999
 
 # threshold for using batch sql api or not for geometry creation
 MAX_ROWS_LNGLAT = 100000
+
+# Cache directory for temporary data operations
+CACHE_DIR = user_cache_dir('cartoframes')
 
 
 class CartoContext(object):
@@ -137,8 +141,9 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-    def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
-              lnglat=None, encode_geom=False, geom_col=None, **kwargs):
+    def write(self, df, table_name, temp_dir=CACHE_DIR,
+              overwrite=False, lnglat=None, encode_geom=False, geom_col=None,
+              **kwargs):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -155,8 +160,15 @@ class CartoContext(object):
             .. code:: python
 
                 url = 'https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy'
+                # retrieve first HTML table from that page
                 df = pd.read_html(url, header=0)[0]
-                cc.write(df, 'life_expectancy', content_guessing=True)
+                # send to carto, let it guess polygons based on the 'country'
+                #   column. Also set privacy to 'public'
+                cc.write(df, 'life_expectancy',
+                         content_guessing=True,
+                         privacy='public')
+                cc.map(layers=Layer('life_expectancy',
+                                    color='both_sexes_life_expectancy'))
 
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
@@ -190,6 +202,9 @@ class CartoContext(object):
             DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
         """
+        if not os.path.exists(temp_dir):
+            self._debug_print(temp_dir='creating directory at ' + temp_dir)
+            os.makedirs(temp_dir)
         if encode_geom:
             _add_encoded_geom(df, geom_col)
 
@@ -499,8 +514,9 @@ class CartoContext(object):
                 try:
                     res = self.sql_client.send('''
                         DROP TABLE IF EXISTS {orig_table};
-                        ALTER TABLE {dupe_table}
-                        RENAME TO {orig_table};
+                        ALTER TABLE {dupe_table} RENAME TO {orig_table};
+                        SELECT CDB_TableMetadataTouch(
+                                   '{orig_table}'::regclass);
                         '''.format(
                             orig_table=table_name,
                             dupe_table=import_job['table_name']))
