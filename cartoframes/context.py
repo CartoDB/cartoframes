@@ -22,6 +22,7 @@ from .utils import (dict_items, normalize_colnames, norm_colname,
                     importify_params, join_url)
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
+from .table import Table
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -136,6 +137,10 @@ class CartoContext(object):
                 raise ValueError("`limit` parameter must an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
+
+    def table(self, table_name):
+        """Carto table object"""
+        return Table(table_name, self)
 
     def write(self, df, table_name, temp_dir='/tmp', overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
@@ -664,6 +669,10 @@ class CartoContext(object):
             layers = [layers]
         else:
             layers = list(layers)
+
+        for idx, layer in enumerate(layers):
+            if isinstance(layer, Table):
+                layers[idx] = layer.layer()
 
         if len(layers) > 8:
             raise ValueError('Map can have at most 8 layers')
