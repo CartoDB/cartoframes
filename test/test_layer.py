@@ -177,9 +177,11 @@ class TestQueryLayer(unittest.TestCase):
                                   bins=','.join(str(i) for i in range(1, 11))))
         # expect category maps query
         self.assertRegexpMatches(ql.query,
-                                 '^SELECT orig\.\*, '
-                                 '__wrap.cf_value_colorcol.* '
-                                 'GROUP BY.*orig\.colorcol$')
+                                 ('^SELECT orig\.\*, '
+                                  '__wrap.cf_value_colorcol.* '))
+        # has order by style
+        self.assertRegexpMatches(ql.query,
+                                 '.*_orderwrap.*')
         # cartocss should have cdb math mode
         self.assertRegexpMatches(ql.cartocss,
                                  '.*CDB_Math_Mode\(cf_value_colorcol\).*')
@@ -200,8 +202,9 @@ class TestQueryLayer(unittest.TestCase):
                              styling.mint(5))
         # expect category maps query
         self.assertRegexpMatches(ql.query.strip(),
-                                 '^SELECT \*, colorcol as value '
-                                 '.*_wrap$')
+                                 '^SELECT\s\*,\scolorcol\sas\svalue.*')
+        self.assertRegexpMatches(ql.query,
+                                 '.*_orderwrap.*')
         # cartocss should have cdb math mode
         self.assertRegexpMatches(ql.cartocss,
                                  '.*avg\(colorcol\).*')

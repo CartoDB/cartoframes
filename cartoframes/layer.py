@@ -295,7 +295,14 @@ class QueryLayer(AbstractLayer):
             # Since we're accessing min/max, convert range into a list
             size['range'] = list(size['range'])
             self.style_cols[size['column']] = None
-
+        if self.style_cols:
+            self.query = '''
+                SELECT * FROM ({query}) AS _orderwrap
+                ORDER BY {orders}
+                '''.format(
+                        query=self.query,
+                        orders=', '.join('{} ASC'.format(col)
+                                         for col in self.style_cols))
         self.color = color
         self.scheme = scheme
         self.size = size
