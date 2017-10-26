@@ -266,7 +266,7 @@ class CartoContext(object):
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
 
-            self.sql_client.send(query, **default_sql_args)
+            self.sql_client.send(query)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
                        table_url=join_url((self.creds.base_url(),
@@ -383,7 +383,7 @@ class CartoContext(object):
                                 if self.is_org else 'public'),
                            drop_tables=drop_tables)
             self._debug_print(query=query)
-            self.sql_client.send(query)
+            self.sql_client.send(query, **default_sql_args)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
@@ -479,7 +479,7 @@ class CartoContext(object):
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
-            self.sql_client.send(alter_query)
+            self.sql_client.send(alter_query, **default_sql_args)
         except CartoException as err:
             warn('DataFrame written to CARTO but the table schema failed to '
                  'update to match DataFrame. All columns in CARTO table have '
@@ -742,12 +742,13 @@ class CartoContext(object):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
-                    SELECT {cols}
-                    FROM ({query}) AS _wrap
-                    LIMIT 0
-                '''.format(cols=','.join(layer.style_cols),
-                           comma=',' if layer.style_cols else '',
-                           query=layer.query))
+                        SELECT {cols}
+                        FROM ({query}) AS _wrap
+                        LIMIT 0
+                    '''.format(cols=','.join(layer.style_cols),
+                               comma=',' if layer.style_cols else '',
+                               query=layer.query),
+                    **default_sql_args)
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
