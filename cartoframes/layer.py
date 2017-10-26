@@ -293,12 +293,13 @@ class QueryLayer(AbstractLayer):
             }
             # Assign default range and update if min/max given
             old_size['range'] = size['range']
-            if 'min' in old_size.keys():
+            if 'min' in old_size:
                 old_size['range'][0] = old_size['min']
-            if 'max' in old_size.keys():
+            if 'max' in old_size:
                 old_size['range'][1] = old_size['max']
             # Update all the keys in size if they exist in old_size
             size.update(old_size)
+            self.style_cols[size['column']] = None
 
         self.color = color
         self.scheme = scheme
