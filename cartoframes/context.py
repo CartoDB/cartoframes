@@ -51,7 +51,8 @@ MAX_ROWS_LNGLAT = 100000
 CACHE_DIR = user_cache_dir('cartoframes')
 
 # cartoframes version
-CFVERSION = 'cartoframes_{}'.format(__version__)
+default_sql_args = dict(client='cartoframes_{}'.format(__version__),
+                        do_post=False)
 
 
 class CartoContext(object):
@@ -109,8 +110,7 @@ class CartoContext(object):
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path',
-                                   client=CFVERSION)
+        res = self.sql_client.send('SHOW search_path', **default_sql_args)
 
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
@@ -266,8 +266,7 @@ class CartoContext(object):
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
 
-            self.sql_client.send(query,
-                                 client=CFVERSION)
+            self.sql_client.send(query, **default_sql_args)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
                        table_url=join_url((self.creds.base_url(),
@@ -586,13 +585,13 @@ class CartoContext(object):
 
             select_res = self.sql_client.send(
                 'SELECT * FROM {table_name}'.format(table_name=new_table_name),
-                client=CFVERSION)
+                **default_sql_args)
         else:
             skipfields = ('the_geom_webmercator'
                           if 'the_geom_webmercator' not in query else None)
             select_res = self.sql_client.send(query,
                                               skipfields=skipfields,
-                                              client=CFVERSION)
+                                              **default_sql_args)
 
         self._debug_print(select_res=select_res)
 
@@ -933,7 +932,7 @@ class CartoContext(object):
             GROUP BY 1
             ORDER BY 2 DESC
             '''.format(query=layer.query),
-            client=CFVERSION)
+            **default_sql_args)
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
@@ -1037,7 +1036,7 @@ class CartoContext(object):
         '''.format(username=self.creds.username(),
                    tablename=table_name,
                    cols_meta=json.dumps(metadata))
-        self.sql_client.send(augment_query, client=CFVERSION)
+        self.sql_client.send(augment_query, **default_sql_args)
 
         # read full augmented table
         return self.read(table_name)
