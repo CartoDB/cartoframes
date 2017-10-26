@@ -11,6 +11,7 @@ from warnings import warn
 import requests
 import IPython
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
@@ -144,7 +145,7 @@ class CartoContext(object):
     def write(self, df, table_name, temp_dir=CACHE_DIR,
               overwrite=False, lnglat=None, encode_geom=False, geom_col=None,
               **kwargs):
-        """Write a DataFrame to a CARTO table.
+        """Write a DataFrame to a CARTO table. DataFrame index is not included.
 
         Example:
             Write a pandas DataFrame to CARTO.
@@ -216,6 +217,13 @@ class CartoContext(object):
         if table_name != norm_colname(table_name):
             table_name = norm_colname(table_name)
             warn('Table will be named `{}`'.format(table_name))
+
+        # Issue warning if the index is anything but the Pandas default range index
+        if (df.index != np.arange(len(df))).any():
+            warn('CARTO dataset will not include DataFrame index. To include the index, '
+                 'use Pandas method `reset_index` before '
+                 'writing the DataFrame to CARTO. ')
+
         if df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
@@ -389,7 +397,8 @@ class CartoContext(object):
 
     def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames,
                         kwargs):
-        """Send a DataFrame to CARTO to be imported as a SQL table.
+        """Send a DataFrame to CARTO to be imported as a SQL table. Index of
+            DataFrame not included.
 
         Note:
             Schema from ``df`` is not enforced with this method. Use
@@ -417,6 +426,7 @@ class CartoContext(object):
         df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
                                                           na_rep='',
                                                           header=pgcolnames,
+                                                          index=False,
                                                           encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
