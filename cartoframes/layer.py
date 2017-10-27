@@ -176,10 +176,21 @@ class QueryLayer(AbstractLayer):
             - trails (int, optional): Number of trails after the incidence of
               a point. Defaults to 2.
 
-            If `time` is a :obj:`str`, then it must be a column name available in
-            the query that is of type numeric or datetime.
+            If `time` is a :obj:`str`, then it must be a column name available
+            in the query that is of type numeric or datetime.
 
-        color (dict or str, optional): Color style to apply to map.
+        color (dict or str, optional): Color style to apply to map. For
+            example, this can be used to change the color of all geometries
+            in this layer, or creating a graduated color or choropleth map.
+
+            If `color` is a :obj:`str`, there are two options:
+
+            - A column name to style by. The default classification is
+              quantiles for quantitative data and category for qualitative
+              data.
+            - A hex value or `web color name
+              <https://www.w3.org/TR/css3-color/#svg-color>`__.
+
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
 
@@ -188,16 +199,22 @@ class QueryLayer(AbstractLayer):
               or a scheme such as `styling.sunset(7)` from the
               styling module of cartoframes that exposes `CartoColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
-              Defaults to mint scheme.
+              Defaults to `mint <#styling.mint>`__ scheme for quantitative
+              data and `bold` for qualitative data. More control is given by
+              using `styling.scheme <#styling.scheme>`__.
+
+              If you wish to define a custom scheme outside of CartoColors, it
+              is recommended to use the `styling.custom <#styling.custom>`__
+              utility function.
 
         size (dict or int, optional): Size style to apply to point data.
-            If `size` is a :obj:`dict`, the follow keys are options, with values
-            described as:
+            If `size` is a :obj:`dict`, the follow keys are options, with
+            values described as:
 
             - column (str): Column to base sizing of points on
             - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
+              data range into bins. Must be one of the methods in
+              :obj:`BinMethod` (excluding `category`).
             - bins (int, optional): Number of bins to break data into. Defaults
               to 5.
             - max (int, optional): Maximum point width (in pixels). Defaults to
@@ -320,7 +337,7 @@ class QueryLayer(AbstractLayer):
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
         # choose appropriate scheme if not already specified
-        if (self.scheme is None) and (self.color in self.style_cols):
+        if (not self.scheme) and (self.color in self.style_cols):
             if self.style_cols[self.color] in ('string', 'boolean', ):
                 self.scheme = antique(10)
             elif self.style_cols[self.color] in ('number', ):
