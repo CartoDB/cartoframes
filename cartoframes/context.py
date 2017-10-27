@@ -941,7 +941,7 @@ class CartoContext(object):
         """Not currently implemented"""
         pass
 
-    def data_augment(self, table_name, metadata):
+    def data(self, table_name, metadata, augment=False):
         """Augment an existing CARTO table with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. See the full `Data
         Observatory catalog
@@ -1005,6 +1005,8 @@ class CartoContext(object):
                   `max_timespan_rank` for this element of metadata
                 - `max_score_rank` (str, optional): Override global
                   `max_score_rank` for this element of metadata
+            augment (bool): Augment `table_name`. Defaults to False. If set to
+                ``True``, `table_name` will have new columns appended to it.
 
         Returns:
             pandas.DataFrame: A DataFrame representation of `table_name` which
@@ -1016,21 +1018,37 @@ class CartoContext(object):
                                    'assets/data_obs_augment.sql'), 'r') as f:
                 augment_functions = f.read()
             self.sql_client.send(augment_functions)
-        except Exception as err:
+        except CartoException as err:
             raise CartoException("Could not install `obs_augment_table` onto "
                                  "user account ({})".format(err))
 
-        # augment with data observatory metadata
-        augment_query = '''
-            select obs_augment_table('{username}.{tablename}',
-                                     '{cols_meta}');
-        '''.format(username=self.creds.username(),
-                   tablename=table_name,
-                   cols_meta=json.dumps(metadata))
-        self.sql_client.send(augment_query)
+        if augment:
+            # augment with data observatory metadata
+            # self.sql_client.send(augment_query)
 
-        # read full augmented table
-        return self.read(table_name)
+            query = '''
+                SELECT obs_augment_table('{username}.{tablename}',
+                                         '{cols_meta}')
+                '''.format(username=self.creds.username(),
+                           tablename=table_name,
+                           cols_meta=json.dumps(metadata))
+            # read full augmented table
+            return self.read(table_name)
+        else:
+            cols = ','.join(
+                'a.data::json->{n}->\'value\' As obs_val_{n}'.format(n=i)
+                for i in range(1, len(metadata) + 1))
+            query = '''
+                SELECT {tablename}.*, {cols}
+                FROM obs_data_table('{username}.{tablename}',
+                                    '{cols_meta}') as a
+                JOIN {tablename}
+                  ON {tablename}.cartodb_id = a.id;
+            '''.format(username=self.creds.username(),
+                       tablename=table_name,
+                       cols=cols,
+                       cols_meta=json.dumps(metadata))
+            return self.query(query)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
