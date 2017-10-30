@@ -17,11 +17,11 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
-from cartoframes.credentials import Credentials
-from cartoframes.utils import (dict_items, normalize_colnames, norm_colname,
+from .credentials import Credentials
+from .utils import (dict_items, normalize_colnames, norm_colname,
                     importify_params, join_url)
-from cartoframes.layer import BaseMap
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from .layer import BaseMap
+from .maps import non_basemap_layers, get_map_name, get_map_template
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
