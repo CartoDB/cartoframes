@@ -839,19 +839,21 @@ class CartoContext(object):
 
             if time_layer:
                 # get turbo-carto processed cartocss
-                params.update(dict(callback='cartoframes'))
-                resp = requests.get(
-                        os.path.join(self.creds.base_url(),
-                                     'api/v1/map/named', map_name, 'jsonp'),
-                        params=params,
+                resp = self._auth_send(
+                        'api/v1/map/named/{}'.format(map_name),
+                        'POST',
+                        data=params['config'],
                         headers={'Content-Type': 'application/json'})
 
                 # check if errors in cartocss (already turbo-carto processed)
-                if "errors" not in resp.text:
-                    # replace previous cartocss with turbo-carto processed version
-                    layer.cartocss = json.loads(
-                            resp.text.split('&& cartoframes(')[1]
-                                .strip(');'))['metadata']['layers'][1]['meta']['cartocss']
+                if 'errors' not in resp:
+                    # replace previous cartocss with turbo-carto processed
+                    #  version
+                    layer.cartocss = (resp['metadata']
+                                          ['layers']
+                                          [1]
+                                          ['meta']
+                                          ['cartocss'])
                 config.update({
                     'order': 1,
                     'options': {
