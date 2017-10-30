@@ -604,7 +604,7 @@ class CartoContext(object):
 
         df = pd.DataFrame(data=select_res['rows'])
         for field in fields:
-            if fields[field]['type'] == 'timestamptz':
+            if fields[field]['type'] == 'date':
                 df[field] = pd.to_datetime(df[field], errors='ignore')
 
         self._debug_print(columns=df.columns,
@@ -1231,7 +1231,7 @@ def _dtypes2pg(dtype):
         'int32': 'numeric',
         'object': 'text',
         'bool': 'boolean',
-        'datetime64[ns]': 'timestamptz',
+        'datetime64[ns]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
 
@@ -1239,7 +1239,7 @@ def _dtypes2pg(dtype):
 def _pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
-        'timestamptz': 'datetime64[ns]',
+        'date': 'datetime64[ns]',
         'number': 'float64',
         'string': 'object',
         'boolean': 'bool',
