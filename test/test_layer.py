@@ -330,8 +330,8 @@ class TestQueryLayer(unittest.TestCase):
         """layer.QueryLayer._get_cartocss"""
         qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
                                                   max=20))
-        self.assertRegex(
+        self.assertRegexpMatches(
             qlayer._get_cartocss(BaseMap()),
-            ('.*marker-width:\sramp\\(\\[cold_brew\\],\srange\\(10,20\\),\s'
-             'quantiles\\(5\\)\\).*')
+            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             'quantiles\(5\)\).*')
         )
