@@ -176,8 +176,8 @@ class QueryLayer(AbstractLayer):
             - trails (int, optional): Number of trails after the incidence of
               a point. Defaults to 2.
 
-            If `time` is a :obj:`str`, then it must be a column name available in
-            the query that is of type numeric or datetime.
+            If `time` is a :obj:`str`, then it must be a column name available
+            in the query that is of type numeric or datetime.
 
         color (dict or str, optional): Color style to apply to map.
             If `color` is a :obj:`dict`, the following keys are options, with
@@ -195,8 +195,8 @@ class QueryLayer(AbstractLayer):
               the `bin_method`. Defaults to 5.
 
         size (dict or int, optional): Size style to apply to point data.
-            If `size` is a :obj:`dict`, the follow keys are options, with values
-            described as:
+            If `size` is a :obj:`dict`, the follow keys are options, with
+            values described as:
 
             - column (str): Column to base sizing of points on
             - bin_method (str, optional): Quantification method for dividing
@@ -211,11 +211,12 @@ class QueryLayer(AbstractLayer):
 
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
-    """
+    """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
 
         self.query = query
+        self.orig_query = query
         # style_cols and geom_type are updated right before layer is `_setup`
         # style columns as keys, data types as values
         self.style_cols = dict()
@@ -341,7 +342,8 @@ class QueryLayer(AbstractLayer):
             if self.geom_type != 'point':
                 raise ValueError('Cannot do time-based maps with data in '
                                  '`{query}` since this table does not contain '
-                                 'point geometries'.format(query=self.query))
+                                 'point geometries'.format(
+                                     query=self.orig_query))
             elif self.style_cols[self.time['column']] not in (
                     'number', 'date', ):
                 raise ValueError('Cannot create an animated map from column '
@@ -373,7 +375,7 @@ class QueryLayer(AbstractLayer):
                     '    ) AS _wrap',
                     ') AS __wrap',
                     'WHERE __wrap.{col} = orig.{col}',
-                ]]).format(col=self.color, query=self.query)
+                ]]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
                         'bins': ','.join(str(i) for i in range(1, 11)),
@@ -386,7 +388,7 @@ class QueryLayer(AbstractLayer):
                 self.query = ' '.join([
                     'SELECT *, {col} as value',
                     'FROM ({query}) as _wrap'
-                ]).format(col=self.color, query=self.query)
+                ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(

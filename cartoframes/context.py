@@ -201,7 +201,7 @@ class CartoContext(object):
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
             DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
-        """
+        """  # noqa
         if not os.path.exists(temp_dir):
             self._debug_print(temp_dir='creating directory at ' + temp_dir)
             os.makedirs(temp_dir)
@@ -739,7 +739,7 @@ class CartoContext(object):
                     LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            comma=',' if layer.style_cols else '',
-                           query=layer.query))
+                           query=layer.orig_query))
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
@@ -927,11 +927,11 @@ class CartoContext(object):
             WHERE the_geom IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
-        '''.format(query=layer.query))
+        '''.format(query=layer.orig_query))
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
-                    query=layer.query,
+                    query=layer.orig_query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
         return resp['rows'][0]['geom_type']
@@ -1113,7 +1113,7 @@ class CartoContext(object):
         extent_query = ('SELECT ST_EXTENT(the_geom) AS the_geom '
                         'FROM ({query}) AS t{idx}\n')
         union_query = 'UNION ALL\n'.join(
-            [extent_query.format(query=layer.query, idx=idx)
+            [extent_query.format(query=layer.orig_query, idx=idx)
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
