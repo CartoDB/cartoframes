@@ -23,6 +23,7 @@ from .utils import (dict_items, normalize_colnames, norm_colname,
                     importify_params, join_url)
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
+from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -48,6 +49,10 @@ MAX_ROWS_LNGLAT = 100000
 
 # Cache directory for temporary data operations
 CACHE_DIR = user_cache_dir('cartoframes')
+
+# cartoframes version
+DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
+                        do_post=False)
 
 
 class CartoContext(object):
@@ -105,7 +110,7 @@ class CartoContext(object):
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path')
+        res = self.sql_client.send('SHOW search_path', **DEFAULT_SQL_ARGS)
 
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
@@ -261,7 +266,7 @@ class CartoContext(object):
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
 
-            self.sql_client.send(query)
+            self.sql_client.send(query, do_post=False)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
                        table_url=join_url((self.creds.base_url(),
@@ -295,7 +300,8 @@ class CartoContext(object):
         try:
             self.sql_client.send('''
                 EXPLAIN SELECT * FROM "{table_name}"
-                '''.format(table_name=table_name))
+                '''.format(table_name=table_name),
+                do_post=False)
             raise NameError(
                 'Table `{table_name}` already exists. '
                 'Run with `overwrite=True` if you wish to replace the '
@@ -378,7 +384,7 @@ class CartoContext(object):
                                 if self.is_org else 'public'),
                            drop_tables=drop_tables)
             self._debug_print(query=query)
-            self.sql_client.send(query)
+            self.sql_client.send(query, **DEFAULT_SQL_ARGS)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
@@ -414,10 +420,11 @@ class CartoContext(object):
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
-                                                          na_rep='',
-                                                          header=pgcolnames,
-                                                          encoding='utf-8')
+        df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
+                path_or_buf=tempfile,
+                na_rep='',
+                header=pgcolnames,
+                encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
@@ -474,7 +481,7 @@ class CartoContext(object):
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
-            self.sql_client.send(alter_query)
+            self.sql_client.send(alter_query, **DEFAULT_SQL_ARGS)
         except CartoException as err:
             warn('DataFrame written to CARTO but the table schema failed to '
                  'update to match DataFrame. All columns in CARTO table have '
@@ -513,13 +520,14 @@ class CartoContext(object):
             if import_job['table_name'] != table_name:
                 try:
                     res = self.sql_client.send('''
-                        DROP TABLE IF EXISTS {orig_table};
-                        ALTER TABLE {dupe_table} RENAME TO {orig_table};
-                        SELECT CDB_TableMetadataTouch(
-                                   '{orig_table}'::regclass);
-                        '''.format(
-                            orig_table=table_name,
-                            dupe_table=import_job['table_name']))
+                            DROP TABLE IF EXISTS {orig_table};
+                            ALTER TABLE {dupe_table} RENAME TO {orig_table};
+                            SELECT CDB_TableMetadataTouch(
+                                       '{orig_table}'::regclass);
+                            '''.format(
+                                orig_table=table_name,
+                                dupe_table=import_job['table_name']),
+                            do_post=False)
 
                     self._debug_print(res=res)
                 except Exception as err:
@@ -572,18 +580,22 @@ class CartoContext(object):
                             if self.is_org else 'public'))
             self._debug_print(create_table_query=create_table_query)
 
-            create_table_res = self.sql_client.send(create_table_query)
+            create_table_res = self.sql_client.send(create_table_query,
+                                                    do_post=False)
             self._debug_print(create_table_res=create_table_res)
 
             new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
             self._debug_print(new_table_name=new_table_name)
 
             select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(table_name=new_table_name))
+                'SELECT * FROM {table_name}'.format(table_name=new_table_name),
+                **DEFAULT_SQL_ARGS)
         else:
             skipfields = ('the_geom_webmercator'
                           if 'the_geom_webmercator' not in query else None)
-            select_res = self.sql_client.send(query, skipfields=skipfields)
+            select_res = self.sql_client.send(query,
+                                              skipfields=skipfields,
+                                              **DEFAULT_SQL_ARGS)
 
         self._debug_print(select_res=select_res)
 
@@ -739,7 +751,8 @@ class CartoContext(object):
                     LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            comma=',' if layer.style_cols else '',
-                           query=layer.orig_query))
+                           query=layer.orig_query),
+                   **DEFAULT_SQL_ARGS)
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
@@ -927,7 +940,8 @@ class CartoContext(object):
             WHERE the_geom IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
-        '''.format(query=layer.orig_query))
+        '''.format(query=layer.orig_query),
+            **DEFAULT_SQL_ARGS)
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
@@ -1019,7 +1033,7 @@ class CartoContext(object):
             with open(os.path.join(os.path.dirname(__file__),
                                    'assets/data_obs_augment.sql'), 'r') as f:
                 augment_functions = f.read()
-            self.sql_client.send(augment_functions)
+            self.sql_client.send(augment_functions, do_post=False)
         except Exception as err:
             raise CartoException("Could not install `obs_augment_table` onto "
                                  "user account ({})".format(err))
@@ -1031,7 +1045,7 @@ class CartoContext(object):
         '''.format(username=self.creds.username(),
                    tablename=table_name,
                    cols_meta=json.dumps(metadata))
-        self.sql_client.send(augment_query)
+        self.sql_client.send(augment_query, **DEFAULT_SQL_ARGS)
 
         # read full augmented table
         return self.read(table_name)
@@ -1057,7 +1071,8 @@ class CartoContext(object):
                 '''.format(query=query,
                            comma=',' if style_cols else '',
                            style_cols=(','.join(style_cols)
-                                       if style_cols else '')))
+                                       if style_cols else '')),
+                           do_post=False)
         except Exception as err:
             raise ValueError(('Layer query `{query}` and/or style column(s) '
                               '{cols} are not valid: {err}.'
@@ -1117,17 +1132,18 @@ class CartoContext(object):
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
-        extent = self.sql_client.send('''
-                       SELECT
-                         ST_XMIN(ext) AS west,
-                         ST_YMIN(ext) AS south,
-                         ST_XMAX(ext) AS east,
-                         ST_YMAX(ext) AS north
-                       FROM (
-                           SELECT ST_Extent(the_geom) AS ext
-                           FROM ({union_query}) AS _wrap1
-                       ) AS _wrap2
-                            '''.format(union_query=union_query))
+        extent = self.sql_client.send(
+            '''
+            SELECT
+              ST_XMIN(ext) AS west,
+              ST_YMIN(ext) AS south,
+              ST_XMAX(ext) AS east,
+              ST_YMAX(ext) AS north
+            FROM (
+                SELECT ST_Extent(the_geom) AS ext
+                FROM ({union_query}) AS _wrap1
+            ) AS _wrap2'''.format(union_query=union_query),
+            do_post=False)
 
         return extent['rows'][0]
 
