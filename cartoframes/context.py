@@ -420,10 +420,11 @@ class CartoContext(object):
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
-                                                          na_rep='',
-                                                          header=pgcolnames,
-                                                          encoding='utf-8')
+        df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
+                path_or_buf=tempfile,
+                na_rep='',
+                header=pgcolnames,
+                encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
