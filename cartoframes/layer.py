@@ -195,10 +195,9 @@ class QueryLayer(AbstractLayer):
 
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
-
             - column (`str`): Column used for the basis of styling
-            - scheme (`dict`, optional): Scheme such as `styling.sunset(7)` from
-              the `styling module <#module-styling>`__ of cartoframes that
+            - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
+              from the `styling module <#module-styling>`__ of cartoframes that
               exposes `CartoColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
               Defaults to `mint <#styling.mint>`__ scheme for quantitative
@@ -310,14 +309,22 @@ class QueryLayer(AbstractLayer):
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
             old_size = size
+            # Default size range, bins, and bin_method
             size = {
                 'range': [5, 25],
-                'bins': 10,
+                'bins': 5,
                 'bin_method': BinMethod.quantiles,
             }
+            # Assign default range and update if min/max given
+            old_size['range'] = old_size.get('range', size['range'])
+            if 'min' in old_size:
+                old_size['range'][0] = old_size['min']
+                old_size.pop('min')
+            if 'max' in old_size:
+                old_size['range'][1] = old_size['max']
+                old_size.pop('max')
+            # Update all the keys in size if they exist in old_size
             size.update(old_size)
-            # Since we're accessing min/max, convert range into a list
-            size['range'] = list(size['range'])
             self.style_cols[size['column']] = None
 
         self.color = color
