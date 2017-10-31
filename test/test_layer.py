@@ -289,20 +289,39 @@ class TestQueryLayer(unittest.TestCase):
     def test_querylayer_size_defaults(self):
         """layer.QueryLayer gets defaults for options not passed"""
         qlayer = QueryLayer(self.query, size='cold_brew')
-        size_col_ans = {'column': 'cold_brew',
-                        'range': [5, 25],
-                        'bins': 10,
-                        'bin_method': 'quantiles'}
-        self.assertEqual(qlayer.size, size_col_ans,
-                         msg='size column should receive defaults')
+        size_col_ans = {
+            'column': 'cold_brew',
+            'range': [5, 25],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, size_col_ans,
+                             msg='size column should receive defaults')
 
-        qlayer = QueryLayer(self.query, size={'column': 'cold_brew',
-                                              'range': [4, 15],
-                                              'bin_method': 'equal'})
-        ans = {'column': 'cold_brew',
-               'range': [4, 15],
-               'bins': 10,
-               'bin_method': 'equal'}
-        self.assertEqual(qlayer.size, ans,
-                         msg=('size dict should receive defaults if not '
-                              'provided'))
+        qlayer = QueryLayer(self.query,
+                            size={
+                                'column': 'cold_brew',
+                                'range': [4, 15],
+                                'bin_method': 'equal'
+                            })
+        ans = {
+            'column': 'cold_brew',
+            'range': [4, 15],
+            'bins': 5,
+            'bin_method': 'equal'
+        }
+        self.assertDictEqual(qlayer.size, ans,
+                             msg=('size dict should receive defaults if not '
+                                  'provided'))
+        qlayer = QueryLayer(self.query, size={
+                                            'column': 'cold_brew',
+                                            'min': 10,
+                                            'max': 20
+                                        })
+        ans = {
+            'column': 'cold_brew',
+            'range': [10, 20],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, ans)

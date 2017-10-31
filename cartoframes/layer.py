@@ -292,11 +292,13 @@ class QueryLayer(AbstractLayer):
                 'bin_method': BinMethod.quantiles,
             }
             # Assign default range and update if min/max given
-            old_size['range'] = size['range']
+            old_size['range'] = old_size.get('range', size['range'])
             if 'min' in old_size:
                 old_size['range'][0] = old_size['min']
+                old_size.pop('min')
             if 'max' in old_size:
                 old_size['range'][1] = old_size['max']
+                old_size.pop('max')
             # Update all the keys in size if they exist in old_size
             size.update(old_size)
             self.style_cols[size['column']] = None
