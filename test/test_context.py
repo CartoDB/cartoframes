@@ -768,12 +768,11 @@ class TestCartoContext(unittest.TestCase):
             'int32': 'numeric',
             'object': 'text',
             'bool': 'boolean',
-            'datetime64[ns]': 'date',
+            'datetime64[ns]': 'timestamp',
             'unknown_dtype': 'text'
         }
         for i in results:
-            result = _dtypes2pg(i)
-            self.assertEqual(result, results[i])
+            self.assertEqual(_dtypes2pg(i), results[i])
 
     def test_pg2dtypes(self):
         """context._pg2dtypes"""
