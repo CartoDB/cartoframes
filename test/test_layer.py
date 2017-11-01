@@ -1,12 +1,28 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
 from cartoframes import styling
+import pandas as pd
 
 
 class TestAbstractLayer(unittest.TestCase):
     def test_class(self):
         self.assertIsNone(AbstractLayer().__init__())
+
+
+class TestLayer(unittest.TestCase):
+    def setUp(self):
+        self.coffee_temps = pd.DataFrame({
+            'a': range(4),
+            'b': list('abcd')
+        })
+
+    def test_layer_setup_dataframe(self):
+        """layer.Layer._setup()"""
+        layer = Layer('cortado', source=self.coffee_temps)
+
+        with self.assertRaises(NotImplementedError):
+            layer._setup([BaseMap(), layer], 1)
 
 
 class TestBaseMap(unittest.TestCase):
@@ -289,20 +305,49 @@ class TestQueryLayer(unittest.TestCase):
     def test_querylayer_size_defaults(self):
         """layer.QueryLayer gets defaults for options not passed"""
         qlayer = QueryLayer(self.query, size='cold_brew')
-        size_col_ans = {'column': 'cold_brew',
-                        'range': [5, 25],
-                        'bins': 10,
-                        'bin_method': 'quantiles'}
-        self.assertEqual(qlayer.size, size_col_ans,
-                         msg='size column should receive defaults')
+        size_col_ans = {
+            'column': 'cold_brew',
+            'range': [5, 25],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, size_col_ans,
+                             msg='size column should receive defaults')
 
-        qlayer = QueryLayer(self.query, size={'column': 'cold_brew',
-                                              'range': [4, 15],
-                                              'bin_method': 'equal'})
-        ans = {'column': 'cold_brew',
-               'range': [4, 15],
-               'bins': 10,
-               'bin_method': 'equal'}
-        self.assertEqual(qlayer.size, ans,
-                         msg=('size dict should receive defaults if not '
-                              'provided'))
+        qlayer = QueryLayer(self.query,
+                            size={
+                                'column': 'cold_brew',
+                                'range': [4, 15],
+                                'bin_method': 'equal'
+                            })
+        ans = {
+            'column': 'cold_brew',
+            'range': [4, 15],
+            'bins': 5,
+            'bin_method': 'equal'
+        }
+        self.assertDictEqual(qlayer.size, ans,
+                             msg=('size dict should receive defaults if not '
+                                  'provided'))
+        qlayer = QueryLayer(self.query, size={
+                                            'column': 'cold_brew',
+                                            'min': 10,
+                                            'max': 20
+                                        })
+        ans = {
+            'column': 'cold_brew',
+            'range': [10, 20],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, ans)
+
+    def test_querylayer_get_cartocss(self):
+        """layer.QueryLayer._get_cartocss"""
+        qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
+                                                  max=20))
+        self.assertRegexpMatches(
+            qlayer._get_cartocss(BaseMap()),
+            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             'quantiles\(5\)\).*')
+        )
