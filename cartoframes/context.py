@@ -1236,7 +1236,7 @@ def _dtypes2pg(dtype):
         'int32': 'numeric',
         'object': 'text',
         'bool': 'boolean',
-        'datetime64[ns]': 'date',
+        'datetime64[ns]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
 
