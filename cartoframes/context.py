@@ -144,7 +144,7 @@ class CartoContext(object):
     def write(self, df, table_name, temp_dir=CACHE_DIR,
               overwrite=False, lnglat=None, encode_geom=False, geom_col=None,
               **kwargs):
-        """Write a DataFrame to a CARTO table. DataFrame index is not included.
+        """Write a DataFrame to a CARTO table.
 
         Example:
             Write a pandas DataFrame to CARTO.
@@ -201,43 +201,48 @@ class CartoContext(object):
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
             DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
+
+        .. note::
+            DataFrame indexes are changed to ordinary columns. CARTO creates
+            an index called `cartodb_id` for every table that runs from 1 to
+            the length of the DataFrame.
         """
+        # work on a copy to avoid changing the original
+        _df = df.copy()
         if not os.path.exists(temp_dir):
             self._debug_print(temp_dir='creating directory at ' + temp_dir)
             os.makedirs(temp_dir)
         if encode_geom:
-            _add_encoded_geom(df, geom_col)
+            _add_encoded_geom(_df, geom_col)
 
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
 
-        pgcolnames = normalize_colnames(df.columns)
+        # issue warning if the index is anything but the pandas default
+        #  range index
+        if not _df.index.equals(pd.RangeIndex(0, _df.shape[0], 1)):
+            _df.reset_index(inplace=True)
+
+        pgcolnames = normalize_colnames(_df.columns)
         if table_name != norm_colname(table_name):
             table_name = norm_colname(table_name)
             warn('Table will be named `{}`'.format(table_name))
 
-        # issue warning if the index is anything but the pandas default
-        #  range index
-        if not df.index.equals(pd.RangeIndex(0, df.shape[0], 1)):
-            warn('CARTO dataset will not include DataFrame index. To '
-                 'include the index, use Pandas method `reset_index` before '
-                 'writing the DataFrame to CARTO. ')
-
-        if df.shape[0] > MAX_IMPORT_ROWS:
+        if _df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
-            final_table_name = self._send_dataframe(df.iloc[0:0], table_name,
+            final_table_name = self._send_dataframe(_df.iloc[0:0], table_name,
                                                     temp_dir, geom_col,
                                                     pgcolnames, kwargs)
             # send dataframe in batches, combine into placeholder table
-            final_table_name = self._send_batches(df, table_name, temp_dir,
+            final_table_name = self._send_batches(_df, table_name, temp_dir,
                                                   geom_col, pgcolnames, kwargs)
         else:
-            final_table_name = self._send_dataframe(df, table_name, temp_dir,
+            final_table_name = self._send_dataframe(_df, table_name, temp_dir,
                                                     geom_col, pgcolnames,
                                                     kwargs)
-            self._set_schema(df, final_table_name, pgcolnames)
+            self._set_schema(_df, final_table_name, pgcolnames)
 
         # create geometry column from long/lats if requested
         if lnglat:
@@ -249,7 +254,7 @@ class CartoContext(object):
                     '''.format(table_name=final_table_name,
                                lng=norm_colname(lnglat[0]),
                                lat=norm_colname(lnglat[1]))
-            if df.shape[0] > MAX_ROWS_LNGLAT:
+            if _df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
                 tqdm.write(
@@ -423,7 +428,7 @@ class CartoContext(object):
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
+        df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
                                                           na_rep='',
                                                           header=pgcolnames,
                                                           index=False,
