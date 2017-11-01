@@ -11,7 +11,6 @@ from warnings import warn
 import requests
 import IPython
 import pandas as pd
-import numpy as np
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
@@ -218,10 +217,11 @@ class CartoContext(object):
             table_name = norm_colname(table_name)
             warn('Table will be named `{}`'.format(table_name))
 
-        # Issue warning if the index is anything but the Pandas default range index
-        if (df.index != np.arange(len(df))).any():
-            warn('CARTO dataset will not include DataFrame index. To include the index, '
-                 'use Pandas method `reset_index` before '
+        # issue warning if the index is anything but the pandas default
+        #  range index
+        if not df.index.equals(pd.RangeIndex(0, df.shape[0], 1)):
+            warn('CARTO dataset will not include DataFrame index. To '
+                 'include the index, use Pandas method `reset_index` before '
                  'writing the DataFrame to CARTO. ')
 
         if df.shape[0] > MAX_IMPORT_ROWS:
