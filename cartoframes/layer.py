@@ -179,7 +179,6 @@ class QueryLayer(AbstractLayer):
               Defaults to 30.
             - trails (`int`, optional): Number of trails after the incidence of
               a point. Defaults to 2.
-
         color (dict or str, optional): Color style to apply to map. For
             example, this can be used to change the color of all geometries
             in this layer, or to create a graduated color or choropleth map.
@@ -234,11 +233,12 @@ class QueryLayer(AbstractLayer):
 
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
-    """
+    """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
 
         self.query = query
+        self.orig_query = query
         # style_cols and geom_type are updated right before layer is `_setup`
         # style columns as keys, data types as values
         self.style_cols = dict()
@@ -372,7 +372,8 @@ class QueryLayer(AbstractLayer):
             if self.geom_type != 'point':
                 raise ValueError('Cannot do time-based maps with data in '
                                  '`{query}` since this table does not contain '
-                                 'point geometries'.format(query=self.query))
+                                 'point geometries'.format(
+                                     query=self.orig_query))
             elif self.style_cols[self.time['column']] not in (
                     'number', 'date', ):
                 raise ValueError('Cannot create an animated map from column '
@@ -404,7 +405,7 @@ class QueryLayer(AbstractLayer):
                     '    ) AS _wrap',
                     ') AS __wrap',
                     'WHERE __wrap.{col} = orig.{col}',
-                ]]).format(col=self.color, query=self.query)
+                ]]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
                         'bins': ','.join(str(i) for i in range(1, 11)),
@@ -417,7 +418,7 @@ class QueryLayer(AbstractLayer):
                 self.query = ' '.join([
                     'SELECT *, {col} as value',
                     'FROM ({query}) as _wrap'
-                ]).format(col=self.color, query=self.query)
+                ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(

@@ -1,12 +1,28 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
 from cartoframes import styling
+import pandas as pd
 
 
 class TestAbstractLayer(unittest.TestCase):
     def test_class(self):
         self.assertIsNone(AbstractLayer().__init__())
+
+
+class TestLayer(unittest.TestCase):
+    def setUp(self):
+        self.coffee_temps = pd.DataFrame({
+            'a': range(4),
+            'b': list('abcd')
+        })
+
+    def test_layer_setup_dataframe(self):
+        """layer.Layer._setup()"""
+        layer = Layer('cortado', source=self.coffee_temps)
+
+        with self.assertRaises(NotImplementedError):
+            layer._setup([BaseMap(), layer], 1)
 
 
 class TestBaseMap(unittest.TestCase):
@@ -325,3 +341,13 @@ class TestQueryLayer(unittest.TestCase):
             'bin_method': 'quantiles'
         }
         self.assertDictEqual(qlayer.size, ans)
+
+    def test_querylayer_get_cartocss(self):
+        """layer.QueryLayer._get_cartocss"""
+        qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
+                                                  max=20))
+        self.assertRegexpMatches(
+            qlayer._get_cartocss(BaseMap()),
+            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             'quantiles\(5\)\).*')
+        )

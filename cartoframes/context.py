@@ -206,7 +206,7 @@ class CartoContext(object):
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
             DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
-        """
+        """  # noqa
         if not os.path.exists(temp_dir):
             self._debug_print(temp_dir='creating directory at ' + temp_dir)
             os.makedirs(temp_dir)
@@ -746,13 +746,13 @@ class CartoContext(object):
             if not layer.is_basemap:
                 # get schema of style columns
                 resp = self.sql_client.send('''
-                        SELECT {cols}
-                        FROM ({query}) AS _wrap
-                        LIMIT 0
-                    '''.format(cols=','.join(layer.style_cols),
-                               comma=',' if layer.style_cols else '',
-                               query=layer.query),
-                    **DEFAULT_SQL_ARGS)
+                    SELECT {cols}
+                    FROM ({query}) AS _wrap
+                    LIMIT 0
+                '''.format(cols=','.join(layer.style_cols),
+                           comma=',' if layer.style_cols else '',
+                           query=layer.orig_query),
+                   **DEFAULT_SQL_ARGS)
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
@@ -852,17 +852,21 @@ class CartoContext(object):
 
             if time_layer:
                 # get turbo-carto processed cartocss
-                params.update(dict(callback='cartoframes'))
-                resp = requests.get(
-                        os.path.join(self.creds.base_url(),
-                                     'api/v1/map/named', map_name, 'jsonp'),
-                        params=params,
+                resp = self._auth_send(
+                        'api/v1/map/named/{}'.format(map_name),
+                        'POST',
+                        data=params['config'],
                         headers={'Content-Type': 'application/json'})
 
-                # replace previous cartocss with turbo-carto processed version
-                layer.cartocss = json.loads(
-                        resp.text.split('&& cartoframes(')[1]
-                            .strip(');'))['metadata']['layers'][1]['meta']['cartocss']
+                # check if errors in cartocss (already turbo-carto processed)
+                if 'errors' not in resp:
+                    # replace previous cartocss with turbo-carto processed
+                    #  version
+                    layer.cartocss = (resp['metadata']
+                                          ['layers']
+                                          [1]
+                                          ['meta']
+                                          ['cartocss'])
                 config.update({
                     'order': 1,
                     'options': {
@@ -936,12 +940,12 @@ class CartoContext(object):
             WHERE the_geom IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
-            '''.format(query=layer.query),
+        '''.format(query=layer.orig_query),
             **DEFAULT_SQL_ARGS)
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
-                    query=layer.query,
+                    query=layer.orig_query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
         return resp['rows'][0]['geom_type']
@@ -1124,7 +1128,7 @@ class CartoContext(object):
         extent_query = ('SELECT ST_EXTENT(the_geom) AS the_geom '
                         'FROM ({query}) AS t{idx}\n')
         union_query = 'UNION ALL\n'.join(
-            [extent_query.format(query=layer.query, idx=idx)
+            [extent_query.format(query=layer.orig_query, idx=idx)
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
