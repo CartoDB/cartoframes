@@ -58,22 +58,18 @@ DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
 class CartoContext(object):
     """CartoContext class for authentication with CARTO and high-level operations
     such as reading tables from CARTO into dataframes, writing dataframes to
-    CARTO tables, and creating custom maps from dataframes and CARTO tables.
-    Future methods interact with CARTO's services like
-    `Data Observatory <https://carto.com/data-observatory>`__, and `routing,
-    geocoding, and isolines <https://carto.com/location-data-services/>`__.
+    CARTO tables, creating custom maps from dataframes and CARTO tables, and
+    augmenting data using CARTO's `Data Observatory
+    <https://carto.com/data-observatory>`__. Future methods will interact with
+    CARTO's services like `routing, geocoding, and isolines
+    <https://carto.com/location-data-services/>`__, PostGIS backend for spatial
+    processing, and much more.
 
     Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
-    Example:
-        Create a CartoContext object::
-
-            import cartoframes
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
-
-    Attrs:
+    Attributes:
         creds (cartoframes.Credentials): :obj:`Credentials` instance
 
     Args:
@@ -92,6 +88,12 @@ class CartoContext(object):
     Returns:
         :obj:`CartoContext`: A CartoContext object that is authenticated
         against the user's CARTO account.
+
+    Example:
+        Create a CartoContext object::
+
+            import cartoframes
+            cc = cartoframes.CartoContext(BASEURL, APIKEY)
     """
     def __init__(self, base_url=None, api_key=None, creds=None, session=None,
                  verbose=0):
@@ -118,7 +120,21 @@ class CartoContext(object):
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False):
-        """Read tables from CARTO into pandas DataFrames.
+        """Read a table from CARTO into a pandas DataFrames.
+
+        Args:
+            table_name (str): Name of table in user's CARTO account.
+            limit (int, optional): Read only `limit` lines from
+                `table_name`. Defaults to ``None``, which reads the full table.
+            index (str, optional): Not currently in use.
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of `table_name` from
+            CARTO.
 
         Example:
             .. code:: python
@@ -126,16 +142,6 @@ class CartoContext(object):
                 import cartoframes
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
-
-        Args:
-            table_name (str): Name of table in user's CARTO account.
-            limit (int, optional): Read only ``limit`` lines from
-                ``table_name``. Defaults to `None`, which reads the full table.
-            index (str, optional): Not currently in use.
-
-        Returns:
-            pandas.DataFrame: DataFrame representation of `table_name` from
-            CARTO.
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
         if limit is not None:
@@ -572,15 +578,21 @@ class CartoContext(object):
         operations (creating/dropping tables, adding columns, updates, etc.).
 
         Args:
-            query (str): Query to run against CARTO user database.
+            query (str): Query to run against CARTO user database. This data
+              will then be converted into a pandas DataFrame.
             table_name (str, optional): If set, this will create a new
-                table in the user's CARTO account that is the result of the
-                query. Defaults to None (no table created).
+              table in the user's CARTO account that is the result of the
+              query. Defaults to None (no table created).
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of PostgreSQL date types, the data type 'object' is
-            used.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -695,8 +707,9 @@ class CartoContext(object):
                 ``interactive`` is ``False``.
 
         Returns:
-            IPython.display.HTML: Interactive maps are rendered in an
-            ``iframe``, while static maps are rendered in ``img`` tags.
+            IPython.display.HTML or matplotlib Axes: Interactive maps are
+            rendered as HTML in an `iframe`, while static maps are returned as
+            matplotlib Axes objects or IPython Image.
         """
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
