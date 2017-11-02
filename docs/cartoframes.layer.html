@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cartoframes.layer module &#8212; cartoframes 0.0.1 documentation</title>
+    <title>cartoframes.layer module &#8212; cartoframes 0.3.0b5 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.3.0b5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -41,7 +41,8 @@
   <div class="section" id="module-cartoframes.layer">
 <span id="cartoframes-layer-module"></span><h1>cartoframes.layer module<a class="headerlink" href="#module-cartoframes.layer" title="Permalink to this headline">¶</a></h1>
 <p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a> and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a>
-for example usage.</p>
+for example usage for data layers. See <a class="reference external" href="#layer.BaseMap">layer.BaseMap</a> for
+basemap layers.</p>
 <dl class="class">
 <dt id="cartoframes.layer.AbstractLayer">
 <em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">AbstractLayer</code><a class="headerlink" href="#cartoframes.layer.AbstractLayer" title="Permalink to this definition">¶</a></dt>
@@ -115,8 +116,9 @@ Voyager), <cite>False</cite> otherwise.</td>
 <em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">Layer</code><span class="sig-paren">(</span><em>table_name</em>, <em>source=None</em>, <em>overwrite=False</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.Layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cartoframes.layer.QueryLayer" title="cartoframes.layer.QueryLayer"><code class="xref py py-class docutils literal"><span class="pre">cartoframes.layer.QueryLayer</span></code></a></p>
 <p>A cartoframes Data Layer based on a specific table in user’s CARTO
-database. This layer class is useful for visualizing individual datasets
-with <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
+database. This layer class is used for visualizing individual datasets
+with <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>’s <code class="docutils literal"><span class="pre">layers</span></code>
+keyword argument.</p>
 <p class="rubric">Example</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">QueryLayer</span><span class="p">,</span> <span class="n">styling</span>
@@ -127,24 +129,38 @@ with <a class="reference external" href="#context.CartoContext.map">CartoContext
                             <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">prism</span><span class="p">(</span><span class="mi">10</span><span class="p">)})])</span>
 </pre></div>
 </div>
-<p><strong>Parameters:</strong> See <a class="reference internal" href="#cartoframes.layer.QueryLayer" title="cartoframes.layer.QueryLayer"><code class="xref py py-obj docutils literal"><span class="pre">QueryLayer</span></code></a> for a full list of arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>table_name</strong> (<em>str</em>) – Name of table in CARTO account</li>
+<li><strong>Styling</strong> – See <a class="reference internal" href="#cartoframes.layer.QueryLayer" title="cartoframes.layer.QueryLayer"><code class="xref py py-obj docutils literal"><span class="pre">QueryLayer</span></code></a> for a full list of all arguments
+arguments for styling this map data layer.</li>
+<li><strong>source</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – Not currently implemented</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Not currently implemented</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
 <dt id="cartoframes.layer.QueryLayer">
 <em class="property">class </em><code class="descclassname">cartoframes.layer.</code><code class="descname">QueryLayer</code><span class="sig-paren">(</span><em>query</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.layer.QueryLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#cartoframes.layer.AbstractLayer" title="cartoframes.layer.AbstractLayer"><code class="xref py py-class docutils literal"><span class="pre">cartoframes.layer.AbstractLayer</span></code></a></p>
-<p>cartoframes Data Layer based on an arbitrary query to the user’s CARTO
+<p>cartoframes data layer based on an arbitrary query to the user’s CARTO
 database. This layer class is useful for offloading processing to the cloud
 to do some of the following:</p>
 <ul class="simple">
-<li>pull down a snapshot of the data (e.g., selecting only important columns
-instead of all columns in the dataset)</li>
-<li>doing spatial processing using <a class="reference external" href="http://postgis.net/">PostGIS</a> and
-<a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a>, which is the database
+<li>Visualizing spatial operations using <a class="reference external" href="http://postgis.net/">PostGIS</a>
+and <a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a>, which is the database
 underlying CARTO</li>
-<li>performing arbitrary relational database queries (e.g., complex JOINs
+<li>Performing arbitrary relational database queries (e.g., complex JOINs
 in SQL instead of in pandas)</li>
+<li>Visualizing a subset of the data (e.g., <code class="docutils literal"><span class="pre">SELECT</span> <span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">table</span> <span class="pre">LIMIT</span>
+<span class="pre">1000</span></code>)</li>
 </ul>
 <p>Used in the <cite>layers</cite> keyword in <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
 <p class="rubric">Example</p>
@@ -186,62 +202,77 @@ points are sized by the column <code class="docutils literal"><span class="pre">
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>query</strong> (<em>str</em>) – Query that is fed into a pandas DataFrame. At a minimum,
-all queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
-<cite>the_geom_webmercator</cite>. Read more in
-<a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>
-for more information.</li>
-<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Style to apply to layer.
-If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options:</p>
+<li><strong>query</strong> (<em>str</em>) – Query to expose data on a map layer. At a minimum, a
+query needs to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
+<cite>the_geom_webmercator</cite> for the map to display. Read more about
+queries in <a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>.</li>
+<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Time-based style to apply to layer.</p>
+<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, it must be the name of a column which
+has a data type of <cite>datetime</cite> or <cite>float</cite>.</p>
+<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options:</p>
 <ul>
-<li>column (str, required): Column for animating map from. Data must
+<li>column (<cite>str</cite>, required): Column for animating map, which must
 be of type <cite>datetime</cite> or <cite>float</cite>.</li>
-<li>method (str, optional): Type of aggregation method for operating
-on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
-be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
-functions</a>
+<li>method (<cite>str</cite>, optional): Type of aggregation method for
+operating on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must be one of <code class="docutils literal"><span class="pre">avg</span></code>,
+<code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate functions</a>
 with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (bool, optional): Whether to accumulate points over
+<li>cumulative (<cite>bool</cite>, optional): Whether to accumulate points over
 time (<code class="docutils literal"><span class="pre">True</span></code>) or not (<code class="docutils literal"><span class="pre">False</span></code>, default)</li>
-<li>frames (int, optional): Number of frames in the animation.
+<li>frames (<cite>int</cite>, optional): Number of frames in the animation.
 Defaults to 256.</li>
-<li>duration (int, optional): Number of seconds in the animation.
+<li>duration (<cite>int</cite>, optional): Number of seconds in the animation.
 Defaults to 30.</li>
-<li>trails (int, optional): Number of trails after the incidence of
+<li>trails (<cite>int</cite>, optional): Number of trails after the incidence of
 a point. Defaults to 2.</li>
 </ul>
-<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
-the query that is of type numeric or datetime.</p>
 </li>
-<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map.
-If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
+<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map. For
+example, this can be used to change the color of all geometries
+in this layer, or to create a graduated color or choropleth map.</p>
+<p>If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, there are two options:</p>
+<ul>
+<li>A column name to style by to create, for example, a choropleth
+map if working with polygons. The default classification is
+<cite>quantiles</cite> for quantitative data and <cite>category</cite> for
+qualitative data.</li>
+<li>A hex value or <a class="reference external" href="https://www.w3.org/TR/css3-color/#svg-color">web color name</a>.</li>
+</ul>
+<p>If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
 values described:</p>
 <ul>
-<li>column (str): Column to base coloring from.</li>
-<li>scheme (str, optinal): Color scheme from
-<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
-Defaults to <cite>Mint</cite>.</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to divide data amongst in
-the <cite>bin_method</cite>. Defaults to 5.</li>
+<li>column (<cite>str</cite>): Column used for the basis of styling</li>
+<li>scheme (<cite>dict</cite>, optional): Scheme such as <cite>styling.sunset(7)</cite>
+from the <a class="reference external" href="#module-styling">styling module</a> of cartoframes that
+exposes <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
+Defaults to <a class="reference external" href="#styling.mint">mint</a> scheme for quantitative
+data and <cite>bold</cite> for qualitative data. More control is given by
+using <a class="reference external" href="#styling.scheme">styling.scheme</a>.<p>If you wish to define a custom scheme outside of CartoColors, it
+is recommended to use the <a class="reference external" href="#styling.custom">styling.custom</a>
+utility function.</p>
+</li>
 </ul>
 </li>
-<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.
-If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
-described as:</p>
+<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.</p>
+<p>If <cite>size</cite> is an <code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, all points are sized by this value.</p>
+<p>If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, this value is interpreted as a column,
+and the points are sized by the value in this column. The
+classification method defaults to <cite>quantiles</cite>, with a min size of
+5, and a max size of 5. Use the <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code> input to override these
+values.</p>
+<p>If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with
+values described as:</p>
 <ul>
-<li>column (str): Column to base sizing of points on</li>
+<li>column (<cite>str</cite>): Column to base sizing of points on</li>
 <li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to break data into. Defaults
+data range into bins. Must be one of the methods in
+<code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code> (excluding <cite>category</cite>).</li>
+<li>bins (<cite>int</cite>, optional): Number of bins to break data into.
+Defaults to 5.</li>
+<li>max (<cite>int</cite>, optional): Maximum point width (in pixels). Defaults
+to 25.</li>
+<li>min (<cite>int</cite>, optional): Minimum point width (in pixels). Defaults
 to 5.</li>
-<li>max (int, optional): Maximum point width (in pixels). Defaults to
-25.</li>
-<li>min (int, optional): Minimum point width (in pixels). Defaults to
-5.</li>
 </ul>
 </li>
 <li><strong>tooltip</strong> (<em>tuple</em><em>, </em><em>optional</em>) – <strong>Not yet implemented.</strong></li>
@@ -292,7 +323,7 @@ to 5.</li>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

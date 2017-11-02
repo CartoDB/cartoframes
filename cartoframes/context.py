@@ -591,8 +591,8 @@ class CartoContext(object):
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of PostgreSQL date types, the data type 'object' is
-            used.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -707,8 +707,9 @@ class CartoContext(object):
                 ``interactive`` is ``False``.
 
         Returns:
-            IPython.display.HTML: Interactive maps are rendered in an
-            ``iframe``, while static maps are rendered in ``img`` tags.
+            IPython.display.HTML or matplotlib Axes: Interactive maps are
+            rendered as HTML in an `iframe`, while static maps are returned as
+            matplotlib Axes objects or IPython Image.
         """
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
