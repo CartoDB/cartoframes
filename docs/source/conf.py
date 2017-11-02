@@ -153,7 +153,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'cartoframes', 'cartoframes Documentation',
-     author, 'cartoframes', 'One line description of project.',
+     author, 'cartoframes', 'data science package for using CARTO',
      'Miscellaneous'),
 ]
 
