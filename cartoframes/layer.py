@@ -1,6 +1,7 @@
 """Layer classes for map creation. See examples in `layer.Layer
 <#layer.Layer>`__ and `layer.QueryLayer <#layer.QueryLayer>`__
-for example usage.
+for example usage for data layers. See `layer.BaseMap <#layer.BaseMap>`__ for
+basemap layers.
 """
 
 import pandas as pd
@@ -194,6 +195,7 @@ class QueryLayer(AbstractLayer):
 
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
+
             - column (`str`): Column used for the basis of styling
             - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
               from the `styling module <#module-styling>`__ of cartoframes that
