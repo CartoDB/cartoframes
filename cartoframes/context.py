@@ -6,6 +6,7 @@ import sys
 import time
 import collections
 import binascii as ba
+import re
 from warnings import warn
 
 import requests
@@ -984,8 +985,46 @@ class CartoContext(object):
 
     def data_discovery(self, keywords=None, regex=None, time=None,
                        boundary=None):
-        """Not currently implemented"""
-        pass
+        """Not currently implemented
+
+        - obs_getavailablenumerators
+        - args: bounds, filter_tags, denom_id, geom_id, timespan
+        """
+        if keywords:
+            if isinstance(keywords, str):
+                keywords = [keywords, ]
+            kwsearch = ' OR '.join('numer_description ilike \'%{}%\''.format(k)
+                                   for k in keywords)
+            kwsearch = 'WHERE {}'.format(kwsearch)
+        if time:
+            if '-' in time:
+                trange = (t.strip() for t in time.split('-'))
+            timesearch = ''
+        query = '''
+            WITH envelope AS (
+                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) as env
+                  FROM {table}
+            ), numers AS (
+                SELECT *
+                  FROM OBS_GetAvailableNumerators((SELECT env FROM envelope))
+                 {kwsearch}
+            )
+            SELECT
+                OBS_GetMeta(
+                    envelope.env,
+                    ('[' || string_agg(
+                      '{{"numer_id": "' || numers.numer_id::text || '"}}',
+                      ',') || ']')::json,
+                    1, 1, count(*)::int
+                ) AS meta
+            FROM numers, envelope
+            GROUP BY env
+        '''.format(table=boundary,
+                   kwsearch=kwsearch if keywords else '').strip()
+        query = re.sub('( +|\n)', ' ', query)
+        self._debug_print(query=query)
+        resp = self.sql_client.send(query)
+        return pd.DataFrame(resp['rows'][0]['meta'])
 
     def data(self, table_name, metadata, augment=False):
         """Augment an existing CARTO table with `Data Observatory
@@ -1059,14 +1098,14 @@ class CartoContext(object):
             has new columns for each measure in `metadata`.
         """
 
-        try:
-            with open(os.path.join(os.path.dirname(__file__),
-                                   'assets/data_obs_augment.sql'), 'r') as f:
-                augment_functions = f.read()
-            self.sql_client.send(augment_functions)
-        except CartoException as err:
-            raise CartoException("Could not install `obs_augment_table` onto "
-                                 "user account ({})".format(err))
+        # try:
+        #     with open(os.path.join(os.path.dirname(__file__),
+        #                            'assets/data_obs_augment.sql'), 'r') as f:
+        #         augment_functions = f.read()
+        #     self.sql_client.send(augment_functions)
+        # except CartoException as err:
+        #     raise CartoException("Could not install `obs_augment_table` onto "
+        #                          "user account ({})".format(err))
 
         if augment:
             # augment with data observatory metadata
@@ -1081,19 +1120,27 @@ class CartoContext(object):
             # read full augmented table
             return self.read(table_name)
         else:
-            cols = ','.join(
-                'a.data::json->{n}->\'value\' As obs_val_{n}'.format(n=i)
-                for i in range(1, len(metadata) + 1))
+            # cols = ','.join(
+            #     'a.data::json->{n}->\'value\' As obs_val_{n}'.format(n=i)
+            #     for i in range(1, len(metadata) + 1))
+            # query = '''
+            #     SELECT {tablename}.*, {cols}
+            #     FROM obs_data_table('{username}.{tablename}',
+            #                         '{cols_meta}') as a
+            #     JOIN {tablename}
+            #       ON {tablename}.cartodb_id = a.id;
+            # '''.format(username=self.creds.username(),
+            #            tablename=table_name,
+            #            cols=cols,
+            #            cols_meta=json.dumps(metadata))
             query = '''
-                SELECT {tablename}.*, {cols}
-                FROM obs_data_table('{username}.{tablename}',
-                                    '{cols_meta}') as a
-                JOIN {tablename}
-                  ON {tablename}.cartodb_id = a.id;
-            '''.format(username=self.creds.username(),
-                       tablename=table_name,
-                       cols=cols,
-                       cols_meta=json.dumps(metadata))
+                SELECT *
+                  FROM OBS_GetData(
+                      (select array_agg((the_geom, cartodb)::geomval)
+                       from {tablename}),
+                      {meta})
+            '''.format(tablename=table_name,
+                       meta=json.dumps(metadata.to_json()))
             return self.query(query)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
