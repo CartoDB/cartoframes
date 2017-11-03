@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cartoframes.styling module &#8212; cartoframes 0.0.1 documentation</title>
+    <title>cartoframes.styling module &#8212; cartoframes 0.3.0b5 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.3.0b5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,6 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cartoframes.utils module" href="cartoframes.utils.html" />
+    <link rel="prev" title="cartoframes.maps module" href="cartoframes.maps.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -47,29 +49,60 @@ in its <a class="reference external" href="https://github.com/Carto-color/">GitH
 <dt id="cartoframes.styling.BinMethod">
 <em class="property">class </em><code class="descclassname">cartoframes.styling.</code><code class="descname">BinMethod</code><a class="headerlink" href="#cartoframes.styling.BinMethod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Data classification methods used for the styling of data on maps.</p>
 <dl class="attribute">
-<dt id="cartoframes.styling.BinMethod.category">
-<code class="descname">category</code><em class="property"> = 'category'</em><a class="headerlink" href="#cartoframes.styling.BinMethod.category" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="cartoframes.styling.BinMethod.equal">
-<code class="descname">equal</code><em class="property"> = 'equal'</em><a class="headerlink" href="#cartoframes.styling.BinMethod.equal" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="cartoframes.styling.BinMethod.headtails">
-<code class="descname">headtails</code><em class="property"> = 'headtails'</em><a class="headerlink" href="#cartoframes.styling.BinMethod.headtails" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="cartoframes.styling.BinMethod.quantiles">
+<code class="descname">quantiles</code><a class="headerlink" href="#cartoframes.styling.BinMethod.quantiles" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Quantiles classification for quantitative data</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="cartoframes.styling.BinMethod.jenks">
-<code class="descname">jenks</code><em class="property"> = 'jenks'</em><a class="headerlink" href="#cartoframes.styling.BinMethod.jenks" title="Permalink to this definition">¶</a></dt>
+<code class="descname">jenks</code><a class="headerlink" href="#cartoframes.styling.BinMethod.jenks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Jenks classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cartoframes.styling.BinMethod.headtails">
+<code class="descname">headtails</code><a class="headerlink" href="#cartoframes.styling.BinMethod.headtails" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Head/Tails classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cartoframes.styling.BinMethod.equal">
+<code class="descname">equal</code><a class="headerlink" href="#cartoframes.styling.BinMethod.equal" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Equal Interval classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cartoframes.styling.BinMethod.category">
+<code class="descname">category</code><a class="headerlink" href="#cartoframes.styling.BinMethod.category" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Category classification for qualitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">category</code><em class="property"> = 'category'</em></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="cartoframes.styling.BinMethod.quantiles">
-<code class="descname">quantiles</code><em class="property"> = 'quantiles'</em><a class="headerlink" href="#cartoframes.styling.BinMethod.quantiles" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">equal</code><em class="property"> = 'equal'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">headtails</code><em class="property"> = 'headtails'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">jenks</code><em class="property"> = 'jenks'</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">quantiles</code><em class="property"> = 'quantiles'</em></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -125,7 +158,23 @@ in its <a class="reference external" href="https://github.com/Carto-color/">GitH
 <dl class="function">
 <dt id="cartoframes.styling.custom">
 <code class="descclassname">cartoframes.styling.</code><code class="descname">custom</code><span class="sig-paren">(</span><em>colors</em>, <em>bins=None</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.styling.custom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get custom scheme</p>
+<dd><p>Create a custom scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>colors</strong> (<em>list of str</em>) – List of hex values for styling data</li>
+<li><strong>bins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins to style by. If not given, the
+number of colors will be used.</li>
+<li><strong>bin_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Classification method. One of the values
+in <a class="reference internal" href="#cartoframes.styling.BinMethod" title="cartoframes.styling.BinMethod"><code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code></a>. Defaults to <cite>quantiles</cite>, which only works with
+quantitative data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -231,6 +280,32 @@ in its <a class="reference external" href="https://github.com/Carto-color/">GitH
 </dd></dl>
 
 <dl class="function">
+<dt id="cartoframes.styling.scheme">
+<code class="descclassname">cartoframes.styling.</code><code class="descname">scheme</code><span class="sig-paren">(</span><em>name</em>, <em>bins</em>, <em>bin_method</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.styling.scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom scheme based on CartoColors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – Name of a CartoColor.</li>
+<li><strong>bins</strong> (<em>int</em>) – Number of bins for classifying data. CartoColors have 7
+bins max for quantitative data, and 11 max for qualitative data.</li>
+<li><strong>bin_method</strong> (<em>str</em>) – One of methods in <a class="reference internal" href="#cartoframes.styling.BinMethod" title="cartoframes.styling.BinMethod"><code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Input types are particularly sensitive in this function, and little
+feedback is given for errors. <code class="docutils literal"><span class="pre">name</span></code> and <code class="docutils literal"><span class="pre">bin_method</span></code> arguments
+are case-sensitive.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="cartoframes.styling.sunset">
 <code class="descclassname">cartoframes.styling.</code><code class="descname">sunset</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.styling.sunset" title="Permalink to this definition">¶</a></dt>
 <dd><p>CartoColor Sunset quantitative scheme</p>
@@ -289,6 +364,12 @@ in its <a class="reference external" href="https://github.com/Carto-color/">GitH
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">cartoframes</a><ul>
+  <li><a href="cartoframes.html">cartoframes package</a><ul>
+      <li>Previous: <a href="cartoframes.maps.html" title="previous chapter">cartoframes.maps module</a></li>
+      <li>Next: <a href="cartoframes.utils.html" title="next chapter">cartoframes.utils module</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
@@ -317,7 +398,7 @@ in its <a class="reference external" href="https://github.com/Carto-color/">GitH
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

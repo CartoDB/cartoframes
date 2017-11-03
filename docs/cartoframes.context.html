@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>cartoframes.context module &#8212; cartoframes 0.0.1 documentation</title>
+    <title>cartoframes.context module &#8212; cartoframes 0.3.0b5 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.3.0b5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,6 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="cartoframes.credentials module" href="cartoframes.credentials.html" />
+    <link rel="prev" title="cartoframes package" href="cartoframes.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -122,22 +124,18 @@ information about the failure</td>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>CartoContext class for authentication with CARTO and high-level operations
 such as reading tables from CARTO into dataframes, writing dataframes to
-CARTO tables, and creating custom maps from dataframes and CARTO tables.
-Future methods interact with CARTO’s services like
-<a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>, and <a class="reference external" href="https://carto.com/location-data-services/">routing,
-geocoding, and isolines</a>.</p>
+CARTO tables, creating custom maps from dataframes and CARTO tables, and
+augmenting data using CARTO’s <a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>. Future methods will interact with
+CARTO’s services like <a class="reference external" href="https://carto.com/location-data-services/">routing, geocoding, and isolines</a>, PostGIS backend for spatial
+processing, and much more.</p>
 <p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
-<p class="rubric">Example</p>
-<p>Create a CartoContext object:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="docutils">
-<dt>Attrs:</dt>
-<dd>creds (cartoframes.Credentials): <code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code> instance</dd>
-</dl>
+<dl class="attribute">
+<dt id="cartoframes.context.CartoContext.creds">
+<code class="descname">creds</code><a class="headerlink" href="#cartoframes.context.CartoContext.creds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>cartoframes.Credentials</em> – <code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code> instance</p>
+</dd></dl>
+
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -165,6 +163,12 @@ against the user’s CARTO account.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<p>Create a CartoContext object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.data_augment">
 <code class="descname">data_augment</code><span class="sig-paren">(</span><em>table_name</em>, <em>metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.data_augment" title="Permalink to this definition">¶</a></dt>
@@ -343,11 +347,12 @@ Format is <code class="docutils literal"><span class="pre">(width,</span> <span 
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an
-<code class="docutils literal"><span class="pre">iframe</span></code>, while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are
+rendered as HTML in an <cite>iframe</cite>, while static maps are returned as
+matplotlib Axes objects or IPython Image.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML or matplotlib Axes</p>
 </td>
 </tr>
 </tbody>
@@ -365,17 +370,21 @@ operations (creating/dropping tables, adding columns, updates, etc.).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>str</em>) – Query to run against CARTO user database.</li>
+<li><strong>query</strong> (<em>str</em>) – Query to run against CARTO user database. This data
+will then be converted into a pandas DataFrame.</li>
 <li><strong>table_name</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, this will create a new
 table in the user’s CARTO account that is the result of the
 query. Defaults to None (no table created).</li>
+<li><strong>decode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Decodes CARTO’s geometries into a
+<a class="reference external" href="https://github.com/Toblerity/Shapely">Shapely</a>
+object that can be used, for example, in <a class="reference external" href="http://geopandas.org/">GeoPandas</a>.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of query supplied.
 Pandas data types are inferred from PostgreSQL data types.
-In the case of PostgreSQL date types, the data type ‘object’ is
-used.</p>
+In the case of PostgreSQL date types, dates are attempted to be
+converted, but on failure a data type ‘object’ is used.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
@@ -388,22 +397,19 @@ used.</p>
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index='cartodb_id'</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read tables from CARTO into pandas DataFrames.</p>
-<p class="rubric">Example</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<dd><p>Read a table from CARTO into a pandas DataFrames.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>table_name</strong> (<em>str</em>) – Name of table in user’s CARTO account.</li>
-<li><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – Read only <code class="docutils literal"><span class="pre">limit</span></code> lines from
-<code class="docutils literal"><span class="pre">table_name</span></code>. Defaults to <cite>None</cite>, which reads the full table.</li>
+<li><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – Read only <cite>limit</cite> lines from
+<cite>table_name</cite>. Defaults to <code class="docutils literal"><span class="pre">None</span></code>, which reads the full table.</li>
 <li><strong>index</strong> (<em>str</em><em>, </em><em>optional</em>) – Not currently in use.</li>
+<li><strong>decode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Decodes CARTO’s geometries into a
+<a class="reference external" href="https://github.com/Toblerity/Shapely">Shapely</a>
+object that can be used, for example, in <a class="reference external" href="http://geopandas.org/">GeoPandas</a>.</li>
 </ul>
 </td>
 </tr>
@@ -416,6 +422,12 @@ CARTO.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -433,7 +445,7 @@ operations, if on the smaller side use Import API.</p>
 
 <dl class="method">
 <dt id="cartoframes.context.CartoContext.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/tmp'</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir='/Users/peschbacher/Library/Caches/cartoframes'</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a DataFrame to a CARTO table.</p>
 <p class="rubric">Example</p>
 <p>Write a pandas DataFrame to CARTO.</p>
@@ -444,8 +456,15 @@ operations, if on the smaller side use Import API.</p>
 guessing to create a geometry from the country column. This uses
 a CARTO Import API param <cite>content_guessing</cite> parameter.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy&#39;</span>
+<span class="c1"># retrieve first HTML table from that page</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span> <span class="n">content_guessing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># send to carto, let it guess polygons based on the &#39;country&#39;</span>
+<span class="c1">#   column. Also set privacy to &#39;public&#39;</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span>
+         <span class="n">content_guessing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+         <span class="n">privacy</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;both_sexes_life_expectancy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -489,6 +508,12 @@ instance is returned. Otherwise, None.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">DataFrame indexes are changed to ordinary columns. CARTO creates
+an index called <cite>cartodb_id</cite> for every table that runs from 1 to
+the length of the DataFrame.</p>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -504,6 +529,12 @@ instance is returned. Otherwise, None.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">cartoframes</a><ul>
+  <li><a href="cartoframes.html">cartoframes package</a><ul>
+      <li>Previous: <a href="cartoframes.html" title="previous chapter">cartoframes package</a></li>
+      <li>Next: <a href="cartoframes.credentials.html" title="next chapter">cartoframes.credentials module</a></li>
+  </ul></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
@@ -532,7 +563,7 @@ instance is returned. Otherwise, None.</p>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

@@ -23,6 +23,7 @@ from .utils import (dict_items, normalize_colnames, norm_colname,
                     importify_params, join_url)
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
+from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -49,26 +50,26 @@ MAX_ROWS_LNGLAT = 100000
 # Cache directory for temporary data operations
 CACHE_DIR = user_cache_dir('cartoframes')
 
+# cartoframes version
+DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
+                        do_post=False)
+
 
 class CartoContext(object):
     """CartoContext class for authentication with CARTO and high-level operations
     such as reading tables from CARTO into dataframes, writing dataframes to
-    CARTO tables, and creating custom maps from dataframes and CARTO tables.
-    Future methods interact with CARTO's services like
-    `Data Observatory <https://carto.com/data-observatory>`__, and `routing,
-    geocoding, and isolines <https://carto.com/location-data-services/>`__.
+    CARTO tables, creating custom maps from dataframes and CARTO tables, and
+    augmenting data using CARTO's `Data Observatory
+    <https://carto.com/data-observatory>`__. Future methods will interact with
+    CARTO's services like `routing, geocoding, and isolines
+    <https://carto.com/location-data-services/>`__, PostGIS backend for spatial
+    processing, and much more.
 
     Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
     <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
 
-    Example:
-        Create a CartoContext object::
-
-            import cartoframes
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
-
-    Attrs:
+    Attributes:
         creds (cartoframes.Credentials): :obj:`Credentials` instance
 
     Args:
@@ -87,6 +88,12 @@ class CartoContext(object):
     Returns:
         :obj:`CartoContext`: A CartoContext object that is authenticated
         against the user's CARTO account.
+
+    Example:
+        Create a CartoContext object::
+
+            import cartoframes
+            cc = cartoframes.CartoContext(BASEURL, APIKEY)
     """
     def __init__(self, base_url=None, api_key=None, creds=None, session=None,
                  verbose=0):
@@ -105,7 +112,7 @@ class CartoContext(object):
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path')
+        res = self.sql_client.send('SHOW search_path', **DEFAULT_SQL_ARGS)
 
         paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
         # is an org user if first item is not `public`
@@ -113,7 +120,21 @@ class CartoContext(object):
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False):
-        """Read tables from CARTO into pandas DataFrames.
+        """Read a table from CARTO into a pandas DataFrames.
+
+        Args:
+            table_name (str): Name of table in user's CARTO account.
+            limit (int, optional): Read only `limit` lines from
+                `table_name`. Defaults to ``None``, which reads the full table.
+            index (str, optional): Not currently in use.
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of `table_name` from
+            CARTO.
 
         Example:
             .. code:: python
@@ -121,16 +142,6 @@ class CartoContext(object):
                 import cartoframes
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
-
-        Args:
-            table_name (str): Name of table in user's CARTO account.
-            limit (int, optional): Read only ``limit`` lines from
-                ``table_name``. Defaults to `None`, which reads the full table.
-            index (str, optional): Not currently in use.
-
-        Returns:
-            pandas.DataFrame: DataFrame representation of `table_name` from
-            CARTO.
         """
         query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
         if limit is not None:
@@ -201,35 +212,48 @@ class CartoContext(object):
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
             DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
             instance is returned. Otherwise, None.
-        """
+
+        .. note::
+            DataFrame indexes are changed to ordinary columns. CARTO creates
+            an index called `cartodb_id` for every table that runs from 1 to
+            the length of the DataFrame.
+        """  # noqa
+        # work on a copy to avoid changing the original
+        _df = df.copy()
         if not os.path.exists(temp_dir):
             self._debug_print(temp_dir='creating directory at ' + temp_dir)
             os.makedirs(temp_dir)
         if encode_geom:
-            _add_encoded_geom(df, geom_col)
+            _add_encoded_geom(_df, geom_col)
 
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
 
-        pgcolnames = normalize_colnames(df.columns)
+        # issue warning if the index is anything but the pandas default
+        #  range index
+        if not _df.index.equals(pd.RangeIndex(0, _df.shape[0], 1)):
+            _df.reset_index(inplace=True)
+
+        pgcolnames = normalize_colnames(_df.columns)
         if table_name != norm_colname(table_name):
             table_name = norm_colname(table_name)
             warn('Table will be named `{}`'.format(table_name))
-        if df.shape[0] > MAX_IMPORT_ROWS:
+
+        if _df.shape[0] > MAX_IMPORT_ROWS:
             # NOTE: schema is set using different method than in _set_schema
             # send placeholder table
-            final_table_name = self._send_dataframe(df.iloc[0:0], table_name,
+            final_table_name = self._send_dataframe(_df.iloc[0:0], table_name,
                                                     temp_dir, geom_col,
                                                     pgcolnames, kwargs)
             # send dataframe in batches, combine into placeholder table
-            final_table_name = self._send_batches(df, table_name, temp_dir,
+            final_table_name = self._send_batches(_df, table_name, temp_dir,
                                                   geom_col, pgcolnames, kwargs)
         else:
-            final_table_name = self._send_dataframe(df, table_name, temp_dir,
+            final_table_name = self._send_dataframe(_df, table_name, temp_dir,
                                                     geom_col, pgcolnames,
                                                     kwargs)
-            self._set_schema(df, final_table_name, pgcolnames)
+            self._set_schema(_df, final_table_name, pgcolnames)
 
         # create geometry column from long/lats if requested
         if lnglat:
@@ -241,7 +265,7 @@ class CartoContext(object):
                     '''.format(table_name=final_table_name,
                                lng=norm_colname(lnglat[0]),
                                lat=norm_colname(lnglat[1]))
-            if df.shape[0] > MAX_ROWS_LNGLAT:
+            if _df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
                 tqdm.write(
@@ -261,7 +285,7 @@ class CartoContext(object):
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
 
-            self.sql_client.send(query)
+            self.sql_client.send(query, do_post=False)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
                        table_url=join_url((self.creds.base_url(),
@@ -295,7 +319,8 @@ class CartoContext(object):
         try:
             self.sql_client.send('''
                 EXPLAIN SELECT * FROM "{table_name}"
-                '''.format(table_name=table_name))
+                '''.format(table_name=table_name),
+                do_post=False)
             raise NameError(
                 'Table `{table_name}` already exists. '
                 'Run with `overwrite=True` if you wish to replace the '
@@ -378,7 +403,7 @@ class CartoContext(object):
                                 if self.is_org else 'public'),
                            drop_tables=drop_tables)
             self._debug_print(query=query)
-            self.sql_client.send(query)
+            self.sql_client.send(query, **DEFAULT_SQL_ARGS)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
@@ -389,7 +414,8 @@ class CartoContext(object):
 
     def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames,
                         kwargs):
-        """Send a DataFrame to CARTO to be imported as a SQL table.
+        """Send a DataFrame to CARTO to be imported as a SQL table. Index of
+            DataFrame not included.
 
         Note:
             Schema from ``df`` is not enforced with this method. Use
@@ -414,10 +440,12 @@ class CartoContext(object):
         tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
                                                         table_name=table_name)
         self._debug_print(tempfile=tempfile)
-        df.drop(geom_col, axis=1, errors='ignore').to_csv(path_or_buf=tempfile,
-                                                          na_rep='',
-                                                          header=pgcolnames,
-                                                          encoding='utf-8')
+        df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
+                path_or_buf=tempfile,
+                na_rep='',
+                header=pgcolnames,
+                index=False,
+                encoding='utf-8')
 
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
@@ -474,7 +502,7 @@ class CartoContext(object):
             alter_cols=alter_cols)
         self._debug_print(alter_query=alter_query)
         try:
-            self.sql_client.send(alter_query)
+            self.sql_client.send(alter_query, **DEFAULT_SQL_ARGS)
         except CartoException as err:
             warn('DataFrame written to CARTO but the table schema failed to '
                  'update to match DataFrame. All columns in CARTO table have '
@@ -513,13 +541,14 @@ class CartoContext(object):
             if import_job['table_name'] != table_name:
                 try:
                     res = self.sql_client.send('''
-                        DROP TABLE IF EXISTS {orig_table};
-                        ALTER TABLE {dupe_table} RENAME TO {orig_table};
-                        SELECT CDB_TableMetadataTouch(
-                                   '{orig_table}'::regclass);
-                        '''.format(
-                            orig_table=table_name,
-                            dupe_table=import_job['table_name']))
+                            DROP TABLE IF EXISTS {orig_table};
+                            ALTER TABLE {dupe_table} RENAME TO {orig_table};
+                            SELECT CDB_TableMetadataTouch(
+                                       '{orig_table}'::regclass);
+                            '''.format(
+                                orig_table=table_name,
+                                dupe_table=import_job['table_name']),
+                            do_post=False)
 
                     self._debug_print(res=res)
                 except Exception as err:
@@ -549,15 +578,21 @@ class CartoContext(object):
         operations (creating/dropping tables, adding columns, updates, etc.).
 
         Args:
-            query (str): Query to run against CARTO user database.
+            query (str): Query to run against CARTO user database. This data
+              will then be converted into a pandas DataFrame.
             table_name (str, optional): If set, this will create a new
-                table in the user's CARTO account that is the result of the
-                query. Defaults to None (no table created).
+              table in the user's CARTO account that is the result of the
+              query. Defaults to None (no table created).
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
-            In the case of PostgreSQL date types, the data type 'object' is
-            used.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
         """
         self._debug_print(query=query)
         if table_name:
@@ -572,18 +607,22 @@ class CartoContext(object):
                             if self.is_org else 'public'))
             self._debug_print(create_table_query=create_table_query)
 
-            create_table_res = self.sql_client.send(create_table_query)
+            create_table_res = self.sql_client.send(create_table_query,
+                                                    do_post=False)
             self._debug_print(create_table_res=create_table_res)
 
             new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
             self._debug_print(new_table_name=new_table_name)
 
             select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(table_name=new_table_name))
+                'SELECT * FROM {table_name}'.format(table_name=new_table_name),
+                **DEFAULT_SQL_ARGS)
         else:
             skipfields = ('the_geom_webmercator'
                           if 'the_geom_webmercator' not in query else None)
-            select_res = self.sql_client.send(query, skipfields=skipfields)
+            select_res = self.sql_client.send(query,
+                                              skipfields=skipfields,
+                                              **DEFAULT_SQL_ARGS)
 
         self._debug_print(select_res=select_res)
 
@@ -668,8 +707,9 @@ class CartoContext(object):
                 ``interactive`` is ``False``.
 
         Returns:
-            IPython.display.HTML: Interactive maps are rendered in an
-            ``iframe``, while static maps are rendered in ``img`` tags.
+            IPython.display.HTML or matplotlib Axes: Interactive maps are
+            rendered as HTML in an `iframe`, while static maps are returned as
+            matplotlib Axes objects or IPython Image.
         """
         # TODO: add layers preprocessing method like
         #       layers = process_layers(layers)
@@ -739,7 +779,8 @@ class CartoContext(object):
                     LIMIT 0
                 '''.format(cols=','.join(layer.style_cols),
                            comma=',' if layer.style_cols else '',
-                           query=layer.query))
+                           query=layer.orig_query),
+                   **DEFAULT_SQL_ARGS)
                 self._debug_print(layer_fields=resp)
                 for k, v in dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
@@ -839,17 +880,21 @@ class CartoContext(object):
 
             if time_layer:
                 # get turbo-carto processed cartocss
-                params.update(dict(callback='cartoframes'))
-                resp = requests.get(
-                        os.path.join(self.creds.base_url(),
-                                     'api/v1/map/named', map_name, 'jsonp'),
-                        params=params,
+                resp = self._auth_send(
+                        'api/v1/map/named/{}'.format(map_name),
+                        'POST',
+                        data=params['config'],
                         headers={'Content-Type': 'application/json'})
 
-                # replace previous cartocss with turbo-carto processed version
-                layer.cartocss = json.loads(
-                        resp.text.split('&& cartoframes(')[1]
-                            .strip(');'))['metadata']['layers'][1]['meta']['cartocss']
+                # check if errors in cartocss (already turbo-carto processed)
+                if 'errors' not in resp:
+                    # replace previous cartocss with turbo-carto processed
+                    #  version
+                    layer.cartocss = (resp['metadata']
+                                          ['layers']
+                                          [1]
+                                          ['meta']
+                                          ['cartocss'])
                 config.update({
                     'order': 1,
                     'options': {
@@ -923,11 +968,12 @@ class CartoContext(object):
             WHERE the_geom IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
-        '''.format(query=layer.query))
+        '''.format(query=layer.orig_query),
+            **DEFAULT_SQL_ARGS)
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
-                    query=layer.query,
+                    query=layer.orig_query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
         return resp['rows'][0]['geom_type']
@@ -1071,7 +1117,8 @@ class CartoContext(object):
                 '''.format(query=query,
                            comma=',' if style_cols else '',
                            style_cols=(','.join(style_cols)
-                                       if style_cols else '')))
+                                       if style_cols else '')),
+                           do_post=False)
         except Exception as err:
             raise ValueError(('Layer query `{query}` and/or style column(s) '
                               '{cols} are not valid: {err}.'
@@ -1127,21 +1174,22 @@ class CartoContext(object):
         extent_query = ('SELECT ST_EXTENT(the_geom) AS the_geom '
                         'FROM ({query}) AS t{idx}\n')
         union_query = 'UNION ALL\n'.join(
-            [extent_query.format(query=layer.query, idx=idx)
+            [extent_query.format(query=layer.orig_query, idx=idx)
              for idx, layer in enumerate(layers)
              if not layer.is_basemap])
 
-        extent = self.sql_client.send('''
-                       SELECT
-                         ST_XMIN(ext) AS west,
-                         ST_YMIN(ext) AS south,
-                         ST_XMAX(ext) AS east,
-                         ST_YMAX(ext) AS north
-                       FROM (
-                           SELECT ST_Extent(the_geom) AS ext
-                           FROM ({union_query}) AS _wrap1
-                       ) AS _wrap2
-                            '''.format(union_query=union_query))
+        extent = self.sql_client.send(
+            '''
+            SELECT
+              ST_XMIN(ext) AS west,
+              ST_YMIN(ext) AS south,
+              ST_XMAX(ext) AS east,
+              ST_YMAX(ext) AS north
+            FROM (
+                SELECT ST_Extent(the_geom) AS ext
+                FROM ({union_query}) AS _wrap1
+            ) AS _wrap2'''.format(union_query=union_query),
+            do_post=False)
 
         return extent['rows'][0]
 
@@ -1234,7 +1282,7 @@ def _dtypes2pg(dtype):
         'int32': 'numeric',
         'object': 'text',
         'bool': 'boolean',
-        'datetime64[ns]': 'date',
+        'datetime64[ns]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
 

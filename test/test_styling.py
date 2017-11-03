@@ -113,6 +113,6 @@ class TestColorScheme(unittest.TestCase):
                 'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
 
     def test_scheme(self):
-        """styling._scheme"""
-        self.assertEqual(styling._scheme('acadia', 27, 'jenks'),
+        """styling.scheme"""
+        self.assertEqual(styling.scheme('acadia', 27, 'jenks'),
                          dict(name='acadia', bins=27, bin_method='jenks'))

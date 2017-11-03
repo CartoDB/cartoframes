@@ -29,7 +29,7 @@ class TestCartoContext(unittest.TestCase):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:
+            except:  # noqa: E722
                 warnings.warn("Skipping CartoContext tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
@@ -48,8 +48,10 @@ class TestCartoContext(unittest.TestCase):
                                                 api_key=self.apikey)
             self.sql_client = SQLClient(self.auth_client)
 
+        # sets client to be ci
+        cartoframes.context.DEFAULT_SQL_ARGS['client'] += '_dev_ci'
         # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None
+        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
@@ -60,35 +62,34 @@ class TestCartoContext(unittest.TestCase):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
+        table_args = dict(ver=pyver, mpl=has_mpl)
         # torque table
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
-            ver=pyver,
-            mpl=has_mpl)
+            **table_args)
         self.mixed_case_table = 'AbCdEfG_{0}_{1}'.format(pyver, has_mpl)
 
         # for batch writing to carto
         self.test_write_batch_table = (
             'cartoframes_test_batch_table_{ver}_{mpl}'.format(
-                ver=pyver,
-                mpl=has_mpl))
+                **table_args))
 
         self.test_write_lnglat_table = (
             'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
-                ver=pyver,
-                mpl=has_mpl))
+                **table_args))
 
+        self.write_named_index = (
+                'cartoframes_test_write_non_default_index_{ver}_{mpl}'.format(
+                    **table_args))
         # for queries
         self.test_query_table = ('cartoframes_test_query_'
                                  'table_{ver}_{mpl}'.format(
-                                    ver=pyver,
-                                    mpl=has_mpl))
+                                    **table_args))
         self.test_delete_table = ('cartoframes_test_delete_'
                                   'table_{ver}_{mpl}').format(
-                                      ver=pyver,
-                                      mpl=has_mpl)
+                                      **table_args)
 
     def tearDown(self):
         """restore to original state"""
@@ -96,7 +97,8 @@ class TestCartoContext(unittest.TestCase):
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
                   self.test_query_table,
-                  self.mixed_case_table.lower(), )
+                  self.mixed_case_table.lower(),
+                  self.write_named_index, )
         sql_drop = 'DROP TABLE IF EXISTS {};'
 
         if self.apikey and self.baseurl:
@@ -140,7 +142,6 @@ class TestCartoContext(unittest.TestCase):
         saved_creds.save()
         cc_saved = cartoframes.CartoContext()
         self.assertEqual(cc_saved.creds.key(), self.apikey)
-
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
@@ -266,7 +267,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertDictEqual(cols['fields'], expected_schema)
 
         # test properly encoding
-        df = pd.DataFrame({'vals':[1,2],'strings':['a','ô']})
+        df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
         cc.write(df, self.test_write_table, overwrite=True)
 
         # check if table exists
@@ -276,6 +277,23 @@ class TestCartoContext(unittest.TestCase):
             LIMIT 0
             '''.format(table=self.test_write_table))
         self.assertIsNotNone(resp)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_write_index(self):
+        """context.CartoContext.write with non-default index"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        df = pd.DataFrame({
+                    'vals': range(3),
+                    'ids': list('abc')
+                },
+                index=list('xyz'))
+        df.index.name = 'named_index'
+        cc.write(df, self.write_named_index)
+
+        df_index = cc.read(self.write_named_index)
+        self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
+                            set(df_index.columns))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_mixed_case(self):
@@ -766,12 +784,11 @@ class TestCartoContext(unittest.TestCase):
             'int32': 'numeric',
             'object': 'text',
             'bool': 'boolean',
-            'datetime64[ns]': 'date',
+            'datetime64[ns]': 'timestamp',
             'unknown_dtype': 'text'
         }
         for i in results:
-            result = _dtypes2pg(i)
-            self.assertEqual(result, results[i])
+            self.assertEqual(_dtypes2pg(i), results[i])
 
     def test_pg2dtypes(self):
         """context._pg2dtypes"""
@@ -828,7 +845,7 @@ class TestBatchJobStatus(unittest.TestCase):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:
+            except:  # noqa: E722
                 warnings.warn('Skipping CartoContext tests. To test it, '
                               'create a `secret.json` file in test/ by '
                               'renaming `secret.json.sample` to `secret.json` '
@@ -848,7 +865,7 @@ class TestBatchJobStatus(unittest.TestCase):
             self.sql_client = SQLClient(self.auth_client)
 
         # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None
+        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
         pyver = sys.version[0:3].replace('.', '_')
 
