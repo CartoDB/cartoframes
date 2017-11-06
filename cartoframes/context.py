@@ -6,7 +6,6 @@ import sys
 import time
 import collections
 import binascii as ba
-import re
 from warnings import warn
 
 import requests
@@ -983,50 +982,100 @@ class CartoContext(object):
         """Not currently implemented"""
         pass
 
-    def data_discovery(self, keywords=None, regex=None, time=None,
-                       boundary=None):
-        """Not currently implemented
+    def data_discovery(self, boundary, keywords=None, regex=None, time=None):
+        """Discover data observatory meastures. This method returns the full
+        Data Observatory metadata model that is needed to create raw tables
+        or for augmenting an existing table from these measures.
 
-        - obs_getavailablenumerators
-        - args: bounds, filter_tags, denom_id, geom_id, timespan
+        Arguments:
+            boundary (str): Name of table from which the boundary is
+              calculated. Currently the extent of the table is used as the
+              boundary. Since DO measures tend to be at the country level
+              this degree of approximation is appropriate.
+            keywords (str or list of str, optional): Keywords for measures
+              to filter on. Any keyword in this list will be used to filter.
+            regex (str, optional): A regular expression to search the measure
+              descriptions. Note that this relies on PostgreSQL's case
+              insensitive operation `~*`. See `PostgreSQL docs
+              <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
+              for more information.
+
+        Returns:
+            pandas.DataFrame: A dataframe of the complete metadata model for
+            specific measures based on the search parameters.
         """
         if keywords:
             if isinstance(keywords, str):
                 keywords = [keywords, ]
             kwsearch = ' OR '.join('numer_description ilike \'%{}%\''.format(k)
                                    for k in keywords)
-            kwsearch = 'WHERE {}'.format(kwsearch)
+            kwsearch = '({})'.format(kwsearch)
+
+        if regex:
+            regexsearch = '(numer_description ~* \'{}\')'.format(regex)
+
         if time:
-            if '-' in time:
-                trange = (t.strip() for t in time.split('-'))
-            timesearch = ''
+            # if '-' in time:
+            #     trange = (t.strip() for t in time.split('-'))
+            if isinstance(time, str):
+                time = [time, ]
+            timesearch = ' OR '.join('numer_timespan = \'{t}\''.format(t=t)
+                                     for t in time)
+            timesearch = 'WHERE {}'.format(timesearch)
+
+        filters = 'WHERE {kw} {op} {regex}'.format(
+                kw=kwsearch if keywords else '',
+                op='OR' if (keywords and regex) else '',
+                regex=regexsearch if regex else ''
+            )
         query = '''
             WITH envelope AS (
-                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) as env
+                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
+                       count(*)::int AS cnt
                   FROM {table}
             ), numers AS (
-                SELECT *
+                SELECT numer_id
                   FROM OBS_GetAvailableNumerators((SELECT env FROM envelope))
-                 {kwsearch}
+                {filters}
             )
-            SELECT
-                OBS_GetMeta(
+            SELECT *
+            FROM json_to_recordset(
+                (SELECT OBS_GetMeta(
                     envelope.env,
                     ('[' || string_agg(
                       '{{"numer_id": "' || numers.numer_id::text || '"}}',
                       ',') || ']')::json,
-                    1, 1, count(*)::int
+                    10, 1, envelope.cnt
                 ) AS meta
             FROM numers, envelope
-            GROUP BY env
+            GROUP BY env, cnt)) as data(
+                denom_aggregate text, denom_colname text,
+                denom_description text, denom_geomref_colname text,
+                denom_id text, denom_name text, denom_reltype text,
+                denom_t_description text, denom_tablename text,
+                denom_type text, geom_colname text, geom_description text,
+                geom_geomref_colname text, geom_id text, geom_name text,
+                geom_t_description text, geom_tablename text,
+                geom_timespan text, geom_type text, id numeric,
+                max_score_rank text, max_timespan_rank text,
+                normalization text, num_geoms numeric, numer_aggregate text,
+                numer_colname text, numer_description text,
+                numer_geomref_colname text, numer_id text,
+                numer_name text, numer_t_description text,
+                numer_tablename text, numer_timespan text,
+                numer_type text, score numeric, score_rank numeric,
+                score_rownum numeric, suggested_name text,
+                target_area text, target_geoms text, timespan_rank numeric,
+                timespan_rownum numeric)
+            {time}
         '''.format(table=boundary,
-                   kwsearch=kwsearch if keywords else '').strip()
-        query = re.sub('( +|\n)', ' ', query)
+                   filters=filters,
+                   time=timesearch if time else '').strip()
         self._debug_print(query=query)
         resp = self.sql_client.send(query)
-        return pd.DataFrame(resp['rows'][0]['meta'])
+        return pd.DataFrame(resp['rows'])
 
-    def data(self, table_name, metadata, augment=False):
+    def data(self, table_name, metadata, persist_table=None):
         """Augment an existing CARTO table with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. See the full `Data
         Observatory catalog
@@ -1060,88 +1109,39 @@ class CartoContext(object):
         Args:
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
-            metadata (list of dicts): List of all measures to add to
-                `table_name`. Each `dict` has the following keys:
-
-                - `numer_id` (str): The identifier for the desired measurement
-                - `geom_id` (str, optional): Identifier for a desired
-                  geographic boundary level to use when calculating measures.
-                  Will be automatically assigned if undefined
-                - `normalization` (str, optional): The desired normalization.
-                  One of 'area', 'prenormalized', or 'denominated'. 'Area' will
-                  normalize the measure per square kilometer, 'prenormalized'
-                  will return the original value, and 'denominated' will
-                  normalize by a denominator.
-                - `denom_id` (str, optional): Measure ID from DO catalog
-                - `numer_timespan` (str, optional): The desired timespan for
-                  the measurement. Defaults to most recent timespan available
-                  if left unspecified.
-                - `geom_timespan` (str, optional): The desired timespan for the
-                  geometry. Defaults to timespan matching `numer_timespan` if
-                  left unspecified.
-                - `target_area` (str, optional): Instead of aiming to have
-                  `target_geoms` in the area of the geometry passed as extent,
-                  fill this area. Unit is square degrees WGS84. Set this to
-                  `0` if you want to use the smallest source geometry for this
-                  element of metadata, for example if you're passing in points.
-                - `target_geoms` (str, optional): Override global
-                  `target_geoms` for this element of metadata
-                - `max_timespan_rank` (str, optional): Override global
-                  `max_timespan_rank` for this element of metadata
-                - `max_score_rank` (str, optional): Override global
-                  `max_score_rank` for this element of metadata
-            augment (bool): Augment `table_name`. Defaults to False. If set to
-                ``True``, `table_name` will have new columns appended to it.
+            metadata (pandas.DataFrame): List of all measures to add to
+                `table_name`. See `CartoContext.data_discovery` outputs
+                for a full list of metadata columns.
+            persist (str, optional): Output the results of augmenting
+                `table_name` to `persist_table`. Defaults to not create a
+                persistent table (``None``).
 
         Returns:
             pandas.DataFrame: A DataFrame representation of `table_name` which
             has new columns for each measure in `metadata`.
         """
-
-        # try:
-        #     with open(os.path.join(os.path.dirname(__file__),
-        #                            'assets/data_obs_augment.sql'), 'r') as f:
-        #         augment_functions = f.read()
-        #     self.sql_client.send(augment_functions)
-        # except CartoException as err:
-        #     raise CartoException("Could not install `obs_augment_table` onto "
-        #                          "user account ({})".format(err))
-
-        if augment:
-            # augment with data observatory metadata
-            # self.sql_client.send(augment_query)
-
-            query = '''
-                SELECT obs_augment_table('{username}.{tablename}',
-                                         '{cols_meta}')
-                '''.format(username=self.creds.username(),
-                           tablename=table_name,
-                           cols_meta=json.dumps(metadata))
-            # read full augmented table
-            return self.read(table_name)
-        else:
-            # cols = ','.join(
-            #     'a.data::json->{n}->\'value\' As obs_val_{n}'.format(n=i)
-            #     for i in range(1, len(metadata) + 1))
-            # query = '''
-            #     SELECT {tablename}.*, {cols}
-            #     FROM obs_data_table('{username}.{tablename}',
-            #                         '{cols_meta}') as a
-            #     JOIN {tablename}
-            #       ON {tablename}.cartodb_id = a.id;
-            # '''.format(username=self.creds.username(),
-            #            tablename=table_name,
-            #            cols=cols,
-            #            cols_meta=json.dumps(metadata))
-            query = '''
-                SELECT *
-                  FROM OBS_GetData(
-                      (select array_agg((the_geom, cartodb)::geomval)
-                       from {tablename}),
-                      {meta})
-            '''.format(tablename=table_name,
-                       meta=json.dumps(metadata.to_json()))
-            return self.query(query)
+        cols = ', '.join(
+                '(data->{n}->>\'value\')::{pgtype} as {col}'.format(
+                    n=row[0],
+                    pgtype=row[1]['numer_type'],
+                    col=row[1]['suggested_name'])
+                for row in metadata.iterrows()
+            )
+        if isinstance(metadata, pd.DataFrame):
+            metadata = metadata.to_json(orient='records')
+        query = '''
+            SELECT t.*, {cols}
+              FROM OBS_GetData(
+                   (SELECT array_agg((the_geom, cartodb_id)::geomval)
+                    FROM "{tablename}"),
+                   (SELECT \'{meta}\'::json)) as m,
+                   {tablename} as t
+             WHERE t.cartodb_id = m.id
+        '''.format(tablename=table_name,
+                   cols=cols,
+                   meta=metadata.replace('\'', '\'\''))
+        return self.query(query,
+                          table_name=persist_table)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
