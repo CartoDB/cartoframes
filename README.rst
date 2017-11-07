@@ -108,7 +108,7 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                    Layer('peregrine_falcon_nest_sites',
                          size='num_eggs',
                          color={'column': 'bird_id',
-                                'scheme': styling.vivid(10))],
+                                'scheme': styling.vivid(10)})],
            interactive=True)
 
 
