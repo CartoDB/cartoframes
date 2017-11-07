@@ -278,9 +278,9 @@ class CartoContext(object):
                     'minutes.\n'
                     '\033[1mNote:\033[0m `CartoContext.map` will not work on '
                     'this table until its geometries are created.'.format(
-                               table_url=join_url((self.creds.base_url(),
-                                                   'dataset',
-                                                   final_table_name, )),
+                               table_url=join_url(self.creds.base_url(),
+                                                  'dataset',
+                                                  final_table_name),
                                job_id=status.get('job_id'),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
@@ -288,9 +288,9 @@ class CartoContext(object):
             self.sql_client.send(query, do_post=False)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-                       table_url=join_url((self.creds.base_url(),
-                                           'dataset',
-                                           final_table_name, ))))
+                       table_url=join_url(self.creds.base_url(),
+                                          'dataset',
+                                          final_table_name)))
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -600,7 +600,8 @@ class CartoContext(object):
                 CREATE TABLE {table_name} As
                 SELECT *
                   FROM ({query}) As _wrap;
-                SELECT CDB_CartodbfyTable('{org}', '{table_name}');
+                SELECT CDB_CartoDBfyTable('{org}', '{table_name}');
+                SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
             '''.format(table_name=table_name,
                        query=query,
                        org=(self.creds.username()
@@ -610,6 +611,19 @@ class CartoContext(object):
             create_table_res = self.sql_client.send(create_table_query,
                                                     do_post=False)
             self._debug_print(create_table_res=create_table_res)
+            print(
+                'Table `{table_name}` successfully created. Visit '
+                '{table_url} to see it on CARTO. NOTE: You may have to load '
+                'the dataset dashboard at {dashboard} for it to be '
+                'registered'.format(
+                    table_name=table_name,
+                    table_url=join_url(self.creds.base_url(),
+                                       'dataset',
+                                       table_name),
+                    dashboard=join_url(self.creds.base_url(),
+                                       'dashboard/datasets')
+                )
+            )
 
             new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
             self._debug_print(new_table_name=new_table_name)
@@ -830,7 +844,7 @@ class CartoContext(object):
             params.update(dict(bbox=bbox))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = join_url((self.creds.base_url(), 'api/v1/map', ))
+        api_url = join_url(self.creds.base_url(), 'api/v1/map')
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(
@@ -985,7 +999,20 @@ class CartoContext(object):
     def data_discovery(self, boundary, keywords=None, regex=None, time=None):
         """Discover data observatory meastures. This method returns the full
         Data Observatory metadata model that is needed to create raw tables
-        or for augmenting an existing table from these measures.
+        or for augmenting an existing table from these measures. For the full
+        Data Observatory catalog, visit
+        <https://cartodb.github.io/bigmetadata/>.
+
+        .. note::
+            Narrowing down a discovery query using the `keywords`, `regex`, and
+            `time` filters is important for getting a manageable metadata
+            set. Besides there being a large number of measures in the DO, a
+            metadata response can have acceptable combinations of measures with
+            demonimators (normalization and density), the same measure from
+            other years, and quantiles measurements.
+
+            For example, setting the boundary to be USA counties with no filter
+            values set will result in many thousands of measures.
 
         Arguments:
             boundary (str): Name of table from which the boundary is
@@ -1023,11 +1050,15 @@ class CartoContext(object):
                                      for t in time)
             timesearch = 'WHERE {}'.format(timesearch)
 
-        filters = 'WHERE {kw} {op} {regex}'.format(
-                kw=kwsearch if keywords else '',
-                op='OR' if (keywords and regex) else '',
-                regex=regexsearch if regex else ''
-            )
+        if keywords or regex:
+            filters = 'WHERE {kw} {op} {regex}'.format(
+                    kw=kwsearch if keywords else '',
+                    op='OR' if (keywords and regex) else '',
+                    regex=regexsearch if regex else ''
+                )
+        else:
+            filters = ''
+
         query = '''
             WITH envelope AS (
                 SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
@@ -1075,31 +1106,29 @@ class CartoContext(object):
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])
 
-    def data(self, table_name, metadata, persist_table=None):
-        """Augment an existing CARTO table with `Data Observatory
-        <https://carto.com/data-observatory>`__ measures. See the full `Data
-        Observatory catalog
-        <https://cartodb.github.io/bigmetadata/index.html>`__ for all available
-        measures. The result of this operation is:
-
-        1. It updates `table_name` by adding columns from the Data Observatory
-        2. It returns a pandas DataFrame representation of that newly augmented
-           table.
-
-        Note:
-            This method alters `table_name` in the user's CARTO database by
-            adding additional columns. To avoid this, create a copy of the
-            table first and use the new copy instead.
+    def data(self, table_name, metadata, persist_as=None):
+        """Get an augmented CARTO dataset with `Data Observatory
+        <https://carto.com/data-observatory>`__ measures. Use
+        `CartoContext.data_discovery
+        <#context.CartoContext.data_discovery>`__ to search for available
+        measures, or see the full `Data Observatory catalog
+        <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
+        persist the data as a new table.
 
         Example:
-            Add new measures to a CARTO table and pass it to a pandas
-            DataFrame. Using the "Median Household Income in the past 12
-            months" measure from the `Data Observatory Catalog
-            <https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months>`__.
+            Get a DataFrame with Data Observatory measures based on the
+            geometries in a CARTO table.
             ::
 
-                import cartoframes
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
+                median_income = cc.data_discovery('transaction_events',
+                                                  regex='.*median income.*',
+                                                  timespan='2011 - 2015')
+                df = cc.data('transaction_events',
+                             median_income)
+
+            Pass in cherry-picked measures from the Data Observatory catalog.
+            ::
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
@@ -1112,23 +1141,79 @@ class CartoContext(object):
             metadata (pandas.DataFrame): List of all measures to add to
                 `table_name`. See `CartoContext.data_discovery` outputs
                 for a full list of metadata columns.
-            persist (str, optional): Output the results of augmenting
-                `table_name` to `persist_table`. Defaults to not create a
-                persistent table (``None``).
+            persist_as (str, optional): Output the results of augmenting
+                `table_name` to `persist_as` as a persistent table on CARTO.
+                Defaults to ``None``, which will not create a table.
 
         Returns:
             pandas.DataFrame: A DataFrame representation of `table_name` which
             has new columns for each measure in `metadata`.
+
+        Raises:
+            NameError: If the columns in `table_name` are in the
+              ``suggested_name`` column of `metadata`.
         """
+        if isinstance(metadata, pd.DataFrame):
+            _meta = metadata.copy().reset_index()
+        elif isinstance(metadata, list):
+            query = '''
+              WITH envelope AS (
+                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
+                       count(*)::int AS cnt
+                  FROM {table_name}
+              )
+              SELECT *
+                FROM json_to_recordset(
+                    (SELECT OBS_GetMeta(
+                        envelope.env,
+                        ('{meta}')::json,
+                        10, 1, envelope.cnt
+                    ) AS meta
+                FROM envelope
+                GROUP BY env, cnt)) as data(
+                    denom_aggregate text, denom_colname text,
+                    denom_description text, denom_geomref_colname text,
+                    denom_id text, denom_name text, denom_reltype text,
+                    denom_t_description text, denom_tablename text,
+                    denom_type text, geom_colname text, geom_description text,
+                    geom_geomref_colname text, geom_id text, geom_name text,
+                    geom_t_description text, geom_tablename text,
+                    geom_timespan text, geom_type text, id numeric,
+                    max_score_rank text, max_timespan_rank text,
+                    normalization text, num_geoms numeric,numer_aggregate text,
+                    numer_colname text, numer_description text,
+                    numer_geomref_colname text, numer_id text,
+                    numer_name text, numer_t_description text,
+                    numer_tablename text, numer_timespan text,
+                    numer_type text, score numeric, score_rank numeric,
+                    score_rownum numeric, suggested_name text,
+                    target_area text, target_geoms text, timespan_rank numeric,
+                    timespan_rownum numeric)
+            '''.format(
+                    table_name=table_name,
+                    meta=json.dumps(metadata).replace('\'', '\'\''))
+            resp = self.sql_client.send(query)
+            _meta = pd.DataFrame(resp['rows'])
+
+        # TODO: add OBS_GetMetadataValidation here?
+        tablecols = self.sql_client.send('''
+            SELECT * FROM {table_name} LIMIT 0
+            '''.format(table_name=table_name),
+            **DEFAULT_SQL_ARGS)['fields'].keys()
+
+        if set(tablecols) & set(_meta['suggested_name']):
+            commoncols = set(tablecols) & set(_meta['suggested_name'])
+            raise NameError('Column name collision for column(s): {cols}. '
+                            'Rename table column(s) to resolve.'.format(
+                                cols=', '.join(commoncols)))
+
         cols = ', '.join(
-                '(data->{n}->>\'value\')::{pgtype} as {col}'.format(
+                '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
                     n=row[0],
                     pgtype=row[1]['numer_type'],
                     col=row[1]['suggested_name'])
-                for row in metadata.iterrows()
+                for row in _meta.iterrows()
             )
-        if isinstance(metadata, pd.DataFrame):
-            metadata = metadata.to_json(orient='records')
         query = '''
             SELECT t.*, {cols}
               FROM OBS_GetData(
@@ -1139,9 +1224,10 @@ class CartoContext(object):
              WHERE t.cartodb_id = m.id
         '''.format(tablename=table_name,
                    cols=cols,
-                   meta=metadata.replace('\'', '\'\''))
+                   meta=_meta.to_json(orient='records').replace(
+                       '\'', '\'\''))
         return self.query(query,
-                          table_name=persist_table)
+                          table_name=persist_as)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,

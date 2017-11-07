@@ -115,8 +115,6 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 Augment from Data Observatory
 -----------------------------
 
-**Note:** This is a provisional function, so the signature may change.
-
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
 .. code:: python
@@ -132,8 +130,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.data_augment('transactions', data_obs_measures)
-    df.head()
+    df = cc.data('transactions', data_obs_measures)
 
 
 CARTO Credential Management
