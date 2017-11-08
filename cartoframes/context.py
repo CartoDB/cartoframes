@@ -1229,6 +1229,9 @@ class CartoContext(object):
         return self.query(query,
                           table_name=persist_as)
 
+    # backwards compatibility
+    data_augment = data
+
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
                           http_method=http_method,

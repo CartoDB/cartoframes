@@ -90,6 +90,8 @@ class TestCartoContext(unittest.TestCase):
         self.test_delete_table = ('cartoframes_test_delete_'
                                   'table_{ver}_{mpl}').format(
                                       **table_args)
+        # for data observatory
+        self.test_data_table = 'carto_usa_offices'
 
     def tearDown(self):
         """restore to original state"""
@@ -827,13 +829,54 @@ class TestCartoContext(unittest.TestCase):
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
 
-    def test_data_obs_functions(self):
-        """context.data_x"""
+    def test_data_discovery(self):
+        """context.data_discovery"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
-        self.assertIsNone(cc.data_boundaries())
-        self.assertIsNone(cc.data_discovery())
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        meta_columns = set((
+                'denom_aggregate', 'denom_colname', 'denom_description',
+                'denom_geomref_colname', 'denom_id', 'denom_name',
+                'denom_reltype', 'denom_t_description', 'denom_tablename',
+                'denom_type', 'geom_colname', 'geom_description',
+                'geom_geomref_colname', 'geom_id', 'geom_name',
+                'geom_t_description', 'geom_tablename', 'geom_timespan',
+                'geom_type', 'id', 'max_score_rank', 'max_timespan_rank',
+                'normalization', 'num_geoms', 'numer_aggregate',
+                'numer_colname', 'numer_description', 'numer_geomref_colname',
+                'numer_id', 'numer_name', 'numer_t_description',
+                'numer_tablename', 'numer_timespan', 'numer_type', 'score',
+                'score_rank', 'score_rownum', 'suggested_name', 'target_area',
+                'target_geoms', 'timespan_rank', 'timespan_rownum'))
+        self.assertSetEqual(set(meta.columns), meta_columns,
+                            msg='metadata columns are all there')
+        self.assertTrue((meta['numer_timespan'] == '2010 - 2014').all())
+        self.assertTrue(
+                (meta['numer_description'].str.contains('poverty')).all()
+        )
+
+    def test_data(self):
+        """context.data"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols)
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols)
 
 
 class TestBatchJobStatus(unittest.TestCase):
