@@ -19,6 +19,7 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
+from .dataobs import get_countrytag
 from . import utils
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
@@ -997,12 +998,18 @@ class CartoContext(object):
         pass
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
-                       boundaries=None, country=None):
-        """Discover data observatory meastures. This method returns the full
-        Data Observatory metadata model that is needed to create raw tables
-        or for augmenting an existing table from these measures. For the full
-        Data Observatory catalog, visit
-        <https://cartodb.github.io/bigmetadata/>.
+                       boundaries=None):
+        """Discover Data Observatory measures. This method returns the full
+        Data Observatory metadata model for each measure that matches the
+        conditions from the inputs. The full metadata in each row uniquely
+        defines a measure. Read more about the metadata response in `Data
+        Observatory
+        <https://carto.com/docs/carto-engine/data/measures-functions/#obs_getmetaextent-geometry-metadata-json-max_timespan_rank-max_score_rank-target_geoms>`__
+        documentation.
+
+        This metadata can then be used to create raw tables or for augmenting
+        an existing table from these measures. For the full Data Observatory
+        catalog, visit <https://cartodb.github.io/bigmetadata/>.
 
         .. note::
             Narrowing down a discovery query using the `keywords`, `regex`, and
@@ -1012,14 +1019,34 @@ class CartoContext(object):
             demonimators (normalization and density), the same measure from
             other years, and quantiles measurements.
 
-            For example, setting the region to be USA counties with no filter
-            values set will result in many thousands of measures.
+            For example, setting the region to be United States counties with
+            no filter values set will result in many thousands of measures.
 
         Arguments:
-            region (str): Name of table from which the region is
-              calculated. Currently the extent of the table is used as the
-              region. Since DO measures tend to be at the country level
-              this degree of approximation is usually appropriate.
+            region (str or list): Information about the region of interest.
+            `region` can be one of three types:
+
+                - region name (str): Name of region of interest. Acceptable
+                  values are limited to: 'Australia', 'Brazil', 'Canada',
+                  'European Union', 'France', 'Mexico', 'Spain',
+                  'United Kingdom', 'United States'.
+                - table name (str): Name of a table in user's CARTO account
+                  with geometries. The region will be the bounding box of
+                  the table.
+                - bounding box (list): List of four values (two lng/lat pairs)
+                  in the following order: western longitude, southern latitude,
+                  eastern longitude, and northern latitude. For example,
+                  Switerland fits in ``[5.9559111595,45.8179931641,
+                  10.4920501709,47.808380127]``
+
+                Note: Geometry levels are generally chosen by subdividing the
+                region into the next smallest administrative unit. To override
+                this behavior, specify the `boundaries` flag. For example, set
+                `boundaries` to ``'us.census.tiger.census_tract'``.
+
+                Note: If a table name is also a valid Data Observatory region
+                name, the Data Observatory name will be chosen over the table.
+
             keywords (str or list of str, optional): Keywords for measures
               to filter on. Any keyword in this list will be used to filter.
             regex (str, optional): A regular expression to search the measure
@@ -1032,9 +1059,40 @@ class CartoContext(object):
             pandas.DataFrame: A dataframe of the complete metadata model for
             specific measures based on the search parameters.
         """
-        if country:
-            countrytag = utils.data_obs_country2tag(country)
-        else:
+        if isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError('`region` should be a list of the geographic '
+                                 'bounds of a region in the following order: '
+                                 'western longitude, southern latitude, '
+                                 'eastern longitude, and northern latitude. '
+                                 'For example, Switerland fits in '
+                                 '``[5.9559111595,45.8179931641,10.4920501709,'
+                                 '47.808380127]``.')
+            boundary = 'ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)'.format(
+                    *region)
+        elif isinstance(region, str):
+            try:
+                # see if it's a DO region
+                countrytag = '\'{{{0}}}\''.format(
+                        get_countrytag(region))
+                boundary = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
+            except ValueError as regiontag_err:
+                try:
+                    # TODO: make this work for general queries
+                    # see if it's a table
+                    self.sql_client.send('''
+                        EXPLAIN SELECT * FROM {0} LIMIT 0
+                    '''.format(region))
+                    boundary = ('(SELECT ST_SetSRID(ST_Extent(the_geom), '
+                                '4326) FROM {table_name})').format(
+                                        table_name=region)
+                except CartoException:
+                    raise ValueError('`{0}` is neither a table in user '
+                                     'account nor an available Data '
+                                     'Observatory region. {1}'.format(
+                                             region, regiontag_err))
+
+        if locals().get('countrytag') is None:
             countrytag = 'null'
 
         if keywords:
@@ -1084,17 +1142,35 @@ class CartoContext(object):
         else:
             bt_filters = ''
 
+        if time:
+            numer_query = '''
+                SELECT numer_id {{geom_ids}}
+                  FROM (SELECT * FROM
+                    OBS_GetAvailableNumerators(
+                      (SELECT env FROM envelope),
+                      {{countrytag}},  -- filter tags
+                      null,  -- denom_id
+                      {geom_id},  -- geom_id
+                      {timespan} -- timespan
+                    )
+                    WHERE valid_timespan) as _wrap
+                {{filters}}
+            '''
+            numers = '\nUNION\n'.join(numer_query.format(
+                timespan=t,
+                geom_id=(g if boundaries else 'null'))
+                                      for t in time for g in boundaries)
+
         query = '''
             WITH envelope AS (
-                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
-                       count(*)::int AS cnt
-                  FROM {table}
+                SELECT {boundary} AS env,
+                       3000::int AS cnt
             ), numers AS (
                 SELECT numer_id {geom_ids}
                   FROM
                     OBS_GetAvailableNumerators(
                       (SELECT env FROM envelope),
-                      null,  -- filter tags
+                      {countrytag},  -- filter tags
                       null,  -- denom_id
                       null,  -- geom_id
                       null   -- timespan
@@ -1108,7 +1184,7 @@ class CartoContext(object):
                     ('[' || string_agg(
                       '{{"numer_id": "' || numers.numer_id::text || '"}}',
                       ',') || ']')::json,
-                    10, 1, envelope.cnt
+                    10, 4, 100000 -- envelope.cnt
                 ) AS meta
             FROM numers, envelope
             GROUP BY env, cnt)) as data(
@@ -1132,7 +1208,8 @@ class CartoContext(object):
                 timespan_rownum numeric)
             {bt_filters}
         '''.format(table=region,
-                   # countrytag=countrytag,
+                   countrytag=countrytag,
+                   boundary=boundary,
                    geom_ids='',
                    filters=subjectfilters,
                    bt_filters=bt_filters).strip()
