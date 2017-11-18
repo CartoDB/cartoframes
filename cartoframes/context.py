@@ -1054,12 +1054,18 @@ class CartoContext(object):
               insensitive operation `~*`. See `PostgreSQL docs
               <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
               for more information.
+            boundaries (str or list of str, optional): Boundary or list of
+              boundaries that specify the measure resolution. See `Data
+              Observatory documentation
+              <https://carto.com/docs/carto-engine/data/glossary/#boundary-ids>`__
+              for a full list of boundary IDs.
 
         Returns:
             pandas.DataFrame: A dataframe of the complete metadata model for
             specific measures based on the search parameters.
         """
-        if isinstance(region, collections.Iterable):
+        if (isinstance(region, collections.Iterable) and
+                not isinstance(region, str)):
             if len(region) != 4:
                 raise ValueError('`region` should be a list of the geographic '
                                  'bounds of a region in the following order: '
@@ -1144,38 +1150,33 @@ class CartoContext(object):
 
         if time:
             numer_query = '''
-                SELECT numer_id {{geom_ids}}
+                SELECT numer_id {geom_ids}
                   FROM (SELECT * FROM
                     OBS_GetAvailableNumerators(
                       (SELECT env FROM envelope),
                       {{countrytag}},  -- filter tags
                       null,  -- denom_id
                       {geom_id},  -- geom_id
-                      {timespan} -- timespan
+                      \'{timespan}\' -- timespan
                     )
-                    WHERE valid_timespan) as _wrap
+                    WHERE valid_timespan and valid_geom) as _wrap
                 {{filters}}
             '''
+            geom_ids = ', unnest(Array[{}]) as geom_id'.format(
+                    ','.join(['\'{}\''.format(g) for g in boundaries]))
             numers = '\nUNION\n'.join(numer_query.format(
                 timespan=t,
+                geom_ids=geom_ids if boundaries else '',
                 geom_id=(g if boundaries else 'null'))
                                       for t in time for g in boundaries)
+            print(numers)
 
         query = '''
             WITH envelope AS (
                 SELECT {boundary} AS env,
                        3000::int AS cnt
             ), numers AS (
-                SELECT numer_id {geom_ids}
-                  FROM
-                    OBS_GetAvailableNumerators(
-                      (SELECT env FROM envelope),
-                      {countrytag},  -- filter tags
-                      null,  -- denom_id
-                      null,  -- geom_id
-                      null   -- timespan
-                    )
-                {filters}
+              {numers}
             )
             SELECT *
             FROM json_to_recordset(
@@ -1211,9 +1212,11 @@ class CartoContext(object):
                    countrytag=countrytag,
                    boundary=boundary,
                    geom_ids='',
+                   numers=numers,
                    filters=subjectfilters,
                    bt_filters=bt_filters).strip()
         self._debug_print(query=query)
+        print(query)
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])
 
