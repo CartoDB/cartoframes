@@ -538,8 +538,9 @@ class CartoContext(object):
                                      'carto-engine/import-api/import-errors'
                                      ''.format(import_job['error_code']))
         elif import_job['state'] == 'complete':
-            self._debug_print(final_table=import_job['table_name'])
-            if import_job['table_name'] != table_name:
+            import_job_table_name = import_job['table_name']
+            self._debug_print(final_table=import_job_table_name)
+            if import_job_table_name != table_name:
                 try:
                     res = self.sql_client.send('''
                             DROP TABLE IF EXISTS {orig_table};
@@ -548,7 +549,7 @@ class CartoContext(object):
                                        '{orig_table}'::regclass);
                             '''.format(
                                 orig_table=table_name,
-                                dupe_table=import_job['table_name']),
+                                dupe_table=import_job_table_name),
                             do_post=False)
 
                     self._debug_print(res=res)
@@ -559,7 +560,9 @@ class CartoContext(object):
                                     '`{new_table}` instead.'.format(
                                         table_name=table_name,
                                         err=err,
-                                        new_table=import_job['table_name']))
+                                        new_table=import_job_table_name))
+                finally:
+                    self.delete(import_job_table_name)
         return table_name
 
     def sync(self, dataframe, table_name):
@@ -597,47 +600,49 @@ class CartoContext(object):
         """
         self._debug_print(query=query)
         if table_name:
-            create_table_query = '''
-                CREATE TABLE {table_name} As
-                SELECT *
-                  FROM ({query}) As _wrap;
-                SELECT CDB_CartoDBfyTable('{org}', '{table_name}');
-                SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
-            '''.format(table_name=table_name,
-                       query=query,
-                       org=(self.creds.username()
-                            if self.is_org else 'public'))
-            self._debug_print(create_table_query=create_table_query)
+            # TODO: replace the following error catching with Import API
+            #  checking once Import API sql/table_name collision_strategy=skip
+            #  bug is fixed ref: support/1127
+            try:
+                self.sql_client.send('''
+                    create table {0} as SELECT 1;
+                    drop table {0};
+                '''.format(table_name))
+                resp = self._auth_send(
+                        'api/v1/imports', 'POST',
+                        params=dict(sql=query,
+                                    # collision_strategy='',
+                                    table_name=table_name),
+                        headers={'Content-Type': 'application/json'})
+            except CartoException:
+                raise CartoException('Table `{0}` already exists. Delete it '
+                                     'before creating a table from this '
+                                     'query'.format(table_name))
 
-            create_table_res = self.sql_client.send(create_table_query,
-                                                    do_post=False)
-            self._debug_print(create_table_res=create_table_res)
-            print(
-                'Table `{table_name}` successfully created. Visit '
-                '{table_url} to see it on CARTO. NOTE: You may have to load '
-                'the dataset dashboard at {dashboard} for it to be '
-                'registered'.format(
-                    table_name=table_name,
-                    table_url=utils.join_url(self.creds.base_url(),
-                                             'dataset',
-                                             table_name),
-                    dashboard=utils.join_url(self.creds.base_url(),
-                                             'dashboard/datasets')
-                )
-            )
+            while True:
+                import_job = self._check_import(resp['item_queue_id'])
+                self._debug_print(import_job=import_job)
+                final_table_name = self._handle_import(import_job, table_name)
+                if import_job['state'] == 'complete':
 
-            new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
-            self._debug_print(new_table_name=new_table_name)
+                    print('Table successfully written to CARTO: '
+                          '{table_url}'.format(
+                              table_url=utils.join_url(self.creds.base_url(),
+                                                       'dataset',
+                                                       final_table_name)))
+                    break
+                time.sleep(1.0)
 
             select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(table_name=new_table_name),
-                **DEFAULT_SQL_ARGS)
+                    'SELECT * FROM {table_name}'.format(
+                        table_name=final_table_name),
+                    skipfields='the_geom_webmercator',
+                    **DEFAULT_SQL_ARGS)
         else:
-            skipfields = ('the_geom_webmercator'
-                          if 'the_geom_webmercator' not in query else None)
-            select_res = self.sql_client.send(query,
-                                              skipfields=skipfields,
-                                              **DEFAULT_SQL_ARGS)
+            select_res = self.sql_client.send(
+                    query,
+                    skipfields='the_geom_webmercator',
+                    **DEFAULT_SQL_ARGS)
 
         self._debug_print(select_res=select_res)
 

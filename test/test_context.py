@@ -403,7 +403,7 @@ class TestCartoContext(unittest.TestCase):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'object', 'object', 'int64',
+        expected_dtypes = ('object', 'object', 'object', 'float64',
                            'datetime64[ns]', 'object', )
         self.assertTupleEqual(expected_dtypes,
                               tuple(str(d) for d in df.dtypes),
