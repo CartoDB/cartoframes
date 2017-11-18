@@ -596,12 +596,24 @@ class CartoContext(object):
         """
         self._debug_print(query=query)
         if table_name:
-            resp = self._auth_send(
-                    'api/v1/imports', 'POST',
-                    params=dict(sql=query,
-                                collision_strategy='overwrite',
-                                table_name=table_name),
-                    headers={'Content-Type': 'application/json'})
+            # TODO: replace the following error catching with Import API
+            #  checking once Import API sql/table_name collision_strategy=skip
+            #  bug is fixed ref: support/1127
+            try:
+                self.sql_client.send('''
+                    create table {0} as SELECT 1;
+                    drop table {0};
+                '''.format(table_name))
+                resp = self._auth_send(
+                        'api/v1/imports', 'POST',
+                        params=dict(sql=query,
+                                    # collision_strategy='',
+                                    table_name=table_name),
+                        headers={'Content-Type': 'application/json'})
+            except CartoException:
+                raise CartoException('Table `{0}` already exists. Delete it '
+                                     'before creating a table from this '
+                                     'query'.format(table_name))
 
             while True:
                 import_job = self._check_import(resp['item_queue_id'])
