@@ -537,8 +537,9 @@ class CartoContext(object):
                                      'carto-engine/import-api/import-errors'
                                      ''.format(import_job['error_code']))
         elif import_job['state'] == 'complete':
-            self._debug_print(final_table=import_job['table_name'])
-            if import_job['table_name'] != table_name:
+            import_job_table_name = import_job['table_name']
+            self._debug_print(final_table=import_job_table_name)
+            if import_job_table_name != table_name:
                 try:
                     res = self.sql_client.send('''
                             DROP TABLE IF EXISTS {orig_table};
@@ -547,7 +548,7 @@ class CartoContext(object):
                                        '{orig_table}'::regclass);
                             '''.format(
                                 orig_table=table_name,
-                                dupe_table=import_job['table_name']),
+                                dupe_table=import_job_table_name),
                             do_post=False)
 
                     self._debug_print(res=res)
@@ -558,7 +559,9 @@ class CartoContext(object):
                                     '`{new_table}` instead.'.format(
                                         table_name=table_name,
                                         err=err,
-                                        new_table=import_job['table_name']))
+                                        new_table=import_job_table_name))
+                finally:
+                    self.delete(import_job_table_name)
         return table_name
 
     def sync(self, dataframe, table_name):
