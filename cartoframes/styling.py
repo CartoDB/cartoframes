@@ -4,7 +4,7 @@ in its `GitHub repository <https://github.com/Carto-color/>`__.
 .. image:: https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png
     :width: 700px
     :alt: CARTOColors
-"""
+"""  # noqa
 
 
 class BinMethod:
@@ -31,13 +31,14 @@ def get_scheme_cartocss(column, scheme_info):
     else:
         color_scheme = 'cartocolor({})'.format(scheme_info['name'])
     bin_method = scheme_info['bin_method']
-    return "ramp([{column}], {color_scheme}, {bin_method}({bins}) {comparison})".format(
-        column=column,
-        color_scheme=color_scheme,
-        bin_method=bin_method,
-        bins=scheme_info['bins'],
-        comparison=('' if bin_method == 'category' else ', <=')
-    )
+    return ('ramp([{column}], {color_scheme}, '
+            '{bin_method}({bins}){comparison})').format(
+                column=column,
+                color_scheme=color_scheme,
+                bin_method=bin_method,
+                bins=scheme_info['bins'],
+                comparison=('' if bin_method == 'category' else ', <=')
+            )
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles):
