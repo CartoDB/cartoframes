@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Data Observatory utility functions"""
 
 # Country names are pegged to the following query:
