@@ -1084,8 +1084,7 @@ class CartoContext(object):
         elif isinstance(region, str):
             try:
                 # see if it's a DO region
-                countrytag = '\'{{{0}}}\''.format(
-                        get_countrytag(region))
+                countrytag = '\'{{{0}}}\''.format(get_countrytag(region))
                 boundary = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
             except ValueError as regiontag_err:
                 try:
@@ -1110,17 +1109,17 @@ class CartoContext(object):
             if isinstance(keywords, str):
                 keywords = [keywords, ]
             kwsearch = ' OR '.join(
-                    ('numer_description ilike \'%{kw}%\' or '
+                    ('numer_description ilike \'%{kw}%\' OR '
                      'numer_name ilike \'%{kw}%\'').format(kw=kw)
                     for kw in keywords)
             kwsearch = '({})'.format(kwsearch)
 
         if regex:
-            regexsearch = ('(numer_description ~* \'{regex}\' or '
+            regexsearch = ('(numer_description ~* \'{regex}\' OR '
                            'numer_name ~* \'{regex}\')').format(regex)
 
         if keywords or regex:
-            subjectfilters = 'WHERE {kw} {op} {regex}'.format(
+            subjectfilters = '{kw} {op} {regex}'.format(
                     kw=kwsearch if keywords else '',
                     op='OR' if (keywords and regex) else '',
                     regex=regexsearch if regex else ''
@@ -1128,93 +1127,92 @@ class CartoContext(object):
         else:
             subjectfilters = ''
 
-        if time:
-            # TODO: break into timerange search here?
-            # if '-' in time:
-            #     trange = (t.strip() for t in time.split('-'))
-            if isinstance(time, str):
-                time = [time, ]
-            timesearch = ' OR '.join('numer_timespan = \'{t}\''.format(t=t)
-                                     for t in time)
-            timesearch = '({})'.format(timesearch)
+        if isinstance(time, str):
+            time = [time, ]
+        elif time is None:
+            time = [None, ]
+        if isinstance(boundaries, str):
+            boundaries = [boundaries, ]
+        elif boundaries is None:
+            boundaries = [None, ]
 
-        if boundaries:
-            if isinstance(boundaries, str):
-                boundaries = [boundaries, ]
-            boundarysearch = ' OR '.join('geom_id = \'{b}\''.format(b=b)
-                                         for b in boundaries)
-            boundarysearch = '({})'.format(boundarysearch)
-
-        if time or boundaries:
-            bt_filters = 'WHERE {b} {op} {t}'.format(
-                    b=boundarysearch if boundaries else '',
-                    op='AND' if (time and boundaries) else '',
-                    t=timesearch if time else '')
+        if all(time) and all(boundaries):
+            bt_filters = 'valid_geom AND valid_timespan'
+        if all(time) or all(boundaries):
+            bt_filters = 'valid_geom' if all(boundaries) else 'valid_timespan'
         else:
             bt_filters = ''
 
-        if time:
-            numer_query = '''
-                SELECT numer_id {geom_ids}
-                  FROM (SELECT * FROM
-                    OBS_GetAvailableNumerators(
-                      (SELECT env FROM envelope),
-                      {{countrytag}},  -- filter tags
-                      null,  -- denom_id
-                      {geom_id},  -- geom_id
-                      \'{timespan}\' -- timespan
-                    )
-                    WHERE valid_timespan and valid_geom) as _wrap
-                {{filters}}
-            '''
-            geom_ids = ', unnest(Array[{}]) as geom_id'.format(
-                    ','.join(['\'{}\''.format(g) for g in boundaries]))
-            numers = '\nUNION\n'.join(numer_query.format(
-                timespan=t,
-                geom_ids=geom_ids if boundaries else '',
-                geom_id=(g if boundaries else 'null'))
-                                      for t in time for g in boundaries)
-            print(numers)
+        if bt_filters and subjectfilters:
+            filters = 'WHERE ({s}) AND ({bt})'.format(s=subjectfilters,
+                                                      bt=bt_filters)
+        elif bt_filters or subjectfilters:
+            filters = 'WHERE {f}'.format(f=subjectfilters or bt_filters)
+        else:
+            filters = ''
 
-        query = '''
-            WITH envelope AS (
-                SELECT {boundary} AS env,
-                       3000::int AS cnt
-            ), numers AS (
-              {numers}
+        numer_query = '\n'.join(s.strip() for s in (
+            'SELECT',
+            '    numer_id,',
+            '    {geom_id} AS geom_id,',
+            '    {timespan} AS numer_timespan',
+            '  FROM',
+            '    OBS_GetAvailableNumerators(',
+            '        (SELECT env FROM envelope),',
+            '        {countrytag},',
+            '        null,',
+            '        {geom_id},',
+            '        {timespan}',
+            '    )',
+            '{filters}', ))
+
+        # TODO / BUG: This doesn't work if time or boundaries is None
+        numers = '\nUNION\n'.join(
+                numer_query.format(
+                    timespan=('\'{}\''.format(t) if t else 'null'),
+                    geom_id=('\'{}\''.format(b) if b else 'null'),
+                    countrytag=countrytag,
+                    filters=filters
+                )
+                for t in time
+                for b in boundaries
             )
-            SELECT *
-            FROM json_to_recordset(
-                (SELECT OBS_GetMeta(
-                    envelope.env,
-                    ('[' || string_agg(
-                      '{{"numer_id": "' || numers.numer_id::text || '"}}',
-                      ',') || ']')::json,
-                    10, 4, 100000 -- envelope.cnt
-                ) AS meta
-            FROM numers, envelope
-            GROUP BY env, cnt)) as data(
-                denom_aggregate text, denom_colname text,
-                denom_description text, denom_geomref_colname text,
-                denom_id text, denom_name text, denom_reltype text,
-                denom_t_description text, denom_tablename text,
-                denom_type text, geom_colname text, geom_description text,
-                geom_geomref_colname text, geom_id text, geom_name text,
-                geom_t_description text, geom_tablename text,
-                geom_timespan text, geom_type text, id numeric,
-                max_score_rank text, max_timespan_rank text,
-                normalization text, num_geoms numeric, numer_aggregate text,
-                numer_colname text, numer_description text,
-                numer_geomref_colname text, numer_id text,
-                numer_name text, numer_t_description text,
-                numer_tablename text, numer_timespan text,
-                numer_type text, score numeric, score_rank numeric,
-                score_rownum numeric, suggested_name text,
-                target_area text, target_geoms text, timespan_rank numeric,
-                timespan_rownum numeric)
-            {bt_filters}
-        '''.format(table=region,
-                   countrytag=countrytag,
+
+        query = '\n'.join(s.strip() for s in (
+           'WITH envelope AS (',
+           '    SELECT {boundary} AS env,',
+           '           10000::int AS cnt',
+           '), numers AS (',
+           '  {numers}',
+           ')',
+           'SELECT *',
+           'FROM json_to_recordset(',
+           '    (SELECT OBS_GetMeta(',
+           '        envelope.env,',
+           '        json_agg(numers),',
+           '        10, 10, envelope.cnt',
+           '    ) AS meta',
+           'FROM numers, envelope',
+           'GROUP BY env, cnt)) as data(',
+           '    denom_aggregate text, denom_colname text,',
+           '    denom_description text, denom_geomref_colname text,',
+           '    denom_id text, denom_name text, denom_reltype text,',
+           '    denom_t_description text, denom_tablename text,',
+           '    denom_type text, geom_colname text, geom_description text,',
+           '    geom_geomref_colname text, geom_id text, geom_name text,',
+           '    geom_t_description text, geom_tablename text,',
+           '    geom_timespan text, geom_type text, id numeric,',
+           '    max_score_rank text, max_timespan_rank text,',
+           '    normalization text, num_geoms numeric, numer_aggregate text,',
+           '    numer_colname text, numer_description text,',
+           '    numer_geomref_colname text, numer_id text,',
+           '    numer_name text, numer_t_description text,',
+           '    numer_tablename text, numer_timespan text,',
+           '    numer_type text, score numeric, score_rank numeric,',
+           '    score_rownum numeric, suggested_name text,',
+           '    target_area text, target_geoms text, timespan_rank numeric,',
+           '    timespan_rownum numeric)', )).format(
+                   table=region,
                    boundary=boundary,
                    geom_ids='',
                    numers=numers,
