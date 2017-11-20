@@ -1054,6 +1054,16 @@ class CartoContext(object):
             For example, setting the region to be United States counties with
             no filter values set will result in many thousands of measures.
 
+        Example:
+
+        Get all European Union measures that mention ``freight``.
+        .. code::
+
+            meta = cc.data_discovery('European Union',
+                                     keywords='freight',
+                                     time='2010')
+            print(meta['numer_name'].values)
+
         Arguments:
             region (str or list of float): Information about the region of
               interest. `region` can be one of three types:
@@ -1177,7 +1187,7 @@ class CartoContext(object):
 
         if all(time) and all(boundaries):
             bt_filters = 'valid_geom AND valid_timespan'
-        if all(time) or all(boundaries):
+        elif all(time) or all(boundaries):
             bt_filters = 'valid_geom' if all(boundaries) else 'valid_timespan'
         else:
             bt_filters = ''
@@ -1205,7 +1215,6 @@ class CartoContext(object):
             '    )',
             '{filters}', ))
 
-        # TODO / BUG: This doesn't work if time or boundaries is None
         numers = '\nUNION\n'.join(
                 numer_query.format(
                     timespan=('\'{}\''.format(t) if t else 'null'),
@@ -1250,12 +1259,8 @@ class CartoContext(object):
            '    score_rownum numeric, suggested_name text,',
            '    target_area text, target_geoms text, timespan_rank numeric,',
            '    timespan_rownum numeric)', )).format(
-                   table=region,
                    boundary=boundary,
-                   geom_ids='',
-                   numers=numers,
-                   filters=subjectfilters,
-                   bt_filters=bt_filters).strip()
+                   numers=numers)
         self._debug_print(query=query)
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])
@@ -1278,7 +1283,7 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 median_income = cc.data_discovery('transaction_events',
                                                   regex='.*median income.*',
-                                                  timespan='2011 - 2015')
+                                                  time='2011 - 2015')
                 df = cc.data(median_income,
                              'transaction_event')
 
