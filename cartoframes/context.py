@@ -1073,7 +1073,7 @@ class CartoContext(object):
                 - bounding box (list of float): List of four values (two
                   lng/lat pairs) in the following order: western longitude,
                   southern latitude, eastern longitude, and northern latitude.
-                  For example, Switerland fits in
+                  For example, Switzerland fits in
                   ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
 
                 .. Note:: Geometry levels are generally chosen by subdividing
@@ -1155,7 +1155,7 @@ class CartoContext(object):
 
         if regex:
             regexsearch = ('(numer_description ~* \'{regex}\' OR '
-                           'numer_name ~* \'{regex}\')').format(regex)
+                           'numer_name ~* \'{regex}\')').format(regex=regex)
 
         if keywords or regex:
             subjectfilters = '{kw} {op} {regex}'.format(
@@ -1257,7 +1257,6 @@ class CartoContext(object):
                    filters=subjectfilters,
                    bt_filters=bt_filters).strip()
         self._debug_print(query=query)
-        print(query)
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])
 
@@ -1293,8 +1292,7 @@ class CartoContext(object):
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = cc.data_augment('transaction_events',
-                                     median_income)
+                df = cc.data('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data
@@ -1324,6 +1322,9 @@ class CartoContext(object):
             ValueError: If metadata object is invalid or empty, or if the
               number of requested measures exceeds 50.
         """
+        if how != 'the_geom':
+            raise NotImplementedError('Data gathering currently only works if '
+                                      'a geometry is present')
         if isinstance(metadata, pd.DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
@@ -1410,7 +1411,7 @@ class CartoContext(object):
         return self.query(query,
                           table_name=persist_as)
 
-    def _get_meta(self, ):
+    def _get_meta(self):
         """hi"""
         pass
 

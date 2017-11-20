@@ -858,6 +858,30 @@ class TestCartoContext(unittest.TestCase):
                 (meta['numer_description'].str.contains('poverty')).all()
         )
 
+        # test region = list of lng/lats
+        with self.assertRaises(ValueError):
+            cc.data_discovery([1, 2, 3])
+
+        switzerland = [5.9559111595, 45.8179931641,
+                       10.4920501709, 47.808380127]
+        dd = cc.data_discovery(switzerland, keywords='freight', time='2010')
+        self.assertEqual(dd['numer_id'][0], 'eu.eurostat.tgs00078')
+
+        dd = cc.data_discovery('Australia',
+                               regex='.*Torres Strait Islander.*')
+        for nid in dd['numer_id'].values:
+            self.assertRegexpMatches(
+                    nid,
+                    '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
+
+        with self.assertRaises(ValueError):
+            cc.data_discovery('non_existent_table_abcdefg')
+
+        dd = cc.data_discovery('United States',
+                               boundaries='us.epa.huc.hydro_unit',
+                               time=('2006', '2010', ))
+        self.assertTrue(dd.shape[0] >= 1)
+
     def test_data(self):
         """context.data"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
