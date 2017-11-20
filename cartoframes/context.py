@@ -296,7 +296,7 @@ class CartoContext(object):
         """Delete a table in user's CARTO account.
 
         Args:
-            table_name (str): Table name to delete
+            table_name (str): Name of table to delete
 
         Returns:
             None
@@ -1005,16 +1005,43 @@ class CartoContext(object):
     def data_discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None):
         """Discover Data Observatory measures. This method returns the full
-        Data Observatory metadata model for each measure that matches the
-        conditions from the inputs. The full metadata in each row uniquely
-        defines a measure. Read more about the metadata response in `Data
-        Observatory
+        Data Observatory metadata model for each measure or measures that
+        match the conditions from the inputs. The full metadata in each row
+        uniquely defines a measure based on the timespan, geographic
+        resolution, and normalization (if any). Read more about the metadata
+        response in `Data Observatory
         <https://carto.com/docs/carto-engine/data/measures-functions/#obs_getmetaextent-geometry-metadata-json-max_timespan_rank-max_score_rank-target_geoms>`__
         documentation.
 
-        This metadata can then be used to create raw tables or for augmenting
-        an existing table from these measures. For the full Data Observatory
-        catalog, visit <https://cartodb.github.io/bigmetadata/>.
+        Internally, this method finds all measures in `region` that match the
+        conditions set in `keywords`, `regex`, `time`, and `boundaries` (if
+        any of them are specified). Then, if `boundaries` is not specified, a
+        geographical resolution for that measure will be chosen subject to the
+        type of region specified:
+
+          1. If `region` is a table name, then a geographical resolution that
+             is roughly equal to `region size / number of subunits`.
+          2. If `region` is a country name or bounding box, then a geographical
+             resolution will be chosen roughly equal to `region size / 500`.
+
+        Since different measures are in some geographic resolutions and not
+        others, different geographical resolutions for different measures are
+        oftentimes returned.
+
+        .. tip::
+
+            To remove the guesswork in how geographical resolutions are
+            selected, specify one or more boundaries in `boundaries`. See
+            the boundaries section for each region in the `Data Observatory
+            catalog <http://cartodb.github.io/bigmetadata/>`__.
+
+        The metadata returned from this method can then be used to create raw
+        tables or for augmenting an existing table from these measures using
+        `CartoContext.data`. For the full Data Observatory catalog, visit
+        https://cartodb.github.io/bigmetadata/. When working with the metadata
+        DataFrame returned from this method, be careful to only remove rows not
+        columns as `CartoContext.data <#context.CartoContext.data>`__ generally
+        needs the full metadata.
 
         .. note::
             Narrowing down a discovery query using the `keywords`, `regex`, and
@@ -1028,8 +1055,8 @@ class CartoContext(object):
             no filter values set will result in many thousands of measures.
 
         Arguments:
-            region (str or list): Information about the region of interest.
-            `region` can be one of three types:
+            region (str or list of float): Information about the region of
+              interest. `region` can be one of three types:
 
                 - region name (str): Name of region of interest. Acceptable
                   values are limited to: 'Australia', 'Brazil', 'Canada',
@@ -1038,39 +1065,49 @@ class CartoContext(object):
                 - table name (str): Name of a table in user's CARTO account
                   with geometries. The region will be the bounding box of
                   the table.
-                - bounding box (list): List of four values (two lng/lat pairs)
-                  in the following order: western longitude, southern latitude,
-                  eastern longitude, and northern latitude. For example,
-                  Switerland fits in ``[5.9559111595,45.8179931641,
-                  10.4920501709,47.808380127]``
 
-                Note: Geometry levels are generally chosen by subdividing the
-                region into the next smallest administrative unit. To override
-                this behavior, specify the `boundaries` flag. For example, set
-                `boundaries` to ``'us.census.tiger.census_tract'``.
+                  .. Note:: If a table name is also a valid Data Observatory
+                      region name, the Data Observatory name will be chosen
+                      over the table.
 
-                Note: If a table name is also a valid Data Observatory region
-                name, the Data Observatory name will be chosen over the table.
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
 
-            keywords (str or list of str, optional): Keywords for measures
-              to filter on. Any keyword in this list will be used to filter.
+                .. Note:: Geometry levels are generally chosen by subdividing
+                    the region into the next smallest administrative unit. To
+                    override this behavior, specify the `boundaries` flag. For
+                    example, set `boundaries` to
+                    ``'us.census.tiger.census_tract'`` to choose US census
+                    tracts.
+
+            keywords (str or list of str, optional): Keyword or list of
+              keywords in measure description or name. Response will be matched
+              on all keywords listed (boolean `or`).
             regex (str, optional): A regular expression to search the measure
-              descriptions. Note that this relies on PostgreSQL's case
-              insensitive operation `~*`. See `PostgreSQL docs
+              descriptions and names. Note that this relies on PostgreSQL's
+              case insensitive operator ``~*``. See `PostgreSQL docs
               <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
               for more information.
             boundaries (str or list of str, optional): Boundary or list of
-              boundaries that specify the measure resolution. See `Data
-              Observatory documentation
-              <https://carto.com/docs/carto-engine/data/glossary/#boundary-ids>`__
-              for a full list of boundary IDs.
+              boundaries that specify the measure resolution. See the
+              boundaries section for each region in the `Data Observatory
+              catalog <http://cartodb.github.io/bigmetadata/>`__.
 
         Returns:
             pandas.DataFrame: A dataframe of the complete metadata model for
             specific measures based on the search parameters.
+
+        Raises:
+            ValueError: If `region` is a :obj:`list` and does not consist of
+              four elements, or if `region` is neither an acceptable region
+              nor a table in user account.
         """
         if (isinstance(region, collections.Iterable) and
                 not isinstance(region, str)):
+            # TODO: should this also check to see if each item is a number?
             if len(region) != 4:
                 raise ValueError('`region` should be a list of the geographic '
                                  'bounds of a region in the following order: '
@@ -1079,22 +1116,24 @@ class CartoContext(object):
                                  'For example, Switerland fits in '
                                  '``[5.9559111595,45.8179931641,10.4920501709,'
                                  '47.808380127]``.')
-            boundary = 'ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)'.format(
-                    *region)
+            boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
+                        'env, 500::int AS cnt'.format(*region))
         elif isinstance(region, str):
             try:
                 # see if it's a DO region
                 countrytag = '\'{{{0}}}\''.format(get_countrytag(region))
-                boundary = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
+                boundary = ('SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, '
+                            '85.0, 4326) AS env, 500::int AS cnt')
             except ValueError as regiontag_err:
                 try:
                     # TODO: make this work for general queries
                     # see if it's a table
                     self.sql_client.send('''
                         EXPLAIN SELECT * FROM {0} LIMIT 0
-                    '''.format(region))
-                    boundary = ('(SELECT ST_SetSRID(ST_Extent(the_geom), '
-                                '4326) FROM {table_name})').format(
+                    '''.format(region).strip())
+                    boundary = ('SELECT ST_SetSRID(ST_Extent(the_geom), '
+                                '4326) AS env, count(*)::int AS cnt '
+                                'FROM {table_name}').format(
                                         table_name=region)
                 except CartoException:
                     raise ValueError('`{0}` is neither a table in user '
@@ -1180,8 +1219,7 @@ class CartoContext(object):
 
         query = '\n'.join(s.strip() for s in (
            'WITH envelope AS (',
-           '    SELECT {boundary} AS env,',
-           '           10000::int AS cnt',
+           '    {boundary}',
            '), numers AS (',
            '  {numers}',
            ')',
@@ -1235,7 +1273,8 @@ class CartoContext(object):
         Example:
             Get a DataFrame with Data Observatory measures based on the
             geometries in a CARTO table.
-            ::
+
+            .. code::
 
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 median_income = cc.data_discovery('transaction_events',
@@ -1248,7 +1287,9 @@ class CartoContext(object):
             The rest of the metadata will be filled in, but it's important to
             specify the geographic level as this will not show up in the column
             name.
-            ::
+
+            .. code::
+
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
