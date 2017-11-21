@@ -902,6 +902,26 @@ class TestCartoContext(unittest.TestCase):
         self.assertSetEqual(set(('median_income_2011_2015', )),
                             set(data.columns) - origcols)
 
+        with self.assertRaises(NotImplementedError):
+            cc.data(self.test_data_table, meta, how='geom_ref')
+
+        with self.assertRaises(ValueError, msg='no measures'):
+            meta = cc.data_discovery('United States', keywords='not a measure')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(ValueError, msg='too many metadata measures'):
+            # returns ~180 measures
+            meta = cc.data_discovery(region='united states',
+                                     keywords='education')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(NameError, msg='column name already exists'):
+            meta = cc.data_discovery(region='united states',
+                                     time='2006 - 2010',
+                                     regex='.*walked to work.*',
+                                     boundaries='us.census.tiger.census_tract')
+            cc.data(self.test_data_table, meta)
+
 
 class TestBatchJobStatus(unittest.TestCase):
     """Tests for cartoframes.BatchJobStatus"""

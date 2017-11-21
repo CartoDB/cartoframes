@@ -1131,7 +1131,8 @@ class CartoContext(object):
         elif isinstance(region, str):
             try:
                 # see if it's a DO region
-                countrytag = '\'{{{0}}}\''.format(get_countrytag(region))
+                countrytag = '\'{{{0}}}\''.format(
+                        get_countrytag(region.lower()))
                 boundary = ('SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, '
                             '85.0, 4326) AS env, 500::int AS cnt')
             except ValueError as regiontag_err:
@@ -1416,12 +1417,11 @@ class CartoContext(object):
         return self.query(query,
                           table_name=persist_as)
 
-    def _get_meta(self):
-        """hi"""
-        pass
-
     # backwards compatibility
-    data_augment = data
+    def data_augment(self, table_name, metadata):
+        warn('This function is being deprecated. Use `CartoContext.data` '
+             'instead.', DeprecationWarning)
+        return self.data(table_name, metadata, persist_as=table_name)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
