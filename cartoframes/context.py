@@ -894,7 +894,7 @@ class CartoContext(object):
             }
 
             map_options = {
-                'filter': ['http', 'mapnik', 'torque'],
+                'filter': ['mapnik', 'torque', ],
                 'https': True,
             }
 
