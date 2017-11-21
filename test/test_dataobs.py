@@ -17,7 +17,7 @@ class TestUtils(unittest.TestCase):
         invalid_regions = ('USofA', None, '', 'Jupiter', )
 
         for idx, r in enumerate(valid_regions):
-            self.assertEqual(get_countrytag(r), valid_answers[idx])
+            self.assertEqual(get_countrytag(r.lower()), valid_answers[idx])
 
         for r in invalid_regions:
             with self.assertRaises(ValueError):
