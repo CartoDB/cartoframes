@@ -49,7 +49,9 @@ class TestCartoContext(unittest.TestCase):
             self.sql_client = SQLClient(self.auth_client)
 
         # sets client to be ci
-        cartoframes.context.DEFAULT_SQL_ARGS['client'] += '_dev_ci'
+        if not cartoframes.context.DEFAULT_SQL_ARGS['client']\
+                .endswith('_dev_ci'):
+            cartoframes.context.DEFAULT_SQL_ARGS['client'] += '_dev_ci'
         # sets skip value
         WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
 

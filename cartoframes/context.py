@@ -388,6 +388,8 @@ class CartoContext(object):
             # 2. drop all previous temp tables
             # 3. drop placeholder table and move temp table into it's place
             # 4. cartodb-fy table, register it with metadata
+            # TODO: use Import API here instead with a combo of sql/table_name
+            #       and collision_strategy=overwrite?
             query = '''
                 CREATE TABLE "{table_name}_temp" As {unioned_tables};
                 ALTER TABLE "{table_name}_temp"
@@ -403,7 +405,11 @@ class CartoContext(object):
                                 if self.is_org else 'public'),
                            drop_tables=drop_tables)
             self._debug_print(query=query)
-            self.sql_client.send(query, **DEFAULT_SQL_ARGS)
+            batch_client = BatchSQLClient(self.auth_client)
+            status = batch_client.create([query, ])
+            batchjob = BatchJobStatus(self, status)
+            while batchjob.status()['status'] in ('running', 'pending', ):
+                time.sleep(1)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
