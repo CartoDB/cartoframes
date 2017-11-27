@@ -11,7 +11,7 @@ from cartoframes.utils import cssify, join_url
 from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
-# from cartocolor vivid scheme
+# from CARTOColor vivid scheme
 DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
                   '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
                   '#CC3A8E', '#A5AA99')
@@ -74,10 +74,7 @@ class BaseMap(AbstractLayer):
                     label_type = '_labels_under'
                 style = source + (label_type if labels == 'back'
                                   else '_nolabels')
-            self.url = join_url((stem,
-                                 '{style}/{{z}}/{{x}}/{{y}}.png'.format(
-                                     style=style)
-                                 ))
+            self.url = join_url(stem, style, '{z}/{x}/{y}.png')
         elif self.source.startswith('http'):
             # TODO: Remove this once baselayer urls can be passed in named
             # map config
@@ -199,13 +196,13 @@ class QueryLayer(AbstractLayer):
             - column (`str`): Column used for the basis of styling
             - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
               from the `styling module <#module-styling>`__ of cartoframes that
-              exposes `CartoColors
+              exposes `CARTOColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
               Defaults to `mint <#styling.mint>`__ scheme for quantitative
               data and `bold` for qualitative data. More control is given by
               using `styling.scheme <#styling.scheme>`__.
 
-              If you wish to define a custom scheme outside of CartoColors, it
+              If you wish to define a custom scheme outside of CARTOColors, it
               is recommended to use the `styling.custom <#styling.custom>`__
               utility function.
 

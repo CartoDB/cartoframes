@@ -90,6 +90,8 @@ class TestCartoContext(unittest.TestCase):
         self.test_delete_table = ('cartoframes_test_delete_'
                                   'table_{ver}_{mpl}').format(
                                       **table_args)
+        # for data observatory
+        self.test_data_table = 'carto_usa_offices'
 
     def tearDown(self):
         """restore to original state"""
@@ -401,7 +403,7 @@ class TestCartoContext(unittest.TestCase):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'object', 'object', 'int64',
+        expected_dtypes = ('object', 'object', 'object', 'float64',
                            'datetime64[ns]', 'object', )
         self.assertTupleEqual(expected_dtypes,
                               tuple(str(d) for d in df.dtypes),
@@ -827,13 +829,98 @@ class TestCartoContext(unittest.TestCase):
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
 
-    def test_data_obs_functions(self):
-        """context.data_x"""
+    def test_data_discovery(self):
+        """context.data_discovery"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
-        self.assertIsNone(cc.data_boundaries())
-        self.assertIsNone(cc.data_discovery())
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        meta_columns = set((
+                'denom_aggregate', 'denom_colname', 'denom_description',
+                'denom_geomref_colname', 'denom_id', 'denom_name',
+                'denom_reltype', 'denom_t_description', 'denom_tablename',
+                'denom_type', 'geom_colname', 'geom_description',
+                'geom_geomref_colname', 'geom_id', 'geom_name',
+                'geom_t_description', 'geom_tablename', 'geom_timespan',
+                'geom_type', 'id', 'max_score_rank', 'max_timespan_rank',
+                'normalization', 'num_geoms', 'numer_aggregate',
+                'numer_colname', 'numer_description', 'numer_geomref_colname',
+                'numer_id', 'numer_name', 'numer_t_description',
+                'numer_tablename', 'numer_timespan', 'numer_type', 'score',
+                'score_rank', 'score_rownum', 'suggested_name', 'target_area',
+                'target_geoms', 'timespan_rank', 'timespan_rownum'))
+        self.assertSetEqual(set(meta.columns), meta_columns,
+                            msg='metadata columns are all there')
+        self.assertTrue((meta['numer_timespan'] == '2010 - 2014').all())
+        self.assertTrue(
+                (meta['numer_description'].str.contains('poverty')).all()
+        )
+
+        # test region = list of lng/lats
+        with self.assertRaises(ValueError):
+            cc.data_discovery([1, 2, 3])
+
+        switzerland = [5.9559111595, 45.8179931641,
+                       10.4920501709, 47.808380127]
+        dd = cc.data_discovery(switzerland, keywords='freight', time='2010')
+        self.assertEqual(dd['numer_id'][0], 'eu.eurostat.tgs00078')
+
+        dd = cc.data_discovery('Australia',
+                               regex='.*Torres Strait Islander.*')
+        for nid in dd['numer_id'].values:
+            self.assertRegexpMatches(
+                    nid,
+                    '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
+
+        with self.assertRaises(ValueError):
+            cc.data_discovery('non_existent_table_abcdefg')
+
+        dd = cc.data_discovery('United States',
+                               boundaries='us.epa.huc.hydro_unit',
+                               time=('2006', '2010', ))
+        self.assertTrue(dd.shape[0] >= 1)
+
+    def test_data(self):
+        """context.data"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols)
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols)
+
+        with self.assertRaises(NotImplementedError):
+            cc.data(self.test_data_table, meta, how='geom_ref')
+
+        with self.assertRaises(ValueError, msg='no measures'):
+            meta = cc.data_discovery('United States', keywords='not a measure')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(ValueError, msg='too many metadata measures'):
+            # returns ~180 measures
+            meta = cc.data_discovery(region='united states',
+                                     keywords='education')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(NameError, msg='column name already exists'):
+            meta = cc.data_discovery(region='united states',
+                                     time='2006 - 2010',
+                                     regex='.*walked to work.*',
+                                     boundaries='us.census.tiger.census_tract')
+            cc.data(self.test_data_table, meta)
 
 
 class TestBatchJobStatus(unittest.TestCase):

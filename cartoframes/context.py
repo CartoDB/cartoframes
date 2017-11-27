@@ -19,8 +19,8 @@ from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
 from .credentials import Credentials
-from .utils import (dict_items, normalize_colnames, norm_colname,
-                    importify_params, join_url)
+from .dataobs import get_countrytag
+from . import utils
 from .layer import BaseMap
 from .maps import non_basemap_layers, get_map_name, get_map_template
 from .__version__ import __version__
@@ -235,9 +235,9 @@ class CartoContext(object):
         if not _df.index.equals(pd.RangeIndex(0, _df.shape[0], 1)):
             _df.reset_index(inplace=True)
 
-        pgcolnames = normalize_colnames(_df.columns)
-        if table_name != norm_colname(table_name):
-            table_name = norm_colname(table_name)
+        pgcolnames = utils.normalize_colnames(_df.columns)
+        if table_name != utils.norm_colname(table_name):
+            table_name = utils.norm_colname(table_name)
             warn('Table will be named `{}`'.format(table_name))
 
         if _df.shape[0] > MAX_IMPORT_ROWS:
@@ -263,8 +263,8 @@ class CartoContext(object):
                                               "{lng}"::numeric);
                     SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
                     '''.format(table_name=final_table_name,
-                               lng=norm_colname(lnglat[0]),
-                               lat=norm_colname(lnglat[1]))
+                               lng=utils.norm_colname(lnglat[0]),
+                               lat=utils.norm_colname(lnglat[1]))
             if _df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
@@ -278,9 +278,9 @@ class CartoContext(object):
                     'minutes.\n'
                     '\033[1mNote:\033[0m `CartoContext.map` will not work on '
                     'this table until its geometries are created.'.format(
-                               table_url=join_url((self.creds.base_url(),
-                                                   'dataset',
-                                                   final_table_name, )),
+                               table_url=utils.join_url(self.creds.base_url(),
+                                                        'dataset',
+                                                        final_table_name),
                                job_id=status.get('job_id'),
                                lnglat=str(lnglat)))
                 return BatchJobStatus(self, status)
@@ -288,15 +288,15 @@ class CartoContext(object):
             self.sql_client.send(query, do_post=False)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-                       table_url=join_url((self.creds.base_url(),
-                                           'dataset',
-                                           final_table_name, ))))
+                       table_url=utils.join_url(self.creds.base_url(),
+                                                'dataset',
+                                                final_table_name)))
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
 
         Args:
-            table_name (str): Table name to delete
+            table_name (str): Name of table to delete
 
         Returns:
             None
@@ -450,7 +450,8 @@ class CartoContext(object):
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
             params.update(kwargs)
-            params = {k: importify_params(v) for k, v in dict_items(params)}
+            params = {k: utils.importify_params(v)
+                      for k, v in utils.dict_items(params)}
             res = self._auth_send('api/v1/imports', 'POST',
                                   files={'file': f},
                                   params=params,
@@ -537,8 +538,9 @@ class CartoContext(object):
                                      'carto-engine/import-api/import-errors'
                                      ''.format(import_job['error_code']))
         elif import_job['state'] == 'complete':
-            self._debug_print(final_table=import_job['table_name'])
-            if import_job['table_name'] != table_name:
+            import_job_table_name = import_job['table_name']
+            self._debug_print(final_table=import_job_table_name)
+            if import_job_table_name != table_name:
                 try:
                     res = self.sql_client.send('''
                             DROP TABLE IF EXISTS {orig_table};
@@ -547,7 +549,7 @@ class CartoContext(object):
                                        '{orig_table}'::regclass);
                             '''.format(
                                 orig_table=table_name,
-                                dupe_table=import_job['table_name']),
+                                dupe_table=import_job_table_name),
                             do_post=False)
 
                     self._debug_print(res=res)
@@ -558,7 +560,9 @@ class CartoContext(object):
                                     '`{new_table}` instead.'.format(
                                         table_name=table_name,
                                         err=err,
-                                        new_table=import_job['table_name']))
+                                        new_table=import_job_table_name))
+                finally:
+                    self.delete(import_job_table_name)
         return table_name
 
     def sync(self, dataframe, table_name):
@@ -596,33 +600,49 @@ class CartoContext(object):
         """
         self._debug_print(query=query)
         if table_name:
-            create_table_query = '''
-                CREATE TABLE {table_name} As
-                SELECT *
-                  FROM ({query}) As _wrap;
-                SELECT CDB_CartodbfyTable('{org}', '{table_name}');
-            '''.format(table_name=table_name,
-                       query=query,
-                       org=(self.creds.username()
-                            if self.is_org else 'public'))
-            self._debug_print(create_table_query=create_table_query)
+            # TODO: replace the following error catching with Import API
+            #  checking once Import API sql/table_name collision_strategy=skip
+            #  bug is fixed ref: support/1127
+            try:
+                self.sql_client.send('''
+                    create table {0} as SELECT 1;
+                    drop table {0};
+                '''.format(table_name))
+                resp = self._auth_send(
+                        'api/v1/imports', 'POST',
+                        params=dict(sql=query,
+                                    # collision_strategy='',
+                                    table_name=table_name),
+                        headers={'Content-Type': 'application/json'})
+            except CartoException:
+                raise CartoException('Table `{0}` already exists. Delete it '
+                                     'before creating a table from this '
+                                     'query'.format(table_name))
 
-            create_table_res = self.sql_client.send(create_table_query,
-                                                    do_post=False)
-            self._debug_print(create_table_res=create_table_res)
+            while True:
+                import_job = self._check_import(resp['item_queue_id'])
+                self._debug_print(import_job=import_job)
+                final_table_name = self._handle_import(import_job, table_name)
+                if import_job['state'] == 'complete':
 
-            new_table_name = create_table_res['rows'][0]['cdb_cartodbfytable']
-            self._debug_print(new_table_name=new_table_name)
+                    print('Table successfully written to CARTO: '
+                          '{table_url}'.format(
+                              table_url=utils.join_url(self.creds.base_url(),
+                                                       'dataset',
+                                                       final_table_name)))
+                    break
+                time.sleep(1.0)
 
             select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(table_name=new_table_name),
-                **DEFAULT_SQL_ARGS)
+                    'SELECT * FROM {table_name}'.format(
+                        table_name=final_table_name),
+                    skipfields='the_geom_webmercator',
+                    **DEFAULT_SQL_ARGS)
         else:
-            skipfields = ('the_geom_webmercator'
-                          if 'the_geom_webmercator' not in query else None)
-            select_res = self.sql_client.send(query,
-                                              skipfields=skipfields,
-                                              **DEFAULT_SQL_ARGS)
+            select_res = self.sql_client.send(
+                    query,
+                    skipfields='the_geom_webmercator',
+                    **DEFAULT_SQL_ARGS)
 
         self._debug_print(select_res=select_res)
 
@@ -782,7 +802,7 @@ class CartoContext(object):
                            query=layer.orig_query),
                    **DEFAULT_SQL_ARGS)
                 self._debug_print(layer_fields=resp)
-                for k, v in dict_items(resp['fields']):
+                for k, v in utils.dict_items(resp['fields']):
                     layer.style_cols[k] = v['type']
                 layer.geom_type = self._geom_type(layer)
                 if not base_layers:
@@ -830,7 +850,7 @@ class CartoContext(object):
             params.update(dict(bbox=bbox))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = join_url((self.creds.base_url(), 'api/v1/map', ))
+        api_url = utils.join_url(self.creds.base_url(), 'api/v1/map')
 
         static_url = ('{api_url}/static/named/{map_name}'
                       '/{width}/{height}.png?{params}').format(
@@ -868,13 +888,13 @@ class CartoContext(object):
                     'name': map_name,
                     'params': {
                         k: safe_quotes(v, escape_single_quotes=True)
-                        for k, v in dict_items(options)
+                        for k, v in utils.dict_items(options)
                     },
                 },
             }
 
             map_options = {
-                'filter': ['http', 'mapnik', 'torque'],
+                'filter': ['mapnik', 'torque', ],
                 'https': True,
             }
 
@@ -982,101 +1002,426 @@ class CartoContext(object):
         """Not currently implemented"""
         pass
 
-    def data_discovery(self, keywords=None, regex=None, time=None,
-                       boundary=None):
-        """Not currently implemented"""
-        pass
+    def data_discovery(self, region, keywords=None, regex=None, time=None,
+                       boundaries=None):
+        """Discover Data Observatory measures. This method returns the full
+        Data Observatory metadata model for each measure or measures that
+        match the conditions from the inputs. The full metadata in each row
+        uniquely defines a measure based on the timespan, geographic
+        resolution, and normalization (if any). Read more about the metadata
+        response in `Data Observatory
+        <https://carto.com/docs/carto-engine/data/measures-functions/#obs_getmetaextent-geometry-metadata-json-max_timespan_rank-max_score_rank-target_geoms>`__
+        documentation.
 
-    def data_augment(self, table_name, metadata):
-        """Augment an existing CARTO table with `Data Observatory
-        <https://carto.com/data-observatory>`__ measures. See the full `Data
-        Observatory catalog
-        <https://cartodb.github.io/bigmetadata/index.html>`__ for all available
-        measures. The result of this operation is:
+        Internally, this method finds all measures in `region` that match the
+        conditions set in `keywords`, `regex`, `time`, and `boundaries` (if
+        any of them are specified). Then, if `boundaries` is not specified, a
+        geographical resolution for that measure will be chosen subject to the
+        type of region specified:
 
-        1. It updates `table_name` by adding columns from the Data Observatory
-        2. It returns a pandas DataFrame representation of that newly augmented
-           table.
+          1. If `region` is a table name, then a geographical resolution that
+             is roughly equal to `region size / number of subunits`.
+          2. If `region` is a country name or bounding box, then a geographical
+             resolution will be chosen roughly equal to `region size / 500`.
 
-        Note:
-            This method alters `table_name` in the user's CARTO database by
-            adding additional columns. To avoid this, create a copy of the
-            table first and use the new copy instead.
+        Since different measures are in some geographic resolutions and not
+        others, different geographical resolutions for different measures are
+        oftentimes returned.
+
+        .. tip::
+
+            To remove the guesswork in how geographical resolutions are
+            selected, specify one or more boundaries in `boundaries`. See
+            the boundaries section for each region in the `Data Observatory
+            catalog <http://cartodb.github.io/bigmetadata/>`__.
+
+        The metadata returned from this method can then be used to create raw
+        tables or for augmenting an existing table from these measures using
+        `CartoContext.data`. For the full Data Observatory catalog, visit
+        https://cartodb.github.io/bigmetadata/. When working with the metadata
+        DataFrame returned from this method, be careful to only remove rows not
+        columns as `CartoContext.data <#context.CartoContext.data>`__ generally
+        needs the full metadata.
+
+        .. note::
+            Narrowing down a discovery query using the `keywords`, `regex`, and
+            `time` filters is important for getting a manageable metadata
+            set. Besides there being a large number of measures in the DO, a
+            metadata response has acceptable combinations of measures with
+            demonimators (normalization and density), the same measure from
+            other years, and quantiles measurements.
+
+            For example, setting the region to be United States counties with
+            no filter values set will result in many thousands of measures.
 
         Example:
-            Add new measures to a CARTO table and pass it to a pandas
-            DataFrame. Using the "Median Household Income in the past 12
-            months" measure from the `Data Observatory Catalog
-            <https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months>`__.
-            ::
 
-                import cartoframes
+        Get all European Union measures that mention ``freight``.
+        .. code::
+
+            meta = cc.data_discovery('European Union',
+                                     keywords='freight',
+                                     time='2010')
+            print(meta['numer_name'].values)
+
+        Arguments:
+            region (str or list of float): Information about the region of
+              interest. `region` can be one of three types:
+
+                - region name (str): Name of region of interest. Acceptable
+                  values are limited to: 'Australia', 'Brazil', 'Canada',
+                  'European Union', 'France', 'Mexico', 'Spain',
+                  'United Kingdom', 'United States'.
+                - table name (str): Name of a table in user's CARTO account
+                  with geometries. The region will be the bounding box of
+                  the table.
+
+                  .. Note:: If a table name is also a valid Data Observatory
+                      region name, the Data Observatory name will be chosen
+                      over the table.
+
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+
+                .. Note:: Geometry levels are generally chosen by subdividing
+                    the region into the next smallest administrative unit. To
+                    override this behavior, specify the `boundaries` flag. For
+                    example, set `boundaries` to
+                    ``'us.census.tiger.census_tract'`` to choose US census
+                    tracts.
+
+            keywords (str or list of str, optional): Keyword or list of
+              keywords in measure description or name. Response will be matched
+              on all keywords listed (boolean `or`).
+            regex (str, optional): A regular expression to search the measure
+              descriptions and names. Note that this relies on PostgreSQL's
+              case insensitive operator ``~*``. See `PostgreSQL docs
+              <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
+              for more information.
+            boundaries (str or list of str, optional): Boundary or list of
+              boundaries that specify the measure resolution. See the
+              boundaries section for each region in the `Data Observatory
+              catalog <http://cartodb.github.io/bigmetadata/>`__.
+
+        Returns:
+            pandas.DataFrame: A dataframe of the complete metadata model for
+            specific measures based on the search parameters.
+
+        Raises:
+            ValueError: If `region` is a :obj:`list` and does not consist of
+              four elements, or if `region` is neither an acceptable region
+              nor a table in user account.
+        """
+        if (isinstance(region, collections.Iterable) and
+                not isinstance(region, str)):
+            # TODO: should this also check to see if each item is a number?
+            if len(region) != 4:
+                raise ValueError('`region` should be a list of the geographic '
+                                 'bounds of a region in the following order: '
+                                 'western longitude, southern latitude, '
+                                 'eastern longitude, and northern latitude. '
+                                 'For example, Switerland fits in '
+                                 '``[5.9559111595,45.8179931641,10.4920501709,'
+                                 '47.808380127]``.')
+            boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
+                        'env, 500::int AS cnt'.format(*region))
+        elif isinstance(region, str):
+            try:
+                # see if it's a DO region
+                countrytag = '\'{{{0}}}\''.format(
+                        get_countrytag(region.lower()))
+                boundary = ('SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, '
+                            '85.0, 4326) AS env, 500::int AS cnt')
+            except ValueError as regiontag_err:
+                try:
+                    # TODO: make this work for general queries
+                    # see if it's a table
+                    self.sql_client.send('''
+                        EXPLAIN SELECT * FROM {0} LIMIT 0
+                    '''.format(region).strip())
+                    boundary = ('SELECT ST_SetSRID(ST_Extent(the_geom), '
+                                '4326) AS env, count(*)::int AS cnt '
+                                'FROM {table_name}').format(
+                                        table_name=region)
+                except CartoException:
+                    raise ValueError('`{0}` is neither a table in user '
+                                     'account nor an available Data '
+                                     'Observatory region. {1}'.format(
+                                             region, regiontag_err))
+
+        if locals().get('countrytag') is None:
+            countrytag = 'null'
+
+        if keywords:
+            if isinstance(keywords, str):
+                keywords = [keywords, ]
+            kwsearch = ' OR '.join(
+                    ('numer_description ilike \'%{kw}%\' OR '
+                     'numer_name ilike \'%{kw}%\'').format(kw=kw)
+                    for kw in keywords)
+            kwsearch = '({})'.format(kwsearch)
+
+        if regex:
+            regexsearch = ('(numer_description ~* \'{regex}\' OR '
+                           'numer_name ~* \'{regex}\')').format(regex=regex)
+
+        if keywords or regex:
+            subjectfilters = '{kw} {op} {regex}'.format(
+                    kw=kwsearch if keywords else '',
+                    op='OR' if (keywords and regex) else '',
+                    regex=regexsearch if regex else ''
+                )
+        else:
+            subjectfilters = ''
+
+        if isinstance(time, str):
+            time = [time, ]
+        elif time is None:
+            time = [None, ]
+        if isinstance(boundaries, str):
+            boundaries = [boundaries, ]
+        elif boundaries is None:
+            boundaries = [None, ]
+
+        if all(time) and all(boundaries):
+            bt_filters = 'valid_geom AND valid_timespan'
+        elif all(time) or all(boundaries):
+            bt_filters = 'valid_geom' if all(boundaries) else 'valid_timespan'
+        else:
+            bt_filters = ''
+
+        if bt_filters and subjectfilters:
+            filters = 'WHERE ({s}) AND ({bt})'.format(s=subjectfilters,
+                                                      bt=bt_filters)
+        elif bt_filters or subjectfilters:
+            filters = 'WHERE {f}'.format(f=subjectfilters or bt_filters)
+        else:
+            filters = ''
+
+        numer_query = '\n'.join(s.strip() for s in (
+            'SELECT',
+            '    numer_id,',
+            '    {geom_id} AS geom_id,',
+            '    {timespan} AS numer_timespan',
+            '  FROM',
+            '    OBS_GetAvailableNumerators(',
+            '        (SELECT env FROM envelope),',
+            '        {countrytag},',
+            '        null,',
+            '        {geom_id},',
+            '        {timespan}',
+            '    )',
+            '{filters}', ))
+
+        numers = '\nUNION\n'.join(
+                numer_query.format(
+                    timespan=('\'{}\''.format(t) if t else 'null'),
+                    geom_id=('\'{}\''.format(b) if b else 'null'),
+                    countrytag=countrytag,
+                    filters=filters
+                )
+                for t in time
+                for b in boundaries
+            )
+
+        query = '\n'.join(s.strip() for s in (
+           'WITH envelope AS (',
+           '    {boundary}',
+           '), numers AS (',
+           '  {numers}',
+           ')',
+           'SELECT *',
+           'FROM json_to_recordset(',
+           '    (SELECT OBS_GetMeta(',
+           '        envelope.env,',
+           '        json_agg(numers),',
+           '        10, 10, envelope.cnt',
+           '    ) AS meta',
+           'FROM numers, envelope',
+           'GROUP BY env, cnt)) as data(',
+           '    denom_aggregate text, denom_colname text,',
+           '    denom_description text, denom_geomref_colname text,',
+           '    denom_id text, denom_name text, denom_reltype text,',
+           '    denom_t_description text, denom_tablename text,',
+           '    denom_type text, geom_colname text, geom_description text,',
+           '    geom_geomref_colname text, geom_id text, geom_name text,',
+           '    geom_t_description text, geom_tablename text,',
+           '    geom_timespan text, geom_type text, id numeric,',
+           '    max_score_rank text, max_timespan_rank text,',
+           '    normalization text, num_geoms numeric, numer_aggregate text,',
+           '    numer_colname text, numer_description text,',
+           '    numer_geomref_colname text, numer_id text,',
+           '    numer_name text, numer_t_description text,',
+           '    numer_tablename text, numer_timespan text,',
+           '    numer_type text, score numeric, score_rank numeric,',
+           '    score_rownum numeric, suggested_name text,',
+           '    target_area text, target_geoms text, timespan_rank numeric,',
+           '    timespan_rownum numeric)', )).format(
+                   boundary=boundary,
+                   numers=numers)
+        self._debug_print(query=query)
+        resp = self.sql_client.send(query)
+        return pd.DataFrame(resp['rows'])
+
+    def data(self, table_name, metadata, persist_as=None, how='the_geom'):
+        """Get an augmented CARTO dataset with `Data Observatory
+        <https://carto.com/data-observatory>`__ measures. Use
+        `CartoContext.data_discovery
+        <#context.CartoContext.data_discovery>`__ to search for available
+        measures, or see the full `Data Observatory catalog
+        <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
+        persist the data as a new table.
+
+        Example:
+            Get a DataFrame with Data Observatory measures based on the
+            geometries in a CARTO table.
+
+            .. code::
+
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
+                median_income = cc.data_discovery('transaction_events',
+                                                  regex='.*median income.*',
+                                                  time='2011 - 2015')
+                df = cc.data(median_income,
+                             'transaction_event')
+
+            Pass in cherry-picked measures from the Data Observatory catalog.
+            The rest of the metadata will be filled in, but it's important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            .. code::
+
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = cc.data_augment('transaction_events',
-                                     median_income)
+                df = cc.data('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
-            metadata (list of dicts): List of all measures to add to
-                `table_name`. Each `dict` has the following keys:
-
-                - `numer_id` (str): The identifier for the desired measurement
-                - `geom_id` (str, optional): Identifier for a desired
-                  geographic boundary level to use when calculating measures.
-                  Will be automatically assigned if undefined
-                - `normalization` (str, optional): The desired normalization.
-                  One of 'area', 'prenormalized', or 'denominated'. 'Area' will
-                  normalize the measure per square kilometer, 'prenormalized'
-                  will return the original value, and 'denominated' will
-                  normalize by a denominator.
-                - `denom_id` (str, optional): Measure ID from DO catalog
-                - `numer_timespan` (str, optional): The desired timespan for
-                  the measurement. Defaults to most recent timespan available
-                  if left unspecified.
-                - `geom_timespan` (str, optional): The desired timespan for the
-                  geometry. Defaults to timespan matching `numer_timespan` if
-                  left unspecified.
-                - `target_area` (str, optional): Instead of aiming to have
-                  `target_geoms` in the area of the geometry passed as extent,
-                  fill this area. Unit is square degrees WGS84. Set this to
-                  `0` if you want to use the smallest source geometry for this
-                  element of metadata, for example if you're passing in points.
-                - `target_geoms` (str, optional): Override global
-                  `target_geoms` for this element of metadata
-                - `max_timespan_rank` (str, optional): Override global
-                  `max_timespan_rank` for this element of metadata
-                - `max_score_rank` (str, optional): Override global
-                  `max_score_rank` for this element of metadata
+            metadata (pandas.DataFrame): List of all measures to add to
+                `table_name`. See `CartoContext.data_discovery` outputs
+                for a full list of metadata columns.
+            persist_as (str, optional): Output the results of augmenting
+                `table_name` to `persist_as` as a persistent table on CARTO.
+                Defaults to ``None``, which will not create a table.
+            how (str, optional): Column name for identifying the geometry from
+                which to fetch the data. Defaults to `the_geom`, which results
+                in measures that are spatially interpolated (e.g., a
+                neighborhood boundary's population will be calculated from
+                underlying census tracts). Specifying a column that has the
+                geometry identifier (for example, GEOID for US Census
+                boundaries), results in measures directly from the Census for
+                that GEOID but normalized how it is specified in the metadata.
 
         Returns:
             pandas.DataFrame: A DataFrame representation of `table_name` which
             has new columns for each measure in `metadata`.
+
+        Raises:
+            NameError: If the columns in `table_name` are in the
+              ``suggested_name`` column of `metadata`.
+            ValueError: If metadata object is invalid or empty, or if the
+              number of requested measures exceeds 50.
         """
+        if how != 'the_geom':
+            raise NotImplementedError('Data gathering currently only works if '
+                                      'a geometry is present')
+        if isinstance(metadata, pd.DataFrame):
+            _meta = metadata.copy().reset_index()
+        elif isinstance(metadata, collections.Iterable):
+            query = '''
+              WITH envelope AS (
+                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
+                       count(*)::int AS cnt
+                  FROM {table_name}
+              )
+              SELECT *
+                FROM json_to_recordset(
+                    (SELECT OBS_GetMeta(
+                        envelope.env,
+                        ('{meta}')::json,
+                        10, 1, envelope.cnt
+                    ) AS meta
+                FROM envelope
+                GROUP BY env, cnt)) as data(
+                    denom_aggregate text, denom_colname text,
+                    denom_description text, denom_geomref_colname text,
+                    denom_id text, denom_name text, denom_reltype text,
+                    denom_t_description text, denom_tablename text,
+                    denom_type text, geom_colname text, geom_description text,
+                    geom_geomref_colname text, geom_id text, geom_name text,
+                    geom_t_description text, geom_tablename text,
+                    geom_timespan text, geom_type text, id numeric,
+                    max_score_rank text, max_timespan_rank text,
+                    normalization text, num_geoms numeric,numer_aggregate text,
+                    numer_colname text, numer_description text,
+                    numer_geomref_colname text, numer_id text,
+                    numer_name text, numer_t_description text,
+                    numer_tablename text, numer_timespan text,
+                    numer_type text, score numeric, score_rank numeric,
+                    score_rownum numeric, suggested_name text,
+                    target_area text, target_geoms text, timespan_rank numeric,
+                    timespan_rownum numeric)
+            '''.format(
+                    table_name=table_name,
+                    meta=json.dumps(metadata).replace('\'', '\'\''))
+            resp = self.sql_client.send(query)
+            _meta = pd.DataFrame(resp['rows'])
 
-        try:
-            with open(os.path.join(os.path.dirname(__file__),
-                                   'assets/data_obs_augment.sql'), 'r') as f:
-                augment_functions = f.read()
-            self.sql_client.send(augment_functions, do_post=False)
-        except Exception as err:
-            raise CartoException("Could not install `obs_augment_table` onto "
-                                 "user account ({})".format(err))
+        if _meta.shape[0] == 0:
+            raise ValueError('There are no valid metadata entries. Check '
+                             'inputs.')
+        elif _meta.shape[0] > 50:
+            raise ValueError('The number of metadata entries exceeds 50. Tip: '
+                             'If `metadata` is a pandas.DataFrame, iterate '
+                             'over this object using `metadata.groupby`. If '
+                             'it is a list, iterate over chunks of it. Then '
+                             'combine resulting DataFrames using '
+                             '`pandas.concat`')
 
-        # augment with data observatory metadata
-        augment_query = '''
-            select obs_augment_table('{username}.{tablename}',
-                                     '{cols_meta}');
-        '''.format(username=self.creds.username(),
-                   tablename=table_name,
-                   cols_meta=json.dumps(metadata))
-        self.sql_client.send(augment_query, **DEFAULT_SQL_ARGS)
+        tablecols = self.sql_client.send('''
+                SELECT * FROM {table_name} LIMIT 0
+                '''.format(table_name=table_name),
+                **DEFAULT_SQL_ARGS)['fields'].keys()
 
-        # read full augmented table
-        return self.read(table_name)
+        if set(tablecols) & set(_meta['suggested_name']):
+            commoncols = set(tablecols) & set(_meta['suggested_name'])
+            raise NameError('Column name collision for column(s): {cols}. '
+                            'Rename table column(s) to resolve.'.format(
+                                cols=', '.join(commoncols)))
+
+        cols = ', '.join(
+                '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
+                    n=row[0],
+                    pgtype=row[1]['numer_type'],
+                    col=row[1]['suggested_name'])
+                for row in _meta.iterrows()
+            )
+        query = '''
+            SELECT t.*, {cols}
+              FROM OBS_GetData(
+                   (SELECT array_agg((the_geom, cartodb_id)::geomval)
+                    FROM "{tablename}"),
+                   (SELECT \'{meta}\'::json)) as m,
+                   {tablename} as t
+             WHERE t.cartodb_id = m.id
+        '''.format(tablename=table_name,
+                   cols=cols,
+                   meta=_meta.to_json(orient='records').replace(
+                       '\'', '\'\''))
+        return self.query(query,
+                          table_name=persist_as)
+
+    # backwards compatibility
+    def data_augment(self, table_name, metadata):
+        warn('This function is being deprecated. Use `CartoContext.data` '
+             'instead.', DeprecationWarning)
+        return self.data(table_name, metadata, persist_as=table_name)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
@@ -1179,7 +1524,7 @@ class CartoContext(object):
         if self._verbose <= 0:
             return
 
-        for key, value in dict_items(kwargs):
+        for key, value in utils.dict_items(kwargs):
             if isinstance(value, requests.Response):
                 str_value = ("status_code: {status_code}, "
                              "content: {content}").format(

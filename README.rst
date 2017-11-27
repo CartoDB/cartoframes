@@ -94,7 +94,7 @@ Write an existing pandas DataFrame to CARTO.
 Map workflow
 ------------
 
-The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `TurboCARTO <https://github.com/CartoDB/turbo-carto>`__ and `CARTOColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CARTOColors wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
 .. code:: python
 
@@ -108,14 +108,12 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                    Layer('peregrine_falcon_nest_sites',
                          size='num_eggs',
                          color={'column': 'bird_id',
-                                'scheme': styling.vivid(10))],
+                                'scheme': styling.vivid(10)})],
            interactive=True)
 
 
 Augment from Data Observatory
 -----------------------------
-
-**Note:** This is a provisional function, so the signature may change.
 
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
@@ -132,8 +130,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.data_augment('transactions', data_obs_measures)
-    df.head()
+    df = cc.data('transactions', data_obs_measures)
 
 
 CARTO Credential Management
