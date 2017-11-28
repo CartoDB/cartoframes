@@ -198,7 +198,8 @@ class CartoContext(object):
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
-                information is stored. Used in conjunction with `encode_geom`.
+                information is stored. Used in conjunction with 
+                `encode_geom`.
             kwargs: Keyword arguments from CARTO's Import API. See the `params
                 listed in the documentation
                 <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
@@ -257,14 +258,14 @@ class CartoContext(object):
 
         # create geometry column from long/lats if requested
         if lnglat:
-            query = '''
-                    UPDATE "{table_name}"
-                    SET the_geom = CDB_LatLng("{lat}"::numeric,
-                                              "{lng}"::numeric);
-                    SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
-                    '''.format(table_name=final_table_name,
-                               lng=utils.norm_colname(lnglat[0]),
-                               lat=utils.norm_colname(lnglat[1]))
+            query = minify_sql((
+                'UPDATE "{table_name}"',
+                'SET the_geom = CDB_LatLng("{lat}"::numeric,',
+                '                          "{lng}"::numeric);',
+                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
+                )).format(table_name=final_table_name,
+                          lng=norm_colname(lnglat[0]),
+                          lat=norm_colname(lnglat[1]))
             if _df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
@@ -388,22 +389,28 @@ class CartoContext(object):
             # 2. drop all previous temp tables
             # 3. drop placeholder table and move temp table into it's place
             # 4. cartodb-fy table, register it with metadata
-            query = '''
-                CREATE TABLE "{table_name}_temp" As {unioned_tables};
-                ALTER TABLE "{table_name}_temp"
-                      DROP COLUMN IF EXISTS cartodb_id;
-                {drop_tables}
-                DROP TABLE IF EXISTS "{table_name}";
-                ALTER TABLE "{table_name}_temp" RENAME TO "{table_name}";
-                SELECT CDB_CartoDBFYTable('{org}', '{table_name}');
-                SELECT CDB_TableMetadataTouch('{table_name}'::regclass);
-                '''.format(table_name=table_name,
-                           unioned_tables=unioned_tables,
-                           org=(self.creds.username()
-                                if self.is_org else 'public'),
-                           drop_tables=drop_tables)
+            # TODO: use Import API here instead with a combo of sql/table_name
+            #       and collision_strategy=overwrite?
+            query = minify_sql((
+                'CREATE TABLE "{table_name}_temp" As {unioned_tables};',
+                'ALTER TABLE "{table_name}_temp"',
+                '      DROP COLUMN IF EXISTS cartodb_id;',
+                '{drop_tables}',
+                'DROP TABLE IF EXISTS "{table_name}";',
+                'ALTER TABLE "{table_name}_temp" RENAME TO "{table_name}";',
+                'SELECT CDB_CartoDBFYTable(\'{org}\', \'{table_name}\');',
+                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
+            )).format(table_name=table_name,
+                      unioned_tables=unioned_tables,
+                      org=(self.creds.username()
+                           if self.is_org else 'public'),
+                      drop_tables=drop_tables)
             self._debug_print(query=query)
-            self.sql_client.send(query, **DEFAULT_SQL_ARGS)
+            batch_client = BatchSQLClient(self.auth_client)
+            status = batch_client.create([query, ])
+            batchjob = BatchJobStatus(self, status)
+            while batchjob.status()['status'] in ('running', 'pending', ):
+                time.sleep(1)
         except CartoException as err:
             for table in subtables:
                 self.delete(table)
@@ -485,14 +492,17 @@ class CartoContext(object):
                 from
             table_name (str): Table name where schema is being altered
             pgcolnames (list of str): List of column names from ``dataframe``
-                as they appear on the database
+                as they appear in the database
         Returns:
             None
         """
-        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
+        # if there's nothing to change, exit
+        if set(str(s) for s in dataframe.dtypes) == set(('object', )):
+            return None
+        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', )
         alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
                       'NULLIF("{col}", \'\')::{ctype}')
-        # alter non-util columns that are not text type
+        # alter non-util columns that are not type text
         alter_cols = ', '.join(alter_temp.format(col=c,
                                                  ctype=_dtypes2pg(t))
                                for c, t in zip(pgcolnames,
@@ -793,13 +803,13 @@ class CartoContext(object):
         for idx, layer in enumerate(layers):
             if not layer.is_basemap:
                 # get schema of style columns
-                resp = self.sql_client.send('''
-                    SELECT {cols}
-                    FROM ({query}) AS _wrap
-                    LIMIT 0
-                '''.format(cols=','.join(layer.style_cols),
-                           comma=',' if layer.style_cols else '',
-                           query=layer.orig_query),
+                resp = self.sql_client.send(minify_sql((
+                    'SELECT {cols}',
+                    'FROM ({query}) AS _wrap',
+                    'LIMIT 0',
+                )).format(cols=','.join(layer.style_cols),
+                          comma=',' if layer.style_cols else '',
+                          query=layer.orig_query),
                    **DEFAULT_SQL_ARGS)
                 self._debug_print(layer_fields=resp)
                 for k, v in utils.dict_items(resp['fields']):
@@ -971,24 +981,24 @@ class CartoContext(object):
 
     def _geom_type(self, layer):
         """gets geometry type(s) of specified layer"""
-        resp = self.sql_client.send('''
-            SELECT
-                CASE WHEN ST_GeometryType(the_geom) in ('ST_Point',
-                                                        'ST_MultiPoint')
-                     THEN 'point'
-                     WHEN ST_GeometryType(the_geom) in ('ST_LineString',
-                                                        'ST_MultiLineString')
-                     THEN 'line'
-                     WHEN ST_GeometryType(the_geom) in ('ST_Polygon',
-                                                        'ST_MultiPolygon')
-                     THEN 'polygon'
-                     ELSE null END AS geom_type,
-                count(*) as cnt
-            FROM ({query}) AS _wrap
-            WHERE the_geom IS NOT NULL
-            GROUP BY 1
-            ORDER BY 2 DESC
-        '''.format(query=layer.orig_query),
+        resp = self.sql_client.send(minify_sql((
+            'SELECT',
+            '    CASE WHEN ST_GeometryType(the_geom)',
+            '               in (\'ST_Point\', \'ST_MultiPoint\')',
+            '         THEN \'point\'',
+            '         WHEN ST_GeometryType(the_geom)',
+            '              in (\'ST_LineString\', \'ST_MultiLineString\')',
+            '         THEN \'line\'',
+            '         WHEN ST_GeometryType(the_geom)',
+            '              in (\'ST_Polygon\', \'ST_MultiPolygon\')',
+            '         THEN \'polygon\'',
+            '         ELSE null END AS geom_type,',
+            '    count(*) as cnt',
+            'FROM ({query}) AS _wrap',
+            'WHERE the_geom IS NOT NULL',
+            'GROUP BY 1',
+            'ORDER BY 2 DESC',
+        )).format(query=layer.orig_query),
             **DEFAULT_SQL_ARGS)
         if len(resp['rows']) > 1:
             warn('There are multiple geometry types in {query}: '
@@ -1435,17 +1445,18 @@ class CartoContext(object):
     def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
         try:
-            self.sql_client.send('''
-                EXPLAIN
-                SELECT
-                  {style_cols}{comma}
-                  the_geom, the_geom_webmercator
-                FROM ({query}) _wrap;
-                '''.format(query=query,
-                           comma=',' if style_cols else '',
-                           style_cols=(','.join(style_cols)
-                                       if style_cols else '')),
-                           do_post=False)
+            self.sql_client.send(
+                    minify_sql((
+                        'EXPLAIN',
+                        'SELECT',
+                        '  {style_cols}{comma}',
+                        '  the_geom, the_geom_webmercator',
+                        'FROM ({query}) _wrap;',
+                    )).format(query=query,
+                              comma=',' if style_cols else '',
+                              style_cols=(','.join(style_cols)
+                                          if style_cols else '')),
+                    do_post=False)
         except Exception as err:
             raise ValueError(('Layer query `{query}` and/or style column(s) '
                               '{cols} are not valid: {err}.'
@@ -1506,17 +1517,18 @@ class CartoContext(object):
              if not layer.is_basemap])
 
         extent = self.sql_client.send(
-            '''
-            SELECT
-              ST_XMIN(ext) AS west,
-              ST_YMIN(ext) AS south,
-              ST_XMAX(ext) AS east,
-              ST_YMAX(ext) AS north
-            FROM (
-                SELECT ST_Extent(the_geom) AS ext
-                FROM ({union_query}) AS _wrap1
-            ) AS _wrap2'''.format(union_query=union_query),
-            do_post=False)
+                minify_sql((
+                    'SELECT',
+                    '    ST_XMIN(ext) AS west,',
+                    '    ST_YMIN(ext) AS south,',
+                    '    ST_XMAX(ext) AS east,',
+                    '    ST_YMAX(ext) AS north',
+                    'FROM (',
+                    '    SELECT ST_Extent(the_geom) AS ext',
+                    '    FROM ({union_query}) AS _wrap1',
+                    ') AS _wrap2',
+                )).format(union_query=union_query),
+                do_post=False)
 
         return extent['rows'][0]
 
