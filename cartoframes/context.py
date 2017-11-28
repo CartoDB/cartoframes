@@ -490,14 +490,17 @@ class CartoContext(object):
                 from
             table_name (str): Table name where schema is being altered
             pgcolnames (list of str): List of column names from ``dataframe``
-                as they appear on the database
+                as they appear in the database
         Returns:
             None
         """
-        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id')
+        # if there's nothing to change, exit
+        if set(str(s) for s in dataframe.dtypes) == set(('object', )):
+            return None
+        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', )
         alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
                       'NULLIF("{col}", \'\')::{ctype}')
-        # alter non-util columns that are not text type
+        # alter non-util columns that are not type text
         alter_cols = ', '.join(alter_temp.format(col=c,
                                                  ctype=_dtypes2pg(t))
                                for c, t in zip(pgcolnames,

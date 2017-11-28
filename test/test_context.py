@@ -280,6 +280,15 @@ class TestCartoContext(unittest.TestCase):
             '''.format(table=self.test_write_table))
         self.assertIsNotNone(resp)
 
+        cc.delete(self.test_write_table)
+        df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
+        df = df.astype({'vals': str, 'ids': str})
+        cc.write(df, self.test_write_table)
+        schema = cc.sql_client.send('select ids, vals from {}'.format(
+            self.test_write_table))['fields']
+        self.assertSetEqual(set([schema[c]['type'] for c in schema]),
+                            set(('string', )))
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):
         """context.CartoContext.write with non-default index"""
