@@ -258,14 +258,14 @@ class CartoContext(object):
 
         # create geometry column from long/lats if requested
         if lnglat:
-            query = minify_sql((
+            query = utils.minify_sql((
                 'UPDATE "{table_name}"',
                 'SET the_geom = CDB_LatLng("{lat}"::numeric,',
                 '                          "{lng}"::numeric);',
                 'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
                 )).format(table_name=final_table_name,
-                          lng=norm_colname(lnglat[0]),
-                          lat=norm_colname(lnglat[1]))
+                          lng=utils.norm_colname(lnglat[0]),
+                          lat=utils.norm_colname(lnglat[1]))
             if _df.shape[0] > MAX_ROWS_LNGLAT:
                 batch_client = BatchSQLClient(self.auth_client)
                 status = batch_client.create([query, ])
@@ -391,7 +391,7 @@ class CartoContext(object):
             # 4. cartodb-fy table, register it with metadata
             # TODO: use Import API here instead with a combo of sql/table_name
             #       and collision_strategy=overwrite?
-            query = minify_sql((
+            query = utils.minify_sql((
                 'CREATE TABLE "{table_name}_temp" As {unioned_tables};',
                 'ALTER TABLE "{table_name}_temp"',
                 '      DROP COLUMN IF EXISTS cartodb_id;',
@@ -803,7 +803,7 @@ class CartoContext(object):
         for idx, layer in enumerate(layers):
             if not layer.is_basemap:
                 # get schema of style columns
-                resp = self.sql_client.send(minify_sql((
+                resp = self.sql_client.send(utils.minify_sql((
                     'SELECT {cols}',
                     'FROM ({query}) AS _wrap',
                     'LIMIT 0',
@@ -981,7 +981,7 @@ class CartoContext(object):
 
     def _geom_type(self, layer):
         """gets geometry type(s) of specified layer"""
-        resp = self.sql_client.send(minify_sql((
+        resp = self.sql_client.send(utils.minify_sql((
             'SELECT',
             '    CASE WHEN ST_GeometryType(the_geom)',
             '               in (\'ST_Point\', \'ST_MultiPoint\')',
@@ -1446,7 +1446,7 @@ class CartoContext(object):
         """Checks if query from Layer or QueryLayer is valid"""
         try:
             self.sql_client.send(
-                    minify_sql((
+                    utils.minify_sql((
                         'EXPLAIN',
                         'SELECT',
                         '  {style_cols}{comma}',
@@ -1517,7 +1517,7 @@ class CartoContext(object):
              if not layer.is_basemap])
 
         extent = self.sql_client.send(
-                minify_sql((
+                utils.minify_sql((
                     'SELECT',
                     '    ST_XMIN(ext) AS west,',
                     '    ST_YMIN(ext) AS south,',
