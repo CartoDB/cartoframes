@@ -7,11 +7,8 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   modules
-
-CARTOFrames Functionality
+CARTOframes Functionality
 =========================
 
 CartoContext

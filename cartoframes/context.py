@@ -18,12 +18,12 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 
-from .credentials import Credentials
-from .dataobs import get_countrytag
-from . import utils
-from .layer import BaseMap
-from .maps import non_basemap_layers, get_map_name, get_map_template
-from .__version__ import __version__
+from cartoframes.credentials import Credentials
+from cartoframes.dataobs import get_countrytag
+from cartoframes import utils
+from cartoframes.layer import BaseMap
+from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from cartoframes.__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -74,9 +74,10 @@ class CartoContext(object):
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
-            are of the form ``https://{username}.carto.com`` (e.g.,
-            https://eschbacher.carto.com for user ``eschbacher``). On-premises
-            installation users should ask their admin.
+            should use the form ``https://{username}.carto.com`` (e.g.,
+            https://eschbacher.carto.com for user ``eschbacher``) whether on
+            a personal or multi-user account. On-premises installation users
+            should ask their admin.
         api_key (str): CARTO API key.
         session (requests.Session, optional): requests session. See `requests
             documentation
@@ -186,7 +187,8 @@ class CartoContext(object):
                 CARTO account
             table_name (str): Table to write ``df`` to in CARTO.
             temp_dir (str, optional): Directory for temporary storage of data
-                that is sent to CARTO. Default is ``/tmp`` (Unix-like systems).
+                that is sent to CARTO. Defaults are defined by `appdirs
+                <https://github.com/ActiveState/appdirs/blob/master/README.rst>`__.
             overwrite (bool, optional): Behavior for overwriting ``table_name``
                 if it exits on CARTO. Defaults to ``False``.
             lnglat (tuple, optional): lng/lat pair that can be used for
@@ -207,7 +209,9 @@ class CartoContext(object):
                 `content_guessing='true'`, a column named 'countries' with
                 country names will be used to generate polygons for each
                 country. To avoid unintended consequences, avoid `file`, `url`,
-                and other similar arguments.
+                and other similar arguments. Note: Combining `privacy` with
+                `overwrite` (defined above) does not currently update the
+                privacy of a dataset: https://github.com/CartoDB/cartoframes/issues/252.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
@@ -1064,15 +1068,16 @@ class CartoContext(object):
             For example, setting the region to be United States counties with
             no filter values set will result in many thousands of measures.
 
-        Example:
+        Examples:
 
-        Get all European Union measures that mention ``freight``.
-        .. code::
+            Get all European Union measures that mention ``freight``.
 
-            meta = cc.data_discovery('European Union',
-                                     keywords='freight',
-                                     time='2010')
-            print(meta['numer_name'].values)
+            .. code::
+
+                meta = cc.data_discovery('European Union',
+                                         keywords='freight',
+                                         time='2010')
+                print(meta['numer_name'].values)
 
         Arguments:
             region (str or list of float): Information about the region of
@@ -1319,14 +1324,15 @@ class CartoContext(object):
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
                 Defaults to ``None``, which will not create a table.
-            how (str, optional): Column name for identifying the geometry from
-                which to fetch the data. Defaults to `the_geom`, which results
-                in measures that are spatially interpolated (e.g., a
-                neighborhood boundary's population will be calculated from
-                underlying census tracts). Specifying a column that has the
-                geometry identifier (for example, GEOID for US Census
-                boundaries), results in measures directly from the Census for
-                that GEOID but normalized how it is specified in the metadata.
+            how (str, optional): **Not fully implemented**. Column name for
+                identifying the geometry from which to fetch the data. Defaults
+                to `the_geom`, which results in measures that are spatially
+                interpolated (e.g., a neighborhood boundary's population will
+                be calculated from underlying census tracts). Specifying a
+                column that has the geometry identifier (for example, GEOID for
+                US Census boundaries), results in measures directly from the
+                Census for that GEOID but normalized how it is specified in the
+                metadata.
 
         Returns:
             pandas.DataFrame: A DataFrame representation of `table_name` which
