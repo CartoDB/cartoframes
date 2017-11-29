@@ -1,5 +1,5 @@
 ===========
-CARTOFrames
+CARTOframes
 ===========
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
@@ -12,7 +12,7 @@ CARTOFrames
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
-Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
+Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
 Features
 
@@ -38,7 +38,7 @@ To install `cartoframes` (currently in beta) on your machine, do the following t
 
 .. code:: bash
 
-    $ pip install --pre cartoframes
+    $ pip install cartoframes
 
 It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
@@ -51,7 +51,7 @@ To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-gu
 
     $ virtualenv venv
     $ source venv/bin/activate
-    (venv) $ pip install --pre cartoframes
+    (venv) $ pip install cartoframes
     (venv) $ pip install jupyter
     (venv) $ jupyter notebook
 
