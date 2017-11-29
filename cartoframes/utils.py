@@ -82,7 +82,7 @@ def importify_params(param_arg):
     return param_arg
 
 
-def join_url(parts):
+def join_url(*parts):
     """join parts of URL into complete url"""
     return '/'.join(s.strip('/') for s in parts)
 

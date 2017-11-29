@@ -74,10 +74,7 @@ class BaseMap(AbstractLayer):
                     label_type = '_labels_under'
                 style = source + (label_type if labels == 'back'
                                   else '_nolabels')
-            self.url = join_url((stem,
-                                 '{style}/{{z}}/{{x}}/{{y}}.png'.format(
-                                     style=style)
-                                 ))
+            self.url = join_url(stem, style, '{z}/{x}/{y}.png')
         elif self.source.startswith('http'):
             # TODO: Remove this once baselayer urls can be passed in named
             # map config
