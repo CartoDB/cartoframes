@@ -114,6 +114,12 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                                 'scheme': styling.vivid(10)})],
            interactive=True)
 
+.. note::
+
+    Legends are under active development. See
+    <https://github.com/CartoDB/cartoframes/pull/184> for more information. To
+    try out that code, install `cartoframes` as:
+    `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
 Augment from Data Observatory
 -----------------------------
