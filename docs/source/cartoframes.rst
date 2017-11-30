@@ -8,10 +8,10 @@ Submodules
 
    cartoframes.context
    cartoframes.credentials
+   cartoframes.dataobs
    cartoframes.layer
    cartoframes.maps
    cartoframes.styling
-   cartoframes.updates
    cartoframes.utils
 
 Module contents

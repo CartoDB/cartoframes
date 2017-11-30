@@ -1,7 +1,7 @@
 """Unit tests for cartoframes.utils"""
 import unittest
 from cartoframes.utils import (dict_items, cssify, norm_colname,
-                               normalize_colnames)
+                               normalize_colnames, importify_params)
 from collections import OrderedDict
 
 
@@ -54,9 +54,9 @@ class TestUtils(unittest.TestCase):
         ])
 
         self.cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3',
-                     'old_soaker', '_testingTesting', ]
+                     'old_soaker', '_testingTesting', 1, 1.0]
         self.cols_ans = ['unnamed_0', '_201moore', 'acadia_1_2_3',
-                         'old_soaker', '_testingtesting', ]
+                         'old_soaker', '_testingtesting', '_1', '_1_0']
 
     def test_dict_items(self):
         """utils.dict_items"""
@@ -132,3 +132,10 @@ class TestUtils(unittest.TestCase):
         self.assertListEqual(normalize_colnames(self.cols_ans),
                              self.cols_ans,
                              msg='already normalize columns should not change')
+
+    def test_importify_params(self):
+        """utils.importify_params"""
+        params = [True, False, 'true', 'Gulab Jamon', ]
+        ans = ('true', 'false', 'true', 'gulab jamon', )
+        for idx, p in enumerate(params):
+            self.assertTrue(importify_params(p), ans[idx])

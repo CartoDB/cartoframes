@@ -5,16 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cartoframes.updates module &#8212; cartoframes 0.0.1 documentation</title>
-    
+    <title>cartoframes.dataobs module &#8212; cartoframes 0.4.0b6 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.4.0b6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -41,38 +38,13 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-cartoframes.updates">
-<span id="cartoframes-updates-module"></span><h1>cartoframes.updates module<a class="headerlink" href="#module-cartoframes.updates" title="Permalink to this headline">¶</a></h1>
-<p>Class for updating a cartoframe postgres table</p>
-<dl class="class">
-<dt id="cartoframes.updates.SQL">
-<em class="property">class </em><code class="descclassname">cartoframes.updates.</code><code class="descname">SQL</code><span class="sig-paren">(</span><em>cartoframe</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.updates.SQL" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>class for building queries for syncing</p>
-<dl class="method">
-<dt id="cartoframes.updates.SQL.add_cols">
-<code class="descname">add_cols</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.updates.SQL.add_cols" title="Permalink to this definition">¶</a></dt>
-<dd><p>prototype methods for add columns to table/dataframe</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="cartoframes.updates.SQL.drop_cols">
-<code class="descname">drop_cols</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.updates.SQL.drop_cols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Drops columns removed from dataframe</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="cartoframes.updates.SQL.update_vals">
-<code class="descname">update_vals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.updates.SQL.update_vals" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update cells which have changed since last sync</p>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="module-cartoframes.dataobs">
+<span id="cartoframes-dataobs-module"></span><h1>cartoframes.dataobs module<a class="headerlink" href="#module-cartoframes.dataobs" title="Permalink to this headline">¶</a></h1>
+<p>Data Observatory utility functions</p>
 <dl class="function">
-<dt id="cartoframes.updates.pg_type">
-<code class="descclassname">cartoframes.updates.</code><code class="descname">pg_type</code><span class="sig-paren">(</span><em>dtype</em>, <em>colname</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.updates.pg_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maps dataframe type to postgres type</p>
+<dt id="cartoframes.dataobs.get_countrytag">
+<code class="descclassname">cartoframes.dataobs.</code><code class="descname">get_countrytag</code><span class="sig-paren">(</span><em>country</em><span class="sig-paren">)</span><a class="headerlink" href="#cartoframes.dataobs.get_countrytag" title="Permalink to this definition">¶</a></dt>
+<dd><p>normalize country name to match data obs</p>
 </dd></dl>
 
 </div>
@@ -92,7 +64,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/cartoframes.updates.rst.txt"
+      <li><a href="_sources/cartoframes.dataobs.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -114,11 +86,11 @@
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="_sources/cartoframes.updates.rst.txt"
+      <a href="_sources/cartoframes.dataobs.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

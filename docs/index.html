@@ -5,16 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>CARTOFrames &#8212; cartoframes 0.0.1 documentation</title>
-    
+    <title>CARTOframes &#8212; cartoframes 0.4.0b6 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.4.0b6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -42,10 +39,12 @@
           <div class="body" role="main">
             
   <div class="section" id="cartoframes">
-<h1>CARTOFrames<a class="headerlink" href="#cartoframes" title="Permalink to this headline">¶</a></h1>
+<h1>CARTOframes<a class="headerlink" href="#cartoframes" title="Permalink to this headline">¶</a></h1>
 <a class="reference external image-reference" href="https://travis-ci.org/CartoDB/cartoframes"><img alt="https://travis-ci.org/CartoDB/cartoframes.svg?branch=master" src="https://travis-ci.org/CartoDB/cartoframes.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://coveralls.io/github/CartoDB/cartoframes?branch=master"><img alt="https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master" src="https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/CartoDB/cartoframes/binder-examples?filepath=examples"><img alt="https://mybinder.org/badge.svg" src="https://mybinder.org/badge.svg" /></a>
 <p>A Python package for integrating <a class="reference external" href="https://carto.com/">CARTO</a> maps, analysis, and data services into data science workflows.</p>
-<p>Python data analysis workflows often rely on the de facto standards <a class="reference external" href="http://pandas.pydata.org/">pandas</a> and <a class="reference external" href="http://jupyter.org/">Jupyter notebooks</a>. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO’s services like hosted, dynamic or static maps and <a class="reference external" href="https://carto.com/data-observatory/">Data Observatory</a> augmentation.</p>
+<p>Python data analysis workflows often rely on the de facto standards <a class="reference external" href="http://pandas.pydata.org/">pandas</a> and <a class="reference external" href="http://jupyter.org/">Jupyter notebooks</a>. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO’s services like hosted, dynamic or static maps and <a class="reference external" href="https://carto.com/data-observatory/">Data Observatory</a> augmentation.</p>
 <p>Features</p>
 <ul class="simple">
 <li>Write pandas DataFrames to CARTO tables</li>
@@ -66,7 +65,7 @@
 </div>
 <div class="section" id="install-instructions">
 <h2>Install Instructions<a class="headerlink" href="#install-instructions" title="Permalink to this headline">¶</a></h2>
-<p>To install <cite>cartoframes</cite> on your machine, do the following:</p>
+<p>To install <cite>cartoframes</cite> (currently in beta) on your machine, do the following to install the latest pre-release version:</p>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ pip install cartoframes
 </pre></div>
 </div>
@@ -76,7 +75,8 @@
 <p>To setup <cite>cartoframes</cite> and <cite>Jupyter</cite> in a <a class="reference external" href="http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage">virtual environment</a>:</p>
 <div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ virtualenv venv
 $ source venv/bin/activate
-(venv) $ pip install cartoframes jupyter
+(venv) $ pip install cartoframes
+(venv) $ pip install jupyter
 (venv) $ jupyter notebook
 </pre></div>
 </div>
@@ -115,7 +115,7 @@ $ source venv/bin/activate
 </div>
 <div class="section" id="map-workflow">
 <h3>Map workflow<a class="headerlink" href="#map-workflow" title="Permalink to this headline">¶</a></h3>
-<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">Turbo Carto</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CartoColors</a>. See the <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColor wiki</a> for a full list of available color schemes.</p>
+<p>The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by <a class="reference external" href="https://github.com/CartoDB/turbo-carto">TurboCARTO</a> and <a class="reference external" href="https://carto.com/blog/introducing-cartocolors">CARTOColors</a>. See the <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CARTOColors wiki</a> for a full list of available color schemes.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span><span class="p">,</span> <span class="n">styling</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">BASEURL</span><span class="p">,</span>
                               <span class="n">api_key</span><span class="o">=</span><span class="n">APIKEY</span><span class="p">)</span>
@@ -126,14 +126,13 @@ $ source venv/bin/activate
                <span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;peregrine_falcon_nest_sites&#39;</span><span class="p">,</span>
                      <span class="n">size</span><span class="o">=</span><span class="s1">&#39;num_eggs&#39;</span><span class="p">,</span>
                      <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
-                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">vivid</span><span class="p">(</span><span class="mi">10</span><span class="p">))],</span>
+                            <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">vivid</span><span class="p">(</span><span class="mi">10</span><span class="p">)})],</span>
        <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="augment-from-data-observatory">
 <h3>Augment from Data Observatory<a class="headerlink" href="#augment-from-data-observatory" title="Permalink to this headline">¶</a></h3>
-<p><strong>Note:</strong> This is a provisional function, so the signature may change.</p>
 <p>Interact with CARTO’s <a class="reference external" href="https://carto.com/docs/carto-engine/data">Data Observatory</a>:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
@@ -146,55 +145,69 @@ $ source venv/bin/activate
                      <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">},</span>
                      <span class="p">{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B17001002&#39;</span><span class="p">,</span>
                       <span class="s1">&#39;normalization&#39;</span><span class="p">:</span> <span class="s1">&#39;predenominated&#39;</span><span class="p">},]</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data_augment</span><span class="p">(</span><span class="s1">&#39;transactions&#39;</span><span class="p">,</span> <span class="n">data_obs_measures</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s1">&#39;transactions&#39;</span><span class="p">,</span> <span class="n">data_obs_measures</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="carto-credential-management">
+<h3>CARTO Credential Management<a class="headerlink" href="#carto-credential-management" title="Permalink to this headline">¶</a></h3>
+<p>Save and update your CARTO credentials for later use.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span><span class="p">,</span> <span class="n">CartoContext</span>
+<span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;eschbacher&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;abcdefg&#39;</span><span class="p">)</span>
+<span class="n">creds</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>  <span class="c1"># save credentials for later use (not dependent on Python session)</span>
+</pre></div>
+</div>
+<p>Once you save your credentials, you can get started in future sessions more quickly:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">CartoContext</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">CartoContext</span><span class="p">()</span>  <span class="c1"># automatically loads credentials if previously saved</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">
 </div>
 </div>
 </div>
-<div class="section" id="cartoframes-methods">
-<h2>CARTOFrames Methods<a class="headerlink" href="#cartoframes-methods" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="module-context">
-<span id="cartocontext-class"></span><h3>CartoContext Class<a class="headerlink" href="#module-context" title="Permalink to this headline">¶</a></h3>
-<p>CartoContext class for authentication with CARTO and high-level operations
-such as reading tables from CARTO into dataframes, writing dataframes to CARTO
-tables, and creating custom maps from dataframes and CARTO tables. Future
-methods interact with CARTO’s services like
-<a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>, and <a class="reference external" href="https://carto.com/location-data-services/">routing,
-geocoding, and isolines</a>.</p>
+<div class="section" id="cartoframes-functionality">
+<h2>CARTOframes Functionality<a class="headerlink" href="#cartoframes-functionality" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cartocontext">
+<h3>CartoContext<a class="headerlink" href="#cartocontext" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="context.CartoContext">
-<em class="property">class </em><code class="descclassname">context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext" title="Permalink to this definition">¶</a></dt>
-<dd><p>Manages connections with CARTO for data and map operations. Modeled
+<em class="property">class </em><code class="descclassname">context.</code><code class="descname">CartoContext</code><span class="sig-paren">(</span><em>base_url=None</em>, <em>api_key=None</em>, <em>creds=None</em>, <em>session=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>CartoContext class for authentication with CARTO and high-level operations
+such as reading tables from CARTO into dataframes, writing dataframes to
+CARTO tables, creating custom maps from dataframes and CARTO tables, and
+augmenting data using CARTO’s <a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a>. Future methods will interact with
+CARTO’s services like <a class="reference external" href="https://carto.com/location-data-services/">routing, geocoding, and isolines</a>, PostGIS backend for spatial
+processing, and much more.</p>
+<p>Manages connections with CARTO for data and map operations. Modeled
 after <a class="reference external" href="https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html">SparkContext</a>.</p>
-<p class="rubric">Example</p>
-<p>Create a CartoContext object
-.. code:: python</p>
-<blockquote>
-<div>import cartoframes
-cc = cartoframes.CartoContext(BASEURL, APIKEY)</div></blockquote>
+<dl class="attribute">
+<dt id="context.CartoContext.creds">
+<code class="descname">creds</code><a class="headerlink" href="#context.CartoContext.creds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>cartoframes.Credentials</em> – <code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code> instance</p>
+</dd></dl>
+
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>base_url</strong> (<em>str</em>) – Base URL of CARTO user account. Cloud-based accounts
-are of the form <code class="docutils literal"><span class="pre">https://{username}.carto.com</span></code> (e.g.,
-<a class="reference external" href="https://eschbacher.carto.com">https://eschbacher.carto.com</a> for user <code class="docutils literal"><span class="pre">eschbacher</span></code>). On-premises
-installation users should ask their admin.</li>
+should use the form <code class="docutils literal"><span class="pre">https://{username}.carto.com</span></code> (e.g.,
+<a class="reference external" href="https://eschbacher.carto.com">https://eschbacher.carto.com</a> for user <code class="docutils literal"><span class="pre">eschbacher</span></code>) whether on
+a personal or multi-user account. On-premises installation users
+should ask their admin.</li>
 <li><strong>api_key</strong> (<em>str</em>) – CARTO API key.</li>
 <li><strong>session</strong> (<em>requests.Session</em><em>, </em><em>optional</em>) – requests session. See <a class="reference external" href="http://docs.python-requests.org/en/master/user/advanced/">requests
 documentation</a>
-for more information:</li>
+for more information.</li>
 <li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Output underlying process states (True), or
 suppress (False, default)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A CartoContext object that is authenticated against
-the user’s CARTO account.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A CartoContext object that is authenticated
+against the user’s CARTO account.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#context.CartoContext" title="context.CartoContext"><code class="xref py py-obj docutils literal"><span class="pre">CartoContext</span></code></a></p>
@@ -202,34 +215,34 @@ the user’s CARTO account.</p>
 </tr>
 </tbody>
 </table>
-<dl class="method">
-<dt id="context.CartoContext.data_augment">
-<code class="descname">data_augment</code><span class="sig-paren">(</span><em>table_name</em>, <em>metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_augment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Augment an existing CARTO table with <a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a> measures. See the full <a class="reference external" href="https://cartodb.github.io/bigmetadata/index.html">Data
-Observatory catalog</a> for all available
-measures. The result of this operation is:</p>
-<ol class="arabic simple">
-<li>It updates <cite>table_name</cite> by adding columns from the Data Observatory</li>
-<li>It returns a pandas DataFrame representation of that newly augmented
-table.</li>
-</ol>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This method alters <cite>table_name</cite> in the user’s CARTO database by
-adding additional columns. To avoid this, create a copy of the
-table first and use the new copy instead.</p>
-</div>
 <p class="rubric">Example</p>
-<p>Add new measures to a CARTO table and pass it to a pandas DataFrame.
-Using the “Median Household Income in the past 12 months” measure
-from the <a class="reference external" href="https://cartodb.github.io/bigmetadata/united_states/income.html#median-household-income-in-the-past-12-months">Data Observatory Catalog</a>.</p>
+<p>Create a CartoContext object:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-<span class="n">median_income</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">,</span>
-                  <span class="s1">&#39;geom_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.tiger.block_group&#39;</span><span class="p">,</span>
-                  <span class="s1">&#39;numer_timespan&#39;</span><span class="p">:</span> <span class="s1">&#39;2011 - 2015&#39;</span><span class="p">}]</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data_augment</span><span class="p">(</span><span class="s1">&#39;transaction_events&#39;</span><span class="p">,</span>
-                     <span class="n">median_income</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="context.CartoContext.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir=SYSTEM_TMP_PATH</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a DataFrame to a CARTO table.</p>
+<p class="rubric">Example</p>
+<p>Write a pandas DataFrame to CARTO.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Scrape an HTML table from Wikipedia and send to CARTO with content
+guessing to create a geometry from the country column. This uses
+a CARTO Import API param <cite>content_guessing</cite> parameter.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/List_of_countries_by_life_expectancy&#39;</span>
+<span class="c1"># retrieve first HTML table from that page</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_html</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># send to carto, let it guess polygons based on the &#39;country&#39;</span>
+<span class="c1">#   column. Also set privacy to &#39;public&#39;</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span>
+         <span class="n">content_guessing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+         <span class="n">privacy</span><span class="o">=</span><span class="s1">&#39;public&#39;</span><span class="p">)</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;life_expectancy&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;both_sexes_life_expectancy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -237,45 +250,131 @@ from the <a class="reference external" href="https://cartodb.github.io/bigmetada
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>table_name</strong> (<em>str</em>) – Name of table on CARTO account that Data
-Observatory measures are to be added to.</li>
-<li><strong>metadata</strong> (<em>list of dicts</em>) – <p>List of all measures to add to
-<cite>table_name</cite>. Each <cite>dict</cite> has the following keys:</p>
-<ul>
-<li><cite>numer_id</cite> (str): The identifier for the desired measurement</li>
-<li><cite>geom_id</cite> (str, optional): Identifier for a desired
-geographic boundary level to use when calculating measures.
-Will be automatically assigned if undefined</li>
-<li><cite>normalization</cite> (str, optional): The desired normalization. One
-of ‘area’, ‘prenormalized’, or ‘denominated’. ‘Area’ will
-normalize the measure per square kilometer, ‘prenormalized’
-will return the original value, and ‘denominated’ will
-normalize by a denominator.</li>
-<li><cite>denom_id</cite> (str, optional): Measure ID from DO catalog</li>
-<li><cite>numer_timespan</cite> (str, optional): The desired timespan for the
-measurement. Defaults to most recent timespan available if
-left unspecified.</li>
-<li><cite>geom_timespan</cite> (str, optional): The desired timespan for the
-geometry. Defaults to timespan matching <cite>numer_timespan</cite> if
-left unspecified.</li>
-<li><cite>target_area</cite> (str, optional): Instead of aiming to have
-<cite>target_geoms</cite> in the area of the geometry passed as extent,
-fill this area. Unit is square degrees WGS84. Set this to
-<cite>0</cite> if you want to use the smallest source geometry for this
-element of metadata, for example if you’re passing in points.</li>
-<li><cite>target_geoms</cite> (str, optional): Override global <cite>target_geoms</cite>
-for this element of metadata</li>
-<li><cite>max_timespan_rank</cite> (str, optional): Override global
-<cite>max_timespan_rank</cite> for this element of metadata</li>
-<li><cite>max_score_rank</cite> (str, optional): Override global
-<cite>max_score_rank</cite> for this element of metadata</li>
-</ul>
-</li>
+<li><strong>df</strong> (<em>pandas.DataFrame</em>) – DataFrame to write to <code class="docutils literal"><span class="pre">table_name</span></code> in user
+CARTO account</li>
+<li><strong>table_name</strong> (<em>str</em>) – Table to write <code class="docutils literal"><span class="pre">df</span></code> to in CARTO.</li>
+<li><strong>temp_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory for temporary storage of data
+that is sent to CARTO. Defaults are defined by <a class="reference external" href="https://github.com/ActiveState/appdirs/blob/master/README.rst">appdirs</a>.</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Behavior for overwriting <code class="docutils literal"><span class="pre">table_name</span></code>
+if it exits on CARTO. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
+<li><strong>lnglat</strong> (<em>tuple</em><em>, </em><em>optional</em>) – lng/lat pair that can be used for
+creating a geometry on CARTO. Defaults to <code class="docutils literal"><span class="pre">None</span></code>. In some
+cases, geometry will be created without specifying this. See
+CARTO’s <a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables">Import API</a>
+for more information.</li>
+<li><strong>encode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to write <cite>geom_col</cite> to CARTO
+as <cite>the_geom</cite>.</li>
+<li><strong>geom_col</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column where geometry
+information is stored. Used in conjunction with
+<cite>encode_geom</cite>.</li>
+<li><strong>kwargs</strong> – Keyword arguments from CARTO’s Import API. See the <a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables/#params">params
+listed in the documentation</a>
+for more information. For example, when using
+<cite>content_guessing=’true’</cite>, a column named ‘countries’ with
+country names will be used to generate polygons for each
+country. To avoid unintended consequences, avoid <cite>file</cite>, <cite>url</cite>,
+and other similar arguments. Note: Combining <cite>privacy</cite> with
+<cite>overwrite</cite> (defined above) does not currently update the
+privacy of a dataset: <a class="reference external" href="https://github.com/CartoDB/cartoframes/issues/252">https://github.com/CartoDB/cartoframes/issues/252</a>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A DataFrame representation of <cite>table_name</cite> which
-has new columns for each measure in <cite>metadata</cite>.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If <cite>lnglat</cite> flag is set and the
+DataFrame has more than 100,000 rows, a <a class="reference internal" href="#context.BatchJobStatus" title="context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a>
+instance is returned. Otherwise, None.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#context.BatchJobStatus" title="context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a> or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">DataFrame indexes are changed to ordinary columns. CARTO creates
+an index called <cite>cartodb_id</cite> for every table that runs from 1 to
+the length of the DataFrame.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index='cartodb_id'</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a table from CARTO into a pandas DataFrames.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table_name</strong> (<em>str</em>) – Name of table in user’s CARTO account.</li>
+<li><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – Read only <cite>limit</cite> lines from
+<cite>table_name</cite>. Defaults to <code class="docutils literal"><span class="pre">None</span></code>, which reads the full table.</li>
+<li><strong>index</strong> (<em>str</em><em>, </em><em>optional</em>) – Not currently in use.</li>
+<li><strong>decode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Decodes CARTO’s geometries into a
+<a class="reference external" href="https://github.com/Toblerity/Shapely">Shapely</a>
+object that can be used, for example, in <a class="reference external" href="http://geopandas.org/">GeoPandas</a>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of <cite>table_name</cite> from
+CARTO.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a table in user’s CARTO account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>table_name</strong> (<em>str</em>) – Name of table to delete</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>query</em>, <em>table_name=None</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pull the result from an arbitrary SQL query from a CARTO account
+into a pandas DataFrame. Can also be used to perform database
+operations (creating/dropping tables, adding columns, updates, etc.).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> (<em>str</em>) – Query to run against CARTO user database. This data
+will then be converted into a pandas DataFrame.</li>
+<li><strong>table_name</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, this will create a new
+table in the user’s CARTO account that is the result of the
+query. Defaults to None (no table created).</li>
+<li><strong>decode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Decodes CARTO’s geometries into a
+<a class="reference external" href="https://github.com/Toblerity/Shapely">Shapely</a>
+object that can be used, for example, in <a class="reference external" href="http://geopandas.org/">GeoPandas</a>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of query supplied.
+Pandas data types are inferred from PostgreSQL data types.
+In the case of PostgreSQL date types, dates are attempted to be
+converted, but on failure a data type ‘object’ is used.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
@@ -286,23 +385,11 @@ has new columns for each measure in <cite>metadata</cite>.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="context.CartoContext.data_boundaries">
-<code class="descname">data_boundaries</code><span class="sig-paren">(</span><em>df=None</em>, <em>table_name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_boundaries" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not currently implemented</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="context.CartoContext.data_discovery">
-<code class="descname">data_discovery</code><span class="sig-paren">(</span><em>keywords=None</em>, <em>regex=None</em>, <em>time=None</em>, <em>boundary=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_discovery" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not currently implemented</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="context.CartoContext.map">
-<code class="descname">map</code><span class="sig-paren">(</span><em>layers=None</em>, <em>interactive=True</em>, <em>zoom=None</em>, <em>lat=None</em>, <em>lng=None</em>, <em>size=(800</em>, <em>400)</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.map" title="Permalink to this definition">¶</a></dt>
+<code class="descname">map</code><span class="sig-paren">(</span><em>layers=None</em>, <em>interactive=True</em>, <em>zoom=None</em>, <em>lat=None</em>, <em>lng=None</em>, <em>size=(800</em>, <em>400)</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produce a CARTO map visualizing data layers.</p>
-<p class="rubric">Example</p>
-<p>Create a map with two data layers, and one BaseMap layer.</p>
+<p class="rubric">Examples</p>
+<p>Create a map with two data layers, and one BaseMap layer:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">BaseMap</span><span class="p">,</span> <span class="n">styling</span>
 <span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
@@ -315,6 +402,15 @@ has new columns for each measure in <cite>metadata</cite>.</p>
                      <span class="n">color</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;column&#39;</span><span class="p">:</span> <span class="s1">&#39;bird_id&#39;</span><span class="p">,</span>
                             <span class="s1">&#39;scheme&#39;</span><span class="p">:</span> <span class="n">styling</span><span class="o">.</span><span class="n">vivid</span><span class="p">(</span><span class="mi">10</span><span class="p">))],</span>
        <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a snapshot of a map at a specific zoom and center:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">=</span><span class="n">Layer</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;simpson_index&#39;</span><span class="p">),</span>
+       <span class="n">interactive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+       <span class="n">zoom</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+       <span class="n">lng</span><span class="o">=-</span><span class="mf">68.3823549</span><span class="p">,</span>
+       <span class="n">lat</span><span class="o">=</span><span class="mf">44.3036906</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -348,16 +444,19 @@ to a view to have all data layers in view.</li>
 <li><strong>lng</strong> (<em>float</em><em>, </em><em>optional</em>) – Longitude value for the center of the map.
 Must be used in conjunction with <code class="docutils literal"><span class="pre">zoom</span></code> and <code class="docutils literal"><span class="pre">lat</span></code>. Defaults
 to a view to have all data layers in view.</li>
-<li><strong>size</strong> (<em>tuple</em><em>, </em><em>optional</em>) – List of pixel dimensions for the map. Format
-is <code class="docutils literal"><span class="pre">(width,</span> <span class="pre">height)</span></code>. Defaults to <code class="docutils literal"><span class="pre">(800,</span> <span class="pre">400)</span></code>.</li>
+<li><strong>size</strong> (<em>tuple</em><em>, </em><em>optional</em>) – List of pixel dimensions for the map.
+Format is <code class="docutils literal"><span class="pre">(width,</span> <span class="pre">height)</span></code>. Defaults to <code class="docutils literal"><span class="pre">(800,</span> <span class="pre">400)</span></code>.</li>
+<li><strong>ax</strong> – matplotlib axis on which to draw the image. Only used when
+<code class="docutils literal"><span class="pre">interactive</span></code> is <code class="docutils literal"><span class="pre">False</span></code>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are rendered in an <code class="docutils literal"><span class="pre">iframe</span></code>,
-while static maps are rendered in <code class="docutils literal"><span class="pre">img</span></code> tags.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interactive maps are
+rendered as HTML in an <cite>iframe</cite>, while static maps are returned as
+matplotlib Axes objects or IPython Image.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">IPython.display.HTML or matplotlib Axes</p>
 </td>
 </tr>
 </tbody>
@@ -365,87 +464,62 @@ while static maps are rendered in <code class="docutils literal"><span class="pr
 </dd></dl>
 
 <dl class="method">
-<dt id="context.CartoContext.query">
-<code class="descname">query</code><span class="sig-paren">(</span><em>query</em>, <em>table_name=None</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.query" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pull the result from an arbitrary SQL query from a CARTO account
-into a pandas DataFrame. Can also be used to perform database
-operations (creating/dropping tables, adding columns, updates, etc.).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>query</strong> (<em>str</em>) – Query to run against CARTO user database.</li>
-<li><strong>table_name</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, this will create a new
-table in the user’s CARTO account that is the result of the
-query. Defaults to None (no table created).</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of query supplied.
-Pandas data types are inferred from PostgreSQL data types.
-In the case of PostgreSQL date types, the data type ‘object’ is used.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="context.CartoContext.read">
-<code class="descname">read</code><span class="sig-paren">(</span><em>table_name</em>, <em>limit=None</em>, <em>index=’cartodb_id’</em>, <em>decode_geom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read tables from CARTO into pandas DataFrames.</p>
-<p class="rubric">Example</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;acadia_biodiversity&#39;</span><span class="p">)</span>
-</pre></div>
+<dt id="context.CartoContext.data_discovery">
+<code class="descname">data_discovery</code><span class="sig-paren">(</span><em>region</em>, <em>keywords=None</em>, <em>regex=None</em>, <em>time=None</em>, <em>boundaries=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data_discovery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discover Data Observatory measures. This method returns the full
+Data Observatory metadata model for each measure or measures that
+match the conditions from the inputs. The full metadata in each row
+uniquely defines a measure based on the timespan, geographic
+resolution, and normalization (if any). Read more about the metadata
+response in <a class="reference external" href="https://carto.com/docs/carto-engine/data/measures-functions/#obs_getmetaextent-geometry-metadata-json-max_timespan_rank-max_score_rank-target_geoms">Data Observatory</a>
+documentation.</p>
+<p>Internally, this method finds all measures in <cite>region</cite> that match the
+conditions set in <cite>keywords</cite>, <cite>regex</cite>, <cite>time</cite>, and <cite>boundaries</cite> (if
+any of them are specified). Then, if <cite>boundaries</cite> is not specified, a
+geographical resolution for that measure will be chosen subject to the
+type of region specified:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>If <cite>region</cite> is a table name, then a geographical resolution that
+is roughly equal to <cite>region size / number of subunits</cite>.</li>
+<li>If <cite>region</cite> is a country name or bounding box, then a geographical
+resolution will be chosen roughly equal to <cite>region size / 500</cite>.</li>
+</ol>
+</div></blockquote>
+<p>Since different measures are in some geographic resolutions and not
+others, different geographical resolutions for different measures are
+oftentimes returned.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">To remove the guesswork in how geographical resolutions are
+selected, specify one or more boundaries in <cite>boundaries</cite>. See
+the boundaries section for each region in the <a class="reference external" href="http://cartodb.github.io/bigmetadata/">Data Observatory
+catalog</a>.</p>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>table_name</strong> (<em>str</em>) – Name of table in user’s CARTO account.</li>
-<li><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – Read only <code class="docutils literal"><span class="pre">limit</span></code> lines from
-<code class="docutils literal"><span class="pre">table_name</span></code>. Defaults to <cite>None</cite>, which reads the full table.</li>
-<li><strong>index</strong> (<em>str</em><em>, </em><em>optional</em>) – Not currently in use.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">DataFrame representation of <cite>table_name</cite> from
-CARTO.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="context.CartoContext.sync">
-<code class="descname">sync</code><span class="sig-paren">(</span><em>dataframe</em>, <em>table_name</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.sync" title="Permalink to this definition">¶</a></dt>
-<dd><p>Depending on the size of the DataFrame or CARTO table, perform
-granular operations on a DataFrame to only update the changed cells
-instead of a bulk upload. If on the large side, perform granular
-operations, if on the smaller side use Import API.</p>
+<p>The metadata returned from this method can then be used to create raw
+tables or for augmenting an existing table from these measures using
+<cite>CartoContext.data</cite>. For the full Data Observatory catalog, visit
+<a class="reference external" href="https://cartodb.github.io/bigmetadata/">https://cartodb.github.io/bigmetadata/</a>. When working with the metadata
+DataFrame returned from this method, be careful to only remove rows not
+columns as <a class="reference external" href="#context.CartoContext.data">CartoContext.data</a> generally
+needs the full metadata.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Not yet implemented.</p>
+<p>Narrowing down a discovery query using the <cite>keywords</cite>, <cite>regex</cite>, and
+<cite>time</cite> filters is important for getting a manageable metadata
+set. Besides there being a large number of measures in the DO, a
+metadata response has acceptable combinations of measures with
+demonimators (normalization and density), the same measure from
+other years, and quantiles measurements.</p>
+<p class="last">For example, setting the region to be United States counties with
+no filter values set will result in many thousands of measures.</p>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="context.CartoContext.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>df</em>, <em>table_name</em>, <em>temp_dir=’/tmp’</em>, <em>overwrite=False</em>, <em>lnglat=None</em>, <em>encode_geom=False</em>, <em>geom_col=None</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write a DataFrame to a CARTO table.</p>
-<p class="rubric">Example</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;brooklyn_poverty&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<p class="rubric">Examples</p>
+<p>Get all European Union measures that mention <code class="docutils literal"><span class="pre">freight</span></code>.</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">meta</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data_discovery</span><span class="p">(</span><span class="s1">&#39;European Union&#39;</span><span class="p">,</span>
+                         <span class="n">keywords</span><span class="o">=</span><span class="s1">&#39;freight&#39;</span><span class="p">,</span>
+                         <span class="n">time</span><span class="o">=</span><span class="s1">&#39;2010&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;numer_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -453,26 +527,136 @@ operations, if on the smaller side use Import API.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>df</strong> (<em>pandas.DataFrame</em>) – DataFrame to write to <code class="docutils literal"><span class="pre">table_name</span></code> in user
-CARTO account</li>
-<li><strong>table_name</strong> (<em>str</em>) – Table to write <code class="docutils literal"><span class="pre">df</span></code> to in CARTO.</li>
-<li><strong>temp_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory for temporary storage of data
-that is sent to CARTO. Defaults to <code class="docutils literal"><span class="pre">/tmp</span></code> (Unix-like systems).</li>
-<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Behavior for overwriting <code class="docutils literal"><span class="pre">table_name</span></code>
-if it exits on CARTO. Defaults to <code class="docutils literal"><span class="pre">False</span></code>.</li>
-<li><strong>lnglat</strong> (<em>tuple</em><em>, </em><em>optional</em>) – lng/lat pair that can be used for creating
-a geometry on CARTO. Defaults to <code class="docutils literal"><span class="pre">None</span></code>. In some cases,
-geometry will be created without specifying this. See CARTO’s
-<a class="reference external" href="https://carto.com/docs/carto-engine/import-api/standard-tables">Import API</a>
+<li><strong>region</strong> (<em>str</em><em> or </em><em>list of float</em>) – <p>Information about the region of
+interest. <cite>region</cite> can be one of three types:</p>
+<blockquote>
+<div><ul>
+<li>region name (str): Name of region of interest. Acceptable
+values are limited to: ‘Australia’, ‘Brazil’, ‘Canada’,
+‘European Union’, ‘France’, ‘Mexico’, ‘Spain’,
+‘United Kingdom’, ‘United States’.</li>
+<li>table name (str): Name of a table in user’s CARTO account
+with geometries. The region will be the bounding box of
+the table.<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If a table name is also a valid Data Observatory
+region name, the Data Observatory name will be chosen
+over the table.</p>
+</div>
+</li>
+<li>bounding box (list of float): List of four values (two
+lng/lat pairs) in the following order: western longitude,
+southern latitude, eastern longitude, and northern latitude.
+For example, Switzerland fits in
+<code class="docutils literal"><span class="pre">[5.9559111595,45.8179931641,10.4920501709,47.808380127]</span></code></li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Geometry levels are generally chosen by subdividing
+the region into the next smallest administrative unit. To
+override this behavior, specify the <cite>boundaries</cite> flag. For
+example, set <cite>boundaries</cite> to
+<code class="docutils literal"><span class="pre">'us.census.tiger.census_tract'</span></code> to choose US census
+tracts.</p>
+</div>
+</div></blockquote>
+</li>
+<li><strong>keywords</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Keyword or list of
+keywords in measure description or name. Response will be matched
+on all keywords listed (boolean <cite>or</cite>).</li>
+<li><strong>regex</strong> (<em>str</em><em>, </em><em>optional</em>) – A regular expression to search the measure
+descriptions and names. Note that this relies on PostgreSQL’s
+case insensitive operator <code class="docutils literal"><span class="pre">~*</span></code>. See <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-matching.html">PostgreSQL docs</a>
 for more information.</li>
-<li><strong>encode_geom</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to write <cite>geom_col</cite> to CARTO
-as <cite>the_geom</cite>.</li>
-<li><strong>geom_col</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the column where geometry
-information is stored. Used in conjunction with <cite>encode_geom</cite>.</li>
+<li><strong>boundaries</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Boundary or list of
+boundaries that specify the measure resolution. See the
+boundaries section for each region in the <a class="reference external" href="http://cartodb.github.io/bigmetadata/">Data Observatory
+catalog</a>.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A dataframe of the complete metadata model for
+specific measures based on the search parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">pandas.DataFrame</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> – If <cite>region</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">list</span></code> and does not consist of
+four elements, or if <cite>region</cite> is neither an acceptable region
+nor a table in user account.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.CartoContext.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>table_name</em>, <em>metadata</em>, <em>persist_as=None</em>, <em>how='the_geom'</em><span class="sig-paren">)</span><a class="headerlink" href="#context.CartoContext.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an augmented CARTO dataset with <a class="reference external" href="https://carto.com/data-observatory">Data Observatory</a> measures. Use
+<a class="reference external" href="#context.CartoContext.data_discovery">CartoContext.data_discovery</a> to search for available
+measures, or see the full <a class="reference external" href="https://cartodb.github.io/bigmetadata/index.html">Data Observatory catalog</a>. Optionally
+persist the data as a new table.</p>
+<p class="rubric">Example</p>
+<p>Get a DataFrame with Data Observatory measures based on the
+geometries in a CARTO table.</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">cc</span> <span class="o">=</span> <span class="n">cartoframes</span><span class="o">.</span><span class="n">CartoContext</span><span class="p">(</span><span class="n">BASEURL</span><span class="p">,</span> <span class="n">APIKEY</span><span class="p">)</span>
+<span class="n">median_income</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data_discovery</span><span class="p">(</span><span class="s1">&#39;transaction_events&#39;</span><span class="p">,</span>
+                                  <span class="n">regex</span><span class="o">=</span><span class="s1">&#39;.*median income.*&#39;</span><span class="p">,</span>
+                                  <span class="n">time</span><span class="o">=</span><span class="s1">&#39;2011 - 2015&#39;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">median_income</span><span class="p">,</span>
+             <span class="s1">&#39;transaction_event&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pass in cherry-picked measures from the Data Observatory catalog.
+The rest of the metadata will be filled in, but it’s important to
+specify the geographic level as this will not show up in the column
+name.</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">median_income</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;numer_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.acs.B19013001&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;geom_id&#39;</span><span class="p">:</span> <span class="s1">&#39;us.census.tiger.block_group&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;numer_timespan&#39;</span><span class="p">:</span> <span class="s1">&#39;2011 - 2015&#39;</span><span class="p">}]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s1">&#39;transaction_events&#39;</span><span class="p">,</span> <span class="n">median_income</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table_name</strong> (<em>str</em>) – Name of table on CARTO account that Data
+Observatory measures are to be added to.</li>
+<li><strong>metadata</strong> (<em>pandas.DataFrame</em>) – List of all measures to add to
+<cite>table_name</cite>. See <cite>CartoContext.data_discovery</cite> outputs
+for a full list of metadata columns.</li>
+<li><strong>persist_as</strong> (<em>str</em><em>, </em><em>optional</em>) – Output the results of augmenting
+<cite>table_name</cite> to <cite>persist_as</cite> as a persistent table on CARTO.
+Defaults to <code class="docutils literal"><span class="pre">None</span></code>, which will not create a table.</li>
+<li><strong>how</strong> (<em>str</em><em>, </em><em>optional</em>) – <strong>Not fully implemented</strong>. Column name for
+identifying the geometry from which to fetch the data. Defaults
+to <cite>the_geom</cite>, which results in measures that are spatially
+interpolated (e.g., a neighborhood boundary’s population will
+be calculated from underlying census tracts). Specifying a
+column that has the geometry identifier (for example, GEOID for
+US Census boundaries), results in measures directly from the
+Census for that GEOID but normalized how it is specified in the
+metadata.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A DataFrame representation of <cite>table_name</cite> which
+has new columns for each measure in <cite>metadata</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">pandas.DataFrame</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">NameError</span></code> – If the columns in <cite>table_name</cite> are in the
+<code class="docutils literal"><span class="pre">suggested_name</span></code> column of <cite>metadata</cite>.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> – If metadata object is invalid or empty, or if the
+number of requested measures exceeds 50.</li>
+</ul>
 </td>
 </tr>
 </tbody>
@@ -484,17 +668,12 @@ information is stored. Used in conjunction with <cite>encode_geom</cite>.</li>
 </div>
 <div class="section" id="module-layer">
 <span id="map-layer-classes"></span><h3>Map Layer Classes<a class="headerlink" href="#module-layer" title="Permalink to this headline">¶</a></h3>
-<p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a>
-and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> for example usage.</p>
-<dl class="class">
-<dt id="layer.AbstractLayer">
-<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">AbstractLayer</code><a class="headerlink" href="#layer.AbstractLayer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Abstract Layer object</p>
-</dd></dl>
-
+<p>Layer classes for map creation. See examples in <a class="reference external" href="#layer.Layer">layer.Layer</a> and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a>
+for example usage for data layers. See <a class="reference external" href="#layer.BaseMap">layer.BaseMap</a> for
+basemap layers.</p>
 <dl class="class">
 <dt id="layer.BaseMap">
-<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source=’dark’</em>, <em>labels=’back’</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.BaseMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">layer.</code><code class="descname">BaseMap</code><span class="sig-paren">(</span><em>source='voyager'</em>, <em>labels='back'</em>, <em>only_labels=False</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.BaseMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Layer object for adding basemaps to a cartoframes map.</p>
 <p class="rubric">Example</p>
 <p>Add a custom basemap to a cartoframes map.</p>
@@ -510,11 +689,11 @@ and <a class="reference external" href="#layer.QueryLayer">layer.QueryLayer</a> 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to <code class="docutils literal"><span class="pre">dark</span></code>.
-Basemaps come from
+<li><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">light</span></code> or <code class="docutils literal"><span class="pre">dark</span></code>. Defaults to
+<code class="docutils literal"><span class="pre">voyager</span></code>. Basemaps come from
 <a class="reference external" href="https://carto.com/location-data-services/basemaps/">https://carto.com/location-data-services/basemaps/</a></li>
-<li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on the
-front will be above the data layers. Labels on back will be
+<li><strong>labels</strong> (<em>str</em><em>, </em><em>optional</em>) – One of <code class="docutils literal"><span class="pre">back</span></code>, <code class="docutils literal"><span class="pre">front</span></code>, or None. Labels on
+the front will be above the data layers. Labels on back will be
 underneath the data layers but on top of the basemap. Setting
 labels to <code class="docutils literal"><span class="pre">None</span></code> will only show the basemap.</li>
 <li><strong>only_labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to show labels or not.</li>
@@ -531,8 +710,8 @@ labels to <code class="docutils literal"><span class="pre">None</span></code> wi
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if using a CARTO basemap (Dark Matter or Positron),
-<cite>False</cite> otherwise.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if using a CARTO basemap (Dark Matter, Positron or
+Voyager), <cite>False</cite> otherwise.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
@@ -546,8 +725,9 @@ labels to <code class="docutils literal"><span class="pre">None</span></code> wi
 <dt id="layer.Layer">
 <em class="property">class </em><code class="descclassname">layer.</code><code class="descname">Layer</code><span class="sig-paren">(</span><em>table_name</em>, <em>source=None</em>, <em>overwrite=False</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.Layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>A cartoframes Data Layer based on a specific table in user’s CARTO
-database. This layer class is useful for visualizing individual datasets
-with <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
+database. This layer class is used for visualizing individual datasets
+with <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>’s <code class="docutils literal"><span class="pre">layers</span></code>
+keyword argument.</p>
 <p class="rubric">Example</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cartoframes</span>
 <span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">QueryLayer</span><span class="p">,</span> <span class="n">styling</span>
@@ -563,68 +743,11 @@ with <a class="reference external" href="#context.CartoContext.map">CartoContext
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>table_name</strong> (<em>str</em>) – Table in user CARTO account that is fed into a
-pandas DataFrame.</li>
-<li><strong>source</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – If specified, writes DataFrame
-to the tablename specified (if it does not exist), then creates
-a map layer.</li>
-<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal"><span class="pre">table_name</span></code> exists in user’s CARTO
-account, setting this to <cite>True</cite> will overwrite it. Defaults to
-<cite>False</cite> (do not overwrite).</li>
-<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Style to apply to layer.
-If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
-<ul>
-<li>column (str, required): Column for animating map from. Data must
-be of type time or float.</li>
-<li>method (str, optional): Type of aggregation method for operating
-on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
-be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate
-functions</a>
-with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
-the point data overtime, or show the event at the specified time
-only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
-<li>frames (int, optional): Number of frames in the animation.
-Defaults to 256.</li>
-<li>duration (int, optional): Number of seconds in the animation.
-Defaults to 30.</li>
-</ul>
-<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
-the query that is of type numeric or datetime.</p>
-</li>
-<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map.
-If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
-values described:</p>
-<ul>
-<li>column (str): Column to base coloring from.</li>
-<li>scheme (str, optinal): Color scheme from
-<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
-Defaults to <cite>Mint</cite>.</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to divide data amongst in
-the <cite>bin_method</cite>. Defaults to 5.</li>
-</ul>
-</li>
-<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.
-If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
-described as:</p>
-<ul>
-<li>column (str): Column to base sizing of points on</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to break data into. Defaults
-to 5.</li>
-<li>max (int, optional): Maximum point width (in pixels). Defaults to
-25.</li>
-<li>min (int, optional): Minimum point width (in pixels). Defaults to
-5.</li>
-</ul>
-</li>
-<li><strong>tooltip</strong> (<em>tuple of str</em><em>, </em><em>optional</em>) – <strong>Not implemented.</strong></li>
-<li><strong>legend</strong> – <strong>Not implemented.</strong></li>
+<li><strong>table_name</strong> (<em>str</em>) – Name of table in CARTO account</li>
+<li><strong>Styling</strong> – See <a class="reference internal" href="#layer.QueryLayer" title="layer.QueryLayer"><code class="xref py py-obj docutils literal"><span class="pre">QueryLayer</span></code></a> for a full list of all arguments
+arguments for styling this map data layer.</li>
+<li><strong>source</strong> (<em>pandas.DataFrame</em><em>, </em><em>optional</em>) – Not currently implemented</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Not currently implemented</li>
 </ul>
 </td>
 </tr>
@@ -635,17 +758,17 @@ to 5.</li>
 <dl class="class">
 <dt id="layer.QueryLayer">
 <em class="property">class </em><code class="descclassname">layer.</code><code class="descname">QueryLayer</code><span class="sig-paren">(</span><em>query</em>, <em>time=None</em>, <em>color=None</em>, <em>size=None</em>, <em>tooltip=None</em>, <em>legend=None</em><span class="sig-paren">)</span><a class="headerlink" href="#layer.QueryLayer" title="Permalink to this definition">¶</a></dt>
-<dd><p>cartoframes Data Layer based on an arbitrary query to the user’s CARTO
+<dd><p>cartoframes data layer based on an arbitrary query to the user’s CARTO
 database. This layer class is useful for offloading processing to the cloud
 to do some of the following:</p>
 <ul class="simple">
-<li>pull down a snapshot of the data (e.g., selecting only important columns
-instead of all columns in the dataset)</li>
-<li>doing spatial processing using <a class="reference external" href="http://postgis.net/">PostGIS</a> and
-<a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a>, which is the database
+<li>Visualizing spatial operations using <a class="reference external" href="http://postgis.net/">PostGIS</a>
+and <a class="reference external" href="https://www.postgresql.org/">PostgreSQL</a>, which is the database
 underlying CARTO</li>
-<li>performing arbitrary relational database queries (e.g., complex JOINs
+<li>Performing arbitrary relational database queries (e.g., complex JOINs
 in SQL instead of in pandas)</li>
+<li>Visualizing a subset of the data (e.g., <code class="docutils literal"><span class="pre">SELECT</span> <span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">table</span> <span class="pre">LIMIT</span>
+<span class="pre">1000</span></code>)</li>
 </ul>
 <p>Used in the <cite>layers</cite> keyword in <a class="reference external" href="#context.CartoContext.map">CartoContext.map()</a>.</p>
 <p class="rubric">Example</p>
@@ -687,60 +810,77 @@ points are sized by the column <code class="docutils literal"><span class="pre">
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>query</strong> (<em>str</em>) – Query that is fed into a pandas DataFrame. At a minimum, all
-queries need to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
-<cite>the_geom_webmercator</cite>. Read more in
-<a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>
-for more information.</li>
-<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Style to apply to layer.
-If <cite>time</cite> is a <cite>dict</cite>, the following keys are options:</p>
+<li><strong>query</strong> (<em>str</em>) – Query to expose data on a map layer. At a minimum, a
+query needs to have the columns <cite>cartodb_id</cite>, <cite>the_geom</cite>, and
+<cite>the_geom_webmercator</cite> for the map to display. Read more about
+queries in <a class="reference external" href="https://carto.com/docs/tips-and-tricks/geospatial-analysis">CARTO’s docs</a>.</li>
+<li><strong>time</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Time-based style to apply to layer.</p>
+<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, it must be the name of a column which
+has a data type of <cite>datetime</cite> or <cite>float</cite>.</p>
+<p>If <cite>time</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options:</p>
 <ul>
-<li>column (str, required): Column for animating map from. Data must
-be of type time or float.</li>
-<li>method (str, optional): Type of aggregation method for operating
-on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must
-be one of <code class="docutils literal"><span class="pre">avg</span></code>, <code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate functions</a>
+<li>column (<cite>str</cite>, required): Column for animating map, which must
+be of type <cite>datetime</cite> or <cite>float</cite>.</li>
+<li>method (<cite>str</cite>, optional): Type of aggregation method for
+operating on <a class="reference external" href="https://github.com/CartoDB/torque">Torque TileCubes</a>. Must be one of <code class="docutils literal"><span class="pre">avg</span></code>,
+<code class="docutils literal"><span class="pre">sum</span></code>, or another <a class="reference external" href="https://www.postgresql.org/docs/9.5/static/functions-aggregate.html">PostgreSQL aggregate functions</a>
 with a numeric output. Defaults to <code class="docutils literal"><span class="pre">count</span></code>.</li>
-<li>cumulative (str, optional): Whether to accumulate (<code class="docutils literal"><span class="pre">cumulative</span></code>)
-the point data overtime, or show the event at the specified time
-only (<code class="docutils literal"><span class="pre">linear</span></code>). Defaults to <code class="docutils literal"><span class="pre">linear</span></code>.</li>
-<li>frames (int, optional): Number of frames in the animation.
+<li>cumulative (<cite>bool</cite>, optional): Whether to accumulate points over
+time (<code class="docutils literal"><span class="pre">True</span></code>) or not (<code class="docutils literal"><span class="pre">False</span></code>, default)</li>
+<li>frames (<cite>int</cite>, optional): Number of frames in the animation.
 Defaults to 256.</li>
-<li>duration (int, optional): Number of seconds in the animation.
+<li>duration (<cite>int</cite>, optional): Number of seconds in the animation.
 Defaults to 30.</li>
+<li>trails (<cite>int</cite>, optional): Number of trails after the incidence of
+a point. Defaults to 2.</li>
 </ul>
-<p>If <cite>time</cite> is a <code class="docutils literal"><span class="pre">str</span></code>, then it must be a column name available in
-the query that is of type numeric or datetime.</p>
 </li>
-<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map.
-If <cite>color</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
+<li><strong>color</strong> (<em>dict</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – <p>Color style to apply to map. For
+example, this can be used to change the color of all geometries
+in this layer, or to create a graduated color or choropleth map.</p>
+<p>If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, there are two options:</p>
+<ul>
+<li>A column name to style by to create, for example, a choropleth
+map if working with polygons. The default classification is
+<cite>quantiles</cite> for quantitative data and <cite>category</cite> for
+qualitative data.</li>
+<li>A hex value or <a class="reference external" href="https://www.w3.org/TR/css3-color/#svg-color">web color name</a>.</li>
+</ul>
+<p>If <cite>color</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the following keys are options, with
 values described:</p>
 <ul>
-<li>column (str): Column to base coloring from.</li>
-<li>scheme (str, optinal): Color scheme from
-<a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CartoColors</a>.
-Defaults to <cite>Mint</cite>.</li>
-<li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to divide data amongst in
-the <cite>bin_method</cite>. Defaults to 5.</li>
+<li>column (<cite>str</cite>): Column used for the basis of styling</li>
+<li>scheme (<cite>dict</cite>, optional): Scheme such as <cite>styling.sunset(7)</cite>
+from the <a class="reference external" href="#module-styling">styling module</a> of cartoframes that
+exposes <a class="reference external" href="https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names">CARTOColors</a>.
+Defaults to <a class="reference external" href="#styling.mint">mint</a> scheme for quantitative
+data and <cite>bold</cite> for qualitative data. More control is given by
+using <a class="reference external" href="#styling.scheme">styling.scheme</a>.<p>If you wish to define a custom scheme outside of CARTOColors, it
+is recommended to use the <a class="reference external" href="#styling.custom">styling.custom</a>
+utility function.</p>
+</li>
 </ul>
 </li>
-<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.
-If <cite>size</cite> is a <code class="docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with values
-described as:</p>
+<li><strong>size</strong> (<em>dict</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – <p>Size style to apply to point data.</p>
+<p>If <cite>size</cite> is an <code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, all points are sized by this value.</p>
+<p>If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">str</span></code>, this value is interpreted as a column,
+and the points are sized by the value in this column. The
+classification method defaults to <cite>quantiles</cite>, with a min size of
+5, and a max size of 5. Use the <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code> input to override these
+values.</p>
+<p>If <cite>size</cite> is a <code class="xref py py-obj docutils literal"><span class="pre">dict</span></code>, the follow keys are options, with
+values described as:</p>
 <ul>
-<li>column (str): Column to base sizing of points on</li>
+<li>column (<cite>str</cite>): Column to base sizing of points on</li>
 <li>bin_method (str, optional): Quantification method for dividing
-data range into bins. Must be one of: <code class="docutils literal"><span class="pre">quantiles</span></code>, <code class="docutils literal"><span class="pre">equal</span></code>,
-<code class="docutils literal"><span class="pre">headtails</span></code>, or <code class="docutils literal"><span class="pre">jenks</span></code>. Defaults to <code class="docutils literal"><span class="pre">quantiles</span></code>.</li>
-<li>bins (int, optional): Number of bins to break data into. Defaults
+data range into bins. Must be one of the methods in
+<code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code> (excluding <cite>category</cite>).</li>
+<li>bins (<cite>int</cite>, optional): Number of bins to break data into.
+Defaults to 5.</li>
+<li>max (<cite>int</cite>, optional): Maximum point width (in pixels). Defaults
+to 25.</li>
+<li>min (<cite>int</cite>, optional): Minimum point width (in pixels). Defaults
 to 5.</li>
-<li>max (int, optional): Maximum point width (in pixels). Defaults to
-25.</li>
-<li>min (int, optional): Minimum point width (in pixels). Defaults to
-5.</li>
 </ul>
 </li>
 <li><strong>tooltip</strong> (<em>tuple</em><em>, </em><em>optional</em>) – <strong>Not yet implemented.</strong></li>
@@ -755,349 +895,593 @@ to 5.</li>
 </div>
 <div class="section" id="module-styling">
 <span id="map-styling-functions"></span><h3>Map Styling Functions<a class="headerlink" href="#module-styling" title="Permalink to this headline">¶</a></h3>
-<p>Styling module that exposes CartoColor schemes. Read more about CartoColor in its <a class="reference external" href="https://github.com/Carto-color/">GitHub repository</a>.</p>
-<a class="reference internal image-reference" href="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png"><img alt="CartoColors" src="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png" style="width: 700px;" /></a>
+<p>Styling module that exposes CARTOColor schemes. Read more about CARTOColor
+in its <a class="reference external" href="https://github.com/Carto-color/">GitHub repository</a>.</p>
+<a class="reference internal image-reference" href="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png"><img alt="CARTOColors" src="https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png" style="width: 700px;" /></a>
+<dl class="class">
+<dt id="styling.BinMethod">
+<em class="property">class </em><code class="descclassname">styling.</code><code class="descname">BinMethod</code><a class="headerlink" href="#styling.BinMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data classification methods used for the styling of data on maps.</p>
+<dl class="attribute">
+<dt id="styling.BinMethod.quantiles">
+<code class="descname">quantiles</code><a class="headerlink" href="#styling.BinMethod.quantiles" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Quantiles classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="styling.BinMethod.jenks">
+<code class="descname">jenks</code><a class="headerlink" href="#styling.BinMethod.jenks" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Jenks classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="styling.BinMethod.headtails">
+<code class="descname">headtails</code><a class="headerlink" href="#styling.BinMethod.headtails" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Head/Tails classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="styling.BinMethod.equal">
+<code class="descname">equal</code><a class="headerlink" href="#styling.BinMethod.equal" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Equal Interval classification for quantitative data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="styling.BinMethod.category">
+<code class="descname">category</code><a class="headerlink" href="#styling.BinMethod.category" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Category classification for qualitative data</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="styling.antique">
-<code class="descclassname">styling.</code><code class="descname">antique</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.antique" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Antique qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">antique</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.antique" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Antique qualitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.armyRose">
-<code class="descclassname">styling.</code><code class="descname">armyRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.armyRose" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor ArmyRose divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">armyRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.armyRose" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor ArmyRose divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.bluGrn">
-<code class="descclassname">styling.</code><code class="descname">bluGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluGrn" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor BluGrn quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">bluGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluGrn" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor BluGrn quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.bluYl">
-<code class="descclassname">styling.</code><code class="descname">bluYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluYl" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor BluYl quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">bluYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bluYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor BluYl quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.bold">
-<code class="descclassname">styling.</code><code class="descname">bold</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bold" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Bold qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">bold</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.bold" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Bold qualitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.brwnYl">
-<code class="descclassname">styling.</code><code class="descname">brwnYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.brwnYl" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor BrwnYl quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">brwnYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.brwnYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor BrwnYl quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.burg">
-<code class="descclassname">styling.</code><code class="descname">burg</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burg" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Burg quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">burg</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burg" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Burg quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.burgYl">
-<code class="descclassname">styling.</code><code class="descname">burgYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burgYl" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor BurgYl quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">burgYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.burgYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor BurgYl quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.custom">
-<code class="descclassname">styling.</code><code class="descname">custom</code><span class="sig-paren">(</span><em>colors</em>, <em>bins=None</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.custom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get custom scheme</p>
+<code class="descclassname">styling.</code><code class="descname">custom</code><span class="sig-paren">(</span><em>colors</em>, <em>bins=None</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.custom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a custom scheme.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>colors</strong> (<em>list of str</em>) – List of hex values for styling data</li>
+<li><strong>bins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins to style by. If not given, the
+number of colors will be used.</li>
+<li><strong>bin_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Classification method. One of the values
+in <a class="reference internal" href="#styling.BinMethod" title="styling.BinMethod"><code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code></a>. Defaults to <cite>quantiles</cite>, which only works with
+quantitative data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.darkMint">
-<code class="descclassname">styling.</code><code class="descname">darkMint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.darkMint" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor DarkMint quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">darkMint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.darkMint" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor DarkMint quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.earth">
-<code class="descclassname">styling.</code><code class="descname">earth</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.earth" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Earth divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">earth</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.earth" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Earth divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.emrld">
-<code class="descclassname">styling.</code><code class="descname">emrld</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.emrld" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Emrld quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">emrld</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.emrld" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Emrld quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.fall">
-<code class="descclassname">styling.</code><code class="descname">fall</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.fall" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Fall divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">fall</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.fall" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Fall divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.get_scheme_cartocss">
 <code class="descclassname">styling.</code><code class="descname">get_scheme_cartocss</code><span class="sig-paren">(</span><em>column</em>, <em>scheme_info</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.get_scheme_cartocss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get TurboCartoCSS based on input parameters</p>
+<dd><p>Get TurboCARTO CartoCSS based on input parameters</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.geyser">
-<code class="descclassname">styling.</code><code class="descname">geyser</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.geyser" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Geyser divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">geyser</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.geyser" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Geyser divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.magenta">
-<code class="descclassname">styling.</code><code class="descname">magenta</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.magenta" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Magenta quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">magenta</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.magenta" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Magenta quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.mint">
-<code class="descclassname">styling.</code><code class="descname">mint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.mint" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Mint quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">mint</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.mint" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Mint quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.orYel">
-<code class="descclassname">styling.</code><code class="descname">orYel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.orYel" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor OrYel quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">orYel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.orYel" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor OrYel quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.pastel">
-<code class="descclassname">styling.</code><code class="descname">pastel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pastel" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Pastel qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">pastel</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pastel" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Pastel qualitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.peach">
-<code class="descclassname">styling.</code><code class="descname">peach</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.peach" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Peach quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">peach</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.peach" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Peach quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.pinkYl">
-<code class="descclassname">styling.</code><code class="descname">pinkYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pinkYl" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor PinkYl quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">pinkYl</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.pinkYl" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor PinkYl quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.prism">
-<code class="descclassname">styling.</code><code class="descname">prism</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.prism" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Prism qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">prism</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.prism" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Prism qualitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.purp">
-<code class="descclassname">styling.</code><code class="descname">purp</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purp" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Purp quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">purp</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purp" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Purp quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.purpOr">
-<code class="descclassname">styling.</code><code class="descname">purpOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purpOr" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor PurpOr quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">purpOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.purpOr" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor PurpOr quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.redOr">
-<code class="descclassname">styling.</code><code class="descname">redOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.redOr" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor RedOr quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">redOr</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.redOr" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor RedOr quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.safe">
-<code class="descclassname">styling.</code><code class="descname">safe</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.safe" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Safe qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">safe</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.safe" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Safe qualitative scheme</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="styling.scheme">
+<code class="descclassname">styling.</code><code class="descname">scheme</code><span class="sig-paren">(</span><em>name</em>, <em>bins</em>, <em>bin_method</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a custom scheme based on CARTOColors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – Name of a CARTOColor.</li>
+<li><strong>bins</strong> (<em>int</em>) – Number of bins for classifying data. CARTOColors have 7
+bins max for quantitative data, and 11 max for qualitative data.</li>
+<li><strong>bin_method</strong> (<em>str</em>) – One of methods in <a class="reference internal" href="#styling.BinMethod" title="styling.BinMethod"><code class="xref py py-obj docutils literal"><span class="pre">BinMethod</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Input types are particularly sensitive in this function, and little
+feedback is given for errors. <code class="docutils literal"><span class="pre">name</span></code> and <code class="docutils literal"><span class="pre">bin_method</span></code> arguments
+are case-sensitive.</p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.sunset">
-<code class="descclassname">styling.</code><code class="descname">sunset</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunset" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Sunset quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">sunset</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunset" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Sunset quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.sunsetDark">
-<code class="descclassname">styling.</code><code class="descname">sunsetDark</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunsetDark" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor SunsetDark quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">sunsetDark</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.sunsetDark" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor SunsetDark quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.teal">
-<code class="descclassname">styling.</code><code class="descname">teal</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.teal" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Teal quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">teal</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.teal" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Teal quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.tealGrn">
-<code class="descclassname">styling.</code><code class="descname">tealGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealGrn" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor TealGrn quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">tealGrn</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealGrn" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor TealGrn quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.tealRose">
-<code class="descclassname">styling.</code><code class="descname">tealRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealRose" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor TealRose divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">tealRose</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tealRose" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor TealRose divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.temps">
-<code class="descclassname">styling.</code><code class="descname">temps</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.temps" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Temps divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">temps</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.temps" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Temps divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.tropic">
-<code class="descclassname">styling.</code><code class="descname">tropic</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’quantiles’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tropic" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Tropic divergent quantitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">tropic</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='quantiles'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.tropic" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Tropic divergent quantitative scheme</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="styling.vivid">
-<code class="descclassname">styling.</code><code class="descname">vivid</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method=’category’</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.vivid" title="Permalink to this definition">¶</a></dt>
-<dd><p>CartoColor Vivid qualitative scheme</p>
+<code class="descclassname">styling.</code><code class="descname">vivid</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_method='category'</em><span class="sig-paren">)</span><a class="headerlink" href="#styling.vivid" title="Permalink to this definition">¶</a></dt>
+<dd><p>CARTOColor Vivid qualitative scheme</p>
+</dd></dl>
+
+</div>
+<div class="section" id="batchjobstatus">
+<h3>BatchJobStatus<a class="headerlink" href="#batchjobstatus" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="context.BatchJobStatus">
+<em class="property">class </em><code class="descclassname">context.</code><code class="descname">BatchJobStatus</code><span class="sig-paren">(</span><em>carto_context</em>, <em>job</em><span class="sig-paren">)</span><a class="headerlink" href="#context.BatchJobStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Status of a write or query operation. Read more at <a class="reference external" href="https://carto.com/docs/carto-engine/sql-api/batch-queries/">Batch SQL API docs</a> about
+responses and how to interpret them.</p>
+<p class="rubric">Example</p>
+<p>Poll for a job’s status if you’ve caught the <a class="reference internal" href="#context.BatchJobStatus" title="context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a>
+instance.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;new_table&#39;</span><span class="p">,</span>
+               <span class="n">lnglat</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;lng_col&#39;</span><span class="p">,</span> <span class="s1">&#39;lat_col&#39;</span><span class="p">))</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">curr_status</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">()[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">curr_status</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;done&#39;</span><span class="p">,</span> <span class="s1">&#39;failed&#39;</span><span class="p">,</span> <span class="s1">&#39;canceled&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span> <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">curr_status</span><span class="p">)</span>
+        <span class="k">break</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a <a class="reference internal" href="#context.BatchJobStatus" title="context.BatchJobStatus"><code class="xref py py-obj docutils literal"><span class="pre">BatchJobStatus</span></code></a> instance if you have a <cite>job_id</cite> output
+from a <cite>cc.write</cite> operation.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">CartoContext</span><span class="p">,</span> <span class="n">BatchJobStatus</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cc</span> <span class="o">=</span> <span class="n">CartoContext</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;new_table&#39;</span><span class="p">,</span> <span class="n">lnglat</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;lng&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span><span class="p">))</span>
+<span class="go">&#39;BatchJobStatus(job_id=&#39;job-id-string&#39;, ...)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">batch_job</span> <span class="o">=</span> <span class="n">BatchJobStatus</span><span class="p">(</span><span class="n">cc</span><span class="p">,</span> <span class="s1">&#39;job-id-string&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Attrs:</dt>
+<dd>job_id (str): Job ID of the Batch SQL API job
+last_status (str): Status of <code class="docutils literal"><span class="pre">job_id</span></code> job when last polled
+created_at (str): Time and date when job was created</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>carto_context</strong> (<em>carto.CartoContext</em>) – CartoContext instance</li>
+<li><strong>job</strong> (<em>dict</em><em> or </em><em>str</em>) – If a dict, job status dict returned after sending
+a Batch SQL API request. If str, a Batch SQL API job id.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="context.BatchJobStatus.get_status">
+<code class="descname">get_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#context.BatchJobStatus.get_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>return current status of job</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="context.BatchJobStatus.status">
+<code class="descname">status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#context.BatchJobStatus.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the current status of job <code class="docutils literal"><span class="pre">job_id</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Status and time it was updated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Warns:</th><td class="field-body"><strong>UserWarning</strong> – If the job failed, a warning is raised with
+information about the failure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
 <div class="section" id="module-credentials">
 <span id="credentials-management"></span><h3>Credentials Management<a class="headerlink" href="#module-credentials" title="Permalink to this headline">¶</a></h3>
-<p>API key utility functions</p>
-<dl class="function">
-<dt id="credentials.api_key">
-<code class="descclassname">credentials.</code><code class="descname">api_key</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns stored API key that was set with <cite>cartoframes.credentials.set_key</cite></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">CARTO API key</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="credentials.base_url">
-<code class="descclassname">credentials.</code><code class="descname">base_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.base_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns stored base_url that was set with <cite>cartoframes.credentials.set_base_url</cite></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">CARTO API base URL</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="credentials.credentials">
-<code class="descclassname">credentials.</code><code class="descname">credentials</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#credentials.credentials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns stored credentials that was set with
-<cite>cartoframes.credentials.set_credentials</cite></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dictionary containing CARTO API base_url and API key.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="credentials.set_api_key">
-<code class="descclassname">credentials.</code><code class="descname">set_api_key</code><span class="sig-paren">(</span><em>key</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_api_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save the CARTO API key so that users can access it via
-<cite>cartoframes.credentials.api_key()</cite>. This lets users bind an API key to a given
-installation.</p>
+<p>Credentials management for cartoframes usage.</p>
+<dl class="class">
+<dt id="credentials.Credentials">
+<em class="property">class </em><code class="descclassname">credentials.</code><code class="descname">Credentials</code><span class="sig-paren">(</span><em>creds=None</em>, <em>key=None</em>, <em>username=None</em>, <em>base_url=None</em>, <em>cred_file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Credentials class for managing and storing user CARTO credentials. The
+arguments are listed in order of precedence: <a class="reference internal" href="#credentials.Credentials" title="credentials.Credentials"><code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code></a> instances
+are first, <cite>key</cite> and <cite>base_url</cite>/<cite>username</cite> are taken next, and
+<cite>config_file</cite> (if given) is taken last. If no arguments are passed, then
+there will be an attempt to retrieve credentials from a previously saved
+session. One of the above scenarios needs to be met to successfully
+instantiate a <a class="reference internal" href="#credentials.Credentials" title="credentials.Credentials"><code class="xref py py-obj docutils literal"><span class="pre">Credentials</span></code></a> object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>key</strong> (<em>str</em>) – CARTO API key</li>
-<li><strong>overwrite</strong> (<em>bool</em>) – Whether to overwrite existing key. Defaults to False.</li>
+<li><strong>creds</strong> (<code class="xref py py-obj docutils literal"><span class="pre">cartoframes.Credentials</span></code>, optional) – Credentials instance</li>
+<li><strong>key</strong> (<em>str</em><em>, </em><em>optional</em>) – API key of user’s CARTO account</li>
+<li><strong>username</strong> (<em>str</em><em>, </em><em>optional</em>) – Username of CARTO account</li>
+<li><strong>base_url</strong> (<em>str</em><em>, </em><em>optional</em>) – Base URL used for API calls. This is usually
+of the form <cite>https://eschbacher.carto.com/</cite> for user <cite>eschbacher</cite>.
+On premises installations (and others) have a different URL
+pattern.</li>
+<li><strong>cred_file</strong> (<em>str</em><em>, </em><em>optional</em>) – Pull credentials from a stored file. If this
+and all other args are not entered, Credentials will attempt to
+load a user config credentials file that was previously set with
+Credentials(…).save().</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file. Raises FileError if
-overwriting is prohibited and the file exists.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> – If not enough credential information is passed and no
+stored credentials file is found, this error will be raised.</p>
 </td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="credentials.set_base_url">
-<code class="descclassname">credentials.</code><code class="descname">set_base_url</code><span class="sig-paren">(</span><em>base_url</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_base_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save the CARTO API base_url so that users can access it via
-cartoframes.credentials.access_base_url(). This lets users bind their API base_url
-to a given installation.</p>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span><span class="p">,</span> <span class="n">CartoContext</span>
+<span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;abcdefg&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;eschbacher&#39;</span><span class="p">)</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">CartoContext</span><span class="p">(</span><span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="credentials.Credentials.base_url">
+<code class="descname">base_url</code><span class="sig-paren">(</span><em>base_url=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.base_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return or set <cite>base_url</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_url</strong> (<em>str</em>) – CARTO access URL</li>
-<li><strong>overwrite</strong> (<em>bool</em>) – Whether to overwrite the existing key. Defaults to False.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to location of the credentials file. Raises FileError if
-overwriting is prohibited and the file exists.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_url</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, updates the <cite>base_url</cite>. Otherwise
+returns current <cite>base_url</cite>.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This does not update the <cite>username</cite> attribute. Separately update
+the username with <code class="docutils literal"><span class="pre">Credentials.username</span></code> or update <cite>base_url</cite> and
+<cite>username</cite> at the same time with <code class="docutils literal"><span class="pre">Credentials.set</span></code>.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span>
+<span class="go"># load credentials saved in previous session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">()</span>
+<span class="go"># returns current base_url</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">base_url</span><span class="p">()</span>
+<span class="go">&#39;https://eschbacher.carto.com/&#39;</span>
+<span class="go"># updates base_url with new value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">base_url</span><span class="p">(</span><span class="s1">&#39;new_base_url&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
-<dl class="function">
-<dt id="credentials.set_credentials">
-<code class="descclassname">credentials.</code><code class="descname">set_credentials</code><span class="sig-paren">(</span><em>base_url=”</em>, <em>api_key=”</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.set_credentials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save the CARTO API base URL and API key so that users can access it via
-cartoframes.credentials.credentials(). This lets users bind their CARTO access
-credentials to a given installation.</p>
+<dl class="method">
+<dt id="credentials.Credentials.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>config_file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the credentials file specified in <cite>config_file</cite>. If no
+file is specified, it deletes the default user credential file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_url</strong> (<em>str</em>) – CARTO API base URL. Defaults to an empty string. Format
-is <cite>https://{username}.carto.com/</cite> for cloud users.</li>
-<li><strong>api_key</strong> (<em>str</em>) – CARTO api key. Defaults to an empty string.</li>
-<li><strong>overwrite</strong> (<em>bool</em>) – Whether to overwrite the existing credentials.
-Defaults to False.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_file</strong> (<em>str</em>) – Path to configuration file. Defaults to delete
+the user default location if <cite>None</cite>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p>To see if there is a default user credential file stored, do the
+following:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">creds</span><span class="p">)</span>
+<span class="go">Credentials(username=eschbacher, key=abcdefg,</span>
+<span class="go">        base_url=https://eschbacher.carto.com/)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="credentials.Credentials.key">
+<code class="descname">key</code><span class="sig-paren">(</span><em>key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return or set API <cite>key</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, updates the API key, otherwise returns
+current API key.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span>
+<span class="go"># load credentials saved in previous session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">()</span>
+<span class="go"># returns current API key</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">key</span><span class="p">()</span>
+<span class="go">&#39;abcdefg&#39;</span>
+<span class="go"># updates API key with new value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s1">&#39;new_api_key&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="credentials.Credentials.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>config_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves current user credentials to user directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config_loc</strong> (<em>str</em><em>, </em><em>optional</em>) – Location where credentials are to be
+stored. If no argument is provided, it will be send to the
+default location.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span>
+<span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;eschbacher&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;abcdefg&#39;</span><span class="p">)</span>
+<span class="n">creds</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>  <span class="c1"># save to default location</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="credentials.Credentials.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>key=None</em>, <em>username=None</em>, <em>base_url=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the credentials of a Credentials instance instead with new
+values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> (<em>str</em>) – API key of user account. Defaults to previous value if
+not specified.</li>
+<li><strong>username</strong> (<em>str</em>) – User name of account. This parameter is optional if
+<cite>base_url</cite> is not specified, but defaults to the previous
+value if not set.</li>
+<li><strong>base_url</strong> (<em>str</em>) – Base URL of user account. This parameter is
+optional if <cite>username</cite> is specified and on CARTO’s
+cloud-based account. Generally of the form
+<code class="docutils literal"><span class="pre">https://your_user_name.carto.com/</span></code> for cloud-based accounts.
+If on-prem or otherwise, contact your admin.</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Path to the location of the API key file.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">str</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">EnvironmentError</span></code> – if overwriting is prohibited and the file exists</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span>
+<span class="c1"># load credentials saved in previous session</span>
+<span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">()</span>
+<span class="c1"># set new API key</span>
+<span class="n">creds</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;new_api_key&#39;</span><span class="p">)</span>
+<span class="c1"># save new creds to default user config directory</span>
+<span class="n">creds</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If the <cite>username</cite> is specified but the <cite>base_url</cite> is not, the
+<cite>base_url</cite> will be updated to <code class="docutils literal"><span class="pre">https://&lt;username&gt;.carto.com/</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="credentials.Credentials.username">
+<code class="descname">username</code><span class="sig-paren">(</span><em>username=None</em><span class="sig-paren">)</span><a class="headerlink" href="#credentials.Credentials.username" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return or set <cite>username</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>username</strong> (<em>str</em><em>, </em><em>optional</em>) – If set, updates the <cite>username</cite>. Otherwise
+returns current <cite>username</cite>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This does not update the <cite>base_url</cite> attribute. Use
+<cite>Credentials.set</cite> to have that updated with <cite>username</cite>.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cartoframes</span> <span class="k">import</span> <span class="n">Credentials</span>
+<span class="go"># load credentials saved in previous session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span> <span class="o">=</span> <span class="n">Credentials</span><span class="p">()</span>
+<span class="go"># returns current username</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">username</span><span class="p">()</span>
+<span class="go">&#39;eschbacher&#39;</span>
+<span class="go"># updates username with new value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">creds</span><span class="o">.</span><span class="n">username</span><span class="p">(</span><span class="s1">&#39;new_username&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1109,6 +1493,14 @@ Defaults to False.</li>
 <li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
 <li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">0.4.0b6</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -1120,7 +1512,7 @@ Defaults to False.</li>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">CARTOFrames</a><ul>
+<li><a class="reference internal" href="#">CARTOframes</a><ul>
 <li><a class="reference internal" href="#install-instructions">Install Instructions</a><ul>
 <li><a class="reference internal" href="#virtual-environment">Virtual Environment</a></li>
 </ul>
@@ -1129,12 +1521,14 @@ Defaults to False.</li>
 <li><a class="reference internal" href="#data-workflow">Data workflow</a></li>
 <li><a class="reference internal" href="#map-workflow">Map workflow</a></li>
 <li><a class="reference internal" href="#augment-from-data-observatory">Augment from Data Observatory</a></li>
+<li><a class="reference internal" href="#carto-credential-management">CARTO Credential Management</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#cartoframes-methods">CARTOFrames Methods</a><ul>
-<li><a class="reference internal" href="#module-context">CartoContext Class</a></li>
+<li><a class="reference internal" href="#cartoframes-functionality">CARTOframes Functionality</a><ul>
+<li><a class="reference internal" href="#cartocontext">CartoContext</a></li>
 <li><a class="reference internal" href="#module-layer">Map Layer Classes</a></li>
 <li><a class="reference internal" href="#module-styling">Map Styling Functions</a></li>
+<li><a class="reference internal" href="#batchjobstatus">BatchJobStatus</a></li>
 <li><a class="reference internal" href="#module-credentials">Credentials Management</a></li>
 </ul>
 </li>
@@ -1174,7 +1568,7 @@ Defaults to False.</li>
       &copy;2017, Andy Eschbacher, Stuart Lynn.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

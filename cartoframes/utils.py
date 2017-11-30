@@ -1,11 +1,13 @@
 import sys
 from tqdm import tqdm
 
+
 def dict_items(d):
-    if sys.version_info >= (3,0):
+    if sys.version_info >= (3, 0):
         return d.items()
     else:
         return d.iteritems()
+
 
 def cssify(css_dict):
     css = ''
@@ -29,7 +31,7 @@ def normalize_colnames(columns):
         list of str: Normalized column names
     """
     normalized_columns = [norm_colname(c) for c in columns]
-    changed_cols = ',\n'.join([
+    changed_cols = '\n'.join([
         '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
             orig=c,
             new=normalized_columns[i])
@@ -57,7 +59,7 @@ def norm_colname(colname):
     """
     last_char_special = False
     char_list = []
-    for e in colname:
+    for e in str(colname):
         if e.isalnum():
             char_list.append(e.lower())
             last_char_special = False
@@ -71,3 +73,20 @@ def norm_colname(colname):
     if final_name[0].isdigit():
         return '_' + final_name
     return final_name
+
+
+def importify_params(param_arg):
+    """Convert parameter arguments to what CARTO's Import API expects"""
+    if isinstance(param_arg, bool):
+        return str(param_arg).lower()
+    return param_arg
+
+
+def join_url(*parts):
+    """join parts of URL into complete url"""
+    return '/'.join(s.strip('/') for s in parts)
+
+
+def minify_sql(lines):
+    """eliminate whitespace in sql queries"""
+    return '\n'.join(line.strip() for line in lines)

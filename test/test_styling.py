@@ -2,7 +2,7 @@
 import unittest
 from cartoframes.styling import BinMethod, get_scheme_cartocss
 from cartoframes import styling
-# from cartoframes import styling
+
 
 class TestColorScheme(unittest.TestCase):
     """Tests for functions in key modules"""
@@ -92,7 +92,8 @@ class TestColorScheme(unittest.TestCase):
         self.assertEqual(styling.vivid(bins=5)['bins'], 5)
 
         # check that bin method is as defined
-        self.assertEqual(styling.vivid(bins=4, bin_method='category')['bin_method'],
+        self.assertEqual(styling.vivid(bins=4,
+                                       bin_method='category')['bin_method'],
                          'category')
 
     def test_get_scheme_cartocss(self):
@@ -102,13 +103,14 @@ class TestColorScheme(unittest.TestCase):
                          'ramp([acadia], cartocolor(Vivid), category(4))')
         # test on quantative
         self.assertEqual(get_scheme_cartocss('acadia', self.purp),
-                         'ramp([acadia], cartocolor(Purp), quantiles(4))')
+                         'ramp([acadia], cartocolor(Purp), quantiles(4), <=)')
         # test on custom
-        self.assertEqual(get_scheme_cartocss('acadia',
-                                             styling.custom(('#FFF', '#888', '#000'),
-                                                            bins=3,
-                                                            bin_method='equal')),
-                         'ramp([acadia], (#FFF,#888,#000), equal(3))')
+        self.assertEqual(
+                get_scheme_cartocss('acadia',
+                                    styling.custom(('#FFF', '#888', '#000'),
+                                                   bins=3,
+                                                   bin_method='equal')),
+                'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
 
     def test_scheme(self):
         """styling._scheme"""

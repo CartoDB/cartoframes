@@ -7,24 +7,31 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-CARTOFrames Methods
-===================
+CARTOframes Functionality
+=========================
 
-CartoContext Class
-------------------
-.. automodule:: context
-    :members:
+CartoContext
+------------
+.. autoclass:: context.CartoContext
+    :member-order: bysource
+    :members: read, query, delete, map, data_discovery, data
+
+    .. automethod:: write(df, table_name, temp_dir=SYSTEM_TMP_PATH, overwrite=False, lnglat=None, encode_geom=False, geom_col=None, \*\*kwargs)
 
 Map Layer Classes
 -----------------
 .. automodule:: layer
-    :members:
+    :members: BaseMap, Layer, QueryLayer
 
 Map Styling Functions
 ---------------------
 .. automodule:: styling
+    :members:
+
+BatchJobStatus
+--------------
+.. autoclass:: context.BatchJobStatus
     :members:
 
 Credentials Management
@@ -38,3 +45,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+:Version: |version|
