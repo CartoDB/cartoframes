@@ -968,23 +968,26 @@ class CartoContext(object):
                      img_html=img_html)
             return IPython.display.HTML(html)
         elif HAS_MATPLOTLIB:
+            # TODO: see if retina outputs from carto are possible
             raw_data = mpi.imread(static_url, format='png')
             if ax is None:
                 dpi = mpi.rcParams['figure.dpi']
                 mpl_size = (size[0] / dpi, size[1] / dpi)
-                # fig = plt.figure(figsize=mpl_size, dpi=dpi, frameon=False)
                 fig, ax = plt.subplots(1, 1, figsize=mpl_size, dpi=dpi,
                                        frameon=False)
                 fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
-                # ax = plt.gca()
                 # TODO: extend this to draw legends for multiple layers
                 if (len(nb_layers) > 0 and
                         nb_layers[0].scheme.get('bin_method') and
                         nb_layers[0].scheme.get('bin_method') != 'category'):
                     legend_ax = Legend(
-                            self.sql_client,
-                            nb_layers[0]
-                        ).draw_legend(fig)
+                                self.sql_client,
+                                nb_layers[0]
+                            ).draw_legend(fig)
+                else:
+                    legend_ax = None
+            else:
+                legend_ax = None
             im = ax.imshow(raw_data)
             ax.axis('off')
             # despine(ax=ax)

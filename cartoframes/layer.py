@@ -334,7 +334,7 @@ class QueryLayer(AbstractLayer):
             size.update(old_size)
             self.style_cols[size['column']] = None
 
-        print(self.legend)
+        # print(self.legend)
         self.color = color
         self.scheme = scheme or {}
         self.size = size

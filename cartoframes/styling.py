@@ -1,5 +1,6 @@
-"""Styling module that exposes CARTOColor schemes. Read more about CARTOColor
-in its `GitHub repository <https://github.com/Carto-color/>`__.
+"""Styling module that exposes CARTOColors schemes and others provided through
+`palettable <https://github.com/jiffyclub/palettable/>`__. Read more about
+CARTOColors in its `GitHub repository <https://github.com/Carto-color/>`__.
 
 .. image:: https://cloud.githubusercontent.com/assets/1566273/21021002/fc9df60e-bd33-11e6-9438-d67951a7a9bf.png
     :width: 700px

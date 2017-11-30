@@ -1,5 +1,4 @@
-"""legend generation functions
-"""
+"""Legend class"""
 try:
     import matplotlib.pyplot as plt
     import matplotlib as mpl
@@ -30,7 +29,7 @@ class Legend(object):
             cmap = get_scheme(self.layer.scheme, 'mpl_colormap')
         # fig = plt.figure(figsize=(8, 3))
         if self.ax is None:
-            self.ax = fig.add_axes([0.05, 0.80, 0.9, 0.15])
+            self.ax = fig.add_axes([1.02, 0.05, 0.035, 0.9])
         cmap.set_over('0.25')
         cmap.set_under('0.75')
         # length of bounds array must be one greater than length of color list
@@ -43,10 +42,8 @@ class Legend(object):
                 # specify two extra boundaries:
                 boundaries=list(map(lambda x: round(x, 2), self.edges)),
                 ticks=list(map(lambda x: round(x, 2), self.edges)),
-                # ticks=list(map(lambda x: round(x, 2), self.edges)),
                 spacing='proportional',
-                orientation='horizontal')
-        print(self.layer.legend)
+                orientation='vertical')
         cb.set_label(self.layer.legend['color'] or self.layer.color)
         return cb
 
