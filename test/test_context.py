@@ -391,6 +391,10 @@ class TestCartoContext(unittest.TestCase):
             with self.assertRaisesRegexp(RuntimeError, 'geopandas and shapely'):
                 cc.write(df, self.test_write_table, overwrite=True,
                          encode_geom=True)
+                
+        # test properly encoding
+        df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
+        cc.write(df, self.test_write_table, overwrite=True)
 
         # check if table exists
         resp = self.sql_client.send('''
