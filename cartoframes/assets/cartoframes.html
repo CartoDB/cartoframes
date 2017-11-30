@@ -28,7 +28,8 @@
   <body>
     <div id='zoom-center'>
       zoom=<span id='zoom'>4</span>,
-      lng=<span id='lon'>No data</span>, lat=<span id='lat'>No data</span></div>
+      lng=<span id='lon'>No data</span>, lat=<span id='lat'>No data</span>
+    </div>
     <div id='map'></div>
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
@@ -44,6 +45,15 @@
        zoom: @@ZOOM@@,
        center: [@@LAT@@, @@LNG@@],
      });
+
+     if (L.Browser.retina) {
+         var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+     } else {
+         var basemap = config.named_map.params.basemap_url;
+     }
+     L.tileLayer(basemap, {
+         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+     }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));

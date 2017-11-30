@@ -1,7 +1,28 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
 from cartoframes import styling
+import pandas as pd
+
+
+class TestAbstractLayer(unittest.TestCase):
+    def test_class(self):
+        self.assertIsNone(AbstractLayer().__init__())
+
+
+class TestLayer(unittest.TestCase):
+    def setUp(self):
+        self.coffee_temps = pd.DataFrame({
+            'a': range(4),
+            'b': list('abcd')
+        })
+
+    def test_layer_setup_dataframe(self):
+        """layer.Layer._setup()"""
+        layer = Layer('cortado', source=self.coffee_temps)
+
+        with self.assertRaises(NotImplementedError):
+            layer._setup([BaseMap(), layer], 1)
 
 
 class TestBaseMap(unittest.TestCase):
@@ -10,18 +31,23 @@ class TestBaseMap(unittest.TestCase):
         # basemaps with baked-in labels
         self.dark_map_all = BaseMap(source='dark')
         self.light_map_all = BaseMap(source='light')
+        self.voyager_labels_under = BaseMap(source='voyager')
 
         # basemaps with no labels
         self.dark_map_no_labels = BaseMap(source='dark',
                                           labels=None)
         self.light_map_no_labels = BaseMap(source='light',
                                            labels=None)
+        self.voyager_map_no_labels = BaseMap(source='voyager',
+                                             labels=None)
 
         # labels with no basemaps
         self.dark_only_labels = BaseMap(source='dark',
                                         only_labels=True)
         self.light_only_labels = BaseMap(source='light',
                                          only_labels=True)
+        self.voyager_only_labels = BaseMap(source='voyager',
+                                           only_labels=True)
 
     def test_basemap_invalid(self):
         """layer.Basemap exceptions on invalid source"""
@@ -48,23 +74,34 @@ class TestBaseMap(unittest.TestCase):
         self.assertEqual(self.light_map_all.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_all/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_labels_under.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_labels_under/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_map_no_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'dark_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_map_no_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_nolabels/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_map_no_labels.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_only_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'light_only_labels/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_only_labels.url,
                          'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
                          'dark_only_labels/{z}/{x}/{y}.png')
+        self.assertEqual(self.voyager_only_labels.url,
+                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'rastertiles/voyager_only_labels/{z}/{x}/{y}.png')
 
         # ensure self.is_basic() works as intended
         self.assertTrue(self.light_map_all.is_basic(),
                         msg='is a basic carto basemap')
         self.assertTrue(self.dark_map_all.is_basic())
+        self.assertTrue(self.voyager_labels_under.is_basic(),
+                        msg='is a basic carto basemap')
 
 
 class TestQueryLayer(unittest.TestCase):
@@ -102,16 +139,26 @@ class TestQueryLayer(unittest.TestCase):
             self.assertEqual(qlayer.scheme, dict_colors_scheme[idx])
 
         # check valid string color options
-        str_colors = ['#FF0000', 'aliceblue', 'cookie_monster']
-        str_colors_ans = ['#FF0000', 'aliceblue', 'cookie_monster']
-        str_scheme_ans = [None, None, styling.mint(5)]
+        str_colors = ('#FF0000', 'aliceblue', 'cookie_monster', 'big_bird')
+        str_colors_ans = ('#FF0000', 'aliceblue', 'cookie_monster', 'big_bird')
+        str_scheme_ans = (None, None, styling.mint(5), styling.antique(10))
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
-            print(qlayer.color)
+            if color == 'cookie_monster':
+                qlayer.style_cols[color] = 'number'
+                qlayer._setup([BaseMap(), qlayer], 1)
+            elif color == 'big_bird':
+                qlayer.style_cols[color] = 'string'
+                qlayer._setup([BaseMap(), qlayer], 1)
             self.assertEqual(qlayer.color, str_colors_ans[idx])
             self.assertEqual(qlayer.scheme, str_scheme_ans[idx])
 
+        with self.assertRaises(ValueError,
+                               msg='styling value cannot be a date'):
+            qlayer = QueryLayer(self.query, color='datetime_column')
+            qlayer.style_cols['datetime_column'] = 'date'
+            qlayer._setup([BaseMap(), qlayer], 1)
         # Exception testing
         # color column cannot be a geometry column
         with self.assertRaises(ValueError,
@@ -122,6 +169,58 @@ class TestQueryLayer(unittest.TestCase):
         with self.assertRaises(ValueError,
                                msg='color dict must have a `column` key'):
             QueryLayer(self.query, color={'scheme': styling.vivid(10)})
+
+    def test_querylayer_time_category(self):
+        """layer.QueryLayer time with categories"""
+        ql = QueryLayer(self.query,
+                        time='timecol',
+                        color='colorcol')
+        # category type
+        ql.style_cols['colorcol'] = 'string'
+        ql.style_cols['timecol'] = 'date'
+
+        # if non-point geoms are present (or None), raise an error
+        with self.assertRaises(
+                ValueError,
+                msg='cannot make torque map with non-point geometries'):
+            ql._setup([BaseMap(), ql], 1)
+
+        ql.geom_type = 'point'
+        # normal behavior for point geometries
+        ql._setup([BaseMap(), ql], 1)
+        self.assertDictEqual(ql.scheme,
+                             dict(name='Antique', bin_method='',
+                                  bins=','.join(str(i) for i in range(1, 11))))
+        # expect category maps query
+        self.assertRegexpMatches(ql.query,
+                                 '^SELECT orig\.\*, '
+                                 '__wrap.cf_value_colorcol.* '
+                                 'GROUP BY.*orig\.colorcol$')
+        # cartocss should have cdb math mode
+        self.assertRegexpMatches(ql.cartocss,
+                                 '.*CDB_Math_Mode\(cf_value_colorcol\).*')
+
+    def test_querylayer_time_numeric(self):
+        """layer.QueryLayer time with quantitative classification"""
+        ql = QueryLayer(self.query,
+                        time='timecol',
+                        color='colorcol')
+        # category type
+        ql.style_cols['colorcol'] = 'number'
+        ql.style_cols['timecol'] = 'date'
+        ql.geom_type = 'point'
+
+        # normal behavior for point geometries
+        ql._setup([BaseMap(), ql], 1)
+        self.assertDictEqual(ql.scheme,
+                             styling.mint(5))
+        # expect category maps query
+        self.assertRegexpMatches(ql.query.strip(),
+                                 '^SELECT \*, colorcol as value '
+                                 '.*_wrap$')
+        # cartocss should have cdb math mode
+        self.assertRegexpMatches(ql.cartocss,
+                                 '.*avg\(colorcol\).*')
 
     def test_querylayer_time_errors(self):
         """layer.QueryLayer time option exceptions"""
@@ -141,13 +240,26 @@ class TestQueryLayer(unittest.TestCase):
                                msg='`time` key has to be a str or dict'):
             QueryLayer(self.query, time=7)
 
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'string'
+            ql.geom_type = 'point'
+            ql._setup([BaseMap(), ql], 1)
+
+        with self.assertRaises(ValueError):
+            ql = QueryLayer('select * from watermelon', time='seeds')
+            ql.style_cols['seeds'] = 'date'
+            ql.geom_type = 'polygon'
+            ql._setup([BaseMap(), ql], 1)
+
     def test_querylayer_time_default(self):
         """layer.QueryLayer time defaults"""
         time_ans = {'column': 'time_col',
                     'method': 'count',
                     'cumulative': False,
                     'frames': 256,
-                    'duration': 30}
+                    'duration': 30,
+                    'trails': 2}
         # pass a valid column name
         qlayer = QueryLayer(self.query, time='time_col')
         self.assertEqual(qlayer.time, time_ans)
@@ -160,7 +272,8 @@ class TestQueryLayer(unittest.TestCase):
                     'method': 'avg',
                     'frames': 256,
                     'duration': 10,
-                    'cumulative': False}
+                    'cumulative': False,
+                    'trails': 2}
 
         self.assertEqual(qlayer.time, time_ans)
 
@@ -192,20 +305,49 @@ class TestQueryLayer(unittest.TestCase):
     def test_querylayer_size_defaults(self):
         """layer.QueryLayer gets defaults for options not passed"""
         qlayer = QueryLayer(self.query, size='cold_brew')
-        size_col_ans = {'column': 'cold_brew',
-                        'range': [5, 25],
-                        'bins': 10,
-                        'bin_method': 'quantiles'}
-        self.assertEqual(qlayer.size, size_col_ans,
-                         msg='size column should receive defaults')
+        size_col_ans = {
+            'column': 'cold_brew',
+            'range': [5, 25],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, size_col_ans,
+                             msg='size column should receive defaults')
 
-        qlayer = QueryLayer(self.query, size={'column': 'cold_brew',
-                                              'range': [4, 15],
-                                              'bin_method': 'equal'})
-        ans = {'column': 'cold_brew',
-               'range': [4, 15],
-               'bins': 10,
-               'bin_method': 'equal'}
-        self.assertEqual(qlayer.size, ans,
-                         msg=('size dict should receive defaults if not '
-                              'provided'))
+        qlayer = QueryLayer(self.query,
+                            size={
+                                'column': 'cold_brew',
+                                'range': [4, 15],
+                                'bin_method': 'equal'
+                            })
+        ans = {
+            'column': 'cold_brew',
+            'range': [4, 15],
+            'bins': 5,
+            'bin_method': 'equal'
+        }
+        self.assertDictEqual(qlayer.size, ans,
+                             msg=('size dict should receive defaults if not '
+                                  'provided'))
+        qlayer = QueryLayer(self.query, size={
+                                            'column': 'cold_brew',
+                                            'min': 10,
+                                            'max': 20
+                                        })
+        ans = {
+            'column': 'cold_brew',
+            'range': [10, 20],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, ans)
+
+    def test_querylayer_get_cartocss(self):
+        """layer.QueryLayer._get_cartocss"""
+        qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
+                                                  max=20))
+        self.assertRegexpMatches(
+            qlayer._get_cartocss(BaseMap()),
+            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             'quantiles\(5\)\).*')
+        )
