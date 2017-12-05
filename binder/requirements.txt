@@ -1,0 +1,7 @@
+cartoframes
+# Additional dependencies from examples
+matplotlib
+pandas
+geopandas
+dask
+
