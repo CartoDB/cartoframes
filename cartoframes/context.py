@@ -1343,6 +1343,8 @@ class CartoContext(object):
               ``suggested_name`` column of `metadata`.
             ValueError: If metadata object is invalid or empty, or if the
               number of requested measures exceeds 50.
+            CartoException: If user account consumes all of Data Observatory
+              quota
         """
         if how != 'the_geom':
             raise NotImplementedError('Data gathering currently only works if '
