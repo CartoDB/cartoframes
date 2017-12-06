@@ -24,7 +24,7 @@ Features
 
 More info
 
-- Complete documentation: https://cartodb.github.io/cartoframes
+- Complete documentation: http://cartoframes.readthedocs.io/en/latest/
 - Source code: https://github.com/CartoDB/cartoframes
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
