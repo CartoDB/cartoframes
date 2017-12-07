@@ -17,7 +17,7 @@ def cssify(css_dict):
             css += ' {field}: {field_value};'.format(field=field,
                                                      field_value=field_value)
         css += '} '
-    return css
+    return css.strip()
 
 
 def normalize_colnames(columns):

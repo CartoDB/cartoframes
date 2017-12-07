@@ -362,6 +362,16 @@ class TestQueryLayer(unittest.TestCase):
         qlayer.geom_type = 'line'
         self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
                                  '^\#layer.*line\-width.*$')
+        # test point, line, polygon
+        for g in ('point', 'line', 'polygon', ):
+            styles = {'point': 'marker\-fill',
+                      'line': 'line\-color',
+                      'polygon': 'polygon\-fill'}
+            qlayer = QueryLayer(self.query, color='colname')
+            qlayer.geom_type = g
+            self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                     '^\#layer.*{}.*\}}$'.format(styles[g]))
+
         # geometry type should be defined
         with self.assertRaises(ValueError,
                                msg='invalid geometry type'):
