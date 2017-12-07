@@ -566,6 +566,16 @@ class TestCartoContext(unittest.TestCase):
             cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
                            Layer(self.test_read_table, time='cartodb_id')])
 
+        # no geometry
+        with self.assertRaises(ValueError):
+            cc.map(layers=QueryLayer('''
+                SELECT
+                    null::geometry as the_geom,
+                    null::geometry as the_geom_webmercator,
+                    row_number() OVER () as cartodb_id
+                FROM generate_series(1, 10) as m(i)
+                '''))
+
     @unittest.skipIf(WILL_SKIP, 'no cartocredentials, skipping')
     def test_cartocontext_map_time(self):
         """CartoContext.map time options"""

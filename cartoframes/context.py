@@ -1013,6 +1013,9 @@ class CartoContext(object):
                     query=layer.orig_query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
+        elif len(resp['rows']) == 0:
+            raise ValueError('No geometry for layer. Check all layer tables '
+                             'and queries to ensure there are geometries.')
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, df=None, table_name=None):
@@ -1303,8 +1306,8 @@ class CartoContext(object):
                 median_income = cc.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')
-                df = cc.data(median_income,
-                             'transaction_event')
+                df = cc.data('transaction_events',
+                             median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
             The rest of the metadata will be filled in, but it's important to
