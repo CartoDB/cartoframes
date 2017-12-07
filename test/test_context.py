@@ -126,9 +126,9 @@ class TestCartoContext(unittest.TestCase):
         self.assertEqual(cc.creds.base_url(), self.baseurl.strip('/'))
         self.assertEqual(cc.creds.username(), self.username)
         self.assertTrue(not cc.is_org)
-        # TODO: how to test instances of a class?
-        # self.assertTrue(cc.auth_client.__dict__ == self.auth_client.__dict__)
-        # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
+        with self.assertRaises(CartoException):
+            cartoframes.CartoContext(base_url=self.baseurl,
+                                     api_key='notavalidkey')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_credentials(self):
