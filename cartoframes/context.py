@@ -657,6 +657,8 @@ class CartoContext(object):
                     query,
                     skipfields='the_geom_webmercator',
                     **DEFAULT_SQL_ARGS)
+            if 'error' in select_res:
+                raise CartoException(str(select_res['error']))
 
         self._debug_print(select_res=select_res)
 
