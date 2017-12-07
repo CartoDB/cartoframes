@@ -7,7 +7,7 @@ basemap layers.
 import pandas as pd
 import webcolors
 
-from cartoframes.utils import cssify, join_url
+from cartoframes.utils import cssify, join_url, minify_sql
 from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
@@ -388,7 +388,7 @@ class QueryLayer(AbstractLayer):
             duration = self.time['duration']
             if (self.color in self.style_cols and
                     self.style_cols[self.color] in ('string', 'boolean', )):
-                self.query = ' '.join([s.strip() for s in [
+                self.query = minify_sql([
                     'SELECT',
                     '    orig.*, __wrap.cf_value_{col}',
                     'FROM ({query}) AS orig, (',
@@ -404,7 +404,7 @@ class QueryLayer(AbstractLayer):
                     '    ) AS _wrap',
                     ') AS __wrap',
                     'WHERE __wrap.{col} = orig.{col}',
-                ]]).format(col=self.color, query=self.orig_query)
+                ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
                         'bins': ','.join(str(i) for i in range(1, 11)),
@@ -487,33 +487,53 @@ class QueryLayer(AbstractLayer):
                 css += trail_temp
             return css
         else:
-            return cssify({
-                # Point CSS
-                "#layer['mapnik::geometry_type'=1]": {
-                    'marker-width': size_style,
-                    'marker-fill': color_style,
-                    'marker-fill-opacity': '1',
-                    'marker-allow-overlap': 'true',
-                    'marker-line-width': '0.5',
-                    'marker-line-color': line_color,
-                    'marker-line-opacity': '1',
-                },
-                # Line CSS
-                "#layer['mapnik::geometry_type'=2]": {
-                    'line-width': '1.5',
-                    'line-color': color_style,
-                },
-                # Polygon CSS
-                "#layer['mapnik::geometry_type'=3]": {
-                    'polygon-fill': color_style,
-                    'polygon-opacity': '0.9',
-                    'polygon-gamma': '0.5',
-                    'line-color': '#FFF',
-                    'line-width': '0.5',
-                    'line-opacity': '0.25',
-                    'line-comp-op': 'hard-light',
-                }
-            })
+            if self.geom_type == 'point':
+                css = cssify({
+                    # Point CSS
+                    "#layer": {
+                        'marker-width': size_style,
+                        'marker-fill': color_style,
+                        'marker-fill-opacity': '1',
+                        'marker-allow-overlap': 'true',
+                        'marker-line-width': '0.5',
+                        'marker-line-color': line_color,
+                        'marker-line-opacity': '1',
+                    }})
+                css += cssify({
+                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
+                        'marker-fill': '#ccc'}
+                    })
+                return css
+            elif self.geom_type == 'line':
+                css = cssify({
+                    "#layer": {
+                        'line-width': '1.5',
+                        'line-color': color_style,
+                    }})
+                css += cssify({
+                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
+                        'line-color': '#ccc'}
+                    })
+                return css
+            elif self.geom_type == 'polygon':
+                css = cssify({
+                    "#layer": {
+                        'polygon-fill': color_style,
+                        'polygon-opacity': '0.9',
+                        'polygon-gamma': '0.5',
+                        'line-color': '#FFF',
+                        'line-width': '0.5',
+                        'line-opacity': '0.25',
+                        'line-comp-op': 'hard-light',
+                    }})
+                css += cssify({
+                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
+                        'polygon-fill': '#ccc'}
+                    })
+                return css
+            else:
+                raise ValueError('Unsupported geometry type: {}'.format(
+                    self.geom_type))
 
 
 class Layer(QueryLayer):
