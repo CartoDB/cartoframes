@@ -1306,8 +1306,8 @@ class CartoContext(object):
                 median_income = cc.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')
-                df = cc.data(median_income,
-                             'transaction_event')
+                df = cc.data('transaction_events',
+                             median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
             The rest of the metadata will be filled in, but it's important to

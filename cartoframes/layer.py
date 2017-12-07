@@ -476,10 +476,11 @@ class QueryLayer(AbstractLayer):
                     'comp-op': 'source-over',
                 }
             })
-            css += cssify({
-                '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
-                    'marker-fill': '#666'}
-                })
+            if self.color in self.style_cols:
+                css += cssify({
+                    '#layer[{} = null]'.format(self.color): {
+                        'marker-fill': '#666'}
+                    })
             for t in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({
@@ -503,10 +504,11 @@ class QueryLayer(AbstractLayer):
                         'marker-line-color': line_color,
                         'marker-line-opacity': '1',
                     }})
-                css += cssify({
-                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
-                        'marker-fill': '#ccc'}
-                    })
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'marker-fill': '#ccc'}
+                        })
                 return css
             elif self.geom_type == 'line':
                 css = cssify({
@@ -514,10 +516,11 @@ class QueryLayer(AbstractLayer):
                         'line-width': '1.5',
                         'line-color': color_style,
                     }})
-                css += cssify({
-                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
-                        'line-color': '#ccc'}
-                    })
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'line-color': '#ccc'}
+                        })
                 return css
             elif self.geom_type == 'polygon':
                 css = cssify({
@@ -530,10 +533,11 @@ class QueryLayer(AbstractLayer):
                         'line-opacity': '0.25',
                         'line-comp-op': 'hard-light',
                     }})
-                css += cssify({
-                    '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
-                        'polygon-fill': '#ccc'}
-                    })
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'polygon-fill': '#ccc'}
+                        })
                 return css
             else:
                 raise ValueError('Unsupported geometry type: {}'.format(
