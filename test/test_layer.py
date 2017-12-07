@@ -160,6 +160,7 @@ class TestQueryLayer(unittest.TestCase):
             qlayer = QueryLayer(self.query, color='datetime_column')
             qlayer.style_cols['datetime_column'] = 'date'
             qlayer._setup([BaseMap(), qlayer], 1)
+
         # Exception testing
         # color column cannot be a geometry column
         with self.assertRaises(ValueError,
@@ -355,3 +356,15 @@ class TestQueryLayer(unittest.TestCase):
             ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
              'quantiles\(5\)\).*')
         )
+
+        # test line cartocss
+        qlayer = QueryLayer(self.query)
+        qlayer.geom_type = 'line'
+        self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                 '^\#layer.*line\-width.*$')
+        # geometry type should be defined
+        with self.assertRaises(ValueError,
+                               msg='invalid geometry type'):
+            ql = QueryLayer(self.query, color='red')
+            ql.geom_type = 'notvalid'
+            ql._get_cartocss(BaseMap())

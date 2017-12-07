@@ -476,6 +476,10 @@ class QueryLayer(AbstractLayer):
                     'comp-op': 'source-over',
                 }
             })
+            css += cssify({
+                '#layer[{} = null]'.format(self.color or 'cartodb_id'): {
+                    'marker-fill': '#666'}
+                })
             for t in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({

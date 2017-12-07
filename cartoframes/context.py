@@ -1013,6 +1013,9 @@ class CartoContext(object):
                     query=layer.orig_query,
                     geoms=','.join(g['geom_type'] for g in resp['rows']),
                     common_geom=resp['rows'][0]['geom_type']))
+        elif len(resp['rows']) == 0:
+            raise ValueError('No geometry for layer. Check all layer tables '
+                             'and queries to ensure there are geometries.')
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, df=None, table_name=None):
