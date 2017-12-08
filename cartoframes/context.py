@@ -105,11 +105,23 @@ class CartoContext(object):
                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
+        self._is_authenticated()
         self.is_org = self._is_org_user()
 
         self._map_templates = {}
         self._srcdoc = None
         self._verbose = verbose
+
+    def _is_authenticated(self):
+        """Checks if credentials allow for authenticated carto access"""
+        try:
+            self.sql_client.send(
+                    'select * from information_schema.tables limit 0')
+        except CartoException as err:
+            raise CartoException('Cannot authenticate user `{0}`. Check '
+                                 'credentials ({1}).'.format(
+                                     self.creds.username(),
+                                     err))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
