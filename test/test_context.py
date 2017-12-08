@@ -457,6 +457,20 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
 
+        # see what happens if a query fails after 100 successful rows
+        with self.assertRaises(CartoException):
+            cc.query('''
+                WITH cte AS (
+                    SELECT CDB_LatLng(0, 0) as the_geom, i
+                    FROM generate_series(1, 110) as m(i)
+                    UNION ALL
+                    SELECT ST_Buffer(CDB_LatLng(0, 0), 0.1) as the_geom, i
+                    FROM generate_series(111, 120) as i
+                )
+                SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+                FROM cte
+            ''')
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map(self):
         """CartoContext.map"""
@@ -551,6 +565,16 @@ class TestCartoContext(unittest.TestCase):
         with self.assertRaises(ValueError):
             cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
                            Layer(self.test_read_table, time='cartodb_id')])
+
+        # no geometry
+        with self.assertRaises(ValueError):
+            cc.map(layers=QueryLayer('''
+                SELECT
+                    null::geometry as the_geom,
+                    null::geometry as the_geom_webmercator,
+                    row_number() OVER () as cartodb_id
+                FROM generate_series(1, 10) as m(i)
+                '''))
 
     @unittest.skipIf(WILL_SKIP, 'no cartocredentials, skipping')
     def test_cartocontext_map_time(self):

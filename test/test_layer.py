@@ -145,6 +145,7 @@ class TestQueryLayer(unittest.TestCase):
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
+            qlayer.geom_type = 'point'
             if color == 'cookie_monster':
                 qlayer.style_cols[color] = 'number'
                 qlayer._setup([BaseMap(), qlayer], 1)
@@ -159,6 +160,7 @@ class TestQueryLayer(unittest.TestCase):
             qlayer = QueryLayer(self.query, color='datetime_column')
             qlayer.style_cols['datetime_column'] = 'date'
             qlayer._setup([BaseMap(), qlayer], 1)
+
         # Exception testing
         # color column cannot be a geometry column
         with self.assertRaises(ValueError,
@@ -192,10 +194,12 @@ class TestQueryLayer(unittest.TestCase):
                              dict(name='Antique', bin_method='',
                                   bins=','.join(str(i) for i in range(1, 11))))
         # expect category maps query
+        with open('qlayerquery.txt', 'w') as f:
+            f.write(ql.query)
         self.assertRegexpMatches(ql.query,
-                                 '^SELECT orig\.\*, '
-                                 '__wrap.cf_value_colorcol.* '
-                                 'GROUP BY.*orig\.colorcol$')
+                                 '(?s)^SELECT\norig\.\*,\s__wrap\.'
+                                 'cf_value_colorcol\n.*GROUP\sBY.*orig\.'
+                                 'colorcol$')
         # cartocss should have cdb math mode
         self.assertRegexpMatches(ql.cartocss,
                                  '.*CDB_Math_Mode\(cf_value_colorcol\).*')
@@ -346,8 +350,31 @@ class TestQueryLayer(unittest.TestCase):
         """layer.QueryLayer._get_cartocss"""
         qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
                                                   max=20))
+        qlayer.geom_type = 'point'
         self.assertRegexpMatches(
             qlayer._get_cartocss(BaseMap()),
             ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
              'quantiles\(5\)\).*')
         )
+
+        # test line cartocss
+        qlayer = QueryLayer(self.query)
+        qlayer.geom_type = 'line'
+        self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                 '^\#layer.*line\-width.*$')
+        # test point, line, polygon
+        for g in ('point', 'line', 'polygon', ):
+            styles = {'point': 'marker\-fill',
+                      'line': 'line\-color',
+                      'polygon': 'polygon\-fill'}
+            qlayer = QueryLayer(self.query, color='colname')
+            qlayer.geom_type = g
+            self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                     '^\#layer.*{}.*\}}$'.format(styles[g]))
+
+        # geometry type should be defined
+        with self.assertRaises(ValueError,
+                               msg='invalid geometry type'):
+            ql = QueryLayer(self.query, color='red')
+            ql.geom_type = 'notvalid'
+            ql._get_cartocss(BaseMap())
