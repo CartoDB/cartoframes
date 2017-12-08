@@ -1030,9 +1030,48 @@ class CartoContext(object):
                              'and queries to ensure there are geometries.')
         return resp['rows'][0]['geom_type']
 
-    def data_boundaries(self, df=None, table_name=None):
-        """Not currently implemented"""
-        pass
+    def data_boundaries(self, boundary=None, region=None, decode_geom=False):
+        """
+        Returns all available boundaries if neither `region` or `boundary` are
+          passed
+        Returns
+        """
+        if isinstance(region, list):
+            if len(region) != 4:
+                raise ValueError('`region` should be a list of the geographic '
+                                 'bounds of a region in the following order: '
+                                 'western longitude, southern latitude, '
+                                 'eastern longitude, and northern latitude. '
+                                 'For example, Switerland fits in '
+                                 '``[5.9559111595,45.8179931641,10.4920501709,'
+                                 '47.808380127]``.')
+            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, '
+                      '4326)').format(*region)
+        elif isinstance(region, str):
+            bounds = ('(SELECT ST_SetSRID(ST_Extent(the_geom), 4326) '
+                      'FROM {table})').format(table=region)
+        elif region is None:
+            bounds = ('ST_MakeEnvelope(-180.0, -85.0, 180.0, '
+                      '85.0, 4326)')
+        else:
+            raise ValueError('`region` must be a str, a list of two lng/lat '
+                             'pairs, or ``None`` (which defaults to the '
+                             'world)')
+        if boundary is None:
+            query = ('SELECT * FROM OBS_GetAvailableGeometries('
+                     '{bounds})').format(bounds=bounds)
+            return self.query(query)
+
+        query = utils.minify_sql((
+                'SELECT the_geom, geom_refs',
+                'FROM OBS_GetBoundariesByGeometry(',
+                '       {bounds},',
+                '       \'{boundary}\')',
+            )).format(boundary=boundary,
+                      bounds=bounds)
+
+        self._debug_print(query=query)
+        return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None):
