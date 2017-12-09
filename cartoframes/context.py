@@ -1252,9 +1252,9 @@ class CartoContext(object):
 
         numers = '\nUNION\n'.join(
                 numer_query.format(
-                    timespan=('\'{}\''.format(t) if t else 'null'),
-                    geom_id=('\'{}\''.format(b) if b else 'null'),
-                    normalization=('\'{}\''.format(n) if n else 'null'),
+                    timespan=utils.pgquote(t),
+                    geom_id=utils.pgquote(b),
+                    normalization=utils.pgquote(n),
                     countrytag=countrytag,
                     filters=filters
                 )
