@@ -1030,13 +1030,16 @@ class CartoContext(object):
                              'and queries to ensure there are geometries.')
         return resp['rows'][0]['geom_type']
 
-    def data_boundaries(self, boundary=None, region=None, decode_geom=False):
+    def data_boundaries(self, boundary=None, region=None, decode_geom=False,
+                        time=None):
         """
         Returns all available boundaries if neither `region` or `boundary` are
           passed
         Returns
         """
-        if isinstance(region, list):
+        # TODO: create a function out of this?
+        if (isinstance(region, collections.Iterable)
+                and not isinstance(region, str)):
             if len(region) != 4:
                 raise ValueError('`region` should be a list of the geographic '
                                  'bounds of a region in the following order: '
@@ -1048,11 +1051,10 @@ class CartoContext(object):
             bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, '
                       '4326)').format(*region)
         elif isinstance(region, str):
-            bounds = ('(SELECT ST_SetSRID(ST_Extent(the_geom), 4326) '
+            bounds = ('(SELECT ST_Union(the_geom) '
                       'FROM {table})').format(table=region)
         elif region is None:
-            bounds = ('ST_MakeEnvelope(-180.0, -85.0, 180.0, '
-                      '85.0, 4326)')
+            bounds = ('ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)')
         else:
             raise ValueError('`region` must be a str, a list of two lng/lat '
                              'pairs, or ``None`` (which defaults to the '
@@ -1066,10 +1068,11 @@ class CartoContext(object):
                 'SELECT the_geom, geom_refs',
                 'FROM OBS_GetBoundariesByGeometry(',
                 '       {bounds},',
-                '       \'{boundary}\')',
+                '       \'{boundary}\',',
+                '       {time})',
             )).format(boundary=boundary,
-                      bounds=bounds)
-
+                      bounds=bounds,
+                      time='\'{}\''.format(time) if time else 'null')
         self._debug_print(query=query)
         return self.query(query, decode_geom=decode_geom)
 
@@ -1187,8 +1190,8 @@ class CartoContext(object):
               four elements, or if `region` is neither an acceptable region
               nor a table in user account.
         """
-        if (isinstance(region, collections.Iterable) and
-                not isinstance(region, str)):
+        if (isinstance(region, collections.Iterable)
+                and not isinstance(region, str)):
             # TODO: should this also check to see if each item is a number?
             if len(region) != 4:
                 raise ValueError('`region` should be a list of the geographic '
@@ -1277,7 +1280,8 @@ class CartoContext(object):
             'SELECT',
             '    numer_id,',
             '    {geom_id} AS geom_id,',
-            '    {timespan} AS numer_timespan',
+            '    {timespan} AS numer_timespan,',
+            '    {normalization} as normalization',
             '  FROM',
             '    OBS_GetAvailableNumerators(',
             '        (SELECT env FROM envelope),',
@@ -1292,14 +1296,16 @@ class CartoContext(object):
                 numer_query.format(
                     timespan=('\'{}\''.format(t) if t else 'null'),
                     geom_id=('\'{}\''.format(b) if b else 'null'),
+                    normalization=('\'{}\''.format(n) if n else 'null'),
                     countrytag=countrytag,
                     filters=filters
                 )
                 for t in time
                 for b in boundaries
+                for n in ('predenominated', None)
             )
 
-        query = '\n'.join(s.strip() for s in (
+        query = utils.minify_sql((
            'WITH envelope AS (',
            '    {boundary}',
            '), numers AS (',
@@ -1403,9 +1409,9 @@ class CartoContext(object):
             CartoException: If user account consumes all of Data Observatory
               quota
         """
-        if how != 'the_geom':
-            raise NotImplementedError('Data gathering currently only works if '
-                                      'a geometry is present')
+        # if how != 'the_geom':
+        #     raise NotImplementedError('Data gathering currently only works if '
+        #                               'a geometry is present')
         if isinstance(metadata, pd.DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
@@ -1480,12 +1486,15 @@ class CartoContext(object):
         query = '''
             SELECT t.*, {cols}
               FROM OBS_GetData(
-                   (SELECT array_agg((the_geom, cartodb_id)::geomval)
+                   (SELECT array_agg({how})
                     FROM "{tablename}"),
                    (SELECT \'{meta}\'::json)) as m,
-                   {tablename} as t
-             WHERE t.cartodb_id = m.id
-        '''.format(tablename=table_name,
+                   "{tablename}" as t
+             WHERE t."{rowid}" = m.id
+        '''.format(how=('(the_geom, cartodb_id)::geomval' if how == 'the_geom'
+                        else how),
+                   tablename=table_name,
+                   rowid='cartodb_id' if how == 'the_geom' else how,
                    cols=cols,
                    meta=_meta.to_json(orient='records').replace(
                        '\'', '\'\''))
