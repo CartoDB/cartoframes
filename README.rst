@@ -45,7 +45,7 @@ It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyte
 Virtual Environment
 -------------------
 
-To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
+To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide.readthedocs.io/en/latest/dev/virtualenvs/>`__:
 
 .. code:: bash
 
