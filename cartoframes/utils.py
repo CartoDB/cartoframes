@@ -90,3 +90,8 @@ def join_url(*parts):
 def minify_sql(lines):
     """eliminate whitespace in sql queries"""
     return '\n'.join(line.strip() for line in lines)
+
+
+def pgquote(string):
+    """single-quotes a string if not None, else returns null"""
+    return '\'{}\''.format(string) if string else 'null'
