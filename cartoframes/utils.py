@@ -84,9 +84,14 @@ def importify_params(param_arg):
 
 def join_url(*parts):
     """join parts of URL into complete url"""
-    return '/'.join(s.strip('/') for s in parts)
+    return '/'.join(str(s).strip('/') for s in parts)
 
 
 def minify_sql(lines):
     """eliminate whitespace in sql queries"""
     return '\n'.join(line.strip() for line in lines)
+
+
+def pgquote(string):
+    """single-quotes a string if not None, else returns null"""
+    return '\'{}\''.format(string) if string else 'null'

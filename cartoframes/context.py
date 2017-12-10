@@ -460,8 +460,7 @@ class CartoContext(object):
             """removes temporary file"""
             os.remove(filepath)
 
-        tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
-                                                        table_name=table_name)
+        tempfile = os.path.join(temp_dir, '{}.csv'.format(table_name))
         self._debug_print(tempfile=tempfile)
         df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
                 path_or_buf=tempfile,
@@ -881,12 +880,9 @@ class CartoContext(object):
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
         api_url = utils.join_url(self.creds.base_url(), 'api/v1/map')
 
-        static_url = ('{api_url}/static/named/{map_name}'
-                      '/{width}/{height}.png?{params}').format(
-                          api_url=api_url,
-                          map_name=map_name,
-                          width=size[0],
-                          height=size[1],
+        static_url = ('{url}.png?{params}').format(
+                          url=utils.join_url(api_url, 'static/named',
+                                             map_name, size[0], size[1]),
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
@@ -1276,12 +1272,12 @@ class CartoContext(object):
         else:
             filters = ''
 
-        numer_query = '\n'.join(s.strip() for s in (
+        numer_query = utils.minify_sql((
             'SELECT',
             '    numer_id,',
             '    {geom_id} AS geom_id,',
             '    {timespan} AS numer_timespan,',
-            '    {normalization} as normalization',
+            '    {normalization} AS normalization',
             '  FROM',
             '    OBS_GetAvailableNumerators(',
             '        (SELECT env FROM envelope),',
@@ -1294,9 +1290,9 @@ class CartoContext(object):
 
         numers = '\nUNION\n'.join(
                 numer_query.format(
-                    timespan=('\'{}\''.format(t) if t else 'null'),
-                    geom_id=('\'{}\''.format(b) if b else 'null'),
-                    normalization=('\'{}\''.format(n) if n else 'null'),
+                    timespan=utils.pgquote(t),
+                    geom_id=utils.pgquote(b),
+                    normalization=utils.pgquote(n),
                     countrytag=countrytag,
                     filters=filters
                 )
@@ -1410,45 +1406,46 @@ class CartoContext(object):
               quota
         """
         # if how != 'the_geom':
-        #     raise NotImplementedError('Data gathering currently only works if '
-        #                               'a geometry is present')
+        #   raise NotImplementedError('Data gathering currently only works if '
+        #                             'a geometry is present')
         if isinstance(metadata, pd.DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
-            query = '''
-              WITH envelope AS (
-                SELECT ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,
-                       count(*)::int AS cnt
-                  FROM {table_name}
-              )
-              SELECT *
-                FROM json_to_recordset(
-                    (SELECT OBS_GetMeta(
-                        envelope.env,
-                        ('{meta}')::json,
-                        10, 1, envelope.cnt
-                    ) AS meta
-                FROM envelope
-                GROUP BY env, cnt)) as data(
-                    denom_aggregate text, denom_colname text,
-                    denom_description text, denom_geomref_colname text,
-                    denom_id text, denom_name text, denom_reltype text,
-                    denom_t_description text, denom_tablename text,
-                    denom_type text, geom_colname text, geom_description text,
-                    geom_geomref_colname text, geom_id text, geom_name text,
-                    geom_t_description text, geom_tablename text,
-                    geom_timespan text, geom_type text, id numeric,
-                    max_score_rank text, max_timespan_rank text,
-                    normalization text, num_geoms numeric,numer_aggregate text,
-                    numer_colname text, numer_description text,
-                    numer_geomref_colname text, numer_id text,
-                    numer_name text, numer_t_description text,
-                    numer_tablename text, numer_timespan text,
-                    numer_type text, score numeric, score_rank numeric,
-                    score_rownum numeric, suggested_name text,
-                    target_area text, target_geoms text, timespan_rank numeric,
-                    timespan_rownum numeric)
-            '''.format(
+            query = utils.minify_sql((
+              'WITH envelope AS (',
+              '  SELECT ',
+              '      ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,',
+              '      count(*)::int AS cnt',
+              '    FROM {table_name}',
+              ')',
+              'SELECT *',
+              '  FROM json_to_recordset(',
+              '      (SELECT OBS_GetMeta(',
+              '          envelope.env,',
+              '          (\'{meta}\')::json,',
+              '          10, 1, envelope.cnt',
+              '      ) AS meta',
+              '  FROM envelope',
+              '  GROUP BY env, cnt)) as data(',
+              '      denom_aggregate text, denom_colname text,',
+              '      denom_description text, denom_geomref_colname text,',
+              '      denom_id text, denom_name text, denom_reltype text,',
+              '      denom_t_description text, denom_tablename text,',
+              '      denom_type text, geom_colname text, ',
+              '      geom_description text,geom_geomref_colname text, ',
+              '      geom_id text, geom_name text, geom_t_description text, ',
+              '      geom_tablename text, geom_timespan text, ',
+              '      geom_type text, id numeric, max_score_rank text, ',
+              '      max_timespan_rank text, normalization text, num_geoms ',
+              '      numeric,numer_aggregate text, numer_colname text, ',
+              '      numer_description text, numer_geomref_colname text, ',
+              '      numer_id text, numer_name text, numer_t_description ',
+              '      text, numer_tablename text, numer_timespan text,',
+              '      numer_type text, score numeric, score_rank numeric,',
+              '      score_rownum numeric, suggested_name text,',
+              '      target_area text, target_geoms text, timespan_rank ',
+              '      numeric, timespan_rownum numeric)',
+            )).format(
                     table_name=table_name,
                     meta=json.dumps(metadata).replace('\'', '\'\''))
             resp = self.sql_client.send(query)
@@ -1483,21 +1480,22 @@ class CartoContext(object):
                     col=row[1]['suggested_name'])
                 for row in _meta.iterrows()
             )
-        query = '''
-            SELECT t.*, {cols}
-              FROM OBS_GetData(
-                   (SELECT array_agg({how})
-                    FROM "{tablename}"),
-                   (SELECT \'{meta}\'::json)) as m,
-                   "{tablename}" as t
-             WHERE t."{rowid}" = m.id
-        '''.format(how=('(the_geom, cartodb_id)::geomval' if how == 'the_geom'
-                        else how),
-                   tablename=table_name,
-                   rowid='cartodb_id' if how == 'the_geom' else how,
-                   cols=cols,
-                   meta=_meta.to_json(orient='records').replace(
-                       '\'', '\'\''))
+        query = utils.minify_sql((
+                'SELECT t.*, {cols}',
+                '  FROM OBS_GetData(',
+                '       (SELECT array_agg({how})',
+                '        FROM "{tablename}"),',
+                '       (SELECT \'{meta}\'::json)) as m,',
+                '       {tablename} as t',
+                ' WHERE t."{rowid}" = m.id',
+            )).format(how=('(the_geom, cartodb_id)::geomval'
+                           if how == 'the_geom'
+                           else how),
+                      tablename=table_name,
+                      rowid='cartodb_id' if how == 'the_geom' else how,
+                      cols=cols,
+                      meta=_meta.to_json(orient='records').replace(
+                          '\'', '\'\''))
         return self.query(query,
                           table_name=persist_as)
 
