@@ -84,7 +84,7 @@ def importify_params(param_arg):
 
 def join_url(*parts):
     """join parts of URL into complete url"""
-    return '/'.join(s.strip('/') for s in parts)
+    return '/'.join(str(s).strip('/') for s in parts)
 
 
 def minify_sql(lines):
