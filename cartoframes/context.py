@@ -460,8 +460,7 @@ class CartoContext(object):
             """removes temporary file"""
             os.remove(filepath)
 
-        tempfile = '{temp_dir}/{table_name}.csv'.format(temp_dir=temp_dir,
-                                                        table_name=table_name)
+        tempfile = os.path.join(temp_dir, '{}.csv'.format(table_name))
         self._debug_print(tempfile=tempfile)
         df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
                 path_or_buf=tempfile,
@@ -881,12 +880,9 @@ class CartoContext(object):
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
         api_url = utils.join_url(self.creds.base_url(), 'api/v1/map')
 
-        static_url = ('{api_url}/static/named/{map_name}'
-                      '/{width}/{height}.png?{params}').format(
-                          api_url=api_url,
-                          map_name=map_name,
-                          width=size[0],
-                          height=size[1],
+        static_url = ('{url}.png?{params}').format(
+                          url=utils.join_url(api_url, 'static/named',
+                                             map_name, size[0], size[1]),
                           params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
