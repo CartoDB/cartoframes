@@ -460,14 +460,18 @@ class CartoContext(object):
             """removes temporary file"""
             os.remove(filepath)
 
-        tempfile = os.path.join(temp_dir, '{}.csv'.format(table_name))
+        file_name = '{table_name}.{ext}'.format(table_name=table_name,
+                                                ext='csv.gz' if kwargs.get('compression') else 'csv')
+        tempfile = os.path.join(temp_dir, file_name)
+
         self._debug_print(tempfile=tempfile)
         df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
                 path_or_buf=tempfile,
                 na_rep='',
                 header=pgcolnames,
                 index=False,
-                encoding='utf-8')
+                encoding='utf-8',
+                compression='gzip' if kwargs.get('compression') else None)
 
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
