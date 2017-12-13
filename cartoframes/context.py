@@ -21,7 +21,7 @@ from carto.exceptions import CartoException
 from cartoframes.credentials import Credentials
 from cartoframes.dataobs import get_countrytag
 from cartoframes import utils
-from cartoframes.layer import BaseMap
+from cartoframes.layer import BaseMap, AbstractLayer
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 from cartoframes.__version__ import __version__
 
@@ -212,8 +212,7 @@ class CartoContext(object):
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
-                information is stored. Used in conjunction with 
-                `encode_geom`.
+                information is stored. Used in conjunction with `encode_geom`.
             kwargs: Keyword arguments from CARTO's Import API. See the `params
                 listed in the documentation
                 <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
@@ -462,7 +461,8 @@ class CartoContext(object):
 
         tempfile = os.path.join(temp_dir, '{}.csv'.format(table_name))
         self._debug_print(tempfile=tempfile)
-        df.drop(labels=[geom_col], axis=1, errors='ignore').to_csv(
+        df.drop(labels=[geom_col], axis=1, errors='ignore')\
+            .to_csv(
                 path_or_buf=tempfile,
                 na_rep='',
                 header=pgcolnames,
@@ -566,15 +566,16 @@ class CartoContext(object):
             self._debug_print(final_table=import_job_table_name)
             if import_job_table_name != table_name:
                 try:
-                    res = self.sql_client.send('''
-                            DROP TABLE IF EXISTS {orig_table};
-                            ALTER TABLE {dupe_table} RENAME TO {orig_table};
-                            SELECT CDB_TableMetadataTouch(
-                                       '{orig_table}'::regclass);
-                            '''.format(
+                    res = self.sql_client.send(
+                        utils.minify_sql((
+                            'DROP TABLE IF EXISTS {orig_table};',
+                            'ALTER TABLE {dupe_table} RENAME TO {orig_table};',
+                            'SELECT CDB_TableMetadataTouch(',
+                            '           \'{orig_table}\'::regclass);',
+                            )).format(
                                 orig_table=table_name,
                                 dupe_table=import_job_table_name),
-                            do_post=False)
+                        do_post=False)
 
                     self._debug_print(res=res)
                 except Exception as err:
@@ -664,9 +665,9 @@ class CartoContext(object):
                 **DEFAULT_SQL_ARGS)
         else:
             select_res = self.sql_client.send(
-                    query,
-                    skipfields='the_geom_webmercator',
-                    **DEFAULT_SQL_ARGS)
+                query,
+                skipfields='the_geom_webmercator',
+                **DEFAULT_SQL_ARGS)
             if 'error' in select_res:
                 raise CartoException(str(select_res['error']))
 
@@ -820,17 +821,18 @@ class CartoContext(object):
             if not layer.is_basemap:
                 # get schema of style columns
                 if layer.style_cols:
-                    resp = self.sql_client.send(utils.minify_sql((
-                        'SELECT {cols}',
-                        'FROM ({query}) AS _wrap',
-                        'LIMIT 0',
-                    )).format(cols=','.join(layer.style_cols),
-                              comma=',' if layer.style_cols else '',
-                              query=layer.orig_query),
-                       **DEFAULT_SQL_ARGS)
+                    resp = self.sql_client.send(
+                        utils.minify_sql((
+                            'SELECT {cols}',
+                            'FROM ({query}) AS _wrap',
+                            'LIMIT 0',
+                        )).format(cols=','.join(layer.style_cols),
+                                  comma=',' if layer.style_cols else '',
+                                  query=layer.orig_query),
+                        **DEFAULT_SQL_ARGS)
                     self._debug_print(layer_fields=resp)
-                    for k, v in utils.dict_items(resp['fields']):
-                        layer.style_cols[k] = v['type']
+                    for stylecol, coltype in utils.dict_items(resp['fields']):
+                        layer.style_cols[stylecol] = coltype['type']
                 layer.geom_type = self._geom_type(layer)
                 if not base_layers:
                     geoms.add(layer.geom_type)
@@ -880,11 +882,12 @@ class CartoContext(object):
         api_url = utils.join_url(self.creds.base_url(), 'api/v1/map')
 
         static_url = ('{url}.png?{params}').format(
-                          url=utils.join_url(api_url, 'static/named',
-                                             map_name, size[0], size[1]),
-                          params=urlencode(params))
+            url=utils.join_url(api_url, 'static/named',
+                               map_name, size[0], size[1]),
+            params=urlencode(params))
 
         html = '<img src="{url}" />'.format(url=static_url)
+        self._debug_print(static_url=static_url)
 
         # TODO: write this as a private method
         if interactive:
@@ -925,10 +928,10 @@ class CartoContext(object):
             if time_layer:
                 # get turbo-carto processed cartocss
                 resp = self._auth_send(
-                        'api/v1/map/named/{}'.format(map_name),
-                        'POST',
-                        data=params['config'],
-                        headers={'Content-Type': 'application/json'})
+                    'api/v1/map/named/{}'.format(map_name),
+                    'POST',
+                    data=params['config'],
+                    headers={'Content-Type': 'application/json'})
 
                 # check if errors in cartocss (already turbo-carto processed)
                 if 'errors' not in resp:
@@ -993,8 +996,12 @@ class CartoContext(object):
                                          height=size[1],
                                          metadata=dict(origin_url=static_url))
 
-    def _geom_type(self, layer):
+    def _geom_type(self, source):
         """gets geometry type(s) of specified layer"""
+        if isinstance(source, AbstractLayer):
+            query = source.orig_query
+        else:
+            query = 'SELECT * FROM "{table}"'.format(table=source)
         resp = self.sql_client.send(
             utils.minify_sql((
                 'SELECT',
@@ -1013,12 +1020,12 @@ class CartoContext(object):
                 'WHERE the_geom IS NOT NULL',
                 'GROUP BY 1',
                 'ORDER BY 2 DESC',
-            )).format(query=layer.orig_query),
+            )).format(query=query),
             **DEFAULT_SQL_ARGS)
         if resp['total_rows'] > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
-                     query=layer.orig_query,
+                     query=query,
                      geoms=','.join(g['geom_type'] for g in resp['rows']),
                      common_geom=resp['rows'][0]['geom_type']))
         elif resp['total_rows'] == 0:
@@ -1027,7 +1034,7 @@ class CartoContext(object):
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
-                        time=None):
+                        timespan=None):
         """
         Returns all available boundaries if neither `region` or `boundary` are
           passed
@@ -1037,18 +1044,23 @@ class CartoContext(object):
         if (isinstance(region, collections.Iterable)
                 and not isinstance(region, str)):
             if len(region) != 4:
-                raise ValueError('`region` should be a list of the geographic '
-                                 'bounds of a region in the following order: '
-                                 'western longitude, southern latitude, '
-                                 'eastern longitude, and northern latitude. '
-                                 'For example, Switerland fits in '
-                                 '``[5.9559111595,45.8179931641,10.4920501709,'
-                                 '47.808380127]``.')
-            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, '
-                      '4326)').format(*region)
+                raise ValueError(
+                    '`region` should be a list of the geographic bounds of a '
+                    'region in the following order: western longitude, '
+                    'southern latitude, eastern longitude, and northern '
+                    'latitude. For example, Switerland fits in '
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.')
+            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
+                *region)
         elif isinstance(region, str):
-            bounds = ('(SELECT ST_Union(the_geom) '
-                      'FROM {table})').format(table=region)
+            geom_type = self._geom_type(region)
+            if geom_type in ('point', 'line', ):
+                bounds = ('(SELECT ST_ConvexHull(ST_Collect(the_geom)) '
+                          'FROM {table})').format(table=region)
+            else:
+                bounds = ('(SELECT ST_Union(the_geom) '
+                          'FROM {table})').format(table=region)
         elif region is None:
             bounds = ('ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)')
         else:
@@ -1063,12 +1075,12 @@ class CartoContext(object):
         query = utils.minify_sql((
             'SELECT the_geom, geom_refs',
             'FROM OBS_GetBoundariesByGeometry(',
-            '       {bounds},',
-            '       \'{boundary}\',',
-            '       {time})', )).format(
-                boundary=boundary,
+            '    {bounds},',
+            '    {boundary},',
+            '    {time})', )).format(
+                boundary=utils.pgquote(boundary),
                 bounds=bounds,
-                time=utils.pgquote(time))
+                time=utils.pgquote(timespan))
         self._debug_print(query=query)
         return self.query(query, decode_geom=decode_geom)
 
@@ -1236,8 +1248,9 @@ class CartoContext(object):
             kwsearch = '({})'.format(kwsearch)
 
         if regex:
-            regexsearch = ('(numer_description ~* \'{regex}\' OR '
-                           'numer_name ~* \'{regex}\')').format(regex=regex)
+            regexsearch = ('(numer_description ~* {regex} OR '
+                           'numer_name ~* {regex})').format(
+                               regex=utils.pgquote(regex))
 
         if keywords or regex:
             subjectfilters = '{kw} {op} {regex}'.format(
