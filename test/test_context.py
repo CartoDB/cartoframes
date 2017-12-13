@@ -15,6 +15,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
 import IPython
+from cartoframes.utils import dict_items
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -290,6 +291,22 @@ class TestCartoContext(unittest.TestCase):
             self.test_write_table))['fields']
         self.assertSetEqual(set([schema[c]['type'] for c in schema]),
                             set(('string', )))
+
+        df = pd.DataFrame({
+            'vals': list('abcd'),
+            'ids': list('wxyz'),
+            'nums': [1.2 * i for i in range(4)],
+            'boolvals': [True, False, None, True, ],
+            })
+        cc.write(df, self.test_write_table, overwrite=True,
+                 type_guessing='true')
+        resp = cc.sql_client.send('SELECT * FROM {}'.format(
+            self.test_write_table))['fields']
+        schema = {k: v['type'] for k, v in dict_items(resp)}
+        ans = dict(vals='string', ids='string', nums='number',
+                   boolvals='boolean', the_geom='geometry',
+                   the_geom_webmercator='geometry', cartodb_id='number')
+        self.assertDictEqual(schema, ans)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):
