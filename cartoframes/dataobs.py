@@ -56,7 +56,7 @@ def get_countrytag(country):
         'u.s.': 'United States',
         'u.s.a.': 'United States'
     }
-    if country.lower() in norm_name:
+    if country is not None and country.lower() in norm_name:
         return REGIONTAGS.get(norm_name.get(country.lower()))
     else:
         raise ValueError(
