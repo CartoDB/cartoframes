@@ -878,7 +878,11 @@ class TestCartoContext(unittest.TestCase):
         self.assertTrue(meta_cols & set(boundary_meta.columns))
 
         # boundary metadata in a region
-        regions = (self.test_read_table, self.test_data_table, )
+        regions = (
+            self.test_read_table,
+            self.test_data_table,
+            [5.9559111595, 45.8179931641, 10.4920501709, 47.808380127],
+            'Australia', )
         for region in regions:
             boundary_meta = cc.data_boundaries(region=region)
             self.assertTrue(meta_cols & set(boundary_meta.columns))

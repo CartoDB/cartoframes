@@ -651,9 +651,9 @@ class CartoContext(object):
                                 table_name=table_name),
                     headers={'Content-Type': 'application/json'})
             except CartoException:
-                raise CartoException('Table `{0}` already exists. Delete it '
-                                     'before creating a table from this '
-                                     'query'.format(table_name))
+                raise CartoException(
+                    'Table `{0}` already exists. Delete it before creating a '
+                    'table from this query'.format(table_name))
 
             while True:
                 import_job = self._check_import(resp['item_queue_id'])
