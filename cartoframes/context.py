@@ -1062,7 +1062,8 @@ class CartoContext(object):
             `geom_name` gives us the name of the boundary and `geom_id`
             is what we need for the `boundary` argument.
 
-            ::
+            .. code:: python
+
                 import cartoframes
                 cc = cartoframes.CartoContext('base url', 'api key')
                 au_boundaries = cc.data_boundaries(region='Australia')
@@ -1070,7 +1071,8 @@ class CartoContext(object):
 
             Get the boundaries for Australian Postal Areas and map them.
 
-            ::
+            .. code:: python
+
                 from cartoframes import Layer
                 au_postal_areas = cc.data_boundaries(boundary='au.geo.POA')
                 cc.write(au_postal_areas, 'au_postal_areas')
@@ -1080,7 +1082,8 @@ class CartoContext(object):
             income from the US census. Without limiting the metadata, we get
             median income measures for each census in the Data Observatory.
 
-            ::
+            .. code:: python
+
                 cc = cartoframes.CartoContext('base url', 'api key')
                 # will return DataFrame with columns `the_geom` and `geom_ref`
                 tracts = cc.data_boundaries(
