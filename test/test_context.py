@@ -865,6 +865,40 @@ class TestCartoContext(unittest.TestCase):
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
 
+    def test_data_boundaries(self):
+        """context.CartoContext.data_boundaries"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # all boundary metadata
+        boundary_meta = cc.data_boundaries()
+        self.assertTrue(boundary_meta.shape[0] > 0,
+                        msg='has non-zero number of boundaries')
+        meta_cols = set(('geom_id', 'geom_tags', 'geom_type', ))
+        self.assertTrue(meta_cols & set(boundary_meta.columns))
+
+        # boundary metadata in a region
+        boundary_meta = cc.data_boundaries(region=self.test_data_table)
+        self.assertTrue(meta_cols & set(boundary_meta.columns))
+        self.assertTrue(boundary_meta.shape[0] > 0,
+                        msg='has non-zero number of boundaries')
+
+        #  boundaries for world
+        boundaries = cc.data_boundaries(boundary='us.census.tiger.state')
+        self.assertTrue(boundaries.shape[0] > 0)
+        self.assertEqual(boundaries.shape[1], 2)
+        self.assertSetEqual(set(('the_geom', 'geom_refs', )),
+                            set(boundaries.columns))
+
+        # boundaries for region
+        boundaries = cc.data_boundaries(
+            boundary='us.census.tiger.state',
+            region=self.test_data_table)
+        self.assertTrue(boundaries.shape[0] > 0)
+        self.assertEqual(boundaries.shape[1], 2)
+        self.assertSetEqual(set(('the_geom', 'geom_refs', )),
+                            set(boundaries.columns))
+
     def test_data_discovery(self):
         """context.CartoContext.data_discovery"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -938,8 +972,8 @@ class TestCartoContext(unittest.TestCase):
         self.assertSetEqual(set(('median_income_2011_2015', )),
                             set(data.columns) - origcols)
 
-        with self.assertRaises(NotImplementedError):
-            cc.data(self.test_data_table, meta, how='geom_ref')
+        # with self.assertRaises(NotImplementedError):
+        #     cc.data(self.test_data_table, meta, how='geom_ref')
 
         with self.assertRaises(ValueError, msg='no measures'):
             meta = cc.data_discovery('United States', keywords='not a measure')
