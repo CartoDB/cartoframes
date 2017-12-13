@@ -1047,9 +1047,86 @@ class CartoContext(object):
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
                         timespan=None):
         """
-        Returns all available boundaries if neither `region` or `boundary` are
-          passed
-        Returns
+        Find all boundaries available for the world or a `region`. If
+        `boundary` is specified, get all available boundary polygons for the
+        region specified (if any). This method is espeically useful for getting
+        boundaries for a region and, with `CartoContext.data` and
+        `CartoContext.data_discovery`, getting tables of geometries and the
+        corresponding raw measures. For example, if you want to analyze
+        how median income has changed in a region (see examples section for
+        more).
+
+        Examples:
+
+            Find all boundaries available for Australia. The columns
+            `geom_name` gives us the name of the boundary and `geom_id`
+            is what we need for the `boundary` argument.
+
+            ::
+                import cartoframes
+                cc = cartoframes.CartoContext('base url', 'api key')
+                au_boundaries = cc.data_boundaries(region='Australia')
+                au_boundaries[['geom_name', 'geom_id']]
+
+            Get the boundaries for Australian Postal Areas and map them.
+
+            ::
+                from cartoframes import Layer
+                au_postal_areas = cc.data_boundaries(boundary='au.geo.POA')
+                cc.write(au_postal_areas, 'au_postal_areas')
+                cc.map(Layer('au_postal_areas'))
+
+            Get census tracts around Idaho Falls, Idaho, USA, and add median
+            income from the US census. Without limiting the metadata, we get
+            median income measures for each census in the Data Observatory.
+
+            ::
+                cc = cartoframes.CartoContext('base url', 'api key')
+                # will return DataFrame with columns `the_geom` and `geom_ref`
+                tracts = cc.data_boundaries(
+                    boundary='us.census.tiger.census_tract',
+                    region=[-112.096642,43.429932,-111.974213,43.553539])
+                # write geometries to a CARTO table
+                cc.write(tracts, 'idaho_falls_tracts')
+                # gather metadata needed to look up median income
+                median_income_meta = cc.data_discovery(
+                    'idaho_falls_tracts',
+                    keywords='median income',
+                    boundaries='us.census.tiger.census_tract')
+                # get median income data and original table as new dataframe
+                idaho_falls_income = cc.data(
+                    'idaho_falls_tracts',
+                    median_income_meta)
+                # overwrite existing table with newly-enriched dataframe
+                cc.write(idaho_falls_income,
+                         'idaho_falls_tracts',
+                         overwrite=True)
+
+        Args:
+            boundary (str, optional): Boundary identifier for the boundaries
+              that are of interest. For example, US census tracts have a
+              boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+              Municipios have an ID of ``br.geo.municipios``. Find IDs by
+              running `CartoContext.data_boundaries` without any arguments,
+              or by looking in the `Data Observatory catalog
+              <http://cartodb.github.io/bigmetadata/>`__.
+            region (str, optional): Region where boundary information or,
+              if `boundary` is specified, boundary polygons are of interest.
+              `region` can be one of the following:
+
+                - table name (str): Name of a table in user's CARTO account
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+
+        Returns:
+            pandas.DataFrame: If `boundary` is specified, then all available
+            boundaries and accompanying `geom_refs` in `region` (or the world
+            if `region` is ``None`` or not specified) are returned. If
+            `boundary` is not specified, then a DataFrame of all available
+            boundaries in `region` (or the world if `region` is ``None``)
         """
         # TODO: create a function out of this?
         if (isinstance(region, collections.Iterable)
@@ -1065,22 +1142,33 @@ class CartoContext(object):
             bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
                 *region)
         elif isinstance(region, str):
-            geom_type = self._geom_type(region)
-            if geom_type in ('point', 'line', ):
-                bounds = ('(SELECT ST_ConvexHull(ST_Collect(the_geom)) '
-                          'FROM {table})').format(table=region)
-            else:
-                bounds = ('(SELECT ST_Union(the_geom) '
-                          'FROM {table})').format(table=region)
+            # see if it's a table
+            try:
+                geom_type = self._geom_type(region)
+                if geom_type in ('point', 'line', ):
+                    bounds = ('(SELECT ST_ConvexHull(ST_Collect(the_geom)) '
+                              'FROM {table})').format(table=region)
+                else:
+                    bounds = ('(SELECT ST_Union(the_geom) '
+                              'FROM {table})').format(table=region)
+            except CartoException:
+                # see if it's a Data Obs region tag
+                regionsearch = 'WHERE "geom_tags"::text ilike \'%{}%\''.format(
+                    get_countrytag(region))
+                bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
+
         elif region is None:
-            bounds = ('ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)')
+            bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
         else:
             raise ValueError('`region` must be a str, a list of two lng/lat '
                              'pairs, or ``None`` (which defaults to the '
                              'world)')
         if boundary is None:
+            regionsearch = locals().get('regionsearch')
             query = ('SELECT * FROM OBS_GetAvailableGeometries('
-                     '{bounds})').format(bounds=bounds)
+                     '{bounds}) {regionsearch}').format(
+                         bounds=bounds,
+                         regionsearch=regionsearch if regionsearch else '')
             return self.query(query)
 
         query = utils.minify_sql((
@@ -1226,7 +1314,7 @@ class CartoContext(object):
             try:
                 # see if it's a DO region
                 countrytag = '\'{{{0}}}\''.format(
-                    get_countrytag(region.lower()))
+                    get_countrytag(region))
                 boundary = ('SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, '
                             '85.0, 4326) AS env, 500::int AS cnt')
             except ValueError as regiontag_err:
