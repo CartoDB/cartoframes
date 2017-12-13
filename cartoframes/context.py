@@ -213,16 +213,22 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
-            kwargs: Keyword arguments from CARTO's Import API. See the `params
-                listed in the documentation
-                <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
-                for more information. For example, when using
-                `content_guessing='true'`, a column named 'countries' with
-                country names will be used to generate polygons for each
-                country. To avoid unintended consequences, avoid `file`, `url`,
-                and other similar arguments. Note: Combining `privacy` with
-                `overwrite` (defined above) does not currently update the
-                privacy of a dataset: https://github.com/CartoDB/cartoframes/issues/252.
+            kwargs: Keyword arguments to control write operations. Options are:
+
+                - `compression` to set compression for files sent to CARTO.
+                  This will cause write speedups depending on the dataset.
+                  Options are ``None`` (no compression, default) or ``gzip``.
+                - Some arguments from CARTO's Import API. See the `params
+                  listed in the documentation
+                  <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
+                  for more information. For example, when using
+                  `content_guessing='true'`, a column named 'countries' with
+                  country names will be used to generate polygons for each
+                  country. To avoid unintended consequences, avoid `file`,
+                  `url`, and other similar arguments. Note: Combining `privacy`
+                  with `overwrite` (defined above) does not currently update
+                  the privacy of a dataset if it already exists:
+                  https://github.com/CartoDB/cartoframes/issues/252.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
@@ -459,7 +465,11 @@ class CartoContext(object):
             """removes temporary file"""
             os.remove(filepath)
 
-        tempfile = os.path.join(temp_dir, '{}.csv'.format(table_name))
+        file_name = '{table_name}.{ext}'.format(
+            table_name=table_name,
+            ext='csv.gz' if kwargs.get('compression') else 'csv')
+        tempfile = os.path.join(temp_dir, file_name)
+
         self._debug_print(tempfile=tempfile)
         df.drop(labels=[geom_col], axis=1, errors='ignore')\
             .to_csv(
@@ -467,7 +477,8 @@ class CartoContext(object):
                 na_rep='',
                 header=pgcolnames,
                 index=False,
-                encoding='utf-8')
+                encoding='utf-8',
+                compression='gzip' if kwargs.get('compression') else None)
 
         with open(tempfile, 'rb') as f:
             params = {'type_guessing': False}
