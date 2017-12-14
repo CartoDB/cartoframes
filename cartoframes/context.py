@@ -1187,7 +1187,7 @@ class CartoContext(object):
         return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
-                       boundaries=None):
+                       boundaries=None, include_quantiles=False):
         """Discover Data Observatory measures. This method returns the full
         Data Observatory metadata model for each measure or measures that
         match the conditions from the inputs. The full metadata in each row
@@ -1232,8 +1232,8 @@ class CartoContext(object):
             `time` filters is important for getting a manageable metadata
             set. Besides there being a large number of measures in the DO, a
             metadata response has acceptable combinations of measures with
-            demonimators (normalization and density), the same measure from
-            other years, and quantiles measurements.
+            demonimators (normalization and density), and the same measure from
+            other years.
 
             For example, setting the region to be United States counties with
             no filter values set will result in many thousands of measures.
@@ -1290,6 +1290,11 @@ class CartoContext(object):
               boundaries that specify the measure resolution. See the
               boundaries section for each region in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
+            include_quantiles (bool, optional): Include quantiles calculations
+              which are a calculation of how a measure compares to all measures
+              in the full dataset. Defaults to ``False``. If ``True``,
+              quantiles columns will be returned for each column which has it
+              pre-calculated.
 
         Returns:
             pandas.DataFrame: A dataframe of the complete metadata model for
@@ -1297,45 +1302,35 @@ class CartoContext(object):
 
         Raises:
             ValueError: If `region` is a :obj:`list` and does not consist of
-              four elements, or if `region` is neither an acceptable region
-              nor a table in user account.
+              four elements, or if `region` is not an acceptable region
+            CartoException: If `region` is not a table in user account
         """
-        if (isinstance(region, collections.Iterable)
-                and not isinstance(region, str)):
-            # TODO: should this also check to see if each item is a number?
-            if len(region) != 4:
-                raise ValueError('`region` should be a list of the geographic '
-                                 'bounds of a region in the following order: '
-                                 'western longitude, southern latitude, '
-                                 'eastern longitude, and northern latitude. '
-                                 'For example, Switerland fits in '
-                                 '``[5.9559111595,45.8179931641,10.4920501709,'
-                                 '47.808380127]``.')
-            boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
-                        'env, 500::int AS cnt'.format(*region))
-        elif isinstance(region, str):
+        if isinstance(region, str):
             try:
-                # see if it's a DO region
+                # see if it's a DO region, nest in {}
                 countrytag = '\'{{{0}}}\''.format(
                     get_countrytag(region))
                 boundary = ('SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, '
                             '85.0, 4326) AS env, 500::int AS cnt')
-            except ValueError as regiontag_err:
-                try:
-                    # TODO: make this work for general queries
-                    # see if it's a table
-                    self.sql_client.send('''
-                        EXPLAIN SELECT * FROM {0} LIMIT 0
-                    '''.format(region).strip())
-                    boundary = ('SELECT ST_SetSRID(ST_Extent(the_geom), '
-                                '4326) AS env, count(*)::int AS cnt '
-                                'FROM {table_name}').format(
-                                    table_name=region)
-                except CartoException:
-                    raise ValueError('`{0}` is neither a table in user '
-                                     'account nor an available Data '
-                                     'Observatory region. {1}'.format(
-                                         region, regiontag_err))
+            except ValueError:
+                # TODO: make this work for general queries
+                # see if it's a table
+                self.sql_client.send(
+                    'EXPLAIN SELECT * FROM {}'.format(region))
+                boundary = (
+                    'SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, '
+                    'count(*)::int AS cnt FROM {table_name}').format(
+                        table_name=region)
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    '`region` should be a list of the geographic bounds of a '
+                    'region in the following order: western longitude, '
+                    'southern latitude, eastern longitude, and northern '
+                    'latitude. For example, Switerland fits in '
+                    '``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``.')
+            boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
+                        'env, 500::int AS cnt'.format(*region))
 
         if locals().get('countrytag') is None:
             countrytag = 'null'
@@ -1344,32 +1339,27 @@ class CartoContext(object):
             if isinstance(keywords, str):
                 keywords = [keywords, ]
             kwsearch = ' OR '.join(
-                ('numer_description ilike \'%{kw}%\' OR '
-                 'numer_name ilike \'%{kw}%\'').format(kw=kw)
+                ('numer_description ILIKE \'%{kw}%\' OR '
+                 'numer_name ILIKE \'%{kw}%\'').format(kw=kw)
                 for kw in keywords)
             kwsearch = '({})'.format(kwsearch)
 
         if regex:
-            regexsearch = ('(numer_description ~* {regex} OR '
-                           'numer_name ~* {regex})').format(
-                               regex=utils.pgquote(regex))
+            regexsearch = ('(numer_description ~* {regex} OR numer_name '
+                           '~* {regex})').format(regex=utils.pgquote(regex))
 
         if keywords or regex:
             subjectfilters = '{kw} {op} {regex}'.format(
                 kw=kwsearch if keywords else '',
                 op='OR' if (keywords and regex) else '',
-                regex=regexsearch if regex else '')
+                regex=regexsearch if regex else '').strip()
         else:
             subjectfilters = ''
 
-        if isinstance(time, str):
+        if isinstance(time, str) or time is None:
             time = [time, ]
-        elif time is None:
-            time = [None, ]
-        if isinstance(boundaries, str):
+        if isinstance(boundaries, str) or boundaries is None:
             boundaries = [boundaries, ]
-        elif boundaries is None:
-            boundaries = [None, ]
 
         if all(time) and all(boundaries):
             bt_filters = 'valid_geom AND valid_timespan'
@@ -1379,12 +1369,15 @@ class CartoContext(object):
             bt_filters = ''
 
         if bt_filters and subjectfilters:
-            filters = 'WHERE ({s}) AND ({bt})'.format(s=subjectfilters,
-                                                      bt=bt_filters)
+            filters = 'WHERE ({s}) AND ({bt})'.format(
+                s=subjectfilters, bt=bt_filters)
         elif bt_filters or subjectfilters:
             filters = 'WHERE {f}'.format(f=subjectfilters or bt_filters)
         else:
             filters = ''
+
+        quantiles = ('WHERE numer_aggregate <> \'quantile\''
+                     if not include_quantiles else '')
 
         numer_query = utils.minify_sql((
             'SELECT',
@@ -1396,12 +1389,12 @@ class CartoContext(object):
             '    OBS_GetAvailableNumerators(',
             '        (SELECT env FROM envelope),',
             '        {countrytag},',
-            '        null,',
+            '        null,',  # denom_id
             '        {geom_id},',
-            '        {timespan}',
-            '    )',
-            '{filters}', ))
+            '        {timespan})',
+            '{filters}', )).strip()
 
+        # query all numerators for all `time`, `boundaries`, and raw/derived
         numers = '\nUNION\n'.join(
             numer_query.format(
                 timespan=utils.pgquote(t),
@@ -1445,9 +1438,11 @@ class CartoContext(object):
             '    numer_type text, score numeric, score_rank numeric,',
             '    score_rownum numeric, suggested_name text,',
             '    target_area text, target_geoms text, timespan_rank numeric,',
-            '    timespan_rownum numeric)', )).format(
+            '    timespan_rownum numeric)',
+            '{quantiles}', )).format(
                 boundary=boundary,
-                numers=numers)
+                numers=numers,
+                quantiles=quantiles).strip()
         self._debug_print(query=query)
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])
