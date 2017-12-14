@@ -975,7 +975,7 @@ class TestCartoContext(unittest.TestCase):
                     nid,
                     '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CartoException):
             cc.data_discovery('non_existent_table_abcdefg')
 
         dd = cc.data_discovery('United States',
