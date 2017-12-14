@@ -1661,9 +1661,12 @@ class CartoContext(object):
 
     def _get_iframe_srcdoc(self, config, bounds, options, map_options):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
-            with open(os.path.join(os.path.dirname(__file__),
-                                   'assets/cartoframes.html'), 'r') as f:
-                self._srcdoc = f.read()
+            html_template = os.path.join(
+                os.path.dirname(__file__),
+                'assets',
+                'cartoframes.html')
+            with open(html_template, 'r') as html_file:
+                self._srcdoc = html_file.read()
 
         return (self._srcdoc
                 .replace('@@CONFIG@@', json.dumps(config))
