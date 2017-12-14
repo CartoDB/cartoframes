@@ -34,21 +34,27 @@ def get_scheme(scheme_info, scheme_attr):
         if scheme_info['provider'] in ('cartocolors', 'colorbrewer',
                                        'cmocean',):
             colors = getattr(
-                         getattr(
-                             getattr(
-                                 palettable,
-                                 scheme_info['provider']),
-                             scheme_info['type']),
-                         '{name}_{bins}_r'.format(**scheme_info))
+                getattr(
+                    getattr(
+                        palettable,
+                        scheme_info['provider']),
+                    scheme_info['type']),
+                '{name}_{bins}{reverse}'.format(
+                    name=scheme_info['name'],
+                    bins=scheme_info['bins'],
+                    reverse='_r' if scheme_info.get('reverse') else ''))
         # format is: palettable.<palette>
         # E.g., palettable.matplotlib
         elif scheme_info['provider'] in ('matplotlib', 'mycarta', 'tableau',
                                          'wesanderson',):
             colors = getattr(
-                         getattr(
-                             palettable,
-                             scheme_info['provider']),
-                         '{name}_{bins}_r'.format(**scheme_info))
+                getattr(
+                    palettable,
+                    scheme_info['provider']),
+                '{name}_{bins}{reverse}'.format(
+                    name=scheme_info['name'],
+                    bins=scheme_info['bins'],
+                    reverse='_r' if scheme_info.get('reverse') else ''))
         elif scheme_info['provider'] == 'cubehelix':
             # TODO: provide more guidance on how to do this
             raise ValueError('Use `cubehelix` to generate a custom scheme and '
@@ -79,7 +85,8 @@ def get_scheme_cartocss(column, scheme_info):
             name=scheme_info['name'])
     # TODO: remove this -- handle at a level higher up by providing colors
     elif scheme_info.get('provider') in ('cmocean', 'matplotlib', 'mycarta',
-                                         'tableau', 'wesanderson'):
+                                         'tableau', 'wesanderson',
+                                         'cartocolors', ):
         colors = get_scheme(scheme_info, 'hex_colors')
         color_scheme = '({})'.format(','.join(colors))
     else:
@@ -97,7 +104,7 @@ def get_scheme_cartocss(column, scheme_info):
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles,
-           provider=None, scheme_type=None):
+           provider=None, scheme_type=None, reverse=False):
     """Create a custom scheme.
 
     Args:
@@ -120,10 +127,11 @@ def custom(colors, bins=None, bin_method=BinMethod.quantiles,
         'bin_method': bin_method,
         'provider': provider,
         'type': scheme_type,
+        'reverse': reverse
     }
 
 
-def scheme(name, bins, bin_method, provider, scheme_type):
+def scheme(name, bins, bin_method, provider, scheme_type, reverse):
     """Return a custom scheme based on CARTOColors.
 
     Args:
@@ -154,165 +162,166 @@ def scheme(name, bins, bin_method, provider, scheme_type):
         'bin_method': bin_method,
         'provider': provider,
         'type': scheme_type,
+        'reverse': reverse,
     }
 
 
 # Get methods for CARTOColors schemes
-def burg(bins, bin_method=BinMethod.quantiles):
+def burg(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Burg quantitative scheme"""
-    return scheme('Burg', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Burg', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def burgYl(bins, bin_method=BinMethod.quantiles):
+def burgYl(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors BurgYl quantitative scheme"""
-    return scheme('BurgYl', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('BurgYl', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def redOr(bins, bin_method=BinMethod.quantiles):
+def redOr(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors RedOr quantitative scheme"""
-    return scheme('RedOr', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('RedOr', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def orYel(bins, bin_method=BinMethod.quantiles):
+def orYel(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors OrYel quantitative scheme"""
-    return scheme('OrYel', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('OrYel', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def peach(bins, bin_method=BinMethod.quantiles):
+def peach(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Peach quantitative scheme"""
-    return scheme('Peach', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Peach', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def pinkYl(bins, bin_method=BinMethod.quantiles):
+def pinkYl(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors PinkYl quantitative scheme"""
-    return scheme('PinkYl', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('PinkYl', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def mint(bins, bin_method=BinMethod.quantiles):
+def mint(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Mint quantitative scheme"""
-    return scheme('Mint', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Mint', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def bluGrn(bins, bin_method=BinMethod.quantiles):
+def bluGrn(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors BluGrn quantitative scheme"""
-    return scheme('BluGrn', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('BluGrn', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def darkMint(bins, bin_method=BinMethod.quantiles):
+def darkMint(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors DarkMint quantitative scheme"""
-    return scheme('DarkMint', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('DarkMint', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def emrld(bins, bin_method=BinMethod.quantiles):
+def emrld(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Emrld quantitative scheme"""
-    return scheme('Emrld', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Emrld', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def bluYl(bins, bin_method=BinMethod.quantiles):
+def bluYl(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors BluYl quantitative scheme"""
-    return scheme('BluYl', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('BluYl', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def teal(bins, bin_method=BinMethod.quantiles):
+def teal(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Teal quantitative scheme"""
-    return scheme('Teal', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Teal', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def tealGrn(bins, bin_method=BinMethod.quantiles):
+def tealGrn(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors TealGrn quantitative scheme"""
-    return scheme('TealGrn', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('TealGrn', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def purp(bins, bin_method=BinMethod.quantiles):
+def purp(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Purp quantitative scheme"""
-    return scheme('Purp', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Purp', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def purpOr(bins, bin_method=BinMethod.quantiles):
+def purpOr(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors PurpOr quantitative scheme"""
-    return scheme('PurpOr', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('PurpOr', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def sunset(bins, bin_method=BinMethod.quantiles):
+def sunset(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Sunset quantitative scheme"""
-    return scheme('Sunset', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Sunset', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def magenta(bins, bin_method=BinMethod.quantiles):
+def magenta(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Magenta quantitative scheme"""
-    return scheme('Magenta', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('Magenta', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def sunsetDark(bins, bin_method=BinMethod.quantiles):
+def sunsetDark(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors SunsetDark quantitative scheme"""
-    return scheme('SunsetDark', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('SunsetDark', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def brwnYl(bins, bin_method=BinMethod.quantiles):
+def brwnYl(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors BrwnYl quantitative scheme"""
-    return scheme('BrwnYl', bins, bin_method, 'cartocolors', 'sequential')
+    return scheme('BrwnYl', bins, bin_method, 'cartocolors', 'sequential', reverse)
 
 
-def armyRose(bins, bin_method=BinMethod.quantiles):
+def armyRose(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors ArmyRose divergent quantitative scheme"""
-    return scheme('ArmyRose', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('ArmyRose', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def fall(bins, bin_method=BinMethod.quantiles):
+def fall(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Fall divergent quantitative scheme"""
-    return scheme('Fall', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('Fall', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def geyser(bins, bin_method=BinMethod.quantiles):
+def geyser(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Geyser divergent quantitative scheme"""
-    return scheme('Geyser', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('Geyser', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def temps(bins, bin_method=BinMethod.quantiles):
+def temps(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Temps divergent quantitative scheme"""
-    return scheme('Temps', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('Temps', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def tealRose(bins, bin_method=BinMethod.quantiles):
+def tealRose(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors TealRose divergent quantitative scheme"""
-    return scheme('TealRose', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('TealRose', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def tropic(bins, bin_method=BinMethod.quantiles):
+def tropic(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Tropic divergent quantitative scheme"""
-    return scheme('Tropic', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('Tropic', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def earth(bins, bin_method=BinMethod.quantiles):
+def earth(bins, bin_method=BinMethod.quantiles, reverse=False):
     """CartoColors Earth divergent quantitative scheme"""
-    return scheme('Earth', bins, bin_method, 'cartocolors', 'divergent')
+    return scheme('Earth', bins, bin_method, 'cartocolors', 'divergent', reverse)
 
 
-def antique(bins, bin_method=BinMethod.category):
+def antique(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Antique qualitative scheme"""
-    return scheme('Antique', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Antique', bins, bin_method, 'cartocolors', 'qualitative', reverse)
 
 
-def bold(bins, bin_method=BinMethod.category):
+def bold(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Bold qualitative scheme"""
-    return scheme('Bold', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Bold', bins, bin_method, 'cartocolors', 'qualitative', reverse)
 
 
-def pastel(bins, bin_method=BinMethod.category):
+def pastel(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Pastel qualitative scheme"""
-    return scheme('Pastel', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Pastel', bins, bin_method, 'cartocolors', 'qualitative', reverse)
 
 
-def prism(bins, bin_method=BinMethod.category):
+def prism(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Prism qualitative scheme"""
-    return scheme('Prism', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Prism', bins, bin_method, 'cartocolors', 'qualitative', reverse)
 
 
-def safe(bins, bin_method=BinMethod.category):
+def safe(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Safe qualitative scheme"""
-    return scheme('Safe', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Safe', bins, bin_method, 'cartocolors', 'qualitative', reverse)
 
 
-def vivid(bins, bin_method=BinMethod.category):
+def vivid(bins, bin_method=BinMethod.category, reverse=False):
     """CartoColors Vivid qualitative scheme"""
-    return scheme('Vivid', bins, bin_method, 'cartocolors', 'qualitative')
+    return scheme('Vivid', bins, bin_method, 'cartocolors', 'qualitative', reverse)
