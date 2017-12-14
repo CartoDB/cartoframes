@@ -56,11 +56,9 @@ def get_countrytag(country):
         'u.s.': 'United States',
         'u.s.a.': 'United States'
     }
-    if country in norm_name:
-        return REGIONTAGS.get(norm_name.get(country))
+    if country is not None and country.lower() in norm_name:
+        return REGIONTAGS.get(norm_name.get(country.lower()))
     else:
-        raise ValueError('The available regions are {1}.'.format(
-                             country,
-                             ', '.join('\'{}\''.format(k)
-                                       for k in REGIONTAGS.keys())
-                         ))
+        raise ValueError(
+            'The available regions are {0}.'.format(
+                ', '.join('\'{}\''.format(k) for k in REGIONTAGS)))

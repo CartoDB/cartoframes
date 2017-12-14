@@ -157,162 +157,162 @@ def scheme(name, bins, bin_method, provider, scheme_type):
     }
 
 
-# Get methods for CARTOColor schemes
+# Get methods for CARTOColors schemes
 def burg(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Burg quantitative scheme"""
+    """CartoColors Burg quantitative scheme"""
     return scheme('Burg', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def burgYl(bins, bin_method=BinMethod.quantiles):
-    """CartoColor BurgYl quantitative scheme"""
+    """CartoColors BurgYl quantitative scheme"""
     return scheme('BurgYl', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def redOr(bins, bin_method=BinMethod.quantiles):
-    """CartoColor RedOr quantitative scheme"""
+    """CartoColors RedOr quantitative scheme"""
     return scheme('RedOr', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def orYel(bins, bin_method=BinMethod.quantiles):
-    """CartoColor OrYel quantitative scheme"""
+    """CartoColors OrYel quantitative scheme"""
     return scheme('OrYel', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def peach(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Peach quantitative scheme"""
+    """CartoColors Peach quantitative scheme"""
     return scheme('Peach', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def pinkYl(bins, bin_method=BinMethod.quantiles):
-    """CartoColor PinkYl quantitative scheme"""
+    """CartoColors PinkYl quantitative scheme"""
     return scheme('PinkYl', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def mint(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Mint quantitative scheme"""
+    """CartoColors Mint quantitative scheme"""
     return scheme('Mint', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def bluGrn(bins, bin_method=BinMethod.quantiles):
-    """CartoColor BluGrn quantitative scheme"""
+    """CartoColors BluGrn quantitative scheme"""
     return scheme('BluGrn', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def darkMint(bins, bin_method=BinMethod.quantiles):
-    """CartoColor DarkMint quantitative scheme"""
+    """CartoColors DarkMint quantitative scheme"""
     return scheme('DarkMint', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def emrld(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Emrld quantitative scheme"""
+    """CartoColors Emrld quantitative scheme"""
     return scheme('Emrld', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def bluYl(bins, bin_method=BinMethod.quantiles):
-    """CartoColor BluYl quantitative scheme"""
+    """CartoColors BluYl quantitative scheme"""
     return scheme('BluYl', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def teal(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Teal quantitative scheme"""
+    """CartoColors Teal quantitative scheme"""
     return scheme('Teal', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def tealGrn(bins, bin_method=BinMethod.quantiles):
-    """CartoColor TealGrn quantitative scheme"""
+    """CartoColors TealGrn quantitative scheme"""
     return scheme('TealGrn', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def purp(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Purp quantitative scheme"""
+    """CartoColors Purp quantitative scheme"""
     return scheme('Purp', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def purpOr(bins, bin_method=BinMethod.quantiles):
-    """CartoColor PurpOr quantitative scheme"""
+    """CartoColors PurpOr quantitative scheme"""
     return scheme('PurpOr', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def sunset(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Sunset quantitative scheme"""
+    """CartoColors Sunset quantitative scheme"""
     return scheme('Sunset', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def magenta(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Magenta quantitative scheme"""
+    """CartoColors Magenta quantitative scheme"""
     return scheme('Magenta', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def sunsetDark(bins, bin_method=BinMethod.quantiles):
-    """CartoColor SunsetDark quantitative scheme"""
+    """CartoColors SunsetDark quantitative scheme"""
     return scheme('SunsetDark', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def brwnYl(bins, bin_method=BinMethod.quantiles):
-    """CartoColor BrwnYl quantitative scheme"""
+    """CartoColors BrwnYl quantitative scheme"""
     return scheme('BrwnYl', bins, bin_method, 'cartocolors', 'sequential')
 
 
 def armyRose(bins, bin_method=BinMethod.quantiles):
-    """CartoColor ArmyRose divergent quantitative scheme"""
+    """CartoColors ArmyRose divergent quantitative scheme"""
     return scheme('ArmyRose', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def fall(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Fall divergent quantitative scheme"""
+    """CartoColors Fall divergent quantitative scheme"""
     return scheme('Fall', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def geyser(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Geyser divergent quantitative scheme"""
+    """CartoColors Geyser divergent quantitative scheme"""
     return scheme('Geyser', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def temps(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Temps divergent quantitative scheme"""
+    """CartoColors Temps divergent quantitative scheme"""
     return scheme('Temps', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def tealRose(bins, bin_method=BinMethod.quantiles):
-    """CartoColor TealRose divergent quantitative scheme"""
+    """CartoColors TealRose divergent quantitative scheme"""
     return scheme('TealRose', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def tropic(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Tropic divergent quantitative scheme"""
+    """CartoColors Tropic divergent quantitative scheme"""
     return scheme('Tropic', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def earth(bins, bin_method=BinMethod.quantiles):
-    """CartoColor Earth divergent quantitative scheme"""
+    """CartoColors Earth divergent quantitative scheme"""
     return scheme('Earth', bins, bin_method, 'cartocolors', 'divergent')
 
 
 def antique(bins, bin_method=BinMethod.category):
-    """CartoColor Antique qualitative scheme"""
+    """CartoColors Antique qualitative scheme"""
     return scheme('Antique', bins, bin_method, 'cartocolors', 'qualitative')
 
 
 def bold(bins, bin_method=BinMethod.category):
-    """CartoColor Bold qualitative scheme"""
+    """CartoColors Bold qualitative scheme"""
     return scheme('Bold', bins, bin_method, 'cartocolors', 'qualitative')
 
 
 def pastel(bins, bin_method=BinMethod.category):
-    """CartoColor Pastel qualitative scheme"""
+    """CartoColors Pastel qualitative scheme"""
     return scheme('Pastel', bins, bin_method, 'cartocolors', 'qualitative')
 
 
 def prism(bins, bin_method=BinMethod.category):
-    """CartoColor Prism qualitative scheme"""
+    """CartoColors Prism qualitative scheme"""
     return scheme('Prism', bins, bin_method, 'cartocolors', 'qualitative')
 
 
 def safe(bins, bin_method=BinMethod.category):
-    """CartoColor Safe qualitative scheme"""
+    """CartoColors Safe qualitative scheme"""
     return scheme('Safe', bins, bin_method, 'cartocolors', 'qualitative')
 
 
 def vivid(bins, bin_method=BinMethod.category):
-    """CartoColor Vivid qualitative scheme"""
+    """CartoColors Vivid qualitative scheme"""
     return scheme('Vivid', bins, bin_method, 'cartocolors', 'qualitative')

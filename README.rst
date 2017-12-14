@@ -7,7 +7,7 @@ CARTOframes
 .. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
     :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
 .. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/CartoDB/cartoframes/binder-examples?filepath=examples
+    :target: https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples
 
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
@@ -24,7 +24,7 @@ Features
 
 More info
 
-- Complete documentation: https://cartodb.github.io/cartoframes
+- Complete documentation: http://cartoframes.readthedocs.io/en/latest/
 - Source code: https://github.com/CartoDB/cartoframes
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
@@ -45,7 +45,7 @@ It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyte
 Virtual Environment
 -------------------
 
-To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
+To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide.readthedocs.io/en/latest/dev/virtualenvs/>`__:
 
 .. code:: bash
 
@@ -114,6 +114,12 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                                 'scheme': styling.vivid(10)})],
            interactive=True)
 
+.. note::
+    Legends are under active development. See
+    https://github.com/CartoDB/cartoframes/pull/184 for more information. To
+    try out that code, install `cartoframes` as:
+
+        `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
 Augment from Data Observatory
 -----------------------------

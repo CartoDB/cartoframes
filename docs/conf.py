@@ -21,9 +21,9 @@ import subprocess
 import os
 import sys
 cur_dir = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, os.path.join(cur_dir, '..', '..', 'cartoframes'))
-from cartoframes.__version__ import __version__ as cf_version
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.join(cur_dir, '..', 'cartoframes'))
+from cartoframes.__version__ import __version__ as cf_version  # noqa
+# sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- General configuration ------------------------------------------------
@@ -87,7 +87,8 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -141,7 +142,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cartoframes', 'cartoframes Documentation',
+    (master_doc, 'cartoframes', 'CARTOframes Documentation',
      [author], 1)
 ]
 
@@ -160,12 +161,15 @@ texinfo_documents = [
 
 def run_apidoc(_):
     cur_dir = os.path.abspath(os.path.dirname(__file__))
-    module = os.path.join(cur_dir, '..', '..', 'cartoframes')
+    module = os.path.join(cur_dir, '..', 'cartoframes')
     cmd_path = 'sphinx-apidoc'
     if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
         # If we are, assemble the path manually
-        cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+        cmd_path = os.path.abspath(os.path.join(sys.prefix,
+                                                'bin',
+                                                'sphinx-apidoc'))
     subprocess.check_call([cmd_path, '-e', '-o', cur_dir, module, '--force'])
+
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)

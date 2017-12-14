@@ -17,7 +17,7 @@ def cssify(css_dict):
             css += ' {field}: {field_value};'.format(field=field,
                                                      field_value=field_value)
         css += '} '
-    return css
+    return css.strip()
 
 
 def normalize_colnames(columns):
@@ -84,9 +84,14 @@ def importify_params(param_arg):
 
 def join_url(*parts):
     """join parts of URL into complete url"""
-    return '/'.join(s.strip('/') for s in parts)
+    return '/'.join(str(s).strip('/') for s in parts)
 
 
 def minify_sql(lines):
     """eliminate whitespace in sql queries"""
     return '\n'.join(line.strip() for line in lines)
+
+
+def pgquote(string):
+    """single-quotes a string if not None, else returns null"""
+    return '\'{}\''.format(string) if string else 'null'
