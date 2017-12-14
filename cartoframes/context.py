@@ -1187,7 +1187,7 @@ class CartoContext(object):
         return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
-                       boundaries=None):
+                       boundaries=None, include_quantiles=False):
         """Discover Data Observatory measures. This method returns the full
         Data Observatory metadata model for each measure or measures that
         match the conditions from the inputs. The full metadata in each row
@@ -1290,6 +1290,11 @@ class CartoContext(object):
               boundaries that specify the measure resolution. See the
               boundaries section for each region in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
+            include_quantiles (bool, optional): Include quantiles calculations
+              which are a calculation of how a measure compares to all measures
+              in the full dataset. Defaults to ``False``. If ``True``,
+              quantiles columns will be returned for each column which has it
+              pre-calculated.
 
         Returns:
             pandas.DataFrame: A dataframe of the complete metadata model for
@@ -1386,6 +1391,11 @@ class CartoContext(object):
         else:
             filters = ''
 
+        if not include_quantiles:
+            quantiles = 'WHERE numer_aggregate <> \'quantile\''
+        else:
+            quantiles = ''
+
         numer_query = utils.minify_sql((
             'SELECT',
             '    numer_id,',
@@ -1445,9 +1455,11 @@ class CartoContext(object):
             '    numer_type text, score numeric, score_rank numeric,',
             '    score_rownum numeric, suggested_name text,',
             '    target_area text, target_geoms text, timespan_rank numeric,',
-            '    timespan_rownum numeric)', )).format(
+            '    timespan_rownum numeric)',
+            '{quantiles}', )).format(
                 boundary=boundary,
-                numers=numers)
+                numers=numers,
+                quantiles=quantiles)
         self._debug_print(query=query)
         resp = self.sql_client.send(query)
         return pd.DataFrame(resp['rows'])

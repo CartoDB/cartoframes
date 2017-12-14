@@ -983,6 +983,24 @@ class TestCartoContext(unittest.TestCase):
                                time=('2006', '2010', ))
         self.assertTrue(dd.shape[0] >= 1)
 
+        poverty = cc.data_discovery(
+            'United States',
+            boundaries='us.census.tiger.census_tract',
+            keywords=['poverty status', ],
+            time='2011 - 2015',
+            include_quantiles=False)
+        df_quantiles = poverty[poverty.numer_aggregate == 'quantile']
+        self.assertEqual(df_quantiles.shape[0], 0)
+
+        poverty = cc.data_discovery(
+            'United States',
+            boundaries='us.census.tiger.census_tract',
+            keywords=['poverty status', ],
+            time='2011 - 2015',
+            include_quantiles=True)
+        df_quantiles = poverty[poverty.numer_aggregate == 'quantile']
+        self.assertTrue(df_quantiles.shape[0] > 0)
+
     def test_data(self):
         """context.CartoContext.data"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
