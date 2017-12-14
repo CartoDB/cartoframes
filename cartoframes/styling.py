@@ -5,7 +5,7 @@ in its `GitHub repository <https://github.com/Carto-color/>`__.
     :width: 700px
     :alt: CARTOColors
 """  # noqa
-
+import collections
 
 class BinMethod:
     """Data classification methods used for the styling of data on maps.
@@ -31,14 +31,19 @@ def get_scheme_cartocss(column, scheme_info):
     else:
         color_scheme = 'cartocolor({})'.format(scheme_info['name'])
     bin_method = scheme_info['bin_method']
-    return ('ramp([{column}], {color_scheme}, '
+    if not isinstance(scheme_info['bins'], int):
+        bins = ','.join(str(i) for i in scheme_info['bins'])
+    else:
+        bins = scheme_info['bins']
+    ramp = ('ramp([{column}], {color_scheme}, '
             '{bin_method}({bins}){comparison})').format(
                 column=column,
                 color_scheme=color_scheme,
                 bin_method=bin_method,
-                bins=scheme_info['bins'],
-                comparison=('' if bin_method == 'category' else ', <=')
-            )
+                bins=bins,
+                comparison=('' if bin_method == 'category' else ', <='))
+    print(ramp)
+    return ramp
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles):
@@ -78,7 +83,8 @@ def scheme(name, bins, bin_method):
     return {
         'name': name,
         'bins': bins,
-        'bin_method': bin_method,
+        'bin_method': (bin_method if not isinstance(bins, collections.Iterable)
+                       else ''),
     }
 
 

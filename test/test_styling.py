@@ -106,11 +106,17 @@ class TestColorScheme(unittest.TestCase):
                          'ramp([acadia], cartocolor(Purp), quantiles(4), <=)')
         # test on custom
         self.assertEqual(
-                get_scheme_cartocss('acadia',
-                                    styling.custom(('#FFF', '#888', '#000'),
-                                                   bins=3,
-                                                   bin_method='equal')),
-                'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
+            get_scheme_cartocss('acadia',
+                                styling.custom(('#FFF', '#888', '#000'),
+                                               bins=3,
+                                               bin_method='equal')),
+            'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
+
+        # test with non-int quantification
+        self.assertEqual(
+            get_scheme_cartocss('acadia',
+                                styling.sunset([1, 2, 3])),
+            'ramp([acadia], cartocolor(Sunset), (1,2,3), <=)')
 
     def test_scheme(self):
         """styling.scheme"""
