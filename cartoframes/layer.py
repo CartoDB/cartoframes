@@ -242,6 +242,8 @@ class QueryLayer(AbstractLayer):
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
+        self.cartocss = None
+        self.torque_cartocss = None
 
         # TODO: move these if/else branches to individual methods
         # color, scheme = self._get_colorscheme()
@@ -360,11 +362,10 @@ class QueryLayer(AbstractLayer):
             elif self.style_cols[self.color] in ('number', ):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, text, or '
-                                 'boolean.'.format(
-                                     col=self.color,
-                                     type=self.style_cols[self.color]))
+                raise ValueError(
+                    'Cannot style column `{col}` of type `{type}`. It must be '
+                    'numeric, text, or boolean.'.format(
+                        col=self.color, type=self.style_cols[self.color]))
 
         if self.time:
             # validate time column information
@@ -407,11 +408,10 @@ class QueryLayer(AbstractLayer):
                 ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
-                        'bins': ','.join(str(i) for i in range(1, 11)),
-                        'name': (self.scheme.get('name') if self.scheme
-                                 else 'Bold'),
-                        'bin_method': '',
-                        }
+                    'bins': ','.join(str(i) for i in range(1, 11)),
+                    'name': (self.scheme.get('name') if self.scheme
+                             else 'Bold'),
+                    'bin_method': '', }
             elif (self.color in self.style_cols and
                   self.style_cols[self.color] in ('number', )):
                 self.query = ' '.join([
@@ -421,7 +421,7 @@ class QueryLayer(AbstractLayer):
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(
-                        method=method)
+                    method=method)
             self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
@@ -456,8 +456,8 @@ class QueryLayer(AbstractLayer):
 
         if self.scheme:
             color_style = get_scheme_cartocss(
-                    'value' if has_time else self.color,
-                    self.scheme)
+                'value' if has_time else self.color,
+                self.scheme)
         else:
             color_style = self.color
 
@@ -481,14 +481,14 @@ class QueryLayer(AbstractLayer):
                     '#layer[{} = null]'.format(self.color): {
                         'marker-fill': '#666'}
                     })
-            for t in range(1, self.time['trails'] + 1):
+            for trail_num in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({
-                        '#layer[frame-offset={}]'.format(t): {
-                            'marker-width': size_style * (1.0 + t * 0.3),
-                            'marker-opacity': 0.9 / 2.0**t,
-                        }
-                    })
+                    '#layer[frame-offset={}]'.format(trail_num): {
+                        'marker-width': size_style * (1.0 + trail_num * 0.3),
+                        'marker-opacity': 0.9 / 2.0**trail_num,
+                    }
+                })
                 css += trail_temp
             return css
         else:

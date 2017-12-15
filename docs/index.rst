@@ -28,6 +28,7 @@ Map Styling Functions
 ---------------------
 .. automodule:: styling
     :members:
+    :member-order: bysource
 
 BatchJobStatus
 --------------
