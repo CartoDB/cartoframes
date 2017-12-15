@@ -13,6 +13,7 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
@@ -325,6 +326,9 @@ class TestCartoContext(unittest.TestCase):
         cc.write(df, self.test_write_table, overwrite=True, privacy='public')
         dataset = ds_manager.get(self.test_write_table)
         self.assertEqual(dataset.privacy.lower(), 'public')
+
+        privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
+        self.assertIsNone(privacy)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):
