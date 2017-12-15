@@ -18,6 +18,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
+from pyrestcli.exceptions import NotFoundException
 
 from cartoframes.credentials import Credentials
 from cartoframes.dataobs import get_countrytag
@@ -249,6 +250,11 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
+        elif kwargs.get('privacy') is None:
+            # get privacy so it's not overwritten on write
+            privacy = self._get_privacy(table_name)
+            if privacy:
+                kwargs['privacy'] = privacy
 
         # issue warning if the index is anything but the pandas default
         #  range index
@@ -314,6 +320,15 @@ class CartoContext(object):
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
                                      final_table_name)))
+
+    def _get_privacy(self, table_name):
+        """gets current privacy of a table"""
+        ds_manager = DatasetManager(self.auth_client)
+        try:
+            dataset = ds_manager.get(table_name)
+            return dataset.privacy.lower()
+        except NotFoundException:
+            return None
 
     def _update_privacy(self, table_name, privacy):
         """Updates the privacy of a dataset"""
