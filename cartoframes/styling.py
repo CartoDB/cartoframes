@@ -16,12 +16,22 @@ class BinMethod:
         headtails (str): Head/Tails classification for quantitative data
         equal (str): Equal Interval classification for quantitative data
         category (str): Category classification for qualitative data
+        mapping (dict): The TurboCarto mappings
     """
     quantiles = 'quantiles'
     jenks = 'jenks'
     headtails = 'headtails'
     equal = 'equal'
     category = 'category'
+
+    # Mappings: https://github.com/CartoDB/turbo-carto/#mappings-default-values
+    mapping = {
+        quantiles: '>',
+        jenks: '>',
+        headtails: '<',
+        equal: '>',
+        category: '=',
+    }
 
 
 def get_scheme_cartocss(column, scheme_info):
@@ -35,13 +45,14 @@ def get_scheme_cartocss(column, scheme_info):
         bins = ','.join(str(i) for i in scheme_info['bins'])
     else:
         bins = scheme_info['bins']
+    comparison = ', {}'.format(BinMethod.mapping.get(bin_method, '>='))
     ramp = ('ramp([{column}], {color_scheme}, '
             '{bin_method}({bins}){comparison})').format(
                 column=column,
                 color_scheme=color_scheme,
                 bin_method=bin_method,
                 bins=bins,
-                comparison=('' if bin_method == 'category' else ', <='))
+                comparison=comparison)
     print(ramp)
     return ramp
 
