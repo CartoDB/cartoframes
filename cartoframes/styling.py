@@ -53,7 +53,6 @@ def get_scheme_cartocss(column, scheme_info):
                 bin_method=bin_method,
                 bins=bins,
                 comparison=comparison)
-    print(ramp)
     return ramp
 
 

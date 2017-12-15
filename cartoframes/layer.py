@@ -362,11 +362,10 @@ class QueryLayer(AbstractLayer):
             elif self.style_cols[self.color] in ('number', ):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, text, or '
-                                 'boolean.'.format(
-                                     col=self.color,
-                                     type=self.style_cols[self.color]))
+                raise ValueError(
+                    'Cannot style column `{col}` of type `{type}`. It must be '
+                    'numeric, text, or boolean.'.format(
+                        col=self.color, type=self.style_cols[self.color]))
 
         if self.time:
             # validate time column information
