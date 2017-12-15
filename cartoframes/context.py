@@ -1045,7 +1045,7 @@ class CartoContext(object):
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
-                        timespan=None):
+                        timespan=None, include_nonclipped=False):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
@@ -1099,7 +1099,8 @@ class CartoContext(object):
                 # get median income data and original table as new dataframe
                 idaho_falls_income = cc.data(
                     'idaho_falls_tracts',
-                    median_income_meta)
+                    median_income_meta,
+                    how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
                 cc.write(idaho_falls_income,
                          'idaho_falls_tracts',
@@ -1123,6 +1124,15 @@ class CartoContext(object):
                   southern latitude, eastern longitude, and northern latitude.
                   For example, Switzerland fits in
                   ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional): Specific timespan to get geometries from.
+              Defaults to use the most recent. See the Data Observatory catalog
+              for more information.
+            decode_geom (bool, optional): Whether to return the geometries as
+              Shapely objects or keep them encoded as EWKB strings. Defaults
+              to False.
+            include_nonclipped (bool, optional): Optionally include
+              non-shoreline-clipped boundaries. These boundaries are the raw
+              boundaries provided by, for example, US Census Tiger.
 
         Returns:
             pandas.DataFrame: If `boundary` is specified, then all available
