@@ -308,6 +308,24 @@ class TestCartoContext(unittest.TestCase):
                    the_geom_webmercator='geometry', cartodb_id='number')
         self.assertDictEqual(schema, ans)
 
+    @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
+    def test_write_privacy(self):
+        """context.CartoContext.write Updates the privacy of a dataset"""
+        from carto.datasets import DatasetManager
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        ds_manager = DatasetManager(self.auth_client)
+
+        df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
+        cc.write(df, self.test_write_table)
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'private')
+
+        df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
+        cc.write(df, self.test_write_table, overwrite=True, privacy='public')
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'public')
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):
         """context.CartoContext.write with non-default index"""
