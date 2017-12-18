@@ -20,7 +20,7 @@ def cssify(css_dict):
     return css.strip()
 
 
-def normalize_colnames(columns):
+def normalize_colnames(columns, warn=True):
     """SQL-normalize columns in `dataframe` to reflect changes made through
     CARTO's SQL API.
 
@@ -37,7 +37,7 @@ def normalize_colnames(columns):
             new=normalized_columns[i])
         for i, c in enumerate(columns)
         if c != normalized_columns[i]])
-    if changed_cols != '':
+    if changed_cols != '' and warn:
         tqdm.write('The following columns were changed in the CARTO '
                    'copy of this dataframe:\n{0}'.format(changed_cols))
 
