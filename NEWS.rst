@@ -4,6 +4,15 @@ Changelog
 0.5.0b9
 -------
 
+Released 2017-12-18
+
+Updates
+
+- Bug fix for overwrite / privacy used in conjunction
+
+0.5.0b9
+-------
+
 Released 2017-12-14
 
 Updates
