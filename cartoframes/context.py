@@ -1068,7 +1068,7 @@ class CartoContext(object):
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
-                        timespan=None):
+                        timespan=None, include_nonclipped=False):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
@@ -1122,7 +1122,8 @@ class CartoContext(object):
                 # get median income data and original table as new dataframe
                 idaho_falls_income = cc.data(
                     'idaho_falls_tracts',
-                    median_income_meta)
+                    median_income_meta,
+                    how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
                 cc.write(idaho_falls_income,
                          'idaho_falls_tracts',
@@ -1146,6 +1147,15 @@ class CartoContext(object):
                   southern latitude, eastern longitude, and northern latitude.
                   For example, Switzerland fits in
                   ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional): Specific timespan to get geometries from.
+              Defaults to use the most recent. See the Data Observatory catalog
+              for more information.
+            decode_geom (bool, optional): Whether to return the geometries as
+              Shapely objects or keep them encoded as EWKB strings. Defaults
+              to False.
+            include_nonclipped (bool, optional): Optionally include
+              non-shoreline-clipped boundaries. These boundaries are the raw
+              boundaries provided by, for example, US Census Tiger.
 
         Returns:
             pandas.DataFrame: If `boundary` is specified, then all available
@@ -1179,7 +1189,7 @@ class CartoContext(object):
                               'FROM {table})').format(table=region)
             except CartoException:
                 # see if it's a Data Obs region tag
-                regionsearch = 'WHERE "geom_tags"::text ilike \'%{}%\''.format(
+                regionsearch = '"geom_tags"::text ilike \'%{}%\''.format(
                     get_countrytag(region))
                 bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
 
@@ -1189,12 +1199,22 @@ class CartoContext(object):
             raise ValueError('`region` must be a str, a list of two lng/lat '
                              'pairs, or ``None`` (which defaults to the '
                              'world)')
+        if include_nonclipped:
+            clipped = None
+        else:
+            clipped = (r"(geom_id ~ '^us\.census\..*_clipped$' OR "
+                       r"geom_id !~ '^us\.census\..*')")
+
         if boundary is None:
             regionsearch = locals().get('regionsearch')
-            query = ('SELECT * FROM OBS_GetAvailableGeometries('
-                     '{bounds}) {regionsearch}').format(
-                         bounds=bounds,
-                         regionsearch=regionsearch if regionsearch else '')
+            filters = ' AND '.join(r for r in [regionsearch, clipped] if r)
+            query = utils.minify_sql((
+                'SELECT *',
+                'FROM OBS_GetAvailableGeometries({bounds})',
+                '{filters}')).format(
+                    bounds=bounds,
+                    filters='WHERE {}'.format(filters) if filters else ''
+                )
             return self.query(query)
 
         query = utils.minify_sql((
@@ -1203,10 +1223,9 @@ class CartoContext(object):
             '    {bounds},',
             '    {boundary},',
             '    {time})', )).format(
-                boundary=utils.pgquote(boundary),
                 bounds=bounds,
+                boundary=utils.pgquote(boundary),
                 time=utils.pgquote(timespan))
-        self._debug_print(query=query)
         return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
