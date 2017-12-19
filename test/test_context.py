@@ -924,6 +924,15 @@ class TestCartoContext(unittest.TestCase):
             self.assertSetEqual(set(('the_geom', 'geom_refs', )),
                                 set(geoms.columns))
 
+        # presence or lack of clipped boundaries
+        nonclipped = (True, False, )
+        for tf in nonclipped:
+            meta = cc.data_boundaries(include_nonclipped=tf)
+            self.assertEqual(
+                'us.census.tiger.state' in set(meta.geom_id),
+                tf
+            )
+ 
         with self.assertRaises(ValueError):
             cc.data_boundaries(region=[1, 2, 3])
 
