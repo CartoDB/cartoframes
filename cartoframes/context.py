@@ -1166,7 +1166,7 @@ class CartoContext(object):
                               'FROM {table})').format(table=region)
             except CartoException:
                 # see if it's a Data Obs region tag
-                regionsearch = 'WHERE "geom_tags"::text ilike \'%{}%\''.format(
+                regionsearch = '"geom_tags"::text ilike \'%{}%\''.format(
                     get_countrytag(region))
                 bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
 
@@ -1176,12 +1176,22 @@ class CartoContext(object):
             raise ValueError('`region` must be a str, a list of two lng/lat '
                              'pairs, or ``None`` (which defaults to the '
                              'world)')
+        if include_nonclipped:
+            clipped = None
+        else:
+            clipped = (r"(geom_id ~ '^us\.census\..*_clipped$' OR "
+                       r"geom_id !~ '^us\.census\..*')")
+
         if boundary is None:
             regionsearch = locals().get('regionsearch')
-            query = ('SELECT * FROM OBS_GetAvailableGeometries('
-                     '{bounds}) {regionsearch}').format(
-                         bounds=bounds,
-                         regionsearch=regionsearch if regionsearch else '')
+            filters = ' AND '.join(r for r in [regionsearch, clipped] if r)
+            query = utils.minify_sql((
+                'SELECT *',
+                'FROM OBS_GetAvailableGeometries({bounds})',
+                '{filters}')).format(
+                    bounds=bounds,
+                    filters='WHERE {}'.format(filters) if filters else ''
+                )
             return self.query(query)
 
         query = utils.minify_sql((
@@ -1190,10 +1200,9 @@ class CartoContext(object):
             '    {bounds},',
             '    {boundary},',
             '    {time})', )).format(
-                boundary=utils.pgquote(boundary),
                 bounds=bounds,
+                boundary=utils.pgquote(boundary),
                 time=utils.pgquote(timespan))
-        self._debug_print(query=query)
         return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
