@@ -13,6 +13,7 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
@@ -307,6 +308,27 @@ class TestCartoContext(unittest.TestCase):
                    boolvals='boolean', the_geom='geometry',
                    the_geom_webmercator='geometry', cartodb_id='number')
         self.assertDictEqual(schema, ans)
+
+    @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
+    def test_write_privacy(self):
+        """context.CartoContext.write Updates the privacy of a dataset"""
+        from carto.datasets import DatasetManager
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        ds_manager = DatasetManager(self.auth_client)
+
+        df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
+        cc.write(df, self.test_write_table)
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'private')
+
+        df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
+        cc.write(df, self.test_write_table, overwrite=True, privacy='public')
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'public')
+
+        privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
+        self.assertIsNone(privacy)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):

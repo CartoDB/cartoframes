@@ -17,6 +17,8 @@ from appdirs import user_cache_dir
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
+from carto.datasets import DatasetManager
+from pyrestcli.exceptions import NotFoundException
 
 from cartoframes.credentials import Credentials
 from cartoframes.dataobs import get_countrytag
@@ -165,9 +167,8 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-    def write(self, df, table_name, temp_dir=CACHE_DIR,
-              overwrite=False, lnglat=None, encode_geom=False, geom_col=None,
-              **kwargs):
+    def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
+              lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
         Example:
@@ -224,11 +225,9 @@ class CartoContext(object):
                   for more information. For example, when using
                   `content_guessing='true'`, a column named 'countries' with
                   country names will be used to generate polygons for each
-                  country. To avoid unintended consequences, avoid `file`,
-                  `url`, and other similar arguments. Note: Combining `privacy`
-                  with `overwrite` (defined above) does not currently update
-                  the privacy of a dataset if it already exists:
-                  https://github.com/CartoDB/cartoframes/issues/252.
+                  country. Another use is setting the privacy of a dataset. To
+                  avoid unintended consequences, avoid `file`, `url`, and other
+                  similar arguments.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
@@ -251,6 +250,11 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
+        elif kwargs.get('privacy') is None:
+            # get privacy so it's not overwritten on write
+            privacy = self._get_privacy(table_name)
+            if privacy:
+                kwargs['privacy'] = privacy
 
         # issue warning if the index is anything but the pandas default
         #  range index
@@ -276,6 +280,9 @@ class CartoContext(object):
                                                     geom_col, pgcolnames,
                                                     kwargs)
             self._set_schema(_df, final_table_name, pgcolnames)
+
+        if kwargs.get('privacy'):
+            self._update_privacy(final_table_name, kwargs.get('privacy'))
 
         # create geometry column from long/lats if requested
         if lnglat:
@@ -313,6 +320,22 @@ class CartoContext(object):
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
                                      final_table_name)))
+
+    def _get_privacy(self, table_name):
+        """gets current privacy of a table"""
+        ds_manager = DatasetManager(self.auth_client)
+        try:
+            dataset = ds_manager.get(table_name)
+            return dataset.privacy.lower()
+        except NotFoundException:
+            return None
+
+    def _update_privacy(self, table_name, privacy):
+        """Updates the privacy of a dataset"""
+        ds_manager = DatasetManager(self.auth_client)
+        dataset = ds_manager.get(table_name)
+        dataset.privacy = privacy
+        dataset.save()
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
