@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5.2b11
+-------
+
+Released 2017-12-20
+
+Updates
+
+- Adds flag to `CartoContext.data_discovery` that excludes non-shoreline-clipped boundary metadata by default
+
 0.5.1b10
 -------
 
