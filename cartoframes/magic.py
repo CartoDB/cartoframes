@@ -14,9 +14,11 @@ class CartoMagics(Magics):
     @line_cell_magic
     def carto(self, line, cell=None):
         "query carto"
-        opts, query = self.parse_options(line, 'c:', posix=False, strict=False)
+        opts, table = self.parse_options(line, 'c:', posix=False, strict=False)
         if cell:
             query = cell
+        else:
+            query = 'select * from {}'.format(table)
         context = getattr(opts, 'c', None)
         if context is None:
             # try to find a CartoContext instance if not specified
