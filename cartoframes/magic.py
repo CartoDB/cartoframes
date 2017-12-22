@@ -38,11 +38,12 @@ class CartoMagics(Magics):
     @line_cell_magic
     def cartomap(self, line, cell=None):
         """carto map"""
-        opts, table = self.parse_options(line, 'c:s:',
+        opts, table = self.parse_options(line, 'c:s:i',
                                          posix=False, strict=False)
         context = getattr(opts, 'c', None)
         stylecol = getattr(opts, 's', None)
-        # print (context, stylecol, cell)
+        interactive = True if 'i' in opts.keys() else False
+
         if context is None:
             # try to find a CartoContext instance if not specified
             for key, val in self.shell.user_ns.items():
@@ -63,7 +64,9 @@ class CartoMagics(Magics):
             layer = 'cartoframes.Layer({table}, color={color})'.format(
                 table=utils.pgquote(table),
                 color=color)
-        evalstr = "{0}.map({1})".format(context, layer)
+        evalstr = "{0}.map({1},interactive={2})".format(context,
+                                                         layer,
+                                                         interactive)
         # return evalstr
         return eval(evalstr, self.shell.user_ns)
 
