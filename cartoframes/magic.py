@@ -68,7 +68,8 @@ class CartoMagics(Magics):
                                                          layer,
                                                          interactive)
         if 'v' in opts.keys():
-            return eval(evalstr, self.shell.user_ns),evalstr
+            print evalstr
+
         return eval(evalstr, self.shell.user_ns)
 
 ipython_sess = get_ipython()
