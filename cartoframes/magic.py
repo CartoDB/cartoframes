@@ -8,6 +8,10 @@ from cartoframes import utils
 # - make it agnostic to line or cell magics
 # - maps!
 
+def null_to_none(string):
+    """changes null to None"""
+    return None
+
 @magics_class
 class CartoMagics(Magics):
     """Magics for bringing CARTO exploratory data analysis to IPython"""
@@ -33,11 +37,12 @@ class CartoMagics(Magics):
 
     @line_cell_magic
     def cartomap(self, line, cell=None):
-        "carto map"
+        """carto map"""
         opts, table = self.parse_options(line, 'c:s:',
                                          posix=False, strict=False)
         context = getattr(opts, 'c', None)
         stylecol = getattr(opts, 's', None)
+        # print (context, stylecol, cell)
         if context is None:
             # try to find a CartoContext instance if not specified
             for key, val in self.shell.user_ns.items():
@@ -46,15 +51,20 @@ class CartoMagics(Magics):
                     break
         if context is None:
             raise ValueError('No CartoContext found or specified')
-        if cell:
-            layer = 'QueryLayer({query}, color={color})'.format(
-                query=utils.pgquote(cell.replace('\n', ' ')),
-                color=utils.pgquote(stylecol))
+        if stylecol is not None:
+            color = utils.pgquote(stylecol)
         else:
-            layer = 'Layer({table}, color={color})'.format(
+            color = None
+        if cell:
+            layer = 'cartoframes.QueryLayer({query}, color={color})'.format(
+                query=utils.pgquote(cell.replace('\n', ' ')),
+                color=color)
+        else:
+            layer = 'cartoframes.Layer({table}, color={color})'.format(
                 table=utils.pgquote(table),
-                color=utils.pgquote(stylecol))
+                color=color)
         evalstr = "{0}.map({1})".format(context, layer)
+        # return evalstr
         return eval(evalstr, self.shell.user_ns)
 
 ipython_sess = get_ipython()
