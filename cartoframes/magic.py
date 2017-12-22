@@ -38,10 +38,11 @@ class CartoMagics(Magics):
     @line_cell_magic
     def cartomap(self, line, cell=None):
         """carto map"""
-        opts, table = self.parse_options(line, 'c:s:iv',
+        opts, table = self.parse_options(line, 'c:s:ivt:',
                                          posix=False, strict=False)
         context = getattr(opts, 'c', None)
         stylecol = getattr(opts, 's', None)
+        timecol = getattr(opts, 't', None)
         interactive = True if 'i' in opts.keys() else False
 
         if context is None:
@@ -52,18 +53,23 @@ class CartoMagics(Magics):
                     break
         if context is None:
             raise ValueError('No CartoContext found or specified')
+
         if stylecol is not None:
-            color = utils.pgquote(stylecol)
-        else:
-            color = None
+            stylecol = utils.pgquote(stylecol)
+
+        if timecol is not None:
+            timecol = utils.pgquote(timecol)
+
         if cell:
-            layer = 'cartoframes.QueryLayer({query}, color={color})'.format(
+            layer = 'cartoframes.QueryLayer({query}, color={color}, time={time})'.format(
                 query=utils.pgquote(cell.replace('\n', ' ')),
-                color=color)
+                color=stylecol,
+                time=timecol)
         else:
-            layer = 'cartoframes.Layer({table}, color={color})'.format(
+            layer = 'cartoframes.Layer({table}, color={color}, time={time})'.format(
                 table=utils.pgquote(table),
-                color=color)
+                color=stylecol,
+                time=timecol)
         evalstr = "{0}.map({1},interactive={2})".format(context,
                                                          layer,
                                                          interactive)
