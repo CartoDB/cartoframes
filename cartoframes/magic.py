@@ -68,7 +68,7 @@ class CartoMagics(Magics):
                                                          layer,
                                                          interactive)
         if 'v' in opts.keys():
-            print evalstr
+            print(evalstr)
 
         return eval(evalstr, self.shell.user_ns)
 
