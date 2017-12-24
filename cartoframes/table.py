@@ -4,6 +4,7 @@ from .layer import Layer
 # TODO: mimic the code for Layer/QueryLayer/Etc
 # Table should inherit from QueryLayer, for example
 
+
 class Table(object):
     """Table object for interacting with at table on CARTO
     """
@@ -16,6 +17,23 @@ class Table(object):
 
     def read(self):
         return self.cc.read(self.table_name)
+
+    def agg(self, aggs):
+        """Performs an aggregation
+        `aggs` is a list of tuples, like so:
+            [('poverty_per_pop', 'max'),
+             ('poverty_per_pop', 'min'),
+             ('bike_commuter_rate', 'avg'), ]
+        """
+        print(aggs)
+        return self.cc.query('''
+            SELECT {aggs}
+              FROM {table}
+        '''.format(
+            aggs=', '.join(
+                '{agg}({col}) as {col}_{agg}'.format(agg=agg, col=col)
+                for col, agg in aggs),
+            table=self.table_name))
 
     def buffer(self, dist):
         """Buffer geometry by `dist`"""
@@ -40,4 +58,5 @@ class Table(object):
         return self
 
     def layer(self):
+        """return the layer object from this table layer"""
         return Layer(self.table_name)
