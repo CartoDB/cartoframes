@@ -1,12 +1,28 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
 from cartoframes import styling
+import pandas as pd
 
 
 class TestAbstractLayer(unittest.TestCase):
     def test_class(self):
         self.assertIsNone(AbstractLayer().__init__())
+
+
+class TestLayer(unittest.TestCase):
+    def setUp(self):
+        self.coffee_temps = pd.DataFrame({
+            'a': range(4),
+            'b': list('abcd')
+        })
+
+    def test_layer_setup_dataframe(self):
+        """layer.Layer._setup()"""
+        layer = Layer('cortado', source=self.coffee_temps)
+
+        with self.assertRaises(NotImplementedError):
+            layer._setup([BaseMap(), layer], 1)
 
 
 class TestBaseMap(unittest.TestCase):
@@ -129,6 +145,7 @@ class TestQueryLayer(unittest.TestCase):
 
         for idx, color in enumerate(str_colors):
             qlayer = QueryLayer(self.query, color=color)
+            qlayer.geom_type = 'point'
             if color == 'cookie_monster':
                 qlayer.style_cols[color] = 'number'
                 qlayer._setup([BaseMap(), qlayer], 1)
@@ -143,6 +160,7 @@ class TestQueryLayer(unittest.TestCase):
             qlayer = QueryLayer(self.query, color='datetime_column')
             qlayer.style_cols['datetime_column'] = 'date'
             qlayer._setup([BaseMap(), qlayer], 1)
+
         # Exception testing
         # color column cannot be a geometry column
         with self.assertRaises(ValueError,
@@ -176,10 +194,12 @@ class TestQueryLayer(unittest.TestCase):
                              dict(name='Antique', bin_method='',
                                   bins=','.join(str(i) for i in range(1, 11))))
         # expect category maps query
+        with open('qlayerquery.txt', 'w') as f:
+            f.write(ql.query)
         self.assertRegexpMatches(ql.query,
-                                 '^SELECT orig\.\*, '
-                                 '__wrap.cf_value_colorcol.* '
-                                 'GROUP BY.*orig\.colorcol$')
+                                 '(?s)^SELECT\norig\.\*,\s__wrap\.'
+                                 'cf_value_colorcol\n.*GROUP\sBY.*orig\.'
+                                 'colorcol$')
         # cartocss should have cdb math mode
         self.assertRegexpMatches(ql.cartocss,
                                  '.*CDB_Math_Mode\(cf_value_colorcol\).*')
@@ -289,20 +309,72 @@ class TestQueryLayer(unittest.TestCase):
     def test_querylayer_size_defaults(self):
         """layer.QueryLayer gets defaults for options not passed"""
         qlayer = QueryLayer(self.query, size='cold_brew')
-        size_col_ans = {'column': 'cold_brew',
-                        'range': [5, 25],
-                        'bins': 10,
-                        'bin_method': 'quantiles'}
-        self.assertEqual(qlayer.size, size_col_ans,
-                         msg='size column should receive defaults')
+        size_col_ans = {
+            'column': 'cold_brew',
+            'range': [5, 25],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, size_col_ans,
+                             msg='size column should receive defaults')
 
-        qlayer = QueryLayer(self.query, size={'column': 'cold_brew',
-                                              'range': [4, 15],
-                                              'bin_method': 'equal'})
-        ans = {'column': 'cold_brew',
-               'range': [4, 15],
-               'bins': 10,
-               'bin_method': 'equal'}
-        self.assertEqual(qlayer.size, ans,
-                         msg=('size dict should receive defaults if not '
-                              'provided'))
+        qlayer = QueryLayer(self.query,
+                            size={
+                                'column': 'cold_brew',
+                                'range': [4, 15],
+                                'bin_method': 'equal'
+                            })
+        ans = {
+            'column': 'cold_brew',
+            'range': [4, 15],
+            'bins': 5,
+            'bin_method': 'equal'
+        }
+        self.assertDictEqual(qlayer.size, ans,
+                             msg=('size dict should receive defaults if not '
+                                  'provided'))
+        qlayer = QueryLayer(self.query, size={
+                                            'column': 'cold_brew',
+                                            'min': 10,
+                                            'max': 20
+                                        })
+        ans = {
+            'column': 'cold_brew',
+            'range': [10, 20],
+            'bins': 5,
+            'bin_method': 'quantiles'
+        }
+        self.assertDictEqual(qlayer.size, ans)
+
+    def test_querylayer_get_cartocss(self):
+        """layer.QueryLayer._get_cartocss"""
+        qlayer = QueryLayer(self.query, size=dict(column='cold_brew', min=10,
+                                                  max=20))
+        qlayer.geom_type = 'point'
+        self.assertRegexpMatches(
+            qlayer._get_cartocss(BaseMap()),
+            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             'quantiles\(5\)\).*')
+        )
+
+        # test line cartocss
+        qlayer = QueryLayer(self.query)
+        qlayer.geom_type = 'line'
+        self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                 '^\#layer.*line\-width.*$')
+        # test point, line, polygon
+        for g in ('point', 'line', 'polygon', ):
+            styles = {'point': 'marker\-fill',
+                      'line': 'line\-color',
+                      'polygon': 'polygon\-fill'}
+            qlayer = QueryLayer(self.query, color='colname')
+            qlayer.geom_type = g
+            self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
+                                     '^\#layer.*{}.*\}}$'.format(styles[g]))
+
+        # geometry type should be defined
+        with self.assertRaises(ValueError,
+                               msg='invalid geometry type'):
+            ql = QueryLayer(self.query, color='red')
+            ql.geom_type = 'notvalid'
+            ql._get_cartocss(BaseMap())

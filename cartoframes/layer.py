@@ -1,16 +1,17 @@
 """Layer classes for map creation. See examples in `layer.Layer
 <#layer.Layer>`__ and `layer.QueryLayer <#layer.QueryLayer>`__
-for example usage.
+for example usage for data layers. See `layer.BaseMap <#layer.BaseMap>`__ for
+basemap layers.
 """
 
 import pandas as pd
 import webcolors
 
-from cartoframes.utils import cssify, join_url
+from cartoframes.utils import cssify, join_url, minify_sql
 from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
-# from cartocolor vivid scheme
+# from CARTOColor vivid scheme
 DEFAULT_COLORS = ('#E58606', '#5D69B1', '#52BCA3', '#99C945', '#CC61B0',
                   '#24796C', '#DAA51B', '#2F8AC4', '#764E9F', '#ED645A',
                   '#CC3A8E', '#A5AA99')
@@ -73,10 +74,7 @@ class BaseMap(AbstractLayer):
                     label_type = '_labels_under'
                 style = source + (label_type if labels == 'back'
                                   else '_nolabels')
-            self.url = join_url((stem,
-                                 '{style}/{{z}}/{{x}}/{{y}}.png'.format(
-                                     style=style)
-                                 ))
+            self.url = join_url(stem, style, '{z}/{x}/{y}.png')
         elif self.source.startswith('http'):
             # TODO: Remove this once baselayer urls can be passed in named
             # map config
@@ -98,17 +96,17 @@ class BaseMap(AbstractLayer):
 
 
 class QueryLayer(AbstractLayer):
-    """cartoframes Data Layer based on an arbitrary query to the user's CARTO
+    """cartoframes data layer based on an arbitrary query to the user's CARTO
     database. This layer class is useful for offloading processing to the cloud
     to do some of the following:
 
-    * pull down a snapshot of the data (e.g., selecting only important columns
-      instead of all columns in the dataset)
-    * doing spatial processing using `PostGIS <http://postgis.net/>`__ and
-      `PostgreSQL <https://www.postgresql.org/>`__, which is the database
+    * Visualizing spatial operations using `PostGIS <http://postgis.net/>`__
+      and `PostgreSQL <https://www.postgresql.org/>`__, which is the database
       underlying CARTO
-    * performing arbitrary relational database queries (e.g., complex JOINs
+    * Performing arbitrary relational database queries (e.g., complex JOINs
       in SQL instead of in pandas)
+    * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
+      1000``)
 
     Used in the `layers` keyword in `CartoContext.map()
     <#context.CartoContext.map>`__.
@@ -150,76 +148,102 @@ class QueryLayer(AbstractLayer):
                        Layer('fantastic_sql_table')])
 
     Args:
-        query (str): Query that is fed into a pandas DataFrame. At a minimum,
-            all queries need to have the columns `cartodb_id`, `the_geom`, and
-            `the_geom_webmercator`. Read more in
-            `CARTO's docs
-            <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__
-            for more information.
-        time (dict or str, optional): Style to apply to layer.
+        query (str): Query to expose data on a map layer. At a minimum, a
+            query needs to have the columns `cartodb_id`, `the_geom`, and
+            `the_geom_webmercator` for the map to display. Read more about
+            queries in `CARTO's docs
+            <https://carto.com/docs/tips-and-tricks/geospatial-analysis>`__.
+
+        time (dict or str, optional): Time-based style to apply to layer.
+
+            If `time` is a :obj:`str`, it must be the name of a column which
+            has a data type of `datetime` or `float`.
+
             If `time` is a :obj:`dict`, the following keys are options:
 
-            - column (str, required): Column for animating map from. Data must
+            - column (`str`, required): Column for animating map, which must
               be of type `datetime` or `float`.
-            - method (str, optional): Type of aggregation method for operating
-              on `Torque TileCubes <https://github.com/CartoDB/torque>`__. Must
-              be one of ``avg``, ``sum``, or another `PostgreSQL aggregate
-              functions
+            - method (`str`, optional): Type of aggregation method for
+              operating on `Torque TileCubes
+              <https://github.com/CartoDB/torque>`__. Must be one of ``avg``,
+              ``sum``, or another `PostgreSQL aggregate functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (bool, optional): Whether to accumulate points over
+            - cumulative (`bool`, optional): Whether to accumulate points over
               time (``True``) or not (``False``, default)
-            - frames (int, optional): Number of frames in the animation.
+            - frames (`int`, optional): Number of frames in the animation.
               Defaults to 256.
-            - duration (int, optional): Number of seconds in the animation.
+            - duration (`int`, optional): Number of seconds in the animation.
               Defaults to 30.
-            - trails (int, optional): Number of trails after the incidence of
+            - trails (`int`, optional): Number of trails after the incidence of
               a point. Defaults to 2.
+        color (dict or str, optional): Color style to apply to map. For
+            example, this can be used to change the color of all geometries
+            in this layer, or to create a graduated color or choropleth map.
 
-            If `time` is a :obj:`str`, then it must be a column name available in
-            the query that is of type numeric or datetime.
+            If `color` is a :obj:`str`, there are two options:
 
-        color (dict or str, optional): Color style to apply to map.
+            - A column name to style by to create, for example, a choropleth
+              map if working with polygons. The default classification is
+              `quantiles` for quantitative data and `category` for
+              qualitative data.
+            - A hex value or `web color name
+              <https://www.w3.org/TR/css3-color/#svg-color>`__.
+
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
 
-            - column (str): Column to base coloring from.
-            - scheme (str, optinal): Color scheme from
-              `CartoColors
+            - column (`str`): Column used for the basis of styling
+            - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
+              from the `styling module <#module-styling>`__ of cartoframes that
+              exposes `CARTOColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
-              Defaults to `Mint`.
-            - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
-            - bins (int, optional): Number of bins to divide data amongst in
-              the `bin_method`. Defaults to 5.
+              Defaults to `mint <#styling.mint>`__ scheme for quantitative
+              data and `bold` for qualitative data. More control is given by
+              using `styling.scheme <#styling.scheme>`__.
+
+              If you wish to define a custom scheme outside of CARTOColors, it
+              is recommended to use the `styling.custom <#styling.custom>`__
+              utility function.
 
         size (dict or int, optional): Size style to apply to point data.
-            If `size` is a :obj:`dict`, the follow keys are options, with values
-            described as:
 
-            - column (str): Column to base sizing of points on
+            If `size` is an :obj:`int`, all points are sized by this value.
+
+            If `size` is a :obj:`str`, this value is interpreted as a column,
+            and the points are sized by the value in this column. The
+            classification method defaults to `quantiles`, with a min size of
+            5, and a max size of 5. Use the :obj:`dict` input to override these
+            values.
+
+            If `size` is a :obj:`dict`, the follow keys are options, with
+            values described as:
+
+            - column (`str`): Column to base sizing of points on
             - bin_method (str, optional): Quantification method for dividing
-              data range into bins. Must be one of: ``quantiles``, ``equal``,
-              ``headtails``, or ``jenks``. Defaults to ``quantiles``.
-            - bins (int, optional): Number of bins to break data into. Defaults
+              data range into bins. Must be one of the methods in
+              :obj:`BinMethod` (excluding `category`).
+            - bins (`int`, optional): Number of bins to break data into.
+              Defaults to 5.
+            - max (`int`, optional): Maximum point width (in pixels). Defaults
+              to 25.
+            - min (`int`, optional): Minimum point width (in pixels). Defaults
               to 5.
-            - max (int, optional): Maximum point width (in pixels). Defaults to
-              25.
-            - min (int, optional): Minimum point width (in pixels). Defaults to
-              5.
 
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
-    """
+    """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
 
         self.query = query
+        self.orig_query = query
         # style_cols and geom_type are updated right before layer is `_setup`
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
+        self.cartocss = None
+        self.torque_cartocss = None
 
         # TODO: move these if/else branches to individual methods
         # color, scheme = self._get_colorscheme()
@@ -286,14 +310,22 @@ class QueryLayer(AbstractLayer):
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
             old_size = size
+            # Default size range, bins, and bin_method
             size = {
                 'range': [5, 25],
-                'bins': 10,
+                'bins': 5,
                 'bin_method': BinMethod.quantiles,
             }
+            # Assign default range and update if min/max given
+            old_size['range'] = old_size.get('range', size['range'])
+            if 'min' in old_size:
+                old_size['range'][0] = old_size['min']
+                old_size.pop('min')
+            if 'max' in old_size:
+                old_size['range'][1] = old_size['max']
+                old_size.pop('max')
+            # Update all the keys in size if they exist in old_size
             size.update(old_size)
-            # Since we're accessing min/max, convert range into a list
-            size['range'] = list(size['range'])
             self.style_cols[size['column']] = None
 
         self.color = color
@@ -324,24 +356,24 @@ class QueryLayer(AbstractLayer):
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
         # choose appropriate scheme if not already specified
-        if (self.scheme is None) and (self.color in self.style_cols):
+        if (not self.scheme) and (self.color in self.style_cols):
             if self.style_cols[self.color] in ('string', 'boolean', ):
                 self.scheme = antique(10)
             elif self.style_cols[self.color] in ('number', ):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, text, or '
-                                 'boolean.'.format(
-                                     col=self.color,
-                                     type=self.style_cols[self.color]))
+                raise ValueError(
+                    'Cannot style column `{col}` of type `{type}`. It must be '
+                    'numeric, text, or boolean.'.format(
+                        col=self.color, type=self.style_cols[self.color]))
 
         if self.time:
             # validate time column information
             if self.geom_type != 'point':
                 raise ValueError('Cannot do time-based maps with data in '
                                  '`{query}` since this table does not contain '
-                                 'point geometries'.format(query=self.query))
+                                 'point geometries'.format(
+                                     query=self.orig_query))
             elif self.style_cols[self.time['column']] not in (
                     'number', 'date', ):
                 raise ValueError('Cannot create an animated map from column '
@@ -357,7 +389,7 @@ class QueryLayer(AbstractLayer):
             duration = self.time['duration']
             if (self.color in self.style_cols and
                     self.style_cols[self.color] in ('string', 'boolean', )):
-                self.query = ' '.join([s.strip() for s in [
+                self.query = minify_sql([
                     'SELECT',
                     '    orig.*, __wrap.cf_value_{col}',
                     'FROM ({query}) AS orig, (',
@@ -373,24 +405,23 @@ class QueryLayer(AbstractLayer):
                     '    ) AS _wrap',
                     ') AS __wrap',
                     'WHERE __wrap.{col} = orig.{col}',
-                ]]).format(col=self.color, query=self.query)
+                ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
-                        'bins': ','.join(str(i) for i in range(1, 11)),
-                        'name': (self.scheme.get('name') if self.scheme
-                                 else 'Bold'),
-                        'bin_method': '',
-                        }
+                    'bins': ','.join(str(i) for i in range(1, 11)),
+                    'name': (self.scheme.get('name') if self.scheme
+                             else 'Bold'),
+                    'bin_method': '', }
             elif (self.color in self.style_cols and
                   self.style_cols[self.color] in ('number', )):
                 self.query = ' '.join([
                     'SELECT *, {col} as value',
                     'FROM ({query}) as _wrap'
-                ]).format(col=self.color, query=self.query)
+                ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(
-                        method=method)
+                    method=method)
             self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
@@ -425,8 +456,8 @@ class QueryLayer(AbstractLayer):
 
         if self.scheme:
             color_style = get_scheme_cartocss(
-                    'value' if has_time else self.color,
-                    self.scheme)
+                'value' if has_time else self.color,
+                self.scheme)
         else:
             color_style = self.color
 
@@ -445,50 +476,79 @@ class QueryLayer(AbstractLayer):
                     'comp-op': 'source-over',
                 }
             })
-            for t in range(1, self.time['trails'] + 1):
+            if self.color in self.style_cols:
+                css += cssify({
+                    '#layer[{} = null]'.format(self.color): {
+                        'marker-fill': '#666'}
+                    })
+            for trail_num in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({
-                        '#layer[frame-offset={}]'.format(t): {
-                            'marker-width': size_style * (1.0 + t * 0.3),
-                            'marker-opacity': 0.9 / 2.0**t,
-                        }
-                    })
+                    '#layer[frame-offset={}]'.format(trail_num): {
+                        'marker-width': size_style * (1.0 + trail_num * 0.3),
+                        'marker-opacity': 0.9 / 2.0**trail_num,
+                    }
+                })
                 css += trail_temp
             return css
         else:
-            return cssify({
-                # Point CSS
-                "#layer['mapnik::geometry_type'=1]": {
-                    'marker-width': size_style,
-                    'marker-fill': color_style,
-                    'marker-fill-opacity': '1',
-                    'marker-allow-overlap': 'true',
-                    'marker-line-width': '0.5',
-                    'marker-line-color': line_color,
-                    'marker-line-opacity': '1',
-                },
-                # Line CSS
-                "#layer['mapnik::geometry_type'=2]": {
-                    'line-width': '1.5',
-                    'line-color': color_style,
-                },
-                # Polygon CSS
-                "#layer['mapnik::geometry_type'=3]": {
-                    'polygon-fill': color_style,
-                    'polygon-opacity': '0.9',
-                    'polygon-gamma': '0.5',
-                    'line-color': '#FFF',
-                    'line-width': '0.5',
-                    'line-opacity': '0.25',
-                    'line-comp-op': 'hard-light',
-                }
-            })
+            if self.geom_type == 'point':
+                css = cssify({
+                    # Point CSS
+                    "#layer": {
+                        'marker-width': size_style,
+                        'marker-fill': color_style,
+                        'marker-fill-opacity': '1',
+                        'marker-allow-overlap': 'true',
+                        'marker-line-width': '0.5',
+                        'marker-line-color': line_color,
+                        'marker-line-opacity': '1',
+                    }})
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'marker-fill': '#ccc'}
+                        })
+                return css
+            elif self.geom_type == 'line':
+                css = cssify({
+                    "#layer": {
+                        'line-width': '1.5',
+                        'line-color': color_style,
+                    }})
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'line-color': '#ccc'}
+                        })
+                return css
+            elif self.geom_type == 'polygon':
+                css = cssify({
+                    "#layer": {
+                        'polygon-fill': color_style,
+                        'polygon-opacity': '0.9',
+                        'polygon-gamma': '0.5',
+                        'line-color': '#FFF',
+                        'line-width': '0.5',
+                        'line-opacity': '0.25',
+                        'line-comp-op': 'hard-light',
+                    }})
+                if self.color in self.style_cols:
+                    css += cssify({
+                        '#layer[{} = null]'.format(self.color): {
+                            'polygon-fill': '#ccc'}
+                        })
+                return css
+            else:
+                raise ValueError('Unsupported geometry type: {}'.format(
+                    self.geom_type))
 
 
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
-    database. This layer class is useful for visualizing individual datasets
-    with `CartoContext.map() <#context.CartoContext.map>`__.
+    database. This layer class is used for visualizing individual datasets
+    with `CartoContext.map() <#context.CartoContext.map>`__'s ``layers``
+    keyword argument.
 
     Example:
         .. code:: python
@@ -501,7 +561,12 @@ class Layer(QueryLayer):
                                  color={'column': 'mr_fox_sightings',
                                         'scheme': styling.prism(10)})])
 
-    **Parameters:** See :obj:`QueryLayer` for a full list of arguments.
+    Args:
+        table_name (str): Name of table in CARTO account
+        Styling: See :obj:`QueryLayer` for a full list of all arguments
+          arguments for styling this map data layer.
+        source (pandas.DataFrame, optional): Not currently implemented
+        overwrite (bool, optional): Not currently implemented
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
                  color=None, size=None, tooltip=None, legend=None):

@@ -1,15 +1,18 @@
 ===========
-CARTOFrames
+CARTOframes
 ===========
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
     :target: https://travis-ci.org/CartoDB/cartoframes
 .. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
     :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
+.. image:: https://mybinder.org/badge.svg
+    :target: https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples
+
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
-Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOFrames give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
+Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
 
 Features
 
@@ -21,7 +24,7 @@ Features
 
 More info
 
-- Complete documentation: https://cartodb.github.io/cartoframes
+- Complete documentation: http://cartoframes.readthedocs.io/en/latest/
 - Source code: https://github.com/CartoDB/cartoframes
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
@@ -35,20 +38,20 @@ To install `cartoframes` (currently in beta) on your machine, do the following t
 
 .. code:: bash
 
-    $ pip install --pre cartoframes
+    $ pip install cartoframes
 
 It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
 Virtual Environment
 -------------------
 
-To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/#basic-usage>`__:
+To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-guide.readthedocs.io/en/latest/dev/virtualenvs/>`__:
 
 .. code:: bash
 
     $ virtualenv venv
     $ source venv/bin/activate
-    (venv) $ pip install --pre cartoframes
+    (venv) $ pip install cartoframes
     (venv) $ pip install jupyter
     (venv) $ jupyter notebook
 
@@ -94,7 +97,7 @@ Write an existing pandas DataFrame to CARTO.
 Map workflow
 ------------
 
-The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `Turbo Carto <https://github.com/CartoDB/turbo-carto>`__ and `CartoColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CartoColor wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
+The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `TurboCARTO <https://github.com/CartoDB/turbo-carto>`__ and `CARTOColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CARTOColors wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
 .. code:: python
 
@@ -108,14 +111,18 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                    Layer('peregrine_falcon_nest_sites',
                          size='num_eggs',
                          color={'column': 'bird_id',
-                                'scheme': styling.vivid(10))],
+                                'scheme': styling.vivid(10)})],
            interactive=True)
 
+.. note::
+    Legends are under active development. See
+    https://github.com/CartoDB/cartoframes/pull/184 for more information. To
+    try out that code, install `cartoframes` as:
+
+        `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
 Augment from Data Observatory
 -----------------------------
-
-**Note:** This is a provisional function, so the signature may change.
 
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
@@ -132,8 +139,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.data_augment('transactions', data_obs_measures)
-    df.head()
+    df = cc.data('transactions', data_obs_measures)
 
 
 CARTO Credential Management

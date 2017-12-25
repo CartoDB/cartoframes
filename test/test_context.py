@@ -13,8 +13,10 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
+from cartoframes.utils import dict_items
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -29,7 +31,7 @@ class TestCartoContext(unittest.TestCase):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:
+            except:  # noqa: E722
                 warnings.warn("Skipping CartoContext tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
@@ -48,8 +50,12 @@ class TestCartoContext(unittest.TestCase):
                                                 api_key=self.apikey)
             self.sql_client = SQLClient(self.auth_client)
 
+        # sets client to be ci
+        if not cartoframes.context.DEFAULT_SQL_ARGS['client']\
+                .endswith('_dev_ci'):
+            cartoframes.context.DEFAULT_SQL_ARGS['client'] += '_dev_ci'
         # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None
+        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
@@ -60,35 +66,36 @@ class TestCartoContext(unittest.TestCase):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
+        table_args = dict(ver=pyver, mpl=has_mpl)
         # torque table
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
         self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
-            ver=pyver,
-            mpl=has_mpl)
+            **table_args)
         self.mixed_case_table = 'AbCdEfG_{0}_{1}'.format(pyver, has_mpl)
 
         # for batch writing to carto
         self.test_write_batch_table = (
             'cartoframes_test_batch_table_{ver}_{mpl}'.format(
-                ver=pyver,
-                mpl=has_mpl))
+                **table_args))
 
         self.test_write_lnglat_table = (
             'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
-                ver=pyver,
-                mpl=has_mpl))
+                **table_args))
 
+        self.write_named_index = (
+                'cartoframes_test_write_non_default_index_{ver}_{mpl}'.format(
+                    **table_args))
         # for queries
         self.test_query_table = ('cartoframes_test_query_'
                                  'table_{ver}_{mpl}'.format(
-                                    ver=pyver,
-                                    mpl=has_mpl))
+                                    **table_args))
         self.test_delete_table = ('cartoframes_test_delete_'
                                   'table_{ver}_{mpl}').format(
-                                      ver=pyver,
-                                      mpl=has_mpl)
+                                      **table_args)
+        # for data observatory
+        self.test_data_table = 'carto_usa_offices'
 
     def tearDown(self):
         """restore to original state"""
@@ -96,7 +103,8 @@ class TestCartoContext(unittest.TestCase):
                   self.test_write_batch_table,
                   self.test_write_lnglat_table,
                   self.test_query_table,
-                  self.mixed_case_table.lower(), )
+                  self.mixed_case_table.lower(),
+                  self.write_named_index, )
         sql_drop = 'DROP TABLE IF EXISTS {};'
 
         if self.apikey and self.baseurl:
@@ -113,20 +121,20 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
     def test_cartocontext(self):
-        """CartoContext.__init__"""
+        """context.CartoContext.__init__ normal usage"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertEqual(cc.creds.key(), self.apikey)
         self.assertEqual(cc.creds.base_url(), self.baseurl.strip('/'))
         self.assertEqual(cc.creds.username(), self.username)
         self.assertTrue(not cc.is_org)
-        # TODO: how to test instances of a class?
-        # self.assertTrue(cc.auth_client.__dict__ == self.auth_client.__dict__)
-        # self.assertTrue(cc.sql_client.__dict__ == self.sql_client.__dict__)
+        with self.assertRaises(CartoException):
+            cartoframes.CartoContext(base_url=self.baseurl,
+                                     api_key='notavalidkey')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_credentials(self):
-        """CartoContext.__init__ Credentials argument"""
+        """context.CartoContext.__init__ Credentials argument"""
         creds = cartoframes.Credentials(username=self.username,
                                         key=self.apikey)
         cc = cartoframes.CartoContext(creds=creds)
@@ -141,17 +149,16 @@ class TestCartoContext(unittest.TestCase):
         cc_saved = cartoframes.CartoContext()
         self.assertEqual(cc_saved.creds.key(), self.apikey)
 
-
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
-        """CartoContext._is_org_user"""
+        """context.CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertTrue(not cc._is_org_user())
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_read(self):
-        """CartoContext.read"""
+        """context.CartoContext.read"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         # fails if limit is smaller than zero
@@ -185,7 +192,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
-        """CartoContext.write"""
+        """context.CartoContext.write normal usage"""
         from cartoframes.context import MAX_ROWS_LNGLAT
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -266,7 +273,7 @@ class TestCartoContext(unittest.TestCase):
         self.assertDictEqual(cols['fields'], expected_schema)
 
         # test properly encoding
-        df = pd.DataFrame({'vals':[1,2],'strings':['a','ô']})
+        df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
         cc.write(df, self.test_write_table, overwrite=True)
 
         # check if table exists
@@ -277,8 +284,72 @@ class TestCartoContext(unittest.TestCase):
             '''.format(table=self.test_write_table))
         self.assertIsNotNone(resp)
 
+        cc.delete(self.test_write_table)
+        df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
+        df = df.astype({'vals': str, 'ids': str})
+        cc.write(df, self.test_write_table)
+        schema = cc.sql_client.send('select ids, vals from {}'.format(
+            self.test_write_table))['fields']
+        self.assertSetEqual(set([schema[c]['type'] for c in schema]),
+                            set(('string', )))
+
+        df = pd.DataFrame({
+            'vals': list('abcd'),
+            'ids': list('wxyz'),
+            'nums': [1.2 * i for i in range(4)],
+            'boolvals': [True, False, None, True, ],
+            })
+        cc.write(df, self.test_write_table, overwrite=True,
+                 type_guessing='true')
+        resp = cc.sql_client.send('SELECT * FROM {}'.format(
+            self.test_write_table))['fields']
+        schema = {k: v['type'] for k, v in dict_items(resp)}
+        ans = dict(vals='string', ids='string', nums='number',
+                   boolvals='boolean', the_geom='geometry',
+                   the_geom_webmercator='geometry', cartodb_id='number')
+        self.assertDictEqual(schema, ans)
+
+    @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
+    def test_write_privacy(self):
+        """context.CartoContext.write Updates the privacy of a dataset"""
+        from carto.datasets import DatasetManager
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        ds_manager = DatasetManager(self.auth_client)
+
+        df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
+        cc.write(df, self.test_write_table)
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'private')
+
+        df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
+        cc.write(df, self.test_write_table, overwrite=True, privacy='public')
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'public')
+
+        privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
+        self.assertIsNone(privacy)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_write_index(self):
+        """context.CartoContext.write with non-default index"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        df = pd.DataFrame({
+                    'vals': range(3),
+                    'ids': list('abc')
+                },
+                index=list('xyz'))
+        df.index.name = 'named_index'
+        cc.write(df, self.write_named_index)
+
+        df_index = cc.read(self.write_named_index)
+        self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
+                            set(df_index.columns))
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_mixed_case(self):
+        """context.CartoContext.write table name mixed case"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         data = pd.DataFrame({'a': [1, 2, 3],
@@ -287,7 +358,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_table_exists(self):
-        """CartoContext._table_exists"""
+        """context.CartoContext._table_exists"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertFalse(cc._table_exists('acadia_biodiversity'))
@@ -295,7 +366,7 @@ class TestCartoContext(unittest.TestCase):
             cc._table_exists(self.test_read_table)
 
     def test_cartocontext_delete(self):
-        """CartoContext.delete"""
+        """context.CartoContext.delete"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         data = {'col1': [1, 2, 3],
@@ -323,11 +394,11 @@ class TestCartoContext(unittest.TestCase):
             assert "Failed to delete" in str(w[-1].message)
 
     def test_cartocontext_send_dataframe(self):
-        """CartoContext._send_dataframe"""
+        """context.CartoContext._send_dataframe"""
         pass
 
     def test_cartocontext_handle_import(self):
-        """CartoContext._handle_import"""
+        """context.CartoContext._handle_import"""
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -348,7 +419,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_sync(self):
-        """cartoframes.CartoContext.sync"""
+        """context.CartoContext.sync"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         self.assertIsNone(cc.sync(pd.DataFrame(), 'acadia'))
@@ -383,7 +454,7 @@ class TestCartoContext(unittest.TestCase):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'object', 'object', 'int64',
+        expected_dtypes = ('object', 'object', 'object', 'float64',
                            'datetime64[ns]', 'object', )
         self.assertTupleEqual(expected_dtypes,
                               tuple(str(d) for d in df.dtypes),
@@ -426,9 +497,23 @@ class TestCartoContext(unittest.TestCase):
                             set(df.columns),
                             msg='Should have the columns requested')
 
+        # see what happens if a query fails after 100 successful rows
+        with self.assertRaises(CartoException):
+            cc.query('''
+                WITH cte AS (
+                    SELECT CDB_LatLng(0, 0) as the_geom, i
+                    FROM generate_series(1, 110) as m(i)
+                    UNION ALL
+                    SELECT ST_Buffer(CDB_LatLng(0, 0), 0.1) as the_geom, i
+                    FROM generate_series(111, 120) as i
+                )
+                SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+                FROM cte
+            ''')
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map(self):
-        """CartoContext.map"""
+        """context.CartoContext.map normal usage"""
         from cartoframes import Layer, QueryLayer, BaseMap
         try:
             import matplotlib
@@ -521,9 +606,19 @@ class TestCartoContext(unittest.TestCase):
             cc.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
                            Layer(self.test_read_table, time='cartodb_id')])
 
+        # no geometry
+        with self.assertRaises(ValueError):
+            cc.map(layers=QueryLayer('''
+                SELECT
+                    null::geometry as the_geom,
+                    null::geometry as the_geom_webmercator,
+                    row_number() OVER () as cartodb_id
+                FROM generate_series(1, 10) as m(i)
+                '''))
+
     @unittest.skipIf(WILL_SKIP, 'no cartocredentials, skipping')
     def test_cartocontext_map_time(self):
-        """CartoContext.map time options"""
+        """context.CartoContext.map time options"""
         from cartoframes import Layer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -558,7 +653,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map_geom_type(self):
-        """CartoContext.map basemap geometry type defaults"""
+        """context.CartoContext.map basemap geometry type defaults"""
         from cartoframes import Layer, QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -605,7 +700,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
-        """CartoContext._get_bounds"""
+        """context.CartoContext._get_bounds"""
         from cartoframes.layer import QueryLayer
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -647,7 +742,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_check_query(self):
-        """CartoContext._check_query"""
+        """context.CartoContext._check_query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         # this table does not exist in this account
@@ -766,12 +861,11 @@ class TestCartoContext(unittest.TestCase):
             'int32': 'numeric',
             'object': 'text',
             'bool': 'boolean',
-            'datetime64[ns]': 'date',
+            'datetime64[ns]': 'timestamp',
             'unknown_dtype': 'text'
         }
         for i in results:
-            result = _dtypes2pg(i)
-            self.assertEqual(result, results[i])
+            self.assertEqual(_dtypes2pg(i), results[i])
 
     def test_pg2dtypes(self):
         """context._pg2dtypes"""
@@ -810,13 +904,173 @@ class TestCartoContext(unittest.TestCase):
                                       verbose=False)
         self.assertIsNone(cc._debug_print(resp=test_str))
 
-    def test_data_obs_functions(self):
-        """context.data_x"""
+    def test_data_boundaries(self):
+        """context.CartoContext.data_boundaries"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
-        self.assertIsNone(cc.data_boundaries())
-        self.assertIsNone(cc.data_discovery())
+        # all boundary metadata
+        boundary_meta = cc.data_boundaries()
+        self.assertTrue(boundary_meta.shape[0] > 0,
+                        msg='has non-zero number of boundaries')
+        meta_cols = set(('geom_id', 'geom_tags', 'geom_type', ))
+        self.assertTrue(meta_cols & set(boundary_meta.columns))
+
+        # boundary metadata in a region
+        regions = (
+            self.test_read_table,
+            self.test_data_table,
+            [5.9559111595, 45.8179931641, 10.4920501709, 47.808380127],
+            'Australia', )
+        for region in regions:
+            boundary_meta = cc.data_boundaries(region=region)
+            self.assertTrue(meta_cols & set(boundary_meta.columns))
+            self.assertTrue(boundary_meta.shape[0] > 0,
+                            msg='has non-zero number of boundaries')
+
+        #  boundaries for world
+        boundaries = cc.data_boundaries(boundary='us.census.tiger.state')
+        self.assertTrue(boundaries.shape[0] > 0)
+        self.assertEqual(boundaries.shape[1], 2)
+        self.assertSetEqual(set(('the_geom', 'geom_refs', )),
+                            set(boundaries.columns))
+
+        # boundaries for region
+        boundaries = ('us.census.tiger.state', )
+        for b in boundaries:
+            geoms = cc.data_boundaries(
+                boundary=b,
+                region=self.test_data_table)
+            self.assertTrue(geoms.shape[0] > 0)
+            self.assertEqual(geoms.shape[1], 2)
+            self.assertSetEqual(set(('the_geom', 'geom_refs', )),
+                                set(geoms.columns))
+
+        # presence or lack of clipped boundaries
+        nonclipped = (True, False, )
+        for tf in nonclipped:
+            meta = cc.data_boundaries(include_nonclipped=tf)
+            self.assertEqual(
+                'us.census.tiger.state' in set(meta.geom_id),
+                tf
+            )
+ 
+        with self.assertRaises(ValueError):
+            cc.data_boundaries(region=[1, 2, 3])
+
+        with self.assertRaises(ValueError):
+            cc.data_boundaries(region=10)
+
+    def test_data_discovery(self):
+        """context.CartoContext.data_discovery"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        meta_columns = set((
+                'denom_aggregate', 'denom_colname', 'denom_description',
+                'denom_geomref_colname', 'denom_id', 'denom_name',
+                'denom_reltype', 'denom_t_description', 'denom_tablename',
+                'denom_type', 'geom_colname', 'geom_description',
+                'geom_geomref_colname', 'geom_id', 'geom_name',
+                'geom_t_description', 'geom_tablename', 'geom_timespan',
+                'geom_type', 'id', 'max_score_rank', 'max_timespan_rank',
+                'normalization', 'num_geoms', 'numer_aggregate',
+                'numer_colname', 'numer_description', 'numer_geomref_colname',
+                'numer_id', 'numer_name', 'numer_t_description',
+                'numer_tablename', 'numer_timespan', 'numer_type', 'score',
+                'score_rank', 'score_rownum', 'suggested_name', 'target_area',
+                'target_geoms', 'timespan_rank', 'timespan_rownum'))
+        self.assertSetEqual(set(meta.columns), meta_columns,
+                            msg='metadata columns are all there')
+        self.assertTrue((meta['numer_timespan'] == '2010 - 2014').all())
+        self.assertTrue(
+                (meta['numer_description'].str.contains('poverty')).all()
+        )
+
+        # test region = list of lng/lats
+        with self.assertRaises(ValueError):
+            cc.data_discovery([1, 2, 3])
+
+        switzerland = [5.9559111595, 45.8179931641,
+                       10.4920501709, 47.808380127]
+        dd = cc.data_discovery(switzerland, keywords='freight', time='2010')
+        self.assertEqual(dd['numer_id'][0], 'eu.eurostat.tgs00078')
+
+        dd = cc.data_discovery('Australia',
+                               regex='.*Torres Strait Islander.*')
+        for nid in dd['numer_id'].values:
+            self.assertRegexpMatches(
+                    nid,
+                    '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
+
+        with self.assertRaises(CartoException):
+            cc.data_discovery('non_existent_table_abcdefg')
+
+        dd = cc.data_discovery('United States',
+                               boundaries='us.epa.huc.hydro_unit',
+                               time=('2006', '2010', ))
+        self.assertTrue(dd.shape[0] >= 1)
+
+        poverty = cc.data_discovery(
+            'United States',
+            boundaries='us.census.tiger.census_tract',
+            keywords=['poverty status', ],
+            time='2011 - 2015',
+            include_quantiles=False)
+        df_quantiles = poverty[poverty.numer_aggregate == 'quantile']
+        self.assertEqual(df_quantiles.shape[0], 0)
+
+        poverty = cc.data_discovery(
+            'United States',
+            boundaries='us.census.tiger.census_tract',
+            keywords=['poverty status', ],
+            time='2011 - 2015',
+            include_quantiles=True)
+        df_quantiles = poverty[poverty.numer_aggregate == 'quantile']
+        self.assertTrue(df_quantiles.shape[0] > 0)
+
+    def test_data(self):
+        """context.CartoContext.data"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols)
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols)
+
+        # with self.assertRaises(NotImplementedError):
+        #     cc.data(self.test_data_table, meta, how='geom_ref')
+
+        with self.assertRaises(ValueError, msg='no measures'):
+            meta = cc.data_discovery('United States', keywords='not a measure')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(ValueError, msg='too many metadata measures'):
+            # returns ~180 measures
+            meta = cc.data_discovery(region='united states',
+                                     keywords='education')
+            cc.data(self.test_read_table, meta)
+
+        with self.assertRaises(NameError, msg='column name already exists'):
+            meta = cc.data_discovery(region='united states',
+                                     time='2006 - 2010',
+                                     regex='.*walked to work.*',
+                                     boundaries='us.census.tiger.census_tract')
+            cc.data(self.test_data_table, meta)
 
 
 class TestBatchJobStatus(unittest.TestCase):
@@ -828,7 +1082,7 @@ class TestBatchJobStatus(unittest.TestCase):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:
+            except:  # noqa
                 warnings.warn('Skipping CartoContext tests. To test it, '
                               'create a `secret.json` file in test/ by '
                               'renaming `secret.json.sample` to `secret.json` '
@@ -842,13 +1096,13 @@ class TestBatchJobStatus(unittest.TestCase):
 
         if self.username and self.apikey:
             self.baseurl = 'https://{username}.carto.com/'.format(
-                    username=self.username)
+                username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
             self.sql_client = SQLClient(self.auth_client)
 
         # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None
+        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
         pyver = sys.version[0:3].replace('.', '_')
 

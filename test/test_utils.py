@@ -85,7 +85,7 @@ class TestUtils(unittest.TestCase):
                           "marker-width: 6; marker-fill: yellow; "
                           "marker-fill-opacity: 1; marker-allow-overlap: "
                           "true; marker-line-width: 0.5; marker-line-color: "
-                          "black; marker-line-opacity: 1;} "),
+                          "black; marker-line-opacity: 1;}"),
                          msg="point style")
 
         # polygon style
@@ -96,7 +96,7 @@ class TestUtils(unittest.TestCase):
                           "#cc607d, #9e3963, #672044), quantiles); "
                           "polygon-opacity: 0.9; polygon-gamma: 0.5; "
                           "line-color: #FFF; line-width: 0.5; line-opacity: "
-                          "0.25; line-comp-op: hard-light;} "),
+                          "0.25; line-comp-op: hard-light;}"),
                          msg="polygon style")
 
         # complex style
@@ -113,7 +113,7 @@ class TestUtils(unittest.TestCase):
                           "polygon-fill: blue; polygon-opacity: 0.9; "
                           "polygon-gamma: 0.5; line-color: #FFF; line-width: "
                           "0.5; line-opacity: 0.25; "
-                          "line-comp-op: hard-light;} "),
+                          "line-comp-op: hard-light;}"),
                          msg="multi-layer styling")
 
     def test_norm_colname(self):
