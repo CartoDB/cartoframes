@@ -1,6 +1,9 @@
-"""carto magics"""
+"""IPython Line and Cell Magics"""
+from IPython.core.getipython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_magic,
                                 cell_magic, line_cell_magic)
+from IPython.core.magic_arguments import (argument, magic_arguments,
+                                          parse_argstring)
 from cartoframes.context import CartoContext
 from cartoframes import utils
 # GOALS
@@ -10,7 +13,9 @@ from cartoframes import utils
 
 @magics_class
 class CartoMagics(Magics):
-    """Magics for bringing CARTO exploratory data analysis to IPython"""
+    """Line and Cell Magics for bringing CARTO exploratory data analysis to IPython"""
+    def __init__(self):
+        return None
 
     def find_carto_context(self, context):
         if context is None:
@@ -23,16 +28,41 @@ class CartoMagics(Magics):
             raise ValueError('No CartoContext found or specified')
         return context
 
+    @magic_arguments()
+    @argument('-c', '--cartocontext', help='An optional argument for '
+        'specifying a CartoContext')
+    @argument('tablename', type=str, help='An string positional argument for table name')
     @line_cell_magic
     def cartoquery(self, line, cell=None):
-        "query carto"
-        opts, table = self.parse_options(line, 'c:', posix=False, strict=False)
-        if cell:
-            query = cell
-        else:
-            query = 'select * from {}'.format(table)
+        """
+        Return results of a query to a CARTO table as a Pandas Dataframe
 
-        context = opts.get('c', None)
+        Returns:
+            pandas.DataFrame: DataFrame representation of query on `table_name`
+            from CARTO.
+
+        Example:
+            .. code:: python
+
+                %cartoquery [-c CARTOCONTEXT] TABLENAME
+
+            .. code:: python
+
+                %%cartoquery [-c CARTOCONTEXT]
+                SELECT cartodb_id, the_geom from TABLENAME
+                LIMIT 2
+        """
+
+        args = parse_argstring(self.cartoquery, line)
+
+        if cell is None:
+            # called as line magic
+            query = 'select * from {}'.format(args.table)
+        else:
+            # called as cell magic
+            query = cell
+
+        context = args.cartocontext
         # try to find a CartoContext instance if not specified
         context = self.find_carto_context(context)
 
@@ -76,5 +106,9 @@ class CartoMagics(Magics):
 
         return eval(evalstr, self.shell.user_ns)
 
+
+# In order to actually use these magics, you must register them with a
+# running IPython.  This code must be placed in a file that is loaded once
+# IPython is up and running:
 ipython_sess = get_ipython()
 ipython_sess.register_magics(CartoMagics)
