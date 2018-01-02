@@ -1,5 +1,5 @@
 """IPython Line and Cell Magics"""
-from IPython.core.getipython import get_ipython
+# from IPython.core.getipython import get_ipython
 from IPython.core.magic import (Magics, magics_class, line_magic,
                                 cell_magic, line_cell_magic)
 from IPython.core.magic_arguments import (argument, magic_arguments,
@@ -31,7 +31,7 @@ class CartoMagics(Magics):
     @magic_arguments()
     @argument('-c', '--cartocontext', help='An optional argument for '
         'specifying a CartoContext')
-    @argument('tablename', type=str, help='An string positional argument for table name')
+    @argument('tablename', type=str, help='A string positional argument for table name')
     @line_cell_magic
     def cartoquery(self, line, cell=None):
         """
@@ -109,6 +109,6 @@ class CartoMagics(Magics):
 
 # In order to actually use these magics, you must register them with a
 # running IPython.  This code must be placed in a file that is loaded once
-# IPython is up and running:
-ipython_sess = get_ipython()
-ipython_sess.register_magics(CartoMagics)
+# # IPython is up and running:
+# ipython_sess = get_ipython()
+# ipython_sess.register_magics(CartoMagics)
