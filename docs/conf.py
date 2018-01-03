@@ -20,6 +20,8 @@
 import subprocess
 import os
 import sys
+import sphinx_rtd_theme
+
 cur_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(cur_dir, '..', 'cartoframes'))
 from cartoframes.__version__ import __version__ as cf_version  # noqa
@@ -51,8 +53,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cartoframes'
-copyright = '2017, Andy Eschbacher, Stuart Lynn'
-author = 'Andy Eschbacher, Stuart Lynn'
+copyright = '2017, Andy Eschbacher, Stuart Lynn, Michelle Ho'
+author = 'Andy Eschbacher, Stuart Lynn, Michelle Ho'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -89,6 +91,9 @@ todo_include_todos = False
 #
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 html_theme = 'default'
+
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
