@@ -40,6 +40,11 @@ Credentials Management
 .. automodule:: credentials
     :members:
 
+Magic Classes
+-----------------
+.. autoclass:: magic.CartoMagics
+    :members:
+
 Indices and tables
 ==================
 
