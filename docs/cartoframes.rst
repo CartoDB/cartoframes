@@ -10,6 +10,7 @@ Submodules
    cartoframes.credentials
    cartoframes.dataobs
    cartoframes.layer
+   cartoframes.magic
    cartoframes.maps
    cartoframes.styling
    cartoframes.utils
