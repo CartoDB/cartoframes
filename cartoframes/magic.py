@@ -24,12 +24,12 @@ class CartoMagics(Magics):
         return context
 
     @magic_arguments()
-    @argument('-c', '--cartocontext',
+    @argument('-c', '--cartocontext', nargs=1,
               help=('An optional argument for specifying a CartoContext. If '
                     'not specified, an attempt will be made to find one.'))
     @argument('datasource', type=str,
               help=('Tablename if line magic, query if cell magic'))
-    @argument('-v', '--verbose',
+    @argument('-v', '--verbose', action='store_true',
               help=('If set, this will have the magic print the underlying '
                     'cartoframes code used to produce the output'))
     @line_cell_magic
@@ -93,17 +93,17 @@ class CartoMagics(Magics):
         return eval(evalstr, self.shell.user_ns)  # pylint: disable=W0123
 
     @magic_arguments()
-    @argument('-c', '--cartocontext',
+    @argument('-c', '--cartocontext', nargs=1,
               help='An optional argument for specifying a CartoContext')
-    @argument('-s', '--stylecol',
+    @argument('-s', '--stylecol', nargs=1,
               help=('An optional argument for specifying a column in the '
                     'table to apply color autostyle'))
-    @argument('-t', '--timecol',
+    @argument('-t', '--timecol', nargs=1,
               help=('An optional argument for specifying a time column in the '
                     'table to apply a time-animated style'))
-    @argument('-i', '--interactive',
+    @argument('-i', '--interactive', action='store_true',
               help='An option for returning a non-interactive static map')
-    @argument('-v', '--verbose',
+    @argument('-v', '--verbose', action='store_true',
               help=('If set, this will have the magic print the underlying '
                     'cartoframes code used to produce the output'))
     @argument('datasource', type=str,
