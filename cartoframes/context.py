@@ -901,6 +901,7 @@ class CartoContext(object):
         params = {
             'config': json.dumps(options),
             'anti_cache': random.random(),
+            'layer': 'all',
         }
 
         if has_zoom:
