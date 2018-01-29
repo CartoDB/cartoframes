@@ -408,7 +408,7 @@ class QueryLayer(AbstractLayer):
                 ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
-                    'bins': ','.join(str(i) for i in range(1, 11)),
+                    'bins': [str(i) for i in range(1, 11)],
                     'name': (self.scheme.get('name') if self.scheme
                              else 'Bold'),
                     'bin_method': '', }
