@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5.3
+-----
+
+Release 2017-01-29
+
+Updates
+
+- Fixes a bug that prevented categorical torque maps to be properly displayed
+
 0.5.2b11
 -------
 
