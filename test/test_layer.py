@@ -192,7 +192,7 @@ class TestQueryLayer(unittest.TestCase):
         ql._setup([BaseMap(), ql], 1)
         self.assertDictEqual(ql.scheme,
                              dict(name='Antique', bin_method='',
-                                  bins=','.join(str(i) for i in range(1, 11))))
+                                  bins=[str(i) for i in range(1, 11)]))
         # expect category maps query
         with open('qlayerquery.txt', 'w') as f:
             f.write(ql.query)
