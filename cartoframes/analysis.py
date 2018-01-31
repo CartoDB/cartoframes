@@ -19,7 +19,7 @@ def buffer(q_obj, dist):
 
 
 class AnalysisChain(object):
-    """Build up an analysis chain à la Builder Analysis.
+    """Build up an analysis chain a la Builder Analysis.
 
     AnalysisChain allows you to build up a chain of analyses which are applied
     sequentially to a source (query or table).
