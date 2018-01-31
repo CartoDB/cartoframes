@@ -2,11 +2,11 @@
 
 ## Feature request
 
-If you'd like to request a feature, first check <https://github.com/cartodb/cartoframes/issues> to see if your request already exists. If it exists, comment on that issie. If it does not, open a new issue clearly defining the need and use case.
+If you'd like to request a feature, first check <https://github.com/cartodb/cartoframes/issues> to see if your request already exists. If it exists, comment on that issue. If it does not exist, open a new issue clearly defining the need and use case.
 
 ## Reporting bugs
 
-If the but is not already reported, open a new issue. Please give the following information:
+If the bug is not already reported, open a new issue. Please give the following information:
 
 * Code snippet that produced the error
 * Relevant error messages
@@ -20,7 +20,7 @@ If the but is not already reported, open a new issue. Please give the following 
 
 CARTOframes has automated testing against a working CARTO account, and the authentication information is not public. Because of this, external pull requests currently cannot successfully run the full suite of tests.
  
- To run tests, rename the file `secret.json.sample` to `secret.json` and fill in the credentials for a CARTO account to which you have access. NOTE: the tests require access to different CARTO services like the Data Observatory, so the tests consume quota.
+To run tests, rename the file `secret.json.sample` to `secret.json` and fill in the credentials for a CARTO account to which you have access. NOTE: the tests require access to different CARTO services like the Data Observatory, so the tests consume quota.
 
 To open a pull request:
 
