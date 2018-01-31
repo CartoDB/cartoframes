@@ -1,7 +1,23 @@
-"""Spec-ing out the analysis framework for cartoframes"""
+# -#- coding: utf-8 -#-
+"""Analysis in cartoframes
+
+Analysis in cartoframes takes two forms:
+
+* :obj:`AnalysisChain` pipelines where multiple analyses can be chained off of
+  a base node. This chain is lazily evaluated by applying a `.compute()` method
+  after the chain is created. See :obj:`AnalysisChain` for more infomration.
+* By chaining analysis methods off of a base node. See the methods of
+  :obj:`Query` and :obj:`Table` for more information.
 
 
-def buffer(q_obj, dist):
+TODO:
+    * Add status updates (node 5 / 7 complete) by using tqdm's
+    * Does the chaining build up an AnalysisChain?
+"""
+from .utils import minify_sql
+
+
+def _buffer(q_obj, dist):
     """Buffer a query or table"""
     if isinstance(q_obj, Query):
         query = q_obj.query
@@ -28,10 +44,10 @@ class AnalysisChain(object):
 
     ::
 
-        from cartoframes import analysischain, table
+        from cartoframes import AnalysisChain, Table
         bklyn_demog = table('brooklyn_demographics')
 
-        chain = analysischain(
+        chain = AnalysisChain(
             bklyn_demog,
             [
                 ('buffer', 100.0),  # buffer by 1/10 of a kilometer
@@ -48,9 +64,10 @@ class AnalysisChain(object):
                 ('div', [('num_gps_pings', 'total_pop')])  # add new column to normalize point count
             ]
         )
+        chain.compute()
 
 
-    Args:
+    Parameters:
 
       source (str, :obj:`Table`, or :obj:`Query`): If str, the name of a table
         in user account. If :obj:`Table` or :obj:`Query`, the base data for the
@@ -69,14 +86,14 @@ class AnalysisChain(object):
             `source` which is matched to the second element, the column from
             `target`.
 
-    """
+    """ # noqa
     def __init__(self, source, analyses):
         self.context = source.context
         self.analyses = analyses
         self.source = source
         self.final_query = None
 
-    def build_chain(self):
+    def _build_chain(self):
         """Builds up an analysis based on `analyses`"""
         temp = 'SELECT * FROM ({query}) as _w{n}'
         last = temp.format(query=self.source.query, n=0)
@@ -87,8 +104,43 @@ class AnalysisChain(object):
             )
         self.final_query = last
 
+    def append(self, analysis):
+        """Append a new analysis to a chain
+        
+        Example:
+
+        ::
+
+            chain = AnalysisChain(
+                Table('transactions'),
+                [('buffer', 10),
+                 ('augment', 'median_income')]
+            )
+            chain.append(('knn', {'mean': 'median_income'}))
+
+        Args:
+          analysis (analysis): An analysis node
+        """
+        pass
+
     def compute(self):
-        """Return the results of the analysis"""
+        """Trigger the AnalysisChain to run
+
+        Example:
+
+        ::
+
+            chain = AnalysisChain(...)
+            # compute analysis chain
+            df = chain.compute()
+            # show results
+            df.head()
+
+        Returns:
+            promise object, which reports the status of the analysis if not
+            complete. Once the analysis finishes, the results will be returned
+            if the operations were successful.
+        """
         if self.final_query:
             return self.context.query(self.final_query)
         else:
@@ -96,41 +148,115 @@ class AnalysisChain(object):
 
 
 class Query(object):
-    """`Query` gives a representation of a query in a users's CARTO account.
-    
-    
-    
+    """:obj:`Query` gives a representation of a query in a users's CARTO
+    account.
+
+    Example:
+
+    ::
+
+        from cartoframes import CartoContext, Query
+        cc = CartoContext()
+        snapshot = Query('''
+            SELECT
+                count(*) as num_sightings,
+                b.acadia_district_name,
+                b.the_geom
+            FROM
+                bird_sightings as a, acadia_districts as b
+            GROUP BY 2, 3
+        ''')
+        snapshot.local_moran('num_sightings', 5).filter('significance<=0.05')
+
+
+    Parameters:
+
+        context (:obj:`CartoContext`): :obj:`CartoContext` instance
+          authenticated against the user's CARTO account.
+        query (str): Valid query against user's CARTO account.
     """
     def __init__(self, context, query):
         self.query = query
         self.context = context
 
+    def _validate_query(self, cols=None):
+        """
+        Validate that the query has the needed column names for the analysis
+        to run
+        """
+        util_cols = ('cartodb_id', 'the_geom', 'the_geom_webmercator', )
+        if cols is None:
+            cols = util_cols
+        self.context.query(
+            'select {cols} FROM ({query}) as _w'.format(
+                cols=','.join(cols),
+                query=self.query
+            )
+        )
+
     def read(self):
-        """read the query to a dataframe"""
+        """Read the query to a pandas DataFrame
+
+        Returns:
+            pandas.DataFrame: Query represented as a pandas DataFrame
+        """
         return self.context.query(self.query)
 
-    def plot(self):
-        """Plot all the columns in the query. cc.query(...).plot()"""
+    def moran_local(self, colname, n_neighbors):
+        """Local Moran's I
 
-    def get(self):
-        """get the query behind this object"""
-        return self.query
+        Args:
+          colname (:obj:`str`): Column name for performing Local Moran's I
+            analysis on
+        """
+    def plot(self):
+        """Plot all the columns in the query.
+
+        Example:
+
+        ::
+
+            Query('''
+                SELECT simpson_index, species
+                FROM acadia_biodiversity
+            ''').plot()
+            <matplotlib plot>
+
+        """
+        return self.context.query(self.query).plot()
 
     def buffer(self, dist):
-        """buffer query"""
-        return Query(self.context, buffer(self, dist))
+        """Buffer query
+        Example:
+
+        ::
+
+            q = Query('...')
+            buffered_q = q.buffer(150).compute()
+            cc.map(layers=[buffered_q, q])
+
+        Args:
+            dist (float): Distance in meters to buffer a geometry
+        """
+        return Query(self.context, _buffer(self, dist))
 
     def describe(self, cols=None):
-        """Gives back basic statistics for a table"""
-        if cols is None:
-            cols = self.read(limit=0).columns
-        qualities = ('count', 'avg', 'min', 'max', )
-        q = minify_sql((
-            'SELECT {aggcols}',
-            'FROM {table}')).format(
-                aggcols=('{agg}({col}) as {col}'.format(agg=None, col=None)))
-        return self.context.query(q)
+        """Gives back basic statistics for a table
 
+        Args:
+          cols (list of str): List of column names to get summary statistics
+
+        TODO: add geometry information
+        """
+        if cols is None:
+            cols = self.context.read(limit=0).columns
+        qualities = ('count', 'avg', 'min', 'max', )
+        summary_query = minify_sql((
+            'SELECT {aggcols}',
+            'FROM ({query}) as _w')).format(
+                aggcols=('{agg}({col}) as {col}'.format(agg=None, col=None)),
+                query=self.query)
+        return self.context.query(summary_query)
 
 
 class Table(Query):

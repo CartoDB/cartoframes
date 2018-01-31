@@ -19,6 +19,18 @@ CartoContext
 
     .. automethod:: write(df, table_name, temp_dir=SYSTEM_TMP_PATH, overwrite=False, lnglat=None, encode_geom=False, geom_col=None, \*\*kwargs)
 
+Analysis
+--------
+.. autoclass:: analysis.AnalysisChain
+    :member-order: bysource
+
+.. autoclass:: analysis.Table
+    :member-order: bysource
+
+.. autoclass:: analysis.Query
+    :member-order: bysource
+
+
 Map Layer Classes
 -----------------
 .. automodule:: layer
