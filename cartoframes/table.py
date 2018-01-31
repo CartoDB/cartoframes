@@ -1,25 +1,82 @@
 """Table objects"""
 from warnings import warn
-from .layer import Layer
+from .layer import Layer, QueryLayer
 from .utils import minify_sql
 
-# TODO: mimic the code for Layer/QueryLayer/Etc
-# Table should inherit from QueryLayer, for example
+warn('entering')
 
 
-class Table(object):
-    """Table object for interacting with at table on CARTO
+def buffer(q_obj, dist):
+    """Buffer a query or table"""
+    if isinstance(q_obj, Query):
+        query = q_obj.query
+    else:
+        query = query
+    return '''
+        SELECT
+            ST_Buffer(the_geom, {dist}) as the_geom
+        FROM (
+            {source_query}
+        ) as _w
+    '''.format(
+        dist=dist,
+        source_query=query)
+
+
+class AnalysisChain(object):
+    """Build up an analysis chain
+    AnalysisChain allows you to build up a chain of analyses which are applied
+    sequentially to a source (query or table).
+
+
+
     """
-    def __init__(self, table_name, cc):
-        self.table_name = table_name
-        self.context = cc
-        # TODO: is synced? is writable?
-        # What other information should be stored?
-        # geometry type?
+    def __init__(self, source, analyses):
+        self.context = source.context
+        self.analyses = analyses
+        self.source = source
+        self.final_query = None
 
-    def read(self, limit=None):
-        """Read a table into a dataframe"""
-        return self.context.read(self.table_name, limit=limit)
+    def build_chain(self):
+        """Builds up an analysis based on `analyses`"""
+        temp = 'SELECT * FROM ({query}) as _w{n}'
+        last = temp.format(query=self.source.query, n=0)
+        for idx, analysis in enumerate(self.analyses):
+            last = temp.format(
+                query=analysis[0](last, *analysis[1]),
+                n=idx+1
+            )
+        self.final_query = last
+
+    def compute(self):
+        """Return the results of the analysis"""
+        if self.final_query:
+            return self.context.query(self.final_query)
+        else:
+            raise ValueError('No analysis nodes provided to analysis chain')
+
+
+class Query(object):
+    """`Query` gives a representation of a query in a users's CARTO account."""
+    def __init__(self, context, query):
+        self.query = query
+        self.context = context
+
+    def read(self):
+        """read the query to a dataframe"""
+        return self.context.query(self.query)
+
+    def plot(self):
+        """Plot all the columns in the query. cc.query(...).plot()"""
+        self.context.query(self.query).plot()
+
+    def get(self):
+        """get the query behind this object"""
+        return self.query
+
+    def buffer(self, dist):
+        """buffer query"""
+        return Query(self.context, buffer(self, dist))
 
     def agg(self, aggs):
         """Performs an aggregation
@@ -50,47 +107,31 @@ class Table(object):
                 aggcols=('{agg}({col}) as {col}'.format(agg=None, col=None)))
         return self.context.query(q)
 
-    def buffer(self, dist):
-        """Buffer geometry by `dist`"""
-        self.context.sql_client.send('''
-            UPDATE {table}
-               SET the_geom = ST_Buffer(the_geom::geography, {dist})::geometry;
-        '''.format(table=self.table_name,
-                   dist=dist))
-        return self
-
     def intersects(self, ref_table, not_intersects=True):
         """geometries from self which intersect with reference table"""
         self.context.sql_client.send('''
             DELETE FROM {table}
             WHERE {table}.cartodb_id {not_intersects} IN (
                 SELECT {table}.cartodb_id
-                FROM {table}, {ref_table}
-                WHERE ST_Intersects({table}.the_geom, {ref_table}.the_geom))
-        '''.format(table=self.table_name,
+                FROM ({query}) as _w, {ref_table}
+                WHERE ST_Intersects(_w.the_geom, {ref_table}.the_geom))
+        '''.format(query=self.query,
                    ref_table=ref_table,
                    not_intersects='NOT' if not_intersects else ''))
         return self
 
     def layer(self):
         """return the layer object from this table layer"""
-        return Layer(self.table_name)
+        return QueryLayer(self.query)
 
-    # management
-    def drop(self, *cols):
-        """Drops columns in self.table"""
-        geom_cols = set(('the_geom', 'the_geom_webmercator', ))
-        if 'cartodb_id' in cols:
-            raise ValueError('Cannot drop `cartodb_id` from CARTO table.')
-        elif set(cols) & geom_cols:
-            warn(
-                'Dropping geometry columns `the_geom` and/or '
-                '`the_geom_webmercator` means that maps will not be '
-                'displayed.')
-        query = minify_sql((
-            'ALTER TABLE {table}',
-            '{drops}'
-        )).format(
-            table=self.table_name,
-            drops=', '.join('DROP COLUMN {col}' for col in cols))
-        self.context.sql_client.send(query)
+
+class Table(Query):
+    """Table object"""
+    def __init__(self, table_name):
+        """Table object"""
+        self.table_name = table_name
+        super(Table, self).__init__('SELECT * FROM {}'.format(table_name))
+
+    def layer(self):
+        """return the layer object from this table layer"""
+        return Layer(self.table_name)
