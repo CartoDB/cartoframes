@@ -3,10 +3,10 @@
 Analysis in cartoframes takes two forms:
 
 * **Pipelines**: :obj:`AnalysisChain` pipelines where multiple analyses can be
-  listed as an analysis pipeline off a base data source node (e.g., a
+  listed sequentially off a base data source node (e.g., a
   :obj:`Table` object). This chain is lazily evaluated by applying a
-  ``.compute()`` method after the chain is created. Besides the class
-  constructor, analyses can be appeneded to the chain after it has been
+  ``.compute()`` method after it is created. Besides the class
+  constructor, analyses can be appended to the chain after it has been
   instantiated. See :obj:`AnalysisChain` for more information. This is modeled
   after Builder analysis workflows and scikit-learn's `PipeLine class
   <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__.
@@ -19,12 +19,16 @@ Analysis in cartoframes takes two forms:
 .. todo::
 
     * Add status updates (e.g., ``node 5 / 7 complete``) by using tqdm
+    * Have a better representation of an analysis than a :obj:`tuple`?
     * Does the chaining build up an AnalysisChain?
     * Add AnalysisChain validation steps for column names / existence of data,
       etc.
     * Instantiating the Table or Query classes is clumsy if the ``cc`` needs to
       be passed to it everytime -- should it be instantiated differently? Maybe
       like ``cc.table('foo')``, which is equivalent to ``Table(cc, 'foo')``?
+    * Idea: Partial evaluation to get states of the data along the chain? User
+      could create a shorter chain to do this instead.
+    * Operator overloading for operations like `Analyses + Analysis`
 """
 from cartoframes import utils
 
@@ -48,8 +52,9 @@ def _buffer(q_obj, dist):
 
 class AnalysisChain(object):
     """Build up an analysis chain à la Builder Analysis or scikit learn
-    Pipeline. Once evaluated with `AnalysisChain.compute()`, the results will
-    persist as a table in the user CARTO account.
+    Pipeline. Once evaluated with ``AnalysisChain.compute()``, the results will
+    persist as a table in the user CARTO account and be returned into the
+    ``data`` attribute.
 
     :obj:`AnalysisChain` allows you to build up a chain of analyses which are
     applied sequentially to a source (:obj:`Query` or :obj:`Table`).
@@ -128,8 +133,8 @@ class AnalysisChain(object):
           :obj:`AnalysisChain.data` and ``.results_url``.
         - 'failed': Failure message if the analysis failed to complete
 
-    - 'results_url': URL where results stored on CARTO. Note: user has to
-      be authenticated to view the table
+      - 'results_url': URL where results stored on CARTO. Note: user has to
+        be authenticated to view the table
     """ # noqa
     def __init__(self, source, analyses):
         self.context = source.context
