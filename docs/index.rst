@@ -23,6 +23,7 @@ Analysis
 --------
 .. automodule:: analysis
     :members: AnalysisChain, Table, Query
+    :inherited-members:
 
 Map Layer Classes
 -----------------

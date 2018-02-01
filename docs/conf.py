@@ -35,7 +35,11 @@ from cartoframes.__version__ import __version__ as cf_version  # noqa
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.napoleon']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinxcontrib.napoleon',
+    'sphinx.ext.todo',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -79,7 +83,7 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
+todo_include_todos = True
 
 
 # -- Options for HTML output ----------------------------------------------
