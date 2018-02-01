@@ -6,6 +6,7 @@ Submodules
 
 .. toctree::
 
+   cartoframes.analysis
    cartoframes.context
    cartoframes.credentials
    cartoframes.dataobs

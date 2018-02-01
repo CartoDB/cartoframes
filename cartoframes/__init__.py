@@ -1,3 +1,4 @@
+from .analysis import Table, Query, AnalysisChain
 from .context import CartoContext, BatchJobStatus
 from .credentials import Credentials
 from .layer import BaseMap, QueryLayer, Layer

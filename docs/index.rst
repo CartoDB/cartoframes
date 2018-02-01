@@ -21,15 +21,8 @@ CartoContext
 
 Analysis
 --------
-.. autoclass:: analysis.AnalysisChain
-    :member-order: bysource
-
-.. autoclass:: analysis.Table
-    :member-order: bysource
-
-.. autoclass:: analysis.Query
-    :member-order: bysource
-
+.. automodule:: analysis
+    :members: AnalysisChain, Table, Query
 
 Map Layer Classes
 -----------------

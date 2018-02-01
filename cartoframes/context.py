@@ -25,7 +25,7 @@ from cartoframes.dataobs import get_countrytag
 from cartoframes import utils
 from cartoframes.layer import BaseMap, AbstractLayer
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
-from cartoframes.table import Table
+from cartoframes.analysis import Table
 from cartoframes.__version__ import __version__
 
 if sys.version_info >= (3, 0):

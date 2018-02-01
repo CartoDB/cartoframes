@@ -1,5 +1,7 @@
 # -#- coding: utf-8 -#-
-"""Analysis in cartoframes
+"""
+Analysis in cartoframes
+-----------------------
 
 Analysis in cartoframes takes two forms:
 
@@ -14,7 +16,7 @@ TODO:
     * Add status updates (node 5 / 7 complete) by using tqdm's
     * Does the chaining build up an AnalysisChain?
 """
-from .utils import minify_sql
+from cartoframes import utils
 
 
 def _buffer(q_obj, dist):
@@ -42,42 +44,44 @@ class AnalysisChain(object):
 
     Example:
 
-    ::
+        Build an analysis chain and return the results into a DataFrame::
 
-        from cartoframes import AnalysisChain, Table
-        bklyn_demog = table('brooklyn_demographics')
+            from cartoframes import AnalysisChain, Table
+            bklyn_demog = Table('brooklyn_demographics')
 
-        chain = AnalysisChain(
-            bklyn_demog,
-            [
-                ('buffer', 100.0),  # buffer by 1/10 of a kilometer
-                ('join', {        # spatial join
-                    'target': table('gps_pings')\
-                                  .filter('type=cell')\
-                                  .distinct(on='user_id'),
-                    'on': 'the_geom',
-                    'type': 'left'
-                }),
-                ('agg', {'by': 'geoid',  # aggregate points to polygons
-                         'ops': [('count', 'num_gps_pings'),
-                                 ('', '')]}),
-                ('div', [('num_gps_pings', 'total_pop')])  # add new column to normalize point count
-            ]
-        )
-        chain.compute()
+            chain = AnalysisChain(
+                bklyn_demog,
+                [
+                    ('buffer', 100.0),  # buffer by 1/10 of a kilometer
+                    ('join', {        # spatial join
+                        'target': Table('gps_pings').filter('type=cell')
+                        'on': 'the_geom',
+                        'type': 'left'
+                    }),
+                    ('distinct', {'on': 'user_id'}),
+                    ('agg', {'by': 'geoid',  # aggregate points to polygons
+                             'ops': [('count', 'num_gps_pings'),
+                                     ('', '')]}),
+                    ('div', [('num_gps_pings', 'total_pop')])  # add new column to normalize point count
+                ]
+            )
+            df = chain.compute()
 
 
     Parameters:
 
-      source (str, :obj:`Table`, or :obj:`Query`): If str, the name of a table
+      source (:obj:`str`, :obj:`Table`, or :obj:`Query`): If str, the name of a table
         in user account. If :obj:`Table` or :obj:`Query`, the base data for the
         analysis chain.
       analyses (list): A list of analyses to apply to `source`. The following
         are available analyses and their parameters:
 
         - buffer:
+
           - radius (float, required): radius of buffer in meters
+
         - join:
+
           - target (:obj:`Table`, :obj:`Query`, or :obj:`str`): The data source
             that the `source` is joined against.
           - on (:obj:`str`): If a :obj:`str`, the column name to join on. If
@@ -251,7 +255,7 @@ class Query(object):
         if cols is None:
             cols = self.context.read(limit=0).columns
         qualities = ('count', 'avg', 'min', 'max', )
-        summary_query = minify_sql((
+        summary_query = utils.minify_sql((
             'SELECT {aggcols}',
             'FROM ({query}) as _w')).format(
                 aggcols=('{agg}({col}) as {col}'.format(agg=None, col=None)),
