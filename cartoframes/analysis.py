@@ -30,6 +30,7 @@ Analysis in cartoframes takes two forms:
       could create a shorter chain to do this instead.
     * Operator overloading for operations like `Analyses + Analysis`
 """
+import pandas as pd
 from cartoframes import utils
 
 
@@ -237,6 +238,23 @@ class Query(object):
         self.query = query
         self.context = context
 
+    @property
+    def columns(self):
+        """return the column names of the table or query"""
+        subquery = 'SELECT * FROM ({query}) AS _W LIMIT 0'.format(
+            query=self.query)
+        cols = self.context.sql_client.send(subquery)
+        return pd.Index(cols['fields'].keys())
+
+    @property
+    def pgtypes(self):
+        """return the dtypes of the columns of the table or query"""
+        subquery = 'SELECT * FROM ({query}) as _w LIMIT 0'.format(
+            query=self.query)
+        dtypes = self.context.sql_client.send(subquery)
+        temp = {k: v['type'] for k, v in utils.dict_items(dtypes['fields'])}
+        return pd.Series(temp)
+
     def _validate_query(self, cols=None):
         """
         Validate that the query has the needed column names for the analysis
@@ -325,7 +343,7 @@ class Query(object):
 
         Example:
 
-            ::
+            .. code::
 
                 q = Query('...')
                 buffered_q = q.buffer(150).compute()
@@ -335,6 +353,10 @@ class Query(object):
             dist (float): Distance in meters to buffer a geometry
         """
         return Query(self.context, _buffer(self, dist))
+
+    def custom(self, query):
+        """Define custom query to add to the chain"""
+        pass
 
     def describe(self, cols=None):
         """Gives back basic statistics for a table
@@ -360,6 +382,9 @@ class Query(object):
 
 class Table(Query):
     """Table object"""
-    def __init__(self, table_name):
+    def __init__(self, context, table_name):
         """Table object"""
-        super(Table, self).__init__('SELECT * FROM {}'.format(table_name))
+        super(Table, self).__init__(
+            context,
+            'SELECT * FROM {}'.format(table_name)
+        )
