@@ -19,16 +19,36 @@ Analysis in cartoframes takes two forms:
 .. todo::
 
     * Add status updates (e.g., ``node 5 / 7 complete``) by using tqdm
-    * Have a better representation of an analysis than a :obj:`tuple`?
-    * Does the chaining build up an AnalysisChain?
+    * Have a better representation of an analysis than a :obj:`tuple`? E.g.,
+      scikit-learn passes class instances to the Pipeline
+
+      .. code::
+
+          from sklearn import svm
+          from sklearn.datasets import samples_generator
+          from sklearn.feature_selection import SelectKBest, f_regression
+          from sklearn.pipeline import Pipeline
+          # build pipeline
+          anova_filter = SelectKBest(f_regression, k=5)
+          clf = svm.SVC(kernel='linear')
+          anova_svm = Pipeline([('anova', anova_filter), ('svc', clf)])
+
+    * Chaining build up an AnalysisChain?
     * Add AnalysisChain validation steps for column names / existence of data,
-      etc.
+      etc. for each step of the chain
     * Instantiating the Table or Query classes is clumsy if the ``cc`` needs to
       be passed to it everytime -- should it be instantiated differently? Maybe
       like ``cc.table('foo')``, which is equivalent to ``Table(cc, 'foo')``?
+      One hiccup here is that ``cc.query`` already exists and means something
+      different.
+    * ``Layer`` should have a ``Query`` attribute instead of storing the query
+      as a string?
     * Idea: Partial evaluation to get states of the data along the chain? User
       could create a shorter chain to do this instead.
     * Operator overloading for operations like `Analyses + Analysis`
+    * Add method for trashing analysis table
+    * What's the standard on column name inheritance from analysis n to n+1?
+      Which columns come over, which don't, and which are added?
 """
 import pandas as pd
 from cartoframes import utils
@@ -240,7 +260,11 @@ class Query(object):
 
     @property
     def columns(self):
-        """return the column names of the table or query"""
+        """return the column names of the table or query
+
+        Returns:
+          pandas.Index: Column names
+        """
         subquery = 'SELECT * FROM ({query}) AS _W LIMIT 0'.format(
             query=self.query)
         cols = self.context.sql_client.send(subquery)
@@ -248,7 +272,11 @@ class Query(object):
 
     @property
     def pgtypes(self):
-        """return the dtypes of the columns of the table or query"""
+        """return the dtypes of the columns of the table or query
+
+        Returns:
+            pandas.Series: Data types (in a PostgreSQL database) of columns
+        """
         subquery = 'SELECT * FROM ({query}) as _w LIMIT 0'.format(
             query=self.query)
         dtypes = self.context.sql_client.send(subquery)
