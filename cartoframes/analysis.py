@@ -33,20 +33,27 @@ Analysis in cartoframes takes two forms:
           clf = svm.SVC(kernel='linear')
           anova_svm = Pipeline([('anova', anova_filter), ('svc', clf)])
 
-    * Chaining build up an AnalysisChain?
+      Each 'analysis' in cartoframes could exist as a class and be constructed
+      similarly. It would be a clone of the camshaft node. Having a solid
+      definition of each analysis would remove the clunkiness of having an ill-
+      defined tuple with name and parameters.
+    * Method chaining builds up an AnalysisChain by reapeatedly applying the
+      ``.append(...)`` to ``self``
+    * Chained methods are lazily evaluated as well
     * Add AnalysisChain validation steps for column names / existence of data,
       etc. for each step of the chain
     * Instantiating the Table or Query classes is clumsy if the ``cc`` needs to
       be passed to it everytime -- should it be instantiated differently? Maybe
       like ``cc.table('foo')``, which is equivalent to ``Table(cc, 'foo')``?
-      One hiccup here is that ``cc.query`` already exists and means something
+      One conflict here is that ``cc.query`` already exists and means something
       different.
     * ``Layer`` should have a ``Query`` attribute instead of storing the query
       as a string?
     * Idea: Partial evaluation to get states of the data along the chain? User
       could create a shorter chain to do this instead.
-    * Operator overloading for operations like `Analyses + Analysis`
-    * Add method for trashing analysis table
+    * Operator overloading for operations like `Analyses + Analysis` does an
+      ``AnalysisChain.append`` under the hood
+    * Add method for trashing / invalidating analysis table and starting anew
     * What's the standard on column name inheritance from analysis n to n+1?
       Which columns come over, which don't, and which are added?
 """
