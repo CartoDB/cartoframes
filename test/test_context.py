@@ -426,7 +426,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_query(self):
-        """cartoframes.CartoContext.query"""
+        """context.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
