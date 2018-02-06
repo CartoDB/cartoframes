@@ -8,8 +8,9 @@ Analysis in cartoframes takes two forms:
   ``.compute()`` method after it is created. Besides the class
   constructor, analyses can be appended to the tree after it has been
   instantiated. See :obj:`AnalysisTree` for more information. This is modeled
-  after Builder analysis workflows and scikit-learn's `PipeLine class
-  <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__.
+  after Builder analysis workflows, scikit-learn's `PipeLine class
+  <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__,
+  and PySpark's SQL syntax.
 
   Example:
 
