@@ -10,6 +10,35 @@ Analysis in cartoframes takes two forms:
   instantiated. See :obj:`AnalysisChain` for more information. This is modeled
   after Builder analysis workflows and scikit-learn's `PipeLine class
   <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__.
+
+  Example:
+
+      .. code::
+
+          from cartoframes import AnalysisChain, analyses as ca
+          chain = AnalysisChain(
+              Table(cc, 'brooklyn_demographics'),
+              [
+                   ('buffer', ca.Buffer(100.0)),
+                   ('join', ca.Join(
+                       Table('gps_pings').filter('type=cell')
+                       on='the_geom',
+                       type='left',
+                       null_replace=0)
+                   ),
+                   ('distinct', ca.Distinct(on='user_id')),
+                   ('agg', ca.Agg(
+                       by=['geoid', 'the_geom', ],
+                       [('num_gps_pings', 'count'),
+                        ('num_gps_pings', 'avg'),
+                        ('median_income', 'min')]),
+                   ('div', ca.Division([
+                       ('num_gps_pings', 'total_pop'),
+                       ('num_gps_pings', 'the_geom')
+                   ]))
+              ]
+          )
+
 * **Method Chaining**: By chaining analysis methods off of a base data source
   node. A base data source can be one of :obj:`Table` or :obj:`Query`, which
   represent queries against the user's CARTO account. For a full list of
@@ -34,9 +63,10 @@ Analysis in cartoframes takes two forms:
           anova_svm = Pipeline([('anova', anova_filter), ('svc', clf)])
 
       Each 'analysis' in cartoframes could exist as a class and be constructed
-      similarly. It would be a clone of the camshaft node. Having a solid
-      definition of each analysis would remove the clunkiness of having an ill-
-      defined tuple with name and parameters.
+      similarly. Most would be a clone of the camshaft node, and others would
+      be more data-science-specific. Having a solid definition of each analysis
+      would remove the clunkiness of having an ill-defined tuple with name and
+      parameters.
     * Method chaining builds up an AnalysisChain by reapeatedly applying the
       ``.append(...)`` to ``self``
     * Chained methods are lazily evaluated as well
@@ -56,6 +86,7 @@ Analysis in cartoframes takes two forms:
     * Add method for trashing / invalidating analysis table and starting anew
     * What's the standard on column name inheritance from analysis n to n+1?
       Which columns come over, which don't, and which are added?
+    * What can be gleaned from http://www.opengeospatial.org/standards/wps ?
 """
 import pandas as pd
 from cartoframes import utils
@@ -75,7 +106,8 @@ def _buffer(q_obj, dist):
         ) as _w
     '''.format(
         dist=dist,
-        source_query=query)
+        source_query=query
+    )
 
 
 class AnalysisChain(object):
@@ -105,24 +137,21 @@ class AnalysisChain(object):
             bklyn_demog,
             [
                 # buffer by 100 meters
-                ('buffer', 100.0),
+                Buffer(100.0),
                 # spatial join
-                ('join', {'target': Table(cc, 'gps_pings').filter('type=cell'),
-                          'on': 'the_geom',
-                          'type': 'left'
-                }),
-                ('distinct', {'on': 'user_id'}),  # distinct users
+                Join(target=Table(cc, 'gps_pings').filter('type=cell'),
+                     on='the_geom',
+                     type='left'),
+                Distinct(on='user_id'),
                 # aggregate points to polygons
-                ('agg', {'by': 'geoid',
-                         'ops': [('count', 'num_gps_pings'),
-                                 ('', '')]}),
+                Agg(by='geoid', ops=[('count', 'num_gps_pings'), ]),
                 # add new column to normalize point count
-                ('div', [('num_gps_pings', 'total_pop')])
+                Div([('num_gps_pings', 'total_pop')])
             ]
         )
 
         # evaluate analysis
-        df = chain.compute()
+        chain.compute()
 
         # visualize with carto map
         chain.map(color='num_gps_pings_per_total_pop')
@@ -161,13 +190,18 @@ class AnalysisChain(object):
           :obj:`AnalysisChain.data` and ``.results_url``.
         - 'failed': Failure message if the analysis failed to complete
 
-      - 'results_url': URL where results stored on CARTO. Note: user has to
+      - results_url: URL where results stored on CARTO. Note: user has to
         be authenticated to view the table
+      - Add method for running the analysis off of a subsample of the data.
+        E.g., ``.compute(subsample=0.1)``, ``.compute_preview()``, etc. etc.
+        With the goal that users feel compelled to run the analysis first on
+        a smaller sample to get the results before running the whole enchilada.
     """ # noqa
     def __init__(self, source, analyses):
         self.context = source.context
         self.analyses = analyses
         self.source = source
+        self.data = None
         self.final_query = None
 
     def _build_chain(self):
@@ -187,6 +221,11 @@ class AnalysisChain(object):
             this should pretty print the analyses and parameters
         """
         print(str(self.analyses))
+
+    @property
+    def results_url(self):
+        """returns the URL where the analysis table exists on CARTO"""
+        pass
 
     def append(self, analysis):
         """Append a new analysis to an existing chain.
@@ -216,9 +255,9 @@ class AnalysisChain(object):
 
                 chain = AnalysisChain(...)
                 # compute analysis chain
-                df = chain.compute()
+                chain.compute()
                 # show results
-                df.head()
+                df.data.head()
 
         Returns:
             promise object, which reports the status of the analysis if not
