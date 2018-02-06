@@ -2,12 +2,12 @@
 """
 Analysis in cartoframes takes two forms:
 
-* **Pipelines**: :obj:`AnalysisChain` pipelines where multiple analyses can be
+* **Pipelines**: :obj:`AnalysisTree` pipelines where multiple analyses can be
   listed sequentially off a base data source node (e.g., a
-  :obj:`Table` object). This chain is lazily evaluated by applying a
+  :obj:`Table` object). This tree is lazily evaluated by applying a
   ``.compute()`` method after it is created. Besides the class
-  constructor, analyses can be appended to the chain after it has been
-  instantiated. See :obj:`AnalysisChain` for more information. This is modeled
+  constructor, analyses can be appended to the tree after it has been
+  instantiated. See :obj:`AnalysisTree` for more information. This is modeled
   after Builder analysis workflows and scikit-learn's `PipeLine class
   <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__.
 
@@ -15,8 +15,8 @@ Analysis in cartoframes takes two forms:
 
       .. code::
 
-          from cartoframes import AnalysisChain, analyses as ca
-          chain = AnalysisChain(
+          from cartoframes import AnalysisTree, analyses as ca
+          tree = AnalysisTree(
               Table(cc, 'brooklyn_demographics'),
               [
                    ('buffer', ca.Buffer(100.0)),
@@ -67,11 +67,11 @@ Analysis in cartoframes takes two forms:
       be more data-science-specific. Having a solid definition of each analysis
       would remove the clunkiness of having an ill-defined tuple with name and
       parameters.
-    * Method chaining builds up an AnalysisChain by reapeatedly applying the
+    * Method chaining builds up an AnalysisTree by reapeatedly applying the
       ``.append(...)`` to ``self``
     * Chained methods are lazily evaluated as well
-    * Add AnalysisChain validation steps for column names / existence of data,
-      etc. for each step of the chain
+    * Add AnalysisTree validation steps for column names / existence of data,
+      etc. for each step of the tree
     * Instantiating the Table or Query classes is clumsy if the ``cc`` needs to
       be passed to it everytime -- should it be instantiated differently? Maybe
       like ``cc.table('foo')``, which is equivalent to ``Table(cc, 'foo')``?
@@ -79,14 +79,20 @@ Analysis in cartoframes takes two forms:
       different.
     * ``Layer`` should have a ``Query`` attribute instead of storing the query
       as a string?
-    * Idea: Partial evaluation to get states of the data along the chain? User
-      could create a shorter chain to do this instead.
+    * Idea: Partial evaluation to get states of the data along the tree? User
+      could create a shorter tree to do this instead.
     * Operator overloading for operations like `Analyses + Analysis` does an
-      ``AnalysisChain.append`` under the hood
+      ``AnalysisTree.append`` under the hood
     * Add method for trashing / invalidating analysis table and starting anew
     * What's the standard on column name inheritance from analysis n to n+1?
       Which columns come over, which don't, and which are added?
     * What can be gleaned from http://www.opengeospatial.org/standards/wps ?
+    * Draw inspiration from Spark:
+      http://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html
+      And place functions into a `functions` module
+      http://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html#module-pyspark.sql.functions
+    * Keep in mind that the chain is actually a tree since data can come in
+      at different nodes. AnalysisTree may be a better name.
 """
 import pandas as pd
 from cartoframes import utils
@@ -97,7 +103,7 @@ def _buffer(q_obj, dist):
     if isinstance(q_obj, Query):
         query = q_obj.query
     else:
-        query = query
+        query = q_obj
     return '''
         SELECT
             ST_Buffer(the_geom, {dist}) as the_geom
@@ -110,66 +116,64 @@ def _buffer(q_obj, dist):
     )
 
 
-class AnalysisChain(object):
-    """Build up an analysis chain à la Builder Analysis or scikit learn
-    Pipeline. Once evaluated with ``AnalysisChain.compute()``, the results will
+class AnalysisTree(object):
+    """Build up an analysis tree à la Builder Analysis or scikit learn
+    Pipeline. Once evaluated with ``AnalysisTree.compute()``, the results will
     persist as a table in the user CARTO account and be returned into the
     ``data`` attribute.
 
-    :obj:`AnalysisChain` allows you to build up a chain of analyses which are
+    :obj:`AnalysisTree` allows you to build up a tree of analyses which are
     applied sequentially to a source (:obj:`Query` or :obj:`Table`).
 
     Example:
 
-      Build and evaluate an analysis chain, return the results into a
+      Build and evaluate an analysis tree, return the results into a
       pandas DataFrame, and map the output
 
       .. code::
 
-        from cartoframes import AnalysisChain, Table, CartoContext
+        from cartoframes import AnalysisTree, Table, CartoContext
+        from cartoframes import analyses as ca
         cc = CartoContext()
 
         # base data node
         bklyn_demog = Table(cc, 'brooklyn_demographics')
 
-        # build analysis chain
-        chain = AnalysisChain(
+        # build analysis tree
+        tree = AnalysisTree(
             bklyn_demog,
             [
                 # buffer by 100 meters
-                Buffer(100.0),
+                ca.Buffer(100.0),
                 # spatial join
-                Join(target=Table(cc, 'gps_pings').filter('type=cell'),
-                     on='the_geom',
-                     type='left'),
-                Distinct(on='user_id'),
+                ca.Join(target=Table(cc, 'gps_pings').filter('type=cell'),
+                    on='the_geom',
+                    type='left'),
+                ca.Distinct(on='user_id'),
                 # aggregate points to polygons
-                Agg(by='geoid', ops=[('count', 'num_gps_pings'), ]),
+                ca.Agg(by='geoid', ops=[('count', 'num_gps_pings'), ]),
                 # add new column to normalize point count
-                Div([('num_gps_pings', 'total_pop')])
+                ca.Div([('num_gps_pings', 'total_pop')])
             ]
         )
 
         # evaluate analysis
-        chain.compute()
+        tree.compute()
 
         # visualize with carto map
-        chain.map(color='num_gps_pings_per_total_pop')
+        tree.map(color='num_gps_pings_per_total_pop')
 
     Parameters:
 
       source (:obj:`str`, :obj:`Table`, or :obj:`Query`): If str, the name of a table
         in user account. If :obj:`Table` or :obj:`Query`, the base data for the
-        analysis chain.
+        analysis tree.
       analyses (list): A list of analyses to apply to `source`. The following
         are available analyses and their parameters:
 
-        - buffer:
-
+        - :obj:`Buffer`:
           - radius (float, required): radius of buffer in meters
-
-        - join:
-
+        - :obj:`Join`:
           - target (:obj:`Table`, :obj:`Query`, or :obj:`str`): The data source
             that the `source` is joined against.
           - on (:obj:`str`): If a :obj:`str`, the column name to join on. If
@@ -177,17 +181,25 @@ class AnalysisChain(object):
             :obj:`tuple` is provided, the first element is the column from
             `source` which is matched to the second element, the column from
             `target`.
+        - :obj:`Div`: Divide one column by another. If the second column is
+          `the_geom`, the result will be numerator per sq km
+        - :obj:`Agg`: Aggregate data according to the `agg`/`column` pairs,
+          and grouping by `by`, which can be a :obj:`str` or list of
+          :obj:`str`.
+        - :obj:`Distinct`: Return only the distinct rows of the Table or Query.
+        - Etc. many more to come
+
 
     Attributes:
-      - data (pandas.DataFrame): ``None`` until the analysis chain is
+      - data (pandas.DataFrame): ``None`` until the analysis tree is
         evaluated, and then a dataframe of the results
-      - state (:obj:`str`): Current state of the :obj:`AnalysisChain`:
+      - state (:obj:`str`): Current state of the :obj:`AnalysisTree`:
 
         - 'not evaluated': Chain has not yet been evaluated
         - 'running': Analysis is currently running
         - 'enqueued': Analysis is queued to be run
         - 'complete': Chain successfully run. Results stored in
-          :obj:`AnalysisChain.data` and ``.results_url``.
+          :obj:`AnalysisTree.data` and ``.results_url``.
         - 'failed': Failure message if the analysis failed to complete
 
       - results_url: URL where results stored on CARTO. Note: user has to
@@ -204,7 +216,7 @@ class AnalysisChain(object):
         self.data = None
         self.final_query = None
 
-    def _build_chain(self):
+    def _build_tree(self):
         """Builds up an analysis based on `analyses`"""
         temp = 'SELECT * FROM ({query}) as _w{n}'
         last = temp.format(query=self.source.query, n=0)
@@ -228,18 +240,18 @@ class AnalysisChain(object):
         pass
 
     def append(self, analysis):
-        """Append a new analysis to an existing chain.
+        """Append a new analysis to an existing tree.
 
         Example:
 
             .. code::
 
-                chain = AnalysisChain(
+                tree = AnalysisTree(
                     Table('transactions'),
                     [('buffer', 10),
                      ('augment', 'median_income')]
                 )
-                chain.append(('knn', {'mean': 'median_income'}))
+                tree.append(('knn', {'mean': 'median_income'}))
 
         Args:
           analysis (analysis): An analysis node
@@ -247,15 +259,15 @@ class AnalysisChain(object):
         pass
 
     def compute(self):
-        """Trigger the AnalysisChain to run.
+        """Trigger the AnalysisTree to run.
 
         Example:
 
             ::
 
-                chain = AnalysisChain(...)
-                # compute analysis chain
-                chain.compute()
+                tree = AnalysisTree(...)
+                # compute analysis tree
+                tree.compute()
                 # show results
                 df.data.head()
 
@@ -267,7 +279,7 @@ class AnalysisChain(object):
         if self.final_query:
             return self.context.query(self.final_query)
         else:
-            raise ValueError('No analysis nodes provided to analysis chain')
+            raise ValueError('No analysis nodes provided to analysis tree')
 
 
 class Query(object):
@@ -429,7 +441,7 @@ class Query(object):
         return Query(self.context, _buffer(self, dist))
 
     def custom(self, query):
-        """Define custom query to add to the chain"""
+        """Define custom query to add to the tree"""
         pass
 
     def describe(self, cols=None):
