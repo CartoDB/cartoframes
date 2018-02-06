@@ -664,19 +664,18 @@ class CartoContext(object):
             #  bug is fixed ref: support/1127
             try:
                 self.sql_client.send('''
-                    create table {0} as SELECT 1;
-                    drop table {0};
+                    CREATE TABLE {0} AS SELECT 1;
+                    DROP TABLE {0};
                 '''.format(table_name))
                 resp = self._auth_send(
                     'api/v1/imports', 'POST',
-                    params=dict(sql=query,
-                                # collision_strategy='',
-                                table_name=table_name),
+                    params=dict(table_name=table_name),
+                    json=dict(sql=query),
+                    # collision_strategy='',
                     headers={'Content-Type': 'application/json'})
-            except CartoException:
+            except CartoException as err:
                 raise CartoException(
-                    'Table `{0}` already exists. Delete it before creating a '
-                    'table from this query'.format(table_name))
+                    'Cannot create table `{0}`: {1}'.format(table_name, err))
 
             while True:
                 import_job = self._check_import(resp['item_queue_id'])
@@ -1658,7 +1657,10 @@ class CartoContext(object):
         res = self.auth_client.send(relative_path, http_method, **kwargs)
         if isinstance(res.content, str):
             return json.loads(res.content)
-        return json.loads(res.content.decode('utf-8'))
+        try:
+            return json.loads(res.content.decode('utf-8'))
+        except json.JSONDecodeError as err:
+            raise CartoException(err)
 
     def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
