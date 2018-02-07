@@ -284,42 +284,15 @@ class CartoContext(object):
         if kwargs.get('privacy'):
             self._update_privacy(final_table_name, kwargs.get('privacy'))
 
+        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
+                table_url=utils.join_url(
+                    self.creds.base_url(), 'dataset', final_table_name)))
+
         # create geometry column from long/lats if requested
         if lnglat:
-            query = utils.minify_sql((
-                'UPDATE "{table_name}"',
-                'SET the_geom = CDB_LatLng("{lat}"::numeric,',
-                '                          "{lng}"::numeric);',
-                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
-                )).format(table_name=final_table_name,
-                          lng=utils.norm_colname(lnglat[0]),
-                          lat=utils.norm_colname(lnglat[1]))
-            if _df.shape[0] > MAX_ROWS_LNGLAT:
-                batch_client = BatchSQLClient(self.auth_client)
-                status = batch_client.create([query, ])
-                tqdm.write(
-                    'Table successfully written to CARTO: {table_url}\n'
-                    '`the_geom` column is being populated from `{lnglat}`. '
-                    'Check the status of the operation with:\n'
-                    '    \033[1mBatchJobStatus(CartoContext(), \'{job_id}\''
-                    ').status()\033[0m\n'
-                    'or try reading the table from CARTO in a couple of '
-                    'minutes.\n'
-                    '\033[1mNote:\033[0m `CartoContext.map` will not work on '
-                    'this table until its geometries are created.'.format(
-                        table_url=utils.join_url(self.creds.base_url(),
-                                                 'dataset',
-                                                 final_table_name),
-                        job_id=status.get('job_id'),
-                        lnglat=str(lnglat)))
-                return BatchJobStatus(self, status)
-
-            self.sql_client.send(query, do_post=False)
-
-        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-            table_url=utils.join_url(self.creds.base_url(),
-                                     'dataset',
-                                     final_table_name)))
+            return self.update(
+                table=final_table_name, to='the_geom', fro=lnglat)
+        return None
 
     def _get_privacy(self, table_name):
         """gets current privacy of a table"""
@@ -336,6 +309,84 @@ class CartoContext(object):
         dataset = ds_manager.get(table_name)
         dataset.privacy = privacy
         dataset.save()
+
+    def update(self, table=None, to_col=None, from_col=None, query=None):
+        """Update an existing dataset
+
+        Args:
+            table (str, optional): Table that the update operations will happen
+              on. Ignored if `query` is passed.
+            to_col (str, optional): Name of column that the update operation
+              will update. Must be used in combination with `table`, and
+              `from_col`. If `from_col` is a :obj:`tuple`, then this argument
+              will be ignored.
+            from_col (str, optional): Name of column or query snippet that will
+              fill the column specified in `to_col`. Must be used in
+              combination with `table` and, if `from_col` is a :obj:`str`:,
+              `to_col`. `from_col` can take two forms:
+
+              - `str`: Name of a column, a SQL literal, or a basic SQL
+                expression
+              - `tuple`: Tuple of lng/lat pair. For example,
+                `from_col=('lngcol', 'latcol')` for columns `lngcol` and
+                `latcol` in `table`. This is only valid for updating
+                `the_geom`.
+
+            query (str, optional): Full query to apply against user CARTO
+              account. UPDATEs, ALTERs, and CREATEs are ideal operations to use
+              here. Note: If a SELECT query is supplied, the results will not
+              be returned. For more information, see the `Batch SQL API
+              documentation
+              <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__.
+
+        Returns:
+            :obj:`BatchJobStatus`: The status of the update job can be polled
+            from the BatchJobStatus object with `BatchJobStatus.status()`.
+        """
+        if (isinstance(from_col, collections.Iterable)
+                and not isinstance(from_col, str) and to_col is not None):
+            raise ValueError(
+                'If `from_col` is a tuple, then `to_col` must be `the_geom` '
+                'or not be specified.')
+        elif any([to_col, table]) and not all([from_col, to_col, table]):
+            raise ValueError('If to_col is specified, both from_col and table '
+                             'must be specified as well.')
+        elif not any([to_col, table, from_col, query]):
+            raise ValueError('No values specified for performing an update')
+
+        # create query from to_col/from_col/table
+        if (isinstance(from_col, collections.Iterable)
+                and not isinstance(from_col, str)):
+            query = utils.minify_sql((
+                'UPDATE "{table_name}"',
+                'SET the_geom = CDB_LatLng("{lat}"::numeric,',
+                '                          "{lng}"::numeric);',
+                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
+            )).format(table_name=table,
+                      lng=utils.norm_colname(from_col[0]),
+                      lat=utils.norm_colname(from_col[1]))
+        elif isinstance(from_col, str):
+            query = utils.minify_sql((
+                'UPDATE "{table_name}"',
+                'SET the_geom = {from_col};',
+                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
+            )).format(table_name=table,
+                      from_col=from_col)
+
+        batch_client = BatchSQLClient(self.auth_client)
+        status = batch_client.create([query, ])
+        tqdm.write(
+            '`{to_col}` column is being populated from `{from_col}`. Check '
+            'the status of the operation with:\n'
+            '\t\033[1mcartoframes.BatchJobStatus(cartoframes.CartoContext(), '
+            '\'{job_id}\').status()\033[0m\n'
+            'or try reading the table from CARTO in a couple of '
+            'minutes.\n\033[1mNote:\033[0m `CartoContext.map` will not work '
+            'on tables until geometries are created.'.format(
+                to_col=to_col,
+                from_col=str(from_col),
+                job_id=status.get('job_id')))
+        return BatchJobStatus(self, status)
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -1907,12 +1958,12 @@ class BatchJobStatus(object):
             'BatchJobStatus(job_id='job-id-string', ...)'
             >>> batch_job = BatchJobStatus(cc, 'job-id-string')
 
-    Attrs:
+    Attributes:
         job_id (str): Job ID of the Batch SQL API job
         last_status (str): Status of ``job_id`` job when last polled
         created_at (str): Time and date when job was created
 
-    Args:
+    Arguments:
         carto_context (carto.CartoContext): CartoContext instance
         job (dict or str): If a dict, job status dict returned after sending
             a Batch SQL API request. If str, a Batch SQL API job id.
