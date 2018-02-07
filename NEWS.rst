@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.5.4
+-----
+
+Release 2017-02-06
+
+Updates
+
+- Fixes a bug that prevented creating a table from a Data Observatory augmentation (#375)
+
+
 0.5.3
 -----
 
