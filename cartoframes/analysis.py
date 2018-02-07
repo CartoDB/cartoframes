@@ -47,17 +47,15 @@ Analysis in cartoframes takes two forms:
 
   Example:
 
-    .. code:
+    .. code::
 
       from cartoframes import Table
-      pt_count = Table('brooklyn_demographics')\
-          .join(Table('gps_pings'), on='the_geom', type='left')\
+      pt_count = Table('brooklyn_demographics')\\
+          .join(Table('gps_pings'), on='the_geom', type='left')\\
           .agg([('num_gps_pings', 'count'), ], by='the_geom')
       # calculate results on a subset of the data
       pt_count.compute(subset=0.1)
       pt_count.map(color='num_gps_pings')
-
-
 
 .. note::
 
