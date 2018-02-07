@@ -14,86 +14,100 @@ Analysis in cartoframes takes two forms:
 
   Example:
 
-      .. code::
+    .. code::
 
-          from cartoframes import AnalysisTree, analyses as ca
-          tree = AnalysisTree(
-              Table(cc, 'brooklyn_demographics'),
-              [
-                   ('buffer', ca.Buffer(100.0)),
-                   ('join', ca.Join(
-                       Table('gps_pings').filter('type=cell')
-                       on='the_geom',
-                       type='left',
-                       null_replace=0)
-                   ),
-                   ('distinct', ca.Distinct(on='user_id')),
-                   ('agg', ca.Agg(
-                       by=['geoid', 'the_geom', ],
-                       [('num_gps_pings', 'count'),
-                        ('num_gps_pings', 'avg'),
-                        ('median_income', 'min')]),
-                   ('div', ca.Division([
-                       ('num_gps_pings', 'total_pop'),
-                       ('num_gps_pings', 'the_geom')
-                   ]))
-              ]
-          )
+      from cartoframes import AnalysisTree, analyses as ca
+      tree = AnalysisTree(
+          Table(cc, 'brooklyn_demographics'),
+          [
+               ('buffer', ca.Buffer(100.0)),
+               ('join', ca.Join(
+                   Table('gps_pings').filter('type=cell')
+                   on='the_geom',
+                   type='left',
+                   null_replace=0)
+               ),
+               ('distinct', ca.Distinct(on='user_id')),
+               ('agg', ca.Agg(
+                   by=['geoid', 'the_geom', ],
+                   [('num_gps_pings', 'count'),
+                    ('num_gps_pings', 'avg'),
+                    ('median_income', 'min')]),
+               ('div', ca.Division([
+                   ('num_gps_pings', 'total_pop'),
+                   ('num_gps_pings', 'the_geom')
+               ]))
+          ]
+      )
 
 * **Method Chaining**: By chaining analysis methods off of a base data source
   node. A base data source can be one of :obj:`Table` or :obj:`Query`, which
   represent queries against the user's CARTO account. For a full list of
   analyses, see the methods of :obj:`Query` and :obj:`Table`.
 
+  Example:
 
-.. todo::
+    .. code:
 
-    * Add status updates (e.g., ``node 5 / 7 complete``) by using tqdm
-    * Have a better representation of an analysis than a :obj:`tuple`? E.g.,
-      scikit-learn passes class instances to the Pipeline
+      from cartoframes import Table
+      pt_count = Table('brooklyn_demographics')\
+          .join(Table('gps_pings'), on='the_geom', type='left')\
+          .agg([('num_gps_pings', 'count'), ], by='the_geom')
+      # calculate results on a subset of the data
+      pt_count.compute(subset=0.1)
+      pt_count.map(color='num_gps_pings')
+
+
+
+.. note::
+
+    * Add status updates (e.g., ``node 5 / 7 complete``)
+    * Have a better representation of an analysis? E.g., scikit-learn passes
+      class instances to the Pipeline
 
       .. code::
 
-          from sklearn import svm
-          from sklearn.datasets import samples_generator
-          from sklearn.feature_selection import SelectKBest, f_regression
-          from sklearn.pipeline import Pipeline
-          # build pipeline
-          anova_filter = SelectKBest(f_regression, k=5)
-          clf = svm.SVC(kernel='linear')
-          anova_svm = Pipeline([('anova', anova_filter), ('svc', clf)])
+        from sklearn import svm
+        from sklearn.datasets import samples_generator
+        from sklearn.feature_selection import SelectKBest, f_regression
+        from sklearn.pipeline import Pipeline
+        # build pipeline
+        anova_filter = SelectKBest(f_regression, k=5)
+        clf = svm.SVC(kernel='linear')
+        anova_svm = Pipeline([('anova', anova_filter), ('svc', clf)])
 
       Each 'analysis' in cartoframes could exist as a class and be constructed
       similarly. Most would be a clone of the camshaft node, and others would
-      be more data-science-specific. Having a solid definition of each analysis
-      would remove the clunkiness of having an ill-defined tuple with name and
-      parameters.
+      be more data-science-specific.
     * Method chaining builds up an AnalysisTree by reapeatedly applying the
       ``.append(...)`` to ``self``
     * Chained methods are lazily evaluated as well
     * Add AnalysisTree validation steps for column names / existence of data,
       etc. for each step of the tree
-    * Instantiating the Table or Query classes is clumsy if the ``cc`` needs to
-      be passed to it everytime -- should it be instantiated differently? Maybe
-      like ``cc.table('foo')``, which is equivalent to ``Table(cc, 'foo')``?
-      One conflict here is that ``cc.query`` already exists and means something
-      different.
+    * Instantiating the :obj:`Table` or :obj:`Query` classes is clumsy if the
+      ``cc`` needs to be passed to it everytime -- should it be instantiated
+      differently? Maybe like ``cc.table('foo')``, which is equivalent to
+      ``Table(cc, 'foo')``? One conflict here is that ``cc.query`` already
+      exists and means something different.
     * ``Layer`` should have a ``Query`` attribute instead of storing the query
       as a string?
     * Idea: Partial evaluation to get states of the data along the tree? User
       could create a shorter tree to do this instead.
-    * Operator overloading for operations like `Analyses + Analysis` does an
-      ``AnalysisTree.append`` under the hood
+    * Use Python's operator overloading for operations like
+      `Analyses + Analysis` does an ``AnalysisTree.append`` under the hood
     * Add method for trashing / invalidating analysis table and starting anew
     * What's the standard on column name inheritance from analysis n to n+1?
       Which columns come over, which don't, and which are added?
     * What can be gleaned from http://www.opengeospatial.org/standards/wps ?
     * Draw inspiration from Spark:
       http://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html
-      And place functions into a `functions` module
+      And place functions/classes into a `functions` module
       http://spark.apache.org/docs/2.2.0/api/python/pyspark.sql.html#module-pyspark.sql.functions
     * Keep in mind that the chain is actually a tree since data can come in
       at different nodes. AnalysisTree may be a better name.
+    * How should the analyses be structured? Similar to scikit-learn's
+      PipeLine? `[A(param), B(param)]` and `A(param).fit(data)` happens once
+      the tree is evaluated?
 """
 import pandas as pd
 from cartoframes import utils
