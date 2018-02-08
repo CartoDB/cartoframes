@@ -53,9 +53,194 @@ Analysis in cartoframes takes two forms:
       pt_count = Table('brooklyn_demographics')\\
           .join(Table('gps_pings'), on='the_geom', type='left')\\
           .agg([('num_gps_pings', 'count'), ], by='the_geom')
+
       # calculate results on a subset of the data
       pt_count.compute(subset=0.1)
       pt_count.map(color='num_gps_pings')
+
+
+Analysis Library
+~~~~~~~~~~~~~~~~
+
+These include traditional GIS operations and common database operations like
+JOINs. [Geopandas](http://geopandas.org/geometric_manipulations.html) has some
+nice functionality for operations like this, as does pandas and pyspark. Here
+we want to take advantage of CARTO's cloud-based database to perform these
+methods, while being careful to stay in a Pythonic syntax like you see in
+pandas.
+
+Functions
+---------
+
+- :obj:`JOIN` (spatial or attribute)
+
+  - **Use case:** Combine data from different data sources which have some
+    data in common (e.g., points intersecting polygons, JOIN by common column
+    values)
+  - References
+
+    - `GeoPandas <http://geopandas.org/mergingdata.html>`__
+    - `PostgreSQL full list of JOIN types
+      <https://www.postgresql.org/docs/9.6/static/queries-table-expressions.html>`__
+    - `PySpark
+      <http://spark.apache.org/docs/2.1.0/api/python/pyspark.sql.html#pyspark.sql.DataFrame.join>`__
+
+  - Params
+
+    - `on` (str or list of str): column name or list of column names,
+      'the_geom' for spatial joins
+    - `op` (str): one of `intersects`, `within`, `contains`
+    - `how` (str, optional, only use with `on='the_geom'`): `inner`
+      (default), `left`, `right`, `outer`, `cross`
+    - `expr` (str, optional): Custom expression (e.g., `col1 == col2` a la
+      PySpark). TODO: should we use Python's ``==`` syntax or SQL's ``=``
+      and then convert internally
+    - `agg` (TBD, optional): implicit group by / aggregation
+
+- :obj:`Centroid`
+
+  - References
+
+    - `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/centroid.js>`__
+      but need the ability to carry over summary information: e.g., avg value
+      of that centroid group, num of items present
+    - Weighted `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/weighted-centroid.js>`__
+
+  - Params
+
+    - category (str or list of str, optional): Column name(s) to group by.
+    - weight (str, optional): weight the centroid based on the weight of a
+      column value
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+
+- :obj:`Area`
+
+  - Use Case: Add an area column calculated from geometry in square kilometers.
+  - Params
+
+    - units (str): One of `sqkm` (default), `sqm`, or `sqmi`.
+
+- :obj:`Envelope`
+
+  - **Use Case:** Group geometries into a convex hull, bounding box, bounding
+    circle, or union
+  - Params
+
+    - category (str or list of str, optional): Column name(s) to group by.
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+
+- :obj:`Agg`
+
+  - **Use Case:** Summary info of any category/group
+  - Params
+
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+- :obj:`Sample`
+
+  - **Use case:** Sample from a data source
+  - References:
+
+    - `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/sampling.js>`__
+      but `TABLESAMPLE` is a better solution
+    - `TABLESAMPLE in PostgreSQL
+      <https://blog.2ndquadrant.com/tablesample-in-postgresql-9-5-2/>`__.
+    - `PySpark sample
+      <http://spark.apache.org/docs/2.1.0/api/python/pyspark.sql.html#pyspark.sql.DataFrame.sample>`__
+  - Params
+
+    - fraction (float): fraction (0 <= x <= 1) of dataset to return
+
+- :obj:`Limit`
+
+  - **Use case:** limit to `n_rows` entries
+  - Params:
+
+    - `n_rows` (int): Number of rows to return
+
+- :obj:`Distinct`
+
+  - **Use case:** De-dupe a dataset on the columns passed
+  - Params
+
+    - cols (str or list of str, optional): Column(s) to de-duplicate the
+      records on. Default is de-duplicate across all columns. Read more in
+      `PostgreSQL documentations
+      <https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-DISTINCT>`__.
+
+- :obj:`FillNull`
+
+  - **Use case:** Fill in null values with a specific value
+  - Params
+
+    - fill_vals (dict or list of dicts): Entry in the form:
+
+      .. code::
+
+        # option 1
+        {'colname': 1}
+        # option 2
+        {'colname': ['other_column', 0]}
+        # option 3
+        [{'colname': 1},
+         {'colname2': 10},
+         {'colname3': ['colname', 'colname2', 0]}]
+
+- :obj:`NullIf`
+
+  - **Use case:** Replace values with null values if a condition is met. Useful
+    for replacing quirky null values like empty strings, values like
+    ``'(none)'``, and so on.
+  - Params
+
+    - vals (tuple or list of tuples): Column name / value pairs. For example,
+      ``('colname', '')`` to replace empty strings in the column `colname` with
+      null values.
+
+- :obj:`StrJoin` - join a list of column names or literals into a new column
+
+  - **Use case:** Useful for constructing text from a combination of other
+    columns and custom values (e.g., a full address from multiple columns).
+  - Params
+
+    - vals (list of str): List of columns or literal values to concatenate into
+      a new column
+    - new_colname (str): New column name
+
+- :obj:`Filter`
+
+  - **Use case:** Filter out records
+  - Params
+
+    - filters (str or list of str): filter (e.g., ``col1 <= 10``) or a list of
+      filter conditions. PostgreSQL conditions are valid:
+      <https://www.postgresql.org/docs/9.6/static/functions-comparison.html>.
+
+- :obj:`Nearest` (give back the n-nearest geometries to another geometry)
+- :obj:`Difference`
+
+Location-data Services
+----------------------
+
+- :obj:`DataObs`
+- :obj:`Geocoding`
+- :obj:`Routing`
+- :obj:`Isochrones`
+- :obj:`AddressNormalization` (#377)
 
 .. note::
 
@@ -106,6 +291,10 @@ Analysis in cartoframes takes two forms:
     * How should the analyses be structured? Similar to scikit-learn's
       PipeLine? `[A(param), B(param)]` and `A(param).fit(data)` happens once
       the tree is evaluated?
+    * Ability to mix in analyses that are run locally
+    * Standardize aggregation tuples as they appear in many places. Besides
+      required values, we could have `distinct`, nullif, coalesce, etc.
+      handling options
 """
 import pandas as pd
 from cartoframes import utils
@@ -257,38 +446,42 @@ class AnalysisTree(object):
 
         Example:
 
-            .. code::
+          .. code::
 
-                tree = AnalysisTree(
-                    Table('transactions'),
-                    [('buffer', 10),
-                     ('augment', 'median_income')]
-                )
-                tree.append(('knn', {'mean': 'median_income'}))
+            tree = AnalysisTree(
+                Table('transactions'),
+                [
+                    Buffer(100),
+                    DataObs('median_income')
+                ]
+            )
+            tree.append(('knn', {'mean': 'median_income'}))
 
         Args:
           analysis (analysis): An analysis node
         """
         pass
 
-    def compute(self):
+    def compute(self, subset=None):
         """Trigger the AnalysisTree to run.
 
         Example:
 
-            ::
+          ::
 
-                tree = AnalysisTree(...)
-                # compute analysis tree
-                tree.compute()
-                # show results
-                df.data.head()
+            tree = AnalysisTree(...)
+            # compute analysis tree
+            tree.compute()
+            # show results
+            df.data.head()
 
         Returns:
             promise object, which reports the status of the analysis if not
             complete. Once the analysis finishes, the results will be stored
             in the attributes ``data``, ``results_url``, and ``state``.
         """
+        if subset:
+            pass
         if self.final_query:
             return self.context.query(self.final_query)
         else:
@@ -363,11 +556,29 @@ class Query(object):
         if cols is None:
             cols = util_cols
         self.context.query(
-            'select {cols} FROM ({query}) as _w'.format(
+            # NOTE: would `ANALYZE SELECT {cols} ... be better?
+            'SELECT {cols} FROM ({query}) AS _w LIMIT 0'.format(
                 cols=','.join(cols),
                 query=self.query
             )
         )
+
+    def stop(self):
+        """stop job from running. Other names: halt, delete, ...
+        This operates on the promise object after running AnalysisTree.compute
+        """
+    def head(self, n_rows=5):
+        """similar to pandas.DataFrame.head"""
+        return self.context.query(
+            'SELECT * FROM {query} as _w LIMIT {n}'.format(
+                query=self.query,
+                n=n_rows
+            )
+        )
+
+    def tail(self, n_rows=5):
+        """Return last n_rows of self.query"""
+        pass
 
     def read(self):
         """Read the query to a pandas DataFrame
@@ -454,7 +665,11 @@ class Query(object):
         return Query(self.context, _buffer(self, dist))
 
     def custom(self, query):
-        """Define custom query to add to the tree"""
+        """Define custom query to add to the tree
+
+        Can info be gleaned from the spark registerUDF?
+        http://spark.apache.org/docs/2.1.0/api/python/pyspark.sql.html#pyspark.sql.SQLContext.registerJavaFunction
+        """
         pass
 
     def describe(self, cols=None):
