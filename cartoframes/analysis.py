@@ -72,6 +72,97 @@ pandas.
 Functions
 ---------
 
+- :obj:`Agg`
+
+  - **Use Case:** Summary info of any category/group
+  - Params
+
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+
+- :obj:`Area`
+
+  - Use Case: Add an area column calculated from geometry in square kilometers.
+  - Params
+
+    - units (str): One of `sqkm` (default), `sqm`, or `sqmi`.
+
+- :obj:`Centroid`
+
+  - References
+
+    - `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/centroid.js>`__
+      but need the ability to carry over summary information: e.g., avg value
+      of that centroid group, num of items present
+    - Weighted `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/weighted-centroid.js>`__
+
+  - Params
+
+    - category (str or list of str, optional): Column name(s) to group by.
+    - weight (str, optional): weight the centroid based on the weight of a
+      column value
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+
+- :obj:`Difference`
+- :obj:`Distinct`
+
+  - **Use case:** De-dupe a dataset on the columns passed
+  - Params
+
+    - cols (str or list of str, optional): Column(s) to de-duplicate the
+      records on. Default is de-duplicate across all columns. Read more in
+      `PostgreSQL documentations
+      <https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-DISTINCT>`__.
+
+- :obj:`Envelope`
+
+  - **Use Case:** Group geometries into a convex hull, bounding box, bounding
+    circle, or union
+  - Params
+
+    - category (str or list of str, optional): Column name(s) to group by.
+    - agg_values (list of agg/column tuples): If `category` is specified, use
+      this option for carrying over aggregations within categories. Options
+      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
+      `PostgreSQL aggregation operations
+      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+
+- :obj:`FillNull`
+
+  - **Use case:** Fill in null values with a specific value
+  - Params
+
+    - fill_vals (dict or list of dicts): Entry in the form:
+
+      .. code::
+
+        # option 1
+        {'colname': 1}
+        # option 2
+        {'colname': ['other_column', 0]}
+        # option 3
+        [{'colname': 1},
+         {'colname2': 10},
+         {'colname3': ['colname', 'colname2', 0]}]
+
+- :obj:`Filter`
+
+  - **Use case:** Filter out records
+  - Params
+
+    - filters (str or list of str): filter (e.g., ``col1 <= 10``) or a list of
+      filter conditions. PostgreSQL conditions are valid:
+      <https://www.postgresql.org/docs/9.6/static/functions-comparison.html>.
+
 - :obj:`JOIN` (spatial or attribute)
 
   - **Use case:** Combine data from different data sources which have some
@@ -97,58 +188,25 @@ Functions
       and then convert internally
     - `agg` (TBD, optional): implicit group by / aggregation
 
-- :obj:`Centroid`
+- :obj:`Limit`
 
-  - References
+  - **Use case:** limit to `n_rows` entries
+  - Params:
 
-    - `camshaft node
-      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/centroid.js>`__
-      but need the ability to carry over summary information: e.g., avg value
-      of that centroid group, num of items present
-    - Weighted `camshaft node
-      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/weighted-centroid.js>`__
+    - `n_rows` (int): Number of rows to return
 
+- :obj:`Nearest` (give back the n-nearest geometries to another geometry)
+- :obj:`NullIf`
+
+  - **Use case:** Replace values with null values if a condition is met. Useful
+    for replacing quirky null values like empty strings, values like
+    ``'(none)'``, and so on.
   - Params
 
-    - category (str or list of str, optional): Column name(s) to group by.
-    - weight (str, optional): weight the centroid based on the weight of a
-      column value
-    - agg_values (list of agg/column tuples): If `category` is specified, use
-      this option for carrying over aggregations within categories. Options
-      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
-      `PostgreSQL aggregation operations
-      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
+    - vals (tuple or list of tuples): Column name / value pairs. For example,
+      ``('colname', '')`` to replace empty strings in the column `colname` with
+      null values.
 
-- :obj:`Area`
-
-  - Use Case: Add an area column calculated from geometry in square kilometers.
-  - Params
-
-    - units (str): One of `sqkm` (default), `sqm`, or `sqmi`.
-
-- :obj:`Envelope`
-
-  - **Use Case:** Group geometries into a convex hull, bounding box, bounding
-    circle, or union
-  - Params
-
-    - category (str or list of str, optional): Column name(s) to group by.
-    - agg_values (list of agg/column tuples): If `category` is specified, use
-      this option for carrying over aggregations within categories. Options
-      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
-      `PostgreSQL aggregation operations
-      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
-
-- :obj:`Agg`
-
-  - **Use Case:** Summary info of any category/group
-  - Params
-
-    - agg_values (list of agg/column tuples): If `category` is specified, use
-      this option for carrying over aggregations within categories. Options
-      available are: `min`, `max`, `count`, `avg`, `sum`, `stddev` and other
-      `PostgreSQL aggregation operations
-      <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
 - :obj:`Sample`
 
   - **Use case:** Sample from a data source
@@ -165,52 +223,6 @@ Functions
 
     - fraction (float): fraction (0 <= x <= 1) of dataset to return
 
-- :obj:`Limit`
-
-  - **Use case:** limit to `n_rows` entries
-  - Params:
-
-    - `n_rows` (int): Number of rows to return
-
-- :obj:`Distinct`
-
-  - **Use case:** De-dupe a dataset on the columns passed
-  - Params
-
-    - cols (str or list of str, optional): Column(s) to de-duplicate the
-      records on. Default is de-duplicate across all columns. Read more in
-      `PostgreSQL documentations
-      <https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-DISTINCT>`__.
-
-- :obj:`FillNull`
-
-  - **Use case:** Fill in null values with a specific value
-  - Params
-
-    - fill_vals (dict or list of dicts): Entry in the form:
-
-      .. code::
-
-        # option 1
-        {'colname': 1}
-        # option 2
-        {'colname': ['other_column', 0]}
-        # option 3
-        [{'colname': 1},
-         {'colname2': 10},
-         {'colname3': ['colname', 'colname2', 0]}]
-
-- :obj:`NullIf`
-
-  - **Use case:** Replace values with null values if a condition is met. Useful
-    for replacing quirky null values like empty strings, values like
-    ``'(none)'``, and so on.
-  - Params
-
-    - vals (tuple or list of tuples): Column name / value pairs. For example,
-      ``('colname', '')`` to replace empty strings in the column `colname` with
-      null values.
-
 - :obj:`StrJoin` - join a list of column names or literals into a new column
 
   - **Use case:** Useful for constructing text from a combination of other
@@ -221,17 +233,6 @@ Functions
       a new column
     - new_colname (str): New column name
 
-- :obj:`Filter`
-
-  - **Use case:** Filter out records
-  - Params
-
-    - filters (str or list of str): filter (e.g., ``col1 <= 10``) or a list of
-      filter conditions. PostgreSQL conditions are valid:
-      <https://www.postgresql.org/docs/9.6/static/functions-comparison.html>.
-
-- :obj:`Nearest` (give back the n-nearest geometries to another geometry)
-- :obj:`Difference`
 
 Location-data Services
 ----------------------
