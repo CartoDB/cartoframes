@@ -72,6 +72,7 @@ pandas.
 Functions
 ---------
 
+- :obj:`AddressNormalization` (#377)
 - :obj:`Agg`
 
   - **Use Case:** Summary info of any category/group
@@ -88,7 +89,21 @@ Functions
   - Use Case: Add an area column calculated from geometry in square kilometers.
   - Params
 
-    - units (str): One of `sqkm` (default), `sqm`, or `sqmi`.
+    - units (str): One of ``sqkm`` (default), ``sqmeters``, or ``sqmiles``.
+
+- :obj:`Buffer`
+
+  - **Use case:** Buffer points, lines, polygons by a given distance. Used
+    widely in spatial analysis for finding points within a distance among
+    other uses
+  - References
+
+    - `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/buffer.js>`__
+
+  - Params
+
+    - radius (float, required): radius of buffer in meters
 
 - :obj:`Centroid`
 
@@ -112,6 +127,30 @@ Functions
       `PostgreSQL aggregation operations
       <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
 
+- :obj:`Custom`
+
+  - **Use case:** Define a custom analysis using SQL.
+  - References
+
+    - `Deprecated SQL node in camshaft
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/deprecated-sql-function.js>`__
+
+  - Params
+
+    - sql (str): Custom analysis defined as a SQL query
+
+- :obj:`DataObs`
+
+  - **Use case:** Augment a dataset with data observatory measures
+  - References
+
+    - Existing implementation: `cartoframes docs
+      <http://cartoframes.readthedocs.io/en/v0.5.4/#context.CartoContext.data>`__
+
+  - Params
+
+    - same as existing implementation
+
 - :obj:`Difference`
 - :obj:`Distinct`
 
@@ -123,12 +162,47 @@ Functions
       `PostgreSQL documentations
       <https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-DISTINCT>`__.
 
+  - Example
+
+    .. code::
+
+      Distinct(cols=('the_geom', 'id_num', 'reading'))
+
+- :obj:`Div`
+
+  - **Use case:** Divide one column by another
+  - Note: Or should we have an inline-custom function that allows you to write
+    select-level math like this. E.g., user can pass ``col1 + 2 * col2 / col3``
+
+  - Params
+
+    - pairs (tuple of str): Tuple of numerator, denominator, and optional name
+
+  - Example
+
+    .. code::
+
+      Div([('num_pings', 'total_pop', 'pings_per_pop'),
+           ('num_pings', 'num_unique_foot_traffic'),
+           ('num_pings', 1000.0)]
+
 - :obj:`Envelope`
 
   - **Use Case:** Group geometries into a convex hull, bounding box, bounding
-    circle, or union
+    circle, concave hull, or union
+  - References
+
+    - PostGIS docs on these: `convex hull
+      <https://postgis.net/docs/ST_ConvexHull.html>`__, `concave hull
+      <https://postgis.net/docs/ST_ConcaveHull.html>`__, `bounding box
+      <https://postgis.net/docs/ST_Envelope.html>`__, `bounding circle
+      <https://postgis.net/docs/ST_MinimumBoundingCircle.html>`__, `union
+      <https://postgis.net/docs/ST_Union.html>`__.
+
   - Params
 
+    - type (str, optional): One of `bounding_box` (default), `convex_hull`,
+      `concave_hull`, `bounding_circle`, or `union`
     - category (str or list of str, optional): Column name(s) to group by.
     - agg_values (list of agg/column tuples): If `category` is specified, use
       this option for carrying over aggregations within categories. Options
@@ -136,23 +210,37 @@ Functions
       `PostgreSQL aggregation operations
       <https://www.postgresql.org/docs/9.6/static/functions-aggregate.html>`__.
 
+  - Example
+
+    .. code::
+
+      Envelope(type='convex_hull')
+
 - :obj:`FillNull`
 
   - **Use case:** Fill in null values with a specific value
+  - References
+
+    - This uses PostgreSQL's `coalesce
+      <https://www.postgresql.org/docs/9.6/static/functions-conditional.html>`__
+
   - Params
 
     - fill_vals (dict or list of dicts): Entry in the form:
 
-      .. code::
+  - Example
 
-        # option 1
-        {'colname': 1}
-        # option 2
-        {'colname': ['other_column', 0]}
-        # option 3
-        [{'colname': 1},
-         {'colname2': 10},
-         {'colname3': ['colname', 'colname2', 0]}]
+    .. code::
+
+      # option 1
+      FillNull({'colname': 1})
+      # option 2
+      FillNull({'colname': ['other_column', 0]})
+      # option 3
+      FillNull(
+          [{'colname': 1},
+           {'colname2': 10},
+           {'colname3': ['colname', 'colname2', 0]}])
 
 - :obj:`Filter`
 
@@ -163,7 +251,28 @@ Functions
       filter conditions. PostgreSQL conditions are valid:
       <https://www.postgresql.org/docs/9.6/static/functions-comparison.html>.
 
-- :obj:`JOIN` (spatial or attribute)
+  - Example
+
+    .. code::
+
+      Filter(['col1 <= 10', 'ST_Area(the_geom::geography) > 10'])
+      Filter('col1 == col2')
+
+- :obj:`Geocoding`
+
+  - **Use case:** Turn numerical or text data into geometries. E.g., street
+    addresses to points, country names to boundaries, IP addresses to points,
+    etc.
+  - Reference
+
+    - See the files beginning with `georeference` in `camshaft node library
+      <https://github.com/CartoDB/camshaft/tree/master/lib/node/nodes>`__
+
+- :obj:`Isochrone`
+
+  - **Use case:** Drive time polygons, etc.
+
+- :obj:`Join` (spatial or attribute)
 
   - **Use case:** Combine data from different data sources which have some
     data in common (e.g., points intersecting polygons, JOIN by common column
@@ -188,12 +297,55 @@ Functions
       and then convert internally
     - `agg` (TBD, optional): implicit group by / aggregation
 
+- :obj:`Kmeans`
+
+  - **Use case:** Find clusters in data spatially or in parameter space
+  - Reference
+
+    - `camshaft spatial
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/kmeans.js>`__
+    - `crankshaft non-spatial
+      <https://github.com/CartoDB/crankshaft/blob/develop/doc/11_kmeans.md>`__
+
+- :obj:`Length`
+
+  - **Use case:** Get the length of a linestring in meters, kilometers, or
+    miles
+
+- :obj:`Line`
+
+  - **Use case:** Create lines out of a series of points
+  - Reference
+
+    - See all `camshaft nodes like line-*
+      <https://github.com/CartoDB/camshaft/tree/master/lib/node/nodes>`__
+
 - :obj:`Limit`
 
   - **Use case:** limit to `n_rows` entries
   - Params:
 
     - `n_rows` (int): Number of rows to return
+
+- :obj:`MoranLocal`
+
+  - **Use case:** Classify geometries by whether they are in a cluster of
+    similarly high or low values, or are an outlier compared to their neighbors
+  - References
+
+    - `camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/moran.js>`__
+    - `crankshaft functions
+      <https://github.com/CartoDB/crankshaft/blob/develop/doc/02_moran.md>`__
+
+  - Params
+
+    - val (str): Column name
+    - denom (str, optional): Column name for denominator
+    - weight_type (str, optional): one of ``knn`` (default) or ``queen``, which
+      requires adjacent geometries
+    - n_neighbors (int, optional): Choose the number of neighbors, only valid
+      for k-nearest neighbors
 
 - :obj:`Nearest` (give back the n-nearest geometries to another geometry)
 - :obj:`NullIf`
@@ -206,6 +358,26 @@ Functions
     - vals (tuple or list of tuples): Column name / value pairs. For example,
       ``('colname', '')`` to replace empty strings in the column `colname` with
       null values.
+
+- :obj:`Routing`
+
+  - **Use case:** Routing
+  - References
+
+    - See `camshaft nodes beginning in routing
+      <https://github.com/CartoDB/camshaft/tree/master/lib/node/nodes>`__
+
+  - Params
+
+    - destination (tuple of :obj:`Table` or :obj:`Query` and colname)
+    - geom_type (str): Whether to return a ``road`` (default) or ``straight``
+
+  - Returns
+
+    - new linestring of route replaces previous `the_geom`
+    - length_km (float): length of route
+    - duration_sec (float): if possible, return the travel time estimate. Will
+      be ``null`` if not possible.
 
 - :obj:`Sample`
 
@@ -237,11 +409,33 @@ Functions
 Location-data Services
 ----------------------
 
-- :obj:`DataObs`
-- :obj:`Geocoding`
-- :obj:`Routing`
-- :obj:`Isochrones`
-- :obj:`AddressNormalization` (#377)
+
+Uncertain about adding
+----------------------
+
+- :obj:`Closest`
+
+  - This is a `camshaft node
+    <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/closest.js>`__
+
+- :obj:`Contour`
+
+  - Not sure if this is ready for primetime? `camshaft node
+    <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/contour.js>`__
+
+- :obj:`Existence`
+
+  - This is a `camshaft node
+    <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/filter-by-node-column.js>`__
+    related to widgets and connected analysis tables
+
+- :obj:`Gravity`
+
+  - We have a better implementation that's an open PR in crankshaft.
+
+    - `current camshaft node
+      <https://github.com/CartoDB/camshaft/blob/master/lib/node/nodes/gravity.js>`__
+    - `crankshaft PR <https://github.com/CartoDB/crankshaft/pull/147>`__
 
 .. note::
 
@@ -372,26 +566,7 @@ class AnalysisTree(object):
         in user account. If :obj:`Table` or :obj:`Query`, the base data for the
         analysis tree.
       analyses (list): A list of analyses to apply to `source`. The following
-        are available analyses and their parameters:
-
-        - :obj:`Buffer`:
-          - radius (float, required): radius of buffer in meters
-        - :obj:`Join`:
-          - target (:obj:`Table`, :obj:`Query`, or :obj:`str`): The data source
-            that the `source` is joined against.
-          - on (:obj:`str`): If a :obj:`str`, the column name to join on. If
-            `the_geom` is provided, a spatial join will be performed. If a
-            :obj:`tuple` is provided, the first element is the column from
-            `source` which is matched to the second element, the column from
-            `target`.
-        - :obj:`Div`: Divide one column by another. If the second column is
-          `the_geom`, the result will be numerator per sq km
-        - :obj:`Agg`: Aggregate data according to the `agg`/`column` pairs,
-          and grouping by `by`, which can be a :obj:`str` or list of
-          :obj:`str`.
-        - :obj:`Distinct`: Return only the distinct rows of the Table or Query.
-        - Etc. many more to come
-
+        are `available analyses <#functions>`__ and their parameters.
 
     Attributes:
       - data (pandas.DataFrame): ``None`` until the analysis tree is
