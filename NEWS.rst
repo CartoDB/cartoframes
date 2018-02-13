@@ -1,10 +1,19 @@
 Changelog
 =========
 
+0.5.5
+-----
+
+Release 2018-02-13
+
+Updates
+
+- Updates basemap URLs to new CDN
+
 0.5.4
 -----
 
-Release 2017-02-06
+Release 2018-02-06
 
 Updates
 
@@ -14,7 +23,7 @@ Updates
 0.5.3
 -----
 
-Release 2017-01-29
+Release 2018-01-29
 
 Updates
 
