@@ -60,9 +60,7 @@ class BaseMap(AbstractLayer):
 
         self.source = source
         self.labels = labels
-        stem = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-        if source == 'voyager':
-            stem += 'rastertiles'
+        stem = 'https://{s}.basemaps.cartocdn.com/rastertiles/'
 
         if self.is_basic():
             if only_labels:
