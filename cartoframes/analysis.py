@@ -63,11 +63,12 @@ Analysis Library
 ~~~~~~~~~~~~~~~~
 
 These include traditional GIS operations and common database operations like
-JOINs. [Geopandas](http://geopandas.org/geometric_manipulations.html) has some
-nice functionality for operations like this, as does pandas and pyspark. Here
-we want to take advantage of CARTO's cloud-based database to perform these
+JOINs. `Geopandas <http://geopandas.org/geometric_manipulations.html>`__ has
+some nice functionality for operations like this, as does pandas and pyspark.
+Here we want to take advantage of CARTO's cloud-based database to perform these
 methods, while being careful to stay in a Pythonic syntax like you see in
-pandas.
+pandas. Other reference: OGC standards:
+http://www.opengeospatial.org/standards/sfs
 
 Functions
 ---------
@@ -406,10 +407,6 @@ Functions
     - new_colname (str): New column name
 
 
-Location-data Services
-----------------------
-
-
 Uncertain about adding
 ----------------------
 
@@ -521,6 +518,10 @@ class AnalysisTree(object):
 
     :obj:`AnalysisTree` allows you to build up a tree of analyses which are
     applied sequentially to a source (:obj:`Query` or :obj:`Table`).
+
+    The analysis inputs can be passed as a list of analyses, or as a list of
+    tuples, each with a unique identifier `key` so it can be later referenced
+    or removed from the chain programmatically.
 
     Example:
 
