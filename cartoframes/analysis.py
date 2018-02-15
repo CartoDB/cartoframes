@@ -10,7 +10,11 @@ Analysis in cartoframes takes two forms:
   instantiated. See :obj:`AnalysisTree` for more information. This is modeled
   after Builder analysis workflows, scikit-learn's `PipeLine class
   <http://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html>`__,
-  and PySpark's SQL syntax.
+  PySpark's SQL syntax, and directed acyclic graphs.
+
+  A key feature of this data structure is that most analyses, besides accepting
+  parameters, can also accept other data sources (:obj:`Table`s, :obj:`Query`s
+  and other analysis pipelines.
 
   Example:
 
