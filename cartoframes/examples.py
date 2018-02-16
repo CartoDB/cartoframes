@@ -1,5 +1,9 @@
 from cartoframes import CartoContext
 
-def exampleContext():
-    """Returns a CartoContext corresponding to a CARTO account with example data"""
-    return CartoContext(base_url='https://cartoframes.carto.com', api_key='default_public')
+EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
+EXAMPLE_API_KEY = 'default_public'
+
+
+def example_context():
+    """Returns a CartoContext with a CARTO account containing example data"""
+    return CartoContext(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
