@@ -1071,7 +1071,7 @@ class CartoContext(object):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
-        region specified (if any). This method is espeically useful for getting
+        region specified (if any). This method is especially useful for getting
         boundaries for a region and, with `CartoContext.data` and
         `CartoContext.data_discovery`, getting tables of geometries and the
         corresponding raw measures. For example, if you want to analyze
