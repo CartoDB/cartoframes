@@ -1616,13 +1616,13 @@ class CartoContext(object):
 
         names = {}
         for row in _meta.iterrows():
-            suggested_name = row[1]['suggested_name']
-            if suggested_name in tablecols:
-                names[suggested_name] = self._unique(suggested_name, tablecols)
+            suggested = row[1]['suggested_name']
+            if suggested in tablecols:
+                names[suggested] = utils.unique_colname(suggested, tablecols)
                 warn('{s0} was augmented as {s1} because of name collision'. \
-                    format(s0=suggested_name, s1=names[suggested_name]))
+                    format(s0=suggested, s1=names[suggested]))
             else:
-                names[suggested_name] = suggested_name
+                names[suggested] = suggested
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
@@ -1646,11 +1646,6 @@ class CartoContext(object):
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
         return self.query(query,
                           table_name=persist_as)
-
-    def _unique(self, suggested, existing):
-        while suggested in existing:
-            suggested = '_' + suggested
-        return suggested
 
     # backwards compatibility
     def data_augment(self, table_name, metadata):
