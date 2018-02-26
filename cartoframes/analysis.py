@@ -63,13 +63,24 @@ Analysis in cartoframes takes two forms:
       pt_count.map(color='num_gps_pings')
 
 
+Data Sources
+~~~~~~~~~~~~
+
+The following data sources can be used as nodes:
+
+* :obj:`Table` - a table present in user account
+* :obj:`Query` - a query against user account
+* :obj:`BuilderAnalysis` - an analysis node already performed
+* :obj:`LocalData` - use local data (file, dataframe, etc.)
+
 Analysis Library
 ~~~~~~~~~~~~~~~~
 
-These include traditional GIS operations and common database operations like
-JOINs. `Geopandas <http://geopandas.org/geometric_manipulations.html>`__ has
-some nice functionality for operations like this, as does pandas and pyspark.
-Here we want to take advantage of CARTO's cloud-based database to perform these
+These include traditional GIS operations, common database operations like
+JOINs, and more advanced spatial statistics. `Geopandas
+<http://geopandas.org/geometric_manipulations.html>`__ has some nice
+functionality for operations like this, as does pandas and pyspark. Here we
+want to take advantage of CARTO's cloud-based database to perform these
 methods, while being careful to stay in a Pythonic syntax like you see in
 pandas. Other reference: OGC standards:
 http://www.opengeospatial.org/standards/sfs
@@ -882,4 +893,23 @@ class Table(Query):
         super(Table, self).__init__(
             context,
             'SELECT * FROM {}'.format(table_name)
+        )
+
+
+class BuilderAnalysis(Query):
+    """Builder analysis node. Use this option for placing an analysis node
+    from Builder."""
+    def __init__(self, context, node_hash):
+        super(BuilderAnalysis, self).__init__(
+            context,
+            'select * from {}'.format(node_hash)
+        )
+
+
+class LocalData(Table):
+    """Use a local file, dataframe, etc. as a node in the analysis framework"""
+    def __init__(self, context, data):
+        super(LocalData, self).__init__(
+            context,
+            data
         )
