@@ -22,7 +22,23 @@ WILL_SKIP = False
 warnings.filterwarnings("ignore")
 
 
-class TestCartoContext(unittest.TestCase):
+class _UserUrlLoader:
+    def user_url(self):
+        user_url = None
+        if (os.environ.get('USERURL') is None):
+            try:
+                creds = json.loads(open('test/secret.json').read())
+                user_url = creds['USERURL']
+            except:
+                warnings.warn('secret.json not found')
+
+        if user_url in (None, ''):
+            user_url = 'https://{username}.carto.com/'
+
+        return user_url
+
+
+class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -43,8 +59,10 @@ class TestCartoContext(unittest.TestCase):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
+        self.user_url = self.user_url()
+
         if self.username and self.apikey:
-            self.baseurl = 'https://{username}.carto.com/'.format(
+            self.baseurl = self.user_url.format(
                     username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
@@ -1073,7 +1091,7 @@ class TestCartoContext(unittest.TestCase):
             cc.data(self.test_data_table, meta)
 
 
-class TestBatchJobStatus(unittest.TestCase):
+class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -1094,8 +1112,10 @@ class TestBatchJobStatus(unittest.TestCase):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
+        self.user_url = self.user_url()
+
         if self.username and self.apikey:
-            self.baseurl = 'https://{username}.carto.com/'.format(
+            self.baseurl = self.user_url.format(
                 username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
@@ -1185,3 +1205,4 @@ class TestBatchJobStatus(unittest.TestCase):
         str_bjs = BatchJobStatus(cc, 'foo')
         self.assertIsNone(str_bjs.get_status())
         self.assertEqual(str_bjs.job_id, 'foo')
+
