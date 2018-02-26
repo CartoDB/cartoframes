@@ -1083,15 +1083,10 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-        with self.assertRaises(NameError, msg='column name already exists'):
-            meta = cc.data_discovery(region='united states',
-                                     time='2006 - 2010',
-                                     regex='.*walked to work.*',
-                                     boundaries='us.census.tiger.census_tract')
-            cc.data(self.test_data_table, meta)
 
     def test_column_name_collision_do_enrichement(self):
         dup_col = 'female_third_level_studies_rate_2011'
+        self.sql_client.send('drop table if EXISTS test_deleteme')
         self.sql_client.send("""create table test_deleteme as (
                 select cdb_latlng(40.4165,-3.70256) the_geom,
                        1 {dup_col})""".format(dup_col=dup_col))
@@ -1109,6 +1104,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.sql_client.send('drop table test_deleteme')
 
         self.assertIn('_' + dup_col, data.keys())
+
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
