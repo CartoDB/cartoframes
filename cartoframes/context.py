@@ -1615,8 +1615,7 @@ class CartoContext(object):
         )['fields'].keys()
 
         names = {}
-        for row in _meta.iterrows():
-            suggested = row[1]['suggested_name']
+        for suggested in _meta['suggested_name']:
             if suggested in tablecols:
                 names[suggested] = utils.unique_colname(suggested, tablecols)
                 warn('{s0} was augmented as {s1} because of name collision'. \
