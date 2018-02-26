@@ -1095,7 +1095,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        meta = cc.data_discovery(region='test_deleteme')
+        meta = cc.data_discovery(region='test_deleteme', keywords='female')
         meta = meta[meta.suggested_name == dup_col]
         data = cc.data(
             'test_deleteme',
