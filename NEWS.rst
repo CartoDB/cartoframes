@@ -4,7 +4,7 @@ Changelog
 0.5.6
 -----
 
-Release TBD
+Release 2018-02-26
 
 Updates
 
