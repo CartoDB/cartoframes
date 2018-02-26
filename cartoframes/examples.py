@@ -1,6 +1,9 @@
+"""example data factory"""
 from cartoframes import CartoContext
 
-EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
+# EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
+# EXAMPLE_API_KEY = 'default_public'
+EXAMPLE_BASE_URL = 'http://cdb.localhost.lan:8888/'
 EXAMPLE_API_KEY = 'default_public'
 
 
