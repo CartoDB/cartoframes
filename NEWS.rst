@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5.6
+-----
+
+Release TBD
+
+Updates
+
+- Avoids collision of column names on DO augmentation (#323).
+
 0.5.5
 -----
 
