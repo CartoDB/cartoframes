@@ -1086,22 +1086,24 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
     def test_column_name_collision_do_enrichement(self):
         dup_col = 'female_third_level_studies_rate_2011'
-        self.sql_client.send('drop table if EXISTS test_deleteme')
-        self.sql_client.send("""create table test_deleteme as (
+        self.sql_client.send("""create table {table} as (
                 select cdb_latlng(40.4165,-3.70256) the_geom,
-                       1 {dup_col})""".format(dup_col=dup_col))
+                       1 {dup_col})""". \
+                             format(dup_col=dup_col,
+                                    table=self.test_write_table))
         self.sql_client.send(
-            "select cdb_cartodbfytable('public', 'test_deleteme')")
+            "select cdb_cartodbfytable('public', '{table}')". \
+                format(table=self.test_write_table))
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        meta = cc.data_discovery(region='test_deleteme', keywords='female')
+        meta = cc.data_discovery(region=self.test_write_table,
+                                 keywords='female')
         meta = meta[meta.suggested_name == dup_col]
         data = cc.data(
-            'test_deleteme',
+            self.test_write_table,
             meta[meta.suggested_name == dup_col]
         )
-        self.sql_client.send('drop table test_deleteme')
 
         self.assertIn('_' + dup_col, data.keys())
 
