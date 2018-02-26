@@ -1614,17 +1614,21 @@ class CartoContext(object):
             **DEFAULT_SQL_ARGS
         )['fields'].keys()
 
-        if set(tablecols) & set(_meta['suggested_name']):
-            commoncols = set(tablecols) & set(_meta['suggested_name'])
-            raise NameError('Column name collision for column(s): {cols}. '
-                            'Rename table column(s) to resolve.'.format(
-                                cols=', '.join(commoncols)))
+        names = {}
+        for row in _meta.iterrows():
+            suggested_name = row[1]['suggested_name']
+            if suggested_name in tablecols:
+                names[suggested_name] = self._unique(suggested_name, tablecols)
+                warn('{s0} was augmented as {s1} because of name collision'. \
+                    format(s0=suggested_name, s1=names[suggested_name]))
+            else:
+                names[suggested_name] = suggested_name
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
                 n=row[0],
                 pgtype=row[1]['numer_type'],
-                col=row[1]['suggested_name'])
+                col=names[row[1]['suggested_name']])
             for row in _meta.iterrows())
         query = utils.minify_sql((
             'SELECT t.*, {cols}',
@@ -1642,6 +1646,11 @@ class CartoContext(object):
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
         return self.query(query,
                           table_name=persist_as)
+
+    def _unique(self, suggested, existing):
+        while suggested in existing:
+            suggested = '_' + suggested
+        return suggested
 
     # backwards compatibility
     def data_augment(self, table_name, metadata):
