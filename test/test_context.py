@@ -1090,6 +1090,25 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      boundaries='us.census.tiger.census_tract')
             cc.data(self.test_data_table, meta)
 
+    def test_column_name_collision_do_enrichement(self):
+        dup_col = 'female_third_level_studies_rate_2011'
+        self.sql_client.send("""create table test_deleteme as (
+                select cdb_latlng(40.4165,-3.70256) the_geom,
+                       1 {dup_col})""".format(dup_col=dup_col))
+        self.sql_client.send(
+            "select cdb_cartodbfytable('public', 'test_deleteme')")
+
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        meta = cc.data_discovery(region='test_deleteme')
+        meta = meta[meta.suggested_name == dup_col]
+        data = cc.data(
+            'test_deleteme',
+            meta[meta.suggested_name == dup_col]
+        )
+        self.sql_client.send('drop table test_deleteme')
+
+        self.assertIn('_' + dup_col, data.keys())
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
