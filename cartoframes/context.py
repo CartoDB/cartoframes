@@ -14,7 +14,7 @@ import pandas as pd
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
-from carto.auth import APIKeyAuthClient
+from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
@@ -105,25 +105,24 @@ class CartoContext(object):
         self.auth_client = APIKeyAuthClient(base_url=self.creds.base_url(),
                                             api_key=self.creds.key(),
                                             session=session)
+        self.auth_api_client = AuthAPIClient(base_url=self.creds.base_url(),
+                                              api_key=self.creds.key(),
+                                              session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
-        self._is_authenticated()
+        self._is_authenticated(self.auth_api_client)
         self.is_org = self._is_org_user()
 
         self._map_templates = {}
         self._srcdoc = None
         self._verbose = verbose
 
-    def _is_authenticated(self):
+    def _is_authenticated(self, auth_api_client):
         """Checks if credentials allow for authenticated carto access"""
-        try:
-            self.sql_client.send(
-                'select * from information_schema.tables limit 0')
-        except CartoException as err:
+        if not auth_api_client.is_valid_api_key:
             raise CartoException('Cannot authenticate user `{0}`. Check '
                                  'credentials ({1}).'.format(
-                                     self.creds.username(),
-                                     err))
+                self.creds.username()))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
