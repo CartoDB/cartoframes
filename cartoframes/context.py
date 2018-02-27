@@ -119,9 +119,9 @@ class CartoContext(object):
 
     def _is_authenticated(self, auth_api_client):
         """Checks if credentials allow for authenticated carto access"""
-        if not auth_api_client.is_valid_api_key:
+        if not auth_api_client.is_valid_api_key():
             raise CartoException('Cannot authenticate user `{0}`. Check '
-                                 'credentials ({1}).'.format(
+                                 'credentials.'.format(
                 self.creds.username()))
 
     def _is_org_user(self):
@@ -165,6 +165,9 @@ class CartoContext(object):
                 raise ValueError("`limit` parameter must an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
+
+    def datasets(self):
+        return DatasetManager(self.auth_client).all()
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):

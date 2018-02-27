@@ -17,6 +17,7 @@ from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
+from cartoframes.examples import examples
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -153,7 +154,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_credentials(self):
         """context.CartoContext.__init__ Credentials argument"""
-        creds = cartoframes.Credentials(username=self.username,
+        creds = cartoframes.Credentials(base_url=self.baseurl,
+                                        username=self.username,
                                         key=self.apikey)
         cc = cartoframes.CartoContext(creds=creds)
         self.assertIsInstance(cc, cartoframes.CartoContext)
@@ -161,7 +163,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(cc.creds.key(), self.apikey)
 
         # CartoContext pulls from saved credentials
-        saved_creds = cartoframes.Credentials(username=self.username,
+        saved_creds = cartoframes.Credentials(base_url=self.baseurl,
+                                              username=self.username,
                                               key=self.apikey)
         saved_creds.save()
         cc_saved = cartoframes.CartoContext()
@@ -1106,6 +1109,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         )
 
         self.assertIn('_' + dup_col, data.keys())
+
+    def test_examples(self):
+        e = examples()
+        tables = e.datasets()
+        # TODO: add assertions for well-known datasets
+        self.assertTrue(tables)
 
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
