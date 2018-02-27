@@ -1614,17 +1614,20 @@ class CartoContext(object):
             **DEFAULT_SQL_ARGS
         )['fields'].keys()
 
-        if set(tablecols) & set(_meta['suggested_name']):
-            commoncols = set(tablecols) & set(_meta['suggested_name'])
-            raise NameError('Column name collision for column(s): {cols}. '
-                            'Rename table column(s) to resolve.'.format(
-                                cols=', '.join(commoncols)))
+        names = {}
+        for suggested in _meta['suggested_name']:
+            if suggested in tablecols:
+                names[suggested] = utils.unique_colname(suggested, tablecols)
+                warn('{s0} was augmented as {s1} because of name collision'. \
+                    format(s0=suggested, s1=names[suggested]))
+            else:
+                names[suggested] = suggested
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
                 n=row[0],
                 pgtype=row[1]['numer_type'],
-                col=row[1]['suggested_name'])
+                col=names[row[1]['suggested_name']])
             for row in _meta.iterrows())
         query = utils.minify_sql((
             'SELECT t.*, {cols}',
