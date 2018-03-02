@@ -284,6 +284,16 @@ Functions
     - See the files beginning with `georeference` in `camshaft node library
       <https://github.com/CartoDB/camshaft/tree/master/lib/node/nodes>`__
 
+- :obj:`Imputer`
+
+  - **Use case:** Help clean up messy data by filling in null values with the
+    mean, median, or mode of the column of interest.
+  - Reference
+
+    - Idea comes from `scikit-learn
+      <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Imputer.html>`__
+    - See also :obj:`StandardScaler`
+
 - :obj:`Isochrone`
 
   - **Use case:** Drive time polygons, etc.
@@ -410,6 +420,15 @@ Functions
   - Params
 
     - fraction (float): fraction (0 <= x <= 1) of dataset to return
+
+- :obj:`StandardScaler`
+
+  - **Use case:** Transforms data to be centered on its mean and scaled to have
+    unit variance
+  - References:
+
+    - Modeled after scikit-learn's `StandardScaler
+      <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html#sklearn.preprocessing.StandardScaler>`__
 
 - :obj:`StrJoin` - join a list of column names or literals into a new column
 
@@ -670,7 +689,8 @@ class AnalysisTree(object):
         Returns:
             promise object, which reports the status of the analysis if not
             complete. Once the analysis finishes, the results will be stored
-            in the attributes ``data``, ``results_url``, and ``state``.
+            in the attributes ``data``, ``results_url``, and ``state``. Also
+            returned would be: compute time and other metadata about the job.
         """
         if subset:
             pass
