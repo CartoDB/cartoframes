@@ -1,5 +1,9 @@
 # -#- coding: utf-8 -#-
 """
+********
+Overview
+********
+
 Analysis in cartoframes takes two forms:
 
 * **Pipelines**: :obj:`AnalysisTree` pipelines where multiple analyses can be
@@ -13,8 +17,8 @@ Analysis in cartoframes takes two forms:
   PySpark's SQL syntax, and directed acyclic graphs.
 
   A key feature of this data structure is that most analyses, besides accepting
-  parameters, can also accept other data sources (:obj:`Table`s, :obj:`Query`s
-  and other analysis pipelines.
+  parameters, can also accept other data sources (:obj:`Table`, :obj:`Query`,
+  etc.) as well as other :obj:`AnalysisTrees`.
 
   Example:
 
@@ -45,9 +49,9 @@ Analysis in cartoframes takes two forms:
       )
 
 * **Method Chaining**: By chaining analysis methods off of a base data source
-  node. A base data source can be one of :obj:`Table` or :obj:`Query`, which
-  represent queries against the user's CARTO account. For a full list of
-  analyses, see the methods of :obj:`Query` and :obj:`Table`.
+  node. A base data source can be a supported `Data Source <#data-sources>`__.
+  For a full list of analyses, see the methods of :obj:`Query` and
+  :obj:`Table`.
 
   Example:
 
@@ -64,7 +68,7 @@ Analysis in cartoframes takes two forms:
 
 
 Data Sources
-~~~~~~~~~~~~
+============
 
 The following data sources can be used as nodes:
 
@@ -72,9 +76,10 @@ The following data sources can be used as nodes:
 * :obj:`Query` - a query against user account
 * :obj:`BuilderAnalysis` - an analysis node already performed
 * :obj:`LocalData` - use local data (file, dataframe, etc.)
+* :obj:`AnalysisTree` - previously constructed analysis tree
 
 Analysis Library
-~~~~~~~~~~~~~~~~
+================
 
 These include traditional GIS operations, common database operations like
 JOINs, and more advanced spatial statistics. `Geopandas
@@ -556,6 +561,10 @@ class AnalysisTree(object):
     The analysis inputs can be passed as a list of analyses, or as a list of
     tuples, each with a unique identifier `key` so it can be later referenced
     or removed from the chain programmatically.
+
+    :obj:`AnalysisTree` can also be used as a layer in a map. If it has not
+    already been evaluated, then `.compute()` will be applied to it and the map
+    will not render until the result is computed.
 
     Example:
 
