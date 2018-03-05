@@ -110,16 +110,16 @@ class CartoContext(object):
                                               session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
-        self._is_authenticated(self.auth_api_client)
+        self._is_authenticated()
         self.is_org = self._is_org_user()
 
         self._map_templates = {}
         self._srcdoc = None
         self._verbose = verbose
 
-    def _is_authenticated(self, auth_api_client):
+    def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
-        if not auth_api_client.is_valid_api_key():
+        if not self.auth_api_client.is_valid_api_key():
             raise CartoException('Cannot authenticate user `{0}`. Check '
                                  'credentials.'.format(
                 self.creds.username()))
