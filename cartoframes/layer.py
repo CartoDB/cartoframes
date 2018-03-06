@@ -162,7 +162,7 @@ class QueryLayer(AbstractLayer):
             .. code::
 
                 from cartoframes import QueryLayer
-                l = QueryLayer('acadia_biodiversity',
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
                                time='bird_sighting_time')
 
             If `time` is a :obj:`dict`, the following keys are options:
@@ -238,7 +238,7 @@ class QueryLayer(AbstractLayer):
             .. code::
 
                 from cartoframes import QueryLayer, styling
-                l = QueryLayer('acadia_biodiversity',
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
                                color={
                                    'column': 'simpson_index',
                                    'scheme': styling.mint(7, bin_method='equal')
@@ -251,7 +251,7 @@ class QueryLayer(AbstractLayer):
             .. code::
 
                 from cartoframes import QueryLayer
-                l = QueryLayer('acadia_biodiversity',
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
                                size=7)
 
             If `size` is a :obj:`str`, this value is interpreted as a column,
