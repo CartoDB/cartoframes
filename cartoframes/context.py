@@ -167,7 +167,16 @@ class CartoContext(object):
         return self.query(query, decode_geom=decode_geom)
 
     def datasets(self):
-        return DatasetManager(self.auth_client).all()
+        return DatasetManager(self.auth_client).filter(
+            show_table_size_and_row_count='false',
+            show_table='false',
+            show_stats='false',
+            show_likes='false',
+            show_liked='false',
+            show_permission='false',
+            show_uses_builder_features='false',
+            show_synchronization='false',
+            load_totals='false')
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
