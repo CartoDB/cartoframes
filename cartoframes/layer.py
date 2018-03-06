@@ -159,25 +159,43 @@ class QueryLayer(AbstractLayer):
             If `time` is a :obj:`str`, it must be the name of a column which
             has a data type of `datetime` or `float`.
 
+            .. code::
+
+                from cartoframes import QueryLayer
+                l = QueryLayer('acadia_biodiversity',
+                               time='bird_sighting_time')
+
             If `time` is a :obj:`dict`, the following keys are options:
 
-            - column (`str`, required): Column for animating map, which must
+            - column (:obj:`str`, required): Column for animating map, which must
               be of type `datetime` or `float`.
-            - method (`str`, optional): Type of aggregation method for
+            - method (:obj:`str`, optional): Type of aggregation method for
               operating on `Torque TileCubes
               <https://github.com/CartoDB/torque>`__. Must be one of ``avg``,
               ``sum``, or another `PostgreSQL aggregate functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (`bool`, optional): Whether to accumulate points over
+            - cumulative (:obj:`bool`, optional): Whether to accumulate points over
               time (``True``) or not (``False``, default)
-            - frames (`int`, optional): Number of frames in the animation.
+            - frames (:obj:`int`, optional): Number of frames in the animation.
               Defaults to 256.
-            - duration (`int`, optional): Number of seconds in the animation.
+            - duration (:obj:`int`, optional): Number of seconds in the animation.
               Defaults to 30.
-            - trails (`int`, optional): Number of trails after the incidence of
+            - trails (:obj:`int`, optional): Number of trails after the incidence of
               a point. Defaults to 2.
-        color (dict or str, optional): Color style to apply to map. For
+
+            .. code::
+
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          time={
+                              'column': 'bird_sighting_time',
+                              'cumulative': True,
+                              'frames': 128,
+                              'duration': 15
+                          })
+
+        color (:obj:`dict` or str, optional): Color style to apply to map. For
             example, this can be used to change the color of all geometries
             in this layer, or to create a graduated color or choropleth map.
 
@@ -190,11 +208,22 @@ class QueryLayer(AbstractLayer):
             - A hex value or `web color name
               <https://www.w3.org/TR/css3-color/#svg-color>`__.
 
+            .. code::
+
+                # color all geometries red (#F00)
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          color='red')
+
+                # color on 'num_eggs' (using defalt color scheme and quantification)
+                l = Layer('acadia_biodiversity',
+                          color='num_eggs')
+
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
 
-            - column (`str`): Column used for the basis of styling
-            - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
+            - column (:obj:`str`): Column used for the basis of styling
+            - scheme (:obj:`dict`, optional): Scheme such as `styling.sunset(7)`
               from the `styling module <#module-styling>`__ of cartoframes that
               exposes `CARTOColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
@@ -206,6 +235,15 @@ class QueryLayer(AbstractLayer):
               is recommended to use the `styling.custom <#styling.custom>`__
               utility function.
 
+            .. code::
+
+                from cartoframes import QueryLayer, styling
+                l = QueryLayer('acadia_biodiversity',
+                               color={
+                                   'column': 'simpson_index',
+                                   'scheme': styling.mint(7, bin_method='equal')
+                               })
+
         size (dict or int, optional): Size style to apply to point data.
 
             If `size` is an :obj:`int`, all points are sized by this value.
@@ -213,8 +251,8 @@ class QueryLayer(AbstractLayer):
             .. code::
 
                 from cartoframes import QueryLayer
-                l = Layer('acadia_biodiversity',
-                          size=7)
+                l = QueryLayer('acadia_biodiversity',
+                               size=7)
 
             If `size` is a :obj:`str`, this value is interpreted as a column,
             and the points are sized by the value in this column. The
@@ -224,22 +262,22 @@ class QueryLayer(AbstractLayer):
 
             .. code::
 
-                from cartoframes import QueryLayer
+                from cartoframes import Layer
                 l = Layer('acadia_biodiversity',
                           size='num_eggs')
 
             If `size` is a :obj:`dict`, the follow keys are options, with
             values described as:
 
-            - column (`str`): Column to base sizing of points on
-            - bin_method (str, optional): Quantification method for dividing
+            - column (:obj:`str`): Column to base sizing of points on
+            - bin_method (:obj:`str`, optional): Quantification method for dividing
               data range into bins. Must be one of the methods in
               :obj:`BinMethod` (excluding `category`).
-            - bins (`int`, optional): Number of bins to break data into.
+            - bins (:obj:`int`, optional): Number of bins to break data into.
               Defaults to 5.
-            - max (`int`, optional): Maximum point width (in pixels). Defaults
+            - max (:obj:`int`, optional): Maximum point width (in pixels). Defaults
               to 25.
-            - min (`int`, optional): Minimum point width (in pixels). Defaults
+            - min (:obj:`int`, optional): Minimum point width (in pixels). Defaults
               to 5.
 
             .. code::
