@@ -210,11 +210,23 @@ class QueryLayer(AbstractLayer):
 
             If `size` is an :obj:`int`, all points are sized by this value.
 
+            .. code::
+
+                from cartoframes import QueryLayer
+                l = Layer('acadia_biodiversity',
+                          size=7)
+
             If `size` is a :obj:`str`, this value is interpreted as a column,
             and the points are sized by the value in this column. The
             classification method defaults to `quantiles`, with a min size of
             5, and a max size of 5. Use the :obj:`dict` input to override these
             values.
+
+            .. code::
+
+                from cartoframes import QueryLayer
+                l = Layer('acadia_biodiversity',
+                          size='num_eggs')
 
             If `size` is a :obj:`dict`, the follow keys are options, with
             values described as:
@@ -229,6 +241,16 @@ class QueryLayer(AbstractLayer):
               to 25.
             - min (`int`, optional): Minimum point width (in pixels). Defaults
               to 5.
+
+            .. code::
+
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          size={
+                              'column': 'num_eggs',
+                              'max': 10,
+                              'min': 2
+                          })
 
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
