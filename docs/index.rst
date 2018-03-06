@@ -24,6 +24,7 @@ Map Layer Classes
 =================
 .. automodule:: layer
     :members: BaseMap, Layer, QueryLayer
+    :inherit-members:
 
 Map Styling Functions
 =====================

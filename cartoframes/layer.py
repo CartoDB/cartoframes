@@ -607,10 +607,11 @@ class QueryLayer(AbstractLayer):
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is used for visualizing individual datasets
-    with `CartoContext.map() <#context.CartoContext.map>`__'s ``layers``
+    with `CartoContext.map <#context.CartoContext.map>`__'s `layers`
     keyword argument.
 
     Example:
+
         .. code:: python
 
             import cartoframes
