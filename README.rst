@@ -164,8 +164,8 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 
         `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
-Augment from Data Observatory
-=============================
+Data Observatory
+================
 
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
