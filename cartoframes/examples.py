@@ -7,6 +7,11 @@ EXAMPLE_API_KEY = 'default_public'
 # EXAMPLE_API_KEY = 'default_public'
 
 
-def examples():
-    """Returns a CartoContext with a CARTO account containing example data"""
-    return CartoContext(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+class Examples(CartoContext):
+    """A CartoContext with a CARTO account containing example data"""
+    def __init__(self):
+        super(Examples, self). \
+            __init__(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+
+    def read_taxi(self):
+        return self.read('taxi_dataset')

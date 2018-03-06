@@ -17,7 +17,7 @@ from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
-from cartoframes.examples import examples
+from cartoframes.examples import Examples
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -1110,11 +1110,18 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         self.assertIn('_' + dup_col, data.keys())
 
-    def test_examples(self):
-        e = examples()
-        tables = e.datasets()
-        # TODO: add assertions for well-known datasets
+class TestExamples(unittest.TestCase):
+    def setUp(self):
+        self.examples = Examples()
+
+    def test_datasets(self):
+        tables = self.examples.datasets()
         self.assertTrue(tables)
+
+    @unittest.skip("Taxi dataset isn't ready yet")
+    def test_read_taxi(self):
+        taxi = self.examples.read_taxi()
+        self.assertIsInstance(taxi, pd.DataFrame)
 
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
