@@ -25,6 +25,7 @@ from cartoframes.dataobs import get_countrytag
 from cartoframes import utils
 from cartoframes.layer import BaseMap, AbstractLayer
 from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from cartoframes.analysis import Table
 from cartoframes.__version__ import __version__
 
 if sys.version_info >= (3, 0):
@@ -166,8 +167,8 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-    def datasets(self):
-        return DatasetManager(self.auth_client).filter(
+    def tables(self):
+        datasets = DatasetManager(self.auth_client).filter(
             show_table_size_and_row_count='false',
             show_table='false',
             show_stats='false',
@@ -177,6 +178,7 @@ class CartoContext(object):
             show_uses_builder_features='false',
             show_synchronization='false',
             load_totals='false')
+        return (Table.from_dataset(d) for d in datasets)
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):

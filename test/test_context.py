@@ -1114,8 +1114,8 @@ class TestExamples(unittest.TestCase):
     def setUp(self):
         self.examples = Examples()
 
-    def test_datasets(self):
-        tables = self.examples.datasets()
+    def test_tables(self):
+        tables = self.examples.tables()
         self.assertTrue(tables)
 
     @unittest.skip("Taxi dataset isn't ready yet")
