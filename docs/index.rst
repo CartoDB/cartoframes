@@ -22,7 +22,7 @@ CartoContext
 Analysis
 --------
 .. automodule:: analysis
-    :members: AnalysisChain, Table, Query
+    :members: AnalysisTree, Table, Query
     :inherited-members:
 
 Map Layer Classes
