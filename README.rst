@@ -125,7 +125,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
-.. image:: docs/read_demo.gif
+.. image:: https://github.com/CartoDB/cartoframes/blob/master/docs/read_demo.gif
 
 Write an existing pandas DataFrame to CARTO.
 
@@ -159,7 +159,7 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                                 'scheme': styling.vivid(10)})],
            interactive=True)
 
-.. image:: docs/map_demo.gif
+.. image:: https://github.com/CartoDB/cartoframes/blob/master/docs/map_demo.gif
 
 .. note::
     Legends are under active development. See
