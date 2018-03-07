@@ -51,7 +51,7 @@ latest version:
 
     $ pip install cartoframes
 
-`cartoframes` is continuously tested on Python versions 2.7, 3.4, 3.5, and 3.6. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
+`cartoframes` is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
 Virtual Environment
 ===================
@@ -125,6 +125,8 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
 
 
+.. image:: docs/read_demo.gif
+
 Write an existing pandas DataFrame to CARTO.
 
 .. code:: python
@@ -156,6 +158,8 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
                          color={'column': 'bird_id',
                                 'scheme': styling.vivid(10)})],
            interactive=True)
+
+.. image:: docs/map_demo.gif
 
 .. note::
     Legends are under active development. See
