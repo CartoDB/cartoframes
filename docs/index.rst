@@ -22,8 +22,12 @@ CartoContext
 
 Map Layer Classes
 =================
-.. automodule:: layer
-    :members: BaseMap, Layer, QueryLayer
+.. autoclass:: layer.BaseMap
+
+.. autoclass:: layer.Layer
+    :inherited-members:
+
+.. autoclass:: layer.QueryLayer
 
 Map Styling Functions
 =====================

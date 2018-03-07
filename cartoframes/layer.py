@@ -108,7 +108,7 @@ class QueryLayer(AbstractLayer):
     * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
       1000``)
 
-    Used in the `layers` keyword in `CartoContext.map()
+    Used in the `layers` keyword in `CartoContext.map
     <#context.CartoContext.map>`__.
 
     Example:
@@ -167,9 +167,9 @@ class QueryLayer(AbstractLayer):
 
             If `time` is a :obj:`dict`, the following keys are options:
 
-            - column (:obj:`str`, required): Column for animating map, which must
+            - column (`str`, required): Column for animating map, which must
               be of type `datetime` or `float`.
-            - method (:obj:`str`, optional): Type of aggregation method for
+            - method (`str`, optional): Type of aggregation method for
               operating on `Torque TileCubes
               <https://github.com/CartoDB/torque>`__. Must be one of ``avg``,
               ``sum``, or another `PostgreSQL aggregate functions
@@ -177,11 +177,11 @@ class QueryLayer(AbstractLayer):
               with a numeric output. Defaults to ``count``.
             - cumulative (:obj:`bool`, optional): Whether to accumulate points over
               time (``True``) or not (``False``, default)
-            - frames (:obj:`int`, optional): Number of frames in the animation.
+            - frames (`int`, optional): Number of frames in the animation.
               Defaults to 256.
-            - duration (:obj:`int`, optional): Number of seconds in the animation.
+            - duration (`int`, optional): Number of seconds in the animation.
               Defaults to 30.
-            - trails (:obj:`int`, optional): Number of trails after the incidence of
+            - trails (`int`, optional): Number of trails after the incidence of
               a point. Defaults to 2.
 
             .. code::
@@ -195,7 +195,7 @@ class QueryLayer(AbstractLayer):
                               'duration': 15
                           })
 
-        color (:obj:`dict` or str, optional): Color style to apply to map. For
+        color (dict or str, optional): Color style to apply to map. For
             example, this can be used to change the color of all geometries
             in this layer, or to create a graduated color or choropleth map.
 
@@ -222,8 +222,8 @@ class QueryLayer(AbstractLayer):
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
 
-            - column (:obj:`str`): Column used for the basis of styling
-            - scheme (:obj:`dict`, optional): Scheme such as `styling.sunset(7)`
+            - column (`str`): Column used for the basis of styling
+            - scheme (`dict`, optional): Scheme such as `styling.sunset(7)`
               from the `styling module <#module-styling>`__ of cartoframes that
               exposes `CARTOColors
               <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__.
@@ -269,15 +269,15 @@ class QueryLayer(AbstractLayer):
             If `size` is a :obj:`dict`, the follow keys are options, with
             values described as:
 
-            - column (:obj:`str`): Column to base sizing of points on
-            - bin_method (:obj:`str`, optional): Quantification method for dividing
+            - column (`str`): Column to base sizing of points on
+            - bin_method (`str`, optional): Quantification method for dividing
               data range into bins. Must be one of the methods in
               :obj:`BinMethod` (excluding `category`).
-            - bins (:obj:`int`, optional): Number of bins to break data into.
+            - bins (`int`, optional): Number of bins to break data into.
               Defaults to 5.
-            - max (:obj:`int`, optional): Maximum point width (in pixels). Defaults
+            - max (`int`, optional): Maximum point width (in pixels). Defaults
               to 25.
-            - min (:obj:`int`, optional): Minimum point width (in pixels). Defaults
+            - min (`int`, optional): Minimum point width (in pixels). Defaults
               to 5.
 
             .. code::
@@ -645,7 +645,6 @@ class Layer(QueryLayer):
 
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
-            # TODO: error on this as NotImplementedError
             raise NotImplementedError('Not currently implemented')
             # context.write(self.source,
             #               self.table_name,
