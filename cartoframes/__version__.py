@@ -1,1 +1,2 @@
-__version__ = '0.4.2b8'
+"""cartoframes version number"""
+__version__ = '0.5.6'

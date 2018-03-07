@@ -6,7 +6,6 @@ in its `GitHub repository <https://github.com/Carto-color/>`__.
     :alt: CARTOColors
 """  # noqa
 
-
 class BinMethod:
     """Data classification methods used for the styling of data on maps.
 
@@ -16,12 +15,22 @@ class BinMethod:
         headtails (str): Head/Tails classification for quantitative data
         equal (str): Equal Interval classification for quantitative data
         category (str): Category classification for qualitative data
+        mapping (dict): The TurboCarto mappings
     """
     quantiles = 'quantiles'
     jenks = 'jenks'
     headtails = 'headtails'
     equal = 'equal'
     category = 'category'
+
+    # Mappings: https://github.com/CartoDB/turbo-carto/#mappings-default-values
+    mapping = {
+        quantiles: '>',
+        jenks: '>',
+        headtails: '<',
+        equal: '>',
+        category: '=',
+    }
 
 
 def get_scheme_cartocss(column, scheme_info):
@@ -30,15 +39,19 @@ def get_scheme_cartocss(column, scheme_info):
         color_scheme = '({})'.format(','.join(scheme_info['colors']))
     else:
         color_scheme = 'cartocolor({})'.format(scheme_info['name'])
+    if not isinstance(scheme_info['bins'], int):
+        bins = ','.join(str(i) for i in scheme_info['bins'])
+    else:
+        bins = scheme_info['bins']
     bin_method = scheme_info['bin_method']
+    comparison = ', {}'.format(BinMethod.mapping.get(bin_method, '>='))
     return ('ramp([{column}], {color_scheme}, '
             '{bin_method}({bins}){comparison})').format(
                 column=column,
                 color_scheme=color_scheme,
                 bin_method=bin_method,
-                bins=scheme_info['bins'],
-                comparison=('' if bin_method == 'category' else ', <=')
-            )
+                bins=bins,
+                comparison=comparison)
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles):
@@ -64,8 +77,11 @@ def scheme(name, bins, bin_method):
 
     Args:
         name (str): Name of a CARTOColor.
-        bins (int): Number of bins for classifying data. CARTOColors have 7
-          bins max for quantitative data, and 11 max for qualitative data.
+        bins (int or iterable): If an `int`, the number of bins for classifying
+          data. CARTOColors have 7 bins max for quantitative data, and 11 max
+          for qualitative data. If `bins` is a `list`, it is the upper range
+          for classifying data. E.g., `bins` can be of the form ``(10, 20, 30,
+          40, 50)``.
         bin_method (str): One of methods in :obj:`BinMethod`.
 
     .. Warning::
@@ -78,7 +94,7 @@ def scheme(name, bins, bin_method):
     return {
         'name': name,
         'bins': bins,
-        'bin_method': bin_method,
+        'bin_method': (bin_method if isinstance(bins, int) else ''),
     }
 
 

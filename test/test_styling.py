@@ -84,6 +84,7 @@ class TestColorScheme(unittest.TestCase):
         self.assertEqual(self.temps['bin_method'], 'quantiles')
 
     def test_styling_values(self):
+        """styling.BinMethod, etc."""
         # Raise AttributeError if invalid name is entered
         with self.assertRaises(AttributeError):
             styling.apple(bins=4, BinMethod=BinMethod.quantiles)
@@ -100,17 +101,23 @@ class TestColorScheme(unittest.TestCase):
         """styling.get_scheme_cartocss"""
         # test on category
         self.assertEqual(get_scheme_cartocss('acadia', self.vivid),
-                         'ramp([acadia], cartocolor(Vivid), category(4))')
+                         'ramp([acadia], cartocolor(Vivid), category(4), =)')
         # test on quantative
         self.assertEqual(get_scheme_cartocss('acadia', self.purp),
-                         'ramp([acadia], cartocolor(Purp), quantiles(4), <=)')
+                         'ramp([acadia], cartocolor(Purp), quantiles(4), >)')
         # test on custom
         self.assertEqual(
-                get_scheme_cartocss('acadia',
-                                    styling.custom(('#FFF', '#888', '#000'),
-                                                   bins=3,
-                                                   bin_method='equal')),
-                'ramp([acadia], (#FFF,#888,#000), equal(3), <=)')
+            get_scheme_cartocss('acadia',
+                                styling.custom(('#FFF', '#888', '#000'),
+                                               bins=3,
+                                               bin_method='equal')),
+            'ramp([acadia], (#FFF,#888,#000), equal(3), >)')
+
+        # test with non-int quantification
+        self.assertEqual(
+            get_scheme_cartocss('acadia',
+                                styling.sunset([1, 2, 3])),
+            'ramp([acadia], cartocolor(Sunset), (1,2,3), >=)')
 
     def test_scheme(self):
         """styling.scheme"""

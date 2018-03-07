@@ -7,7 +7,7 @@ from codecs import open
 from setuptools import setup
 
 NAME = 'cartoframes'
-DESCRIPTION = 'An experimental Python pandas interface for using CARTO'
+DESCRIPTION = 'CARTO Python package for data scientists'
 URL = 'https://github.com/CartoDB/cartoframes'
 AUTHOR = 'Andy Eschbacher'
 EMAIL = 'andy@carto.com'
