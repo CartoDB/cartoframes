@@ -58,10 +58,10 @@ DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
 
 
 class CartoContext(object):
-    """CartoContext class for authentication with CARTO and high-level operations
-    such as reading tables from CARTO into dataframes, writing dataframes to
-    CARTO tables, creating custom maps from dataframes and CARTO tables, and
-    augmenting data using CARTO's `Data Observatory
+    """CartoContext class for authentication with CARTO and high-level
+    operations such as reading tables from CARTO into dataframes, writing
+    dataframes to CARTO tables, creating custom maps from dataframes and CARTO
+    tables, and augmenting data using CARTO's `Data Observatory
     <https://carto.com/data-observatory>`__. Future methods will interact with
     CARTO's services like `routing, geocoding, and isolines
     <https://carto.com/location-data-services/>`__, PostGIS backend for spatial
@@ -69,10 +69,26 @@ class CartoContext(object):
 
     Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
-    <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
+    <http://spark.apache.org/docs/2.1.0/api/python/pyspark.html#pyspark.SparkContext>`__.
+
+    There are two ways of authenticating against a CARTO account:
+
+      1. Setting the `base_url` and `api_key` directly in `CartoContext`. This
+         method is easier.::
+
+            cc = CartoContext(
+                base_url='https://eschbacher.carto.com',
+                api_key='abcdefg')
+
+      2. By passing a :obj:`Credentials` instance in `CartoContext`'s `creds`
+         keyword argument. This method is more flexible.::
+
+            from cartoframes import Credentials
+            creds = Credentials(user='eschbacher', key='abcdefg')
+            cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (cartoframes.Credentials): :obj:`Credentials` instance
+        creds (:obj:`Credentials`): :obj:`Credentials` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -81,6 +97,8 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
+        creds (:obj:`Credentials`): A :obj:`Credentials` instance can be used
+          in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -171,7 +189,7 @@ class CartoContext(object):
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
-        Example:
+        Examples:
             Write a pandas DataFrame to CARTO.
 
             .. code:: python
@@ -214,7 +232,8 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
-            kwargs: Keyword arguments to control write operations. Options are:
+            **kwargs: Keyword arguments to control write operations. Options
+                are:
 
                 - `compression` to set compression for files sent to CARTO.
                   This will cause write speedups depending on the dataset.
