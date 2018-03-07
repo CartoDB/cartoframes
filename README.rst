@@ -1,6 +1,6 @@
-###########
+***********
 CARTOframes
-###########
+***********
 
 .. image:: https://travis-ci.org/CartoDB/cartoframes.svg?branch=master
     :target: https://travis-ci.org/CartoDB/cartoframes
@@ -40,9 +40,8 @@ More info
 .. note::
     `cartoframes` users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
 
-********************
 Install Instructions
-********************
+====================
 
 To install `cartoframes` on your machine, do the following to install the
 latest version:
@@ -54,10 +53,11 @@ latest version:
 `cartoframes` is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
 Virtual Environment
-===================
+-------------------
 
 Using `virtualenv`
-------------------
+^^^^^^^^^^^^^^^^^^
+
 
 Make sure your `virtualenv` package is installed and up-to-date. See the `official Python packaging page <https://packaging.python.org/guides/installing-using-pip-and-virtualenv/>`__ for more information.
 
@@ -73,7 +73,7 @@ To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-gu
 Then create a new notebook and try the example code snippets below with tables that are in your CARTO account.
 
 Using `pipenv`
---------------
+^^^^^^^^^^^^^^
 
 Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an easy way to manage virtual environments. The steps below are: 
 
@@ -91,7 +91,7 @@ Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an
 Next, run a Python kernel by typing `$ python`, `$ jupyter notebook`, or however you typically run Python.
 
 Native pip
-==========
+----------
 
 If you install packages at a system level, you can install `cartoframes` with:
 
@@ -99,12 +99,11 @@ If you install packages at a system level, you can install `cartoframes` with:
 
     $ pip install cartoframes
 
-*************
 Example usage
-*************
+=============
 
 Data workflow
-=============
+-------------
 
 Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
@@ -140,7 +139,7 @@ Write an existing pandas DataFrame to CARTO.
 
 
 Map workflow
-============
+------------
 
 The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `TurboCARTO <https://github.com/CartoDB/turbo-carto>`__ and `CARTOColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CARTOColors wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
@@ -169,7 +168,7 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
         `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
 Data Observatory
-================
+----------------
 
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
@@ -190,12 +189,12 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
 
 
 CARTO Credential Management
-===========================
+---------------------------
 
 Typical usage
--------------
+^^^^^^^^^^^^^
 
-The most common way to input credentials into cartoframes is through the :obj:`CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``http://{your_user_name}.carto.com/your_apps``.
+The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``http://{your_user_name}.carto.com/your_apps``.
 
 .. code:: python
 
@@ -206,7 +205,7 @@ The most common way to input credentials into cartoframes is through the :obj:`C
     )
 
 
-You can also set your credentials using the :obj:`Credentials` class:
+You can also set your credentials using the `Credentials` class:
 
 .. code:: python
 
@@ -217,7 +216,7 @@ You can also set your credentials using the :obj:`Credentials` class:
 
 
 Save/update credentials for later use
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -231,3 +230,4 @@ Once you save your credentials, you can get started in future sessions more quic
 
     from cartoframes import CartoContext
     cc = CartoContext()  # automatically loads credentials if previously saved
+
