@@ -189,7 +189,7 @@ class CartoContext(object):
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
-        Example:
+        Examples:
             Write a pandas DataFrame to CARTO.
 
             .. code:: python
