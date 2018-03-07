@@ -231,7 +231,8 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
-            kwargs: Keyword arguments to control write operations. Options are:
+            **kwargs: Keyword arguments to control write operations. Options are:
+
                 - `compression` to set compression for files sent to CARTO.
                   This will cause write speedups depending on the dataset.
                   Options are ``None`` (no compression, default) or ``gzip``.

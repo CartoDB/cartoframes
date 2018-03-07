@@ -292,6 +292,17 @@ class QueryLayer(AbstractLayer):
 
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
+
+    Raises:
+
+        CartoException: If a column name used in any of the styling options is
+          not in the data source in `query` (or `table` if using :obj:`Layer`).
+        ValueError: If styling using a :obj:`dict` and a ``column`` key is not
+          present, or if the data type for a styling option is not supported.
+          This is also raised if styling by a geometry column (i.e.,
+          ``the_geom`` or ``the_geom_webmercator``). Futher, this is raised if
+          requesting a time-based map with a data source that has geometries
+          other than points.
     """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):

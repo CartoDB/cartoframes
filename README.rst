@@ -57,7 +57,7 @@ Virtual Environment
 ===================
 
 Using `virtualenv`
------------------
+------------------
 
 Make sure your `virtualenv` package is installed and up-to-date. See the `official Python packaging page <https://packaging.python.org/guides/installing-using-pip-and-virtualenv/>`__ for more information.
 
@@ -193,13 +193,14 @@ Typical usage
 
 The most common way to input credentials into cartoframes is through the :obj:`CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``http://{your_user_name}.carto.com/your_apps``.
 
-..code:: python
+.. code:: python
 
     from cartoframes import CartoContext
     cc = CartoContext(
         base_url='https://{your_user_name}.carto.com',
         api_key='{your_api_key}'
     )
+
 
 You can also set your credentials using the :obj:`Credentials` class:
 
@@ -209,6 +210,7 @@ You can also set your credentials using the :obj:`Credentials` class:
     cc = CartoContext(
         creds=Credentials(key='{your_api_key}', username='{your_user_name}')
     )
+
 
 Save/update credentials for later use
 -------------------------------------
