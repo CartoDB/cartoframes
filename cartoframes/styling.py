@@ -72,7 +72,7 @@ def custom(colors, bins=None, bin_method=BinMethod.quantiles):
     }
 
 
-def scheme(name, bins, bin_method):
+def scheme(name, bins, bin_method='quantiles'):
     """Return a custom scheme based on CARTOColors.
 
     Args:
@@ -82,7 +82,9 @@ def scheme(name, bins, bin_method):
           for qualitative data. If `bins` is a `list`, it is the upper range
           for classifying data. E.g., `bins` can be of the form ``(10, 20, 30,
           40, 50)``.
-        bin_method (str): One of methods in :obj:`BinMethod`.
+        bin_method (str, optional): One of methods in :obj:`BinMethod`.
+          Defaults to ``quantiles``. If `bins` is an interable, then that is
+          the bin method that will be used and this will be ignored.
 
     .. Warning::
 
