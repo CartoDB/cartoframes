@@ -6,3 +6,6 @@ class Table:
     @classmethod
     def from_dataset(cls, dataset):
         return cls(dataset.name)
+
+    def __repr__(self):
+        return 'Table(name={})'.format(self.name)
