@@ -178,7 +178,7 @@ class CartoContext(object):
             show_uses_builder_features='false',
             show_synchronization='false',
             load_totals='false')
-        return (Table.from_dataset(d) for d in datasets)
+        return [Table.from_dataset(d) for d in datasets]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
