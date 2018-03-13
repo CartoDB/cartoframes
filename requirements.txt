@@ -6,6 +6,4 @@ shapely>=1.5.0
 tqdm>=4.14.0
 IPython>=5.0.0,<6.0.0;python_version<="2.7"
 IPython>=6.0.0;python_version>="3.0"
-# documentation requirements
-sphinx>=1.6.5
-sphinxcontrib-napoleon>=0.6.1
+appdirs>=1.4.3
