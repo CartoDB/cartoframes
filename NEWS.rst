@@ -1,10 +1,47 @@
 Changelog
 =========
 
+0.5.7
+-----
+
+Release 2018-03-23
+
+Updates
+
+- Updates MANIFEST.in to properly include asset files for interactive maps in sdist release (#400)
+
+0.5.6
+-----
+
+Release 2018-02-26
+
+Updates
+
+- Avoids collision of column names on DO augmentation (#323).
+
+0.5.5
+-----
+
+Release 2018-02-13
+
+Updates
+
+- Updates basemap URLs to new CDN
+
+0.5.4
+-----
+
+Release 2018-02-06
+
+Updates
+
+- Fixes a bug that prevented creating a table from a Data Observatory augmentation (#375)
+
+
 0.5.3
 -----
 
-Release 2017-01-29
+Release 2018-01-29
 
 Updates
 

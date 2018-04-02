@@ -8,12 +8,14 @@
 .. toctree::
    :maxdepth: 2
 
+*************************
 CARTOframes Functionality
-=========================
+*************************
 
 CartoContext
-------------
-.. autoclass:: context.CartoContext
+============
+.. autoclass:: cartoframes.context.CartoContext
+    :noindex:
     :member-order: bysource
     :members: read, query, delete, map, data_discovery, data, data_boundaries
 
@@ -26,28 +28,39 @@ Analysis
     :inherited-members:
 
 Map Layer Classes
------------------
-.. automodule:: layer
-    :members: BaseMap, Layer, QueryLayer
+=================
+.. autoclass:: cartoframes.layer.BaseMap
+    :noindex:
+
+.. autoclass:: cartoframes.layer.Layer
+    :inherited-members:
+    :noindex:
+
+.. autoclass:: cartoframes.layer.QueryLayer
+    :noindex:
 
 Map Styling Functions
----------------------
-.. automodule:: styling
+=====================
+.. automodule:: cartoframes.styling
+    :noindex:
     :members:
     :member-order: bysource
 
 BatchJobStatus
---------------
-.. autoclass:: context.BatchJobStatus
+==============
+.. autoclass:: cartoframes.context.BatchJobStatus
+    :noindex:
     :members:
 
 Credentials Management
-----------------------
-.. automodule:: credentials
+======================
+.. automodule:: cartoframes.credentials
+    :noindex:
     :members:
 
+******************
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`
