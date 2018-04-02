@@ -924,6 +924,24 @@ class Table(Query):
             'SELECT * FROM {}'.format(table_name)
         )
 
+    @classmethod
+    def from_url(cls, url, sync=None):
+        """Create a table from a URL and optionally have it sync periodically
+
+        Args:
+          url (text): External URL of data source
+          sync (int, optional): Number of seconds for updating table. The
+            minimum value is 900.
+
+        Returns:
+          :obj:`Table` with table or, if not finished creating, a promise
+          object.
+
+        Raises:
+          ValueError: If `sync` is smaller than 900 seconds.
+        """
+        pass
+
 
 class BuilderAnalysis(Query):
     """Builder analysis node. Use this option for placing an analysis node
