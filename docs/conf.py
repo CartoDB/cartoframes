@@ -21,7 +21,7 @@ import subprocess
 import os
 import sys
 cur_dir = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, os.path.join(cur_dir, '..', 'cartoframes'))
+sys.path.insert(0, os.path.join(cur_dir, '..'))
 from cartoframes.__version__ import __version__ as cf_version  # noqa
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -99,7 +99,7 @@ html_theme = 'default'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 
 # -- Options for HTMLHelp output ------------------------------------------

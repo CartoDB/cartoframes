@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5.7
+-----
+
+Release 2018-03-23
+
+Updates
+
+- Updates MANIFEST.in to properly include asset files for interactive maps in sdist release (#400)
+
 0.5.6
 -----
 
