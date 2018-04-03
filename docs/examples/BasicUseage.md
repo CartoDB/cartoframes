@@ -220,7 +220,7 @@ cc.map(layers=l,
 
 
 
-![png](docs/examples/BasicUseage_files/docs/examples/BasicUseage_8_1.png)
+![png](./docs/examples/BasicUseage_files/./docs/examples/BasicUseage_8_1.png)
 
 
 ## NYC Taxi Dataset
@@ -474,7 +474,7 @@ cc.map(layers=Layer('taxi_50k'),
 
 
 
-![png](docs/examples/BasicUseage_files/docs/examples/BasicUseage_13_1.png)
+![png](./docs/examples/BasicUseage_files/./docs/examples/BasicUseage_13_1.png)
 
 
 Oops, there are some zero-valued long/lats in there, so the results are going to [null island](https://en.wikipedia.org/wiki/Null_Island). Let's remove them.
@@ -600,5 +600,5 @@ cc.map(layers=Layer('taxi_sample',
 
 
 
-![png](docs/examples/BasicUseage_files/docs/examples/BasicUseage_18_1.png)
+![png](./docs/examples/BasicUseage_files/./docs/examples/BasicUseage_18_1.png)
 
