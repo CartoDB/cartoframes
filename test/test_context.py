@@ -1118,6 +1118,18 @@ class TestExamples(unittest.TestCase):
         tables = self.examples.tables()
         self.assertTrue(tables)
 
+    def test_disabled_context_functions(self):
+        with self.assertRaises(RuntimeError):
+            self.examples.data()
+        with self.assertRaises(RuntimeError):
+            self.examples.write(None, table_name='t')
+        with self.assertRaises(RuntimeError):
+            self.examples.data_boundaries()
+        with self.assertRaises(RuntimeError):
+            self.examples.data_discovery(None)
+        with self.assertRaises(RuntimeError):
+            self.examples.data_augment(None, None)
+
     @unittest.skip("Taxi dataset isn't ready yet")
     def test_read_taxi(self):
         taxi = self.examples.read_taxi()
