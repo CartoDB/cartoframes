@@ -35,3 +35,8 @@ class Examples(CartoContext):
     def data_augment(self, table_name, metadata):
         raise RuntimeError('data_augment function disabled for Examples')
 
+_examples = Examples()
+
+
+def read_taxi():
+    return _examples.read_taxi()

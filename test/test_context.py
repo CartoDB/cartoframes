@@ -1134,6 +1134,11 @@ class TestExamples(unittest.TestCase):
         taxi = self.examples.read_taxi()
         self.assertIsInstance(taxi, pd.DataFrame)
 
+    def test_examples_instance(self):
+        from cartoframes.examples import read_taxi
+        df = read_taxi()
+        self.assertIsInstance(df, pd.DataFrame)
+
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
