@@ -1130,7 +1130,6 @@ class TestExamples(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.examples.data_augment(None, None)
 
-    @unittest.skip("Taxi dataset isn't ready yet")
     def test_read_taxi(self):
         taxi = self.examples.read_taxi()
         self.assertIsInstance(taxi, pd.DataFrame)

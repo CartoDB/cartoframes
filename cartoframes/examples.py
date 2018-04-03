@@ -14,7 +14,7 @@ class Examples(CartoContext):
             __init__(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
 
     def read_taxi(self):
-        return self.read('taxi_dataset')
+        return self.read('taxi_50k')
 
     def data(self):
         raise RuntimeError('data function disabled for Examples')
