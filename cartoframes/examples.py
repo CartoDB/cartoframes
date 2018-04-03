@@ -13,8 +13,8 @@ class Examples(CartoContext):
         super(Examples, self). \
             __init__(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
 
-    def read_taxi(self):
-        return self.read('taxi_50k')
+    def read_taxi(self, limit=None):
+        return self.read('taxi_50k', limit)
 
     def data(self):
         raise RuntimeError('data function disabled for Examples')
@@ -35,8 +35,9 @@ class Examples(CartoContext):
     def data_augment(self, table_name, metadata):
         raise RuntimeError('data_augment function disabled for Examples')
 
-_examples = Examples()
+
+example_context = Examples()
 
 
-def read_taxi():
-    return _examples.read_taxi()
+def read_taxi(limit=None):
+    return example_context.read_taxi(limit=limit)
