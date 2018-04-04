@@ -1,12 +1,12 @@
 ## Quickstart Guide
 
 ### Installing CARTOframes
-You can install CARTOframes with PIP. Simply type
+You can install CARTOframes with `pip`. Simply type
 
 ```bash
 pip install cartoframes
 ```
-This should install install cartoframes to your system, if you want to install it to
+This should install install CARTOframes to your system, if you want to install it to
 a virtual environment you can can run
 
 ```bash
@@ -16,12 +16,49 @@ pip install cartoframes
 ```
 
 
-### Installing jupyter notebook
+### Installing Jupyter notebook
 
-### Starting jupyter notebook
+### Starting Jupyter notebook
 
 ### Authentication
-Before we can do anything with CARTOframes we
+Before we can do anything with CARTOframes, we need to authenticate against a CARTO
+account by passing in CARTO credentials. You will need your username and API keys,
+which can be found at http://your_user_name.carto.com/your_apps.
+
+There are two ways of authentication:
+
+1. Setting the `base_url` and `api_key` directly in CartoContext
+
+```python
+cc = CartoContext(
+    base_url='https://your_user_name.carto.com',
+    api_key='your_api_key')
+```
+
+2. By passing a Credentials instance in CartoContext’s creds keyword argument.
+
+```python
+from cartoframes import Credentials
+creds = Credentials(user='your_user_name', key='your_api_key')
+cc = CartoContext(creds=creds)
+```
+
+You can also save your credentials to use later, independent of the Python session.
+Your credentials will be saved locally on your machine for future sessions.
+
+```python
+from cartoframes import Credentials, CartoContext
+creds = Credentials(username='your_user_name', key='your_api_key')
+creds.save()  # save credentials for later use (not dependent on Python session)
+```
+
+Once your credientials are saved, you can start using CARTOframes more quickly:
+
+```python
+from cartoframes import CartoContext
+cc = CartoContext()  # automatically loads credentials if previously saved
+```
+
 
 ### Reading a table from CARTO
 Failure is not an option.
