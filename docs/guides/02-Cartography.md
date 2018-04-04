@@ -14,7 +14,8 @@ cc = CartoContext(
 )
 cc.map(layers=BaseMap())
 ```
-{% include cartoframes/guides/map_out.html %}
+
+<img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
 
 To change the basemap style to CARTO's 'dark matter', pass the source keyword:
 
