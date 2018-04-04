@@ -2,6 +2,4 @@
 
 ### Running an SQL query
 
-### Maping an SQL query
-
-
+### Mapping an SQL query
