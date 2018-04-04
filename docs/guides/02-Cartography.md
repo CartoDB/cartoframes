@@ -1,6 +1,6 @@
 ## Cartography
 
-Map creation in cartoframes happens through the `CartoContext.map` method. This method takes a list of map layers, each with independt styling options. The layers can be a `BaseMap`, table layer (`Layer`), or a query against data in the user's CARTO account (`QueryLayer`). Each of the layers is styled independently and appear on the map in the order listed. Basemaps are an exception to this ordering rule: they always appear on the bottom regardless of its order in the list.
+Map creation in cartoframes happens through the `CartoContext.map` method. This method takes a list of map layers, each with independent styling options. The layers can be a base map (`BaseMap`), table layer (`Layer`), or a query against data in the user's CARTO account (`QueryLayer`). Each of the layers is styled independently and appear on the map in the order listed. Basemaps are an exception to this ordering rule: they always appear on the bottom regardless of its order in the list.
 
 ### Base Maps
 
@@ -22,8 +22,11 @@ To change the basemap style to CARTO's 'dark matter', pass the source keyword:
 ```python
 cc.map(layers=BaseMap(source='dark'))
 ```
+<img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid1_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
 
 For a light basemap, change source to `'light'`.
+
+<img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid0_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
 
 Remove labels with `labels=None` or put them in back with `labels='back'`.
 
