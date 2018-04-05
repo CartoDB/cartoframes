@@ -15,16 +15,30 @@ cc = CartoContext(
 cc.map(layers=BaseMap())
 ```
 
-<img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
-
-To change the basemap style to CARTO's 'dark matter', pass the source keyword:
+Or more simply, the last line can be:
 
 ```python
-cc.map(layers=BaseMap(source='dark'))
+cc.map()
+```
+
+This produces the following output:
+
+<img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
+
+To get a custom view, pass the lng, lat, and zoom as arguments to `cc.map`:
+
+```python
+cc.map(lat=34.7982209, lng=113.6489703, zoom=11)
+```
+
+To change the basemap style to CARTO's 'dark matter', pass `'dark'` to the `BaseMap` class:
+
+```python
+cc.map(layers=BaseMap('dark'))
 ```
 <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid1_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
 
-For a light basemap, change source to `'light'`.
+For a light basemap, change the source to `'light'`.
 
 <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers0_time0_baseid0_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%7D&anti_cache=0.8603790764089185&zoom=1&lat=0&lon=0" />
 
@@ -32,7 +46,7 @@ Remove labels with `labels=None` or put them in back with `labels='back'`.
 
 ### Single Layer Map
 
-To add a data layer to your map, first find a table you want to visualize. Then use the following code to visualize this data:
+To add a data layer to your map, first find a table you want to visualize. Then use the following code to visualize this data. We're going to use the NYC Taxi dataset from cartoframes examples. See the [cartoframes Quickstart]({{ site.url }}//documentation/cartoframes/guides/quickstart/).
 
 ```python
 cc.map(layers=[
@@ -44,7 +58,6 @@ cc.map(layers=[
 ### Multi-layer Map
 
 To add several layers to your map, add them in the order you want them to display:
-
 
 ```python
 cc.map(layers=[
