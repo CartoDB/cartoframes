@@ -37,6 +37,7 @@
      const config  = @@CONFIG@@;
      const bounds  = @@BOUNDS@@;
      const options = @@OPTIONS@@;
+     var labels_url = '@@LABELS@@';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -48,12 +49,16 @@
 
      if (L.Browser.retina) {
          var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+         labels_url = labels_url.replace('.png', '@2x.png');
      } else {
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
          attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
      }).addTo(map);
+     if (labels_url) {
+         L.tileLayer(labels_url).addTo(map);
+     }
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));
