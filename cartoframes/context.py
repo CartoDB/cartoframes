@@ -179,7 +179,7 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        schema = 'public' if self.is_org else (
+        schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
         query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
             table_name=table_name,
