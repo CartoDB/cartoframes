@@ -849,20 +849,19 @@ class CartoContext(object):
 
         base_layers = [idx for idx, layer in enumerate(layers)
                        if layer.is_basemap]
-
         # Check basemaps, add one if none exist
         if len(base_layers) > 1:
             raise ValueError('Map can at most take one BaseMap layer')
         elif len(base_layers) == 1:
+            # move baselayer to first position
             layers.insert(0, layers.pop(base_layers[0]))
+
+            # add labels layer if requested
             if layers[0].is_basic() and layers[0].labels == 'front':
-                if time_layers:
-                    warn('Basemap labels on top are not currently supported '
-                         'for animated maps')
-                else:
-                    layers.append(BaseMap(layers[0].source,
-                                          labels=layers[0].labels,
-                                          only_labels=True))
+                layers.append(BaseMap(layers[0].source,
+                                      labels='front',
+                                      only_labels=True))
+                layers[0].labels = None
         elif not base_layers:
             # default basemap is dark with labels in back
             # labels will be changed if all geoms are non-point
