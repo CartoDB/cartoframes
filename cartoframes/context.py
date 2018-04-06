@@ -153,7 +153,7 @@ class CartoContext(object):
         return paths[0] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False, user_table=None):
+             decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -179,9 +179,9 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        query = 'SELECT * FROM "{user}"."{table_name}"'.format(
+        query = 'SELECT * FROM "{shared_user}"."{table_name}"'.format(
             table_name=table_name,
-            user=shared_user or self.creds.username())
+            shared_user=shared_user or self.creds.username())
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
