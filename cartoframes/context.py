@@ -165,7 +165,7 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
-            user_table (str, optional): If a table has been shared with you,
+            shared_user (str, optional): If a table has been shared with you,
               specify the user name (schema) who shared it.
 
         Returns:
@@ -179,6 +179,7 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
+        # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
         query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
