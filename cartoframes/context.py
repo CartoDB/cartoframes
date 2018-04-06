@@ -153,7 +153,7 @@ class CartoContext(object):
         return paths[0] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False):
+             decode_geom=False, user_table=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -165,6 +165,8 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
+            user_table (str, optional): If a table has been shared with you,
+              specify the user name (schema) who shared it.
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -177,7 +179,9 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
+        query = 'SELECT * FROM "{user}"."{table_name}"'.format(
+            table_name=table_name,
+            user=shared_user or self.creds.username())
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
