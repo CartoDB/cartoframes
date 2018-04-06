@@ -179,9 +179,11 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        query = 'SELECT * FROM "{shared_user}"."{table_name}"'.format(
+        schema = 'public' if self._is_org else (
+            shared_user or self.creds.username())
+        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
             table_name=table_name,
-            shared_user=shared_user or self.creds.username())
+            schema=schema)
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
