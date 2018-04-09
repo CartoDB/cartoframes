@@ -35,6 +35,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Swap files
+.*.sw[nop]
+
 # project-specific
 CARTOCREDS.json
 SITEKEY.txt

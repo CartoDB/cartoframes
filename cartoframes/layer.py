@@ -60,6 +60,7 @@ class BaseMap(AbstractLayer):
 
         self.source = source
         self.labels = labels
+        self.only_labels = only_labels
         stem = 'https://{s}.basemaps.cartocdn.com/rastertiles/'
 
         if self.is_basic():
@@ -82,6 +83,11 @@ class BaseMap(AbstractLayer):
         else:
             raise ValueError("`source` must be one of 'dark', 'light', or "
                              "'voyager'")
+
+    def __repr__(self):
+        """String representation of object"""
+        return 'BaseMap(source={0}, labels={1}, only_labels={2})'.format(
+            self.source, self.labels, self.only_labels)
 
     def is_basic(self):
         """Does BaseMap pull from CARTO default basemaps?
