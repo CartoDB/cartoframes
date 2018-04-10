@@ -1228,7 +1228,8 @@ class CartoContext(object):
             filters = ' AND '.join(r for r in [regionsearch, clipped] if r)
             query = utils.minify_sql((
                 'SELECT *',
-                'FROM OBS_GetAvailableGeometries({bounds},null,null,null,{timespan}})',
+                'FROM OBS_GetAvailableGeometries(',
+                '  {bounds}, null, null, null, {timespan})',
                 '{filters}')).format(
                     bounds=bounds,
                     timespan=utils.pgquote(timespan),
