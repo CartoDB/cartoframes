@@ -56,13 +56,59 @@ education_meta.head()
 To more fully inspect an entry, look at the values of a specific row:
 
 ```python
-education_meta.iloc[0].value
+education_meta.iloc[0]
 ```
 
-Or even filter further using pandas' `str` operations to find education measures that mention 'secondary':
+```
+denom_aggregate                                                        sum
+denom_colname                                      population_3_years_over
+denom_description        The total number of people in each geography a...
+denom_geomref_colname                                                geoid
+denom_id                                           us.census.acs.B14001001
+denom_name                                     Population 3 Years and Over
+denom_reltype                                                  denominator
+denom_t_description                                                   None
+denom_tablename               obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68
+denom_type                                                         Numeric
+geom_colname                                                      the_geom
+geom_description         School Districts are geographic entities withi...
+geom_geomref_colname                                                 geoid
+geom_id                            us.census.tiger.school_district_unified
+geom_name                                          Unified School District
+geom_t_description                                                    None
+geom_tablename                obs_d5cfd7148bd0d1d3522390caa79b3ccd427b1444
+geom_timespan                                                         2015
+geom_type                                                         Geometry
+id                                                                       1
+max_score_rank                                                        None
+max_timespan_rank                                                     None
+normalization                                               predenominated
+num_geoms                                                          168.091
+numer_aggregate                                                        sum
+numer_colname                                                    in_school
+numer_description        The total number of people in each geography c...
+numer_geomref_colname                                                geoid
+numer_id                                           us.census.acs.B14001002
+numer_name                                     Students Enrolled in School
+numer_t_description                                                   None
+numer_tablename               obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68
+numer_timespan                                                 2011 - 2015
+numer_type                                                         Numeric
+score                                                              41.1686
+score_rank                                                               1
+score_rownum                                                             1
+suggested_name                                         in_school_2011_2015
+target_area                                                           None
+target_geoms                                                          None
+timespan_rank                                                            1
+timespan_rownum                                                          1
+Name: 0, dtype: object
+```
+
+Or even filter further using pandas' `str` operations to find education measures that mention 'college':
 
 ```python
-education_meta[education_meta.numer_description.str.contains('secondary')]
+education_meta[education_meta.numer_description.str.contains('college')]
 ```
 
 ### Augmenting your data
