@@ -63,6 +63,9 @@ class BaseMap(AbstractLayer):
         self.only_labels = only_labels
         stem = 'https://{s}.basemaps.cartocdn.com/rastertiles/'
 
+        if self.source is None:
+            self.url = 'https://cartocdn-ashbu-d.global.ssl.fastly.net/eschbacher/api/v1/map/742b8bb8e9cddfcadafc98511fbbc8a1:1522863759883/1/{z}/{x}/{y}.png?api_key=aae568a6e8a4aa0b617a28b41e27806306153920'
+
         if self.is_basic():
             if only_labels:
                 style = source + '_only_labels'
@@ -74,13 +77,13 @@ class BaseMap(AbstractLayer):
                 style = source + (label_type if labels == 'back'
                                   else '_nolabels')
             self.url = join_url(stem, style, '{z}/{x}/{y}.png')
-        elif self.source.startswith('http'):
+        elif self.source is not None and self.source.startswith('http'):
             # TODO: Remove this once baselayer urls can be passed in named
             # map config
             raise ValueError('BaseMap cannot contain a custom url at the '
                              'moment')
             # self.url = source
-        else:
+        elif self.source is not None:
             raise ValueError("`source` must be one of 'dark', 'light', or "
                              "'voyager'")
 

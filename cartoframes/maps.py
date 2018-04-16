@@ -24,7 +24,8 @@ def get_map_name(layers, has_zoom):
     num_layers = len(non_basemap_layers(layers))
     has_labels = len(layers) > 1 and layers[-1].is_basemap
     has_time = has_time_layer(layers)
-    basemap_id = dict(light=0, dark=1, voyager=2)[layers[0].source]
+    basemap_lookup = {'light': 0, 'dark': 1, 'voyager': 2, None: 3}
+    basemap_id = basemap_lookup[layers[0].source]
 
     return ('cartoframes_ver{version}'
             '_layers{layers}'
