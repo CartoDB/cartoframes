@@ -69,32 +69,32 @@ class TestBaseMap(unittest.TestCase):
         # ensure correct BaseMap urls are created
         # See URLs here: https://carto.com/location-data-services/basemaps/
         self.assertEqual(self.dark_map_all.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'dark_all/{z}/{x}/{y}.png')
         self.assertEqual(self.light_map_all.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'light_all/{z}/{x}/{y}.png')
         self.assertEqual(self.voyager_labels_under.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-                         'rastertiles/voyager_labels_under/{z}/{x}/{y}.png')
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
+                         'voyager_labels_under/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_map_no_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'dark_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_map_no_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'light_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.voyager_map_no_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-                         'rastertiles/voyager_nolabels/{z}/{x}/{y}.png')
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
+                         'voyager_nolabels/{z}/{x}/{y}.png')
         self.assertEqual(self.light_only_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'light_only_labels/{z}/{x}/{y}.png')
         self.assertEqual(self.dark_only_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
                          'dark_only_labels/{z}/{x}/{y}.png')
         self.assertEqual(self.voyager_only_labels.url,
-                         'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-                         'rastertiles/voyager_only_labels/{z}/{x}/{y}.png')
+                         'https://{s}.basemaps.cartocdn.com/rastertiles/'
+                         'voyager_only_labels/{z}/{x}/{y}.png')
 
         # ensure self.is_basic() works as intended
         self.assertTrue(self.light_map_all.is_basic(),
@@ -201,7 +201,7 @@ class TestQueryLayer(unittest.TestCase):
         ql._setup([BaseMap(), ql], 1)
         self.assertDictEqual(ql.scheme,
                              dict(name='Antique', bin_method='',
-                                  bins=','.join(str(i) for i in range(1, 11))))
+                                  bins=[str(i) for i in range(1, 11)]))
         # expect category maps query
         with open('qlayerquery.txt', 'w') as f:
             f.write(ql.query)

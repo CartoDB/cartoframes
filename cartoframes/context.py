@@ -19,13 +19,16 @@ from appdirs import user_cache_dir
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
+from carto.datasets import DatasetManager
+from pyrestcli.exceptions import NotFoundException
 
 from cartoframes.credentials import Credentials
 from cartoframes.dataobs import get_countrytag
 from cartoframes import utils
 from cartoframes.layer import BaseMap, AbstractLayer
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
 from cartoframes.legends import Legend
+from cartoframes.maps import (non_basemap_layers, get_map_name,
+                              get_map_template, top_basemap_layer_url)
 from cartoframes.__version__ import __version__
 
 if sys.version_info >= (3, 0):
@@ -59,10 +62,10 @@ DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
 
 
 class CartoContext(object):
-    """CartoContext class for authentication with CARTO and high-level operations
-    such as reading tables from CARTO into dataframes, writing dataframes to
-    CARTO tables, creating custom maps from dataframes and CARTO tables, and
-    augmenting data using CARTO's `Data Observatory
+    """CartoContext class for authentication with CARTO and high-level
+    operations such as reading tables from CARTO into dataframes, writing
+    dataframes to CARTO tables, creating custom maps from dataframes and CARTO
+    tables, and augmenting data using CARTO's `Data Observatory
     <https://carto.com/data-observatory>`__. Future methods will interact with
     CARTO's services like `routing, geocoding, and isolines
     <https://carto.com/location-data-services/>`__, PostGIS backend for spatial
@@ -70,10 +73,26 @@ class CartoContext(object):
 
     Manages connections with CARTO for data and map operations. Modeled
     after `SparkContext
-    <https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/spark-sparkcontext.html>`__.
+    <http://spark.apache.org/docs/2.1.0/api/python/pyspark.html#pyspark.SparkContext>`__.
+
+    There are two ways of authenticating against a CARTO account:
+
+      1. Setting the `base_url` and `api_key` directly in `CartoContext`. This
+         method is easier.::
+
+            cc = CartoContext(
+                base_url='https://eschbacher.carto.com',
+                api_key='abcdefg')
+
+      2. By passing a :obj:`Credentials` instance in `CartoContext`'s `creds`
+         keyword argument. This method is more flexible.::
+
+            from cartoframes import Credentials
+            creds = Credentials(user='eschbacher', key='abcdefg')
+            cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (cartoframes.Credentials): :obj:`Credentials` instance
+        creds (:obj:`Credentials`): :obj:`Credentials` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -82,6 +101,8 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
+        creds (:obj:`Credentials`): A :obj:`Credentials` instance can be used
+          in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -135,7 +156,7 @@ class CartoContext(object):
         return paths[0] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False):
+             decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -147,6 +168,8 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
+            shared_user (str, optional): If a table has been shared with you,
+              specify the user name (schema) who shared it.
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -159,7 +182,12 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
+        # choose schema (default user - org or standalone - or shared)
+        schema = 'public' if not self.is_org else (
+            shared_user or self.creds.username())
+        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
+            table_name=table_name,
+            schema=schema)
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
@@ -168,12 +196,11 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-    def write(self, df, table_name, temp_dir=CACHE_DIR,
-              overwrite=False, lnglat=None, encode_geom=False, geom_col=None,
-              **kwargs):
+    def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
+              lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
-        Example:
+        Examples:
             Write a pandas DataFrame to CARTO.
 
             .. code:: python
@@ -216,7 +243,8 @@ class CartoContext(object):
                 as `the_geom`.
             geom_col (str, optional): The name of the column where geometry
                 information is stored. Used in conjunction with `encode_geom`.
-            kwargs: Keyword arguments to control write operations. Options are:
+            **kwargs: Keyword arguments to control write operations. Options
+                are:
 
                 - `compression` to set compression for files sent to CARTO.
                   This will cause write speedups depending on the dataset.
@@ -227,11 +255,9 @@ class CartoContext(object):
                   for more information. For example, when using
                   `content_guessing='true'`, a column named 'countries' with
                   country names will be used to generate polygons for each
-                  country. To avoid unintended consequences, avoid `file`,
-                  `url`, and other similar arguments. Note: Combining `privacy`
-                  with `overwrite` (defined above) does not currently update
-                  the privacy of a dataset if it already exists:
-                  https://github.com/CartoDB/cartoframes/issues/252.
+                  country. Another use is setting the privacy of a dataset. To
+                  avoid unintended consequences, avoid `file`, `url`, and other
+                  similar arguments.
 
         Returns:
             :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
@@ -254,6 +280,11 @@ class CartoContext(object):
         if not overwrite:
             # error if table exists and user does not want to overwrite
             self._table_exists(table_name)
+        elif kwargs.get('privacy') is None:
+            # get privacy so it's not overwritten on write
+            privacy = self._get_privacy(table_name)
+            if privacy:
+                kwargs['privacy'] = privacy
 
         # issue warning if the index is anything but the pandas default
         #  range index
@@ -279,6 +310,9 @@ class CartoContext(object):
                                                     geom_col, pgcolnames,
                                                     kwargs)
             self._set_schema(_df, final_table_name, pgcolnames)
+
+        if kwargs.get('privacy'):
+            self._update_privacy(final_table_name, kwargs.get('privacy'))
 
         # create geometry column from long/lats if requested
         if lnglat:
@@ -316,6 +350,22 @@ class CartoContext(object):
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
                                      final_table_name)))
+
+    def _get_privacy(self, table_name):
+        """gets current privacy of a table"""
+        ds_manager = DatasetManager(self.auth_client)
+        try:
+            dataset = ds_manager.get(table_name)
+            return dataset.privacy.lower()
+        except NotFoundException:
+            return None
+
+    def _update_privacy(self, table_name, privacy):
+        """Updates the privacy of a dataset"""
+        ds_manager = DatasetManager(self.auth_client)
+        dataset = ds_manager.get(table_name)
+        dataset.privacy = privacy
+        dataset.save()
 
     def delete(self, table_name):
         """Delete a table in user's CARTO account.
@@ -644,19 +694,18 @@ class CartoContext(object):
             #  bug is fixed ref: support/1127
             try:
                 self.sql_client.send('''
-                    create table {0} as SELECT 1;
-                    drop table {0};
+                    CREATE TABLE {0} AS SELECT 1;
+                    DROP TABLE {0};
                 '''.format(table_name))
                 resp = self._auth_send(
                     'api/v1/imports', 'POST',
-                    params=dict(sql=query,
-                                # collision_strategy='',
-                                table_name=table_name),
+                    params=dict(table_name=table_name),
+                    json=dict(sql=query),
+                    # collision_strategy='',
                     headers={'Content-Type': 'application/json'})
-            except CartoException:
+            except CartoException as err:
                 raise CartoException(
-                    'Table `{0}` already exists. Delete it before creating a '
-                    'table from this query'.format(table_name))
+                    'Cannot create table `{0}`: {1}'.format(table_name, err))
 
             while True:
                 import_job = self._check_import(resp['item_queue_id'])
@@ -810,20 +859,19 @@ class CartoContext(object):
 
         base_layers = [idx for idx, layer in enumerate(layers)
                        if layer.is_basemap]
-
         # Check basemaps, add one if none exist
         if len(base_layers) > 1:
             raise ValueError('Map can at most take one BaseMap layer')
         elif len(base_layers) == 1:
+            # move baselayer to first position
             layers.insert(0, layers.pop(base_layers[0]))
+
+            # add labels layer if requested
             if layers[0].is_basic() and layers[0].labels == 'front':
-                if time_layers:
-                    warn('Basemap labels on top are not currently supported '
-                         'for animated maps')
-                else:
-                    layers.append(BaseMap(layers[0].source,
-                                          labels=layers[0].labels,
-                                          only_labels=True))
+                layers.append(BaseMap(layers[0].source,
+                                      labels='front',
+                                      only_labels=True))
+                layers[0].labels = None
         elif not base_layers:
             # default basemap is dark with labels in back
             # labels will be changed if all geoms are non-point
@@ -976,10 +1024,13 @@ class CartoContext(object):
             bounds = [] if has_zoom else [[options['north'], options['east']],
                                           [options['south'], options['west']]]
 
-            content = self._get_iframe_srcdoc(config=config,
-                                              bounds=bounds,
-                                              options=options,
-                                              map_options=map_options)
+            content = self._get_iframe_srcdoc(
+                config=config,
+                bounds=bounds,
+                options=options,
+                map_options=map_options,
+                top_layer_url=top_basemap_layer_url(layers)
+            )
 
             img_html = html
             html = (
@@ -1062,7 +1113,7 @@ class CartoContext(object):
         return resp['rows'][0]['geom_type']
 
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
-                        timespan=None):
+                        timespan=None, include_nonclipped=False):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
@@ -1116,7 +1167,8 @@ class CartoContext(object):
                 # get median income data and original table as new dataframe
                 idaho_falls_income = cc.data(
                     'idaho_falls_tracts',
-                    median_income_meta)
+                    median_income_meta,
+                    how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
                 cc.write(idaho_falls_income,
                          'idaho_falls_tracts',
@@ -1140,6 +1192,15 @@ class CartoContext(object):
                   southern latitude, eastern longitude, and northern latitude.
                   For example, Switzerland fits in
                   ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional): Specific timespan to get geometries from.
+              Defaults to use the most recent. See the Data Observatory catalog
+              for more information.
+            decode_geom (bool, optional): Whether to return the geometries as
+              Shapely objects or keep them encoded as EWKB strings. Defaults
+              to False.
+            include_nonclipped (bool, optional): Optionally include
+              non-shoreline-clipped boundaries. These boundaries are the raw
+              boundaries provided by, for example, US Census Tiger.
 
         Returns:
             pandas.DataFrame: If `boundary` is specified, then all available
@@ -1173,7 +1234,7 @@ class CartoContext(object):
                               'FROM {table})').format(table=region)
             except CartoException:
                 # see if it's a Data Obs region tag
-                regionsearch = 'WHERE "geom_tags"::text ilike \'%{}%\''.format(
+                regionsearch = '"geom_tags"::text ilike \'%{}%\''.format(
                     get_countrytag(region))
                 bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
 
@@ -1183,12 +1244,22 @@ class CartoContext(object):
             raise ValueError('`region` must be a str, a list of two lng/lat '
                              'pairs, or ``None`` (which defaults to the '
                              'world)')
+        if include_nonclipped:
+            clipped = None
+        else:
+            clipped = (r"(geom_id ~ '^us\.census\..*_clipped$' OR "
+                       r"geom_id !~ '^us\.census\..*')")
+
         if boundary is None:
             regionsearch = locals().get('regionsearch')
-            query = ('SELECT * FROM OBS_GetAvailableGeometries('
-                     '{bounds}) {regionsearch}').format(
-                         bounds=bounds,
-                         regionsearch=regionsearch if regionsearch else '')
+            filters = ' AND '.join(r for r in [regionsearch, clipped] if r)
+            query = utils.minify_sql((
+                'SELECT *',
+                'FROM OBS_GetAvailableGeometries({bounds})',
+                '{filters}')).format(
+                    bounds=bounds,
+                    filters='WHERE {}'.format(filters) if filters else ''
+                )
             return self.query(query)
 
         query = utils.minify_sql((
@@ -1197,10 +1268,9 @@ class CartoContext(object):
             '    {bounds},',
             '    {boundary},',
             '    {time})', )).format(
-                boundary=utils.pgquote(boundary),
                 bounds=bounds,
+                boundary=utils.pgquote(boundary),
                 time=utils.pgquote(timespan))
-        self._debug_print(query=query)
         return self.query(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
@@ -1590,17 +1660,20 @@ class CartoContext(object):
             **DEFAULT_SQL_ARGS
         )['fields'].keys()
 
-        if set(tablecols) & set(_meta['suggested_name']):
-            commoncols = set(tablecols) & set(_meta['suggested_name'])
-            raise NameError('Column name collision for column(s): {cols}. '
-                            'Rename table column(s) to resolve.'.format(
-                                cols=', '.join(commoncols)))
+        names = {}
+        for suggested in _meta['suggested_name']:
+            if suggested in tablecols:
+                names[suggested] = utils.unique_colname(suggested, tablecols)
+                warn('{s0} was augmented as {s1} because of name collision'. \
+                    format(s0=suggested, s1=names[suggested]))
+            else:
+                names[suggested] = suggested
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
                 n=row[0],
                 pgtype=row[1]['numer_type'],
-                col=row[1]['suggested_name'])
+                col=names[row[1]['suggested_name']])
             for row in _meta.iterrows())
         query = utils.minify_sql((
             'SELECT t.*, {cols}',
@@ -1633,7 +1706,10 @@ class CartoContext(object):
         res = self.auth_client.send(relative_path, http_method, **kwargs)
         if isinstance(res.content, str):
             return json.loads(res.content)
-        return json.loads(res.content.decode('utf-8'))
+        try:
+            return json.loads(res.content.decode('utf-8'))
+        except json.JSONDecodeError as err:
+            raise CartoException(err)
 
     def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
@@ -1676,16 +1752,21 @@ class CartoContext(object):
             self._map_templates[map_name] = True
         return map_name
 
-    def _get_iframe_srcdoc(self, config, bounds, options, map_options):
+    def _get_iframe_srcdoc(self, config, bounds, options, map_options,
+                           top_layer_url=None):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
-            with open(os.path.join(os.path.dirname(__file__),
-                                   'assets/cartoframes.html'), 'r') as f:
-                self._srcdoc = f.read()
+            html_template = os.path.join(
+                os.path.dirname(__file__),
+                'assets',
+                'cartoframes.html')
+            with open(html_template, 'r') as html_file:
+                self._srcdoc = html_file.read()
 
         return (self._srcdoc
                 .replace('@@CONFIG@@', json.dumps(config))
                 .replace('@@BOUNDS@@', json.dumps(bounds))
                 .replace('@@OPTIONS@@', json.dumps(map_options))
+                .replace('@@LABELS@@', top_layer_url or '')
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
                 .replace('@@LAT@@', str(options.get('lat', 0)))
                 .replace('@@LNG@@', str(options.get('lng', 0))))

@@ -13,6 +13,7 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
@@ -21,7 +22,23 @@ WILL_SKIP = False
 warnings.filterwarnings("ignore")
 
 
-class TestCartoContext(unittest.TestCase):
+class _UserUrlLoader:
+    def user_url(self):
+        user_url = None
+        if (os.environ.get('USERURL') is None):
+            try:
+                creds = json.loads(open('test/secret.json').read())
+                user_url = creds['USERURL']
+            except:
+                warnings.warn('secret.json not found')
+
+        if user_url in (None, ''):
+            user_url = 'https://{username}.carto.com/'
+
+        return user_url
+
+
+class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -42,8 +59,10 @@ class TestCartoContext(unittest.TestCase):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
+        self.user_url = self.user_url()
+
         if self.username and self.apikey:
-            self.baseurl = 'https://{username}.carto.com/'.format(
+            self.baseurl = self.user_url.format(
                     username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
@@ -308,6 +327,27 @@ class TestCartoContext(unittest.TestCase):
                    the_geom_webmercator='geometry', cartodb_id='number')
         self.assertDictEqual(schema, ans)
 
+    @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
+    def test_write_privacy(self):
+        """context.CartoContext.write Updates the privacy of a dataset"""
+        from carto.datasets import DatasetManager
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        ds_manager = DatasetManager(self.auth_client)
+
+        df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
+        cc.write(df, self.test_write_table)
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'private')
+
+        df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
+        cc.write(df, self.test_write_table, overwrite=True, privacy='public')
+        dataset = ds_manager.get(self.test_write_table)
+        self.assertEqual(dataset.privacy.lower(), 'public')
+
+        privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
+        self.assertIsNone(privacy)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_write_index(self):
         """context.CartoContext.write with non-default index"""
@@ -404,7 +444,7 @@ class TestCartoContext(unittest.TestCase):
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_query(self):
-        """cartoframes.CartoContext.query"""
+        """context.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
@@ -924,6 +964,15 @@ class TestCartoContext(unittest.TestCase):
             self.assertSetEqual(set(('the_geom', 'geom_refs', )),
                                 set(geoms.columns))
 
+        # presence or lack of clipped boundaries
+        nonclipped = (True, False, )
+        for tf in nonclipped:
+            meta = cc.data_boundaries(include_nonclipped=tf)
+            self.assertEqual(
+                'us.census.tiger.state' in set(meta.geom_id),
+                tf
+            )
+ 
         with self.assertRaises(ValueError):
             cc.data_boundaries(region=[1, 2, 3])
 
@@ -1034,15 +1083,32 @@ class TestCartoContext(unittest.TestCase):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-        with self.assertRaises(NameError, msg='column name already exists'):
-            meta = cc.data_discovery(region='united states',
-                                     time='2006 - 2010',
-                                     regex='.*walked to work.*',
-                                     boundaries='us.census.tiger.census_tract')
-            cc.data(self.test_data_table, meta)
+
+    def test_column_name_collision_do_enrichement(self):
+        dup_col = 'female_third_level_studies_rate_2011'
+        self.sql_client.send("""create table {table} as (
+                select cdb_latlng(40.4165,-3.70256) the_geom,
+                       1 {dup_col})""". \
+                             format(dup_col=dup_col,
+                                    table=self.test_write_table))
+        self.sql_client.send(
+            "select cdb_cartodbfytable('public', '{table}')". \
+                format(table=self.test_write_table))
+
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        meta = cc.data_discovery(region=self.test_write_table,
+                                 keywords='female')
+        meta = meta[meta.suggested_name == dup_col]
+        data = cc.data(
+            self.test_write_table,
+            meta[meta.suggested_name == dup_col]
+        )
+
+        self.assertIn('_' + dup_col, data.keys())
 
 
-class TestBatchJobStatus(unittest.TestCase):
+class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -1063,8 +1129,10 @@ class TestBatchJobStatus(unittest.TestCase):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
+        self.user_url = self.user_url()
+
         if self.username and self.apikey:
-            self.baseurl = 'https://{username}.carto.com/'.format(
+            self.baseurl = self.user_url.format(
                 username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
@@ -1154,3 +1222,4 @@ class TestBatchJobStatus(unittest.TestCase):
         str_bjs = BatchJobStatus(cc, 'foo')
         self.assertIsNone(str_bjs.get_status())
         self.assertEqual(str_bjs.job_id, 'foo')
+

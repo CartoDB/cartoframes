@@ -60,9 +60,8 @@ class BaseMap(AbstractLayer):
 
         self.source = source
         self.labels = labels
-        stem = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/'
-        if source == 'voyager':
-            stem += 'rastertiles'
+        self.only_labels = only_labels
+        stem = 'https://{s}.basemaps.cartocdn.com/rastertiles/'
 
         if self.is_basic():
             if only_labels:
@@ -84,6 +83,11 @@ class BaseMap(AbstractLayer):
         else:
             raise ValueError("`source` must be one of 'dark', 'light', or "
                              "'voyager'")
+
+    def __repr__(self):
+        """String representation of object"""
+        return 'BaseMap(source={0}, labels={1}, only_labels={2})'.format(
+            self.source, self.labels, self.only_labels)
 
     def is_basic(self):
         """Does BaseMap pull from CARTO default basemaps?
@@ -108,7 +112,7 @@ class QueryLayer(AbstractLayer):
     * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
       1000``)
 
-    Used in the `layers` keyword in `CartoContext.map()
+    Used in the `layers` keyword in `CartoContext.map
     <#context.CartoContext.map>`__.
 
     Example:
@@ -159,6 +163,12 @@ class QueryLayer(AbstractLayer):
             If `time` is a :obj:`str`, it must be the name of a column which
             has a data type of `datetime` or `float`.
 
+            .. code::
+
+                from cartoframes import QueryLayer
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
+                               time='bird_sighting_time')
+
             If `time` is a :obj:`dict`, the following keys are options:
 
             - column (`str`, required): Column for animating map, which must
@@ -169,7 +179,7 @@ class QueryLayer(AbstractLayer):
               ``sum``, or another `PostgreSQL aggregate functions
               <https://www.postgresql.org/docs/9.5/static/functions-aggregate.html>`__
               with a numeric output. Defaults to ``count``.
-            - cumulative (`bool`, optional): Whether to accumulate points over
+            - cumulative (:obj:`bool`, optional): Whether to accumulate points over
               time (``True``) or not (``False``, default)
             - frames (`int`, optional): Number of frames in the animation.
               Defaults to 256.
@@ -177,6 +187,18 @@ class QueryLayer(AbstractLayer):
               Defaults to 30.
             - trails (`int`, optional): Number of trails after the incidence of
               a point. Defaults to 2.
+
+            .. code::
+
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          time={
+                              'column': 'bird_sighting_time',
+                              'cumulative': True,
+                              'frames': 128,
+                              'duration': 15
+                          })
+
         color (dict or str, optional): Color style to apply to map. For
             example, this can be used to change the color of all geometries
             in this layer, or to create a graduated color or choropleth map.
@@ -189,6 +211,17 @@ class QueryLayer(AbstractLayer):
               qualitative data.
             - A hex value or `web color name
               <https://www.w3.org/TR/css3-color/#svg-color>`__.
+
+            .. code::
+
+                # color all geometries red (#F00)
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          color='red')
+
+                # color on 'num_eggs' (using defalt color scheme and quantification)
+                l = Layer('acadia_biodiversity',
+                          color='num_eggs')
 
             If `color` is a :obj:`dict`, the following keys are options, with
             values described:
@@ -206,9 +239,24 @@ class QueryLayer(AbstractLayer):
               is recommended to use the `styling.custom <#styling.custom>`__
               utility function.
 
+            .. code::
+
+                from cartoframes import QueryLayer, styling
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
+                               color={
+                                   'column': 'simpson_index',
+                                   'scheme': styling.mint(7, bin_method='equal')
+                               })
+
         size (dict or int, optional): Size style to apply to point data.
 
             If `size` is an :obj:`int`, all points are sized by this value.
+
+            .. code::
+
+                from cartoframes import QueryLayer
+                l = QueryLayer('SELECT * FROM acadia_biodiversity',
+                               size=7)
 
             If `size` is a :obj:`str`, this value is interpreted as a column,
             and the points are sized by the value in this column. The
@@ -216,11 +264,17 @@ class QueryLayer(AbstractLayer):
             5, and a max size of 5. Use the :obj:`dict` input to override these
             values.
 
+            .. code::
+
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          size='num_eggs')
+
             If `size` is a :obj:`dict`, the follow keys are options, with
             values described as:
 
             - column (`str`): Column to base sizing of points on
-            - bin_method (str, optional): Quantification method for dividing
+            - bin_method (`str`, optional): Quantification method for dividing
               data range into bins. Must be one of the methods in
               :obj:`BinMethod` (excluding `category`).
             - bins (`int`, optional): Number of bins to break data into.
@@ -232,6 +286,27 @@ class QueryLayer(AbstractLayer):
 
         legend (matplotlib.colorbar): matplotlib ColorBar
         tooltip (tuple, optional): **Not yet implemented.**
+
+            .. code::
+
+                from cartoframes import Layer
+                l = Layer('acadia_biodiversity',
+                          size={
+                              'column': 'num_eggs',
+                              'max': 10,
+                              'min': 2
+                          })
+
+    Raises:
+
+        CartoException: If a column name used in any of the styling options is
+          not in the data source in `query` (or `table` if using :obj:`Layer`).
+        ValueError: If styling using a :obj:`dict` and a ``column`` key is not
+          present, or if the data type for a styling option is not supported.
+          This is also raised if styling by a geometry column (i.e.,
+          ``the_geom`` or ``the_geom_webmercator``). Futher, this is raised if
+          requesting a time-based map with a data source that has geometries
+          other than points.
     """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
                  tooltip=None, legend=None):
@@ -242,6 +317,8 @@ class QueryLayer(AbstractLayer):
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
+        self.cartocss = None
+        self.torque_cartocss = None
 
         # get legends if specified
         self.legend = {
@@ -369,11 +446,10 @@ class QueryLayer(AbstractLayer):
             elif self.style_cols[self.color] in ('number', ):
                 self.scheme = mint(5)
             elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError('Cannot style column `{col}` of type '
-                                 '`{type}`. It must be numeric, text, or '
-                                 'boolean.'.format(
-                                     col=self.color,
-                                     type=self.style_cols[self.color]))
+                raise ValueError(
+                    'Cannot style column `{col}` of type `{type}`. It must be '
+                    'numeric, text, or boolean.'.format(
+                        col=self.color, type=self.style_cols[self.color]))
 
         if self.time:
             # validate time column information
@@ -416,11 +492,10 @@ class QueryLayer(AbstractLayer):
                 ]).format(col=self.color, query=self.orig_query)
                 agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
                 self.scheme = {
-                        'bins': ','.join(str(i) for i in range(1, 11)),
-                        'name': (self.scheme.get('name') if self.scheme
-                                 else 'Bold'),
-                        'bin_method': '',
-                        }
+                    'bins': [str(i) for i in range(1, 11)],
+                    'name': (self.scheme.get('name') if self.scheme
+                             else 'Bold'),
+                    'bin_method': '', }
             elif (self.color in self.style_cols and
                   self.style_cols[self.color] in ('number', )):
                 # replace with utils.minify_sql
@@ -431,7 +506,7 @@ class QueryLayer(AbstractLayer):
                 agg_func = '\'avg({})\''.format(self.color)
             else:
                 agg_func = "'{method}(cartodb_id)'".format(
-                        method=method)
+                    method=method)
             self.torque_cartocss = cssify({
                 'Map': {
                     '-torque-frame-count': frames,
@@ -466,8 +541,8 @@ class QueryLayer(AbstractLayer):
 
         if self.scheme:
             color_style = get_scheme_cartocss(
-                    'value' if has_time else self.color,
-                    self.scheme)
+                'value' if has_time else self.color,
+                self.scheme)
         else:
             color_style = self.color
 
@@ -491,14 +566,14 @@ class QueryLayer(AbstractLayer):
                     '#layer[{} = null]'.format(self.color): {
                         'marker-fill': '#666'}
                     })
-            for t in range(1, self.time['trails'] + 1):
+            for trail_num in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({
-                        '#layer[frame-offset={}]'.format(t): {
-                            'marker-width': size_style * (1.0 + t * 0.3),
-                            'marker-opacity': 0.9 / 2.0**t,
-                        }
-                    })
+                    '#layer[frame-offset={}]'.format(trail_num): {
+                        'marker-width': size_style * (1.0 + trail_num * 0.3),
+                        'marker-opacity': 0.9 / 2.0**trail_num,
+                    }
+                })
                 css += trail_temp
             return css
         else:
@@ -557,10 +632,11 @@ class QueryLayer(AbstractLayer):
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is used for visualizing individual datasets
-    with `CartoContext.map() <#context.CartoContext.map>`__'s ``layers``
+    with `CartoContext.map <#context.CartoContext.map>`__'s `layers`
     keyword argument.
 
     Example:
+
         .. code:: python
 
             import cartoframes
@@ -595,7 +671,6 @@ class Layer(QueryLayer):
     def _setup(self, layers, layer_idx):
         # TODO: enable dataframe write if it is passed as a layer
         if isinstance(self.source, pd.DataFrame):
-            # TODO: error on this as NotImplementedError
             raise NotImplementedError('Not currently implemented')
             # context.write(self.source,
             #               self.table_name,

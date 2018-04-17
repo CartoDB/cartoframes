@@ -8,7 +8,6 @@ CARTOColors in its `GitHub repository <https://github.com/Carto-color/>`__.
 """  # noqa
 import palettable
 
-
 class BinMethod:
     """Data classification methods used for the styling of data on maps.
 
@@ -18,12 +17,22 @@ class BinMethod:
         headtails (str): Head/Tails classification for quantitative data
         equal (str): Equal Interval classification for quantitative data
         category (str): Category classification for qualitative data
+        mapping (dict): The TurboCarto mappings
     """
     quantiles = 'quantiles'
     jenks = 'jenks'
     headtails = 'headtails'
     equal = 'equal'
     category = 'category'
+
+    # Mappings: https://github.com/CartoDB/turbo-carto/#mappings-default-values
+    mapping = {
+        quantiles: '>',
+        jenks: '>',
+        headtails: '<',
+        equal: '>',
+        category: '=',
+    }
 
 
 def get_scheme(scheme_info, scheme_attr):
@@ -92,15 +101,19 @@ def get_scheme_cartocss(column, scheme_info):
     else:
         # fall back to defaults
         color_scheme = 'cartocolor({})'.format(scheme_info['name'])
+    if not isinstance(scheme_info['bins'], int):
+        bins = ','.join(str(i) for i in scheme_info['bins'])
+    else:
+        bins = scheme_info['bins']
     bin_method = scheme_info['bin_method']
+    comparison = ', {}'.format(BinMethod.mapping.get(bin_method, '>='))
     return ('ramp([{column}], {color_scheme}, '
             '{bin_method}({bins}){comparison})').format(
                 column=column,
                 color_scheme=color_scheme,
                 bin_method=bin_method,
-                bins=scheme_info['bins'],
-                comparison=('' if bin_method == 'category' else ', <=')
-            )
+                bins=bins,
+                comparison=comparison)
 
 
 def custom(colors, bins=None, bin_method=BinMethod.quantiles,
@@ -130,17 +143,19 @@ def custom(colors, bins=None, bin_method=BinMethod.quantiles,
         'reverse': reverse
     }
 
-
 def scheme(name, bins, bin_method, provider, scheme_type, reverse):
     """Return a custom scheme based on CARTOColors.
 
     Args:
-        name (str): Name of color scheme/palette
-        bins (int): Number of bins for classifying data. CARTOColors have 7
-          bins max for quantitative data, and 11 max for qualitative data.
-          See `palettable documentation
-          <http://jiffyclub.github.io/palettable/>`__ for others.
-        bin_method (str): One of methods in :obj:`BinMethod`.
+        name (str): Name of a CARTOColor.
+        bins (int or iterable): If an `int`, the number of bins for classifying
+          data. CARTOColors have 7 bins max for quantitative data, and 11 max
+          for qualitative data. If `bins` is a `list`, it is the upper range
+          for classifying data. E.g., `bins` can be of the form ``(10, 20, 30,
+          40, 50)``.
+        bin_method (str, optional): One of methods in :obj:`BinMethod`.
+          Defaults to ``quantiles``. If `bins` is an interable, then that is
+          the bin method that will be used and this will be ignored.
         provider (str): Origin of the color scheme. One of palettes listed on
           `palettable <http://jiffyclub.github.io/palettable/>`__ except
           cubeHelix.
@@ -159,7 +174,7 @@ def scheme(name, bins, bin_method, provider, scheme_type, reverse):
     return {
         'name': name,
         'bins': bins,
-        'bin_method': bin_method,
+        'bin_method': (bin_method if isinstance(bins, int) else ''),
         'provider': provider,
         'type': scheme_type,
         'reverse': reverse,
