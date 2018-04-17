@@ -1,6 +1,6 @@
 ### CARTO Credential Management
 
-#### Typical usage[¶](#typical-usage "Permalink to this headline")
+#### Typical usage
 
 The most common way to input credentials into cartoframes is through the CartoContext, as below. Replace {your\_user\_name} with your CARTO username and {your\_api\_key} with your API key, which you can find at `http://{your_user_name}.carto.com/your_apps`.
 
