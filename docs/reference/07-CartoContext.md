@@ -1,7 +1,7 @@
 
 ### CartoContext
 
-_class_ `cartoframes.context.``CartoContext`(_base_url=None_, _api_key=None_, _creds=None_, _session=None_, _verbose=0_)
+_class_ `cartoframes.context.CartoContext(_base_url=None_, _api_key=None_, _creds=None_, _session=None_, _verbose=0_)`
 
 CartoContext class for authentication with CARTO and high-level operations such as reading tables from CARTO into dataframes, writing dataframes to CARTO tables, creating custom maps from dataframes and CARTO tables, and augmenting data using CARTO’s [Data Observatory](https://carto.com/data-observatory). Future methods will interact with CARTO’s services like [routing, geocoding, and isolines](https://carto.com/location-data-services/), PostGIS backend for spatial processing, and much more.
 
@@ -9,18 +9,21 @@ Manages connections with CARTO for data and map operations. Modeled after [Spark
 
 There are two ways of authenticating against a CARTO account:
 
-> 1.  Setting the base_url and api_key directly in CartoContext. This method is easier.:
->
->     cc = CartoContext(
->         base_url='https://eschbacher.carto.com',
->         api_key='abcdefg')
->
-> 2.  By passing a `Credentials` instance in CartoContext’s creds keyword argument. This method is more flexible.:
->
->     from cartoframes import Credentials
->     creds = Credentials(user='eschbacher', key='abcdefg')
->     cc = CartoContext(creds=creds)
->
+1.  Setting the `base_url` and `api_key` directly in CartoContext. This method is easier.:
+    ```python
+    cc = CartoContext(
+        base_url='https://eschbacher.carto.com',
+        api_key='abcdefg')
+    ```
+
+2.  By passing a `Credentials` instance in CartoContext’s creds keyword argument. This method is more flexible.:
+
+    ```python
+    from cartoframes import Credentials
+    creds = Credentials(user='eschbacher', key='abcdefg')
+    cc = CartoContext(creds=creds)
+    ```
+
 
 `creds`[¶](#cartoframes.context.CartoContext.creds "Permalink to this definition")
 
@@ -30,7 +33,7 @@ There are two ways of authenticating against a CARTO account:
 
 Parameters:
 
-*   **base_url** (_str_) – Base URL of CARTO user account. Cloud-based accounts should use the form `https://{username}.carto.com` (e.g., [https://eschbacher.carto.com](https://eschbacher.carto.com) for user `eschbacher`) whether on a personal or multi-user account. On-premises installation users should ask their admin.
+*   **base\_url** (_str_) – Base URL of CARTO user account. Cloud-based accounts should use the form `https://{username}.carto.com` (e.g., [https://eschbacher.carto.com](https://eschbacher.carto.com) for user `eschbacher`) whether on a personal or multi-user account. On-premises installation users should ask their admin.
 *   **api_key** (_str_) – CARTO API key.
 *   **creds** (`Credentials`) – A `Credentials` instance can be used in place of a base_url/api_key combination.
 *   **session** (_requests.Session__,_ _optional_) – requests session. See [requests documentation](http://docs.python-requests.org/en/master/user/advanced/) for more information.
