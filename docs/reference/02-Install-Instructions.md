@@ -7,7 +7,7 @@ To install cartoframes on your machine, do the following to install the latest v
 $ pip install cartoframes
 ```
 
-cartoframes is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use cartoframes in Jupyter Notebooks (pip install jupyter). See the example usage section below or notebooks in the [examples directory](https://github.com/CartoDB/cartoframes/tree/master/examples) for using cartoframes in that environment.
+CARTOFrames is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use cartoframes in Jupyter Notebooks (pip install jupyter). See the example usage section below or notebooks in the [examples directory](https://github.com/CartoDB/cartoframes/tree/master/examples) for using cartoframes in that environment.
 
 ### Virtual Environment
 
