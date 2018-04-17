@@ -8,7 +8,7 @@
             "samples": [
                 {
                     "title": "Basic usage",
-                    "desc": "Use this notebook to understand CARTOFrames basics.",
+                    "desc": "Use this notebook to understand CARTOframes basics.",
                     "file": "basic-usage.md"
                 }
             ]
