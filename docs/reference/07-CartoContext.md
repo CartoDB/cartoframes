@@ -1,7 +1,7 @@
 
 ### CartoContext
 
-_class_ `cartoframes.context.CartoContext(_base_url=None_, _api_key=None_, _creds=None_, _session=None_, _verbose=0_)`
+_class_ `cartoframes.context.CartoContext(base_url=None, api_key=None, creds=None, session=None, verbose=0)`
 
 CartoContext class for authentication with CARTO and high-level operations such as reading tables from CARTO into dataframes, writing dataframes to CARTO tables, creating custom maps from dataframes and CARTO tables, and augmenting data using CARTO’s [Data Observatory](https://carto.com/data-observatory). Future methods will interact with CARTO’s services like [routing, geocoding, and isolines](https://carto.com/location-data-services/), PostGIS backend for spatial processing, and much more.
 
@@ -25,11 +25,9 @@ There are two ways of authenticating against a CARTO account:
     ```
 
 
-`creds`[¶](#cartoframes.context.CartoContext.creds "Permalink to this definition")
+Attributes:
 
-`Credentials` – `Credentials` instance
-
-
+* **creds** [¶](#cartoframes.context.CartoContext.creds "Permalink to this definition") - `Credentials` – `Credentials` instance
 
 Parameters:
 
@@ -51,10 +49,12 @@ Example
 
 Create a CartoContext object:
 
+```python
 import cartoframes
 cc = cartoframes.CartoContext(BASEURL, APIKEY)
+```
 
-`write`(_df_, _table_name_, _temp\_dir=SYSTEM\_TMP_PATH_, _overwrite=False_, _lnglat=None_, _encode_geom=False_, _geom_col=None_, _**kwargs_)[¶](#cartoframes.context.CartoContext.write "Permalink to this definition")
+`write`(df, table\_name, temp\_dir=SYSTEM\_TMP\_PATH, overwrite=False, lnglat=None, encode\_geom=False, geom\_col=None, \*\*kwargs)[¶](#cartoframes.context.CartoContext.write "Permalink to this definition")
 
 Write a DataFrame to a CARTO table.
 
