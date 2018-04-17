@@ -6,23 +6,23 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 from cartoframes import Layer, BaseMap, styling
 cc = cartoframes.CartoContext(base_url=BASEURL,
                               api_key=APIKEY)
-cc.map(layers=\[BaseMap('light'),
+cc.map(layers=[BaseMap('light'),
                Layer('acadia_biodiversity',
                      color={'column': 'simpson_index',
                             'scheme': styling.tealRose(5)}),
-               Layer('peregrine\_falcon\_nest_sites',
+               Layer('peregrine_falcon_nest_sites',
                      size='num_eggs',
                      color={'column': 'bird_id',
-                            'scheme': styling.vivid(10)})\],
+                            'scheme': styling.vivid(10)})],
        interactive=True)
  ```
 
-![https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/map_demo.gif](https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/map_demo.gif)
+![../../img/map_demo.gif](https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/map_demo.gif)
 
-Note
+**Note**
 
 Legends are under active development. See [https://github.com/CartoDB/cartoframes/pull/184](https://github.com/CartoDB/cartoframes/pull/184) for more information. To try out that code, install cartoframes as:
 
 ```bash
-> pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes
+$ pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes
 ```

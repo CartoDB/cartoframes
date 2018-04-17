@@ -1,6 +1,5 @@
 
-CartoContext
------------------------------------------------------------
+### CartoContext
 
 _class_ `cartoframes.context.``CartoContext`(_base_url=None_, _api_key=None_, _creds=None_, _session=None_, _verbose=0_)
 
