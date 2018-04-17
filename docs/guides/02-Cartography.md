@@ -96,4 +96,30 @@ cc.map(
 
 Styling values by color is similar to styling by size but using the `color` keyword in the Layer object instead. Color by value works for points, lines, and polygons.
 
+Using the [`brooklyn_poverty`](https://cartoframes.carto.com/api/v2/sql?q=SELECT+*+FROM+brooklyn_poverty&format=csv&filename=brooklyn_poverty) dataset, we can style by `poverty_per_pop`:
+
+```python
+from cartofrmaes import Layer
+cc.map(Layer('brooklyn_poverty', color='poverty_per_pop'))
+```
+
+To specify a specific color scheme, we can expand the argument to color:
+
+```python
+from cartoframes import Layer, styling
+cc.map(
+    Layer(
+        'brooklyn_poverty',
+        color={'column': 'poverty_per_pop',
+               'scheme': styling.sunset(y)}
+    )
+)
+```
+
 ### Animated Map
+
+To style a map with time, use the `time` keyword on a numeric or time field in your dataset. Here we use the US Geological Survey [data feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.csv) on earthquakes which has a `time` column.
+
+```python
+cc.map(Layer('all_month', time='time', color='net'))
+```
