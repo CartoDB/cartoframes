@@ -28,9 +28,7 @@ The contents described in this document are subject to CARTO's [Terms of Service
 *   Source code: [https://github.com/CartoDB/cartoframes](https://github.com/CartoDB/cartoframes)
 *   bug tracker / feature requests: [https://github.com/CartoDB/cartoframes/issues](https://github.com/CartoDB/cartoframes/issues)
 
-**Note:**
-
-cartoframes users must have a CARTO API key for most cartoframes functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at [support@carto.com](mailto:support%40carto.com). API key access is also given through [GitHub’s Student Developer Pack](https://carto.com/blog/carto-is-part-of-the-github-student-pack).
+**Note:** CARTOFrames users must have a CARTO API key for most cartoframes functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at [support@carto.com](mailto:support%40carto.com). API key access is also given through [GitHub’s Student Developer Pack](https://carto.com/blog/carto-is-part-of-the-github-student-pack).
 
 
 
