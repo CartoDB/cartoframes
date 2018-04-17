@@ -6,11 +6,11 @@ Feeling stuck? There are many ways to find help.
 * [Report an issue](https://github.com/CartoDB/cartoframes/issues/new) in Github.
 * Engine Plan customers have additional access to enterprise-level support through CARTO's support representatives.
 
-If you just want to describe an issue or share an idea, just <a class="typeform-share" href="https://cartohq.typeform.com/to/mH6RRl" data-mode="popup" target="_blank"> send your feedback</a>
+If you just want to describe an issue or share an idea, just <a class="typeform-share" href="https://cartohq.typeform.com/to/mH6RRl" data-mode="popup" target="_blank">send your feedback</a>
 
-### Issues on Github
+### Issues on GitHub
 
-If you think you may have found a bug, or if you have a feature request that you would like to share with the CARTOFrames team, please [open an issue](https://github.com/CartoDB/cartoframes/issues/new). 
+If you think you may have found a bug, or if you have a feature request that you would like to share with the CARTOframes team, please [open an issue](https://github.com/CartoDB/cartoframes/issues/new).
 
 
 ### Community support on GIS Stack Exchange
@@ -31,4 +31,4 @@ Engine Plan customers have additional support options beyond general community s
 
 In order to speed up the resolution of your issue, provide as much information as possible (even if it is a link from community support). This allows our engineers to investigate your problem as soon as possible.
 
-If you are not yet CARTO customer, browse our [plans & pricing](https://carto.com/pricing/) and find the right plan for you.
+If you are not yet CARTO customer, browse our [plans &amp; pricing](https://carto.com/pricing/) and find the right plan for you.
