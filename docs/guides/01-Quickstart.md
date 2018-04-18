@@ -42,7 +42,7 @@ Next, create a new notebook. See Jupyter's [running a notebook](https://jupyter.
 
 ### Authentication
 
-Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username and API keys, which can be found at `http://your\_user\_name.carto.com/your\_apps`.
+Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username and API keys, which can be found at `http://your_user_name.carto.com/your_apps`.
 
 There are two ways of authentication:
 
