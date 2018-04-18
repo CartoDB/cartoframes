@@ -1,5 +1,7 @@
 # Contributing to CARTOframes
 
+The CARTO platform is an open-source ecosystem. Read the [fundamentals of the CARTO](https://carto.com/developers/fundamentals/components/) to learn about its architecture and components. We are more than happy to receive your contributions to the code and the documentation as well.
+
 ## Feature request
 
 If you'd like to request a feature, first check <https://github.com/cartodb/cartoframes/issues> to see if your request already exists. If it exists, comment on that issue. If it does not exist, open a new issue clearly defining the need and use case.
@@ -31,3 +33,13 @@ To open a pull request:
 ### Internal contributors
 
 Open a new pull request against the `master` branch and tag @andy-esch.
+
+## Completing documentation
+
+CARTOframes documentation is located inline in the functions, classes, and methods in the code. There is additional documentation, guides, and examples in the ```docs/``` folder. That folder is the content that appears in the [Developer Center](http://carto.com/developers/cartoframes/). Just follow the instructions described in [contributing code](#pull-requests) and after accepting your pull request, we will make it appear online :).
+
+**Tip:** A convenient, easy way of proposing changes in documentation is by using the GitHub editor directly on the web. You can easily create a branch with your changes and make a PR from there.
+
+## Submitting contributions
+
+You will need to sign a Contributor License Agreement (CLA) before making a submission. [Learn more here](https://carto.com/contributions).
