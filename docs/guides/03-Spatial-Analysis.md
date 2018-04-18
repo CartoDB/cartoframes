@@ -133,7 +133,7 @@ cc.map(layers=[
 ])
 ```
 
-![](../../03-spatial-analysis-1.png)
+![](../../img/guides/03-spatial-analysis-1.png)
 
 ### Mapping a SQL query
 
@@ -224,4 +224,4 @@ cc.map(layers=[
     interactive=False)
 ```
 
-![Moran's I result](../img/03-Moran_i.png)
+![Moran's I result](../../img/guides/03-Moran_i.png)
