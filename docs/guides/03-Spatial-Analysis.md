@@ -167,7 +167,7 @@ cc.map(Layer("tmp", color={'column': 'cluster_no',
                            'scheme': styling.prism(5)}),
       interactive = True)             
 ```
-![kmeans](../img/03-KMeans.png)
+![kmeans](../../img/guides/03-KMeans.png)
 
 Users also can drop temporary tables using `delete` function after map plotting.
 ```python
