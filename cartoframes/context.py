@@ -48,7 +48,7 @@ HAS_MATPLOTLIB = plt is not None
 MAX_IMPORT_ROWS = 499999
 
 # threshold for using batch sql api or not for geometry creation
-MAX_ROWS_LNGLAT = 100000
+MAX_ROWS_LNGLAT = 1000
 
 # Cache directory for temporary data operations
 CACHE_DIR = user_cache_dir('cartoframes')
