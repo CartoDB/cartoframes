@@ -111,7 +111,7 @@ cc.map(
     Layer(
         'brooklyn_poverty',
         color={'column': 'poverty_per_pop',
-               'scheme': styling.sunset(y)}
+               'scheme': styling.sunset(7)}
     )
 )
 ```

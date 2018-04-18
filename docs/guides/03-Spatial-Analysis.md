@@ -2,18 +2,22 @@
 
 ### About this Guide
 
-This guide walks you through methods to implement spatial analysis using CARTOframes. CARTOframes provides `query` and `QueryLayer` functions to run spatial analysis based on PostgreSQL and PostGIS. Users can receive query results as `pandas.DataFrame` format as well as demonstrate them in maps.
+This guide walks you through methods to implement spatial analysis using CARTOframes. CARTOframes provides the `CartoContext.query` method for performing analysis and returning the results as a pandas dataframe, and the `QueryLayer` class for visualizing analysis as a map layer. Both methods run the quries against a [PostgreSQL](https://www.postgresql.org/) database with [PostGIS](http://postgis.net/).
+
+In this guide, we will analyze McDonald's locations in US Census tracts using spatial analysis functionality in CARTO.
 
 ### Getting Started
 
-To get started, create `CartoContext` and load *New York City Census Tract Boundary (2015)* and *New York City McDonalds' Locations* datasets before running the example codes in this guide.
+To get started, create a `CartoContext`:
+
 ```python
 from cartoframes import CartoContext, QueryLayer, BaseMap
 cc = CartoContext(base_url='your base url',
                   api_key='your api key')
 ```
 
-For *New York City Census Tract Boundary (2015)*, you can either download it from [US Census Bureau](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) or use CARTOframes `data_boundaries` function to request it from CARTO Data Observatory (DO). Check [next guide](./04-Data-Observatory) for more DO interactions within cartoframes.
+To load New York City Census Tract Boundaries, you can either download it from [US Census Bureau](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) or use CARTOframes' `CartoContext.data_boundaries` method to request it from CARTO's Data Observatory (DO). Check out the [next guide](../Data-Observatory/) for more DO interactions within CARTOframes.
+
 ```python
 # request census tract geometry form us.census.tiger.census_tract
 # filtered by the rough bounding box of New York City
@@ -29,25 +33,34 @@ nyc_counties = ['36005', '36047', '36061', '36081', '36085']
 nyc_ct = tracts[list(map(lambda x: str(x)[:5] in nyc_counties, tracts.geom_refs))]
 ```
 
-For *New York City McDonalds' Locations* data, load it from CARTOframes `example` datasets.
+For New York City McDonalds' Locations data, load it from CARTOframes examples account:
+
 ```python
-mcd = cc.example.load_nycMcdonalds()
+import pandas as pd
+mcd = pd.read_csv('https://cartoframes.carto.com/api/v2/sql?q=SELECT+*+FROM+nyc_mcdonalds&format=csv')
 ```
+
 Then write both datasets to your CARTO account.
+
 ```python
 cc.write(nyc_ct, 'nyc_census_tracts')
 cc.write(mcd, 'nyc_mcdonalds')
 ```
 
 ### Running a SQL query
-Use `query` function to run SQL query for the datasets in your CARTO account. PostGIS includes multiple spatial analysis functions like `ST_Intersects`, `ST_buffer`. Also, [CARTO Crankshaft](https://github.com/CartoDB/crankshaft/tree/develop/doc) provides additional advanced spatial analysis functions like `cdb_kmeans`, `cdb_moransilocal`.
+
+Use the `CartoContext.query` method to run a SQL query for the datasets in your CARTO account. PostGIS includes multiple spatial analysis functions like `ST_Intersects` and `ST_Buffer`. CARTO's [spatial analysis library crankshaft](https://github.com/CartoDB/crankshaft/tree/develop/doc) provides additional advanced spatial analysis functions like spatial k-means (`cdb_kmeans`) and Mora's I Local (`cdb_moransilocal`).
 
 #### Example 1
+
+Find the number of McDonald's in each census tract in New York City.
+
 ```python
-# Find the number of McDonald's
-# In each census tract in New York City
 df = cc.query("""
-    SELECT tracts.geom_refs AS FIPS_code, COUNT(mcd.*) AS num_mcdonalds
+    SELECT
+      tracts.geom_refs AS FIPS_code,
+      tracts.the_geom as the_geom,
+      COUNT(mcd.*) AS num_mcdonalds
     FROM nyc_census_tracts As tracts, nyc_mcdonalds As mcd
     WHERE ST_Intersects(tracts.the_geom, mcd.the_geom)
     GROUP BY tracts.geom_refs
@@ -58,14 +71,6 @@ df = cc.query("""
 # Including FIPS code (unique digital identifier for census tracts) and the number of McDonald's
 # Sorted by the number of McDonald's in descending order
 df.head()
-
-#         fips_code	  num_mcdonalds
-# 0	  36061010100	     4
-# 1	  36061007100	     2
-# 2	  36061011300	     2
-# 3	  36061010900	     2
-# 4	  36061001502	     2
-
 ```
 
 |      |  fips_code  | num_mcdonalds |
@@ -75,70 +80,86 @@ df.head()
 |  2   | 36061011300 |       2       |
 |  3   | 36061010900 |       2       |
 |  4   | 36061001502 |       2       |
-** TO-DO: which one is better? markdown table or code comment**
-
 
 #### Example 2
+
+Build 100 meter buffer area for each McDonald's by updating the geometry.
+
 ```python
-# Build 100 meters buffer area for each McDonald's.
-# Either update 'the_geom'
-# (Be Careful! This will change the original table in your account)
+# Be Careful - this will change the original table in your account
 cc.query("""
     UPDATE nyc_mcdonalds
     SET the_geom = ST_Buffer(the_geom::geography, 100)::geometry
 """)
-df = cc.query("""
-    SELECT name, id, address, city, zip, the_geom
-    FROM nyc_mcdonalds
-""",
-    decode_geom=True)
 
-# or Creat a new table and save it as 'nyc_mcdonalds_buffer_100m'.
-df = cc.query("""
-    SELECT name, id, address, city, zip,
-           ST_Buffer(the_geom::geography, 100)::geometry AS the_geom
-    FROM nyc_mcdonalds
-""",
+df = cc.query(
+    """
+        SELECT name, id, address, city, zip, the_geom
+        FROM nyc_mcdonalds
+    """,
+    decode_geom=True
+)
+
+# or create a new table and save it as 'nyc_mcdonalds_buffer_100m'.
+df = cc.query(
+    """
+        SELECT name, id, address, city, zip,
+               ST_Buffer(the_geom::geography, 100)::geometry AS the_geom
+        FROM nyc_mcdonalds
+    """,
     table_name='nyc_mcdonalds_buffer_100m')
 
 # Show the first entry.
 # 'geomtery' is Polygon type now.
 df = cc.read('nyc_mcdonalds_buffer_100m', decode_geom=True)
 df.iloc[0, :]
-
-# address                                    1101 E Tremont Ave
-# city                                                    Bronx
-# id                                                        233
-# name                                               McDonald's
-# the_geom    0106000020E61000000100000001030000000100000021...
-# zip                                                     10460
-# geometry    (POLYGON ((-73.87570453921256 40.8403982178504...
 ```
-**To Do: instead of showing the returned Dataframe here, better to show the screenshot map using CARTOframes, like the one in issue 408**
 
-### Maping a SQL query
-Use table names or `QueryLayer` inside `map` function to demonstrate analysis results.
+| address  |                                 1101 E Tremont Ave |
+| city     |                                              Bronx |
+| id       |                                                233 |
+| name     |                                         McDonald's |
+| the_geom |  0106000020E61000000100000001030000000100000021... |
+| zip      |                                              10460 |
+| geometry |  (POLYGON ((-73.87570453921256 40.8403982178504... |
+
+To show the results of this query on a map, we can do the following:
+
+```python
+from cartoframes import Layer, QueryLayer
+cc.map(layers=[
+    Layer('nyc_mcdonalds', color='red', size=3),
+    Layer('nyc_mcdonalds_buffer_100m', color='#aaa')
+])
+```
+
+![](../../03-spatial-analysis-1.png)
+
+### Mapping a SQL query
+
+Use table names or `QueryLayer` inside the `CartoContext.map` method to demonstrate analysis results.
 
 
 #### Example 3
-```python
-# Apply KMeans (k=5) method
-# Spatial Clustering for all McDonald's in NYC
-# Visualize different clusters by color
 
+Apply k-means (k=5) spatial clustering for all McDonald's in NYC, and visualize different clusters by color. Note: for more complicated queries, it is best to create a temporary table from the query and then visualize it.
+
+```python
 tmp = cc.query("""
        SELECT
-         row_number() over() AS cartodb_id,
+         row_number() OVER () AS cartodb_id,
          c.cluster_no,
          c.the_geom,
          ST_Transform(c.the_geom, 3857) AS the_geom_webmercator
        FROM
-         ((SELECT * FROM cdb_crankshaft.cdb_kmeans('SELECT the_geom, cartodb_id, longitude, latitude FROM nyc_mcdonalds', 5)) a
+         ((SELECT *
+           FROM cdb_crankshaft.cdb_kmeans(
+               'SELECT the_geom, cartodb_id, longitude, latitude FROM nyc_mcdonalds', 5)
+          ) AS a
            JOIN
-         nyc_mcdonalds b
-         ON
-         a.cartodb_id = b.cartodb_id
-         ) c
+         nyc_mcdonalds AS b
+         ON a.cartodb_id = b.cartodb_id
+         ) AS c
               """,
              table_name='tmp')
 
@@ -154,17 +175,17 @@ cc.delete('tmp')
 ```
 
 #### Example 4
-```python
-# Apply Moran's I Analysis
-# Detect Hot Spots & Cold Spots of
-# Median Household Income at Census Tract Level
-# In Manhattan
 
+Apply Moran's I to detect hot spots and cold spots of median household income at census tract level in Manhattan.
+
+```python
 # Augment median_household_income data from DO
 median_income = [{'numer_id': 'us.census.acs.B19013001',
                   'geom_id': 'us.census.tiger.census_tract',
                   'numer_timespan': '2011 - 2015'}]
-df = cc.data('nyc_census_tracts', median_income)
+
+# look up measures using GEOID in the `geom_refs` column
+df = cc.data('nyc_census_tracts', median_income, how='geom_refs')
 
 # Filter census tracts from Manhattan.
 # Keep those whose 'median_income_2011_2015' values aren't 'NaN'.
@@ -175,27 +196,32 @@ manhattan.dropna(subset=['median_income_2011_2015'], inplace=True)
 # Save the dataframe to your CARTO account
 cc.write(manhattan, 'manhattan_median_income', overwrite=True)
 
-# Check crankshaft documentation for more information of 'cdb_moransilocal' function
 tmp = cc.query("""
-            SELECT m.*, t.the_geom, t.the_geom_webmercator, t.cartodb_id
-            FROM cdb_crankshaft.cdb_moransilocal('SELECT * FROM manhattan_median_income', 'median_income_2011_2015') as m
-            JOIN manhattan_median_income as t
-            ON t.cartodb_id = m.rowid
-            """)
+    SELECT
+      m.*,
+      t.the_geom,
+      t.the_geom_webmercator,
+      t.cartodb_id
+    FROM
+      cdb_crankshaft.cdb_moransilocal(
+        'SELECT * FROM manhattan_median_income',
+        'median_income_2011_2015') AS m
+    JOIN manhattan_median_income AS t
+    ON t.cartodb_id = m.rowid
+""")
 cc.write(tmp, 'tmp', overwrite=True)
 
 # The map shows Hot Spots in 'red' and Cold Spots in 'blue'
 cc.map(layers=[
     BaseMap('dark'),
     QueryLayer("""
-            select * from tmp
-            where significance < 0.05 and (quads = 'LL' or quads ='HH')
+            SELECT * FROM tmp
+            WHERE significance < 0.05 AND quads IN ('LL', 'HH')
             """,
             color={'column': 'quads',
                    'scheme': styling.custom(colors=["blue", "red"],
-                                            bin_method='category' )})],
-    interactive = False)
+                                            bin_method='category')})],
+    interactive=False)
 ```
-** TO Do: the styling code might be misleading. Actually can not detect "HH": 'red' and "LL": 'blue' barely from the code itself. The order of colors in `styling.custom` doesn't change anything about the correspondence **
 
-![moran_i](../img/03-Moran_i.png)
+![Moran's I result](../img/03-Moran_i.png)
