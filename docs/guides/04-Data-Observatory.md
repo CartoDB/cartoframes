@@ -115,8 +115,6 @@ education_meta[education_meta.numer_description.str.contains('college')]
 
 Once you have identified the correct metadata for the DO variables you want, you can augment an existing CARTO dataset and return it as a pandas DataFrame. There are two methods for passing in metadata to augment.
 
-TODO: add a step where we are getting a specified table so the user can follow along
-
 1. Pass the metadata DataFrame created from `cc.data_discovery` into `cc.data`
 
 ```python
@@ -139,7 +137,11 @@ df = cc.data('my_table', total_population)
 Additionally, you can persist the results as a new CARTO table by passing a new table name.
 
 ```python
-df = cc.data('my_table', total_population, persist_as='my_table_population')
+df = cc.data(
+    'my_table',
+    total_population,
+    persist_as='my_table_population'
+)
 ```
 
 ### Accessing and finding boundaries
@@ -192,9 +194,11 @@ total_pop = [{'numer_id':'us.census.acs.B01003001',
               'timespan':'2015 - 2015'}]
 
 # augment dataset and persist as a new dataset
+# use how='geom_refs' to get the raw measures
 df = cc.data(
     'us_counties',
-    total_pop
+    total_pop,
+    how='geom_refs'
 )
 
 # overwrite existing dataset
@@ -202,13 +206,16 @@ cc.write(df, 'us_counties', overwrite=True)
 
 # create a choropleth map based on total population per square kilometer
 cc.map(
-    layers=Layer(
-        'us_counties_population',
-        color='total_pop_per_sq_km_2015_2015'
-    )
+    layers=QueryLayer(
+        'SELECT * FROM us_counties_population WHERE total_pop_per_sq_km_2015_2015 < 1e4',
+        color={'column': 'total_pop_per_sq_km_2015_2015',
+               'scheme': styling.sunset(7)}
+    ),
+    interactive=True
 )
 ```
 
+![](../../img/guides/04-data-obs-pop-density.png)
+
 One thing you'll notice about this map: rural areas tend to be null-valued (grey), while more populated areas show values. This is because the [US Census only includes areas with population greater than 65,000](https://www.census.gov/programs-surveys/acs/guidance/estimates.html) in the one year estimates.
 
-TODO: add a link to the image that's produced from this
