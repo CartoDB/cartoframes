@@ -8,17 +8,22 @@ This guide walks you through common operations for Data Observatory (DO) interac
 
 ### Getting Started
 
-To get started, we need to create a `CartoContext` object to interact with CARTO and a table with geometries to establish the search area. Do the following or checkout the QuickStart guide for more information:
+To get started, we need to create a `CartoContext` object to interact with CARTO and a table with geometries to establish the search area. To get started, we'll load a dataset of New York City census tracts into your account. We get the data from the cartoframes examples account, but the data was originally obtained from the Data Observatory (see the section [Getting boundaries for a specific region](#getting-boundaries-for-a-specific-region) below for the method we used).
 
 ```python
-from cartoframes import CartoContext
+from cartoframes import CartoContext, examples
 # create CartoContext against your account
 # base_url is of the form: https://your_username.carto.com
-cc = CartoContext(base_url='your base url', api_key='your api key')
+cc = CartoContext(base_url='<your_base_url>', api_key='<your_api_key>')
+# send census tracts to your account
+cc.write(examples.load_nyc_census_tracts(), 'nyc_census_tracts')
+```
 
-# Optional: send a dataframe to your account
-#  if you don't have a table already
-cc.write(cc.load_nyc_census_tracts(), 'nyc_census_tracts')
+To get a visual preview of the data, create a map of it:
+
+```python
+from cartoframes import Layer
+cc.map(Layer('nyc_census_tracts'))
 ```
 
 ### Querying Metadata
@@ -59,56 +64,56 @@ To more fully inspect an entry, look at the values of a specific row:
 education_meta.iloc[0]
 ```
 
-```
-denom_aggregate                                                        sum
-denom_colname                                      population_3_years_over
-denom_description        The total number of people in each geography a...
-denom_geomref_colname                                                geoid
-denom_id                                           us.census.acs.B14001001
-denom_name                                     Population 3 Years and Over
-denom_reltype                                                  denominator
-denom_t_description                                                   None
-denom_tablename               obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68
-denom_type                                                         Numeric
-geom_colname                                                      the_geom
-geom_description         School Districts are geographic entities withi...
-geom_geomref_colname                                                 geoid
-geom_id                            us.census.tiger.school_district_unified
-geom_name                                          Unified School District
-geom_t_description                                                    None
-geom_tablename                obs_d5cfd7148bd0d1d3522390caa79b3ccd427b1444
-geom_timespan                                                         2015
-geom_type                                                         Geometry
-id                                                                       1
-max_score_rank                                                        None
-max_timespan_rank                                                     None
-normalization                                               predenominated
-num_geoms                                                          168.091
-numer_aggregate                                                        sum
-numer_colname                                                    in_school
-numer_description        The total number of people in each geography c...
-numer_geomref_colname                                                geoid
-numer_id                                           us.census.acs.B14001002
-numer_name                                     Students Enrolled in School
-numer_t_description                                                   None
-numer_tablename               obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68
-numer_timespan                                                 2011 - 2015
-numer_type                                                         Numeric
-score                                                              41.1686
-score_rank                                                               1
-score_rownum                                                             1
-suggested_name                                         in_school_2011_2015
-target_area                                                           None
-target_geoms                                                          None
-timespan_rank                                                            1
-timespan_rownum                                                          1
-Name: 0, dtype: object
-```
+| denom_aggregate        |                                               sum |
+| denom_colname          |                           population_3_years_over |
+| denom_description      | The total number of people in each geography a... |
+| denom_geomref_colname  |                                             geoid |
+| denom_id               |                           us.census.acs.B14001001 |
+| denom_name             |                       Population 3 Years and Over |
+| denom_reltype          |                                       denominator |
+| denom_t_description    |                                              None |
+| denom_tablename        |      obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68 |
+| denom_type             |                                           Numeric |
+| geom_colname           |                                          the_geom |
+| geom_description       | School Districts are geographic entities withi... |
+| geom_geomref_colname   |                                             geoid |
+| geom_id                |           us.census.tiger.school_district_unified |
+| geom_name              |                           Unified School District |
+| geom_t_description     |                                              None |
+| geom_tablename         |      obs_d5cfd7148bd0d1d3522390caa79b3ccd427b1444 |
+| geom_timespan          |                                              2015 |
+| geom_type              |                                          Geometry |
+| id                     |                                                 1 |
+| max_score_rank         |                                              None |
+| max_timespan_rank      |                                              None |
+| normalization          |                                    predenominated |
+| num_geoms              |                                           168.091 |
+| numer_aggregate        |                                               sum |
+| numer_colname          |                                         in_school |
+| numer_description      | The total number of people in each geography c... |
+| numer_geomref_colname  |                                             geoid |
+| numer_id               |                           us.census.acs.B14001002 |
+| numer_name             |                       Students Enrolled in School |
+| numer_t_description    |                                              None |
+| numer_tablename        |      obs_77d6a9c06bd3511a6f89b594e7053a97d1c28f68 |
+| numer_timespan         |                                       2011 - 2015 |
+| numer_type             |                                           Numeric |
+| score                  |                                           41.1686 |
+| score_rank             |                                                 1 |
+| score_rownum           |                                                 1 |
+| suggested_name         |                               in_school_2011_2015 |
+| target_area            |                                              None |
+| target_geoms           |                                              None |
+| timespan_rank          |                                                 1 |
+| timespan_rownum        |                                                 1 |
+
+`Name: 0, dtype: object`
 
 Or even filter further using pandas' `str` operations to find education measures that mention 'college':
 
 ```python
-education_meta[education_meta.numer_description.str.contains('college')]
+education_meta = education_meta[education_meta.numer_description.str.contains('college')]
+education_meta.head()
 ```
 
 ### Augmenting your data
@@ -207,7 +212,7 @@ cc.write(df, 'us_counties', overwrite=True)
 # create a choropleth map based on total population per square kilometer
 cc.map(
     layers=QueryLayer(
-        'SELECT * FROM us_counties_population WHERE total_pop_per_sq_km_2015_2015 < 1e4',
+        'SELECT * FROM us_counties WHERE total_pop_per_sq_km_2015_2015 < 1e4',
         color={'column': 'total_pop_per_sq_km_2015_2015',
                'scheme': styling.sunset(7)}
     ),
@@ -219,3 +224,23 @@ cc.map(
 
 One thing you'll notice about this map: rural areas tend to be null-valued (grey), while more populated areas show values. This is because the [US Census only includes areas with population greater than 65,000](https://www.census.gov/programs-surveys/acs/guidance/estimates.html) in the one year estimates.
 
+### Getting boundaries for a specific region
+
+To get measures for a specific region, it it sometimes required to first narrow down by geography and then filter by the `geom_refs` for the boundaries of interest.
+
+Here we gather all census tracts for New York City:
+
+```python
+# request census tract geometry form us.census.tiger.census_tract
+# filtered by the rough bounding box of New York City
+tracts = cc.data_boundaries(
+        boundary='us.census.tiger.census_tract',
+        region=[-74.2589, 40.4774, -73.7004, 40.9176],
+        timespan='2015')
+
+# filtered by Federal Information Processing Standards (FIPS) County Code
+# '36' is the FIPS code for New York State;
+# '005', '047', '061', '081' and '085' are the FIPS codes for five boroughs in New York City
+nyc_counties = ['36005', '36047', '36061', '36081', '36085']
+nyc_ct = tracts[tracts.geom_refs.str[:5].isin(nyc_counties)]
+```
