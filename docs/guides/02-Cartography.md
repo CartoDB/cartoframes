@@ -51,10 +51,10 @@ To add a data layer to your map, first find a table you want to visualize.
 We're going to use the NYC Taxi dataset from cartoframes examples, which you can put into your account with this snippet:
 
 ```python
-from cartoframes.examples import load_taxi
+from cartoframes.examples import read_taxi
 # write taxi data to your account, setting the geometry as pickup location
 cc.write(
-    load_taxi(),
+    read_taxi(),
     'taxi_50k',
     lnglat=('pickup_longitude', 'pickup_latitude')
 )

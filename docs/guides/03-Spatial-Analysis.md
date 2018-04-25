@@ -12,8 +12,8 @@ To get started, create a `CartoContext`:
 
 ```python
 from cartoframes import CartoContext, QueryLayer, BaseMap
-cc = CartoContext(base_url='your base url',
-                  api_key='your api key')
+cc = CartoContext(base_url='<your_base_url>',
+                  api_key='<your_api_key>')
 ```
 
 To load New York City Census Tract Boundaries, you can either download it from [US Census Bureau](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) or use CARTOframes' `examples.read_nyc_census_tracts` function to request it. This dataset was originally retrieved from CARTO's Data Observatory (DO) but stored in the examples account to avoid consuming DO quota. Check out the [next guide](../Data-Observatory/) for more DO interactions within CARTOframes.

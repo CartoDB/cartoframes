@@ -95,15 +95,15 @@ cc = CartoContext()  # automatically loads credentials if previously saved
 In this section, you will read a table from your CARTO account into your Python environment as a pandas DataFrame. If you don't already have a table in your account that you want to use, you can send a dataset on poverty rates in Brooklyn, New York to your account with the following code:
 
 ```python
-from cartoframes.examples import load_brooklyn_poverty
-cc.write(load_brooklyn_poverty(), 'brooklyn_poverty')
+from cartoframes.examples import read_brooklyn_poverty
+cc.write(read_brooklyn_poverty(), 'brooklyn_poverty')
 ```
 
 To get your table from CARTO, use the `CartoContext.read` method:
 
 ```python
 # read a table from your CARTO account to a DataFrame
-df = cc.read('brooklyn_poverty_census_tracts')
+df = cc.read('brooklyn_poverty')
 ```
 
 This pulls down the table `brooklyn_poverty` from your CARTO account into a pandas DataFrame. The data types of the SQL table are copied over to the DataFrame and the index is `cartodb_id`. To decode the geometries into [Shapely geometries](https://toblerity.org/shapely/project.html), use the `decode_geom=True` flag.
