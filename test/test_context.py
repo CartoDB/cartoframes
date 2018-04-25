@@ -1088,7 +1088,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
 
     def test_column_name_collision_do_enrichement(self):
-        dup_col = 'female_third_level_studies_rate_2011'
+        dup_col = 'female_third_level_studies_2011_by_female_pop'
         self.sql_client.send("""create table {table} as (
                 select cdb_latlng(40.4165,-3.70256) the_geom,
                        1 {dup_col})""". \

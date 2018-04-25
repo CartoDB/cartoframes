@@ -1,6 +1,25 @@
 Changelog
 =========
 
+0.6.1
+-----
+
+Release 2018-04-18
+
+Updates
+
+- Lowers row limit for lnglat creation to avoid platform limits on SQL API
+
+0.6.0
+-----
+
+Release 2018-04-06
+
+Updates
+
+- Fixes a bug where the labels were not always appearing in interactive maps
+- Adds the ability to read shared tables (from other users in org accounts) using `CartoContext.read`
+
 0.5.7
 -----
 

@@ -24,7 +24,8 @@ from cartoframes.credentials import Credentials
 from cartoframes.dataobs import get_countrytag
 from cartoframes import utils
 from cartoframes.layer import BaseMap, AbstractLayer
-from cartoframes.maps import non_basemap_layers, get_map_name, get_map_template
+from cartoframes.maps import (non_basemap_layers, get_map_name,
+                              get_map_template, top_basemap_layer_url)
 from cartoframes.analysis import Table
 from cartoframes.__version__ import __version__
 
@@ -48,7 +49,7 @@ HAS_MATPLOTLIB = plt is not None
 MAX_IMPORT_ROWS = 499999
 
 # threshold for using batch sql api or not for geometry creation
-MAX_ROWS_LNGLAT = 100000
+MAX_ROWS_LNGLAT = 1000
 
 # Cache directory for temporary data operations
 CACHE_DIR = user_cache_dir('cartoframes')
@@ -152,7 +153,7 @@ class CartoContext(object):
         return paths[0] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False):
+             decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -164,6 +165,8 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
+            shared_user (str, optional): If a table has been shared with you,
+              specify the user name (schema) who shared it.
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -176,7 +179,12 @@ class CartoContext(object):
                 cc = cartoframes.CartoContext(BASEURL, APIKEY)
                 df = cc.read('acadia_biodiversity')
         """
-        query = 'SELECT * FROM "{table_name}"'.format(table_name=table_name)
+        # choose schema (default user - org or standalone - or shared)
+        schema = 'public' if not self.is_org else (
+            shared_user or self.creds.username())
+        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
+            table_name=table_name,
+            schema=schema)
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
@@ -861,20 +869,19 @@ class CartoContext(object):
 
         base_layers = [idx for idx, layer in enumerate(layers)
                        if layer.is_basemap]
-
         # Check basemaps, add one if none exist
         if len(base_layers) > 1:
             raise ValueError('Map can at most take one BaseMap layer')
         elif len(base_layers) == 1:
+            # move baselayer to first position
             layers.insert(0, layers.pop(base_layers[0]))
+
+            # add labels layer if requested
             if layers[0].is_basic() and layers[0].labels == 'front':
-                if time_layers:
-                    warn('Basemap labels on top are not currently supported '
-                         'for animated maps')
-                else:
-                    layers.append(BaseMap(layers[0].source,
-                                          labels=layers[0].labels,
-                                          only_labels=True))
+                layers.append(BaseMap(layers[0].source,
+                                      labels='front',
+                                      only_labels=True))
+                layers[0].labels = None
         elif not base_layers:
             # default basemap is dark with labels in back
             # labels will be changed if all geoms are non-point
@@ -1027,10 +1034,13 @@ class CartoContext(object):
             bounds = [] if has_zoom else [[options['north'], options['east']],
                                           [options['south'], options['west']]]
 
-            content = self._get_iframe_srcdoc(config=config,
-                                              bounds=bounds,
-                                              options=options,
-                                              map_options=map_options)
+            content = self._get_iframe_srcdoc(
+                config=config,
+                bounds=bounds,
+                options=options,
+                map_options=map_options,
+                top_layer_url=top_basemap_layer_url(layers)
+            )
 
             img_html = html
             html = (
@@ -1738,7 +1748,8 @@ class CartoContext(object):
             self._map_templates[map_name] = True
         return map_name
 
-    def _get_iframe_srcdoc(self, config, bounds, options, map_options):
+    def _get_iframe_srcdoc(self, config, bounds, options, map_options,
+                           top_layer_url=None):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
             html_template = os.path.join(
                 os.path.dirname(__file__),
@@ -1751,6 +1762,7 @@ class CartoContext(object):
                 .replace('@@CONFIG@@', json.dumps(config))
                 .replace('@@BOUNDS@@', json.dumps(bounds))
                 .replace('@@OPTIONS@@', json.dumps(map_options))
+                .replace('@@LABELS@@', top_layer_url or '')
                 .replace('@@ZOOM@@', str(options.get('zoom', 3)))
                 .replace('@@LAT@@', str(options.get('lat', 0)))
                 .replace('@@LNG@@', str(options.get('lng', 0))))
