@@ -934,6 +934,10 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         meta_cols = set(('geom_id', 'geom_tags', 'geom_type', ))
         self.assertTrue(meta_cols & set(boundary_meta.columns))
 
+        # boundary metadata with correct timespan
+        meta_2015 = cc.data_boundaries(timespan='2015')
+        self.assertTrue(meta_2015[meta_2015.valid_timespan].shape < boundary_meta.shape)
+
         # boundary metadata in a region
         regions = (
             self.test_read_table,
@@ -972,7 +976,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 'us.census.tiger.state' in set(meta.geom_id),
                 tf
             )
- 
+
         with self.assertRaises(ValueError):
             cc.data_boundaries(region=[1, 2, 3])
 
@@ -1222,4 +1226,3 @@ class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
         str_bjs = BatchJobStatus(cc, 'foo')
         self.assertIsNone(str_bjs.get_status())
         self.assertEqual(str_bjs.job_id, 'foo')
-
