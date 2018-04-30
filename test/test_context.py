@@ -936,7 +936,11 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # boundary metadata with correct timespan
         meta_2015 = cc.data_boundaries(timespan='2015')
-        self.assertTrue(meta_2015[meta_2015.valid_timespan].shape < boundary_meta.shape)
+        self.assertTrue(meta_2015[meta_2015.valid_timespan].shape[0] > 0)
+
+        # test for no data with an incorrect or invalid timespan
+        meta_9999 = cc.data_boundaries(timespan='invalid_timespan')
+        self.assertTrue(meta_9999[meta_9999.valid_timespan].shape[0] == 0)
 
         # boundary metadata in a region
         regions = (
