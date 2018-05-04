@@ -146,11 +146,10 @@ class CartoContext(object):
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path', **DEFAULT_SQL_ARGS)
-
-        paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
+        res = self.sql_client.send("select unnest(current_schemas('f'))",
+                                   **DEFAULT_SQL_ARGS)
         # is an org user if first item is not `public`
-        return paths[0] != 'public'
+        return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False, shared_user=None):
