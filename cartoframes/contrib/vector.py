@@ -91,7 +91,6 @@ def ccmap(layers, context):
                                  bounds['south'],
                                  bounds['east'],
                                  bounds['north'])
-    print(bounds)
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
