@@ -33,10 +33,12 @@
     const map = new mapboxgl.Map({
       container: 'map',
       style: BASEMAPS['@@BASEMAPSTYLE@@'] || BASEMAPS['Voyager'],
-      center: [-74.0060, 40.7128],
       zoom: 9,
       dragRotate: false
-    });
+      });
+
+    map.fitBounds(@@BOUNDS@@);
+
     let credentials = @@CREDENTIALS@@;
     carto.setDefaultAuth({
       user: credentials['user'],
