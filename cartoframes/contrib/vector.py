@@ -85,12 +85,19 @@ def safe_quotes(text, escape_single_quotes=False):
     return text
 
 def ccmap(layers, context):
-    bounds = context._get_bounds(layers)
-    bounds =  '[{},{},\
-               {}, {}]'.format(bounds['west'],
-                                 bounds['south'],
-                                 bounds['east'],
-                                 bounds['north'])
+    non_local_layers = []
+    for idx, layer in enumerate(layers):
+        if isinstance(layer, Layer):
+            non_local_layers.append(layer)
+    if non_local_layers:
+        bounds = context._get_bounds(non_local_layers)
+        bounds =  '[{},{},\
+                   {}, {}]'.format(bounds['west'],
+                                     bounds['south'],
+                                     bounds['east'],
+                                     bounds['north'])
+    else:
+        bounds = '[-180,-85.0511,180,85.0511]'
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
