@@ -406,7 +406,7 @@ class QueryLayer(AbstractLayer):
             self.style_cols[size['column']] = None
 
         self.color = color
-        self.opacity = opacity or 0.9
+        self.opacity = opacity if opacity is not None else 0.9
         self.scheme = scheme
         self.size = size
         self.time = time
