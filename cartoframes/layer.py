@@ -294,8 +294,8 @@ class QueryLayer(AbstractLayer):
                               'min': 2
                           })
 
-        opacity (float, opational): Opacity of layer from zero to one. Defaults
-          to 0.9.
+        opacity (float, optional): Opacity of layer from 0 to 1. Defaults to
+          0.9.
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
 
