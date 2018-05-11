@@ -24,7 +24,7 @@ class QueryLayer:
         if self.size:
             self.styling += '\nwidth: {}'.format(self.size)
         if self.time:
-            self.styling += '\nfilter: torque($cartodb_id, 40, fade(0.1, 0.3))'
+            self.styling += '\nfilter: {}'.format(self.time)
 
 def _get_html_doc(sources, creds=None, local_sources=None, basemap=None):
     html_template = os.path.join(
