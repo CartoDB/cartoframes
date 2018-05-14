@@ -953,15 +953,6 @@ class CartoContext(object):
             netloc = urlparse(self.creds.base_url()).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
-            def safe_quotes(text, escape_single_quotes=False):
-                """htmlify string"""
-                if isinstance(text, str):
-                    safe_text = text.replace('"', "&quot;")
-                    if escape_single_quotes:
-                        safe_text = safe_text.replace("'", "&#92;'")
-                    return safe_text.replace('True', 'true')
-                return text
-
             config = {
                 'user_name': self.creds.username(),
                 'maps_api_template': self.creds.base_url(),
@@ -973,7 +964,7 @@ class CartoContext(object):
                 'named_map': {
                     'name': map_name,
                     'params': {
-                        k: safe_quotes(v, escape_single_quotes=True)
+                        k: utils.safe_quotes(v, escape_single_quotes=True)
                         for k, v in utils.dict_items(options)
                     },
                 },

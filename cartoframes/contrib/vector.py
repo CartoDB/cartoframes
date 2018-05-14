@@ -1,12 +1,13 @@
 import os
 import json
-
 import IPython
 try:
     import geopandas
     HAS_GEOPANDAS = True
 except ImportError:
     HAS_GEOPANDAS = False
+
+from .. import utils
 
 class QueryLayer:
     def __init__(self, query, color=None, size=None, time=None):
@@ -75,24 +76,17 @@ class LocalLayer(QueryLayer):
             size=size
         )
 
-# TODO: add this to utils and have cc.map use it as well
-def safe_quotes(text, escape_single_quotes=False):
-    """htmlify string"""
-    if isinstance(text, str):
-        safe_text = text.replace('"', "&quot;")
-        if escape_single_quotes:
-            safe_text = safe_text.replace("'", "&#92;'")
-        return safe_text.replace('True', 'true')
-    return text
-
 def ccmap(layers, context):
-    non_local_layers = [layer for layer in layers
-                        if not isinstance(layer, LocalLayer)]
+    non_local_layers = [
+        layer for layer in layers
+        if not isinstance(layer, LocalLayer)
+    ]
     if non_local_layers:
         bounds = context._get_bounds(non_local_layers)
         bounds =  '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
     else:
         bounds = '[[-180, -85.0511], [180, 85.0511]]'
+
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
@@ -101,12 +95,10 @@ def ccmap(layers, context):
             'styling': layer.styling,
             'source': layer.geojson_str if is_local else layer.query,
         })
-    # return bounds
-    # with open('outdoc.html', 'w') as htmlout:
-    #     for line in _get_html_doc(jslayers).split('\n'):
-    #         htmlout.write(line + '\n')
     html = (
         '<iframe srcdoc="{content}" width=800 height=400>'
         '</iframe>'
-    ).format(content=safe_quotes(_get_html_doc(jslayers, bounds, context.creds)))
+    ).format(content=utils.safe_quotes(
+        _get_html_doc(jslayers, bounds, context.creds)
+    ))
     return IPython.display.HTML(html)
