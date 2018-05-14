@@ -1,4 +1,5 @@
 """CartoContext and BatchJobStatus classes"""
+from __future__ import absolute_import
 import json
 import os
 import random
@@ -20,11 +21,11 @@ from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
 
-from cartoframes.credentials import Credentials
-from cartoframes.dataobs import get_countrytag
-from cartoframes import utils
-from cartoframes.layer import BaseMap, AbstractLayer
-from cartoframes.maps import (non_basemap_layers, get_map_name,
+from .credentials import Credentials
+from .dataobs import get_countrytag
+from . import utils
+from .layer import BaseMap, AbstractLayer
+from .maps import (non_basemap_layers, get_map_name,
                               get_map_template, top_basemap_layer_url)
 from cartoframes.__version__ import __version__
 
