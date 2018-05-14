@@ -75,6 +75,7 @@ class LocalLayer(QueryLayer):
             size=size
         )
 
+# TODO: add this to utils and have cc.map use it as well
 def safe_quotes(text, escape_single_quotes=False):
     """htmlify string"""
     if isinstance(text, str):
@@ -85,19 +86,13 @@ def safe_quotes(text, escape_single_quotes=False):
     return text
 
 def ccmap(layers, context):
-    non_local_layers = []
-    for idx, layer in enumerate(layers):
-        if isinstance(layer, Layer):
-            non_local_layers.append(layer)
+    non_local_layers = [layer for layer in layers
+                        if not isinstance(layer, LocalLayer)]
     if non_local_layers:
         bounds = context._get_bounds(non_local_layers)
-        bounds =  '[{},{},\
-                   {}, {}]'.format(bounds['west'],
-                                     bounds['south'],
-                                     bounds['east'],
-                                     bounds['north'])
+        bounds =  '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
     else:
-        bounds = '[-180,-85.0511,180,85.0511]'
+        bounds = '[[-180, -85.0511], [180, 85.0511]]'
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
