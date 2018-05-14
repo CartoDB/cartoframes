@@ -8,14 +8,14 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-
 class QueryLayer:
     def __init__(self, query, color=None, size=None, time=None):
         self.query = query
         self.color = color
         self.size = size
         self.time = time
-
+        self.orig_query = query
+        self.is_basemap = False
         self.styling = ''
 
         # todo add torque
@@ -26,24 +26,28 @@ class QueryLayer:
         if self.time:
             self.styling += '\nfilter: {}'.format(self.time)
 
-def _get_html_doc(sources, creds=None, local_sources=None, basemap=None):
+def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
         '..',
         'assets',
         'vector.html'
     )
+
     with open(html_template, 'r') as html_file:
         srcdoc = html_file.read()
 
     if basemap is None:
         basemap = 'DarkMatter'
     credentials = {} if creds is None else dict(user=creds.username(), api_key=creds.key())
+
+
     return (
         srcdoc\
             .replace('@@SOURCES@@', json.dumps(sources))
             .replace('@@BASEMAPSTYLE@@', basemap)
             .replace('@@CREDENTIALS@@', json.dumps(credentials))
+            .replace('@@BOUNDS@@', bounds)
     )
 
 class Layer(QueryLayer):
@@ -71,6 +75,7 @@ class LocalLayer(QueryLayer):
             size=size
         )
 
+# TODO: add this to utils and have cc.map use it as well
 def safe_quotes(text, escape_single_quotes=False):
     """htmlify string"""
     if isinstance(text, str):
@@ -81,19 +86,27 @@ def safe_quotes(text, escape_single_quotes=False):
     return text
 
 def ccmap(layers, context):
+    non_local_layers = [layer for layer in layers
+                        if not isinstance(layer, LocalLayer)]
+    if non_local_layers:
+        bounds = context._get_bounds(non_local_layers)
+        bounds =  '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+    else:
+        bounds = '[[-180, -85.0511], [180, 85.0511]]'
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
-            'source': layer.geojson_str if is_local else layer.query
+            'source': layer.geojson_str if is_local else layer.query,
         })
+    # return bounds
     # with open('outdoc.html', 'w') as htmlout:
     #     for line in _get_html_doc(jslayers).split('\n'):
     #         htmlout.write(line + '\n')
     html = (
         '<iframe srcdoc="{content}" width=800 height=400>'
         '</iframe>'
-    ).format(content=safe_quotes(_get_html_doc(jslayers, context.creds)))
+    ).format(content=safe_quotes(_get_html_doc(jslayers, bounds, context.creds)))
     return IPython.display.HTML(html)
