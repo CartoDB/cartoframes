@@ -1026,7 +1026,7 @@ class CartoContext(object):
                 '<iframe srcdoc="{content}" width={width} height={height}>'
                 '  Preview image: {img_html}'
                 '</iframe>'
-            ).format(content=safe_quotes(content),
+            ).format(content=utils.safe_quotes(content),
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
