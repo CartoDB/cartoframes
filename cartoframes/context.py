@@ -10,7 +10,7 @@ import binascii as ba
 from warnings import warn
 
 import requests
-import IPython
+from IPython.display import HTML, Image
 import pandas as pd
 from tqdm import tqdm
 from appdirs import user_cache_dir
@@ -1030,7 +1030,7 @@ class CartoContext(object):
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
-            return IPython.display.HTML(html)
+            return HTML(html)
         elif HAS_MATPLOTLIB:
             raw_data = mpi.imread(static_url, format='png')
             if ax is None:
@@ -1043,12 +1043,12 @@ class CartoContext(object):
             ax.axis('off')
             return ax
         else:
-            return IPython.display.Image(url=static_url,
-                                         embed=True,
-                                         format='png',
-                                         width=size[0],
-                                         height=size[1],
-                                         metadata=dict(origin_url=static_url))
+            return Image(url=static_url,
+                         embed=True,
+                         format='png',
+                         width=size[0],
+                         height=size[1],
+                         metadata=dict(origin_url=static_url))
 
     def _geom_type(self, source):
         """gets geometry type(s) of specified layer"""
