@@ -1,3 +1,9 @@
+"""This module allows users to create interactive vector maps using CARTO VL.
+The API for vector maps is broadly similar to CartoContext.map, with the
+exception that all styling expressions are expected to be straight CARTO VL
+expressions. See examples in the `CARTO VL styling guide
+<https://carto.com/developers/carto-vl/guides/styling-points/>`__
+"""
 import os
 import json
 from warnings import warn
@@ -82,7 +88,6 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
     if basemap is None:
         basemap = 'DarkMatter'
     credentials = {} if creds is None else dict(user=creds.username(), api_key=creds.key())
-
 
     return (
         srcdoc\
