@@ -22,25 +22,42 @@ class QueryLayer:
           inputs are simple web color names and hex values. For more advanced
           styling, see the CARTO VL guide on styling for more information:
           https://carto.com/developers/carto-vl/guides/styling-points/
-        size (int or str, optional): CARTO VL width styling for this layer if
+        size (float or str, optional): CARTO VL width styling for this layer if
           points or lines (which are not yet implemented). Valid inputs are
-          positive numbers or text expressions involving variables.
+          positive numbers or text expressions involving variables. To remain
+          cosistent with cartoframes' raster-based :obj:`Layer` API, `size` is
+          used here in place of `width`, which is the CARTO VL variable name
+          for controlling the width of a point or line. Default size is 7
+          pixels wide.
+        time (str, optional): Time expression to animate data. This is an alias
+          for the CARTO VL `filter` style attribute. Default is no animation.
+        strokeColor (str, optional): Defines the stroke color of polygons.
+          Default is white.
+        strokeWidth (float or str, optional): Defines the width of the stroke in
+          pixels. Default is 1.
     """
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None):
+        strconv = lambda x: str(x) if x is not None else None
+
+        # data source
         self.query = query
+
+        # style attributes
         self.color = color
-        self.width = size
+        self.width = strconv(size)
         self.filter = time
         self.strokeColor = strokeColor
-        self.strokeWidth = strokeWidth
+        self.strokeWidth = strconv(strokeWidth)
+
+        # internal attributes
         self.orig_query = query
         self.is_basemap = False
         self.styling = ''
 
-        self._update_style()
+        self._compose_style()
 
-    def _update_style(self):
+    def _compose_style(self):
         """Appends `prop` with `style` to layer styling"""
         valid_styles = (
             'color', 'width', 'filter', 'strokeWidth', 'strokeColor',
@@ -48,9 +65,8 @@ class QueryLayer:
         self.styling = '\n'.join(
             '{prop}: {style}'.format(prop=s, style=getattr(self, s))
             for s in valid_styles
-            if getattr(self, s)
+            if hasattr(self, s)
         )
-        print(self.styling)
 
 def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None):
     html_template = os.path.join(
@@ -77,28 +93,43 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
     )
 
 class Layer(QueryLayer):
-    def __init__(self, table_name, color=None, size=None, time=None):
+    """Layer from a table name. See :obj:`QueryLayer` for docs on the style
+    attributes"""
+    def __init__(self, table_name, color=None, size=None, time=None,
+                 strokeColor=None, strokeWidth=None):
         self.table_source = table_name
 
         super(Layer, self).__init__(
             'SELECT * FROM {}'.format(table_name),
-            time=time,
             color=color,
-            size=size
+            size=size,
+            time=time,
+            strokeColor=strokeColor,
+            strokeWidth=strokeWidth
         )
 
 class LocalLayer(QueryLayer):
-    def __init__(self, dataframe, color=None, size=None, time=None):
+    """Create a layer from a GeoDataFrame
+
+    TODO: add support for filepath to a geojson file, json/dict, or string
+
+    See :obj:`QueryLayer` for the full styling documentation.
+    """
+    def __init__(self, dataframe, color=None, size=None, time=None,
+                 strokeColor=None, strokeWidth=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             self.geojson_str = dataframe.to_json()
         else:
-            raise ValueError('LocalLayer only works with GeoDataFrames')
+            raise ValueError('LocalLayer only works with GeoDataFrames from '
+                             'the geopandas package')
 
         super(LocalLayer, self).__init__(
             query=None,
-            time=time,
             color=color,
-            size=size
+            size=size,
+            time=time,
+            strokeColor=strokeColor,
+            strokeWidth=strokeWidth
         )
 
 def vmap(layers, context):
@@ -131,10 +162,9 @@ def vmap(layers, context):
             'styling': layer.styling,
             'source': layer.geojson_str if is_local else layer.query,
         })
-    html = (
-        '<iframe srcdoc="{content}" width=800 height=400>'
-        '</iframe>'
-    ).format(content=utils.safe_quotes(
-        _get_html_doc(jslayers, bounds, context.creds)
-    ))
+    html = '<iframe srcdoc="{content}" width=800 height=400></iframe>'.format(
+        content=utils.safe_quotes(
+            _get_html_doc(jslayers, bounds, context.creds)
+        )
+    )
     return HTML(html)
