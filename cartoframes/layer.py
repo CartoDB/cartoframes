@@ -294,6 +294,8 @@ class QueryLayer(AbstractLayer):
                               'min': 2
                           })
 
+        opacity (float, optional): Opacity of layer from 0 to 1. Defaults to
+          0.9.
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
 
@@ -308,7 +310,7 @@ class QueryLayer(AbstractLayer):
           requesting a time-based map with a data source that has geometries
           other than points.
     """  # noqa
-    def __init__(self, query, time=None, color=None, size=None,
+    def __init__(self, query, time=None, color=None, size=None, opacity=None,
                  tooltip=None, legend=None):
 
         self.query = query
@@ -404,6 +406,7 @@ class QueryLayer(AbstractLayer):
             self.style_cols[size['column']] = None
 
         self.color = color
+        self.opacity = opacity if opacity is not None else 0.9
         self.scheme = scheme
         self.size = size
         self.time = time
@@ -543,7 +546,7 @@ class QueryLayer(AbstractLayer):
                 "#layer": {
                     'marker-width': size_style,
                     'marker-fill': color_style,
-                    'marker-fill-opacity': 0.9,
+                    'marker-fill-opacity': self.opacity,
                     'marker-allow-overlap': 'true',
                     'marker-line-width': 0,
                     'marker-line-color': line_color,
@@ -573,7 +576,7 @@ class QueryLayer(AbstractLayer):
                     "#layer": {
                         'marker-width': size_style,
                         'marker-fill': color_style,
-                        'marker-fill-opacity': '1',
+                        'marker-fill-opacity': self.opacity,
                         'marker-allow-overlap': 'true',
                         'marker-line-width': '0.5',
                         'marker-line-color': line_color,
@@ -590,6 +593,7 @@ class QueryLayer(AbstractLayer):
                     "#layer": {
                         'line-width': '1.5',
                         'line-color': color_style,
+                        'line-opacity': self.opacity
                     }})
                 if self.color in self.style_cols:
                     css += cssify({
@@ -601,7 +605,7 @@ class QueryLayer(AbstractLayer):
                 css = cssify({
                     "#layer": {
                         'polygon-fill': color_style,
-                        'polygon-opacity': '0.9',
+                        'polygon-opacity': self.opacity,
                         'polygon-gamma': '0.5',
                         'line-color': '#FFF',
                         'line-width': '0.5',
@@ -645,7 +649,8 @@ class Layer(QueryLayer):
         overwrite (bool, optional): Not currently implemented
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
-                 color=None, size=None, tooltip=None, legend=None):
+                 color=None, size=None, opacity=None, tooltip=None,
+                 legend=None):
 
         self.table_name = table_name
         self.source = source
@@ -655,6 +660,7 @@ class Layer(QueryLayer):
                                     time=time,
                                     color=color,
                                     size=size,
+                                    opacity=opacity,
                                     tooltip=tooltip,
                                     legend=legend)
 

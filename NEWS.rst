@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.6.2
+-----
+
+Release 2018-05-10
+
+Updates
+
+- Adds opacity styling option to Layer and QueryLayer (#440)
+
 0.6.1
 -----
 
