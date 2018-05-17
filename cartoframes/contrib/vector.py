@@ -16,7 +16,7 @@ except ImportError:
 
 from .. import utils
 
-class QueryLayer:
+class QueryLayer(object):
     """CARTO VL layer based on an arbitrary query against user database
 
     Args:
@@ -153,6 +153,7 @@ def vmap(layers, context):
         layer for layer in layers
         if not isinstance(layer, LocalLayer)
     ]
+
     if non_local_layers:
         bounds = context._get_bounds(non_local_layers)
         bounds =  '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
