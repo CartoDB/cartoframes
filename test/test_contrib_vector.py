@@ -117,3 +117,24 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
         ]
         self.assertIsInstance(vector.vmap(layers, cc), HTML)
 
+    @unittest.skipIf(HAS_GEOPANDAS, 'GeoPandas installed, so not needed')
+    def test_vector_local(self):
+        """contrib.vector local with"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        with self.assertRaises(ValueError):
+            df = cc.query('''
+                    select the_geom, the_geom_webmercator, cartodb_id
+                    from {}
+                '''.format(self.local),
+                decode_geom=True)
+            layers = [
+                vector.Layer(self.points, color='red', size=10, strokeColor='blue'),
+                vector.QueryLayer(
+                    'SELECT * FROM {}'.format(self.polys),
+                    time='torque($cartodb_id, 10)', strokeWidth=2),
+                vector.LocalLayer(df)
+            ]
+            self.assertIsInstance(vector.vmap(layers, cc), HTML)
+
+
