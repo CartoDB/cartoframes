@@ -75,14 +75,14 @@ class CartoContext(object):
 
     There are two ways of authenticating against a CARTO account:
 
-      1. Setting the `base_url` and `api_key` directly in `CartoContext`. This
-         method is easier.::
+      1. Setting the `base_url` and `api_key` directly in
+         :py:class:`CartoContext`. This method is easier.::
 
             cc = CartoContext(
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
-      2. By passing a :obj:`Credentials` instance in `CartoContext`'s `creds`
+      2. By passing a :py:class:`Credentials` instance in :py:attr:`creds`
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
@@ -90,7 +90,7 @@ class CartoContext(object):
             cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (:obj:`Credentials`): :obj:`Credentials` instance
+        creds (:py:class:`Credentials`): :py:class:`Credentials` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -99,8 +99,8 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-        creds (:obj:`Credentials`): A :obj:`Credentials` instance can be used
-          in place of a `base_url`/`api_key` combination.
+        creds (:py:class:`Credentials`): A :py:class:`Credentials` instance can
+          be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -109,11 +109,11 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-        :obj:`CartoContext`: A CartoContext object that is authenticated
-        against the user's CARTO account.
+        :py:class:`CartoContext`: A :py:class:`CartoContext` object that is
+        authenticated against the user's CARTO account.
 
     Example:
-        Create a CartoContext object::
+        Create a :py:class:`CartoContext` object::
 
             import cartoframes
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
@@ -258,8 +258,8 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
+            :py:class:`BatchJobStatus` or None: If `lnglat` flag is set and the
+            DataFrame has more than 100,000 rows, a :py:class:`BatchJobStatus`
             instance is returned. Otherwise, None.
 
         .. note::
@@ -1093,8 +1093,8 @@ class CartoContext(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
-        boundaries for a region and, with `CartoContext.data` and
-        `CartoContext.data_discovery`, getting tables of geometries and the
+        boundaries for a region and, with :py:meth:`CartoContext.data` and
+        :py:meth:`CartoContext.data_discovery`, getting tables of geometries and the
         corresponding raw measures. For example, if you want to analyze
         how median income has changed in a region (see examples section for
         more).
@@ -1907,7 +1907,7 @@ class BatchJobStatus(object):
 
     Example:
 
-        Poll for a job's status if you've caught the :obj:`BatchJobStatus`
+        Poll for a job's status if you've caught the :py:class:`BatchJobStatus`
         instance.
 
         .. code:: python
@@ -1922,8 +1922,8 @@ class BatchJobStatus(object):
                     break
                 time.sleep(5)
 
-        Create a :obj:`BatchJobStatus` instance if you have a `job_id` output
-        from a `cc.write` operation.
+        Create a :py:class:`BatchJobStatus` instance if you have a `job_id`
+        output from a `cc.write` operation.
 
         .. code:: python
 
