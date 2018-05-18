@@ -136,6 +136,12 @@ class CartoContext(object):
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
+        # POSTs need to be over HTTPS
+        if urlparse(self.creds.base_url()).scheme != 'https':
+            raise ValueError(
+                '`base_url`s need to be over `https`. Update your `base_url`.'
+            )
+        # check if user is authenticated
         try:
             self.sql_client.send(
                 'select * from information_schema.tables limit 0')
