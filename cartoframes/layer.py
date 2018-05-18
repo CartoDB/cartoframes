@@ -3,12 +3,12 @@
 for example usage for data layers. See `layer.BaseMap <#layer.BaseMap>`__ for
 basemap layers.
 """
-
+from __future__ import absolute_import
 import pandas as pd
 import webcolors
 
-from cartoframes.utils import cssify, join_url, minify_sql
-from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
+from .utils import cssify, join_url, minify_sql
+from .styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
 # from CARTOColor vivid scheme

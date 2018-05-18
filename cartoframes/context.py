@@ -1,4 +1,5 @@
 """CartoContext and BatchJobStatus classes"""
+from __future__ import absolute_import
 import json
 import os
 import random
@@ -9,7 +10,7 @@ import binascii as ba
 from warnings import warn
 
 import requests
-import IPython
+from IPython.display import HTML, Image
 import pandas as pd
 from tqdm import tqdm
 from appdirs import user_cache_dir
@@ -20,11 +21,11 @@ from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
 
-from cartoframes.credentials import Credentials
-from cartoframes.dataobs import get_countrytag
-from cartoframes import utils
-from cartoframes.layer import BaseMap, AbstractLayer
-from cartoframes.maps import (non_basemap_layers, get_map_name,
+from .credentials import Credentials
+from .dataobs import get_countrytag
+from . import utils
+from .layer import BaseMap, AbstractLayer
+from .maps import (non_basemap_layers, get_map_name,
                               get_map_template, top_basemap_layer_url)
 from cartoframes.__version__ import __version__
 
@@ -74,14 +75,14 @@ class CartoContext(object):
 
     There are two ways of authenticating against a CARTO account:
 
-      1. Setting the `base_url` and `api_key` directly in `CartoContext`. This
-         method is easier.::
+      1. Setting the `base_url` and `api_key` directly in
+         :py:class:`CartoContext`. This method is easier.::
 
             cc = CartoContext(
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
-      2. By passing a :obj:`Credentials` instance in `CartoContext`'s `creds`
+      2. By passing a :py:class:`Credentials` instance in :py:attr:`creds`
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
@@ -89,7 +90,7 @@ class CartoContext(object):
             cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (:obj:`Credentials`): :obj:`Credentials` instance
+        creds (:py:class:`Credentials`): :py:class:`Credentials` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -98,8 +99,8 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-        creds (:obj:`Credentials`): A :obj:`Credentials` instance can be used
-          in place of a `base_url`/`api_key` combination.
+        creds (:py:class:`Credentials`): A :py:class:`Credentials` instance can
+          be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -108,11 +109,11 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-        :obj:`CartoContext`: A CartoContext object that is authenticated
-        against the user's CARTO account.
+        :py:class:`CartoContext`: A :py:class:`CartoContext` object that is
+        authenticated against the user's CARTO account.
 
     Example:
-        Create a CartoContext object::
+        Create a :py:class:`CartoContext` object::
 
             import cartoframes
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
@@ -257,8 +258,8 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :obj:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFrame has more than 100,000 rows, a :obj:`BatchJobStatus`
+            :py:class:`BatchJobStatus` or None: If `lnglat` flag is set and the
+            DataFrame has more than 100,000 rows, a :py:class:`BatchJobStatus`
             instance is returned. Otherwise, None.
 
         .. note::
@@ -953,15 +954,6 @@ class CartoContext(object):
             netloc = urlparse(self.creds.base_url()).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
-            def safe_quotes(text, escape_single_quotes=False):
-                """htmlify string"""
-                if isinstance(text, str):
-                    safe_text = text.replace('"', "&quot;")
-                    if escape_single_quotes:
-                        safe_text = safe_text.replace("'", "&#92;'")
-                    return safe_text.replace('True', 'true')
-                return text
-
             config = {
                 'user_name': self.creds.username(),
                 'maps_api_template': self.creds.base_url(),
@@ -973,7 +965,7 @@ class CartoContext(object):
                 'named_map': {
                     'name': map_name,
                     'params': {
-                        k: safe_quotes(v, escape_single_quotes=True)
+                        k: utils.safe_quotes(v, escape_single_quotes=True)
                         for k, v in utils.dict_items(options)
                     },
                 },
@@ -1034,11 +1026,11 @@ class CartoContext(object):
                 '<iframe srcdoc="{content}" width={width} height={height}>'
                 '  Preview image: {img_html}'
                 '</iframe>'
-            ).format(content=safe_quotes(content),
+            ).format(content=utils.safe_quotes(content),
                      width=size[0],
                      height=size[1],
                      img_html=img_html)
-            return IPython.display.HTML(html)
+            return HTML(html)
         elif HAS_MATPLOTLIB:
             raw_data = mpi.imread(static_url, format='png')
             if ax is None:
@@ -1051,12 +1043,12 @@ class CartoContext(object):
             ax.axis('off')
             return ax
         else:
-            return IPython.display.Image(url=static_url,
-                                         embed=True,
-                                         format='png',
-                                         width=size[0],
-                                         height=size[1],
-                                         metadata=dict(origin_url=static_url))
+            return Image(url=static_url,
+                         embed=True,
+                         format='png',
+                         width=size[0],
+                         height=size[1],
+                         metadata=dict(origin_url=static_url))
 
     def _geom_type(self, source):
         """gets geometry type(s) of specified layer"""
@@ -1101,8 +1093,8 @@ class CartoContext(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
-        boundaries for a region and, with `CartoContext.data` and
-        `CartoContext.data_discovery`, getting tables of geometries and the
+        boundaries for a region and, with :py:meth:`CartoContext.data` and
+        :py:meth:`CartoContext.data_discovery`, getting tables of geometries and the
         corresponding raw measures. For example, if you want to analyze
         how median income has changed in a region (see examples section for
         more).
@@ -1915,7 +1907,7 @@ class BatchJobStatus(object):
 
     Example:
 
-        Poll for a job's status if you've caught the :obj:`BatchJobStatus`
+        Poll for a job's status if you've caught the :py:class:`BatchJobStatus`
         instance.
 
         .. code:: python
@@ -1930,8 +1922,8 @@ class BatchJobStatus(object):
                     break
                 time.sleep(5)
 
-        Create a :obj:`BatchJobStatus` instance if you have a `job_id` output
-        from a `cc.write` operation.
+        Create a :py:class:`BatchJobStatus` instance if you have a `job_id`
+        output from a `cc.write` operation.
 
         .. code:: python
 
