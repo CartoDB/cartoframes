@@ -15,7 +15,11 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from pyrestcli.exceptions import NotFoundException
 import pandas as pd
-import geopandas as gpd
+try:
+    import geopandas as gpd
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 from IPython.display import HTML
 
 WILL_SKIP = False
@@ -80,7 +84,20 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
         self.local = 'cb_2013_us_csa_500k'
 
 
-    def test_vector(self):
+    def test_vector_multilayer(self):
+        """contrib.vector"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        layers = [
+            vector.Layer(self.points, color='red', size=10, strokeColor='blue'),
+            vector.QueryLayer(
+                'SELECT * FROM {}'.format(self.polys),
+                time='torque($cartodb_id, 10)', strokeWidth=2)
+        ]
+        self.assertIsInstance(vector.vmap(layers, cc), HTML)
+
+    @unittest.skipIf(not HAS_GEOPANDAS, 'GeoPandas not installed')
+    def test_vector_local(self):
         """contrib.vector"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
