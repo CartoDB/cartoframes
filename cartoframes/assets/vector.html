@@ -37,14 +37,14 @@
       dragRotate: false
       });
 
-    map.fitBounds(@@BOUNDS@@, {"animate": false});
-
     let credentials = @@CREDENTIALS@@;
     carto.setDefaultAuth({
       user: credentials['user'],
       apiKey: credentials['api_key'] || 'default_public'
     });
     var sources = @@SOURCES@@;
+
+    map.fitBounds(@@BOUNDS@@, {animate: false});
 
     sources.forEach((elem, idx) => {
       let temp_source = null;
