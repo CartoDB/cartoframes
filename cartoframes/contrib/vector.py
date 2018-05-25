@@ -71,7 +71,7 @@ class QueryLayer(object):
         self.styling = '\n'.join(
             '{prop}: {style}'.format(prop=s, style=getattr(self, s))
             for s in valid_styles
-            if hasattr(self, s)
+            if getattr(self, s) is not None
         )
 
 def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None):
