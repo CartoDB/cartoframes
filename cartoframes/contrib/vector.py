@@ -69,7 +69,7 @@ class QueryLayer(object):
         self.orig_query = query
         self.is_basemap = False
         self.styling = ''
-        self.interactivity = interactivity is not None
+        self.interactivity = None
 
         self._compose_style()
 
@@ -90,17 +90,21 @@ class QueryLayer(object):
     def _set_interactivity(self, interactivity):
         """Adds interactivity syntax to the styling"""
         if isinstance(interactivity, list) or isinstance(interactivity, tuple):
+            self.interactivity = 'click'
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity
             )
         elif isinstance(interactivity, str):
+            self.interactivity = 'click'
             interactive_cols = '@{0}: ${0}'.format(interactivity)
         elif isinstance(interactivity, dict):
+            self.interactivity = interactivity.get('event', 'click')
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity['cols']
             )
         else:
-            return
+            raise ValueError('`interactivity` must be a str, a list of str, '
+                             'or a dict a `cols` key')
 
         self.styling = '\n'.join([interactive_cols, self.styling])
 

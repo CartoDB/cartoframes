@@ -45,12 +45,6 @@
     });
     var sources = @@SOURCES@@;
 
-    // Define pop-up
-    const popup = new mapboxgl.Popup({
-              closeButton: false,
-              closeOnClick: false
-            });
-
     map.fitBounds(@@BOUNDS@@, {animate: false});
 
     sources.forEach((elem, idx) => {
@@ -70,20 +64,41 @@
       temp.addTo(map, last_source);
       if (elem.interactivity) {
         let interactivity = new carto.Interactivity(temp);
-        interactivity.on('featureClick', featureEvent => {
-            const coords = featureEvent.coordinates;
-            const feature = featureEvent.features[0];
-            if (!feature) { return; }
-            let popupHTML = '';
-            Object.keys(feature.variables).forEach((varName) => {
-                popupHTML += `<h3 class="h3">${varName}</h3><p class="description open-sans">${feature.variables[varName].value}</p>`;
-            });
-            popup.setLngLat([coords.lng, coords.lat])
-                 .setHTML(popupHTML)
-                 .addTo(map);
-        });
+        let tempPopup = new mapboxgl.Popup({
+                  closeButton: false,
+                  closeOnClick: false
+                });
+        if (elem['interactivity'] == 'click') {
+          setPopupsClick(tempPopup, interactivity);
+        } else if (elem['interactivity'] == 'hover') {
+          setPopupsHover(tempPopup, interactivity);
+        }
       }
     });
+    function setPopupsClick(tempPopup, intera) {
+      intera.off('featureHover', (event) => {updatePopup(tempPopup, event)});
+      intera.on('featureClick', (event) => {updatePopup(tempPopup, event)});
+    }
+    function setPopupsHover(tempPopup, intera) {
+      intera.off('featureClick', (event) => {updatePopup(tempPopup, event)});
+      intera.on('featureHover', (event) => {updatePopup(tempPopup, event)});
+    }
+    function updatePopup(layer_popup, event) {
+      if (event.features.length > 0) {
+        const vars = event.features[0].variables;
+        let popupHTML = '';
+        Object.keys(vars).forEach((varName) => {
+            popupHTML += `<h3 class="h3">${varName}</h3><p class="description open-sans">${vars[varName].value}</p>`;
+        });
+        layer_popup.setLngLat([event.coordinates.lng, event.coordinates.lat])
+             .setHTML(`<div>${popupHTML}</div>`);
+        if (!layer_popup.isOpen()) {
+          layer_popup.addTo(map);
+        }
+      } else {
+        layer_popup.remove();
+      }
+    }
   </script>
 </body>
 </html>
