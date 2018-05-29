@@ -41,6 +41,15 @@ class QueryLayer(object):
           Default is white.
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
+        interactivity (str, list, or dict, optional): This option add
+          interactivity (click or hover) to a layer. Three types of inputs are
+          possible:
+
+          dict: If a :obj:`dict`, this must have the key `cols` with its value
+            a list of columns. Optionall add `event` to choose ``hover`` or
+            ``click``.
+          list: A list of valid column names in the data used for this layer
+          str: A column name in the data used in this layer
     """
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):

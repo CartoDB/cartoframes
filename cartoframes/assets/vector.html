@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Multi layer | CARTO</title>
+  <title>CARTO VL + CARTOframes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <!-- Include CARTO VL JS -->
-  <script src="https://cartodb.github.io/carto-vl/dist/carto-vl.min.js"></script>
+  <script src="https://cartodb.github.io/carto-vl/dist/carto-vl.js"></script>
   <!-- Include Mapbox GL JS -->
-  <script src="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.44.1-carto1/mapbox-gl.js"></script>
+  <script src="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.45.0-carto1/mapbox-gl.js"></script>
   <!-- Include Mapbox GL CSS -->
-  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.45.0-carto1/mapbox-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="https://cartodb.github.io/carto-vl/examples/style.css">
   <style>
     body {
       margin: 0;
@@ -44,6 +45,12 @@
     });
     var sources = @@SOURCES@@;
 
+    // Define pop-up
+    const popup = new mapboxgl.Popup({
+              closeButton: false,
+              closeOnClick: false
+            });
+
     map.fitBounds(@@BOUNDS@@, {animate: false});
 
     sources.forEach((elem, idx) => {
@@ -69,12 +76,11 @@
             if (!feature) { return; }
             let popupHTML = '';
             Object.keys(feature.variables).forEach((varName) => {
-              popupHTML += '<h2>' + varName + '</h2><p>' + feature.variables[varName].value + '</p>';
+                popupHTML += `<h3 class="h3">${varName}</h3><p class="description open-sans">${feature.variables[varName].value}</p>`;
             });
-            new mapboxgl.Popup()
-                .setLngLat([coords.lng, coords.lat])
-                .setHTML(popupHTML)
-                .addTo(map);
+            popup.setLngLat([coords.lng, coords.lat])
+                 .setHTML(popupHTML)
+                 .addTo(map);
         });
       }
     });
