@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = cartoframes
-SOURCEDIR     = .
-BUILDDIR      = build
+SOURCEDIR     = source
+BUILDDIR      = reference/json
 
 # Put it first so that "make" without argument is like "make help".
 help:
