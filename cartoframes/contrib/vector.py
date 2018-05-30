@@ -70,6 +70,7 @@ class QueryLayer(object):
         self.is_basemap = False
         self.styling = ''
         self.interactivity = None
+        self.header = None
 
         self._compose_style()
 
@@ -101,6 +102,7 @@ class QueryLayer(object):
             interactive_cols = '@{0}: ${0}'.format(interactivity)
         elif isinstance(interactivity, dict):
             self.interactivity = interactivity.get('event', 'click')
+            self.header = interactivity.get('header')
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity['cols']
             )
@@ -201,11 +203,16 @@ def vmap(layers, context):
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
+        intera = (
+            dict(event=layer.interactivity, header=layer.header)
+            if layer.interactivity is not None
+            else None
+        )
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
             'source': layer.geojson_str if is_local else layer.query,
-            'interactivity': layer.interactivity
+            'interactivity': intera
         })
     html = '<iframe srcdoc="{content}" width=800 height=400></iframe>'.format(
         content=utils.safe_quotes(

@@ -68,27 +68,38 @@
                   closeButton: false,
                   closeOnClick: false
                 });
-        if (elem['interactivity'] == 'click') {
-          setPopupsClick(tempPopup, interactivity);
-        } else if (elem['interactivity'] == 'hover') {
-          setPopupsHover(tempPopup, interactivity);
+        if (elem.interactivity.event == 'click') {
+          setPopupsClick(tempPopup, interactivity, elem.interactivity.header);
+        } else if (elem.interactivity.event == 'hover') {
+          setPopupsHover(tempPopup, interactivity, elem.interactivity.header);
         }
       }
     });
-    function setPopupsClick(tempPopup, intera) {
-      intera.off('featureHover', (event) => {updatePopup(tempPopup, event)});
-      intera.on('featureClick', (event) => {updatePopup(tempPopup, event)});
+    function setPopupsClick(tempPopup, intera, popupHeader) {
+      intera.off('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
+      intera.on('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader, popupHeader)
+      });
     }
-    function setPopupsHover(tempPopup, intera) {
-      intera.off('featureClick', (event) => {updatePopup(tempPopup, event)});
-      intera.on('featureHover', (event) => {updatePopup(tempPopup, event)});
+    function setPopupsHover(tempPopup, intera, popupHeader) {
+      intera.off('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
+      intera.on('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
     }
-    function updatePopup(layer_popup, event) {
+    function updatePopup(layer_popup, event, popupHeader) {
       if (event.features.length > 0) {
         const vars = event.features[0].variables;
-        let popupHTML = '';
+        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
         Object.keys(vars).forEach((varName) => {
-            popupHTML += `<h3 class="h3">${varName}</h3><p class="description open-sans">${vars[varName].value}</p>`;
+            popupHTML += `
+                <h3 class="h3">${varName}</h3>
+                <p class="description open-sans">${vars[varName].value}</p>
+            `;
         });
         layer_popup.setLngLat([event.coordinates.lng, event.coordinates.lat])
              .setHTML(`<div>${popupHTML}</div>`);
