@@ -89,7 +89,9 @@ class QueryLayer(object):
 
     def _set_interactivity(self, interactivity):
         """Adds interactivity syntax to the styling"""
-        if isinstance(interactivity, list) or isinstance(interactivity, tuple):
+        if interactivity is None:
+            return
+        elif isinstance(interactivity, list) or isinstance(interactivity, tuple):
             self.interactivity = 'click'
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity
