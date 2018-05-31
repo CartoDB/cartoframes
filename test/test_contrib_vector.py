@@ -157,5 +157,5 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(vector.vmap(layers, cc), HTML)
 
         # invalid entry for interactivity
-        self.assertRaises(ValueError):
+        with self.assertRaises(ValueError):
             vector.vmap([vector.Layer(self.points, interactivity=10), ])
