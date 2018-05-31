@@ -42,14 +42,15 @@ class QueryLayer(object):
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
         interactivity (str, list, or dict, optional): This option add
-          interactivity (click or hover) to a layer. Three types of inputs are
-          possible:
+          interactivity (click or hover) to a layer. Defaults to click if one
+          of the followring inputs are specified:
 
-          dict: If a :obj:`dict`, this must have the key `cols` with its value
-            a list of columns. Optionall add `event` to choose ``hover`` or
-            ``click``.
-          list: A list of valid column names in the data used for this layer
-          str: A column name in the data used in this layer
+          - dict: If a :obj:`dict`, this must have the key `cols` with its value
+            a list of columns. Optionally add `event` to choose ``hover`` or
+            ``click``. Specifying a `header` key/value pair adds a header to
+            the popup that will be rendered in HTML.
+          - list: A list of valid column names in the data used for this layer
+          - str: A column name in the data used in this layer
     """
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):
@@ -90,18 +91,19 @@ class QueryLayer(object):
 
     def _set_interactivity(self, interactivity):
         """Adds interactivity syntax to the styling"""
+        event_default = 'hover'
         if interactivity is None:
             return
         elif isinstance(interactivity, list) or isinstance(interactivity, tuple):
-            self.interactivity = 'click'
+            self.interactivity = event_default
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity
             )
         elif isinstance(interactivity, str):
-            self.interactivity = 'click'
+            self.interactivity = event_default
             interactive_cols = '@{0}: ${0}'.format(interactivity)
         elif isinstance(interactivity, dict):
-            self.interactivity = interactivity.get('event', 'click')
+            self.interactivity = interactivity.get('event', event_default)
             self.header = interactivity.get('header')
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity['cols']
