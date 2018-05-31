@@ -137,4 +137,25 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
             ]
             self.assertIsInstance(vector.vmap(layers, cc), HTML)
 
+    def test_vector_interactivity(self):
+        """contrib.vector"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        layers = [
+            vector.Layer(self.points, interactivity='body'),
+            vector.QueryLayer(
+                'SELECT * FROM {}'.format(self.polys),
+                interactivity=['name', 'state_name', ]),
+            vector.QueryLayer(
+                'SELECT * FROM {}'.format(self.polys),
+                interactivity={
+                    'cols': ['name', 'state_name', ],
+                    'header': '<h1 class="h1">NAT</h1>',
+                    'event': 'click'
+                })
+        ]
+        self.assertIsInstance(vector.vmap(layers, cc), HTML)
 
+        # invalid entry for interactivity
+        with self.assertRaises(ValueError):
+            vector.vmap([vector.Layer(self.points, interactivity=10), ])
