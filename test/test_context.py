@@ -1184,6 +1184,19 @@ class TestExamples(unittest.TestCase):
         self.assertIsInstance(nycct, pd.DataFrame)
         self.assertGreater(nycct.shape[0], 0)
 
+    def test_read_nat(self):
+        """examples.read_nat"""
+        from cartoframes.examples import read_nat
+        # method test
+        nat = self.examples.read_nat()
+        self.assertIsInstance(nat, pd.DataFrame)
+        self.assertGreater(nat.shape[0], 0)
+
+        # function test
+        nat = read_nat()
+        self.assertIsInstance(nat, pd.DataFrame)
+        self.assertGreater(nat.shape[0], 0)
+
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
     def setUp(self):

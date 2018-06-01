@@ -26,6 +26,9 @@ class Examples(CartoContext):
     def read_taxi(self, limit=None, **kwargs):
         return self.read('taxi_50k', limit, **kwargs)
 
+    def read_nat(self, limit=None, **kwargs):
+        return self.read('nat', limit, **kwargs)
+
     # override behavior of CartoContext methods
     def data(self):
         raise RuntimeError('CartoContext.data method disabled for Examples')
@@ -164,3 +167,28 @@ def read_taxi(limit=None, **kwargs):
 
     """
     return example_context.read_taxi(limit=limit, **kwargs)
+
+def read_nat(limit=None, **kwargs):
+    """Read `nat` dataset: US county homicides 1960-1990
+
+    This table is located at:
+    https://cartoframes.carto.com/tables/nat/public
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in `CartoContext.read`
+
+    Returns:
+
+      pandas.Dataframe: Data in the table `taxi_50k` on the CARTOframes
+        example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(decode_geom=True)
+    """
+    return example_context.read_nat(limit=limit, **kwargs)
