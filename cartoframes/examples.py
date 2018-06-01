@@ -17,7 +17,7 @@ class Examples(CartoContext):
     def read_brooklyn_poverty(self, limit=None, **kwargs):
         return self.read('brooklyn_poverty', limit, **kwargs)
 
-    def read_mcdonalds_nyc(self, limit=None):
+    def read_mcdonalds_nyc(self, limit=None, **kwargs):
         return self.read('mcdonalds_nyc', limit, **kwargs)
 
     def read_nyc_census_tracts(self, limit=None, **kwargs):
