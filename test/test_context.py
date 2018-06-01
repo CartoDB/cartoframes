@@ -1131,14 +1131,28 @@ class TestExamples(unittest.TestCase):
             self.examples.data_augment(None, None)
 
     def test_read_taxi(self):
+        """examples.read_taxi"""
         taxi = self.examples.read_taxi()
         self.assertIsInstance(taxi, pd.DataFrame)
+        self.assertGreater(taxi.shape[0], 0)
 
-    def test_examples_instance(self):
-        from cartoframes.examples import read_taxi
-        df = read_taxi()
-        self.assertIsInstance(df, pd.DataFrame)
+    def test_read_brooklyn_poverty(self):
+        """examples.read_brooklyn_poverty"""
+        bp = self.examples.read_brooklyn_poverty()
+        self.assertIsInstance(bp, pd.DataFrame)
+        self.assertGreaterEqual(bp.shape[0], 0)
 
+    def test_read_mcdonalds(self):
+        """examples.read_mcdonalds"""
+        mcd = self.examples.read_mcdonalds_nyc()
+        self.assertIsInstance(mcd, pd.DataFrame)
+        self.assertGreater(mcd.shape[0], 0)
+
+    def test_read_mcdonalds(self):
+        """examples.read_mcdonalds"""
+        nycct = self.examples.read_nyc_census_tracts()
+        self.assertIsInstance(nycct, pd.DataFrame)
+        self.assertGreater(nycct.shape[0], 0)
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
