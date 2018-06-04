@@ -1679,12 +1679,15 @@ class CartoContext(object):
                           http_method=http_method,
                           kwargs=kwargs)
         res = self.auth_client.send(relative_path, http_method, **kwargs)
-        if isinstance(res.content, str):
-            return json.loads(res.content)
-        try:
+        self_debug_print(**res.headers)
+        if 'application/json' in res.headers.get('content-type'):
             return json.loads(res.content.decode('utf-8'))
-        except json.JSONDecodeError as err:
-            raise CartoException(err)
+        elif 'application/octet-stream' in res.headers.get('content-type'):
+            from io import BytesIO
+            return BytesIO(res.content.decode('utf-8')).getvalue()
+        else:
+            from io import StringIO
+            return StringIO(res.content.decode('utf-8')).getvalue()
 
     def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
