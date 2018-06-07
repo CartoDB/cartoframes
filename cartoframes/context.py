@@ -8,6 +8,7 @@ import time
 import collections
 import binascii as ba
 from warnings import warn
+from io import StringIO, BytesIO
 
 import requests
 from IPython.display import HTML, Image
@@ -153,6 +154,21 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return paths[0] != 'public'
 
+    # def readcopy(self, table_name, limit=None, index='cartodb_id',
+    #              decode_geom=False, shared_user=None):
+    #     schema = 'public' if not self.is_org else (
+    #         shared_user or self.creds.username())
+    #     query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
+    #         table_name=table_name,
+    #         schema=schema)
+    #     if limit is not None:
+    #         if isinstance(limit, int) and (limit >= 0):
+    #             query += ' LIMIT {limit}'.format(limit=limit)
+    #         else:
+    #             raise ValueError("`limit` parameter must an integer >= 0")
+
+    #     return self.querycopy(query, decode_geom=decode_geom)
+
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
@@ -193,6 +209,100 @@ class CartoContext(object):
                 raise ValueError("`limit` parameter must an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
+
+    def writecopy(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
+                  lnglat=None, encode_geom=False, geom_col=None,
+                  method='create', **kwargs):
+        """write prototype using COPYFROM endpoint"""
+        _df = df.copy()
+        # verify method is possible
+        if method not in ('create', 'append', ):
+            raise ValueError('`method` can only be ``create`` or ``append``')
+
+        utilcol_schema = {
+            'the_geom': 'GEOMETRY(GEOMETRY, 4326)',
+            'the_geom_webmercator': 'GEOMETRY(GEOMETRY, 3857)',
+            'cartodb_id': 'SERIAL PRIMARY KEY',
+        }
+        # TODO: decode geometry
+        # create geometry if requested
+        if lnglat:
+            if 'the_geom' in _df.columns:
+                warn('Setting `lnglat` overwrites the existing values in '
+                     '`the_geom` column')
+
+            _df['the_geom'] = [
+                'SRID=4326;POINT({0} {1})'.format(lng, lat)
+                for lng, lat in zip(_df[lnglat[0]], _df[lnglat[1]])
+            ]
+        pgcolnames = utils.normalize_colnames(_df.columns)
+        if table_name != utils.norm_colname(table_name):
+            table_name = utils.norm_colname(table_name)
+            warn('Table will be named `{}`'.format(table_name))
+
+        # create table if it does not already exist
+        if method == 'create':
+            pgschema = {
+                'cols': pgcolnames,
+                'types': [
+                    _dtypes2pg(t) if c != 'the_geom'
+                    else utilcol_schema['the_geom']
+                    for c, t in _df.dtypes.items()
+                ]
+            }
+
+            # create schema
+            full_schema = ', '.join(
+                '{c} {t}'.format(c=c, t=t)
+                for c, t in zip(pgschema['cols'], pgschema['types'])
+            )
+            self._debug_print(full_schema=full_schema)
+            # if util cols are lacking, add them
+            if set(utilcol_schema) - set(pgschema['cols']):
+                self._debug_print(
+                    diffs=set(utilcol_schema) - set(pgschema['cols']))
+                full_schema = ', '.join([
+                    full_schema,
+                    ','.join(
+                        '{c} {t}'.format(c=c, t=t)
+                        for c, t in utils.dict_items(utilcol_schema)
+                        if c not in pgschema['cols']
+                    )
+                ])
+            # create table
+            create_table = '''
+                CREATE TABLE {table}({schema});
+            '''.format(
+                table=table_name,
+                schema=full_schema
+            )
+            self._debug_print(create_table=create_table)
+            self.sql_client.send(create_table)
+
+        # COPYFROM
+        # write dataframe to string 'csv'
+        buffer_str = StringIO()
+        _df.to_csv(buffer_str, index=False, header=False)
+        self._debug_print(buffer_str=buffer_str.getvalue()[0:200])
+        copy_query = (
+            'COPY {table}({cols}) FROM STDIN WITH '
+            '(FORMAT csv, HEADER false, DELIMITER \',\')'
+        ).format(
+            table=table_name,
+            cols=','.join(pgcolnames)
+        )
+        self._debug_print(cols=pgcolnames, copy_query=copy_query)
+        resp = self._auth_send(
+            'api/v2/sql/copyfrom',
+            'POST',
+            params=dict(q=copy_query),
+            data=buffer_str.getvalue(),
+            stream=True)
+        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
+            table_url=utils.join_url(self.creds.base_url(),
+                                     'dataset',
+                                     table_name)))
+        return resp
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
@@ -1679,15 +1789,13 @@ class CartoContext(object):
                           http_method=http_method,
                           kwargs=kwargs)
         res = self.auth_client.send(relative_path, http_method, **kwargs)
-        self_debug_print(**res.headers)
+        self._debug_print(**res.headers)
         if 'application/json' in res.headers.get('content-type'):
-            return json.loads(res.content.decode('utf-8'))
+            return res.json(encoding='utf-8')
         elif 'application/octet-stream' in res.headers.get('content-type'):
-            from io import BytesIO
             return BytesIO(res.content.decode('utf-8')).getvalue()
-        else:
-            from io import StringIO
-            return StringIO(res.content.decode('utf-8')).getvalue()
+        # everything else
+        return StringIO(res.content.decode('utf-8')).getvalue()
 
     def _check_query(self, query, style_cols=None):
         """Checks if query from Layer or QueryLayer is valid"""
@@ -1863,6 +1971,18 @@ def _decode_geom(ewkb):
         return wkb.loads(ba.unhexlify(ewkb))
     return None
 
+def _dtype2pg(dtype):
+    """Returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {
+        'float64': 'numeric',
+        'int64': 'bigint',
+        'float32': 'numeric',
+        'int32': 'int',
+        'object': 'text',
+        'bool': 'boolean',
+        'datetime64[ns]': 'timestamp',
+    }
+    return mapping.get(str(dtype), 'text')
 
 def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
