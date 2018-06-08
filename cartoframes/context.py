@@ -154,20 +154,20 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return paths[0] != 'public'
 
-    # def readcopy(self, table_name, limit=None, index='cartodb_id',
-    #              decode_geom=False, shared_user=None):
-    #     schema = 'public' if not self.is_org else (
-    #         shared_user or self.creds.username())
-    #     query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
-    #         table_name=table_name,
-    #         schema=schema)
-    #     if limit is not None:
-    #         if isinstance(limit, int) and (limit >= 0):
-    #             query += ' LIMIT {limit}'.format(limit=limit)
-    #         else:
-    #             raise ValueError("`limit` parameter must an integer >= 0")
+    def readcopy(self, table_name, limit=None, index='cartodb_id',
+                 decode_geom=False, shared_user=None):
+        schema = 'public' if not self.is_org else (
+            shared_user or self.creds.username())
+        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
+            table_name=table_name,
+            schema=schema)
+        if limit is not None:
+            if isinstance(limit, int) and (limit >= 0):
+                query += ' LIMIT {limit}'.format(limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
 
-    #     return self.querycopy(query, decode_geom=decode_geom)
+        return self.querycopy(query, decode_geom=decode_geom)
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False, shared_user=None):
@@ -298,10 +298,12 @@ class CartoContext(object):
             params=dict(q=copy_query),
             data=buffer_str.getvalue(),
             stream=True)
-        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-            table_url=utils.join_url(self.creds.base_url(),
-                                     'dataset',
-                                     table_name)))
+        tqdm.write(
+            'Table successfully written to CARTO: {table_url}. This URL will '
+            'not work until you visit your dashboard at: {dashboard}'.format(
+                table_url=utils.join_url(
+                    self.creds.base_url(), 'dataset', table_name),
+                dashboard=utils.join_url(self.creds.base_url(), 'datasets')))
         return resp
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
@@ -772,6 +774,108 @@ class CartoContext(object):
             Not yet implemented.
         """
         pass
+
+    # TODO: replace query with this method
+    def querycopy(self, query, table_name=None, decode_geom=False):
+        """Pull the result from an arbitrary SQL query from a CARTO account
+        into a pandas DataFrame. Can also be used to perform database
+        operations (creating/dropping tables, adding columns, updates, etc.).
+
+        Args:
+            query (str): Query to run against CARTO user database. This data
+              will then be converted into a pandas DataFrame.
+            table_name (str, optional): If set, this will create a new
+              table in the user's CARTO account that is the result of the
+              query. Defaults to None (no table created).
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of query supplied.
+            Pandas data types are inferred from PostgreSQL data types.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
+        """
+        self._debug_print(query=query)
+        if table_name:
+            # TODO: replace the following error catching with Import API
+            #  checking once Import API sql/table_name collision_strategy=skip
+            #  bug is fixed ref: support/1127
+            try:
+                self.sql_client.send('''
+                    CREATE TABLE {0} AS SELECT 1;
+                    DROP TABLE {0};
+                '''.format(table_name))
+                resp = self._auth_send(
+                    'api/v1/imports', 'POST',
+                    params=dict(table_name=table_name),
+                    json=dict(sql=query),
+                    # collision_strategy='',
+                    headers={'Content-Type': 'application/json'})
+            except CartoException as err:
+                raise CartoException(
+                    'Cannot create table `{0}`: {1}'.format(table_name, err))
+
+            while True:
+                import_job = self._check_import(resp['item_queue_id'])
+                self._debug_print(import_job=import_job)
+                final_table_name = self._handle_import(import_job, table_name)
+                if import_job['state'] == 'complete':
+
+                    print('Table successfully written to CARTO: '
+                          '{table_url}'.format(
+                              table_url=utils.join_url(self.creds.base_url(),
+                                                       'dataset',
+                                                       final_table_name)))
+                    break
+                time.sleep(1.0)
+
+            select_res = self.sql_client.send(
+                'SELECT * FROM {table_name}'.format(
+                    table_name=final_table_name),
+                skipfields='the_geom_webmercator',
+                **DEFAULT_SQL_ARGS)
+        else:
+            copy_query = 'COPY ({q}) to stdout WITH (FORMAT csv, HEADER true)'
+            resp_data = self._auth_send(
+                'api/v2/sql/copyto',
+                'GET',
+                params=dict(q=copy_query.format(q=query)),
+            )
+            # if 'error' in select_res:
+            #     raise CartoException(str(select_res['error']))
+
+        self._debug_print(resp_data=resp_data)
+
+        fields = self.sql_client.send(
+            'select * FROM ({query}) as _w limit 0'.format(query=query)
+        )['fields']
+        schema = {
+            c: _pg2dtypes(t['type']) for c, t in utils.dict_items(fields)
+        }
+
+        # TODO: ensure zero-row tables are zero-row dataframes
+        # if select_res['total_rows'] == 0:
+        #     return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
+
+        df = pd.read_csv(StringIO(select_res), dtypes=schema)
+        # TODO: iteratively cast (and fallback on error) dates
+        # for field in fields:
+        #     if fields[field]['type'] == 'date':
+        #         df[field] = pd.to_datetime(df[field], errors='ignore')
+
+        # self._debug_print(columns=df.columns,
+        #                   dtypes=df.dtypes)
+
+        if 'cartodb_id' in schema:
+            df.set_index('cartodb_id', inplace=True)
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
+
+        return df
 
     def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
