@@ -1888,6 +1888,34 @@ class CartoContext(object):
              'instead.', DeprecationWarning)
         return self.data(table_name, metadata, persist_as=table_name)
 
+    def _table_touch(self, table_name, dtypes, overwrite=False):
+        """Create an empty table with a specific schema"""
+        if overwrite:
+            self.delete(table_name)
+        schema = ', '.join(
+            'null::{0} as {1}'.format(_dtype2pg(t), c)
+            for c, t in dtypes.items()
+        )
+        query = 'SELECT {} LIMIT 0'.format(schema)
+        print(query)
+        resp = self._auth_send(
+            'api/v1/imports',
+            'POST',
+            params={'sql': query, 'table_name': table_name}
+        )
+        while True:
+            r = self._auth_send(
+                'api/v1/imports/{}'.format(resp['item_queue_id']),
+                'GET'
+            )
+            if r['state'] == 'complete':
+                break
+            elif r['state'] == 'failure':
+                raise CartoException(str(r))
+            time.sleep(0.5)
+            print(r['state'], r['table_name'])
+        return r['table_name']
+
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
                           http_method=http_method,
