@@ -257,6 +257,7 @@ class CartoContext(object):
                 for c, t in zip(pgschema['cols'], pgschema['types'])
             )
             self._debug_print(full_schema=full_schema)
+
             # if util cols are lacking, add them
             if set(utilcol_schema) - set(pgschema['cols']):
                 self._debug_print(
@@ -799,6 +800,9 @@ class CartoContext(object):
             converted, but on failure a data type 'object' is used.
         """
         self._debug_print(query=query)
+
+        # create table from query if requested
+        # TODO: turn this into a _table_touch with a custom query
         if table_name:
             # TODO: replace the following error catching with Import API
             #  checking once Import API sql/table_name collision_strategy=skip
@@ -859,6 +863,7 @@ class CartoContext(object):
         # date cols, converted separatedly
         date_cols = list(set(fields) - set(schema))
 
+        # create dataframe with proper schema
         df = pd.read_csv(
             StringIO(resp_data),
             dtype=schema,
@@ -868,6 +873,7 @@ class CartoContext(object):
         if 'cartodb_id' in schema:
             df.set_index('cartodb_id', inplace=True)
 
+        # decode geoms to Shapely geometries if requested
         if decode_geom:
             df['geometry'] = df.the_geom.apply(_decode_geom)
             tqdm.write(
