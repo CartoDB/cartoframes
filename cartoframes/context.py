@@ -804,10 +804,12 @@ class CartoContext(object):
             #  checking once Import API sql/table_name collision_strategy=skip
             #  bug is fixed ref: support/1127
             try:
+                # error if table exists, otherwise 'do nothing' (create/drop)
                 self.sql_client.send('''
                     CREATE TABLE {0} AS SELECT 1;
                     DROP TABLE {0};
                 '''.format(table_name))
+                # create table from query
                 resp = self._auth_send(
                     'api/v1/imports', 'POST',
                     params=dict(table_name=table_name),
@@ -832,48 +834,47 @@ class CartoContext(object):
                     break
                 time.sleep(1.0)
 
-            select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(
-                    table_name=final_table_name),
-                skipfields='the_geom_webmercator',
-                **DEFAULT_SQL_ARGS)
-        else:
-            copy_query = 'COPY ({q}) to stdout WITH (FORMAT csv, HEADER true)'
-            resp_data = self._auth_send(
-                'api/v2/sql/copyto',
-                'GET',
-                params=dict(q=copy_query.format(q=query)),
-            )
-            # if 'error' in select_res:
-            #     raise CartoException(str(select_res['error']))
+            query = 'SELECT * FROM {}'.format(final_table_name)
+
+        # fetch the data
+        copy_query = 'COPY ({q}) to stdout WITH (FORMAT csv, HEADER true)'
+        resp_data = self._auth_send(
+            'api/v2/sql/copyto',
+            'GET',
+            params=dict(q=copy_query.format(q=query)),
+        )
 
         self._debug_print(resp_data=resp_data)
 
+        # retrieve schema
         fields = self.sql_client.send(
-            'select * FROM ({query}) as _w limit 0'.format(query=query)
+            'SELECT * FROM ({query}) AS _w LIMIT 0'.format(query=query)
         )['fields']
+        # schema that's not dates
         schema = {
-            c: _pg2dtypes(t['type']) for c, t in utils.dict_items(fields)
+            c: _pg2dtypes(t['type'])
+            for c, t in utils.dict_items(fields)
+            if t['type'] != 'date'
         }
+        # date cols, converted separatedly
+        date_cols = list(set(fields) - set(schema))
 
-        # TODO: ensure zero-row tables are zero-row dataframes
-        # if select_res['total_rows'] == 0:
-        #     return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
-
-        df = pd.read_csv(StringIO(select_res), dtypes=schema)
-        # TODO: iteratively cast (and fallback on error) dates
-        # for field in fields:
-        #     if fields[field]['type'] == 'date':
-        #         df[field] = pd.to_datetime(df[field], errors='ignore')
-
-        # self._debug_print(columns=df.columns,
-        #                   dtypes=df.dtypes)
+        df = pd.read_csv(
+            StringIO(resp_data),
+            dtype=schema,
+            parse_dates=date_cols
+        )
 
         if 'cartodb_id' in schema:
             df.set_index('cartodb_id', inplace=True)
 
         if decode_geom:
             df['geometry'] = df.the_geom.apply(_decode_geom)
+            tqdm.write(
+                'Decoded geometries are in the `geometry` column. Tip: Pass '
+                'this dataframe to the GeoPandas GeoDataFrame constructor to '
+                'to use cartoframes with GeoPandas.'
+            )
 
         return df
 
@@ -1925,7 +1926,7 @@ class CartoContext(object):
         if 'application/json' in res.headers.get('content-type'):
             return res.json(encoding='utf-8')
         elif 'application/octet-stream' in res.headers.get('content-type'):
-            return BytesIO(res.content.decode('utf-8')).getvalue()
+            return BytesIO(res.content).getvalue().decode('utf-8')
         # everything else
         return StringIO(res.content.decode('utf-8')).getvalue()
 
