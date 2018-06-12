@@ -113,3 +113,12 @@ def safe_quotes(text, escape_single_quotes=False):
             safe_text = safe_text.replace("'", "&#92;'")
         return safe_text.replace('True', 'true')
     return text
+
+
+def sleep_backoff(plateau=30.):
+    """Sleep based on a exponentially increasing time span with a plateau"""
+    idx = 1
+    while True:
+        curr_val = 0.75 * 1.1**idx
+        yield curr_val if curr_val < plateau else plateau
+        idx += 1

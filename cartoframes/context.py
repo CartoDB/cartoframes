@@ -802,42 +802,8 @@ class CartoContext(object):
         self._debug_print(query=query)
 
         # create table from query if requested
-        # TODO: turn this into a _table_touch with a custom query
         if table_name:
-            # TODO: replace the following error catching with Import API
-            #  checking once Import API sql/table_name collision_strategy=skip
-            #  bug is fixed ref: support/1127
-            try:
-                # error if table exists, otherwise 'do nothing' (create/drop)
-                self.sql_client.send('''
-                    CREATE TABLE {0} AS SELECT 1;
-                    DROP TABLE {0};
-                '''.format(table_name))
-                # create table from query
-                resp = self._auth_send(
-                    'api/v1/imports', 'POST',
-                    params=dict(table_name=table_name),
-                    json=dict(sql=query),
-                    # collision_strategy='',
-                    headers={'Content-Type': 'application/json'})
-            except CartoException as err:
-                raise CartoException(
-                    'Cannot create table `{0}`: {1}'.format(table_name, err))
-
-            while True:
-                import_job = self._check_import(resp['item_queue_id'])
-                self._debug_print(import_job=import_job)
-                final_table_name = self._handle_import(import_job, table_name)
-                if import_job['state'] == 'complete':
-
-                    print('Table successfully written to CARTO: '
-                          '{table_url}'.format(
-                              table_url=utils.join_url(self.creds.base_url(),
-                                                       'dataset',
-                                                       final_table_name)))
-                    break
-                time.sleep(1.0)
-
+            final_table_name = self._table_touch(table_name, query=query)
             query = 'SELECT * FROM {}'.format(final_table_name)
 
         # fetch the data
@@ -875,10 +841,16 @@ class CartoContext(object):
 
         # decode geoms to Shapely geometries if requested
         if decode_geom:
+            if 'geometry' in df.columns:
+                warn(
+                    'The column `geometry` is being overwritten by '
+                    'geometries decoded from `the_geom` column.'
+                )
+
             df['geometry'] = df.the_geom.apply(_decode_geom)
             tqdm.write(
                 'Decoded geometries are in the `geometry` column. Tip: Pass '
-                'this dataframe to the GeoPandas GeoDataFrame constructor to '
+                'this dataframe to the `geopandas.GeoDataFrame` constructor '
                 'to use cartoframes with GeoPandas.'
             )
 
@@ -1895,33 +1867,49 @@ class CartoContext(object):
              'instead.', DeprecationWarning)
         return self.data(table_name, metadata, persist_as=table_name)
 
-    def _table_touch(self, table_name, dtypes, overwrite=False):
+    def _table_touch(self, table_name, query=None, dtypes=None,
+                     overwrite=False):
         """Create an empty table with a specific schema"""
         if overwrite:
             self.delete(table_name)
-        schema = ', '.join(
-            'null::{0} as {1}'.format(_dtype2pg(t), c)
-            for c, t in dtypes.items()
-        )
-        query = 'SELECT {} LIMIT 0'.format(schema)
-        print(query)
+        if dtypes:
+            # create placeholder schema for Import API
+            schema = ', '.join(
+                'null::{0} as {1}'.format(_dtype2pg(t), c)
+                for c, t in dtypes.items()
+            )
+            query = 'SELECT {} LIMIT 0'.format(schema)
+        self._debug_print(query=query)
         resp = self._auth_send(
             'api/v1/imports',
             'POST',
-            params={'sql': query, 'table_name': table_name}
+            params=dict(sql=query, table_name=table_name)
         )
-        while True:
-            r = self._auth_send(
+        # poll for import status 
+        for idx, sleep_val in enumerate(utils.sleep_backoff()):
+            import_status = self._auth_send(
                 'api/v1/imports/{}'.format(resp['item_queue_id']),
                 'GET'
             )
-            if r['state'] == 'complete':
+            if import_status['state'] == 'complete':
                 break
-            elif r['state'] == 'failure':
-                raise CartoException(str(r))
-            time.sleep(0.5)
-            print(r['state'], r['table_name'])
-        return r['table_name']
+            elif import_status['state'] == 'failure':
+                raise CartoException(str(import_status))
+            elif idx == 50:
+                print(
+                    'Max iterations passed without table completing. To keep '
+                    'checking the status use '
+                    '`cartoframes.BatchSQLStatus(<your CartoContext>, '
+                    '\'{}\'`. Last state: {}'.format(
+                        resp['item_queue_id'],
+                        import_status['state']
+                    )
+                )
+            else:
+                time.sleep(sleep_val)
+                print(import_status['state'], import_status['table_name'])
+
+        return import_status['table_name']
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
