@@ -1909,7 +1909,9 @@ class CartoContext(object):
                 regclass = self.sql_client.send(
                     'SELECT to_regclass(\'{}\') as t;'.format(table_name)
                 )
-                assert regclass['rows'][0]['t'] != table_name
+                # to_regclass returns null if table doesn't already exist
+                # in user schema
+                assert regclass['rows'][0]['t'] is None
             except AssertionError as err:
                 raise CartoException(
                     'Table already exists. Delete it or try another '
