@@ -1903,6 +1903,19 @@ class CartoContext(object):
         """Create an empty table with a specific schema"""
         if overwrite:
             self.delete(table_name)
+        else:
+            # error if table already exists
+            try:
+                regclass = self.sql_client.send(
+                    'SELECT to_regclass(\'{}\') as t;'.format(table_name)
+                )
+                assert regclass['rows'][0]['t'] != table_name
+            except AssertionError as err:
+                raise CartoException(
+                    'Table already exists. Delete it or try another '
+                    'table_name instead.'
+                )
+
         if dtypes:
             # create placeholder schema for Import API
             schema = ', '.join(
