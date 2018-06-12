@@ -784,22 +784,55 @@ class CartoContext(object):
 
         Args:
             query (str): Query to run against CARTO user database. This data
-              will then be converted into a pandas DataFrame.
+              will then be converted into a pandas DataFrame. Queries must
+              follow the conventions specified for the `query` parameter for
+              `PostgreSQL's COPY
+              <https://www.postgresql.org/docs/current/static/sql-copy.html>`__.
+              Tip: If you wish to perform database operations other than
+              SELECT, VALUES, INSERT, UPDATE or DELETE, then you can use the
+              `sql_client` attribute of CartoContext as follows::
+
+                from cartoframes import CartoContext
+                cc = CartoContext()
+                cc.sql_client.send('UPDATE my_table SET the_geom = ...')
+
             table_name (str, optional): If set, this will create a new
               table in the user's CARTO account that is the result of the
               query. Defaults to None (no table created).
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
-              <http://geopandas.org/>`__.
+              <http://geopandas.org/>`__. Note: If `decode_geom=True`, it will
+              write the decoded geometries to a column called `geometry`. If
+              this column is already present then it will be overwritten.
 
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
             Pandas data types are inferred from PostgreSQL data types.
             In the case of PostgreSQL date types, dates are attempted to be
-            converted, but on failure a data type 'object' is used.
+            converted, but on failure a data type 'object' is used. If a
+            `cartodb_id` column is present in the query it is used as the
+            DataFrame index, otherwise a default index is used.
         """
         self._debug_print(query=query)
+
+        # check query for validity
+        valid_keywords = ('insert', 'update', 'delete', )
+        invalid_keywords = ('alter', 'drop', 'create', )
+        if any(query.lower().startswith(x) for x in valid_keywords):
+            warn(
+                'If the input query is an UPDATE, INSERT, or DELETE, then a '
+                'RETURNING clause must be present: '
+                'https://www.postgresql.org/docs/9.6/static/dml-returning.html'
+                'Queries specified in `CartoContex.query` must follow the '
+                'guidelines in PostgreSQL\'s COPY query parameter: '
+                'https://www.postgresql.org/docs/current/static/sql-copy.html'
+            )
+        elif any(query.lower().startswith(x) for x in invalid_keywords):
+            raise ValueError(
+                'Queries cannot be ALTER, DROP, or CREATE statements. Read '
+                'CartoContext.query documentation for more information.'
+            )
 
         # create table from query if requested
         if table_name:
@@ -813,8 +846,6 @@ class CartoContext(object):
             'GET',
             params=dict(q=copy_query.format(q=query)),
         )
-
-        self._debug_print(resp_data=resp_data)
 
         # retrieve schema
         fields = self.sql_client.send(
@@ -1907,7 +1938,6 @@ class CartoContext(object):
                 )
             else:
                 time.sleep(sleep_val)
-                print(import_status['state'], import_status['table_name'])
 
         return import_status['table_name']
 
