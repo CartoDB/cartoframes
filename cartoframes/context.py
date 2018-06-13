@@ -785,6 +785,19 @@ class CartoContext(object):
         <https://www.postgresql.org/docs/current/static/sql-copy.html>`__
         clause is present.
 
+        .. note::
+
+            Database access can also be achieved through the `sql_client`
+            attribute of a CartoContext object. This is the recommended way to
+            perform CREATEs, ALTERs, etc.
+
+            .. code::
+
+                from cartoframes import CartoContext
+                cc = CartoContext()
+                cc.sql_client.send('CREATE TABLE ...')
+
+
         Args:
             query (str): Query to run against CARTO user database. This data
               will then be converted into a pandas DataFrame. Queries must
@@ -792,12 +805,17 @@ class CartoContext(object):
               `PostgreSQL's COPY
               <https://www.postgresql.org/docs/current/static/sql-copy.html>`__.
               Tip: If you wish to perform database operations other than
-              SELECT, VALUES, INSERT, UPDATE or DELETE, then you can use the
-              `sql_client` attribute of CartoContext as follows::
+              SELECT, VALUES, INSERT, UPDATE or DELETE (or prefer not to use
+              the RETURNING clause), then you should use the `sql_client`
+              attribute of CartoContext as follows::
 
                 from cartoframes import CartoContext
                 cc = CartoContext()
                 cc.sql_client.send('UPDATE my_table SET the_geom = ...')
+
+              The `sql_client` is an instance of the `CARTO Python SDK's
+              SQLClient class
+              <https://carto.com/developers/python-sdk/guides/sql-api/>`__.
 
             table_name (str, optional): If set, this will create a new
               table in the user's CARTO account that is the result of the
