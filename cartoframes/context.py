@@ -778,9 +778,12 @@ class CartoContext(object):
 
     # TODO: replace query with this method
     def querycopy(self, query, table_name=None, decode_geom=False):
-        """Pull the result from an arbitrary SQL query from a CARTO account
-        into a pandas DataFrame. Can also be used to perform database
-        operations (creating/dropping tables, adding columns, updates, etc.).
+        """Pull the result from a SELECT-style SQL query from a CARTO account
+        into a pandas DataFrame. This method can also be used to perform
+        some database operations (e.g., INSERT, UPDATE, DELETE) if a
+        `RETURNING
+        <https://www.postgresql.org/docs/current/static/sql-copy.html>`__
+        clause is present.
 
         Args:
             query (str): Query to run against CARTO user database. This data
@@ -826,7 +829,9 @@ class CartoContext(object):
                 'https://www.postgresql.org/docs/9.6/static/dml-returning.html'
                 'Queries specified in `CartoContex.query` must follow the '
                 'guidelines in PostgreSQL\'s COPY query parameter: '
-                'https://www.postgresql.org/docs/current/static/sql-copy.html'
+                'https://www.postgresql.org/docs/current/static/sql-copy.html '
+                'Alternatively, use `CartoContext.sql_client.send` for less '
+                'restrictive database access'
             )
         elif any(query.lower().startswith(x) for x in invalid_keywords):
             raise ValueError(
