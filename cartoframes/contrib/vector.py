@@ -41,9 +41,19 @@ class QueryLayer(object):
           Default is white.
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
+        interactivity (str, list, or dict, optional): This option add
+          interactivity (click or hover) to a layer. Defaults to click if one
+          of the followring inputs are specified:
+
+          - dict: If a :obj:`dict`, this must have the key `cols` with its value
+            a list of columns. Optionally add `event` to choose ``hover`` or
+            ``click``. Specifying a `header` key/value pair adds a header to
+            the popup that will be rendered in HTML.
+          - list: A list of valid column names in the data used for this layer
+          - str: A column name in the data used in this layer
     """
     def __init__(self, query, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None):
+                 strokeColor=None, strokeWidth=None, interactivity=None):
         strconv = lambda x: str(x) if x is not None else None
 
         # data source
@@ -60,8 +70,13 @@ class QueryLayer(object):
         self.orig_query = query
         self.is_basemap = False
         self.styling = ''
+        self.interactivity = None
+        self.header = None
 
         self._compose_style()
+
+        # interactivity options
+        self._set_interactivity(interactivity)
 
     def _compose_style(self):
         """Appends `prop` with `style` to layer styling"""
@@ -71,8 +86,33 @@ class QueryLayer(object):
         self.styling = '\n'.join(
             '{prop}: {style}'.format(prop=s, style=getattr(self, s))
             for s in valid_styles
-            if hasattr(self, s)
+            if getattr(self, s) is not None
         )
+
+    def _set_interactivity(self, interactivity):
+        """Adds interactivity syntax to the styling"""
+        event_default = 'hover'
+        if interactivity is None:
+            return
+        elif isinstance(interactivity, list) or isinstance(interactivity, tuple):
+            self.interactivity = event_default
+            interactive_cols = '\n'.join(
+                '@{0}: ${0}'.format(col) for col in interactivity
+            )
+        elif isinstance(interactivity, str):
+            self.interactivity = event_default
+            interactive_cols = '@{0}: ${0}'.format(interactivity)
+        elif isinstance(interactivity, dict):
+            self.interactivity = interactivity.get('event', event_default)
+            self.header = interactivity.get('header')
+            interactive_cols = '\n'.join(
+                '@{0}: ${0}'.format(col) for col in interactivity['cols']
+            )
+        else:
+            raise ValueError('`interactivity` must be a str, a list of str, '
+                             'or a dict a `cols` key')
+
+        self.styling = '\n'.join([interactive_cols, self.styling])
 
 def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None):
     html_template = os.path.join(
@@ -101,7 +141,7 @@ class Layer(QueryLayer):
     """Layer from a table name. See :obj:`QueryLayer` for docs on the style
     attributes"""
     def __init__(self, table_name, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None):
+                 strokeColor=None, strokeWidth=None, interactivity=None):
         self.table_source = table_name
 
         super(Layer, self).__init__(
@@ -110,7 +150,8 @@ class Layer(QueryLayer):
             size=size,
             time=time,
             strokeColor=strokeColor,
-            strokeWidth=strokeWidth
+            strokeWidth=strokeWidth,
+            interactivity=interactivity
         )
 
 class LocalLayer(QueryLayer):
@@ -121,7 +162,7 @@ class LocalLayer(QueryLayer):
     See :obj:`QueryLayer` for the full styling documentation.
     """
     def __init__(self, dataframe, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None):
+                 strokeColor=None, strokeWidth=None, interactivity=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             self.geojson_str = dataframe.to_json()
         else:
@@ -134,7 +175,8 @@ class LocalLayer(QueryLayer):
             size=size,
             time=time,
             strokeColor=strokeColor,
-            strokeWidth=strokeWidth
+            strokeWidth=strokeWidth,
+            interactivity=interactivity
         )
 
 def vmap(layers, context):
@@ -163,10 +205,16 @@ def vmap(layers, context):
     jslayers = []
     for idx, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
+        intera = (
+            dict(event=layer.interactivity, header=layer.header)
+            if layer.interactivity is not None
+            else None
+        )
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
             'source': layer.geojson_str if is_local else layer.query,
+            'interactivity': intera
         })
     html = '<iframe srcdoc="{content}" width=800 height=400></iframe>'.format(
         content=utils.safe_quotes(
