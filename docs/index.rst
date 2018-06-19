@@ -52,6 +52,12 @@ Credentials Management
     :noindex:
     :members:
 
+Example Datasets
+================
+.. automodule:: cartoframes.examples
+    :noindex:
+    :members: read_brooklyn_poverty, read_mcdonalds_nyc, read_nyc_census_tracts, read_taxi, read_nat
+
 contrib
 =======
 
