@@ -79,6 +79,11 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
         has_gpd = 'gpd' if os.environ.get('USE_GEOPANDAS') else 'nongpd'
         pyver = sys.version[0:3].replace('.', '_')
+        buildnum = os.environ.get('TRAVIS_BUILD_NUMBER')
+
+        test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
+            ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
+        )
 
         # test tables
         self.test_read_table = 'cb_2013_us_csa_500k'
@@ -91,34 +96,34 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # for writing to carto
         self.test_write_table = (
-            'cartoframes_test_table_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_test_table_{}'
+        ).format(test_slug)
 
         self.mixed_case_table = (
-            'AbCdEfG_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'AbCdEfG_{}'
+        ).format(test_slug)
 
         # for batch writing to carto
         self.test_write_batch_table = (
-            'cartoframes_test_batch_table_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_testbatch_table_{}'
+        ).format(test_slug)
 
         self.test_write_lnglat_table = (
-            'cartoframes_test_write_lnglat_table_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_testwrite_lnglat_table_{}'
+        ).format(test_slug)
 
         self.write_named_index = (
-            'cartoframes_test_write_non_default_index_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_testwrite_non_default_index_{}'
+        ).format(test_slug)
 
         # for queries
         self.test_query_table = (
-            'cartoframes_test_query_table_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_testquery_table_{}'
+        ).format(test_slug)
 
         self.test_delete_table = (
-            'cartoframes_test_delete_table_{ver}_{mpl}_{gpd}'
-        ).format(**table_args)
+            'cf_testdelete_table_{}'
+        ).format(test_slug)
 
         # for data observatory
         self.test_data_table = 'carto_usa_offices'
@@ -1149,12 +1154,16 @@ class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
         # sets skip value
         WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        has_gpd = 'gpd' if os.environ.get('HAS_GEOPANDAS') else 'nongpd'
+        buildnum = os.environ.get('TRAVIS_BUILD_NUMBER')
         pyver = sys.version[0:3].replace('.', '_')
 
         # for writing to carto
         self.test_write_lnglat_table = (
-            'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
+            'cf_test_write_lnglat_table_{ver}_{num}_{mpl}_{gpd}'.format(
                 ver=pyver,
+                num=buildnum,
+                gpd=has_gpd,
                 mpl=has_mpl))
 
     def tearDown(self):
