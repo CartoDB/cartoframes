@@ -243,7 +243,7 @@ def read_nat(limit=None, **kwargs):
 
     Returns:
 
-      pandas.DataFrame: Data in the table `taxi_50k` on the CARTOframes
+      pandas.DataFrame: Data in the table `nat` on the CARTOframes
       example account
 
     Example:
