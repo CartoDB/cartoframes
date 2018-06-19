@@ -77,6 +77,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
+        has_gpd = 'gpd' if os.environ.get('USE_GEOPANDAS') else 'nongpd'
         pyver = sys.version[0:3].replace('.', '_')
 
         # test tables
@@ -84,34 +85,41 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
-        table_args = dict(ver=pyver, mpl=has_mpl)
+        table_args = dict(ver=pyver, mpl=has_mpl, gpd=has_gpd)
         # torque table
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
-        self.test_write_table = 'cartoframes_test_table_{ver}_{mpl}'.format(
-            **table_args)
-        self.mixed_case_table = 'AbCdEfG_{0}_{1}'.format(pyver, has_mpl)
+        self.test_write_table = (
+            'cartoframes_test_table_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
+
+        self.mixed_case_table = (
+            'AbCdEfG_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
 
         # for batch writing to carto
         self.test_write_batch_table = (
-            'cartoframes_test_batch_table_{ver}_{mpl}'.format(
-                **table_args))
+            'cartoframes_test_batch_table_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
 
         self.test_write_lnglat_table = (
-            'cartoframes_test_write_lnglat_table_{ver}_{mpl}'.format(
-                **table_args))
+            'cartoframes_test_write_lnglat_table_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
 
         self.write_named_index = (
-                'cartoframes_test_write_non_default_index_{ver}_{mpl}'.format(
-                    **table_args))
+            'cartoframes_test_write_non_default_index_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
+
         # for queries
-        self.test_query_table = ('cartoframes_test_query_'
-                                 'table_{ver}_{mpl}'.format(
-                                    **table_args))
-        self.test_delete_table = ('cartoframes_test_delete_'
-                                  'table_{ver}_{mpl}').format(
-                                      **table_args)
+        self.test_query_table = (
+            'cartoframes_test_query_table_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
+
+        self.test_delete_table = (
+            'cartoframes_test_delete_table_{ver}_{mpl}_{gpd}'
+        ).format(**table_args)
+
         # for data observatory
         self.test_data_table = 'carto_usa_offices'
 
