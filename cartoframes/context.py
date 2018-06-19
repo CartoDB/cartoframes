@@ -136,6 +136,7 @@ class CartoContext(object):
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
+        # check if user is authenticated
         try:
             self.sql_client.send(
                 'select * from information_schema.tables limit 0')
