@@ -276,29 +276,45 @@ class CartoContext(object):
 
         # COPYFROM
         # write dataframe to string 'csv'
-        buffer_str = StringIO()
-        _df.to_csv(buffer_str, index=False, header=False)
-        self._debug_print(buffer_str=buffer_str.getvalue()[0:200])
-        copy_query = (
-            'COPY {table}({cols}) FROM STDIN WITH '
-            '(FORMAT csv, HEADER false, DELIMITER \',\')'
-        ).format(
-            table=table_name,
-            cols=','.join(pgcolnames)
-        )
-        self._debug_print(cols=pgcolnames, copy_query=copy_query)
-        resp = self._auth_send(
-            'api/v2/sql/copyfrom',
-            'POST',
-            params=dict(q=copy_query),
-            data=buffer_str.getvalue(),
-            stream=True)
+        with StringIO() as csv_buffer:
+            # TODO: add tests on compression to gzip
+            # with gzip.GzipFile(mode='w', fileobj=csv_buffer) as gz_file:
+            #         gz_file.write(bytes(csv_buffer.getvalue(), 'utf-8'))
+            _df.to_csv(csv_buffer, index=False, header=False)
+            csv_buffer.seek(0)
+            copy_query = (
+                'COPY {table}({cols}) FROM STDIN WITH '
+                '(FORMAT csv, HEADER false, DELIMITER \',\')'
+            ).format(
+                table=table_name,
+                cols=','.join(pgcolnames)
+            )
+            print('fill buffer: ', time.time() - t)
+            resp = self._auth_send(
+                'api/v2/sql/copyfrom',
+                'POST',
+                params=dict(q=copy_query),
+                # headers={'content-encoding': 'gzip'},
+                data=csv_buffer,
+                stream=True)
+
+        # cartodbfy
+        batch_client = BatchSQLClient(self.auth_client)
+        batch_client.create([
+            'SELECT CDB_CartodbfyTable({})'.format(
+                "'{}'".format(table_name) if not self.is_org
+                else "'{0}', '{1}'".format(self.creds.username(), table_name)
+            ),
+        ])
+
+        # success message
         tqdm.write(
             'Table successfully written to CARTO: {table_url}. This URL will '
             'not work until you visit your dashboard at: {dashboard}'.format(
                 table_url=utils.join_url(
                     self.creds.base_url(), 'dataset', table_name),
-                dashboard=utils.join_url(self.creds.base_url(), 'datasets')))
+                dashboard=utils.join_url(self.creds.base_url(), 'dashboard/datasets')))
+
         return resp
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
