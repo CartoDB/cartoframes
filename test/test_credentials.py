@@ -22,10 +22,10 @@ class TestCredentials(unittest.TestCase):
         self.onprem_base_url = 'https://turtleland.com/user/{}'.format(
                 self.username)
         self.default = {
-                'key': 'default_key',
-                'username': 'default_username',
-                'base_url': 'https://default_username.carto.com/'
-                }
+            'key': 'default_key',
+            'username': 'default_username',
+            'base_url': 'https://default_username.carto.com/'
+        }
         self.default_cred = Credentials(**self.default)
         self.default_cred.save()
 
@@ -60,6 +60,12 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(creds.key(), self.key)
         self.assertEqual(creds.username(), None)
         self.assertEqual(creds.base_url(), self.base_url.strip('/'))
+
+        with self.assertRaises(ValueError):
+            creds = Credentials(
+                key=self.key,
+                base_url=self.base_url.replace('https', 'http')
+            )
 
     def test_credentials_onprem_baseurl(self):
         """credentials.Credentials on-prem-style base_url"""

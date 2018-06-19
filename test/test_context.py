@@ -171,6 +171,14 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(cc_saved.creds.key(), self.apikey)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_authenticated(self):
+        """context.CartoContext._is_authenticated"""
+        with self.assertRaises(ValueError):
+            cc = cartoframes.CartoContext(
+                base_url=self.baseurl.replace('https', 'http'),
+                api_key=self.apikey)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
         """context.CartoContext._is_org_user"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,

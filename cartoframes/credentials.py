@@ -1,7 +1,12 @@
 """Credentials management for cartoframes usage."""
 import os
 import json
+import sys
 import warnings
+if sys.version_info >= (3, 0):
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 import appdirs
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
@@ -46,26 +51,32 @@ class Credentials(object):
     """
     def __init__(self, creds=None, key=None, username=None, base_url=None,
                  cred_file=None):
+        self._key = None
+        self._username = None
+        self._base_url = None
         if creds and isinstance(creds, Credentials):
-            self._key = creds.key()
-            self._username = creds.username()
-            self._base_url = creds.base_url()
+            self.key(key=creds.key())
+            self.username(username=creds.username())
+            self.base_url(base_url=creds.base_url())
         elif (key and username) or (key and base_url):
-            self._key = key
-            self._username = username
+            self.key(key=key)
+            self.username(username=username)
             if base_url:
-                self._base_url = base_url
+                self.base_url(base_url=base_url)
             else:
-                self._base_url = 'https://{}.carto.com/'.format(self._username)
+                self.base_url(
+                    base_url='https://{}.carto.com/'.format(self._username)
+                )
         elif cred_file:
             self._retrieve(cred_file)
         else:
             try:
                 self._retrieve(_DEFAULT_PATH)
             except:
-                raise RuntimeError('Could not load CARTO credentials. Try '
-                                   'setting them with the `key` and '
-                                   '`username` arguments.')
+                raise RuntimeError(
+                    'Could not load CARTO credentials. Try setting them with '
+                    'the `key` and `username` arguments.'
+                )
         self._norm_creds()
 
     def __repr__(self):
@@ -77,7 +88,8 @@ class Credentials(object):
 
     def _norm_creds(self):
         """Standardize credentials"""
-        self._base_url = self._base_url.strip('/')
+        if self._base_url:
+            self._base_url = self._base_url.strip('/')
 
     def save(self, config_loc=None):
         """Saves current user credentials to user directory.
@@ -256,6 +268,12 @@ class Credentials(object):
                 >>> creds.base_url('new_base_url')
         """
         if base_url:
+            # POSTs need to be over HTTPS (e.g., Import API reverts to a GET)
+            if urlparse(base_url).scheme != 'https':
+                raise ValueError(
+		    '`base_url`s need to be over `https`. Update your '
+                    '`base_url`.'
+		)
             self._base_url = base_url
         else:
             return self._base_url
