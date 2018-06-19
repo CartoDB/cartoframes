@@ -210,26 +210,21 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
-    def writecopy(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
-                  lnglat=None, encode_geom=False, geom_col=None,
-                  method='create', **kwargs):
+    def writecopy(self, df, table_name, overwrite=False, lnglat=None,
+                  encode_geom=False, geom_col=None, method='create',
+                  **kwargs):
         """write prototype using COPYFROM endpoint"""
         _df = df.copy()
         # verify method is possible
         if method not in ('create', 'append', ):
             raise ValueError('`method` can only be ``create`` or ``append``')
 
-        utilcol_schema = {
-            'the_geom': 'GEOMETRY(GEOMETRY, 4326)',
-            'the_geom_webmercator': 'GEOMETRY(GEOMETRY, 3857)',
-            'cartodb_id': 'SERIAL PRIMARY KEY',
-        }
         # TODO: decode geometry
         # create geometry if requested
         if lnglat:
             if 'the_geom' in _df.columns:
                 warn('Setting `lnglat` overwrites the existing values in '
-                     '`the_geom` column')
+                     '`the_geom` column for the CARTO version of this data')
 
             _df['the_geom'] = [
                 'SRID=4326;POINT({0} {1})'.format(lng, lat)
@@ -246,11 +241,10 @@ class CartoContext(object):
                 'cols': pgcolnames,
                 'types': [
                     _dtypes2pg(t) if c != 'the_geom'
-                    else utilcol_schema['the_geom']
+                    else utils.UTILCOL_SCHEMA['the_geom']
                     for c, t in _df.dtypes.items()
                 ]
             }
-
             # create schema
             full_schema = ', '.join(
                 '{c} {t}'.format(c=c, t=t)
@@ -259,14 +253,14 @@ class CartoContext(object):
             self._debug_print(full_schema=full_schema)
 
             # if util cols are lacking, add them
-            if set(utilcol_schema) - set(pgschema['cols']):
+            if set(utils.UTILCOL_SCHEMA) - set(pgschema['cols']):
                 self._debug_print(
-                    diffs=set(utilcol_schema) - set(pgschema['cols']))
+                    diffs=set(utils.UTILCOL_SCHEMA) - set(pgschema['cols']))
                 full_schema = ', '.join([
                     full_schema,
                     ','.join(
                         '{c} {t}'.format(c=c, t=t)
-                        for c, t in utils.dict_items(utilcol_schema)
+                        for c, t in utils.dict_items(utils.UTILCOL_SCHEMA)
                         if c not in pgschema['cols']
                     )
                 ])

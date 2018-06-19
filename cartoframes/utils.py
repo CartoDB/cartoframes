@@ -1,6 +1,11 @@
 import sys
 from tqdm import tqdm
 
+UTILCOL_SCHEMA = {
+    'the_geom': 'GEOMETRY(GEOMETRY, 4326)',
+    'the_geom_webmercator': 'GEOMETRY(GEOMETRY, 3857)',
+    'cartodb_id': 'SERIAL PRIMARY KEY',
+}
 
 def dict_items(d):
     if sys.version_info >= (3, 0):
