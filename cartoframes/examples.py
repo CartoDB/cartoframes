@@ -351,8 +351,8 @@ def read_nat(limit=None, **kwargs):
 
     .. code::
 
-        from cartoframes.examples import read_taxi
-        df = read_taxi()
+        from cartoframes.examples import read_nat
+        df = read_nat()
 
     """
     return example_context.read_nat(limit=limit, **kwargs)

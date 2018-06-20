@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.layers"""
+"""Unit tests for cartoframes.context"""
 import unittest
 import os
 import sys
@@ -13,11 +13,9 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
-from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
-from cartoframes.examples import Examples
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -30,7 +28,7 @@ class _UserUrlLoader:
             try:
                 creds = json.loads(open('test/secret.json').read())
                 user_url = creds['USERURL']
-            except:
+            except:  # noqa: E722
                 warnings.warn('secret.json not found')
 
         if user_url in (None, ''):
@@ -176,13 +174,16 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc = cartoframes.CartoContext(
                 base_url=self.baseurl.replace('https', 'http'),
-                api_key=self.apikey)
+                api_key=self.apikey
+            )
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
         """context.CartoContext._is_org_user"""
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
+        cc = cartoframes.CartoContext(
+            base_url=self.baseurl,
+            api_key=self.apikey
+        )
         self.assertTrue(not cc._is_org_user())
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -983,7 +984,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 'us.census.tiger.state' in set(meta.geom_id),
                 tf
             )
- 
+
         with self.assertRaises(ValueError):
             cc.data_boundaries(region=[1, 2, 3])
 
@@ -1094,17 +1095,24 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-
     def test_column_name_collision_do_enrichement(self):
+        """context.CartoContext.data column collision"""
         dup_col = 'female_third_level_studies_2011_by_female_pop'
-        self.sql_client.send("""create table {table} as (
-                select cdb_latlng(40.4165,-3.70256) the_geom,
-                       1 {dup_col})""". \
-                             format(dup_col=dup_col,
-                                    table=self.test_write_table))
         self.sql_client.send(
-            "select cdb_cartodbfytable('public', '{table}')". \
-                format(table=self.test_write_table))
+            """
+            create table {table} as (
+                select cdb_latlng(40.4165,-3.70256) the_geom,
+                       1 {dup_col})
+            """.format(
+                dup_col=dup_col,
+                table=self.test_write_table
+            )
+        )
+        self.sql_client.send(
+            "select cdb_cartodbfytable('public', '{table}')".format(
+                table=self.test_write_table
+            )
+        )
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -1118,92 +1126,18 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         self.assertIn('_' + dup_col, data.keys())
 
-class TestExamples(unittest.TestCase):
-    def setUp(self):
-        self.examples = Examples()
-
     def test_tables(self):
-        """examples.tables"""
-        tables = self.examples.tables()
-        self.assertTrue(tables)
+        """context.CartoContext.tables normal usage"""
+        cc = cartoframes.CartoContext(
+            base_url=self.baseurl,
+            api_key=self.apikey
+        )
+        tables = cc.tables()
+        self.assertIsInstance(tables, list)
+        self.assertIsInstance(tables[0], cartoframes.analysis.Table)
+        self.assertIsNotNone(tables[0].name)
+        self.assertIsInstance(tables[0].name, str)
 
-    def test_disabled_context_functions(self):
-        """example.Example().methods that are disabled"""
-        with self.assertRaises(RuntimeError):
-            self.examples.data()
-        with self.assertRaises(RuntimeError):
-            self.examples.write(None, table_name='t')
-        with self.assertRaises(RuntimeError):
-            self.examples.data_boundaries()
-        with self.assertRaises(RuntimeError):
-            self.examples.data_discovery(None)
-        with self.assertRaises(RuntimeError):
-            self.examples.data_augment(None, None)
-
-    def test_read_taxi(self):
-        """examples.read_taxi"""
-        from cartoframes.examples import read_taxi
-        # method test
-        taxi = self.examples.read_taxi()
-        self.assertIsInstance(taxi, pd.DataFrame)
-        self.assertGreater(taxi.shape[0], 0)
-
-        # function test
-        taxi = read_taxi()
-        self.assertIsInstance(taxi, pd.DataFrame)
-        self.assertGreater(taxi.shape[0], 0)
-
-    def test_read_brooklyn_poverty(self):
-        """examples.read_brooklyn_poverty"""
-        from cartoframes.examples import read_brooklyn_poverty
-        # method test
-        bp = self.examples.read_brooklyn_poverty()
-        self.assertIsInstance(bp, pd.DataFrame)
-        self.assertGreaterEqual(bp.shape[0], 0)
-
-        # function test
-        bp = read_brooklyn_poverty()
-        self.assertIsInstance(bp, pd.DataFrame)
-        self.assertGreaterEqual(bp.shape[0], 0)
-
-    def test_read_mcdonalds(self):
-        """examples.read_mcdonalds"""
-        from cartoframes.examples import read_mcdonalds_nyc
-        # method test
-        mcd = self.examples.read_mcdonalds_nyc()
-        self.assertIsInstance(mcd, pd.DataFrame)
-        self.assertGreater(mcd.shape[0], 0)
-
-        # function test
-        mcd = read_mcdonalds_nyc()
-        self.assertIsInstance(mcd, pd.DataFrame)
-        self.assertGreater(mcd.shape[0], 0)
-
-    def test_read_nyc_census_tracts(self):
-        """examples.read_nyc_census_tracts"""
-        from cartoframes.examples import read_nyc_census_tracts
-        # method test
-        nycct = self.examples.read_nyc_census_tracts()
-        self.assertIsInstance(nycct, pd.DataFrame)
-        self.assertGreater(nycct.shape[0], 0)
-
-        # function test
-        nycct = read_nyc_census_tracts()
-        self.assertIsInstance(nycct, pd.DataFrame)
-        self.assertGreater(nycct.shape[0], 0)
-
-    def test_read_nat(self):
-        """examples.read_nat"""
-        from cartoframes.examples import read_nat
-        # method test
-        nat = self.examples.read_nat()
-        self.assertIsInstance(nat, pd.DataFrame)
-        self.assertGreater(nat.shape[0], 0)
-
-        # function test
-        nat = read_nat()
-        self.assertIsInstance(nat, pd.DataFrame)
-        self.assertGreater(nat.shape[0], 0)
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""
@@ -1319,4 +1253,3 @@ class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
         str_bjs = BatchJobStatus(cc, 'foo')
         self.assertIsNone(str_bjs.get_status())
         self.assertEqual(str_bjs.job_id, 'foo')
-
