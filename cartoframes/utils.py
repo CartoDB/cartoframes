@@ -1,5 +1,6 @@
 import sys
 from tqdm import tqdm
+from warnings import filterwarnings, resetwarnings
 
 
 def dict_items(d):
@@ -113,3 +114,15 @@ def safe_quotes(text, escape_single_quotes=False):
             safe_text = safe_text.replace("'", "&#92;'")
         return safe_text.replace('True', 'true')
     return text
+
+
+def temp_ignore_warnings(func):
+    """Temporarily ignores warnings like those emitted by the carto python sdk
+    """
+    def wrapper(*args, **kwargs):
+        """wrapper around func to filter/reset warnings"""
+        filterwarnings('ignore')
+        evaled_func = func(*args, **kwargs)
+        resetwarnings()
+        return evaled_func
+    return wrapper

@@ -26,7 +26,7 @@ from .dataobs import get_countrytag
 from . import utils
 from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
-                              get_map_template, top_basemap_layer_url)
+                   get_map_template, top_basemap_layer_url)
 from cartoframes.analysis import Table
 from cartoframes.__version__ import __version__
 
@@ -127,8 +127,8 @@ class CartoContext(object):
                                             api_key=self.creds.key(),
                                             session=session)
         self.auth_api_client = AuthAPIClient(base_url=self.creds.base_url(),
-                                              api_key=self.creds.key(),
-                                              session=session)
+                                             api_key=self.creds.key(),
+                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
@@ -141,9 +141,9 @@ class CartoContext(object):
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
         if not self.auth_api_client.is_valid_api_key():
-            raise CartoException('Cannot authenticate user `{0}`. Check '
-                                 'credentials.'.format(
-                self.creds.username()))
+            raise CartoException(
+                'Cannot authenticate user `{}`. Check credentials.'.format(
+                    self.creds.username()))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
@@ -193,7 +193,9 @@ class CartoContext(object):
 
         return self.query(query, decode_geom=decode_geom)
 
+    @utils.temp_ignore_warnings
     def tables(self):
+        """List all tables in user's CARTO account"""
         datasets = DatasetManager(self.auth_client).filter(
             show_table_size_and_row_count='false',
             show_table='false',
