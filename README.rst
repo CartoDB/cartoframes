@@ -110,7 +110,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 .. code:: python
 
     import cartoframes
-    # `base_url`s are of the form `http://{username}.carto.com/` for most users
+    # `base_url`s are of the form `https://{username}.carto.com/` for most users
     cc = cartoframes.CartoContext(base_url='https://eschbacher.carto.com/',
                                   api_key=APIKEY)
 
@@ -194,7 +194,7 @@ CARTO Credential Management
 Typical usage
 ^^^^^^^^^^^^^
 
-The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``http://{your_user_name}.carto.com/your_apps``.
+The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
 
 .. code:: python
 
@@ -231,3 +231,17 @@ Once you save your credentials, you can get started in future sessions more quic
     from cartoframes import CartoContext
     cc = CartoContext()  # automatically loads credentials if previously saved
 
+Experimental features
+---------------------
+
+CARTOframes includes experimental features that we are testing for future releases into cartoframes core. These features exist as separate modules in `contrib`. These features are stand-alone other than sometimes relying on some cartoframes utilities, etc. Contrib features will also change often and without notice, so they should never be used in a production environment.
+
+To import an experimental feature, like vector maps, do the following:
+
+.. code:: python
+
+    from cartoframes.contrib import vector
+    from cartoframes import CartoContext
+
+    cc = CartoContext()
+    vector.vmap([vector.Layer('<table name>'), ])
