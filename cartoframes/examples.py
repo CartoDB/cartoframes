@@ -1,5 +1,8 @@
 """Download, preview, and query example datasets for use in cartoframes
-examples.
+examples. Try examples by `running the notebooks in binder
+<https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples>`__,
+or downloading them from the `cartoframes examples directory
+<https://github.com/CartoDB/cartoframes/tree/master/examples>`__.
 
 In addition to the functions listed below, this examples module provides a
 :py:class:`CartoContext <cartoframes.context.CartoContext>` that is
@@ -34,39 +37,135 @@ the poverty rate in the area a McDonald's fast food joint is located.
 
         # visualize data
         from cartoframes import QueryLayer
-        example_context.map(QueryLayer(q, color='poverty_per_pop'))
+        example_context.map(QueryLayer(q, size='poverty_per_pop'))
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&anti_cache=0.040403611167980635&bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001
+
+
 
 """
 from cartoframes import CartoContext
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
-# EXAMPLE_BASE_URL = 'http://cdb.localhost.lan:8888/'
-# EXAMPLE_API_KEY = 'default_public'
-
 
 class Examples(CartoContext):
-    """A CartoContext with a CARTO account containing example data"""
+    """A CartoContext with a CARTO account containing example data. This
+    special :py:class:`CartoContext <cartoframes.context.CartoContext>`
+    provides read access to all the datasets in the cartoframes CARTO account.
+
+    The recommended way to use this class is to import the `example_context`
+    from the `cartoframes.examples` module:
+
+    .. code::
+
+        from cartoframes.examples import example_context
+        df = example_context.read_taxi()
+
+    The following tables are available for use with the
+    :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`,
+    :py:meth:`CartoContext.map <cartoframes.context.CartoContext.map>`, and
+    :py:meth:`CartoContext.query <cartoframes.context.CartoContext.query>`
+    methods.
+
+    - ``brooklyn_poverty`` - basic poverty information for Brooklyn, New York
+    - ``mcdonalds_nyc`` - McDonald's locations in New York City
+    - ``nat`` - historical USA-wide homicide rates at the county level
+    - ``nyc_census_tracts`` - Census tract boundaries for New York City
+    - ``taxi_50k`` - Taxi trip data, including pickup/dropoff locations. This
+      table does not have an explicit geometry, so one must be created from the
+      `pickup_latitude`/`pickup_longitude` columns, the
+      `dropoff_latitude`/`dropoff_longitude` columns, or through some other
+      process. When writing this table to your account, make sure to specify
+      the `lnglat` flag in :py:meth:`CartoContext.write
+      <cartoframes.context.CartoContext.write>`
+
+    Besides the standard :py:class:`CartoContext
+    <cartoframes.context.CartoContext>` methods, this class includes a
+    convenience method for each of the tables listed above. See the full list
+    below.
+    
+    """
     def __init__(self):
-        super(Examples, self). \
-            __init__(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+        super(Examples, self).__init__(
+            base_url=EXAMPLE_BASE_URL,
+            api_key=EXAMPLE_API_KEY
+        )
 
     # example dataset read methods
     def read_brooklyn_poverty(self, limit=None, **kwargs):
+        """Poverty information for Brooklyn, New York, USA. See the function
+        :py:func:`read_brooklyn_poverty
+        <cartoframes.examples.read_brooklyn_poverty>` for more information
+ 
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_brooklyn_poverty()
+        
+        """
         return self.read('brooklyn_poverty', limit, **kwargs)
 
     def read_mcdonalds_nyc(self, limit=None, **kwargs):
+        """McDonald's locations for New York City, USA. See the function
+        :py:func:`read_mcdonalds_nyc
+        <cartoframes.examples.read_mcdonalds_nyc>` for more information
+ 
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_mcdonalds_nyc()
+        
+        """
         return self.read('mcdonalds_nyc', limit, **kwargs)
 
     def read_nyc_census_tracts(self, limit=None, **kwargs):
+        """Census tracts for New York City, USA. See the function
+        :py:func:`read_nyc_census_tracts
+        <cartoframes.examples.read_nyc_census_tracts>` for more information
+ 
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_nyc_census_tracts()
+        
+        """
         return self.read('nyc_census_tracts', limit, **kwargs)
 
     def read_taxi(self, limit=None, **kwargs):
+        """Taxi pickup and dropoff logs for New York City, USA. See the function
+        :py:func:`read_taxi
+        <cartoframes.examples.read_taxi>` for more information
+ 
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_taxi()
+        
+        """
         return self.read('taxi_50k', limit, **kwargs)
 
     def read_nat(self, limit=None, **kwargs):
+        """Historical homicide rates for the United States at the county level.
+        See the function :py:func:`read_nat
+        <cartoframes.examples.read_nat>` for more information
+ 
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_nat()
+        
+        """
         return self.read('nat', limit, **kwargs)
 
     # override behavior of CartoContext methods
@@ -231,7 +330,7 @@ def read_nat(limit=None, **kwargs):
     This table is located at:
     https://cartoframes.carto.com/tables/nat/public
 
-    Visually, the data looks as follows (styled no the `hr90` column):
+    Visually, the data looks as follows (styled by the `hr90` column):
 
     .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bhr90+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&anti_cache=0.9906959573885755&bbox=-124.731422424316%2C24.9559669494629%2C-66.9698486328125%2C49.3717346191406
 
