@@ -11,7 +11,7 @@ account. This means that besides reading the datasets from CARTO, users can
 also create maps from these datasets.
 
 For example, the following will produce an interactive map of poverty rates in
-Census tracts in Brooklyn, New York.
+Census tracts in Brooklyn, New York (preview of static version below code).
 
     .. code::
 
@@ -21,12 +21,16 @@ Census tracts in Brooklyn, New York.
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&anti_cache=0.2903456538919632&bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
 
-To query datasets use the :py:meth:`CartoContext.query
-<cartoframes.context.CartoContext.query>` method. The following example find
-the poverty rate in the area a McDonald's fast food joint is located.
+To query datasets, use the :py:meth:`CartoContext.query
+<cartoframes.context.CartoContext.query>` method. The following example finds
+the poverty rate in the area a McDonald's fast food joint is located (preview
+of static map below code).
 
     .. code::
 
+        from cartoframes.examples import import example_context
+
+        # query to get poverty rates where mcdonald's are located
         q = '''
             SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
             FROM mcdonalds_nyc as m, brooklyn_poverty as c
@@ -40,8 +44,6 @@ the poverty rate in the area a McDonald's fast food joint is located.
         example_context.map(QueryLayer(q, size='poverty_per_pop'))
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&anti_cache=0.040403611167980635&bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001
-
-
 
 """
 from cartoframes import CartoContext
@@ -220,15 +222,15 @@ def read_brooklyn_poverty(limit=None, **kwargs):
     .. code::
 
         from cartoframes.examples import read_brooklyn_poverty
-        df = read_brooklyn_poverty(decode_geom=True)
+        df = read_brooklyn_poverty()
 
     """
     return example_context.read_brooklyn_poverty(limit=limit, **kwargs)
 
 def read_mcdonalds_nyc(limit=None, **kwargs):
-    """Read the dataset `nyc_mcdonalds` into a pandas DataFrame from the
+    """Read the dataset `mcdonalds_nyc` into a pandas DataFrame from the
     cartoframes example account at
-    https://cartoframes.carto.com/tables/nyc_mcdonalds/public
+    https://cartoframes.carto.com/tables/mcdonalds_nyc/public
     This dataset contains the locations of McDonald's Fast Food within New York
     City.
 
@@ -244,7 +246,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
 
     Returns:
 
-      pandas.DataFrame: Data in the table `nyc_mcdonalds` on the CARTOframes
+      pandas.DataFrame: Data in the table `mcdonalds_nyc` on the CARTOframes
       example account
 
     Example:
@@ -252,7 +254,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
     .. code::
 
         from cartoframes.examples import read_mcdonalds_nyc
-        df = read_mcdonalds_nyc(decode_geom=True)
+        df = read_mcdonalds_nyc()
 
     """
     return example_context.read_mcdonalds_nyc(limit=limit, **kwargs)
@@ -284,7 +286,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
     .. code::
 
         from cartoframes.examples import read_nyc_census_tracts
-        df = read_nyc_census_tracts(decode_geom=True)
+        df = read_nyc_census_tracts()
 
     """
     return example_context.read_nyc_census_tracts(limit=limit, **kwargs)
@@ -319,7 +321,7 @@ def read_taxi(limit=None, **kwargs):
     .. code::
 
         from cartoframes.examples import read_taxi
-        df = read_taxi(decode_geom=True)
+        df = read_taxi()
 
     """
     return example_context.read_taxi(limit=limit, **kwargs)
@@ -350,7 +352,7 @@ def read_nat(limit=None, **kwargs):
     .. code::
 
         from cartoframes.examples import read_taxi
-        df = read_taxi(decode_geom=True)
+        df = read_taxi()
 
     """
     return example_context.read_nat(limit=limit, **kwargs)
