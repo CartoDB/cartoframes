@@ -309,7 +309,7 @@ class QueryLayer(AbstractLayer):
           other than points.
     """  # noqa
     def __init__(self, query, time=None, color=None, size=None,
-                 tooltip=None, legend=None):
+                 tooltip=None, legend=None, cartocss=None):
 
         self.query = query
         self.orig_query = query
@@ -317,7 +317,7 @@ class QueryLayer(AbstractLayer):
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
-        self.cartocss = None
+        self.cartocss = cartocss
         self.torque_cartocss = None
 
         # TODO: move these if/else branches to individual methods
@@ -537,6 +537,12 @@ class QueryLayer(AbstractLayer):
             color_style = self.color
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
+
+        if self.cartocss:
+            css = cssify(self.cartocss)
+            print(css)
+            return css
+
         if self.time:
             css = cssify({
                 # Torque Point CSS
@@ -645,7 +651,7 @@ class Layer(QueryLayer):
         overwrite (bool, optional): Not currently implemented
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
-                 color=None, size=None, tooltip=None, legend=None):
+                 color=None, size=None, tooltip=None, cartocss=None, legend=None):
 
         self.table_name = table_name
         self.source = source
@@ -656,7 +662,8 @@ class Layer(QueryLayer):
                                     color=color,
                                     size=size,
                                     tooltip=tooltip,
-                                    legend=legend)
+                                    legend=legend,
+                                    cartocss=cartocss)
 
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
