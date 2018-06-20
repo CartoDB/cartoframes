@@ -1,6 +1,6 @@
 import sys
 from tqdm import tqdm
-from warnings import filterwarnings, resetwarnings
+from warnings import filterwarnings, catch_warnings
 
 
 def dict_items(d):
@@ -121,8 +121,7 @@ def temp_ignore_warnings(func):
     """
     def wrapper(*args, **kwargs):
         """wrapper around func to filter/reset warnings"""
-        filterwarnings('ignore')
-        evaled_func = func(*args, **kwargs)
-        resetwarnings()
+        with catch_warnings():
+            evaled_func = func(*args, **kwargs)
         return evaled_func
     return wrapper
