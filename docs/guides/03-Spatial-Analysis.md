@@ -2,7 +2,7 @@
 
 ### About this Guide
 
-This guide walks you through methods to implement spatial analysis using CARTOframes. CARTOframes provides the `CartoContext.query` method for performing analysis and returning the results as a pandas dataframe, and the `QueryLayer` class for visualizing analysis as a map layer. Both methods run the quries against a [PostgreSQL](https://www.postgresql.org/) database with [PostGIS](http://postgis.net/).
+This guide walks you through methods to implement spatial analysis using CARTOframes. CARTOframes provides the `CartoContext.query` method for performing analysis and returning the results as a pandas dataframe, and the `QueryLayer` class for visualizing analysis as a map layer. Both methods run the quries against a [PostgreSQL](https://www.postgresql.org/) database with [PostGIS](http://postgis.net/). CARTO also provides more advanced spatial analysis through the [`crankshaft` extension](https://github.com/cartodb/crankshaft/).
 
 In this guide, we will analyze McDonald's locations in US Census tracts using spatial analysis functionality in CARTO.
 
@@ -12,32 +12,22 @@ To get started, create a `CartoContext`:
 
 ```python
 from cartoframes import CartoContext, QueryLayer, BaseMap
-cc = CartoContext(base_url='your base url',
-                  api_key='your api key')
+cc = CartoContext(base_url='<your_base_url>',
+                  api_key='<your_api_key>')
 ```
 
-To load New York City Census Tract Boundaries, you can either download it from [US Census Bureau](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) or use CARTOframes' `CartoContext.data_boundaries` method to request it from CARTO's Data Observatory (DO). Check out the [next guide](../Data-Observatory/) for more DO interactions within CARTOframes.
+To load New York City Census Tract Boundaries, you can either download it from [US Census Bureau](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) or use CARTOframes' `examples.read_nyc_census_tracts` function to request it. This dataset was originally retrieved from CARTO's Data Observatory (DO) but stored in the examples account to avoid consuming DO quota. Check out the [next guide](../Data-Observatory/) for more DO interactions within CARTOframes.
 
 ```python
-# request census tract geometry form us.census.tiger.census_tract
-# filtered by the rough bounding box of New York City
-tracts = cc.data_boundaries(
-        boundary='us.census.tiger.census_tract',
-        region=[-74.2589, 40.4774, -73.7004, 40.9176],
-        timespan='2015')
-
-# filtered by Federal Information Processing Standards (FIPS) County Code
-# '36' is the FIPS code for New York State;
-# '005', '047', '061', '081' and '085' are the FIPS codes for five boroughs in New York City
-nyc_counties = ['36005', '36047', '36061', '36081', '36085']
-nyc_ct = tracts[list(map(lambda x: str(x)[:5] in nyc_counties, tracts.geom_refs))]
+from cartoframes.examples import read_nyc_census_tracts
+nyc_ct = read_nyc_census_tracts()
 ```
 
-For New York City McDonalds' Locations data, load it from CARTOframes examples account:
+For New York City McDonald's Locations data, we'll load it from the CARTOframes examples account as well:
 
 ```python
-import pandas as pd
-mcd = pd.read_csv('https://cartoframes.carto.com/api/v2/sql?q=SELECT+*+FROM+nyc_mcdonalds&format=csv')
+from cartoframes.examples import read_mcdonalds_nyc
+mcd = read_mcdonalds_nyc()
 ```
 
 Then write both datasets to your CARTO account.
@@ -49,14 +39,14 @@ cc.write(mcd, 'nyc_mcdonalds')
 
 ### Running a SQL query
 
-Use the `CartoContext.query` method to run a SQL query for the datasets in your CARTO account. PostGIS includes multiple spatial analysis functions like `ST_Intersects` and `ST_Buffer`. CARTO's [spatial analysis library crankshaft](https://github.com/CartoDB/crankshaft/tree/develop/doc) provides additional advanced spatial analysis functions like spatial k-means (`cdb_kmeans`) and Mora's I Local (`cdb_moransilocal`).
+Use the `CartoContext.query` method to run a SQL query for the datasets in your CARTO account. PostGIS includes multiple spatial analysis functions like `ST_Intersects` and `ST_Buffer`. CARTO's [spatial analysis library crankshaft](https://github.com/CartoDB/crankshaft/tree/develop/doc) provides additional advanced spatial analysis functions like spatial k-means (`cdb_kmeans`) and Moran's I Local (`cdb_moransilocal`).
 
 #### Example 1
 
 Find the number of McDonald's in each census tract in New York City.
 
 ```python
-df = cc.query("""
+df = cc.query('''
     SELECT
       tracts.geom_refs AS FIPS_code,
       tracts.the_geom as the_geom,
@@ -65,7 +55,7 @@ df = cc.query("""
     WHERE ST_Intersects(tracts.the_geom, mcd.the_geom)
     GROUP BY tracts.geom_refs
     ORDER BY num_mcdonalds DESC
-""")
+''')
 
 # Show first five entries of results
 # Including FIPS code (unique digital identifier for census tracts) and the number of McDonald's
@@ -93,20 +83,20 @@ cc.query("""
 """)
 
 df = cc.query(
-    """
-        SELECT name, id, address, city, zip, the_geom
-        FROM nyc_mcdonalds
-    """,
+    '''
+    SELECT name, id, address, city, zip, the_geom
+    FROM nyc_mcdonalds
+    ''',
     decode_geom=True
 )
 
 # or create a new table and save it as 'nyc_mcdonalds_buffer_100m'.
 df = cc.query(
-    """
+    '''
         SELECT name, id, address, city, zip,
                ST_Buffer(the_geom::geography, 100)::geometry AS the_geom
         FROM nyc_mcdonalds
-    """,
+    ''',
     table_name='nyc_mcdonalds_buffer_100m')
 
 # Show the first entry.
@@ -145,7 +135,7 @@ Use table names or `QueryLayer` inside the `CartoContext.map` method to demonstr
 Apply k-means (k=5) spatial clustering for all McDonald's in NYC, and visualize different clusters by color. Note: for more complicated queries, it is best to create a temporary table from the query and then visualize it.
 
 ```python
-tmp = cc.query("""
+tmp = cc.query('''
        SELECT
          row_number() OVER () AS cartodb_id,
          c.cluster_no,
@@ -160,18 +150,20 @@ tmp = cc.query("""
          nyc_mcdonalds AS b
          ON a.cartodb_id = b.cartodb_id
          ) AS c
-              """,
-             table_name='tmp')
+              ''',
+    table_name='mcd_clusters')
 
-cc.map(Layer("tmp", color={'column': 'cluster_no',
-                           'scheme': styling.prism(5)}),
+cc.map(Layer('mcd_clusters',
+             color={'column': 'cluster_no',
+                    'scheme': styling.prism(5)}),
       interactive = True)             
 ```
 ![kmeans](../../img/guides/03-KMeans.png)
 
-Users also can drop temporary tables using `delete` function after map plotting.
+Users also can drop temporary tables using `delete` function after map plotting. Note that static images will be preserved in a Jupyter notebook, but interactive maps will cease to work if they still reference a deleted table.
+
 ```python
-cc.delete('tmp')
+cc.delete('mcd_clusters')
 ```
 
 #### Example 4
@@ -189,14 +181,14 @@ df = cc.data('nyc_census_tracts', median_income, how='geom_refs')
 
 # Filter census tracts from Manhattan.
 # Keep those whose 'median_income_2011_2015' values aren't 'NaN'.
-df['isManhattan'] = df.apply(lambda x: x.geom_refs.startswith("36061"), axis=1)
-manhattan = df[df['isManhattan'] == True]
+df['is_manhattan'] = df.apply(lambda x: x.geom_refs.startswith("36061"), axis=1)
+manhattan = df[df['is_manhattan'] == True]
 manhattan.dropna(subset=['median_income_2011_2015'], inplace=True)
 
 # Save the dataframe to your CARTO account
 cc.write(manhattan, 'manhattan_median_income', overwrite=True)
 
-tmp = cc.query("""
+tmp = cc.query('''
     SELECT
       m.*,
       t.the_geom,
@@ -208,7 +200,7 @@ tmp = cc.query("""
         'median_income_2011_2015') AS m
     JOIN manhattan_median_income AS t
     ON t.cartodb_id = m.rowid
-""")
+''')
 cc.write(tmp, 'tmp', overwrite=True)
 
 # The map shows Hot Spots in 'red' and Cold Spots in 'blue'
@@ -219,7 +211,7 @@ cc.map(layers=[
             WHERE significance < 0.05 AND quads IN ('LL', 'HH')
             """,
             color={'column': 'quads',
-                   'scheme': styling.custom(colors=["blue", "red"],
+                   'scheme': styling.custom(colors=['blue', 'red'],
                                             bin_method='category')})],
     interactive=False)
 ```
