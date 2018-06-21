@@ -1,8 +1,8 @@
 """Download, preview, and query example datasets for use in cartoframes
 examples. Try examples by `running the notebooks in binder
 <https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples>`__,
-or downloading them from the `cartoframes examples directory
-<https://github.com/CartoDB/cartoframes/tree/master/examples>`__.
+or trying the `Example Datasets notebook
+<https://github.com/CartoDB/cartoframes/tree/master/examples/Example%20datasets.ipynb>`__.
 
 In addition to the functions listed below, this examples module provides a
 :py:class:`CartoContext <cartoframes.context.CartoContext>` that is
@@ -45,6 +45,19 @@ the poverty rate in the census tract a McDonald's fast food joint is located
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&anti_cache=0.040403611167980635&bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001
 
+
+To write datasets to your account from the examples account, the following is a
+good method:
+
+    .. code::
+
+        from cartoframes import CartoContext
+        from cartoframes.examples import read_taxi
+        cc.write(
+            read_taxi(),
+            'taxi_data_examples_acct',
+            lnglat=('pickup_latitude', 'pickup_longitude')
+        )
 """
 from cartoframes import CartoContext
 

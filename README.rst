@@ -21,6 +21,7 @@ Features
 - Create customizable, interactive CARTO maps in a Jupyter notebook
 - Interact with CARTO's Data Observatory
 - Use CARTO's spatially-enabled database for analysis
+- Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__
 
 Common Uses
 ===========
@@ -29,6 +30,16 @@ Common Uses
 - Perform cloud-based spatial data processing using CARTO's analysis tools
 - Extract, transform, and Load (ETL) data using the Python ecosystem for getting data into and out of CARTO
 - Data Services integrations using CARTO's `Data Observatory <https://carto.com/data-observatory/>`__ and other `Data Services APIs <https://carto.com/location-data-services/>`__
+
+Try it out
+==========
+
+The easiest way to try out cartoframes is to use the cartoframes example notebooks running in binder: https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples If you already have an API key, you can follow along and complete all of the example notebooks.
+
+If you do not have an API key, you can use the `Example Context <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__ to read the example data, make maps, and run arbitrary queries from the datasets there. The best place to get started is in the "Example Datasets" notebook found when running binder or downloading from the `examples <https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__ directory in the cartoframes GitHub repository.
+
+.. note::
+    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 30 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
 
 More info
 =========
