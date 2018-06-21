@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.layers"""
+"""Unit tests for cartoframes.context"""
 import unittest
 import os
 import sys
@@ -13,7 +13,6 @@ import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
-from pyrestcli.exceptions import NotFoundException
 import pandas as pd
 import IPython
 from cartoframes.utils import dict_items
@@ -29,7 +28,7 @@ class _UserUrlLoader:
             try:
                 creds = json.loads(open('test/secret.json').read())
                 user_url = creds['USERURL']
-            except:
+            except:  # noqa: E722
                 warnings.warn('secret.json not found')
 
         if user_url in (None, ''):
@@ -153,7 +152,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_credentials(self):
         """context.CartoContext.__init__ Credentials argument"""
-        creds = cartoframes.Credentials(username=self.username,
+        creds = cartoframes.Credentials(base_url=self.baseurl,
+                                        username=self.username,
                                         key=self.apikey)
         cc = cartoframes.CartoContext(creds=creds)
         self.assertIsInstance(cc, cartoframes.CartoContext)
@@ -161,7 +161,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(cc.creds.key(), self.apikey)
 
         # CartoContext pulls from saved credentials
-        saved_creds = cartoframes.Credentials(username=self.username,
+        saved_creds = cartoframes.Credentials(base_url=self.baseurl,
+                                              username=self.username,
                                               key=self.apikey)
         saved_creds.save()
         cc_saved = cartoframes.CartoContext()
@@ -173,13 +174,16 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc = cartoframes.CartoContext(
                 base_url=self.baseurl.replace('https', 'http'),
-                api_key=self.apikey)
+                api_key=self.apikey
+            )
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_isorguser(self):
         """context.CartoContext._is_org_user"""
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
+        cc = cartoframes.CartoContext(
+            base_url=self.baseurl,
+            api_key=self.apikey
+        )
         self.assertTrue(not cc._is_org_user())
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -980,7 +984,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 'us.census.tiger.state' in set(meta.geom_id),
                 tf
             )
- 
+
         with self.assertRaises(ValueError):
             cc.data_boundaries(region=[1, 2, 3])
 
@@ -1091,17 +1095,24 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-
     def test_column_name_collision_do_enrichement(self):
+        """context.CartoContext.data column collision"""
         dup_col = 'female_third_level_studies_2011_by_female_pop'
-        self.sql_client.send("""create table {table} as (
-                select cdb_latlng(40.4165,-3.70256) the_geom,
-                       1 {dup_col})""". \
-                             format(dup_col=dup_col,
-                                    table=self.test_write_table))
         self.sql_client.send(
-            "select cdb_cartodbfytable('public', '{table}')". \
-                format(table=self.test_write_table))
+            """
+            create table {table} as (
+                select cdb_latlng(40.4165,-3.70256) the_geom,
+                       1 {dup_col})
+            """.format(
+                dup_col=dup_col,
+                table=self.test_write_table
+            )
+        )
+        self.sql_client.send(
+            "select cdb_cartodbfytable('public', '{table}')".format(
+                table=self.test_write_table
+            )
+        )
 
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -1114,6 +1125,18 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         )
 
         self.assertIn('_' + dup_col, data.keys())
+
+    def test_tables(self):
+        """context.CartoContext.tables normal usage"""
+        cc = cartoframes.CartoContext(
+            base_url=self.baseurl,
+            api_key=self.apikey
+        )
+        tables = cc.tables()
+        self.assertIsInstance(tables, list)
+        self.assertIsInstance(tables[0], cartoframes.analysis.Table)
+        self.assertIsNotNone(tables[0].name)
+        self.assertIsInstance(tables[0].name, str)
 
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
@@ -1230,4 +1253,3 @@ class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
         str_bjs = BatchJobStatus(cc, 'foo')
         self.assertIsNone(str_bjs.get_status())
         self.assertEqual(str_bjs.job_id, 'foo')
-
