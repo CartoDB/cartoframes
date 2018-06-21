@@ -1,6 +1,24 @@
 Changelog
 =========
 
+0.6.2
+-----
+
+Release 2018-05-10
+
+Updates
+
+- Adds opacity styling option to Layer and QueryLayer (#440)
+
+0.6.1
+-----
+
+Release 2018-04-18
+
+Updates
+
+- Lowers row limit for lnglat creation to avoid platform limits on SQL API
+
 0.6.0
 -----
 
