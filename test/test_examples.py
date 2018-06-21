@@ -20,7 +20,7 @@ class TestExamples(unittest.TestCase):
     def test_disabled_context_functions(self):
         """examples.Example.x_methods that are disabled"""
         with self.assertRaises(RuntimeError):
-            self.examples.data()
+            self.examples.data(None, None)
         with self.assertRaises(RuntimeError):
             self.examples.write(None, table_name='t')
         with self.assertRaises(RuntimeError):
