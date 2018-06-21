@@ -124,6 +124,7 @@ def temp_ignore_warnings(func):
     def wrapper(*args, **kwargs):
         """wrapper around func to filter/reset warnings"""
         with catch_warnings():
+            filterwarnings('ignore')
             evaled_func = func(*args, **kwargs)
         return evaled_func
     return wrapper
