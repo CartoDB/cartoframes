@@ -15,7 +15,7 @@ import pandas as pd
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
-from carto.auth import APIKeyAuthClient
+from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
@@ -26,8 +26,9 @@ from .dataobs import get_countrytag
 from . import utils
 from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
-                              get_map_template, top_basemap_layer_url)
-from cartoframes.__version__ import __version__
+                   get_map_template, top_basemap_layer_url)
+from .analysis import Table
+from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -125,6 +126,9 @@ class CartoContext(object):
         self.auth_client = APIKeyAuthClient(base_url=self.creds.base_url(),
                                             api_key=self.creds.key(),
                                             session=session)
+        self.auth_api_client = AuthAPIClient(base_url=self.creds.base_url(),
+                                             api_key=self.creds.key(),
+                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
@@ -136,23 +140,17 @@ class CartoContext(object):
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
-        # check if user is authenticated
-        try:
-            self.sql_client.send(
-                'select * from information_schema.tables limit 0')
-        except CartoException as err:
-            raise CartoException('Cannot authenticate user `{0}`. Check '
-                                 'credentials ({1}).'.format(
-                                     self.creds.username(),
-                                     err))
+        if not self.auth_api_client.is_valid_api_key():
+            raise CartoException(
+                'Cannot authenticate user `{}`. Check credentials.'.format(
+                    self.creds.username()))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path', **DEFAULT_SQL_ARGS)
-
-        paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
+        res = self.sql_client.send("select unnest(current_schemas('f'))",
+                                   **DEFAULT_SQL_ARGS)
         # is an org user if first item is not `public`
-        return paths[0] != 'public'
+        return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False, shared_user=None):
@@ -194,6 +192,26 @@ class CartoContext(object):
                 raise ValueError("`limit` parameter must an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
+
+    @utils.temp_ignore_warnings
+    def tables(self):
+        """List all tables in user's CARTO account
+
+        Returns:
+            :obj:`list` of :py:class:`Table <cartoframes.analysis.Table>`
+
+        """
+        datasets = DatasetManager(self.auth_client).filter(
+            show_table_size_and_row_count='false',
+            show_table='false',
+            show_stats='false',
+            show_likes='false',
+            show_liked='false',
+            show_permission='false',
+            show_uses_builder_features='false',
+            show_synchronization='false',
+            load_totals='false')
+        return [Table.from_dataset(d) for d in datasets]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
