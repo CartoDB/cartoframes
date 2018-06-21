@@ -11,7 +11,7 @@ account. This means that besides reading the datasets from CARTO, users can
 also create maps from these datasets.
 
 For example, the following will produce an interactive map of poverty rates in
-Census tracts in Brooklyn, New York (preview of static version below code).
+census tracts in Brooklyn, New York (preview of static version below code).
 
     .. code::
 
@@ -30,7 +30,7 @@ the poverty rate in the census tract a McDonald's fast food joint is located
 
         from cartoframes.examples import import example_context
 
-        # query to get poverty rates where mcdonald's are located
+        # query to get poverty rates where mcdonald's are located in brooklyn
         q = '''
             SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
             FROM mcdonalds_nyc as m, brooklyn_poverty as c
@@ -53,6 +53,12 @@ good method:
 
         from cartoframes import CartoContext
         from cartoframes.examples import read_taxi
+        USERNAME = 'your user name'
+        APIKEY = 'your API key'
+        cc = CartoContext(
+            base_url='https://{}.carto.com'.format(USERNAME),
+            api_key=APIKEY
+        )
         cc.write(
             read_taxi(),
             'taxi_data_examples_acct',
