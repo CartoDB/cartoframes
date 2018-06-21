@@ -83,13 +83,10 @@ class CartoContext(object):
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
-<<<<<<< HEAD
       2. By passing a :py:class:`Credentials
          <cartoframes.credentials.Credentials>` instance in
-         :py:class:`CartoContext <cartoframes.context.CartoContext>`'s `creds`
-=======
-      2. By passing a :py:class:`Credentials` instance in :py:attr:`creds`
->>>>>>> 2a74a5fcd8cb07a00c298cf0968800d6a1983cce
+         :py:class:`CartoContext <cartoframes.context.CartoContext>`'s
+         :py:attr:`creds <cartoframes.credentials.Credentials.creds>`
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
@@ -97,12 +94,8 @@ class CartoContext(object):
             cc = CartoContext(creds=creds)
 
     Attributes:
-<<<<<<< HEAD
         creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
           :py:class:`Credentials <cartoframes.credentials.Credentials>` instance
-=======
-        creds (:py:class:`Credentials`): :py:class:`Credentials` instance
->>>>>>> 2a74a5fcd8cb07a00c298cf0968800d6a1983cce
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -111,14 +104,9 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-<<<<<<< HEAD
         creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
           A :py:class:`Credentials <cartoframes.credentials.Credentials>`
           instance can be used in place of a `base_url`/`api_key` combination.
-=======
-        creds (:py:class:`Credentials`): A :py:class:`Credentials` instance can
-          be used in place of a `base_url`/`api_key` combination.
->>>>>>> 2a74a5fcd8cb07a00c298cf0968800d6a1983cce
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -127,14 +115,9 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-<<<<<<< HEAD
         :py:class:`CartoContext <cartoframes.context.CartoContext>`: A
         CartoContext object that is authenticated against the user's CARTO
         account.
-=======
-        :py:class:`CartoContext`: A :py:class:`CartoContext` object that is
-        authenticated against the user's CARTO account.
->>>>>>> 2a74a5fcd8cb07a00c298cf0968800d6a1983cce
 
     Example:
         Create a :py:class:`CartoContext` object::
@@ -1138,7 +1121,6 @@ class CartoContext(object):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
-<<<<<<< HEAD
         region specified (if any). This method is espeically useful for getting
         boundaries for a region and, with :py:meth:`CartoContext.data
         <cartoframes.context.CartoContext.data>` and
@@ -1147,14 +1129,6 @@ class CartoContext(object):
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
-=======
-        region specified (if any). This method is especially useful for getting
-        boundaries for a region and, with `CartoContext.data` and
-        `CartoContext.data_discovery`, getting tables of geometries and the
-        corresponding raw measures. For example, if you want to analyze
-        how median income has changed in a region (see examples section for
-        more).
->>>>>>> 2a74a5fcd8cb07a00c298cf0968800d6a1983cce
 
         Examples:
 
