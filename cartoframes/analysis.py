@@ -1,4 +1,6 @@
 """Analysis module"""
+
+
 class Table:
     """Table class for abstract representations of tables in user's CARTO
     account. The list of features is limited in the class now, but will be
@@ -14,7 +16,8 @@ class Table:
 
     @classmethod
     def from_dataset(cls, dataset):
-        return cls(dataset.name)
+        """Create a Table instance from a dataset name"""
+        return cls(str(dataset.name))
 
     def __repr__(self):
         return 'Table(name={})'.format(self.name)
