@@ -23,8 +23,8 @@ Census tracts in Brooklyn, New York (preview of static version below code).
 
 To query datasets, use the :py:meth:`CartoContext.query
 <cartoframes.context.CartoContext.query>` method. The following example finds
-the poverty rate in the area a McDonald's fast food joint is located (preview
-of static map below code).
+the poverty rate in the census tract a McDonald's fast food joint is located
+(preview of static map below code).
 
     .. code::
 
@@ -50,6 +50,7 @@ from cartoframes import CartoContext
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
+
 
 class Examples(CartoContext):
     """A CartoContext with a CARTO account containing example data. This
@@ -86,7 +87,7 @@ class Examples(CartoContext):
     <cartoframes.context.CartoContext>` methods, this class includes a
     convenience method for each of the tables listed above. See the full list
     below.
-    
+
     """
     def __init__(self):
         super(Examples, self).__init__(
@@ -99,14 +100,14 @@ class Examples(CartoContext):
         """Poverty information for Brooklyn, New York, USA. See the function
         :py:func:`read_brooklyn_poverty
         <cartoframes.examples.read_brooklyn_poverty>` for more information
- 
+
         Example:
 
         .. code::
 
             from cartoframes.examples import example_context
             df = example_context.read_brooklyn_poverty()
-        
+
         """
         return self.read('brooklyn_poverty', limit, **kwargs)
 
@@ -114,14 +115,14 @@ class Examples(CartoContext):
         """McDonald's locations for New York City, USA. See the function
         :py:func:`read_mcdonalds_nyc
         <cartoframes.examples.read_mcdonalds_nyc>` for more information
- 
+
         Example:
 
         .. code::
 
             from cartoframes.examples import example_context
             df = example_context.read_mcdonalds_nyc()
-        
+
         """
         return self.read('mcdonalds_nyc', limit, **kwargs)
 
@@ -129,14 +130,14 @@ class Examples(CartoContext):
         """Census tracts for New York City, USA. See the function
         :py:func:`read_nyc_census_tracts
         <cartoframes.examples.read_nyc_census_tracts>` for more information
- 
+
         Example:
 
         .. code::
 
             from cartoframes.examples import example_context
             df = example_context.read_nyc_census_tracts()
-        
+
         """
         return self.read('nyc_census_tracts', limit, **kwargs)
 
@@ -144,14 +145,14 @@ class Examples(CartoContext):
         """Taxi pickup and dropoff logs for New York City, USA. See the function
         :py:func:`read_taxi
         <cartoframes.examples.read_taxi>` for more information
- 
+
         Example:
 
         .. code::
 
             from cartoframes.examples import example_context
             df = example_context.read_taxi()
-        
+
         """
         return self.read('taxi_50k', limit, **kwargs)
 
@@ -159,19 +160,19 @@ class Examples(CartoContext):
         """Historical homicide rates for the United States at the county level.
         See the function :py:func:`read_nat
         <cartoframes.examples.read_nat>` for more information
- 
+
         Example:
 
         .. code::
 
             from cartoframes.examples import example_context
             df = example_context.read_nat()
-        
+
         """
         return self.read('nat', limit, **kwargs)
 
     # override behavior of CartoContext methods
-    def data(self):
+    def data(self, table_name, metadata, persist_as=None, how='the_geom'):
         raise RuntimeError('CartoContext.data method disabled for Examples')
 
     def write(self, df, table_name, temp_dir=None, overwrite=False,
@@ -195,6 +196,7 @@ class Examples(CartoContext):
 
 
 example_context = Examples()
+
 
 def read_brooklyn_poverty(limit=None, **kwargs):
     """Read the dataset `brooklyn_poverty` into a pandas DataFrame from the
@@ -226,6 +228,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
 
     """
     return example_context.read_brooklyn_poverty(limit=limit, **kwargs)
+
 
 def read_mcdonalds_nyc(limit=None, **kwargs):
     """Read the dataset `mcdonalds_nyc` into a pandas DataFrame from the
@@ -259,6 +262,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
     """
     return example_context.read_mcdonalds_nyc(limit=limit, **kwargs)
 
+
 def read_nyc_census_tracts(limit=None, **kwargs):
     """Read the dataset `nyc_census_tracts` into a pandas DataFrame from the
     cartoframes example account at
@@ -291,14 +295,18 @@ def read_nyc_census_tracts(limit=None, **kwargs):
     """
     return example_context.read_nyc_census_tracts(limit=limit, **kwargs)
 
+
 def read_taxi(limit=None, **kwargs):
     """Read the dataset `taxi_50k` into a pandas DataFrame from the
     cartoframes example account at
     https://cartoframes.carto.com/tables/taxi_50k/public. This table
     has a sample of 50,000 taxi trips taken in New York City. The dataset
     includes fare amount, tolls, payment type, and pick up and drop off
-    locations. Note: the geometry has to be created by using the pickup or
-    drop off lng/lat pairs. These can be specified in `CartoContext.write`.
+    locations.
+
+    .. note:: This dataset does not have a geometry. The geometry has to be
+        created by using the pickup or drop off lng/lat pairs. These can be
+        specified in `CartoContext.write`.
 
     The data looks as follows (using the pickup location for the geometry and
     styling by `fare_amount`):
@@ -325,6 +333,7 @@ def read_taxi(limit=None, **kwargs):
 
     """
     return example_context.read_taxi(limit=limit, **kwargs)
+
 
 def read_nat(limit=None, **kwargs):
     """Read `nat` dataset: US county homicides 1960-1990

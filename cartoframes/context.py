@@ -27,8 +27,8 @@ from . import utils
 from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
-from cartoframes.analysis import Table
-from cartoframes.__version__ import __version__
+from .analysis import Table
+from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -195,7 +195,12 @@ class CartoContext(object):
 
     @utils.temp_ignore_warnings
     def tables(self):
-        """List all tables in user's CARTO account"""
+        """List all tables in user's CARTO account
+
+        Returns:
+            :obj:`list` of :py:class:`Table <cartoframes.analysis.Table>`
+
+        """
         datasets = DatasetManager(self.auth_client).filter(
             show_table_size_and_row_count='false',
             show_table='false',

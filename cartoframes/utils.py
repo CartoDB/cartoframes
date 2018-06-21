@@ -1,5 +1,6 @@
 import sys
 from tqdm import tqdm
+from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
 
@@ -119,6 +120,7 @@ def safe_quotes(text, escape_single_quotes=False):
 def temp_ignore_warnings(func):
     """Temporarily ignores warnings like those emitted by the carto python sdk
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         """wrapper around func to filter/reset warnings"""
         with catch_warnings():
