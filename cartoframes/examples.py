@@ -75,7 +75,7 @@ class Examples(CartoContext):
     - ``mcdonalds_nyc`` - McDonald's locations in New York City
     - ``nat`` - historical USA-wide homicide rates at the county level
     - ``nyc_census_tracts`` - Census tract boundaries for New York City
-    - ``taxi_50k`` - Taxi trip data, including pickup/dropoff locations. This
+    - ``taxi_50k`` - Taxi trip data, including pickup/drop-off locations. This
       table does not have an explicit geometry, so one must be created from the
       `pickup_latitude`/`pickup_longitude` columns, the
       `dropoff_latitude`/`dropoff_longitude` columns, or through some other
@@ -99,7 +99,7 @@ class Examples(CartoContext):
     def read_brooklyn_poverty(self, limit=None, **kwargs):
         """Poverty information for Brooklyn, New York, USA. See the function
         :py:func:`read_brooklyn_poverty
-        <cartoframes.examples.read_brooklyn_poverty>` for more information
+        <cartoframes.examples.read_brooklyn_poverty>` for more information.
 
         Example:
 
@@ -142,8 +142,8 @@ class Examples(CartoContext):
         return self.read('nyc_census_tracts', limit, **kwargs)
 
     def read_taxi(self, limit=None, **kwargs):
-        """Taxi pickup and dropoff logs for New York City, USA. See the function
-        :py:func:`read_taxi
+        """Taxi pickup and drop-off logs for New York City, USA. See the
+        function :py:func:`read_taxi
         <cartoframes.examples.read_taxi>` for more information
 
         Example:
@@ -216,7 +216,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
 
     Returns:
 
-      pandas.DataFrame: Data in the table `brooklyn_poverty` on the CARTOframes
+      pandas.DataFrame: Data in the table `brooklyn_poverty` on the cartoframes
       example account
 
     Example:
@@ -249,7 +249,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
 
     Returns:
 
-      pandas.DataFrame: Data in the table `mcdonalds_nyc` on the CARTOframes
+      pandas.DataFrame: Data in the table `mcdonalds_nyc` on the cartoframes
       example account
 
     Example:
@@ -283,7 +283,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
     Returns:
 
       pandas.DataFrame: Data in the table `nyc_census_tracts` on the
-      CARTOframes example account
+      cartoframes example account
 
     Example:
 
@@ -304,9 +304,21 @@ def read_taxi(limit=None, **kwargs):
     includes fare amount, tolls, payment type, and pick up and drop off
     locations.
 
-    .. note:: This dataset does not have a geometry. The geometry has to be
-        created by using the pickup or drop off lng/lat pairs. These can be
+    .. note:: This dataset does not have geometries. The geometries have to be
+        created by using the pickup or drop-off lng/lat pairs. These can be
         specified in `CartoContext.write`.
+
+        To create geometries with `example_context.query`, write a query such
+        as this::
+
+            example_context.query('''
+                SELECT
+                  CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                  cartodb_id,
+                  fare_amount
+                FROM
+                  taxi_50
+            ''')
 
     The data looks as follows (using the pickup location for the geometry and
     styling by `fare_amount`):
@@ -317,11 +329,12 @@ def read_taxi(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`CartoContext.read
+        <cartoframes.context.CartoContext.read>`
 
     Returns:
 
-      pandas.DataFrame: Data in the table `taxi_50k` on the CARTOframes
+      pandas.DataFrame: Data in the table `taxi_50k` on the cartoframes
       example account
 
     Example:
@@ -349,11 +362,12 @@ def read_nat(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`CartoContext.read
+        <cartoframes.context.CartoContext.read>`
 
     Returns:
 
-      pandas.DataFrame: Data in the table `nat` on the CARTOframes
+      pandas.DataFrame: Data in the table `nat` on the cartoframes
       example account
 
     Example:
