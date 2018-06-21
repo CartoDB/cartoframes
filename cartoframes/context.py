@@ -81,7 +81,9 @@ class CartoContext(object):
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
-      2. By passing a :obj:`Credentials` instance in `CartoContext`'s `creds`
+      2. By passing a :py:class:`Credentials
+         <cartoframes.credentials.Credentials>` instance in
+         :py:class:`CartoContext <cartoframes.context.CartoContext>`'s `creds`
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
@@ -89,7 +91,8 @@ class CartoContext(object):
             cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (:obj:`Credentials`): :obj:`Credentials` instance
+        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
+          :py:class:`Credentials <cartoframes.credentials.Credentials>` instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -98,8 +101,9 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-        creds (:obj:`Credentials`): A :obj:`Credentials` instance can be used
-          in place of a `base_url`/`api_key` combination.
+        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
+          A :py:class:`Credentials <cartoframes.credentials.Credentials>`
+          instance can be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -108,8 +112,9 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-        :obj:`CartoContext`: A CartoContext object that is authenticated
-        against the user's CARTO account.
+        :py:class:`CartoContext <cartoframes.context.CartoContext>`: A
+        CartoContext object that is authenticated against the user's CARTO
+        account.
 
     Example:
         Create a CartoContext object::
@@ -759,7 +764,9 @@ class CartoContext(object):
         """Produce a CARTO map visualizing data layers.
 
         Examples:
-            Create a map with two data layers, and one BaseMap layer::
+            Create a map with two data :py:class:`Layer
+            <cartoframes.layer.Layer>`\s, and one :py:class:`BaseMap
+            <cartoframes.layer.BaseMap>` layer::
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
@@ -783,16 +790,18 @@ class CartoContext(object):
                        lng=-68.3823549,
                        lat=44.3036906)
         Args:
-            layers (list, optional): List of one or more of the following:
+            layers (list, optional): List of zero or more of the following:
 
-                - Layer: cartoframes Layer object for visualizing data from a
-                  CARTO table. See `layer.Layer <#layer.Layer>`__ for all
-                  styling options.
-                - BaseMap: Basemap for contextualizng data layers. See
-                  `layer.BaseMap <#layer.BaseMap>`__ for all styling options.
-                - QueryLayer: Layer from an arbitrary query. See
-                  `layer.QueryLayer <#layer.QueryLayer>`__ for all styling
-                  options.
+                - :py:class:`Layer <cartoframes.layer.Layer>`: cartoframes
+                  :py:class:`Layer <cartoframes.layer.Layer>` object for
+                  visualizing data from a CARTO table. See :py:class:`Layer
+                  <cartoframes.layer.Layer>` for all styling options.
+                - :py:class:`BaseMap <cartoframes.layer.BaseMap>`: Basemap for
+                  contextualizng data layers. See :py:class:`BaseMap
+                  <cartoframes.layer.BaseMap>` for all styling options.
+                - :py:class:`QueryLayer <cartoframes.layer.QueryLayer>`: Layer
+                  from an arbitrary query. See :py:class:`QueryLayer
+                  <cartoframes.layer.QueryLayer>` for all styling options.
 
             interactive (bool, optional): Defaults to ``True`` to show an
                 interactive slippy map. Setting to ``False`` creates a static
@@ -1101,11 +1110,13 @@ class CartoContext(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
-        boundaries for a region and, with `CartoContext.data` and
-        `CartoContext.data_discovery`, getting tables of geometries and the
-        corresponding raw measures. For example, if you want to analyze
-        how median income has changed in a region (see examples section for
-        more).
+        boundaries for a region and, with :py:meth:`CartoContext.data
+        <cartoframes.context.CartoContext.data>` and
+        :py:meth:`CartoContext.data_discovery
+        <cartoframes.context.CartoContext.data_discovery>`, getting tables of
+        geometries and the corresponding raw measures. For example, if you want
+        to analyze how median income has changed in a region (see examples
+        section for more).
 
         Examples:
 
@@ -1162,9 +1173,10 @@ class CartoContext(object):
               that are of interest. For example, US census tracts have a
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running `CartoContext.data_boundaries` without any arguments,
-              or by looking in the `Data Observatory catalog
-              <http://cartodb.github.io/bigmetadata/>`__.
+              running :py:meth:`CartoContext.data_boundaries
+              <cartoframes.context.CartoContext.data_boundaries>`
+              without any arguments, or by looking in the `Data Observatory
+              catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
               if `boundary` is specified, boundary polygons are of interest.
               `region` can be one of the following:
@@ -1293,11 +1305,12 @@ class CartoContext(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        `CartoContext.data`. For the full Data Observatory catalog, visit
+        :py:meth:`CartoContext.data <cartoframes.context.CartoContext.data>`.
+        For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `CartoContext.data <#context.CartoContext.data>`__ generally
-        needs the full metadata.
+        columns as `CartoContext.data <cartoframes.context.CartoContext.data>`
+        generally needs the full metadata.
 
         .. note::
             Narrowing down a discovery query using the `keywords`, `regex`, and
@@ -1557,7 +1570,8 @@ class CartoContext(object):
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
             metadata (pandas.DataFrame): List of all measures to add to
-                `table_name`. See `CartoContext.data_discovery` outputs
+                `table_name`. See :py:meth:`CartoContext.data_discovery
+                <cartoframes.context.CartoContext.data_discovery>` outputs
                 for a full list of metadata columns.
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
@@ -1949,7 +1963,8 @@ class BatchJobStatus(object):
         created_at (str): Time and date when job was created
 
     Args:
-        carto_context (carto.CartoContext): CartoContext instance
+        carto_context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
+          :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
         job (dict or str): If a dict, job status dict returned after sending
             a Batch SQL API request. If str, a Batch SQL API job id.
     """

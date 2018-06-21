@@ -112,8 +112,8 @@ class QueryLayer(AbstractLayer):
     * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
       1000``)
 
-    Used in the `layers` keyword in `CartoContext.map
-    <#context.CartoContext.map>`__.
+    Used in the `layers` keyword in :py:meth:`CartoContext.map
+    <cartoframes.context.CartoContext.map>`.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
@@ -622,7 +622,8 @@ class QueryLayer(AbstractLayer):
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is used for visualizing individual datasets
-    with `CartoContext.map <#context.CartoContext.map>`__'s `layers`
+    with :py:meth:`CartoContext.map
+    <cartoframes.context.CartoContext.map>`\'s `layers`
     keyword argument.
 
     Example:
@@ -639,8 +640,9 @@ class Layer(QueryLayer):
 
     Args:
         table_name (str): Name of table in CARTO account
-        Styling: See :obj:`QueryLayer` for a full list of all arguments
-          arguments for styling this map data layer.
+        Styling: See :py:class:`QueryLayer <cartoframes.layer.QueryLayer>`
+        for a full list of all arguments arguments for styling this map data
+        layer.
         source (pandas.DataFrame, optional): Not currently implemented
         overwrite (bool, optional): Not currently implemented
     """
