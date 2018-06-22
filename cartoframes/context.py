@@ -1,4 +1,4 @@
-"""CartoContext and BatchJobStatus classes"""
+"""CartoContext class"""
 from __future__ import absolute_import
 import json
 import os
@@ -28,6 +28,7 @@ from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
+from .batch import BatchJobStatus
 from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
@@ -95,7 +96,8 @@ class CartoContext(object):
 
     Attributes:
         creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
-          :py:class:`Credentials <cartoframes.credentials.Credentials>` instance
+          :py:class:`Credentials <cartoframes.credentials.Credentials>`
+          instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -283,9 +285,11 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFrame has more than 100,000 rows, a :py:class:`BatchJobStatus`
-            instance is returned. Otherwise, None.
+            :py:class:`BatchJobStatus <cartoframes.batch.BatchJobStatus>` or
+            None: If `lnglat` flag is set and the DataFrame has more than
+            100,000 rows, a :py:class:`BatchJobStatus
+            <cartoframes.batch.BatchJobStatus>` instance is returned.
+            Otherwise, None.
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
@@ -1425,7 +1429,9 @@ class CartoContext(object):
                     'region in the following order: western longitude, '
                     'southern latitude, eastern longitude, and northern '
                     'latitude. For example, Switerland fits in '
-                    '``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``.')
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.'
+                )
             boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
                         'env, 500::int AS cnt'.format(*region))
 
@@ -1675,8 +1681,10 @@ class CartoContext(object):
         for suggested in _meta['suggested_name']:
             if suggested in tablecols:
                 names[suggested] = utils.unique_colname(suggested, tablecols)
-                warn('{s0} was augmented as {s1} because of name collision'. \
-                    format(s0=suggested, s1=names[suggested]))
+                warn(
+                    '{s0} was augmented as {s1} because of name '
+                    'collision'.format(s0=suggested, s1=names[suggested])
+                )
             else:
                 names[suggested] = suggested
 
@@ -1934,94 +1942,3 @@ def _df2pg_schema(dataframe, pgcolnames):
     if 'the_geom' in pgcolnames:
         return '"the_geom", ' + schema
     return schema
-
-
-class BatchJobStatus(object):
-    """Status of a write or query operation. Read more at `Batch SQL API docs
-    <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__ about
-    responses and how to interpret them.
-
-    Example:
-
-        Poll for a job's status if you've caught the :py:class:`BatchJobStatus`
-        instance.
-
-        .. code:: python
-
-            import time
-            job = cc.write(df, 'new_table',
-                           lnglat=('lng_col', 'lat_col'))
-            while True:
-                curr_status = job.status()['status']
-                if curr_status in ('done', 'failed', 'canceled', 'unknown', ):
-                    print(curr_status)
-                    break
-                time.sleep(5)
-
-        Create a :py:class:`BatchJobStatus` instance if you have a `job_id`
-        output from a :py:meth:`CartoContext.write
-        <cartoframes.context.CartoContext.write>` operation.
-
-        .. code:: python
-
-            >>> from cartoframes import CartoContext, BatchJobStatus
-            >>> cc = CartoContext(username='...', api_key='...')
-            >>> cc.write(df, 'new_table', lnglat=('lng', 'lat'))
-            'BatchJobStatus(job_id='job-id-string', ...)'
-            >>> batch_job = BatchJobStatus(cc, 'job-id-string')
-
-    Attributes:
-        job_id (str): Job ID of the Batch SQL API job
-        last_status (str): Status of ``job_id`` job when last polled
-        created_at (str): Time and date when job was created
-
-    Args:
-        carto_context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
-          :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
-        job (dict or str): If a dict, job status dict returned after sending
-            a Batch SQL API request. If str, a Batch SQL API job id.
-    """
-    def __init__(self, carto_context, job):
-        if isinstance(job, dict):
-            self.job_id = job.get('job_id')
-            self.last_status = job.get('status')
-            self.created_at = job.get('created_at')
-        elif isinstance(job, str):
-            self.job_id = job
-            self.last_status = None
-            self.created_at = None
-
-        self._batch_client = BatchSQLClient(carto_context.auth_client)
-
-    def __repr__(self):
-        return ('BatchJobStatus(job_id=\'{job_id}\', '
-                'last_status=\'{status}\', '
-                'created_at=\'{created_at}\')'.format(
-                    job_id=self.job_id,
-                    status=self.last_status,
-                    created_at=self.created_at))
-
-    def _set_status(self, curr_status):
-        self.last_status = curr_status
-
-    def get_status(self):
-        """return current status of job"""
-        return self.last_status
-
-    def status(self):
-        """Checks the current status of job ``job_id``
-
-        Returns:
-            dict: Status and time it was updated
-
-        Warns:
-            UserWarning: If the job failed, a warning is raised with
-                information about the failure
-        """
-        resp = self._batch_client.read(self.job_id)
-        if 'failed_reason' in resp:
-            warn('Job failed: {}'.format(resp.get('failed_reason')))
-        self._set_status(resp.get('status'))
-        return dict(status=resp.get('status'),
-                    updated_at=resp.get('updated_at'),
-                    created_at=resp.get('created_at'))

@@ -43,7 +43,7 @@ Map Styling Functions
 
 BatchJobStatus
 ==============
-.. autoclass:: cartoframes.context.BatchJobStatus
+.. autoclass:: cartoframes.batch.BatchJobStatus
     :noindex:
     :members:
 
