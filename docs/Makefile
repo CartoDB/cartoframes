@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = cartoframes
-SOURCEDIR     = source
-BUILDDIR      =
+SOURCEDIR     = .
+BUILDDIR      = build
 
 # Put it first so that "make" without argument is like "make help".
 help:

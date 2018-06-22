@@ -1,5 +1,7 @@
 import sys
 from tqdm import tqdm
+from functools import wraps
+from warnings import filterwarnings, catch_warnings
 
 
 def dict_items(d):
@@ -17,7 +19,7 @@ def cssify(css_dict):
             css += ' {field}: {field_value};'.format(field=field,
                                                      field_value=field_value)
         css += '} '
-    return css
+    return css.strip()
 
 
 def normalize_colnames(columns):
@@ -75,6 +77,14 @@ def norm_colname(colname):
     return final_name
 
 
+def unique_colname(suggested, existing):
+    """Given a suggested column name and a list of existing names, returns
+    a name that is not present at existing by prepending _ characters."""
+    while suggested in existing:
+        suggested = '_{0}'.format(suggested)
+    return suggested
+
+
 def importify_params(param_arg):
     """Convert parameter arguments to what CARTO's Import API expects"""
     if isinstance(param_arg, bool):
@@ -84,9 +94,37 @@ def importify_params(param_arg):
 
 def join_url(*parts):
     """join parts of URL into complete url"""
-    return '/'.join(s.strip('/') for s in parts)
+    return '/'.join(str(s).strip('/') for s in parts)
 
 
 def minify_sql(lines):
     """eliminate whitespace in sql queries"""
     return '\n'.join(line.strip() for line in lines)
+
+
+def pgquote(string):
+    """single-quotes a string if not None, else returns null"""
+    return '\'{}\''.format(string) if string else 'null'
+
+
+def safe_quotes(text, escape_single_quotes=False):
+    """htmlify string"""
+    if isinstance(text, str):
+        safe_text = text.replace('"', "&quot;")
+        if escape_single_quotes:
+            safe_text = safe_text.replace("'", "&#92;'")
+        return safe_text.replace('True', 'true')
+    return text
+
+
+def temp_ignore_warnings(func):
+    """Temporarily ignores warnings like those emitted by the carto python sdk
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        """wrapper around func to filter/reset warnings"""
+        with catch_warnings():
+            filterwarnings('ignore')
+            evaled_func = func(*args, **kwargs)
+        return evaled_func
+    return wrapper
