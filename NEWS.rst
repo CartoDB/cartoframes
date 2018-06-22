@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.7.0
+-----
+
+Release 2018-06-22
+
+Updates
+
+- Adds example dataset functionality for example notebook and teaching cartoframes without an account (#382)
+- Adds contrib.vector module for bring CARTO VL maps to cartoframes (#446)
+- Bug fix for timespans in geometry fetching (#416)
+- Suppresses warnings emitted from the Carto Python SDK (#456)
+- Moves BatchJobStatus to its own module (#455)
+- Testing updates (#452)
+- Base URL validation to avoid issue of POSTs being converted to GETs (#445)
+
 0.6.2
 -----
 
