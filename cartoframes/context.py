@@ -1,4 +1,4 @@
-"""CartoContext and BatchJobStatus classes"""
+"""CartoContext class"""
 from __future__ import absolute_import
 import json
 import os
@@ -285,9 +285,11 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFrame has more than 100,000 rows, a :py:class:`BatchJobStatus`
-            instance is returned. Otherwise, None.
+            :py:class:`BatchJobStatus <cartoframes.batch.BatchJobStatus>` or
+            None: If `lnglat` flag is set and the DataFrame has more than
+            100,000 rows, a :py:class:`BatchJobStatus
+            <cartoframes.batch.BatchJobStatus>` instance is returned.
+            Otherwise, None.
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
