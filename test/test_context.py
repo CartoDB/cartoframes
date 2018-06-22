@@ -959,6 +959,14 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         meta_cols = set(('geom_id', 'geom_tags', 'geom_type', ))
         self.assertTrue(meta_cols & set(boundary_meta.columns))
 
+        # boundary metadata with correct timespan
+        meta_2015 = cc.data_boundaries(timespan='2015')
+        self.assertTrue(meta_2015[meta_2015.valid_timespan].shape[0] > 0)
+
+        # test for no data with an incorrect or invalid timespan
+        meta_9999 = cc.data_boundaries(timespan='invalid_timespan')
+        self.assertTrue(meta_9999[meta_9999.valid_timespan].shape[0] == 0)
+
         # boundary metadata in a region
         regions = (
             self.test_read_table,
