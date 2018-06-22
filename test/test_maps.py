@@ -62,111 +62,110 @@ class TestMaps(unittest.TestCase):
         map_name = get_map_name(self.layers,
                                 has_zoom=False)
         self.assertEqual(
-                map_name,
-                'cartoframes_ver20170406_layers2_time0_baseid1_labels0_zoom0')
+            map_name,
+            'cartoframes_ver20170406_layers2_time0_baseid1_labels0_zoom0')
         self.assertEqual(
-                get_map_name(self.layers, has_zoom=True),
-                'cartoframes_ver20170406_layers2_time0_baseid1_labels0_zoom1')
+            get_map_name(self.layers, has_zoom=True),
+            'cartoframes_ver20170406_layers2_time0_baseid1_labels0_zoom1')
         self.assertEqual(
-                get_map_name(self.layers_w_time, has_zoom=False),
-                'cartoframes_ver20170406_layers3_time1_baseid1_labels1_zoom0')
+            get_map_name(self.layers_w_time, has_zoom=False),
+            'cartoframes_ver20170406_layers3_time1_baseid1_labels1_zoom0')
 
     def test_map_template(self):
         """maps.map_template_dict"""
         map_template = get_map_template(self.layers, has_zoom=False)
-        js = {
-                "placeholders": {
-                    "north": {
-                        "default": 45,
-                        "type": "number"
-                        },
-                    "cartocss_1": {
-                        "default": ("#layer { "
-                                    "marker-fill: red; "
-                                    "marker-width: 5; "
-                                    "marker-allow-overlap: true; "
-                                    "marker-line-color: #000; "
-                                    "}"),
-                        "type": "sql_ident"
-                        },
-                    "cartocss_0": {
-                        "default": ("#layer { "
-                                    "marker-fill: red; "
-                                    "marker-width: 5; "
-                                    "marker-allow-overlap: true; "
-                                    "marker-line-color: #000; }"),
-                        "type": "sql_ident"
-                        },
-                    "west": {
-                        "default": -45,
-                        "type": "number"
-                        },
-                    "east": {
-                        "default": 45,
-                        "type": "number"
-                        },
-                    "sql_0": {
-                        "default": ("SELECT ST_PointFromText('POINT(0 0)', "
-                                    "4326) AS the_geom, 1 AS cartodb_id, "
-                                    "ST_PointFromText('Point(0 0)', 3857) AS "
-                                    "the_geom_webmercator"),
-                        "type": "sql_ident"
-                        },
-                    "sql_1": {
-                        "default": ("SELECT ST_PointFromText('POINT(0 0)', "
-                                    "4326) AS the_geom, 1 AS cartodb_id, "
-                                    "ST_PointFromText('Point(0 0)', 3857) AS "
-                                    "the_geom_webmercator"),
-                        "type": "sql_ident"
-                        },
-                    "south": {
-                        "default": -45,
-                        "type": "number"
+        filledtemplate = {
+            "placeholders": {
+                "north": {
+                    "default": 45,
+                    "type": "number"
+                },
+                "cartocss_1": {
+                    "default": ("#layer { "
+                                "marker-fill: red; "
+                                "marker-width: 5; "
+                                "marker-allow-overlap: true; "
+                                "marker-line-color: #000; "
+                                "}"),
+                    "type": "sql_ident"
+                },
+                "cartocss_0": {
+                    "default": ("#layer { "
+                                "marker-fill: red; "
+                                "marker-width: 5; "
+                                "marker-allow-overlap: true; "
+                                "marker-line-color: #000; }"),
+                    "type": "sql_ident"
+                },
+                "west": {
+                    "default": -45,
+                    "type": "number"
+                },
+                "east": {
+                    "default": 45,
+                    "type": "number"
+                },
+                "sql_0": {
+                    "default": ("SELECT ST_PointFromText('POINT(0 0)', "
+                                "4326) AS the_geom, 1 AS cartodb_id, "
+                                "ST_PointFromText('Point(0 0)', 3857) AS "
+                                "the_geom_webmercator"),
+                    "type": "sql_ident"
+                },
+                "sql_1": {
+                    "default": ("SELECT ST_PointFromText('POINT(0 0)', "
+                                "4326) AS the_geom, 1 AS cartodb_id, "
+                                "ST_PointFromText('Point(0 0)', 3857) AS "
+                                "the_geom_webmercator"),
+                    "type": "sql_ident"
+                },
+                "south": {
+                    "default": -45,
+                    "type": "number"
+                    }
+                },
+            "version": "0.0.1",
+            "name": ("cartoframes_ver20170406_layers2_time0_baseid1_"
+                     "labels0_zoom0"),
+            "layergroup": {
+                "layers": [
+                    {
+                        "type": "http",
+                        "options": {
+                            "urlTemplate": ("https://{s}.basemaps."
+                                            "cartocdn.com/rastertiles"
+                                            "/dark_all/{z}/{x}/{y}."
+                                            "png"),
+                            "subdomains": "abcd"
                         }
                     },
-                "version": "0.0.1",
-                "name": ("cartoframes_ver20170406_layers2_time0_baseid1_"
-                         "labels0_zoom0"),
-                "layergroup": {
-                        "layers": [
-                            {
-                                "type": "http",
-                                "options": {
-                                    "urlTemplate": ("https://cartodb-basemaps-"
-                                                    "{s}.global.ssl.fastly.net"
-                                                    "/dark_all/{z}/{x}/{y}."
-                                                    "png"),
-                                    "subdomains": "abcd"
-                                    }
-                                },
-                            {
-                                "type": "mapnik",
-                                "options": {
-                                    "cartocss": "<%= cartocss_0 %>",
-                                    "sql": "<%= sql_0 %>",
-                                    "cartocss_version": "2.1.1"
-                                    }
-                                },
-                            {
-                                "type": "mapnik",
-                                "options": {
-                                    "cartocss": "<%= cartocss_1 %>",
-                                    "sql": "<%= sql_1 %>",
-                                    "cartocss_version": "2.1.1"
-                                    }
-                                }
-                            ],
-                        "version": "1.0.1"
-                        },
-                "view": {
-                        "bounds": {
-                            "west": "<%= west %>",
-                            "east": "<%= east %>",
-                            "north": "<%= north %>",
-                            "south": "<%= south %>"
-                            }
+                    {
+                        "type": "mapnik",
+                        "options": {
+                            "cartocss": "<%= cartocss_0 %>",
+                            "sql": "<%= sql_0 %>",
+                            "cartocss_version": "2.1.1"
                         }
+                    },
+                    {
+                        "type": "mapnik",
+                        "options": {
+                            "cartocss": "<%= cartocss_1 %>",
+                            "sql": "<%= sql_1 %>",
+                            "cartocss_version": "2.1.1"
+                        }
+                    }],
+                "version": "1.0.1"
+            },
+            "view": {
+                "bounds": {
+                    "west": "<%= west %>",
+                    "east": "<%= east %>",
+                    "north": "<%= north %>",
+                    "south": "<%= south %>"
                 }
+            }
+        }
 
         map_template_dict = json.loads(map_template)
-        self.assertDictEqual(map_template_dict, js)
+        self.assertDictEqual(map_template_dict, filledtemplate)

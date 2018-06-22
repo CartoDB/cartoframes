@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CARTO VL + CARTOframes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <!-- Include CARTO VL JS -->
+  <script src="https://cartodb.github.io/carto-vl/dist/carto-vl.js"></script>
+  <!-- Include Mapbox GL JS -->
+  <script src="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.45.0-carto1/mapbox-gl.js"></script>
+  <!-- Include Mapbox GL CSS -->
+  <link href="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.45.0-carto1/mapbox-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="https://cartodb.github.io/carto-vl/examples/style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    const BASEMAPS = {
+        DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        Voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+        Positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    };
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: BASEMAPS['@@BASEMAPSTYLE@@'] || BASEMAPS['Voyager'],
+      zoom: 9,
+      dragRotate: false
+      });
+
+    let credentials = @@CREDENTIALS@@;
+    carto.setDefaultAuth({
+      user: credentials['user'],
+      apiKey: credentials['api_key'] || 'default_public'
+    });
+    var sources = @@SOURCES@@;
+
+    map.fitBounds(@@BOUNDS@@, {animate: false});
+
+    sources.forEach((elem, idx) => {
+      let temp_source = null;
+      if (elem.is_local) {
+        let local_json = JSON.parse(elem.source);
+        temp_source = new carto.source.GeoJSON(local_json);
+      } else {
+        temp_source = new carto.source.SQL(elem.source);
+      }
+      let temp = new carto.Layer(
+          'layer' + idx,
+          temp_source,
+          new carto.Viz(elem['styling'])
+      );
+      var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
+      temp.addTo(map, last_source);
+      if (elem.interactivity) {
+        let interactivity = new carto.Interactivity(temp);
+        let tempPopup = new mapboxgl.Popup({
+                  closeButton: false,
+                  closeOnClick: false
+                });
+        if (elem.interactivity.event == 'click') {
+          setPopupsClick(tempPopup, interactivity, elem.interactivity.header);
+        } else if (elem.interactivity.event == 'hover') {
+          setPopupsHover(tempPopup, interactivity, elem.interactivity.header);
+        }
+      }
+    });
+    function setPopupsClick(tempPopup, intera, popupHeader) {
+      intera.off('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
+      intera.on('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader, popupHeader)
+      });
+    }
+    function setPopupsHover(tempPopup, intera, popupHeader) {
+      intera.off('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
+      intera.on('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader)
+      });
+    }
+    function updatePopup(layer_popup, event, popupHeader) {
+      if (event.features.length > 0) {
+        const vars = event.features[0].variables;
+        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
+        Object.keys(vars).forEach((varName) => {
+            popupHTML += `
+                <h3 class="h3">${varName}</h3>
+                <p class="description open-sans">${vars[varName].value}</p>
+            `;
+        });
+        layer_popup.setLngLat([event.coordinates.lng, event.coordinates.lat])
+             .setHTML(`<div>${popupHTML}</div>`);
+        if (!layer_popup.isOpen()) {
+          layer_popup.addTo(map);
+        }
+      } else {
+        layer_popup.remove();
+      }
+    }
+  </script>
+</body>
+</html>

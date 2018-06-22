@@ -37,6 +37,7 @@
      const config  = @@CONFIG@@;
      const bounds  = @@BOUNDS@@;
      const options = @@OPTIONS@@;
+     var labels_url = '@@LABELS@@';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -48,12 +49,14 @@
 
      if (L.Browser.retina) {
          var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+         labels_url = labels_url.replace('.png', '@2x.png');
      } else {
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
          attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
      }).addTo(map);
+
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));
@@ -63,13 +66,23 @@
      cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
-              if (bounds.length) {
-                map.fitBounds(bounds);
-              }
-              updateMapInfo();
-              map.on('move', () => {
+                // add labels layer
+                if (labels_url) {
+                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+                    var topLayer = new L.tileLayer(labels_url).addTo(map);
+                    topPane.appendChild(topLayer.getContainer());
+                    topLayer.setZIndex(7);
+                 }
+
+                // fit map to bounds
+                if (bounds.length) {
+                  map.fitBounds(bounds);
+                }
+
                 updateMapInfo();
-              });
+                map.on('move', () => {
+                  updateMapInfo();
+                });
             })
             .error((err) => {
               console.log('ERROR: ', err);
