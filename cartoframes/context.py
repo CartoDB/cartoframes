@@ -378,6 +378,7 @@ class CartoContext(object):
                                      'dataset',
                                      final_table_name)))
 
+    @utils.temp_ignore_warnings
     def _get_privacy(self, table_name):
         """gets current privacy of a table"""
         ds_manager = DatasetManager(self.auth_client)
@@ -387,6 +388,7 @@ class CartoContext(object):
         except NotFoundException:
             return None
 
+    @utils.temp_ignore_warnings
     def _update_privacy(self, table_name, privacy):
         """Updates the privacy of a dataset"""
         ds_manager = DatasetManager(self.auth_client)
