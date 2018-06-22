@@ -1,7 +1,8 @@
 """This module allows users to create interactive vector maps using CARTO VL.
-The API for vector maps is broadly similar to CartoContext.map, with the
-exception that all styling expressions are expected to be straight CARTO VL
-expressions. See examples in the `CARTO VL styling guide
+The API for vector maps is broadly similar to :py:meth:`CartoContext.map
+<cartoframes.context.CartoContext.map>`, with the exception that all styling
+expressions are expected to be straight CARTO VL expressions. See examples in
+the `CARTO VL styling guide
 <https://carto.com/developers/carto-vl/guides/styling-points/>`__
 """
 import os
@@ -31,10 +32,10 @@ class QueryLayer(object):
         size (float or str, optional): CARTO VL width styling for this layer if
           points or lines (which are not yet implemented). Valid inputs are
           positive numbers or text expressions involving variables. To remain
-          cosistent with cartoframes' raster-based :obj:`Layer` API, `size` is
-          used here in place of `width`, which is the CARTO VL variable name
-          for controlling the width of a point or line. Default size is 7
-          pixels wide.
+          cosistent with cartoframes' raster-based :py:class:`Layer
+          <cartoframes.layer.Layer>` API, `size` is used here in place of
+          `width`, which is the CARTO VL variable name for controlling the
+          width of a point or line. Default size is 7 pixels wide.
         time (str, optional): Time expression to animate data. This is an alias
           for the CARTO VL `filter` style attribute. Default is no animation.
         strokeColor (str, optional): Defines the stroke color of polygons.
@@ -51,6 +52,28 @@ class QueryLayer(object):
             the popup that will be rendered in HTML.
           - list: A list of valid column names in the data used for this layer
           - str: A column name in the data used in this layer
+
+    Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            from cartoframes.contrib import vector
+            # create geometries from lng/lat columns
+            q = '''
+               SELECT *, ST_Transform(the_geom, 3857) as the_geom_webmercator
+               FROM (
+                   SELECT
+                     CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                     fare_amount,
+                     cartodb_id
+                   FROM taxi_50k
+               ) as _w
+            '''
+            vector.vmap(
+                [vector.QueryLayer(q), ],
+                example_context
+            )
     """
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):
@@ -110,7 +133,7 @@ class QueryLayer(object):
             )
         else:
             raise ValueError('`interactivity` must be a str, a list of str, '
-                             'or a dict a `cols` key')
+                             'or a dict with a `cols` key')
 
         self.styling = '\n'.join([interactive_cols, self.styling])
 
@@ -138,8 +161,28 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
     )
 
 class Layer(QueryLayer):
-    """Layer from a table name. See :obj:`QueryLayer` for docs on the style
-    attributes"""
+    """Layer from a table name. See :py:class:`QueryLayer
+    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes
+    
+    Example:
+
+        Vizualize data from a table. Here we're using the example CartoContext.
+        To use this with your account, replace the `example_context` with your
+        :py:class:`CartoContext <cartoframes.context.CartoContext>` and a table
+        in the account you authenticate against.
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            from cartoframes.contrib import vector
+            vector.vmap(
+                [vector.Layer(
+                    'nat',
+                    color='ramp(globalEqIntervals($hr90, 7), sunset)',
+                    strokeWidth=0),
+                ],
+                example_context)
+    """
     def __init__(self, table_name, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):
         self.table_source = table_name
@@ -160,6 +203,22 @@ class LocalLayer(QueryLayer):
     TODO: add support for filepath to a geojson file, json/dict, or string
 
     See :obj:`QueryLayer` for the full styling documentation.
+
+    Example:
+        In this example, we grab data from the cartoframes example account
+        using `read_mcdonals_nyc` to get McDonald's locations within New York
+        City. Using the `decode_geom=True` argument, we decode the geometries
+        into a form that works with GeoPandas. Finally, we pass the
+        GeoDataFrame into :py:class:`LocalLayer
+        <cartoframes.contrib.vector.LocalLayer>` to visualize.
+
+        .. code::
+
+            import geopandas as gpd
+            from cartoframes.examples import read_mcdonalds_nyc, example_context
+            from cartoframes.contrib import vector
+            gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
+            vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
     def __init__(self, dataframe, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):
@@ -184,13 +243,23 @@ def vmap(layers, context):
 
     Args:
         layers (list of Layer-types): List of layers. One or more of
-          :obj:`Layer`, :obj:`QueryLayer`, or :obj:`LocalLayer`.
-        context (:obj:`CartoContext`): A :obj:`CartoContext` instance
+          :py:class:`Layer <cartoframes.contrib.vector.Layer>`,
+          :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
+          :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
+        context (:py:class:`CartoContext <cartoframes.context.CartoContext>`): A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+
+    Example:
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap([vector.Layer('table in your account'), ], cc)
     """
-    warn(
-        'The `vector` module is in contrib, meaning that all features are '
-        'subject to change as they are experimental features'
-    )
     non_local_layers = [
         layer for layer in layers
         if not isinstance(layer, LocalLayer)
