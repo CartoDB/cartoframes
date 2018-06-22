@@ -722,19 +722,22 @@ class CartoContext(object):
             #  checking once Import API sql/table_name collision_strategy=skip
             #  bug is fixed ref: support/1127
             try:
-                self.sql_client.send('''
-                    CREATE TABLE {0} AS SELECT 1;
-                    DROP TABLE {0};
+                has_table = self.sql_client.send('''
+                    SELECT to_regclass('{}') AS r
                 '''.format(table_name))
+                assert has_table['rows'][0]['r'] == table_name
                 resp = self._auth_send(
                     'api/v1/imports', 'POST',
                     params=dict(table_name=table_name),
                     json=dict(sql=query),
                     # collision_strategy='',
                     headers={'Content-Type': 'application/json'})
-            except CartoException as err:
+            except AssertionError:
                 raise CartoException(
-                    'Cannot create table `{0}`: {1}'.format(table_name, err))
+                    'Cannot create table `{}`, it already exists'.format(
+                        table_name))
+            except CartoException as err:
+                raise CartoException(err)
 
             while True:
                 import_job = self._check_import(resp['item_queue_id'])
@@ -756,12 +759,16 @@ class CartoContext(object):
                 skipfields='the_geom_webmercator',
                 **DEFAULT_SQL_ARGS)
         else:
-            select_res = self.sql_client.send(
-                query,
-                skipfields='the_geom_webmercator',
-                **DEFAULT_SQL_ARGS)
-            if 'error' in select_res:
-                raise CartoException(str(select_res['error']))
+            try:
+                select_res = self.sql_client.send(
+                    query,
+                    skipfields='the_geom_webmercator',
+                    **DEFAULT_SQL_ARGS)
+                if 'error' in select_res:
+                    print('error in select_res', select_res)
+                    raise CartoException(str(select_res['error']))
+            except CartoException as err:
+                return CartoException(err)
 
         self._debug_print(select_res=select_res)
 
