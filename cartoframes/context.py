@@ -96,7 +96,8 @@ class CartoContext(object):
 
     Attributes:
         creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
-          :py:class:`Credentials <cartoframes.credentials.Credentials>` instance
+          :py:class:`Credentials <cartoframes.credentials.Credentials>`
+          instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -1426,7 +1427,9 @@ class CartoContext(object):
                     'region in the following order: western longitude, '
                     'southern latitude, eastern longitude, and northern '
                     'latitude. For example, Switerland fits in '
-                    '``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``.')
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.'
+                )
             boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
                         'env, 500::int AS cnt'.format(*region))
 
@@ -1676,8 +1679,10 @@ class CartoContext(object):
         for suggested in _meta['suggested_name']:
             if suggested in tablecols:
                 names[suggested] = utils.unique_colname(suggested, tablecols)
-                warn('{s0} was augmented as {s1} because of name collision'. \
-                    format(s0=suggested, s1=names[suggested]))
+                warn(
+                    '{s0} was augmented as {s1} because of name '
+                    'collision'.format(s0=suggested, s1=names[suggested])
+                )
             else:
                 names[suggested] = suggested
 
