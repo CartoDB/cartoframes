@@ -1,4 +1,4 @@
-"""CartoContext and BatchJobStatus classes"""
+"""CartoContext class"""
 from __future__ import absolute_import
 import json
 import os
@@ -15,7 +15,7 @@ import pandas as pd
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
-from carto.auth import APIKeyAuthClient
+from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
@@ -26,8 +26,10 @@ from .dataobs import get_countrytag
 from . import utils
 from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
-                              get_map_template, top_basemap_layer_url)
-from cartoframes.__version__ import __version__
+                   get_map_template, top_basemap_layer_url)
+from .analysis import Table
+from .batch import BatchJobStatus
+from .__version__ import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -82,7 +84,10 @@ class CartoContext(object):
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
-      2. By passing a :py:class:`Credentials` instance in :py:attr:`creds`
+      2. By passing a :py:class:`Credentials
+         <cartoframes.credentials.Credentials>` instance in
+         :py:class:`CartoContext <cartoframes.context.CartoContext>`'s
+         :py:attr:`creds <cartoframes.credentials.Credentials.creds>`
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
@@ -90,7 +95,9 @@ class CartoContext(object):
             cc = CartoContext(creds=creds)
 
     Attributes:
-        creds (:py:class:`Credentials`): :py:class:`Credentials` instance
+        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
+          :py:class:`Credentials <cartoframes.credentials.Credentials>`
+          instance
 
     Args:
         base_url (str): Base URL of CARTO user account. Cloud-based accounts
@@ -99,8 +106,9 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-        creds (:py:class:`Credentials`): A :py:class:`Credentials` instance can
-          be used in place of a `base_url`/`api_key` combination.
+        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
+          A :py:class:`Credentials <cartoframes.credentials.Credentials>`
+          instance can be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -109,8 +117,9 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-        :py:class:`CartoContext`: A :py:class:`CartoContext` object that is
-        authenticated against the user's CARTO account.
+        :py:class:`CartoContext <cartoframes.context.CartoContext>`: A
+        CartoContext object that is authenticated against the user's CARTO
+        account.
 
     Example:
         Create a :py:class:`CartoContext` object::
@@ -125,6 +134,9 @@ class CartoContext(object):
         self.auth_client = APIKeyAuthClient(base_url=self.creds.base_url(),
                                             api_key=self.creds.key(),
                                             session=session)
+        self.auth_api_client = AuthAPIClient(base_url=self.creds.base_url(),
+                                             api_key=self.creds.key(),
+                                             session=session)
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
@@ -136,23 +148,17 @@ class CartoContext(object):
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
-        # check if user is authenticated
-        try:
-            self.sql_client.send(
-                'select * from information_schema.tables limit 0')
-        except CartoException as err:
-            raise CartoException('Cannot authenticate user `{0}`. Check '
-                                 'credentials ({1}).'.format(
-                                     self.creds.username(),
-                                     err))
+        if not self.auth_api_client.is_valid_api_key():
+            raise CartoException(
+                'Cannot authenticate user `{}`. Check credentials.'.format(
+                    self.creds.username()))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send('SHOW search_path', **DEFAULT_SQL_ARGS)
-
-        paths = [p.strip() for p in res['rows'][0]['search_path'].split(',')]
+        res = self.sql_client.send("select unnest(current_schemas('f'))",
+                                   **DEFAULT_SQL_ARGS)
         # is an org user if first item is not `public`
-        return paths[0] != 'public'
+        return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
              decode_geom=False, shared_user=None):
@@ -194,6 +200,26 @@ class CartoContext(object):
                 raise ValueError("`limit` parameter must an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
+
+    @utils.temp_ignore_warnings
+    def tables(self):
+        """List all tables in user's CARTO account
+
+        Returns:
+            :obj:`list` of :py:class:`Table <cartoframes.analysis.Table>`
+
+        """
+        datasets = DatasetManager(self.auth_client).filter(
+            show_table_size_and_row_count='false',
+            show_table='false',
+            show_stats='false',
+            show_likes='false',
+            show_liked='false',
+            show_permission='false',
+            show_uses_builder_features='false',
+            show_synchronization='false',
+            load_totals='false')
+        return [Table.from_dataset(d) for d in datasets]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
@@ -259,9 +285,11 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`BatchJobStatus` or None: If `lnglat` flag is set and the
-            DataFrame has more than 100,000 rows, a :py:class:`BatchJobStatus`
-            instance is returned. Otherwise, None.
+            :py:class:`BatchJobStatus <cartoframes.batch.BatchJobStatus>` or
+            None: If `lnglat` flag is set and the DataFrame has more than
+            100,000 rows, a :py:class:`BatchJobStatus
+            <cartoframes.batch.BatchJobStatus>` instance is returned.
+            Otherwise, None.
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
@@ -350,6 +378,7 @@ class CartoContext(object):
                                      'dataset',
                                      final_table_name)))
 
+    @utils.temp_ignore_warnings
     def _get_privacy(self, table_name):
         """gets current privacy of a table"""
         ds_manager = DatasetManager(self.auth_client)
@@ -359,6 +388,7 @@ class CartoContext(object):
         except NotFoundException:
             return None
 
+    @utils.temp_ignore_warnings
     def _update_privacy(self, table_name, privacy):
         """Updates the privacy of a dataset"""
         ds_manager = DatasetManager(self.auth_client)
@@ -761,7 +791,9 @@ class CartoContext(object):
         """Produce a CARTO map visualizing data layers.
 
         Examples:
-            Create a map with two data layers, and one BaseMap layer::
+            Create a map with two data :py:class:`Layer
+            <cartoframes.layer.Layer>`\s, and one :py:class:`BaseMap
+            <cartoframes.layer.BaseMap>` layer::
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
@@ -785,16 +817,18 @@ class CartoContext(object):
                        lng=-68.3823549,
                        lat=44.3036906)
         Args:
-            layers (list, optional): List of one or more of the following:
+            layers (list, optional): List of zero or more of the following:
 
-                - Layer: cartoframes Layer object for visualizing data from a
-                  CARTO table. See `layer.Layer <#layer.Layer>`__ for all
-                  styling options.
-                - BaseMap: Basemap for contextualizng data layers. See
-                  `layer.BaseMap <#layer.BaseMap>`__ for all styling options.
-                - QueryLayer: Layer from an arbitrary query. See
-                  `layer.QueryLayer <#layer.QueryLayer>`__ for all styling
-                  options.
+                - :py:class:`Layer <cartoframes.layer.Layer>`: cartoframes
+                  :py:class:`Layer <cartoframes.layer.Layer>` object for
+                  visualizing data from a CARTO table. See :py:class:`Layer
+                  <cartoframes.layer.Layer>` for all styling options.
+                - :py:class:`BaseMap <cartoframes.layer.BaseMap>`: Basemap for
+                  contextualizng data layers. See :py:class:`BaseMap
+                  <cartoframes.layer.BaseMap>` for all styling options.
+                - :py:class:`QueryLayer <cartoframes.layer.QueryLayer>`: Layer
+                  from an arbitrary query. See :py:class:`QueryLayer
+                  <cartoframes.layer.QueryLayer>` for all styling options.
 
             interactive (bool, optional): Defaults to ``True`` to show an
                 interactive slippy map. Setting to ``False`` creates a static
@@ -1094,11 +1128,13 @@ class CartoContext(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
-        boundaries for a region and, with :py:meth:`CartoContext.data` and
-        :py:meth:`CartoContext.data_discovery`, getting tables of geometries and the
-        corresponding raw measures. For example, if you want to analyze
-        how median income has changed in a region (see examples section for
-        more).
+        boundaries for a region and, with :py:meth:`CartoContext.data
+        <cartoframes.context.CartoContext.data>` and
+        :py:meth:`CartoContext.data_discovery
+        <cartoframes.context.CartoContext.data_discovery>`, getting tables of
+        geometries and the corresponding raw measures. For example, if you want
+        to analyze how median income has changed in a region (see examples
+        section for more).
 
         Examples:
 
@@ -1155,9 +1191,10 @@ class CartoContext(object):
               that are of interest. For example, US census tracts have a
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running `CartoContext.data_boundaries` without any arguments,
-              or by looking in the `Data Observatory catalog
-              <http://cartodb.github.io/bigmetadata/>`__.
+              running :py:meth:`CartoContext.data_boundaries
+              <cartoframes.context.CartoContext.data_boundaries>`
+              without any arguments, or by looking in the `Data Observatory
+              catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
               if `boundary` is specified, boundary polygons are of interest.
               `region` can be one of the following:
@@ -1231,9 +1268,11 @@ class CartoContext(object):
             filters = ' AND '.join(r for r in [regionsearch, clipped] if r)
             query = utils.minify_sql((
                 'SELECT *',
-                'FROM OBS_GetAvailableGeometries({bounds})',
+                'FROM OBS_GetAvailableGeometries(',
+                '  {bounds}, null, null, null, {timespan})',
                 '{filters}')).format(
                     bounds=bounds,
+                    timespan=utils.pgquote(timespan),
                     filters='WHERE {}'.format(filters) if filters else ''
                 )
             return self.query(query)
@@ -1284,11 +1323,12 @@ class CartoContext(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        `CartoContext.data`. For the full Data Observatory catalog, visit
+        :py:meth:`CartoContext.data <cartoframes.context.CartoContext.data>`.
+        For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `CartoContext.data <#context.CartoContext.data>`__ generally
-        needs the full metadata.
+        columns as `CartoContext.data <cartoframes.context.CartoContext.data>`
+        generally needs the full metadata.
 
         .. note::
             Narrowing down a discovery query using the `keywords`, `regex`, and
@@ -1391,7 +1431,9 @@ class CartoContext(object):
                     'region in the following order: western longitude, '
                     'southern latitude, eastern longitude, and northern '
                     'latitude. For example, Switerland fits in '
-                    '``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``.')
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.'
+                )
             boundary = ('SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS '
                         'env, 500::int AS cnt'.format(*region))
 
@@ -1548,7 +1590,8 @@ class CartoContext(object):
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
             metadata (pandas.DataFrame): List of all measures to add to
-                `table_name`. See `CartoContext.data_discovery` outputs
+                `table_name`. See :py:meth:`CartoContext.data_discovery
+                <cartoframes.context.CartoContext.data_discovery>` outputs
                 for a full list of metadata columns.
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
@@ -1640,8 +1683,10 @@ class CartoContext(object):
         for suggested in _meta['suggested_name']:
             if suggested in tablecols:
                 names[suggested] = utils.unique_colname(suggested, tablecols)
-                warn('{s0} was augmented as {s1} because of name collision'. \
-                    format(s0=suggested, s1=names[suggested]))
+                warn(
+                    '{s0} was augmented as {s1} because of name '
+                    'collision'.format(s0=suggested, s1=names[suggested])
+                )
             else:
                 names[suggested] = suggested
 
@@ -1899,92 +1944,3 @@ def _df2pg_schema(dataframe, pgcolnames):
     if 'the_geom' in pgcolnames:
         return '"the_geom", ' + schema
     return schema
-
-
-class BatchJobStatus(object):
-    """Status of a write or query operation. Read more at `Batch SQL API docs
-    <https://carto.com/docs/carto-engine/sql-api/batch-queries/>`__ about
-    responses and how to interpret them.
-
-    Example:
-
-        Poll for a job's status if you've caught the :py:class:`BatchJobStatus`
-        instance.
-
-        .. code:: python
-
-            import time
-            job = cc.write(df, 'new_table',
-                           lnglat=('lng_col', 'lat_col'))
-            while True:
-                curr_status = job.status()['status']
-                if curr_status in ('done', 'failed', 'canceled', 'unknown', ):
-                    print(curr_status)
-                    break
-                time.sleep(5)
-
-        Create a :py:class:`BatchJobStatus` instance if you have a `job_id`
-        output from a `cc.write` operation.
-
-        .. code:: python
-
-            >>> from cartoframes import CartoContext, BatchJobStatus
-            >>> cc = CartoContext(username='...', api_key='...')
-            >>> cc.write(df, 'new_table', lnglat=('lng', 'lat'))
-            'BatchJobStatus(job_id='job-id-string', ...)'
-            >>> batch_job = BatchJobStatus(cc, 'job-id-string')
-
-    Attrs:
-        job_id (str): Job ID of the Batch SQL API job
-        last_status (str): Status of ``job_id`` job when last polled
-        created_at (str): Time and date when job was created
-
-    Args:
-        carto_context (carto.CartoContext): CartoContext instance
-        job (dict or str): If a dict, job status dict returned after sending
-            a Batch SQL API request. If str, a Batch SQL API job id.
-    """
-    def __init__(self, carto_context, job):
-        if isinstance(job, dict):
-            self.job_id = job.get('job_id')
-            self.last_status = job.get('status')
-            self.created_at = job.get('created_at')
-        elif isinstance(job, str):
-            self.job_id = job
-            self.last_status = None
-            self.created_at = None
-
-        self._batch_client = BatchSQLClient(carto_context.auth_client)
-
-    def __repr__(self):
-        return ('BatchJobStatus(job_id=\'{job_id}\', '
-                'last_status=\'{status}\', '
-                'created_at=\'{created_at}\')'.format(
-                    job_id=self.job_id,
-                    status=self.last_status,
-                    created_at=self.created_at))
-
-    def _set_status(self, curr_status):
-        self.last_status = curr_status
-
-    def get_status(self):
-        """return current status of job"""
-        return self.last_status
-
-    def status(self):
-        """Checks the current status of job ``job_id``
-
-        Returns:
-            dict: Status and time it was updated
-
-        Warns:
-            UserWarning: If the job failed, a warning is raised with
-                information about the failure
-        """
-        resp = self._batch_client.read(self.job_id)
-        if 'failed_reason' in resp:
-            warn('Job failed: {}'.format(resp.get('failed_reason')))
-        self._set_status(resp.get('status'))
-        return dict(status=resp.get('status'),
-                    updated_at=resp.get('updated_at'),
-                    created_at=resp.get('created_at'))

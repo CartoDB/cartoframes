@@ -20,6 +20,7 @@ CartoContext
     :members: read, query, delete, map, data_discovery, data, data_boundaries
 
     .. automethod:: write(df, table_name, temp_dir=SYSTEM_TMP_PATH, overwrite=False, lnglat=None, encode_geom=False, geom_col=None, \*\*kwargs)
+    .. automethod:: tables()
 
 Map Layer Classes
 =================
@@ -42,7 +43,7 @@ Map Styling Functions
 
 BatchJobStatus
 ==============
-.. autoclass:: cartoframes.context.BatchJobStatus
+.. autoclass:: cartoframes.batch.BatchJobStatus
     :noindex:
     :members:
 
@@ -51,6 +52,24 @@ Credentials Management
 .. automodule:: cartoframes.credentials
     :noindex:
     :members:
+
+Example Datasets
+================
+.. automodule:: cartoframes.examples
+
+Data access functions
+---------------------
+.. autofunction:: cartoframes.examples.read_brooklyn_poverty
+.. autofunction:: cartoframes.examples.read_mcdonalds_nyc
+.. autofunction:: cartoframes.examples.read_nat
+.. autofunction:: cartoframes.examples.read_nyc_census_tracts
+.. autofunction:: cartoframes.examples.read_taxi
+
+Example CartoContext
+--------------------
+
+.. autoclass:: cartoframes.examples.Examples
+    :members: read_brooklyn_poverty, read_mcdonalds_nyc, read_nat, read_nyc_census_tracts, read_taxi
 
 contrib
 =======
