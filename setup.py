@@ -4,13 +4,7 @@
 import os
 import io
 from codecs import open
-from setuptools import setup
-
-NAME = 'cartoframes'
-DESCRIPTION = 'CARTO Python package for data scientists'
-URL = 'https://github.com/CartoDB/cartoframes'
-AUTHOR = 'Andy Eschbacher'
-EMAIL = 'andy@carto.com'
+from setuptools import setup, find_packages
 
 REQUIRES = [
     'pandas>=0.20.1',
@@ -29,24 +23,34 @@ EXTRAS_REQUIRE = {
     ],
 }
 
+PACKAGE_DATA = {
+    '': [
+        'LICENSE',
+        'CONTRIBUTORS',
+    ],
+    'cartoframes': [
+        'assets/*',
+    ],
+}
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
 about = {}
-with open(os.path.join(here, NAME, '__version__.py')) as f:
+with open(os.path.join(here, 'cartoframes', '__version__.py'), 'r', 'utf-8') as f:
         exec(f.read(), about)
 
 setup(
-    name=NAME,
+    name=about['__title__'],
     version=about['__version__'],
-    description=DESCRIPTION,
+    description=about['__description__'],
     long_description=long_description,
-    url=URL,
-    author=AUTHOR,
-    author_email=EMAIL,
-    license='BSD',
+    url=about['__url__'],
+    author=about['__author__'],
+    author_email=about['__email__'],
+    license=about['__license__'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -58,24 +62,15 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
     ],
     keywords='carto data science maps spatial pandas',
-    packages=[
-        'cartoframes',
-        ],
+    packages=find_packages(),
     install_requires=REQUIRES,
+    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     extras_require=EXTRAS_REQUIRE,
     include_package_data=True,
     package_dir={'cartoframes': 'cartoframes'},
-    package_data={
-        '': [
-            'LICENSE',
-            'CONTRIBUTORS',
-            ],
-        'cartoframes': [
-            'assets/*',
-            'contrib/*',
-            ],
-    },
+    package_data=PACKAGE_DATA,
 )
