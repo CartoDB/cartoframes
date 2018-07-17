@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.7.1
+-----
+
+Release 2018-07-16
+
+Updates
+
+- Fixes issues where contrib wasn't included in distributions (#469)
+
 0.7.0
 -----
 
