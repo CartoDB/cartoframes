@@ -715,6 +715,13 @@ class CartoContext(object):
             Pandas data types are inferred from PostgreSQL data types.
             In the case of PostgreSQL date types, dates are attempted to be
             converted, but on failure a data type 'object' is used.
+
+        Examples:
+            Query a table in CARTO and write a new table that is result of query
+
+            .. code:: python
+                topten_df = cc.query('SELECT * from my_table ORDER BY value_column DESC LIMIT 10',
+                            table_name='top_ten')
         """
         self._debug_print(query=query)
         if table_name:
