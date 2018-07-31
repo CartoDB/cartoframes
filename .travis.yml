@@ -11,7 +11,7 @@ install:
     - pip install . # install package
     - pip install -r requirements.txt # install requires
     - if [[ -n $MPLBACKEND ]]; then pip install matplotlib; fi
-    - if [[ $USE_GEOPANDAS ]]; then pip install git+git://github.com/geopandas/geopandas.git#egg=geopandas; fi
+    - if [[ $USE_GEOPANDAS ]]; then pip install geopandas; fi
     - pip install shapely coveralls # only for testing
 script:
     - nosetests --verbose --with-coverage --cover-package=cartoframes
