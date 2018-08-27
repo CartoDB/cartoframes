@@ -787,7 +787,7 @@ class CartoContext(object):
 
     def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None, size=(800, 400),
-            ax=None):
+            ax=None, save_fig=None):
         """Produce a CARTO map visualizing data layers.
 
         Examples:
@@ -848,6 +848,9 @@ class CartoContext(object):
                 Format is ``(width, height)``. Defaults to ``(800, 400)``.
             ax: matplotlib axis on which to draw the image. Only used when
                 ``interactive`` is ``False``.
+            save_fig (string, optional): Pass in a filename to save the figure
+                as an html file if interactive is True or as a png, according to
+                matplotlib.pyplot `savefig` defaults.
 
         Returns:
             IPython.display.HTML or matplotlib Axes: Interactive maps are
@@ -1055,7 +1058,9 @@ class CartoContext(object):
                 map_options=map_options,
                 top_layer_url=top_basemap_layer_url(layers)
             )
-
+            if save_fig:
+                with open("{}.html".format(save_fig), "w") as html_file:
+                    html_file.write(content)
             img_html = html
             html = (
                 '<iframe srcdoc="{content}" width={width} height={height}>'
@@ -1076,6 +1081,10 @@ class CartoContext(object):
                 ax = plt.gca()
             ax.imshow(raw_data)
             ax.axis('off')
+
+            if save_fig:
+                fig.savefig(save_fig)
+
             return ax
         else:
             return Image(url=static_url,
@@ -1084,7 +1093,9 @@ class CartoContext(object):
                          width=size[0],
                          height=size[1],
                          metadata=dict(origin_url=static_url))
-
+            if save_fig:
+                with open(save_fig, "w") as png:
+                    png.write(img.image)
     def _geom_type(self, source):
         """gets geometry type(s) of specified layer"""
         if isinstance(source, AbstractLayer):
