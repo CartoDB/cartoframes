@@ -1,2 +1,2 @@
 # include the license, README, and asset files
-include LICENSE README.rst cartoframes/assets/*
+include LICENSE README.rst NEWS.rst

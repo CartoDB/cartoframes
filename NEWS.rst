@@ -1,6 +1,25 @@
 Changelog
 =========
 
+0.7.2
+-----
+
+Release 2018-08-27
+
+Updates
+
+- Adds size option for CARTO VL maps
+- Bumps Mapbox GL library so vector maps work correctly
+
+0.7.1
+-----
+
+Release 2018-07-16
+
+Updates
+
+- Fixes issues where contrib wasn't included in distributions (#469)
+
 0.7.0
 -----
 
