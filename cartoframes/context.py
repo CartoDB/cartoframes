@@ -1095,6 +1095,12 @@ class CartoContext(object):
                          metadata=dict(origin_url=static_url))
             if save_fig:
                 with open(save_fig, "w") as png:
+                    img = Image(url=static_url,
+                                 embed=True,
+                                 format='png',
+                                 width=size[0],
+                                 height=size[1],
+                                 metadata=dict(origin_url=static_url))
                     png.write(img.image)
     def _geom_type(self, source):
         """gets geometry type(s) of specified layer"""
