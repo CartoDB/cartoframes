@@ -255,4 +255,4 @@ To import an experimental feature, like vector maps, do the following:
     from cartoframes import CartoContext
 
     cc = CartoContext()
-    vector.vmap([vector.Layer('<table name>'), ])
+    vector.vmap([vector.Layer('<table name>'), ], context=cc)
