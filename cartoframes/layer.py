@@ -310,13 +310,9 @@ class QueryLayer(AbstractLayer):
           requesting a time-based map with a data source that has geometries
           other than points.
     """  # noqa
-<<<<<<< HEAD
-    def __init__(self, query, time=None, color=None, size=None,
-                 tooltip=None, legend=None, cartocss=None):
-=======
+
     def __init__(self, query, time=None, color=None, size=None, opacity=None,
                  tooltip=None, legend=None):
->>>>>>> 7e38a57f795fdbc5d1736eb941c92adec58d6a9d
 
         self.query = query
         self.orig_query = query
@@ -324,7 +320,6 @@ class QueryLayer(AbstractLayer):
         # style columns as keys, data types as values
         self.style_cols = dict()
         self.geom_type = None
-        self.cartocss = cartocss
         self.torque_cartocss = None
 
         # TODO: move these if/else branches to individual methods
@@ -546,10 +541,10 @@ class QueryLayer(AbstractLayer):
 
         line_color = '#000' if basemap.source == 'dark' else '#FFF'
 
-        if self.cartocss:
-            css = cssify(self.cartocss)
-            print(css)
-            return css
+        # if self.cartocss:
+        #     css = cssify(self.cartocss)
+        #     print(css)
+        #     return css
 
         if self.time:
             css = cssify({
@@ -662,12 +657,8 @@ class Layer(QueryLayer):
         overwrite (bool, optional): Not currently implemented
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
-<<<<<<< HEAD
-                 color=None, size=None, tooltip=None, cartocss=None, legend=None):
-=======
                  color=None, size=None, opacity=None, tooltip=None,
                  legend=None):
->>>>>>> 7e38a57f795fdbc5d1736eb941c92adec58d6a9d
 
         self.table_name = table_name
         self.source = source
@@ -679,8 +670,7 @@ class Layer(QueryLayer):
                                     size=size,
                                     opacity=opacity,
                                     tooltip=tooltip,
-                                    legend=legend,
-                                    cartocss=cartocss)
+                                    legend=legend)
 
     def _setup(self, layers, layer_idx):
         if isinstance(self.source, pd.DataFrame):
