@@ -715,6 +715,31 @@ class CartoContext(object):
             Pandas data types are inferred from PostgreSQL data types.
             In the case of PostgreSQL date types, dates are attempted to be
             converted, but on failure a data type 'object' is used.
+
+        Examples:
+            Query a table in CARTO and write a new table that is result of query.
+            This query gets the 10 highest values from a table and returns a dataframe,
+            as well as creating a new table called 'top_ten' in the CARTO account.
+
+            .. code:: python
+                topten_df = cc.query('SELECT * FROM my_table ORDER BY value_column DESC LIMIT 10',
+                            table_name='top_ten')
+
+            This query joins points to polygons based on intersection, and aggregates
+            by summing the values of the points in each polygon. The query returns
+            a dataframe, with a geometry column that contains polygons and also
+            creates a new table called 'points_aggregated_to_polygons' in the
+            CARTO account.
+
+            .. code:: python
+                points_aggregated_to_polygons = cc.query('''SELECT polygons.*, sum(points.values)
+                                                          FROM polygons JOIN points
+                                                          ON ST_Intersects(points.the_geom, polygons.the_geom)
+                                                          GROUP BY polygons.the_geom, polygons.cartodb_id
+                                                          ''',
+                            table_name='points_aggregated_to_polygons',
+                            decode_geom=True)
+
         """
         self._debug_print(query=query)
         if table_name:
