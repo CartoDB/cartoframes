@@ -732,10 +732,11 @@ class CartoContext(object):
             CARTO account.
 
             .. code:: python
-                points_aggregated_to_polygons = cc.query('SELECT polygons.*, sum(points.values)
+                points_aggregated_to_polygons = cc.query('''SELECT polygons.*, sum(points.values)
                                                           FROM polygons JOIN points
                                                           ON ST_Intersects(points.the_geom, polygons.the_geom)
-                                                          GROUP BY polygons.the_geom, polygons.cartodb_id',
+                                                          GROUP BY polygons.the_geom, polygons.cartodb_id
+                                                          ''',
                             table_name='points_aggregated_to_polygons',
                             decode_geom=True)
 
