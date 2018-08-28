@@ -238,7 +238,7 @@ class LocalLayer(QueryLayer):
             interactivity=interactivity
         )
 
-def vmap(layers, context):
+def vmap(layers, context, size=(800, 400)):
     """CARTO VL-powered interactive map
 
     Args:
@@ -285,9 +285,14 @@ def vmap(layers, context):
             'source': layer.geojson_str if is_local else layer.query,
             'interactivity': intera
         })
-    html = '<iframe srcdoc="{content}" width=800 height=400></iframe>'.format(
-        content=utils.safe_quotes(
-            _get_html_doc(jslayers, bounds, context.creds)
-        )
+    html = (
+            '<iframe srcdoc="{content}" width={width} height={height}>'
+            '</iframe>'
+        ).format(
+            width=size[0],
+            height=size[1],
+            content=utils.safe_quotes(
+                _get_html_doc(jslayers, bounds, context.creds)
+            )
     )
     return HTML(html)
