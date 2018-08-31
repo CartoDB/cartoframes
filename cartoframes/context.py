@@ -262,7 +262,7 @@ class CartoContext(object):
                 creating a geometry on CARTO. Defaults to ``None``. In some
                 cases, geometry will be created without specifying this. See
                 CARTO's `Import API
-                <https://carto.com/docs/carto-engine/import-api/standard-tables>`__
+                <https://carto.com/developers/import-api/reference/#tag/Standard-Tables>`__
                 for more information.
             encode_geom (bool, optional): Whether to write `geom_col` to CARTO
                 as `the_geom`.
@@ -276,7 +276,7 @@ class CartoContext(object):
                   Options are ``None`` (no compression, default) or ``gzip``.
                 - Some arguments from CARTO's Import API. See the `params
                   listed in the documentation
-                  <https://carto.com/docs/carto-engine/import-api/standard-tables/#params>`__
+                  <https://carto.com/developers/import-api/reference/#tag/Standard-Tables>`__
                   for more information. For example, when using
                   `content_guessing='true'`, a column named 'countries' with
                   country names will be used to generate polygons for each
@@ -625,8 +625,7 @@ class CartoContext(object):
         except CartoException as err:
             warn('DataFrame written to CARTO but the table schema failed to '
                  'update to match DataFrame. All columns in CARTO table have '
-                 'data type `text`. CARTO error: `{err}`.'.format(
-                     err=err))
+                 'data type `text`. CARTO error: `{err}`.'.format(err=err))
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
@@ -639,21 +638,23 @@ class CartoContext(object):
         """Handle state of import job"""
         if import_job['state'] == 'failure':
             if import_job['error_code'] == 8001:
-                raise CartoException('Over CARTO account storage limit for '
-                                     'user `{}`. Try subsetting your '
-                                     'DataFrame or dropping columns to reduce '
-                                     'the data size.'.format(
-                                         self.creds.username()))
+                raise CartoException(
+                    'Over CARTO account storage limit for user `{}`. Try '
+                    'subsetting your DataFrame or dropping columns to reduce '
+                    'the data size.'.format(self.creds.username())
+                )
             elif import_job['error_code'] == 6668:
-                raise CartoException('Too many rows in DataFrame. Try '
-                                     'subsetting DataFrame before writing to '
-                                     'CARTO.')
+                raise CartoException(
+                    'Too many rows in DataFrame. Try subsetting '
+                    'DataFrame before writing to CARTO.'
+                )
             else:
-                raise CartoException('Error code: `{}`. See CARTO Import '
-                                     'API error documentation for more '
-                                     'information: https://carto.com/docs/'
-                                     'carto-engine/import-api/import-errors'
-                                     ''.format(import_job['error_code']))
+                raise CartoException(
+                    'Error code: `{}`. See CARTO Import API error '
+                    'documentation for more information: '
+                    'https://carto.com/developers/import-api/support/'
+                    'import-errors/'.format(import_job['error_code'])
+                )
         elif import_job['state'] == 'complete':
             import_job_table_name = import_job['table_name']
             self._debug_print(final_table=import_job_table_name)
@@ -673,12 +674,14 @@ class CartoContext(object):
                     self._debug_print(res=res)
                 except Exception as err:
                     self._debug_print(err=err)
-                    raise Exception('Cannot overwrite table `{table_name}` '
-                                    '({err}). DataFrame was written to '
-                                    '`{new_table}` instead.'.format(
-                                        table_name=table_name,
-                                        err=err,
-                                        new_table=import_job_table_name))
+                    raise Exception(
+                        'Cannot overwrite table `{table_name}` ({err}). '
+                        'DataFrame was written to `{new_table}` '
+                        'instead.'.format(
+                            table_name=table_name,
+                            err=err,
+                            new_table=import_job_table_name)
+                    )
                 finally:
                     self.delete(import_job_table_name)
         return table_name
@@ -717,28 +720,40 @@ class CartoContext(object):
             converted, but on failure a data type 'object' is used.
 
         Examples:
-            Query a table in CARTO and write a new table that is result of query.
-            This query gets the 10 highest values from a table and returns a dataframe,
-            as well as creating a new table called 'top_ten' in the CARTO account.
+            Query a table in CARTO and write a new table that is result of
+            query. This query gets the 10 highest values from a table and
+            returns a dataframe, as well as creating a new table called
+            'top_ten' in the CARTO account.
 
             .. code:: python
-                topten_df = cc.query('SELECT * FROM my_table ORDER BY value_column DESC LIMIT 10',
-                            table_name='top_ten')
+                topten_df = cc.query(
+                    '''
+                      SELECT * FROM
+                      my_table
+                      ORDER BY value_column DESC
+                      LIMIT 10
+                    ''',
+                    table_name='top_ten'
+                )
 
-            This query joins points to polygons based on intersection, and aggregates
-            by summing the values of the points in each polygon. The query returns
-            a dataframe, with a geometry column that contains polygons and also
-            creates a new table called 'points_aggregated_to_polygons' in the
-            CARTO account.
+            This query joins points to polygons based on intersection, and
+            aggregates by summing the values of the points in each polygon. The
+            query returns a dataframe, with a geometry column that contains
+            polygons and also creates a new table called
+            'points_aggregated_to_polygons' in the CARTO account.
 
             .. code:: python
-                points_aggregated_to_polygons = cc.query('''SELECT polygons.*, sum(points.values)
-                                                          FROM polygons JOIN points
-                                                          ON ST_Intersects(points.the_geom, polygons.the_geom)
-                                                          GROUP BY polygons.the_geom, polygons.cartodb_id
-                                                          ''',
-                            table_name='points_aggregated_to_polygons',
-                            decode_geom=True)
+
+                points_aggregated_to_polygons = cc.query(
+                    '''
+                      SELECT polygons.*, sum(points.values)
+                      FROM polygons JOIN points
+                      ON ST_Intersects(points.the_geom, polygons.the_geom)
+                      GROUP BY polygons.the_geom, polygons.cartodb_id
+                    ''',
+                    table_name='points_aggregated_to_polygons',
+                    decode_geom=True
+                )
 
         """
         self._debug_print(query=query)
