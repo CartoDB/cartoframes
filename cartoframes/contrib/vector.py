@@ -17,6 +17,12 @@ except ImportError:
 
 from .. import utils
 
+class BaseMaps:
+    """Supported CARTO vector basemaps"""
+    positron = 'Positron'
+    darkmatter = 'DarkMatter'
+    voyager = 'Voyager'
+
 class QueryLayer(object):
     """CARTO VL layer based on an arbitrary query against user database
 
@@ -144,18 +150,27 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
         'assets',
         'vector.html'
     )
+    token = ''
 
     with open(html_template, 'r') as html_file:
         srcdoc = html_file.read()
 
-    if basemap is None:
-        basemap = 'DarkMatter'
     credentials = {} if creds is None else dict(user=creds.username(), api_key=creds.key())
+    if isinstance(basemap, dict):
+        token = basemap.get('token', '')
+        if not 'style' in basemap:
+            raise ValueError(
+                'If basemap is a dict, it must have a `style` key'
+            )
+        if not token and basemap.get('style').startswith('mapbox://'):
+            warn('A Mapbox style usually needs a token')
+        basemap = basemap.get('style')
 
     return (
         srcdoc\
             .replace('@@SOURCES@@', json.dumps(sources))
             .replace('@@BASEMAPSTYLE@@', basemap)
+            .replace('@@MAPBOXTOKEN@@', token)
             .replace('@@CREDENTIALS@@', json.dumps(credentials))
             .replace('@@BOUNDS@@', bounds)
     )
@@ -238,7 +253,7 @@ class LocalLayer(QueryLayer):
             interactivity=interactivity
         )
 
-def vmap(layers, context, size=(800, 400)):
+def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
 
     Args:
@@ -247,6 +262,11 @@ def vmap(layers, context, size=(800, 400)):
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`): A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+        basemap (str): 
+          - if a `str`, name of a CARTO vector basemap. One of `positron`,
+            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
+          - if a `dict`, Mapbox or other style as the value of the `style` key.
+            If a Mapbox style, the access token is the value of the `token` key.
 
     Example:
 
@@ -259,6 +279,25 @@ def vmap(layers, context, size=(800, 400)):
                 api_key='your api key'
             )
             vector.vmap([vector.Layer('table in your account'), ], cc)
+
+        Custom basemap style
+
+            .. code::
+
+                from cartoframes.contrib import vector
+                from cartoframes import CartoContext
+                cc = CartoContext(
+                    base_url='https://your_user_name.carto.com',
+                    api_key='your api key'
+                )
+                vector.vmap(
+                    [vector.Layer('table in your account'), ],
+                    context=cc,
+                    basemap={
+                        'style': 'mapbox://styles/mapbox/streets-v9',
+                        'token: 'abc123'
+                        }
+                    )
     """
     non_local_layers = [
         layer for layer in layers
@@ -292,7 +331,7 @@ def vmap(layers, context, size=(800, 400)):
             width=size[0],
             height=size[1],
             content=utils.safe_quotes(
-                _get_html_doc(jslayers, bounds, context.creds)
+                _get_html_doc(jslayers, bounds, context.creds, basemap=basemap)
             )
     )
     return HTML(html)
