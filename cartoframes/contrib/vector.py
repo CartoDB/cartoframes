@@ -18,7 +18,8 @@ except ImportError:
 from .. import utils
 
 class BaseMaps:
-    """Supported CARTO vector basemaps.
+    """Supported CARTO vector basemaps. Read more about the styles in the
+    `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
 
     Attributes:
         darkmatter (str): CARTO's "Dark Matter" style basemap
@@ -194,7 +195,7 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
 class Layer(QueryLayer):
     """Layer from a table name. See :py:class:`QueryLayer
     <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes
-    
+
     Example:
 
         Vizualize data from a table. Here we're using the example CartoContext.
@@ -278,7 +279,7 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`): A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
-        basemap (str): 
+        basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
@@ -298,39 +299,39 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
 
         CARTO basemap style.
 
-            .. code::
+        .. code::
 
-                from cartoframes.contrib import vector
-                from cartoframes import CartoContext
-                cc = CartoContext(
-                    base_url='https://your_user_name.carto.com',
-                    api_key='your api key'
-                )
-                vector.vmap(
-                    [vector.Layer('table in your account'), ],
-                    context=cc,
-                    basemap=vector.BaseMaps.darkmatter
-                )
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                basemap=vector.BaseMaps.darkmatter
+            )
 
         Custom basemap style. Here we use the Mapbox streets style, which
         requires an access token.
 
-            .. code::
+        .. code::
 
-                from cartoframes.contrib import vector
-                from cartoframes import CartoContext
-                cc = CartoContext(
-                    base_url='https://your_user_name.carto.com',
-                    api_key='your api key'
-                )
-                vector.vmap(
-                    [vector.Layer('table in your account'), ],
-                    context=cc,
-                    basemap={
-                        'style': 'mapbox://styles/mapbox/streets-v9',
-                        'token: '<your mapbox token>'
-                    }
-                )
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                basemap={
+                    'style': 'mapbox://styles/mapbox/streets-v9',
+                    'token: '<your mapbox token>'
+                }
+            )
     """
     non_local_layers = [
         layer for layer in layers
