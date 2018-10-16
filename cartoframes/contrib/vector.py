@@ -280,7 +280,24 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
             )
             vector.vmap([vector.Layer('table in your account'), ], cc)
 
-        Custom basemap style
+        CARTO basemap style.
+
+            .. code::
+
+                from cartoframes.contrib import vector
+                from cartoframes import CartoContext
+                cc = CartoContext(
+                    base_url='https://your_user_name.carto.com',
+                    api_key='your api key'
+                )
+                vector.vmap(
+                    [vector.Layer('table in your account'), ],
+                    context=cc,
+                    basemap=vector.BaseMaps.darkmatter
+                )
+
+        Custom basemap style. Here we use the Mapbox streets style, which
+        requires an access token.
 
             .. code::
 
@@ -295,9 +312,9 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
                     context=cc,
                     basemap={
                         'style': 'mapbox://styles/mapbox/streets-v9',
-                        'token: 'abc123'
-                        }
-                    )
+                        'token: '<your mapbox token>'
+                    }
+                )
     """
     non_local_layers = [
         layer for layer in layers
