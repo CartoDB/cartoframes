@@ -66,8 +66,8 @@ class QueryLayer(object):
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
         interactivity (str, list, or dict, optional): This option add
-          interactivity (click or hover) to a layer. Defaults to click if one
-          of the followring inputs are specified:
+          interactivity (click or hover) to a layer. Defaults to ``click`` if
+          one of the following inputs are specified:
 
           - dict: If a :obj:`dict`, this must have the key `cols` with its value
             a list of columns. Optionally add `event` to choose ``hover`` or
@@ -95,7 +95,11 @@ class QueryLayer(object):
             '''
             vector.vmap(
                 [vector.QueryLayer(q), ],
-                example_context
+                example_context,
+                interactivity={
+                    'cols': ['fare_amount', ],
+                    'event': 'hover'
+                }
             )
     """
     def __init__(self, query, color=None, size=None, time=None,
