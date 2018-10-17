@@ -45,7 +45,7 @@ class QueryLayer(object):
 
     Args:
         query (str): Query against user database. This query must have the
-          the following columns included to successfully have a map rendered:
+          following columns included to successfully have a map rendered:
           `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
           used in styling, they must be included in this query as well.
         color (str, optional): CARTO VL color styling for this layer. Valid
@@ -55,7 +55,7 @@ class QueryLayer(object):
         size (float or str, optional): CARTO VL width styling for this layer if
           points or lines (which are not yet implemented). Valid inputs are
           positive numbers or text expressions involving variables. To remain
-          cosistent with cartoframes' raster-based :py:class:`Layer
+          consistent with cartoframes' raster-based :py:class:`Layer
           <cartoframes.layer.Layer>` API, `size` is used here in place of
           `width`, which is the CARTO VL variable name for controlling the
           width of a point or line. Default size is 7 pixels wide.
@@ -65,7 +65,7 @@ class QueryLayer(object):
           Default is white.
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
-        interactivity (str, list, or dict, optional): This option add
+        interactivity (str, list, or dict, optional): This option adds
           interactivity (click or hover) to a layer. Defaults to ``click`` if
           one of the following inputs are specified:
 
@@ -202,7 +202,7 @@ class Layer(QueryLayer):
 
     Example:
 
-        Vizualize data from a table. Here we're using the example CartoContext.
+        Visualize data from a table. Here we're using the example CartoContext.
         To use this with your account, replace the `example_context` with your
         :py:class:`CartoContext <cartoframes.context.CartoContext>` and a table
         in the account you authenticate against.
@@ -236,7 +236,7 @@ class Layer(QueryLayer):
 class LocalLayer(QueryLayer):
     """Create a layer from a GeoDataFrame
 
-    TODO: add support for filepath to a geojson file, json/dict, or string
+    TODO: add support for filepath to a GeoJSON file, JSON/dict, or string
 
     See :obj:`QueryLayer` for the full styling documentation.
 
@@ -325,7 +325,7 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
             from cartoframes.contrib import vector
             from cartoframes import CartoContext
             cc = CartoContext(
-                base_url='https://your_user_name.carto.com',
+                base_url='https://<username>.carto.com',
                 api_key='your api key'
             )
             vector.vmap(
