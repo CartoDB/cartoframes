@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.7.3
+-----
+
+Release 2018-10-18
+
+Updates
+
+- Bump carto-python version that fixes auth api bug
+
 0.7.2
 -----
 
