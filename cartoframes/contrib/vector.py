@@ -4,6 +4,20 @@ The API for vector maps is broadly similar to :py:meth:`CartoContext.map
 expressions are expected to be straight CARTO VL expressions. See examples in
 the `CARTO VL styling guide
 <https://carto.com/developers/carto-vl/guides/styling-points/>`__
+
+Here is an example using the example CartoContext from the :py:class:`Examples <cartoframes.examples.Examples>` class.
+
+.. code::
+
+    from cartoframes.examples import example_context
+    from cartoframes.contrib import vector
+    vector.vmap(
+        [vector.Layer(
+            'nat',
+            color='ramp(globalEqIntervals($hr90, 7), sunset)',
+            strokeWidth=0),
+        ],
+        example_context)
 """
 import os
 import json
@@ -17,12 +31,35 @@ except ImportError:
 
 from .. import utils
 
+class BaseMaps:
+    """Supported CARTO vector basemaps. Read more about the styles in the
+    `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
+
+    Attributes:
+        darkmatter (str): CARTO's "Dark Matter" style basemap
+        positron (str): CARTO's "Positron" style basemap
+        voyager (str): CARTO's "Voyager" style basemap
+
+    Example:
+        Create an embedded map using CARTO's Positron style with no data layers
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext()
+            vector.vmap([], context=cc, basemap=vector.BaseMaps.positron)
+    """
+    positron = 'Positron'
+    darkmatter = 'DarkMatter'
+    voyager = 'Voyager'
+
 class QueryLayer(object):
     """CARTO VL layer based on an arbitrary query against user database
 
     Args:
         query (str): Query against user database. This query must have the
-          the following columns included to successfully have a map rendered:
+          following columns included to successfully have a map rendered:
           `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
           used in styling, they must be included in this query as well.
         color (str, optional): CARTO VL color styling for this layer. Valid
@@ -32,7 +69,7 @@ class QueryLayer(object):
         size (float or str, optional): CARTO VL width styling for this layer if
           points or lines (which are not yet implemented). Valid inputs are
           positive numbers or text expressions involving variables. To remain
-          cosistent with cartoframes' raster-based :py:class:`Layer
+          consistent with cartoframes' raster-based :py:class:`Layer
           <cartoframes.layer.Layer>` API, `size` is used here in place of
           `width`, which is the CARTO VL variable name for controlling the
           width of a point or line. Default size is 7 pixels wide.
@@ -42,9 +79,9 @@ class QueryLayer(object):
           Default is white.
         strokeWidth (float or str, optional): Defines the width of the stroke in
           pixels. Default is 1.
-        interactivity (str, list, or dict, optional): This option add
-          interactivity (click or hover) to a layer. Defaults to click if one
-          of the followring inputs are specified:
+        interactivity (str, list, or dict, optional): This option adds
+          interactivity (click or hover) to a layer. Defaults to ``click`` if
+          one of the following inputs are specified:
 
           - dict: If a :obj:`dict`, this must have the key `cols` with its value
             a list of columns. Optionally add `event` to choose ``hover`` or
@@ -72,7 +109,11 @@ class QueryLayer(object):
             '''
             vector.vmap(
                 [vector.QueryLayer(q), ],
-                example_context
+                example_context,
+                interactivity={
+                    'cols': ['fare_amount', ],
+                    'event': 'hover'
+                }
             )
     """
     def __init__(self, query, color=None, size=None, time=None,
@@ -144,29 +185,38 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
         'assets',
         'vector.html'
     )
+    token = ''
 
     with open(html_template, 'r') as html_file:
         srcdoc = html_file.read()
 
-    if basemap is None:
-        basemap = 'DarkMatter'
     credentials = {} if creds is None else dict(user=creds.username(), api_key=creds.key())
+    if isinstance(basemap, dict):
+        token = basemap.get('token', '')
+        if not 'style' in basemap:
+            raise ValueError(
+                'If basemap is a dict, it must have a `style` key'
+            )
+        if not token and basemap.get('style').startswith('mapbox://'):
+            warn('A Mapbox style usually needs a token')
+        basemap = basemap.get('style')
 
     return (
         srcdoc\
             .replace('@@SOURCES@@', json.dumps(sources))
             .replace('@@BASEMAPSTYLE@@', basemap)
+            .replace('@@MAPBOXTOKEN@@', token)
             .replace('@@CREDENTIALS@@', json.dumps(credentials))
             .replace('@@BOUNDS@@', bounds)
     )
 
 class Layer(QueryLayer):
-    """Layer from a table name. See :py:class:`QueryLayer
-    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes
-    
+    """Layer from a table name. See :py:class:`vector.QueryLayer
+    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes.
+
     Example:
 
-        Vizualize data from a table. Here we're using the example CartoContext.
+        Visualize data from a table. Here we're using the example CartoContext.
         To use this with your account, replace the `example_context` with your
         :py:class:`CartoContext <cartoframes.context.CartoContext>` and a table
         in the account you authenticate against.
@@ -200,7 +250,7 @@ class Layer(QueryLayer):
 class LocalLayer(QueryLayer):
     """Create a layer from a GeoDataFrame
 
-    TODO: add support for filepath to a geojson file, json/dict, or string
+    TODO: add support for filepath to a GeoJSON file, JSON/dict, or string
 
     See :obj:`QueryLayer` for the full styling documentation.
 
@@ -238,7 +288,7 @@ class LocalLayer(QueryLayer):
             interactivity=interactivity
         )
 
-def vmap(layers, context, size=(800, 400)):
+def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
 
     Args:
@@ -247,6 +297,11 @@ def vmap(layers, context, size=(800, 400)):
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`): A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+        basemap (str):
+          - if a `str`, name of a CARTO vector basemap. One of `positron`,
+            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
+          - if a `dict`, Mapbox or other style as the value of the `style` key.
+            If a Mapbox style, the access token is the value of the `token` key.
 
     Example:
 
@@ -259,6 +314,42 @@ def vmap(layers, context, size=(800, 400)):
                 api_key='your api key'
             )
             vector.vmap([vector.Layer('table in your account'), ], cc)
+
+        CARTO basemap style.
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                basemap=vector.BaseMaps.darkmatter
+            )
+
+        Custom basemap style. Here we use the Mapbox streets style, which
+        requires an access token.
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://<username>.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                basemap={
+                    'style': 'mapbox://styles/mapbox/streets-v9',
+                    'token: '<your mapbox token>'
+                }
+            )
     """
     non_local_layers = [
         layer for layer in layers
@@ -292,7 +383,7 @@ def vmap(layers, context, size=(800, 400)):
             width=size[0],
             height=size[1],
             content=utils.safe_quotes(
-                _get_html_doc(jslayers, bounds, context.creds)
+                _get_html_doc(jslayers, bounds, context.creds, basemap=basemap)
             )
     )
     return HTML(html)

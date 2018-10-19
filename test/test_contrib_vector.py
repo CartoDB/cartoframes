@@ -159,3 +159,31 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
         # invalid entry for interactivity
         with self.assertRaises(ValueError):
             vector.vmap([vector.Layer(self.points, interactivity=10), ])
+
+    def test_vector_basemaps(self):
+        """contrib.vector.BaseMaps"""
+        self.assertEquals(vector.BaseMaps.positron, 'Positron')
+        self.assertEquals(vector.BaseMaps.darkmatter, 'DarkMatter')
+        self.assertEquals(vector.BaseMaps.voyager, 'Voyager')
+        with self.assertRaises(AttributeError):
+            b = vector.BaseMaps.doesntexist
+
+    def test_vector_vmap_basemap(self):
+        """contrib.vector.vmap with basemap flag"""
+        cc = cartoframes.CartoContext(
+            base_url=self.baseurl,
+            api_key=self.apikey
+        )
+        with self.assertRaises(ValueError, msg='style key not in basemap'):
+            vector.vmap(
+                [vector.Layer(self.points), ],
+                context=cc,
+                basemap={'tiles': 'abc123'}
+            )
+
+
+        vector.vmap(
+            [vector.Layer(self.points), ],
+            context=cc,
+            basemap={'style': 'mapbox://styles/mapbox/streets-v9'}
+        )

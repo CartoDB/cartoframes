@@ -39,3 +39,4 @@ wheels/
 # project-specific
 CARTOCREDS.json
 SITEKEY.txt
+test/secret.json

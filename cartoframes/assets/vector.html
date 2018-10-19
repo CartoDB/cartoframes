@@ -31,9 +31,13 @@
         Voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
         Positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
     };
+    if ("@@MAPBOXTOKEN@@") {
+      mapboxgl.accessToken = "@@MAPBOXTOKEN@@";
+    }
+    // Fetch CARTO basemap if it's there, else try to use other supplied style
     const map = new mapboxgl.Map({
       container: 'map',
-      style: BASEMAPS['@@BASEMAPSTYLE@@'] || BASEMAPS['Voyager'],
+      style: BASEMAPS['@@BASEMAPSTYLE@@'] || "@@BASEMAPSTYLE@@",
       zoom: 9,
       dragRotate: false
       });
@@ -61,7 +65,7 @@
           new carto.Viz(elem['styling'])
       );
       var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
-      temp.addTo(map, last_source);
+      temp.addTo(map);
       if (elem.interactivity) {
         let interactivity = new carto.Interactivity(temp);
         let tempPopup = new mapboxgl.Popup({
