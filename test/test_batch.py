@@ -12,20 +12,8 @@ from carto.sql import SQLClient
 from carto.exceptions import CartoException
 import cartoframes
 
-class _UserUrlLoader:
-    def user_url(self):
-        user_url = None
-        if (os.environ.get('USERURL') is None):
-            try:
-                creds = json.loads(open('test/secret.json').read())
-                user_url = creds['USERURL']
-            except:  # noqa: E722
-                warnings.warn('secret.json not found')
+from utils import _UserUrlLoader
 
-        if user_url in (None, ''):
-            user_url = 'https://{username}.carto.com/'
-
-        return user_url
 
 class TestBatchJobStatus(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.BatchJobStatus"""

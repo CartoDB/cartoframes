@@ -9,33 +9,18 @@ import random
 import warnings
 import requests
 
-import cartoframes
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
 import IPython
+
+import cartoframes
 from cartoframes.utils import dict_items
+from utils import _UserUrlLoader
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
-
-
-class _UserUrlLoader:
-    def user_url(self):
-        user_url = None
-        if (os.environ.get('USERURL') is None):
-            try:
-                creds = json.loads(open('test/secret.json').read())
-                user_url = creds['USERURL']
-            except:  # noqa: E722
-                warnings.warn('secret.json not found')
-
-        if user_url in (None, ''):
-            user_url = 'https://{username}.carto.com/'
-
-        return user_url
-
 
 class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
