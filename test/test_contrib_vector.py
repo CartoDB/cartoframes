@@ -64,7 +64,6 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
             self.username = os.environ['USERNAME']
 
         self.user_url = self.user_url()
-        self.baseurl = self.user_url
 
         if self.username and self.apikey:
             self.baseurl = self.user_url.format(
@@ -87,7 +86,7 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
 
     def test_vector_multilayer(self):
         """contrib.vector"""
-        cc = cartoframes.CartoContext(base_url=self.user_url,
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         layers = [
             vector.Layer(self.points, color='red', size=10, strokeColor='blue'),
@@ -172,7 +171,7 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
     def test_vector_vmap_basemap(self):
         """contrib.vector.vmap with basemap flag"""
         cc = cartoframes.CartoContext(
-            base_url=self.user_url,
+            base_url=self.baseurl,
             api_key=self.apikey
         )
         with self.assertRaises(ValueError, msg='style key not in basemap'):
