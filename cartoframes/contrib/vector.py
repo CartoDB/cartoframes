@@ -4,6 +4,20 @@ The API for vector maps is broadly similar to :py:meth:`CartoContext.map
 expressions are expected to be straight CARTO VL expressions. See examples in
 the `CARTO VL styling guide
 <https://carto.com/developers/carto-vl/guides/styling-points/>`__
+
+Here is an example using the example CartoContext from the :py:class:`Examples <cartoframes.examples.Examples>` class.
+
+.. code::
+
+    from cartoframes.examples import example_context
+    from cartoframes.contrib import vector
+    vector.vmap(
+        [vector.Layer(
+            'nat',
+            color='ramp(globalEqIntervals($hr90, 7), sunset)',
+            strokeWidth=0),
+        ],
+        example_context)
 """
 import os
 import json
@@ -197,8 +211,8 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
     )
 
 class Layer(QueryLayer):
-    """Layer from a table name. See :py:class:`QueryLayer
-    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes
+    """Layer from a table name. See :py:class:`vector.QueryLayer
+    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes.
 
     Example:
 
