@@ -15,6 +15,8 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 from pyrestcli.exceptions import NotFoundException
 import pandas as pd
+
+from utils import _UserUrlLoader
 try:
     import geopandas as gpd
     HAS_GEOPANDAS = True
@@ -24,22 +26,6 @@ from IPython.display import HTML
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
-
-
-class _UserUrlLoader:
-    def user_url(self):
-        user_url = None
-        if (os.environ.get('USERURL') is None):
-            try:
-                creds = json.loads(open('test/secret.json').read())
-                user_url = creds['USERURL']
-            except:
-                warnings.warn('secret.json not found')
-
-        if user_url in (None, ''):
-            user_url = 'https://{username}.carto.com/'
-
-        return user_url
 
 
 class TestContribVector(unittest.TestCase, _UserUrlLoader):
