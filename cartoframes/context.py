@@ -122,10 +122,36 @@ class CartoContext(object):
         account.
 
     Example:
-        Create a :py:class:`CartoContext` object::
+
+        Create a :py:class:`CartoContext` object
+
+        .. code::
 
             import cartoframes
+            BASEURL = 'https://{}.carto.com/'.format('your carto username')
+            APIKEY = 'your carto api key'
             cc = cartoframes.CartoContext(BASEURL, APIKEY)
+
+    Tip:
+
+        If using cartoframes with an `on premises CARTO installation
+        <https://carto.com/developers/on-premises/guides/builder/basics/>`__,
+        sometimes it is necessary to disable SSL verification depending on your
+        system configuration. You can do this using a `requests Session
+        <http://docs.python-requests.org/en/master/user/advanced/#session-objects>`__
+        object as follows: ::
+
+            import cartoframes
+            from requests import Session
+            session = Session()
+            session.verify = False
+
+            cc = cartoframes.CartoContext(
+                base_url='https://{}.carto.com/'.format('your carto username'),
+                api_key='your carto api key',
+                session=session
+            )
+
     """
     def __init__(self, base_url=None, api_key=None, creds=None, session=None,
                  verbose=0):
