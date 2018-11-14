@@ -315,8 +315,11 @@ class QueryLayer(AbstractLayer):
 
         self.query = query
         self.orig_query = query
+
         # style_cols and geom_type are updated right before layer is `_setup`
+        # because of this, any geometry related styling happens in `_setup`
         # style columns as keys, data types as values
+        # e.g., dict(my_col='numeric', other_col='text')
         self.style_cols = dict()
         self.geom_type = None
         self.cartocss = None
@@ -326,10 +329,13 @@ class QueryLayer(AbstractLayer):
         self.color, self.scheme = self._parse_color(color)
         self.time = self._parse_time(time)
         self.size = self._parse_size(size, time is not None)
-
         self.opacity = opacity if opacity is not None else 0.9
+
+        # future enhanements
         self.tooltip = tooltip
         self.legend = legend
+
+        # validation step
         self._validate_columns()
 
     def _parse_color(self, color):
@@ -359,7 +365,7 @@ class QueryLayer(AbstractLayer):
         return color, scheme
 
     def _parse_time(self, time):
-        """Setup the default time styling"""
+        """Parse time inputs"""
         if time is None:
             return None
 
@@ -389,7 +395,7 @@ class QueryLayer(AbstractLayer):
         return time
 
     def _parse_size(self, size, has_time=False):
-        """"""
+        """Parse size inputs"""
         if has_time:
             size = size or 4
         else:
