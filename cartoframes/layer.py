@@ -323,30 +323,12 @@ class QueryLayer(AbstractLayer):
         self.torque_cartocss = None
 
         # TODO: move these if/else branches to individual methods
-        # color, scheme = self._get_colorscheme()
         # time = self._get_timescheme()
         # size = self._get_sizescheme()
         # If column was specified, force a scheme
         # It could be that there is a column named 'blue' for example
-        if isinstance(color, dict):
-            if 'column' not in color:
-                raise ValueError("Color must include a 'column' value")
-            # get scheme if exists. if not, one will be chosen later if needed
-            scheme = color.get('scheme')
-            color = color['column']
-            self.style_cols[color] = None
-        elif (color and
-              color[0] != '#' and
-              color not in webcolors.CSS3_NAMES_TO_HEX):
-            # color specified that is not a web color or hex value so its
-            #  assumed to be a column name
-            color = color
-            self.style_cols[color] = None
-            scheme = None
-        else:
-            # assume it's a color (hex, rgb(...),  or webcolor name)
-            color = color
-            scheme = None
+
+        self.color, self.scheme = self._set_color(color)
 
         if time:
             if isinstance(time, dict):
@@ -405,14 +387,37 @@ class QueryLayer(AbstractLayer):
             size.update(old_size)
             self.style_cols[size['column']] = None
 
-        self.color = color
         self.opacity = opacity if opacity is not None else 0.9
-        self.scheme = scheme
         self.size = size
         self.time = time
         self.tooltip = tooltip
         self.legend = legend
         self._validate_columns()
+
+    def _set_color(self, color):
+        """Setup the color scheme"""
+        if isinstance(color, dict):
+            if 'column' not in color:
+                raise ValueError("Color must include a 'column' value")
+            # get scheme if exists. if not, one will be chosen later if needed
+            scheme = color.get('scheme')
+            color = color['column']
+            self.style_cols[color] = None
+        elif (color and
+              color[0] != '#' and
+              color not in webcolors.CSS3_NAMES_TO_HEX):
+            # color specified that is not a web color or hex value so its
+            #  assumed to be a column name
+            color = color
+            self.style_cols[color] = None
+            scheme = None
+        else:
+            # assume it's a color (hex, rgb(...),  or webcolor name)
+            color = color
+            scheme = None
+
+        return color, scheme
+
 
     def _validate_columns(self):
         """Validate the options in the styles"""
