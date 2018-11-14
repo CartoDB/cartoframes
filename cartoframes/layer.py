@@ -439,6 +439,8 @@ class QueryLayer(AbstractLayer):
                                  col=','.join(col_overlap)))
 
     def _setup(self, layers, layer_idx):
+        """Setups layers once geometry types and data types are known
+        """
         basemap = layers[0]
 
         # if color not specified, choose a default
@@ -450,15 +452,7 @@ class QueryLayer(AbstractLayer):
             self.color = self.color or DEFAULT_COLORS[layer_idx]
         # choose appropriate scheme if not already specified
         if (not self.scheme) and (self.color in self.style_cols):
-            if self.style_cols[self.color] in ('string', 'boolean', ):
-                self.scheme = antique(10)
-            elif self.style_cols[self.color] in ('number', ):
-                self.scheme = mint(5)
-            elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError(
-                    'Cannot style column `{col}` of type `{type}`. It must be '
-                    'numeric, text, or boolean.'.format(
-                        col=self.color, type=self.style_cols[self.color]))
+            self._choose_scheme()
 
         if self.time:
             # validate time column information
@@ -532,6 +526,18 @@ class QueryLayer(AbstractLayer):
         else:
             # use turbo-carto for non-animated maps
             self.cartocss = self._get_cartocss(basemap)
+
+    def _choose_scheme(self):
+        """Choose color scheme"""
+        if self.style_cols[self.color] in ('string', 'boolean', ):
+            self.scheme = antique(10)
+        elif self.style_cols[self.color] in ('number', ):
+            self.scheme = mint(5)
+        elif self.style_cols[self.color] in ('date', 'geometry', ):
+            raise ValueError(
+                'Cannot style column `{col}` of type `{type}`. It must be '
+                'numeric, text, or boolean.'.format(
+                    col=self.color, type=self.style_cols[self.color]))
 
     def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
