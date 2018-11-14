@@ -322,80 +322,20 @@ class QueryLayer(AbstractLayer):
         self.cartocss = None
         self.torque_cartocss = None
 
-        # TODO: move these if/else branches to individual methods
-        # time = self._get_timescheme()
-        # size = self._get_sizescheme()
-        # If column was specified, force a scheme
-        # It could be that there is a column named 'blue' for example
-
-        self.color, self.scheme = self._set_color(color)
-
-        if time:
-            if isinstance(time, dict):
-                if 'column' not in time:
-                    raise ValueError("`time` must include a 'column' "
-                                     "key/value")
-                time_column = time['column']
-                time_options = time
-            elif isinstance(time, str):
-                time_column = time
-                time_options = {}
-            else:
-                raise ValueError('`time` should be a column name or '
-                                 'dictionary of styling options.')
-
-            self.style_cols[time_column] = None
-            time = {
-                'column': time_column,
-                'method': 'count',
-                'cumulative': False,
-                'frames': 256,
-                'duration': 30,
-                'trails': 2,
-            }
-            time.update(time_options)
-
-        # assign size defaults if size is not specified
-        if time:
-            size = size or 4
-        else:
-            size = size or 10
-        if isinstance(size, str):
-            size = {'column': size}
-        if isinstance(size, dict):
-            if 'column' not in size:
-                raise ValueError("`size` must include a 'column' key/value")
-            if time:
-                raise ValueError("When time is specified, size can "
-                                 "only be a fixed size")
-            old_size = size
-            # Default size range, bins, and bin_method
-            size = {
-                'range': [5, 25],
-                'bins': 5,
-                'bin_method': BinMethod.quantiles,
-            }
-            # Assign default range and update if min/max given
-            old_size['range'] = old_size.get('range', size['range'])
-            if 'min' in old_size:
-                old_size['range'][0] = old_size['min']
-                old_size.pop('min')
-            if 'max' in old_size:
-                old_size['range'][1] = old_size['max']
-                old_size.pop('max')
-            # Update all the keys in size if they exist in old_size
-            size.update(old_size)
-            self.style_cols[size['column']] = None
+        # setup default styling
+        self.color, self.scheme = self._parse_color(color)
+        self.time = self._parse_time(time)
+        self.size = self._parse_size(size, time is not None)
 
         self.opacity = opacity if opacity is not None else 0.9
-        self.size = size
-        self.time = time
         self.tooltip = tooltip
         self.legend = legend
         self._validate_columns()
 
-    def _set_color(self, color):
+    def _parse_color(self, color):
         """Setup the color scheme"""
+        # If column was specified, force a scheme
+        # It could be that there is a column named 'blue' for example
         if isinstance(color, dict):
             if 'column' not in color:
                 raise ValueError("Color must include a 'column' value")
@@ -418,6 +358,70 @@ class QueryLayer(AbstractLayer):
 
         return color, scheme
 
+    def _parse_time(self, time):
+        """Setup the default time styling"""
+        if time is None:
+            return None
+
+        if isinstance(time, dict):
+            if 'column' not in time:
+                raise ValueError("`time` must include a 'column' key/value")
+            time_column = time['column']
+            time_options = time
+        elif isinstance(time, str):
+            time_column = time
+            time_options = {}
+        else:
+            raise ValueError(
+                '`time` should be a column name or dictionary of '
+                'styling options.')
+
+        self.style_cols[time_column] = None
+        time = {
+            'column': time_column,
+            'method': 'count',
+            'cumulative': False,
+            'frames': 256,
+            'duration': 30,
+            'trails': 2,
+        }
+        time.update(time_options)
+        return time
+
+    def _parse_size(self, size, has_time=False):
+        """"""
+        if has_time:
+            size = size or 4
+        else:
+            size = size or 10
+        if isinstance(size, str):
+            size = {'column': size}
+        if isinstance(size, dict):
+            if 'column' not in size:
+                raise ValueError("`size` must include a 'column' key/value")
+            if has_time:
+                raise ValueError("When time is specified, size can "
+                                 "only be a fixed size")
+            old_size = size
+            # Default size range, bins, and bin_method
+            size = {
+                'range': [5, 25],
+                'bins': 5,
+                'bin_method': BinMethod.quantiles,
+            }
+            # Assign default range and update if min/max given
+            old_size['range'] = old_size.get('range', size['range'])
+            if 'min' in old_size:
+                old_size['range'][0] = old_size['min']
+                old_size.pop('min')
+            if 'max' in old_size:
+                old_size['range'][1] = old_size['max']
+                old_size.pop('max')
+            # Update all the keys in size if they exist in old_size
+            size.update(old_size)
+            self.style_cols[size['column']] = None
+
+        return size
 
     def _validate_columns(self):
         """Validate the options in the styles"""
