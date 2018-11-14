@@ -279,10 +279,12 @@ class QueryLayer(AbstractLayer):
               :obj:`BinMethod` (excluding `category`).
             - bins (`int`, optional): Number of bins to break data into.
               Defaults to 5.
-            - max (`int`, optional): Maximum point width (in pixels). Defaults
-              to 25.
-            - min (`int`, optional): Minimum point width (in pixels). Defaults
-              to 5.
+            - max (`int`, optional): Maximum point width (in pixels). Setting
+              this overrides `range`. Defaults to 25.
+            - min (`int`, optional): Minimum point width (in pixels). Setting
+              this overrides `range`. Defaults to 5.
+            - range (`tuple` or `list`, optional): a `min`/`max` pair. Defaults
+              to `[1, 5]` for lines and `[5, 25]` for points.
 
             .. code::
 
@@ -439,8 +441,8 @@ class QueryLayer(AbstractLayer):
                                  col=','.join(col_overlap)))
 
     def _setup(self, layers, layer_idx):
-        """Setups layers once geometry types and data types are known
-        """
+        """Setups layers once geometry types and data types are known, and when
+        a map is requested to be rendered from zero or more data layers"""
         basemap = layers[0]
 
         # if color not specified, choose a default
@@ -449,6 +451,12 @@ class QueryLayer(AbstractLayer):
             self.color = self.color or '#2752ff'
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
+
+        if isinstance(self.size, (int, float)):
+            if self.geom_type == 'point':
+                self.size = self.size or 4
+            else:
+                self.size = self.size or 1.5
 
         # choose appropriate scheme if not already specified
         if (not self.scheme) and (self.color in self.style_cols):
@@ -545,9 +553,13 @@ class QueryLayer(AbstractLayer):
 
     def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
-        if isinstance(self.size, int):
-            size_style = self.size or 4
+        if isinstance(self.size, (int, float)):
+            size_style = self.size
         elif isinstance(self.size, dict):
+            self.size['range'] = (
+                [1, 5] if self.size['range'] == [5, 25]
+                else self.size['range']
+            )
             size_style = ('ramp([{column}],'
                           ' range({min_range},{max_range}),'
                           ' {bin_method}({bins}))').format(
@@ -613,20 +625,21 @@ class QueryLayer(AbstractLayer):
                             'marker-fill': '#ccc'}
                         })
                 return css
-            elif self.geom_type == 'line':
+            if self.geom_type == 'line':
                 css = cssify({
                     "#layer": {
-                        'line-width': '1.5',
+                        'line-width': size_style,
                         'line-color': color_style,
                         'line-opacity': self.opacity
                     }})
+                print(css)
                 if self.color in self.style_cols:
                     css += cssify({
                         '#layer[{} = null]'.format(self.color): {
                             'line-color': '#ccc'}
                         })
                 return css
-            elif self.geom_type == 'polygon':
+            if self.geom_type == 'polygon':
                 css = cssify({
                     "#layer": {
                         'polygon-fill': color_style,
