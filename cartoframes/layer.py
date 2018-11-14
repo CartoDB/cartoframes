@@ -444,85 +444,18 @@ class QueryLayer(AbstractLayer):
         basemap = layers[0]
 
         # if color not specified, choose a default
-        # choose color time default
         if self.time:
-            # default torque color
+            # default time/torque color
             self.color = self.color or '#2752ff'
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
+
         # choose appropriate scheme if not already specified
         if (not self.scheme) and (self.color in self.style_cols):
             self._choose_scheme()
 
         if self.time:
-            # validate time column information
-            if self.geom_type != 'point':
-                raise ValueError('Cannot do time-based maps with data in '
-                                 '`{query}` since this table does not contain '
-                                 'point geometries'.format(
-                                     query=self.orig_query))
-            elif self.style_cols[self.time['column']] not in (
-                    'number', 'date', ):
-                raise ValueError('Cannot create an animated map from column '
-                                 '`{col}` because it is of type {t1}. It must '
-                                 'be of type number or date.'.format(
-                                     col=self.time['column'],
-                                     t1=self.style_cols[self.time['column']]))
-
-            # don't use turbo-carto for animated maps
-            column = self.time['column']
-            frames = self.time['frames']
-            method = self.time['method']
-            duration = self.time['duration']
-            if (self.color in self.style_cols and
-                    self.style_cols[self.color] in ('string', 'boolean', )):
-                self.query = minify_sql([
-                    'SELECT',
-                    '    orig.*, __wrap.cf_value_{col}',
-                    'FROM ({query}) AS orig, (',
-                    '    SELECT',
-                    '      row_number() OVER (',
-                    '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
-                    '      {col}',
-                    '    FROM (',
-                    '        SELECT {col}, count({col}) AS val_{col}_cnt',
-                    '        FROM ({query}) as orig',
-                    '        GROUP BY {col}',
-                    '        ORDER BY 2 DESC',
-                    '    ) AS _wrap',
-                    ') AS __wrap',
-                    'WHERE __wrap.{col} = orig.{col}',
-                ]).format(col=self.color, query=self.orig_query)
-                agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
-                self.scheme = {
-                    'bins': [str(i) for i in range(1, 11)],
-                    'name': (self.scheme.get('name') if self.scheme
-                             else 'Bold'),
-                    'bin_method': '', }
-            elif (self.color in self.style_cols and
-                  self.style_cols[self.color] in ('number', )):
-                self.query = ' '.join([
-                    'SELECT *, {col} as value',
-                    'FROM ({query}) as _wrap'
-                ]).format(col=self.color, query=self.orig_query)
-                agg_func = '\'avg({})\''.format(self.color)
-            else:
-                agg_func = "'{method}(cartodb_id)'".format(
-                    method=method)
-            self.torque_cartocss = cssify({
-                'Map': {
-                    '-torque-frame-count': frames,
-                    '-torque-animation-duration': duration,
-                    '-torque-time-attribute': "'{}'".format(column),
-                    '-torque-aggregation-function': agg_func,
-                    '-torque-resolution': 1,
-                    '-torque-data-aggregation': ('cumulative'
-                                                 if self.time['cumulative']
-                                                 else 'linear'),
-                },
-            })
-            self.cartocss = (self.torque_cartocss
-                             + self._get_cartocss(basemap, has_time=True))
+            self._setup_time(basemap)
         else:
             # use turbo-carto for non-animated maps
             self.cartocss = self._get_cartocss(basemap)
@@ -538,6 +471,77 @@ class QueryLayer(AbstractLayer):
                 'Cannot style column `{col}` of type `{type}`. It must be '
                 'numeric, text, or boolean.'.format(
                     col=self.color, type=self.style_cols[self.color]))
+
+    def _setup_time(self, basemap):
+        """generates CartoCSS for time-based maps (torque)"""
+        # validate time column information
+        if self.geom_type != 'point':
+            raise ValueError('Cannot do time-based maps with data in '
+                             '`{query}` since this table does not contain '
+                             'point geometries'.format(
+                                 query=self.orig_query))
+        elif self.style_cols[self.time['column']] not in (
+                'number', 'date', ):
+            raise ValueError('Cannot create an animated map from column '
+                             '`{col}` because it is of type {t1}. It must '
+                             'be of type number or date.'.format(
+                                 col=self.time['column'],
+                                 t1=self.style_cols[self.time['column']]))
+
+        # don't use turbo-carto for animated maps
+        column = self.time['column']
+        frames = self.time['frames']
+        method = self.time['method']
+        duration = self.time['duration']
+        if (self.color in self.style_cols and
+                self.style_cols[self.color] in ('string', 'boolean', )):
+            self.query = minify_sql([
+                'SELECT',
+                '    orig.*, __wrap.cf_value_{col}',
+                'FROM ({query}) AS orig, (',
+                '    SELECT',
+                '      row_number() OVER (',
+                '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
+                '      {col}',
+                '    FROM (',
+                '        SELECT {col}, count({col}) AS val_{col}_cnt',
+                '        FROM ({query}) as orig',
+                '        GROUP BY {col}',
+                '        ORDER BY 2 DESC',
+                '    ) AS _wrap',
+                ') AS __wrap',
+                'WHERE __wrap.{col} = orig.{col}',
+            ]).format(col=self.color, query=self.orig_query)
+            agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
+            self.scheme = {
+                'bins': [str(i) for i in range(1, 11)],
+                'name': (self.scheme.get('name') if self.scheme
+                         else 'Bold'),
+                'bin_method': '', }
+        elif (self.color in self.style_cols and
+              self.style_cols[self.color] in ('number', )):
+            self.query = ' '.join([
+                'SELECT *, {col} as value',
+                'FROM ({query}) as _wrap'
+            ]).format(col=self.color, query=self.orig_query)
+            agg_func = '\'avg({})\''.format(self.color)
+        else:
+            agg_func = "'{method}(cartodb_id)'".format(
+                method=method)
+        self.torque_cartocss = cssify({
+            'Map': {
+                '-torque-frame-count': frames,
+                '-torque-animation-duration': duration,
+                '-torque-time-attribute': "'{}'".format(column),
+                '-torque-aggregation-function': agg_func,
+                '-torque-resolution': 1,
+                '-torque-data-aggregation': ('cumulative'
+                                             if self.time['cumulative']
+                                             else 'linear'),
+            },
+        })
+        self.cartocss = (self.torque_cartocss
+                         + self._get_cartocss(basemap, has_time=True))
 
     def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
