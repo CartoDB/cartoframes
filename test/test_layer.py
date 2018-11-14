@@ -1,16 +1,19 @@
 """Unit tests for cartoframes.layers"""
 import unittest
-from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
-from cartoframes import styling
 import pandas as pd
+from cartoframes.layer import BaseMap, QueryLayer, AbstractLayer, Layer
+from cartoframes import styling, BinMethod
 
 
 class TestAbstractLayer(unittest.TestCase):
+    """Test AbstractLayer class"""
     def test_class(self):
+        """basic test"""
         self.assertIsNone(AbstractLayer().__init__())
 
 
 class TestLayer(unittest.TestCase):
+    """Test Layer class"""
     def setUp(self):
         self.coffee_temps = pd.DataFrame({
             'a': range(4),
@@ -22,10 +25,10 @@ class TestLayer(unittest.TestCase):
         layer = Layer('cortado', source=self.coffee_temps)
 
         with self.assertRaises(NotImplementedError):
-            layer._setup([BaseMap(), layer], 1)
+            layer._setup([BaseMap(), layer], 1)  # pylint: disable=protected-access
 
 
-class TestBaseMap(unittest.TestCase):
+class TestBaseMap(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for functions in keys module"""
     def setUp(self):
         # basemaps with baked-in labels
@@ -155,10 +158,10 @@ class TestQueryLayer(unittest.TestCase):
             qlayer.geom_type = 'point'
             if color == 'cookie_monster':
                 qlayer.style_cols[color] = 'number'
-                qlayer._setup([BaseMap(), qlayer], 1)
+                qlayer._setup([BaseMap(), qlayer], 1)  # pylint: disable=protected-access
             elif color == 'big_bird':
                 qlayer.style_cols[color] = 'string'
-                qlayer._setup([BaseMap(), qlayer], 1)
+                qlayer._setup([BaseMap(), qlayer], 1)  # pylint: disable=protected-access
             self.assertEqual(qlayer.color, str_colors_ans[idx])
             self.assertEqual(qlayer.scheme, str_scheme_ans[idx])
 
@@ -166,7 +169,7 @@ class TestQueryLayer(unittest.TestCase):
                                msg='styling value cannot be a date'):
             qlayer = QueryLayer(self.query, color='datetime_column')
             qlayer.style_cols['datetime_column'] = 'date'
-            qlayer._setup([BaseMap(), qlayer], 1)
+            qlayer._setup([BaseMap(), qlayer], 1)  # pylint: disable=protected-access
 
         # Exception testing
         # color column cannot be a geometry column
@@ -192,11 +195,11 @@ class TestQueryLayer(unittest.TestCase):
         with self.assertRaises(
                 ValueError,
                 msg='cannot make torque map with non-point geometries'):
-            ql._setup([BaseMap(), ql], 1)
+            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
 
         ql.geom_type = 'point'
         # normal behavior for point geometries
-        ql._setup([BaseMap(), ql], 1)
+        ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
         self.assertDictEqual(ql.scheme,
                              dict(name='Antique', bin_method='',
                                   bins=[str(i) for i in range(1, 11)]))
@@ -222,7 +225,7 @@ class TestQueryLayer(unittest.TestCase):
         ql.geom_type = 'point'
 
         # normal behavior for point geometries
-        ql._setup([BaseMap(), ql], 1)
+        ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
         self.assertDictEqual(ql.scheme,
                              styling.mint(5))
         # expect category maps query
@@ -255,13 +258,13 @@ class TestQueryLayer(unittest.TestCase):
             ql = QueryLayer('select * from watermelon', time='seeds')
             ql.style_cols['seeds'] = 'string'
             ql.geom_type = 'point'
-            ql._setup([BaseMap(), ql], 1)
+            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
 
         with self.assertRaises(ValueError):
             ql = QueryLayer('select * from watermelon', time='seeds')
             ql.style_cols['seeds'] = 'date'
             ql.geom_type = 'polygon'
-            ql._setup([BaseMap(), ql], 1)
+            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
 
     def test_querylayer_time_default(self):
         """layer.QueryLayer time defaults"""
@@ -341,11 +344,14 @@ class TestQueryLayer(unittest.TestCase):
         self.assertDictEqual(qlayer.size, ans,
                              msg=('size dict should receive defaults if not '
                                   'provided'))
-        qlayer = QueryLayer(self.query, size={
-                                            'column': 'cold_brew',
-                                            'min': 10,
-                                            'max': 20
-                                        })
+        qlayer = QueryLayer(
+            self.query,
+            size={
+                'column': 'cold_brew',
+                'min': 10,
+                'max': 20
+            }
+        )
         ans = {
             'column': 'cold_brew',
             'range': [10, 20],
@@ -360,29 +366,196 @@ class TestQueryLayer(unittest.TestCase):
                                                   max=20))
         qlayer.geom_type = 'point'
         self.assertRegexpMatches(
-            qlayer._get_cartocss(BaseMap()),
-            ('.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
-             'quantiles\(5\)\).*')
+            qlayer._get_cartocss(BaseMap()),  # pylint: disable=protected-access
+            (r'.*marker-width:\sramp\(\[cold_brew\],\srange\(10,20\),\s'
+             r'quantiles\(5\)\).*')
         )
 
         # test line cartocss
         qlayer = QueryLayer(self.query)
         qlayer.geom_type = 'line'
-        self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
-                                 '^\#layer.*line\-width.*$')
+        self.assertRegexpMatches(
+            qlayer._get_cartocss(BaseMap()),  # pylint: disable=protected-access
+            r'^\#layer.*line\-width.*$'
+        )
         # test point, line, polygon
         for g in ('point', 'line', 'polygon', ):
-            styles = {'point': 'marker\-fill',
-                      'line': 'line\-color',
-                      'polygon': 'polygon\-fill'}
+            styles = {'point': r'marker\-fill',
+                      'line': r'line\-color',
+                      'polygon': r'polygon\-fill'}
             qlayer = QueryLayer(self.query, color='colname')
             qlayer.geom_type = g
-            self.assertRegexpMatches(qlayer._get_cartocss(BaseMap()),
-                                     '^\#layer.*{}.*\}}$'.format(styles[g]))
+            self.assertRegexpMatches(
+                qlayer._get_cartocss(BaseMap()),  # pylint: disable=protected-access
+                r'^\#layer.*{}.*\}}$'.format(styles[g])
+            )
 
         # geometry type should be defined
         with self.assertRaises(ValueError,
                                msg='invalid geometry type'):
             ql = QueryLayer(self.query, color='red')
             ql.geom_type = 'notvalid'
-            ql._get_cartocss(BaseMap())
+            ql._get_cartocss(BaseMap())  # pylint: disable=protected-access
+
+    def test_line_styling(self):
+        """layer.QueryLayer line styling"""
+        linelayer = QueryLayer(
+            'select * from lines',
+            size=5
+        )
+
+        linelayer.geom_type = 'line'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: 5' in linelayer.cartocss
+        )
+
+
+        size = 'size_col'
+        color = 'mag'
+        linelayer = QueryLayer('select * from lines', size=size, color=color)
+
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: ramp([size_col], range(1,5), quantiles(5))' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
+        )
+
+
+        size = {'column': 'size_col'}
+        color = 'mag'
+        linelayer = QueryLayer('select * from lines', size=size, color=color)
+
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: ramp([size_col], range(1,5), quantiles(5))' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
+        )
+
+
+        size = {
+            'column': 'size_col',
+            'range': (5, 10)
+        }
+        color = 'mag'
+        linelayer = QueryLayer('select * from lines', size=size, color=color)
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: ramp([size_col], range(5,10), quantiles(5))' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
+        )
+
+
+        size = 1.5
+        color = 'mag'
+
+        linelayer = QueryLayer('select * from lines', size=size, color=color)
+
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: 1.5' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
+        )
+
+
+        size = {
+            'column': 'size_col',
+            'range': [2, 6]
+        }
+
+        color = {
+            'column': 'mag',
+            'scheme': styling.sunset(7)
+        }
+
+        linelayer = QueryLayer('select * from lines', size=size, color=color)
+
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: ramp([size_col], range(2,6), quantiles(5))' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Sunset), quantiles(7), >)' in linelayer.cartocss
+        )
+
+
+        # size and color
+        size = {
+            'column': 'size_col',
+            'range': [2, 6],
+            'bin_method': BinMethod.jenks
+        }
+        color = {
+            'column': 'mag',
+            'scheme': styling.sunset(7)
+        }
+
+        linelayer = QueryLayer(
+            'select * from lines',
+            size=size,
+            color=color
+        )
+
+        linelayer.geom_type = 'line'
+        linelayer.style_cols['mag'] = 'number'
+        linelayer.style_cols['size_col'] = 'number'
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-width: ramp([size_col], range(2,6), jenks(5))' in linelayer.cartocss
+        )
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Sunset), quantiles(7), >)' in linelayer.cartocss
+        )
+
+        # category lines
+
+        linelayer = QueryLayer(
+            'select * from lines',
+            color={'column': 'mag', 'scheme': styling.antique(7)}
+        )
+
+        linelayer.geom_type = 'line'
+
+        linelayer._setup([BaseMap(), linelayer], 1)  # pylint: disable=protected-access
+
+        self.assertTrue(
+            'line-color: ramp([mag], cartocolor(Antique), category(7), =)'
+            in linelayer.cartocss
+        )
+
