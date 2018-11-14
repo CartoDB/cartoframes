@@ -49,6 +49,13 @@ class TestBaseMap(unittest.TestCase):
         self.voyager_only_labels = BaseMap(source='voyager',
                                            only_labels=True)
 
+    def test_basemap_repr(self):
+        """layer.Basemap.__repr__"""
+        self.assertEqual(
+            self.dark_only_labels.__repr__(),
+            'BaseMap(source=dark, labels=back, only_labels=True)'
+        )
+
     def test_basemap_invalid(self):
         """layer.Basemap exceptions on invalid source"""
         # Raise ValueError if invalid label is entered
@@ -309,6 +316,7 @@ class TestQueryLayer(unittest.TestCase):
     def test_querylayer_size_defaults(self):
         """layer.QueryLayer gets defaults for options not passed"""
         qlayer = QueryLayer(self.query, size='cold_brew')
+        qlayer.geom_type = 'point'
         size_col_ans = {
             'column': 'cold_brew',
             'range': [5, 25],
