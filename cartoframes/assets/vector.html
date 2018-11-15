@@ -44,8 +44,11 @@
 
     let credentials = @@CREDENTIALS@@;
     carto.setDefaultAuth({
-      user: credentials['user'],
+      username: credentials['username'],
       apiKey: credentials['api_key'] || 'default_public'
+    });
+    carto.setDefaultConfig({
+        serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
     });
     var sources = @@SOURCES@@;
 
