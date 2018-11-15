@@ -33,7 +33,7 @@ except ImportError:
 from .. import utils
 
 
-class BaseMaps:  # pylint: disable=too-few-public-methods
+class BaseMaps(object):  # pylint: disable=too-few-public-methods
     """Supported CARTO vector basemaps. Read more about the styles in the
     `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
 
@@ -57,7 +57,7 @@ class BaseMaps:  # pylint: disable=too-few-public-methods
     voyager = 'Voyager'
 
 
-class QueryLayer:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
+class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """CARTO VL layer based on an arbitrary query against user database
 
     Args:
