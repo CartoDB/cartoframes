@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.8.0
+-----
+
+Release 2018-11-15
+
+Updates
+
+- Adds style by line options to Layer and QueryLayer (through cc.map) (#504)
+- Fixes a problem that prevented vector maps from working with on premises installations (#505)
+- Updates the Mapbox GL and CARTO VL versions for vector maps (#506)
+- Adds custom basemap layer to vector maps (#490)
+- Fixes a bug with authorization in on prems (#493)
+- Multiple documentation updates
+
+
 0.7.3
 -----
 
