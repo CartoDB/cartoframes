@@ -184,57 +184,55 @@ class TestQueryLayer(unittest.TestCase):
 
     def test_querylayer_time_category(self):
         """layer.QueryLayer time with categories"""
-        ql = QueryLayer(self.query,
-                        time='timecol',
-                        color='colorcol')
+        querylayer = QueryLayer(self.query,
+                                time='timecol',
+                                color='colorcol')
         # category type
-        ql.style_cols['colorcol'] = 'string'
-        ql.style_cols['timecol'] = 'date'
+        querylayer.style_cols['colorcol'] = 'string'
+        querylayer.style_cols['timecol'] = 'date'
 
         # if non-point geoms are present (or None), raise an error
         with self.assertRaises(
                 ValueError,
                 msg='cannot make torque map with non-point geometries'):
-            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
+            querylayer._setup([BaseMap(), querylayer], 1)  # pylint: disable=protected-access
 
-        ql.geom_type = 'point'
+        querylayer.geom_type = 'point'
         # normal behavior for point geometries
-        ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
-        self.assertDictEqual(ql.scheme,
+        querylayer._setup([BaseMap(), querylayer], 1)  # pylint: disable=protected-access
+        self.assertDictEqual(querylayer.scheme,
                              dict(name='Antique', bin_method='',
                                   bins=[str(i) for i in range(1, 11)]))
         # expect category maps query
-        with open('qlayerquery.txt', 'w') as f:
-            f.write(ql.query)
-        self.assertRegexpMatches(ql.query,
-                                 '(?s)^SELECT\norig\.\*,\s__wrap\.'
-                                 'cf_value_colorcol\n.*GROUP\sBY.*orig\.'
-                                 'colorcol$')
+        self.assertRegexpMatches(querylayer.query,
+                                 r'(?s)^SELECT\norig\.\*,\s__wrap\.'
+                                 r'cf_value_colorcol\n.*GROUP\sBY.*orig\.'
+                                 r'colorcol$')
         # cartocss should have cdb math mode
-        self.assertRegexpMatches(ql.cartocss,
-                                 '.*CDB_Math_Mode\(cf_value_colorcol\).*')
+        self.assertRegexpMatches(querylayer.cartocss,
+                                 r'.*CDB_Math_Mode\(cf_value_colorcol\).*')
 
     def test_querylayer_time_numeric(self):
         """layer.QueryLayer time with quantitative classification"""
-        ql = QueryLayer(self.query,
-                        time='timecol',
-                        color='colorcol')
+        querylayer = QueryLayer(self.query,
+                                time='timecol',
+                                color='colorcol')
         # category type
-        ql.style_cols['colorcol'] = 'number'
-        ql.style_cols['timecol'] = 'date'
-        ql.geom_type = 'point'
+        querylayer.style_cols['colorcol'] = 'number'
+        querylayer.style_cols['timecol'] = 'date'
+        querylayer.geom_type = 'point'
 
         # normal behavior for point geometries
-        ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
-        self.assertDictEqual(ql.scheme,
+        querylayer._setup([BaseMap(), querylayer], 1)  # pylint: disable=protected-access
+        self.assertDictEqual(querylayer.scheme,
                              styling.mint(5))
         # expect category maps query
-        self.assertRegexpMatches(ql.query.strip(),
-                                 '^SELECT \*, colorcol as value '
-                                 '.*_wrap$')
+        self.assertRegexpMatches(querylayer.query.strip(),
+                                 r'^SELECT \*, colorcol as value '
+                                 r'.*_wrap$')
         # cartocss should have cdb math mode
-        self.assertRegexpMatches(ql.cartocss,
-                                 '.*avg\(colorcol\).*')
+        self.assertRegexpMatches(querylayer.cartocss,
+                                 r'.*avg\(colorcol\).*')
 
     def test_querylayer_time_errors(self):
         """layer.QueryLayer time option exceptions"""
@@ -255,16 +253,16 @@ class TestQueryLayer(unittest.TestCase):
             QueryLayer(self.query, time=7)
 
         with self.assertRaises(ValueError):
-            ql = QueryLayer('select * from watermelon', time='seeds')
-            ql.style_cols['seeds'] = 'string'
-            ql.geom_type = 'point'
-            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
+            querylayer = QueryLayer('select * from watermelon', time='seeds')
+            querylayer.style_cols['seeds'] = 'string'
+            querylayer.geom_type = 'point'
+            querylayer._setup([BaseMap(), querylayer], 1)  # pylint: disable=protected-access
 
         with self.assertRaises(ValueError):
-            ql = QueryLayer('select * from watermelon', time='seeds')
-            ql.style_cols['seeds'] = 'date'
-            ql.geom_type = 'polygon'
-            ql._setup([BaseMap(), ql], 1)  # pylint: disable=protected-access
+            querylayer = QueryLayer('select * from watermelon', time='seeds')
+            querylayer.style_cols['seeds'] = 'date'
+            querylayer.geom_type = 'polygon'
+            querylayer._setup([BaseMap(), querylayer], 1)  # pylint: disable=protected-access
 
     def test_querylayer_time_default(self):
         """layer.QueryLayer time defaults"""
@@ -379,25 +377,25 @@ class TestQueryLayer(unittest.TestCase):
             r'^\#layer.*line\-width.*$'
         )
         # test point, line, polygon
-        for g in ('point', 'line', 'polygon', ):
+        for geom in ('point', 'line', 'polygon', ):
             styles = {'point': r'marker\-fill',
                       'line': r'line\-color',
                       'polygon': r'polygon\-fill'}
             qlayer = QueryLayer(self.query, color='colname')
-            qlayer.geom_type = g
+            qlayer.geom_type = geom
             self.assertRegexpMatches(
                 qlayer._get_cartocss(BaseMap()),  # pylint: disable=protected-access
-                r'^\#layer.*{}.*\}}$'.format(styles[g])
+                r'^\#layer.*{}.*\}}$'.format(styles[geom])
             )
 
         # geometry type should be defined
         with self.assertRaises(ValueError,
                                msg='invalid geometry type'):
-            ql = QueryLayer(self.query, color='red')
-            ql.geom_type = 'notvalid'
-            ql._get_cartocss(BaseMap())  # pylint: disable=protected-access
+            querylayer = QueryLayer(self.query, color='red')
+            querylayer.geom_type = 'notvalid'
+            querylayer._get_cartocss(BaseMap())  # pylint: disable=protected-access
 
-    def test_line_styling(self):
+    def test_line_styling(self):  # pylint: disable=too-many-statements
         """layer.QueryLayer line styling"""
         linelayer = QueryLayer(
             'select * from lines',
@@ -558,4 +556,3 @@ class TestQueryLayer(unittest.TestCase):
             'line-color: ramp([mag], cartocolor(Antique), category(7), =)'
             in linelayer.cartocss
         )
-
