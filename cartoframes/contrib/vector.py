@@ -190,7 +190,14 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
     with open(html_template, 'r') as html_file:
         srcdoc = html_file.read()
 
-    credentials = {} if creds is None else dict(user=creds.username(), api_key=creds.key())
+    credentials = (
+        {} if creds is None
+        else dict(
+            user=creds.username(),
+            api_key=creds.key(),
+            base_url=creds.base_url()
+        )
+    )
     if isinstance(basemap, dict):
         token = basemap.get('token', '')
         if not 'style' in basemap:

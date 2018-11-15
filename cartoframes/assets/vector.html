@@ -47,6 +47,9 @@
       user: credentials['user'],
       apiKey: credentials['api_key'] || 'default_public'
     });
+    carto.setDefaultConfig({
+        serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
+    });
     var sources = @@SOURCES@@;
 
     map.fitBounds(@@BOUNDS@@, {animate: false});
