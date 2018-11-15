@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <!-- Include CARTO VL JS -->
-  <script src="https://cartodb.github.io/carto-vl/dist/carto-vl.js"></script>
+  <script src="https://libs.cartocdn.com/carto-vl/v1.0.0/carto-vl.min.js"></script>
   <!-- Include Mapbox GL JS -->
-  <script src="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.48.0-carto1/mapbox-gl.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
   <!-- Include Mapbox GL CSS -->
-  <link href="https://cartodb-libs.global.ssl.fastly.net/mapbox-gl/v0.48.0-carto1/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- styling for intearctivity etc. -->
   <link rel="stylesheet" type="text/css" href="https://cartodb.github.io/carto-vl/examples/style.css">
   <style>
     body {
@@ -44,8 +45,11 @@
 
     let credentials = @@CREDENTIALS@@;
     carto.setDefaultAuth({
-      user: credentials['user'],
+      username: credentials['username'],
       apiKey: credentials['api_key'] || 'default_public'
+    });
+    carto.setDefaultConfig({
+        serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
     });
     var sources = @@SOURCES@@;
 
