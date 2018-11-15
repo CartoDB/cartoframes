@@ -5,7 +5,8 @@ expressions are expected to be straight CARTO VL expressions. See examples in
 the `CARTO VL styling guide
 <https://carto.com/developers/carto-vl/guides/styling-points/>`__
 
-Here is an example using the example CartoContext from the :py:class:`Examples <cartoframes.examples.Examples>` class.
+Here is an example using the example CartoContext from the :py:class:`Examples
+<cartoframes.examples.Examples>` class.
 
 .. code::
 
@@ -31,7 +32,8 @@ except ImportError:
 
 from .. import utils
 
-class BaseMaps:
+
+class BaseMaps:  # pylint: disable=too-few-public-methods
     """Supported CARTO vector basemaps. Read more about the styles in the
     `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
 
@@ -54,7 +56,8 @@ class BaseMaps:
     darkmatter = 'DarkMatter'
     voyager = 'Voyager'
 
-class QueryLayer(object):
+
+class QueryLayer:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """CARTO VL layer based on an arbitrary query against user database
 
     Args:
@@ -116,8 +119,8 @@ class QueryLayer(object):
                 }
             )
     """
-    def __init__(self, query, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):
+    def __init__(self, query, *, color=None, size=None, time=None,
+                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         strconv = lambda x: str(x) if x is not None else None
 
         # data source
@@ -127,8 +130,8 @@ class QueryLayer(object):
         self.color = color
         self.width = strconv(size)
         self.filter = time
-        self.strokeColor = strokeColor
-        self.strokeWidth = strconv(strokeWidth)
+        self.strokeColor = strokeColor  # pylint: disable=invalid-name
+        self.strokeWidth = strconv(strokeWidth)  # pylint: disable=invalid-name
 
         # internal attributes
         self.orig_query = query
@@ -158,7 +161,7 @@ class QueryLayer(object):
         event_default = 'hover'
         if interactivity is None:
             return
-        elif isinstance(interactivity, list) or isinstance(interactivity, tuple):
+        if isinstance(interactivity, (tuple, list)):
             self.interactivity = event_default
             interactive_cols = '\n'.join(
                 '@{0}: ${0}'.format(col) for col in interactivity
@@ -178,7 +181,7 @@ class QueryLayer(object):
 
         self.styling = '\n'.join([interactive_cols, self.styling])
 
-def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None):
+def _get_html_doc(sources, bounds, creds=None, basemap=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
         '..',
@@ -205,16 +208,13 @@ def _get_html_doc(sources, bounds, creds=None, local_sources=None, basemap=None)
             warn('A Mapbox style usually needs a token')
         basemap = basemap.get('style')
 
-    return (
-        srcdoc\
-            .replace('@@SOURCES@@', json.dumps(sources))
-            .replace('@@BASEMAPSTYLE@@', basemap)
-            .replace('@@MAPBOXTOKEN@@', token)
-            .replace('@@CREDENTIALS@@', json.dumps(credentials))
-            .replace('@@BOUNDS@@', bounds)
-    )
+    return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
+                 .replace('@@BASEMAPSTYLE@@', basemap) \
+                 .replace('@@MAPBOXTOKEN@@', token) \
+                 .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
+                 .replace('@@BOUNDS@@', bounds)
 
-class Layer(QueryLayer):
+class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Layer from a table name. See :py:class:`vector.QueryLayer
     <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes.
 
@@ -237,8 +237,8 @@ class Layer(QueryLayer):
                 ],
                 example_context)
     """
-    def __init__(self, table_name, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):
+    def __init__(self, table_name, *, color=None, size=None, time=None,
+                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         self.table_source = table_name
 
         super(Layer, self).__init__(
@@ -251,7 +251,7 @@ class Layer(QueryLayer):
             interactivity=interactivity
         )
 
-class LocalLayer(QueryLayer):
+class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Create a layer from a GeoDataFrame
 
     TODO: add support for filepath to a GeoJSON file, JSON/dict, or string
@@ -274,8 +274,8 @@ class LocalLayer(QueryLayer):
             gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
-    def __init__(self, dataframe, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):
+    def __init__(self, dataframe, *, color=None, size=None, time=None,
+                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             self.geojson_str = dataframe.to_json()
         else:
@@ -300,7 +300,8 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
           :py:class:`Layer <cartoframes.contrib.vector.Layer>`,
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
-        context (:py:class:`CartoContext <cartoframes.context.CartoContext>`): A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+        context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
+          A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
@@ -361,13 +362,13 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
     ]
 
     if non_local_layers:
-        bounds = context._get_bounds(non_local_layers)
-        bounds =  '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+        bounds = context._get_bounds(non_local_layers)  # pylint: disable=protected-access
+        bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
     else:
         bounds = '[[-180, -85.0511], [180, 85.0511]]'
 
     jslayers = []
-    for idx, layer in enumerate(layers):
+    for _, layer in enumerate(layers):
         is_local = isinstance(layer, LocalLayer)
         intera = (
             dict(event=layer.interactivity, header=layer.header)
@@ -381,13 +382,13 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
             'interactivity': intera
         })
     html = (
-            '<iframe srcdoc="{content}" width={width} height={height}>'
-            '</iframe>'
+        '<iframe srcdoc="{content}" width={width} height={height}>'
+        '</iframe>'
         ).format(
             width=size[0],
             height=size[1],
             content=utils.safe_quotes(
                 _get_html_doc(jslayers, bounds, context.creds, basemap=basemap)
             )
-    )
+        )
     return HTML(html)
