@@ -119,7 +119,7 @@ class QueryLayer:  # pylint: disable=too-few-public-methods,too-many-instance-at
                 }
             )
     """
-    def __init__(self, query, *, color=None, size=None, time=None,
+    def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         strconv = lambda x: str(x) if x is not None else None
 
@@ -237,7 +237,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                 ],
                 example_context)
     """
-    def __init__(self, table_name, *, color=None, size=None, time=None,
+    def __init__(self, table_name, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         self.table_source = table_name
 
@@ -274,7 +274,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
-    def __init__(self, dataframe, *, color=None, size=None, time=None,
+    def __init__(self, dataframe, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             self.geojson_str = dataframe.to_json()
