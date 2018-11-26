@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.8.1
+-----
+
+Release 2018-11-26
+
+Updates
+
+- Removes unneeded print statement in QueryLayer
+
 0.8.0
 -----
 
