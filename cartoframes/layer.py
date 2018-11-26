@@ -632,7 +632,6 @@ class QueryLayer(AbstractLayer):
                         'line-color': color_style,
                         'line-opacity': self.opacity
                     }})
-                print(css)
                 if self.color in self.style_cols:
                     css += cssify({
                         '#layer[{} = null]'.format(self.color): {
