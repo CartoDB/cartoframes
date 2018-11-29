@@ -57,8 +57,7 @@ MAX_ROWS_LNGLAT = 1000
 CACHE_DIR = user_cache_dir('cartoframes')
 
 # cartoframes version
-DEFAULT_SQL_ARGS = dict(client='cartoframes_{}'.format(__version__),
-                        do_post=False)
+DEFAULT_SQL_ARGS = dict(do_post=False)
 
 
 class CartoContext(object):
@@ -169,9 +168,12 @@ class CartoContext(object):
         self.auth_client = APIKeyAuthClient(base_url=self.creds.base_url(),
                                             api_key=self.creds.key(),
                                             session=session)
-        self.auth_api_client = AuthAPIClient(base_url=self.creds.base_url(),
-                                             api_key=self.creds.key(),
-                                             session=session)
+        self.auth_api_client = AuthAPIClient(
+                base_url=self.creds.base_url(),
+                api_key=self.creds.key(),
+                session=session,
+                client_id='cartoframes_{}'.format(__version__)
+            )
         self.sql_client = SQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
