@@ -1,5 +1,6 @@
 def add_function(func, func_name, func_description, context):
     import dill
+    import pandas as pd
     pkl_func = dill.dumps(func)
     new_func = pd.DataFrame([[func_name, pkl_func, func_description, None]],
                           columns=['name', 'function', 'description', 'the_geom'])
