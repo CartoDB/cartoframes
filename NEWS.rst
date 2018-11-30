@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.8.2
+-----
+
+Release 2018-11-29
+
+Updates
+
+- Refactors how client id is sent to CARTO Python SDK (#516)
+
 0.8.1
 -----
 
