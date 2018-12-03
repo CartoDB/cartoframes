@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.8.3
+-----
+
+Release 2018-12-03
+
+Updates
+
+- Adds a module erroneously excluded (#519)
+
 0.8.2
 -----
 
