@@ -1,4 +1,6 @@
 """Batch SQL API functionality for longer running operations"""
+from warnings import warn
+
 from carto.sql import BatchSQLClient
 
 class BatchJobStatus(object):
