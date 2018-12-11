@@ -1,4 +1,18 @@
-"""CartoContext class"""
+"""CartoContext class
+
+This class is the workhorse of CARTOframes by providing all functionality related to data access to CARTO, map creation, and Data Observatory functionality.
+
+This is a test header
+---------------------
+
+This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text. This is some text.
+
+What is this?
+-------------
+
+It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header! It's another header!
+
+"""
 from __future__ import absolute_import
 import json
 import os
