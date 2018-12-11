@@ -15,14 +15,20 @@ For most operations below, you need to create a :py:class:`CartoContext <cartofr
 How to get census tracts for a state and specific measures
 ----------------------------------------------------------
 
+Get bounding box of the region you're interested in. Tools like Klockan's BoundingBox with the CSV output are prefect. Alternatively, uses a table with the appropriate covering region (e.g., an existing polygon of Missouri or its counties).
+
+When working with US Census GEOIDs, having a State FIPS code helps narrow the results to only the state you're interested in.
 
 .. code::
 
+   # get all census tracts (clipped by water boundaries) in specific bounding box
    missouri_ct = cc.data_boundaries(
        region=[-95.774147,35.995682,-89.098846,40.613636],
        boundary='us.census.tiger.census_tract_clipped'
    )
 
+   # filter out all census tracts that begin with Missouri FIPS (29)
+   # GEOIDs begin with two digit state FIPS, followed by three digit county FIPS
    missouri_ct = missouri_ct[missouri_ct.geom_refs.str.startswith('29')]
 
    # write to carto
