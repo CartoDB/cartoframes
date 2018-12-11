@@ -21,13 +21,15 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
     cc.write(processed_data, 'processed_data')
 
 
-Use cases:
+Use cases
+---------
 
 - Syncing datasets that aren't accessible to the Import API's sync option or that need intermediate processing
 - Connecting datasets that reside in datalakes to CARTO
 - Subsampling large datasets for preview in CARTO
 
-Some more examples:
+Examples
+--------
 
 - `Hive -> CARTO connector <https://github.com/andy-esch/hive-carto-connector>`__
 - `Accessing and parsing a live data feed <https://city-informatics.com/cartoframes-dashboard-tutorial/>`__
