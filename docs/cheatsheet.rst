@@ -1,10 +1,35 @@
 Cheatsheet
 ==========
 
+For most operations below, you need to create a :py:class:`CartoContext <cartoframes.context.CartoContext>` object. Do that as follows for user `cyclingfan` with API key `abc123`:
+
+.. code::
+
+    from cartoframes import CartoContext
+    cc = CartoContext(
+        base_url='https://cyclingfan.carto.com',
+        api_key='abc123'
+    )
+
+
 How to get census tracts for a state and specific measures
 ----------------------------------------------------------
 
-...
+
+.. code::
+
+   missouri_ct = cc.data_boundaries(
+       region=[-95.774147,35.995682,-89.098846,40.613636],
+       boundary='us.census.tiger.census_tract_clipped'
+   )
+
+   missouri_ct = missouri_ct[missouri_ct.geom_refs.str.startswith('29')]
+
+   # write to carto
+   cc.write(missouri_ct, 'missouri_census_tracts')
+
+   # visualize to make sure it makes sense
+   cc.map(Layer('missouri_census_tracts'))
 
 Get raw measures from the DO
 ----------------------------

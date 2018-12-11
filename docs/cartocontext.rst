@@ -1,3 +1,6 @@
+.. automodule:: cartoframes.context
+
+
 CartoContext
 ============
 .. autoclass:: cartoframes.context.CartoContext
