@@ -69,12 +69,12 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
 Get raw measures from the DO
 ----------------------------
 
-To get raw census measures from the Data Observatory, the key part is the us of `predenominated` in the metadata and `how='geoid'` (or some other geom_ref) when using `CartoContext.data`.
+To get raw census measures from the Data Observatory, the key part is the use of `predenominated` in the metadata and `how='geoid'` (or some other geom_ref) when using `CartoContext.data`. If you don't use the `how=` flag, the Data Observatory will perform some calculations with the geometries in the table you are trying to augment.
 
 Here we're using a dataset with a column called `geoid` which has the GEOID of census tracts. Note that it's important to specify the same geometry ID in the measure metadata as the geometries you are wishing to enrich.
 
 1. Find the measures you want, either through `CartoContext.data_discovery` or using the `Data Observatory catalog <https://cartodb.github.io/bigmetadata/>`__.
-2. Create a dataframe with columns for each measure metadata object, or a list of dictionaries (like below) for your curated measures. Be careful to specify the specific geometry level you want the measures for and make sure the geometry reference (e.g., GEOID) you have for your geometries matches this geometry leve.
+2. Create a dataframe with columns for each measure metadata object, or a list of dictionaries (like below) for your curated measures. Be careful to specify the specific geometry level you want the measures for and make sure the geometry reference (e.g., GEOID) you have for your geometries matches this geometry level.
 
 
 .. code::
@@ -107,7 +107,7 @@ How to get a matplotlib figure with four maps
 
 Creating a small multiple is a handy for data science visualizations for comparing data on multiple maps.
 
-In this example, the :py:class:`example_context <cartoframes.examples.Examples>`.
+In this example, we use the :py:class:`example_context <cartoframes.examples.Examples>`, so no CARTO account is required for the snippet to work.
 
 .. code::
 
