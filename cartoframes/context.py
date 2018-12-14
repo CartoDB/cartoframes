@@ -2018,7 +2018,6 @@ def _df2pg_schema(dataframe, pgcolnames):
     a SQL query"""
     util_cols = set(('the_geom', 'the_geom_webmercator', 'cartodb_id'))
     if set(dataframe.columns).issubset(util_cols):
-        print(f'subset: {", ".join(dataframe.columns)}')
         return ', '.join(dataframe.columns)
     schema = ', '.join([
         'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
