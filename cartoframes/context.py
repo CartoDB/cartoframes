@@ -865,6 +865,7 @@ class CartoContext(object):
 
         return df
 
+    @utils.temp_ignore_warnings
     def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None, size=(800, 400),
             ax=None):
