@@ -32,6 +32,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+Pipfile
+Pipfile.lock
 
 # Swap files
 .*.sw[nop]
@@ -40,3 +42,4 @@ wheels/
 CARTOCREDS.json
 SITEKEY.txt
 test/secret.json
+examples/scratch/*
