@@ -789,31 +789,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc._check_query(success_query, style_cols=fail_cols)
 
-    def test_df2pg_schema(self):
-        """context._df2pg_schema"""
-        from cartoframes.context import _df2pg_schema
-        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
-                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
-                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
-        df = pd.DataFrame(data).astype({'id': 'object',
-                                        'val': float,
-                                        'truth': bool,
-                                        'idnum': int})
-        # specify order of columns
-        df = df[['id', 'val', 'truth', 'idnum']]
-        pgcols = ['id', 'val', 'truth', 'idnum']
-        ans = ('NULLIF("id", \'\')::text AS id, '
-               'NULLIF("val", \'\')::numeric AS val, '
-               'NULLIF("truth", \'\')::boolean AS truth, '
-               'NULLIF("idnum", \'\')::numeric AS idnum')
-
-        self.assertEqual(ans, _df2pg_schema(df, pgcols))
-
-        # add the_geom
-        df['the_geom'] = 'Point(0 0)'
-        ans = '\"the_geom\", ' + ans
-        pgcols.append('the_geom')
-        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_add_encoded_geom(self):

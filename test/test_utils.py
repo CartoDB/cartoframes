@@ -1,8 +1,11 @@
 """Unit tests for cartoframes.utils"""
 import unittest
+from collections import OrderedDict
+
+import pandas as pd
+
 from cartoframes.utils import (dict_items, cssify, norm_colname,
                                normalize_colnames, importify_params)
-from collections import OrderedDict
 
 
 class TestUtils(unittest.TestCase):
@@ -171,3 +174,28 @@ class TestUtils(unittest.TestCase):
             result = pg2dtypes(i)
             self.assertEqual(result, results[i])
 
+    def test_df2pg_schema(self):
+        """utils.df2pg_schema"""
+        from cartoframes.utils import df2pg_schema
+        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
+                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
+                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
+        df = pd.DataFrame(data).astype({'id': 'object',
+                                        'val': float,
+                                        'truth': bool,
+                                        'idnum': int})
+        # specify order of columns
+        df = df[['id', 'val', 'truth', 'idnum']]
+        pgcols = ['id', 'val', 'truth', 'idnum']
+        ans = ('NULLIF("id", \'\')::text AS id, '
+               'NULLIF("val", \'\')::numeric AS val, '
+               'NULLIF("truth", \'\')::boolean AS truth, '
+               'NULLIF("idnum", \'\')::numeric AS idnum')
+
+        self.assertEqual(ans, df2pg_schema(df, pgcols))
+
+        # add the_geom
+        df['the_geom'] = 'Point(0 0)'
+        ans = '\"the_geom\", ' + ans
+        pgcols.append('the_geom')
+        self.assertEqual(ans, df2pg_schema(df, pgcols))
