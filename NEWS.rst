@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.8.4
+-----
+
+Release 2018-12-18
+
+Updates
+
+- Fixes bug on batch uploads where columns are a subset of util cols (#523)
+- Suppresses IFrame warnings temporarily (#524)
+
 0.8.3
 -----
 
