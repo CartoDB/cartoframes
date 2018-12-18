@@ -1,17 +1,24 @@
+"""general utility functions"""
 import sys
-from tqdm import tqdm
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
+from tqdm import tqdm
 
-def dict_items(d):
+
+def dict_items(indict):
+    """function for iterating through dict items compatible with py2 and 3
+
+    Args:
+        indict (dict): Dictionary that will be turned into items iterator
+    """
     if sys.version_info >= (3, 0):
-        return d.items()
-    else:
-        return d.iteritems()
+        return indict.items()
+    return indict.iteritems()
 
 
 def cssify(css_dict):
+    """Function to get CartoCSS from Python dicts"""
     css = ''
     for key, value in dict_items(css_dict):
         css += '{key} {{ '.format(key=key)
@@ -61,9 +68,9 @@ def norm_colname(colname):
     """
     last_char_special = False
     char_list = []
-    for e in str(colname):
-        if e.isalnum():
-            char_list.append(e.lower())
+    for colchar in str(colname):
+        if colchar.isalnum():
+            char_list.append(colchar.lower())
             last_char_special = False
         else:
             if not last_char_special:
@@ -130,7 +137,7 @@ def temp_ignore_warnings(func):
     return wrapper
 
 
-## schema definition functions
+# schema definition functions
 def dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
@@ -146,7 +153,7 @@ def dtypes2pg(dtype):
 
 
 # NOTE: this is not currently used anywhere
-def _pg2dtypes(pgtype):
+def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
         'date': 'datetime64[ns]',
@@ -166,7 +173,7 @@ def df2pg_schema(dataframe, pgcolnames):
         return ', '.join(dataframe.columns)
     schema = ', '.join([
         'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
-                                                     t=_dtypes2pg(t))
+                                                     t=dtypes2pg(t))
         for c, t in zip(pgcolnames, dataframe.dtypes)
         if c not in util_cols])
     if 'the_geom' in pgcolnames:
