@@ -875,37 +875,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(ewkb_resp, ewkb)
         self.assertIsNone(_encode_geom(None))
 
-    def test_dtypes2pg(self):
-        """context._dtypes2pg"""
-        from cartoframes.context import _dtypes2pg
-        results = {
-            'float64': 'numeric',
-            'int64': 'numeric',
-            'float32': 'numeric',
-            'int32': 'numeric',
-            'object': 'text',
-            'bool': 'boolean',
-            'datetime64[ns]': 'timestamp',
-            'unknown_dtype': 'text'
-        }
-        for i in results:
-            self.assertEqual(_dtypes2pg(i), results[i])
-
-    def test_pg2dtypes(self):
-        """context._pg2dtypes"""
-        from cartoframes.context import _pg2dtypes
-        results = {
-            'date': 'datetime64[ns]',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-            'unknown_pgdata': 'object'
-        }
-        for i in results:
-            result = _pg2dtypes(i)
-            self.assertEqual(result, results[i])
-
     def test_debug_print(self):
         """context._debug_print"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,

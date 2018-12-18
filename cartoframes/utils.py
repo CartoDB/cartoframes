@@ -128,3 +128,47 @@ def temp_ignore_warnings(func):
             evaled_func = func(*args, **kwargs)
         return evaled_func
     return wrapper
+
+
+## schema definition functions
+def dtypes2pg(dtype):
+    """Returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {
+        'float64': 'numeric',
+        'int64': 'numeric',
+        'float32': 'numeric',
+        'int32': 'numeric',
+        'object': 'text',
+        'bool': 'boolean',
+        'datetime64[ns]': 'timestamp',
+    }
+    return mapping.get(str(dtype), 'text')
+
+
+# NOTE: this is not currently used anywhere
+def _pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'date': 'datetime64[ns]',
+        'number': 'float64',
+        'string': 'object',
+        'boolean': 'bool',
+        'geometry': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')
+
+
+def df2pg_schema(dataframe, pgcolnames):
+    """Print column names with PostgreSQL schema for the SELECT statement of
+    a SQL query"""
+    util_cols = set(('the_geom', 'the_geom_webmercator', 'cartodb_id'))
+    if set(dataframe.columns).issubset(util_cols):
+        return ', '.join(dataframe.columns)
+    schema = ', '.join([
+        'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
+                                                     t=_dtypes2pg(t))
+        for c, t in zip(pgcolnames, dataframe.dtypes)
+        if c not in util_cols])
+    if 'the_geom' in pgcolnames:
+        return '"the_geom", ' + schema
+    return schema
