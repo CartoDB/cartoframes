@@ -26,6 +26,17 @@
 </head>
 <body>
   <div id="map"></div>
+
+  <aside class="toolbox" id="toolbox" style="display: none;">
+      <div class="box">
+          <header>
+              <h1>Legends</h1>
+          </header>
+
+          <div id="legends"></div>
+      </div>
+  </aside>
+
   <script>
     const BASEMAPS = {
         DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -63,13 +74,47 @@
       } else {
         temp_source = new carto.source.SQL(elem.source);
       }
+      const viz = new carto.Viz(elem['styling']);
       let temp = new carto.Layer(
           'layer' + idx,
           temp_source,
-          new carto.Viz(elem['styling'])
+          viz
       );
       var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
       temp.addTo(map);
+
+      // When layer loads, trigger legend event
+      temp.on('loaded', () => {
+          // Request data for legend from the layer viz
+          if (viz.color.getLegendData) {
+              const colorLegend = viz.color.getLegendData();
+              let colorLegendList = '';
+
+              // Create list elements for legend
+              colorLegend.data.forEach((legend, index) => {
+                  const color = legend.value;
+
+                  // Style for legend items
+                  colorLegendList +=
+                      `<li><span class="point-mark" style="background-color: rgb(${color.r}, ${color.g}, ${color.b});border: 1px solid black;"></span> <span>${legend.key}</span></li>\n`;
+              });
+
+              const legend = `<section>
+                  <div id="controls">
+                      <h1>Layer ${idx}</h1>
+                      <ul class="content">
+                      ${colorLegendList}
+                      </ul>
+                  </div>
+              </section>`;
+              document.getElementById('toolbox').style.display = 'block';
+              // Place list items in the content section of the title/legend box
+              document.getElementById('legends').innerHTML += legend;
+          } else {
+              document.getElementById('toolbox').style.display = 'none';
+          }
+      });
+
       if (elem.interactivity) {
         let interactivity = new carto.Interactivity(temp);
         let tempPopup = new mapboxgl.Popup({
