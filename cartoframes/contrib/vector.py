@@ -24,6 +24,7 @@ import os
 import json
 from warnings import warn
 from IPython.display import HTML
+import numpy as np
 try:
     import geopandas
     HAS_GEOPANDAS = True
@@ -278,6 +279,8 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
                  strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             self.geojson_str = dataframe.to_json()
+            self.bounds = dataframe.total_bounds.tolist()
+            # self.bounds = '[[{0}, {1}], [{2}, {3}]]'.format(*dataframe.total_bounds)
         else:
             raise ValueError('LocalLayer only works with GeoDataFrames from '
                              'the geopandas package')
@@ -361,12 +364,17 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
         layer for layer in layers
         if not isinstance(layer, LocalLayer)
     ]
+    local_layers = [
+        layer for layer in layers
+        if isinstance(layer, LocalLayer)
+    ]
 
     if non_local_layers:
         bounds = context._get_bounds(non_local_layers)  # pylint: disable=protected-access
         bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
     else:
-        bounds = '[[-180, -85.0511], [180, 85.0511]]'
+        bounds = _get_bounds_local(local_layers)
+        bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
 
     jslayers = []
     for _, layer in enumerate(layers):
@@ -393,3 +401,30 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
             )
         )
     return HTML(html)
+
+
+def _get_bounds_local(layers):
+    """Aggregates bounding boxes of all local layers
+
+        return: dict of bounding box of all bounds in layers
+    """
+    if not layers:
+        return {'west': -180, 'south': -90, 'east': 180, 'north': 90}
+
+    bounds = layers[0].bounds
+
+    for layer in layers[1:]:
+        bounds = np.concatenate(
+            (
+                np.minimum(
+                    bounds[:2],
+                    layer.bounds[:2]
+                ),
+                np.maximum(
+                    bounds[2:],
+                    layer.bounds[2:]
+                )
+            )
+        )
+
+    return dict(zip(['west', 'south', 'east', 'north'], bounds))
