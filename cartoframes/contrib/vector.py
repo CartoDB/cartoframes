@@ -22,6 +22,7 @@ Here is an example using the example CartoContext from the :py:class:`Examples
 """
 import os
 import json
+import logging
 from warnings import warn
 from IPython.display import HTML
 import numpy as np
@@ -278,9 +279,10 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     def __init__(self, dataframe, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
-            self.geojson_str = dataframe.to_json()
-            self.bounds = dataframe.total_bounds.tolist()
-            # self.bounds = '[[{0}, {1}], [{2}, {3}]]'.format(*dataframe.total_bounds)
+            # filter out null geometries
+            _df_nonnull = dataframe[~dataframe.geometry.isna()]
+            self._geojson_str = _df_nonnull.to_json()
+            self.bounds = _df_nonnull.total_bounds.tolist()
         else:
             raise ValueError('LocalLayer only works with GeoDataFrames from '
                              'the geopandas package')
@@ -360,21 +362,7 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
                 }
             )
     """
-    non_local_layers = [
-        layer for layer in layers
-        if not isinstance(layer, LocalLayer)
-    ]
-    local_layers = [
-        layer for layer in layers
-        if isinstance(layer, LocalLayer)
-    ]
-
-    if non_local_layers:
-        bounds = context._get_bounds(non_local_layers)  # pylint: disable=protected-access
-        bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
-    else:
-        bounds = _get_bounds_local(local_layers)
-        bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+    bounds = _get_super_bounds(layers, context)
 
     jslayers = []
     for _, layer in enumerate(layers):
@@ -387,7 +375,7 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
-            'source': layer.geojson_str if is_local else layer.query,
+            'source': layer._geojson_str if is_local else layer.query,
             'interactivity': intera
         })
     html = (
@@ -401,6 +389,29 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
             )
         )
     return HTML(html)
+
+
+def _get_super_bounds(layers, context):
+    """"""
+    hosted_layers = [
+        layer for layer in layers
+        if not isinstance(layer, LocalLayer)
+    ]
+    local_layers = [
+        layer for layer in layers
+        if isinstance(layer, LocalLayer)
+    ]
+    hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
+    local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
+
+    if hosted_layers:
+        hosted_bounds = context._get_bounds(hosted_layers)  # pylint: disable=protected-access
+    if local_layers:
+        local_bounds = _get_bounds_local(local_layers)
+
+    bounds = _combine_bounds(hosted_bounds, local_bounds)
+
+    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
 
 
 def _get_bounds_local(layers):
@@ -428,3 +439,33 @@ def _get_bounds_local(layers):
         )
 
     return dict(zip(['west', 'south', 'east', 'north'], bounds))
+
+
+def _combine_bounds(bbox1, bbox2):
+    """Takes two bounding boxes dicts and gives a new bbox that encompasses
+    them both"""
+    # if neither are defined, use the world
+    if not bbox1 and not bbox2:
+        return {'west': -180, 'south': -90, 'east': 180, 'north': 90}
+
+    assert bbox1.keys() == bbox2.keys(),\
+        'Input bounding boxes must have the same dictionary keys'
+    outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
+
+    def conv2nan(val):
+        """convert Nones to np.NaNs"""
+        return np.nan if val is None else val
+
+    def maxcoord(coord1, coord2):
+        return np.nanmax([conv2nan(coord1), conv2nan(coord2)])
+
+    def mincoord(coord1, coord2):
+        return np.nanmin([conv2nan(coord1), conv2nan(coord2)])
+
+    # set values and/or defaults
+    for coord in ('north', 'east'):
+        outbbox[coord] = maxcoord(bbox1[coord], bbox2[coord])
+    for coord in ('south', 'west'):
+        outbbox[coord] = mincoord(bbox1[coord], bbox2[coord])
+
+    return outbbox
