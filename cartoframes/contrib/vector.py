@@ -299,7 +299,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         )
 
 @utils.temp_ignore_warnings
-def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
+def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
 
     Args:
