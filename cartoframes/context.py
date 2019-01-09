@@ -59,6 +59,9 @@ CACHE_DIR = user_cache_dir('cartoframes')
 # cartoframes version
 DEFAULT_SQL_ARGS = dict(do_post=False)
 
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
+
 
 class CartoContext(object):
     """CartoContext class for authentication with CARTO and high-level
