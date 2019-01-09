@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>CARTO VL + CARTOframes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +10,10 @@
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
   <!-- Include Mapbox GL CSS -->
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css" rel="stylesheet" />
-  <!-- styling for intearctivity etc. -->
-  <link rel="stylesheet" type="text/css" href="https://cartodb.github.io/carto-vl/examples/style.css">
+  <!-- Include Airship for layouts -->
+  <link rel="stylesheet" href="https://libs.cartocdn.com/airship-style/v1.0.3/airship.css">
+  <!-- Include airship components -->
+  <script src="https://libs.cartocdn.com/airship-components/v1.0.3/airship.js"></script>
   <style>
     body {
       margin: 0;
@@ -23,9 +25,19 @@
       width: 100%;
     }
   </style>
-</head>
-<body>
-  <div id="map"></div>
+  </head>
+  <body class="as-app-body as-app">
+    <div class="as-content">
+      <main class="as-main">
+        <div class="as-map-area">
+          <div id="map"></div>
+        </div>
+      </main>
+      <aside class="as-sidebar as-sidebar--right as-bg--ui-01 as-color--type-01" style="display: none; width: 180px;" id="toolbox">
+        <div class="as-container as-container--scrollable" id="legends"></div>
+      </aside>
+    </div>
+
   <script>
     const BASEMAPS = {
         DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -41,7 +53,7 @@
       style: BASEMAPS['@@BASEMAPSTYLE@@'] || "@@BASEMAPSTYLE@@",
       zoom: 9,
       dragRotate: false
-      });
+    });
 
     let credentials = @@CREDENTIALS@@;
     carto.setDefaultAuth({
@@ -63,13 +75,54 @@
       } else {
         temp_source = new carto.source.SQL(elem.source);
       }
+      const viz = new carto.Viz(elem['styling']);
       let temp = new carto.Layer(
           'layer' + idx,
           temp_source,
-          new carto.Viz(elem['styling'])
+          viz
       );
       var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
       temp.addTo(map);
+
+      // When layer loads, trigger legend event
+      temp.on('loaded', () => {
+          // Request data for legend from the layer viz
+          if (viz.color.getLegendData) {
+              const colorLegend = viz.color.getLegendData();
+              let colorLegendList = '';
+
+              // Create list elements for legend
+              colorLegend.data.forEach((legend, index) => {
+                  const color = legend.value;
+                  const keyMin = legend.key[0].toFixed(2);
+                  const keyMax = legend.key[1].toFixed(2);
+                  let bucket = `${keyMin} - ${keyMax}`;
+                  if (keyMin === '-Infinity') {
+                    bucket = `< ${keyMax}`;
+                  } else if (keyMax === 'Infinity') {
+                    bucket = `> ${keyMin}`;
+                  }
+                  // Style for legend items
+                  colorLegendList +=
+                          `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item"><span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">${bucket}</span></li>\n`;
+              });
+
+              const legend = `<section class="as-box">
+                  <h1 class="as-subheader as-pl--8">${elem.legend || 'Layer ' + idx}</h1>
+                  <div class="legend as-body as-pl--16">
+                    <ul class="as-list">
+					${colorLegendList}
+                    </ul>
+                  </div>
+				</section>`;
+              document.getElementById('toolbox').style.display = 'block';
+              // Place list items in the content section of the title/legend box
+              document.getElementById('legends').innerHTML += legend;
+          } else {
+              document.getElementById('toolbox').style.display = 'none';
+          }
+      });
+
       if (elem.interactivity) {
         let interactivity = new carto.Interactivity(temp);
         let tempPopup = new mapboxgl.Popup({
