@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.9.0
+-----
+
+Release 2019-01-09
+
+Updates
+
+- Adds basic legends for CARTO VL maps (#527)
+- Adds a line to configure tqdm that prevents dependency issues (#528)
+
 0.8.4
 -----
 
