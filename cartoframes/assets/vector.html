@@ -33,7 +33,7 @@
           <div id="map"></div>
         </div>
       </main>
-      <aside class="as-sidebar as-sidebar--right as-bg--ui-01 as-color--type-01" style="display: none; width: 180px;" id="toolbox">
+      <aside class="as-panel as-panel--right as-panel--top as-bg--ui-01 as-color--type-01" style="display: none;" id="toolbox">
         <div class="as-container as-container--scrollable" id="legends"></div>
       </aside>
     </div>
@@ -108,8 +108,8 @@
               });
 
               const legend = `<section class="as-box">
-                  <h1 class="as-subheader as-pl--8">${elem.legend || 'Layer ' + idx}</h1>
-                  <div class="legend as-body as-pl--16">
+                  <h1 class="as-subheader">${elem.legend || 'Layer ' + idx}</h1>
+                  <div class="legend as-body">
                     <ul class="as-list">
 					${colorLegendList}
                     </ul>
