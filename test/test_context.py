@@ -789,31 +789,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc._check_query(success_query, style_cols=fail_cols)
 
-    def test_df2pg_schema(self):
-        """context._df2pg_schema"""
-        from cartoframes.context import _df2pg_schema
-        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
-                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
-                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
-        df = pd.DataFrame(data).astype({'id': 'object',
-                                        'val': float,
-                                        'truth': bool,
-                                        'idnum': int})
-        # specify order of columns
-        df = df[['id', 'val', 'truth', 'idnum']]
-        pgcols = ['id', 'val', 'truth', 'idnum']
-        ans = ('NULLIF("id", \'\')::text AS id, '
-               'NULLIF("val", \'\')::numeric AS val, '
-               'NULLIF("truth", \'\')::boolean AS truth, '
-               'NULLIF("idnum", \'\')::numeric AS idnum')
-
-        self.assertEqual(ans, _df2pg_schema(df, pgcols))
-
-        # add the_geom
-        df['the_geom'] = 'Point(0 0)'
-        ans = '\"the_geom\", ' + ans
-        pgcols.append('the_geom')
-        self.assertEqual(ans, _df2pg_schema(df, pgcols))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_add_encoded_geom(self):
@@ -874,37 +849,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         ewkb_resp = _encode_geom(geom)
         self.assertEqual(ewkb_resp, ewkb)
         self.assertIsNone(_encode_geom(None))
-
-    def test_dtypes2pg(self):
-        """context._dtypes2pg"""
-        from cartoframes.context import _dtypes2pg
-        results = {
-            'float64': 'numeric',
-            'int64': 'numeric',
-            'float32': 'numeric',
-            'int32': 'numeric',
-            'object': 'text',
-            'bool': 'boolean',
-            'datetime64[ns]': 'timestamp',
-            'unknown_dtype': 'text'
-        }
-        for i in results:
-            self.assertEqual(_dtypes2pg(i), results[i])
-
-    def test_pg2dtypes(self):
-        """context._pg2dtypes"""
-        from cartoframes.context import _pg2dtypes
-        results = {
-            'date': 'datetime64[ns]',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-            'unknown_pgdata': 'object'
-        }
-        for i in results:
-            result = _pg2dtypes(i)
-            self.assertEqual(result, results[i])
 
     def test_debug_print(self):
         """context._debug_print"""

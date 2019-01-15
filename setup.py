@@ -10,7 +10,7 @@ REQUIRES = [
     'pandas>=0.20.1',
     'webcolors>=1.7.0',
     'carto>=1.4.0',
-    'tqdm>=4.14.0,!=4.18.0',
+    'tqdm>=4.14.0',
     'appdirs>=1.4.3',
 ]
 
