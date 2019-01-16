@@ -211,4 +211,43 @@ Sometimes tables are too large to read them out in a single `CartoContext.read` 
    all_together = pd.concat(dfs)
    del dfs
 
-When writing large DataFrames to CARTO, cartoframes takes care of the batching. Users shouldn't hit errors in general until they run out of storage in their database.
+jhen writing large DataFrames to CARTO, cartoframes takes care of the batching. Users shouldn't hit errors in general until they run out of storage in their database.
+
+
+Perform long running query if a time out occurs
+-----------------------------------------------
+
+While not a part of cartoframes yet, the CARTO Python SDK -- the CARTO Python package for developers -- gives you the ability to create `Batch SQL API jobs <>`__. Below is a sample workflow for how to accomplish queries that would otherwise produce timeout errors with `CartoContext.query`.
+
+.. code::
+
+   from cartoframes import CartoContext, BatchJobStatus
+   from carto.sql import BatchSQLClient
+   from time import sleep
+
+   cc = CartoContext(
+       base_url='https://your-username.carto.com',
+       api_key='your-api-key'
+   )
+
+   bsc = BatchSQLClient(cc.auth_client)
+
+   job = bsc.create(['''
+       UPDATE really_big_table
+       SET the_geom = cdb_geocode_street_point(direccion, ciudad, provincia, 'Spain')
+       ''', 
+   ])
+
+   bjs = BatchJobStatus(cc, job)
+   last_status = bjs.status()['status']
+
+   while curr_status not in ('failed', 'done', 'canceled', 'unknown'):
+       curr_status = bjs.status()['status']
+       sleep(5)
+       if curr_status != last_status:
+	   last_status = curr_status
+	   print(curr_status)
+
+   # if curr_status is 'done' the operation was successful
+   # and we can read the table into a dataframe
+   geocoded_table = cc.read('really_big_table')
