@@ -211,13 +211,13 @@ Sometimes tables are too large to read them out in a single `CartoContext.read` 
    all_together = pd.concat(dfs)
    del dfs
 
-jhen writing large DataFrames to CARTO, cartoframes takes care of the batching. Users shouldn't hit errors in general until they run out of storage in their database.
+When writing large DataFrames to CARTO, cartoframes takes care of the batching. Users shouldn't hit errors in general until they run out of storage in their database.
 
 
 Perform long running query if a time out occurs
 -----------------------------------------------
 
-While not a part of cartoframes yet, the CARTO Python SDK -- the CARTO Python package for developers -- gives you the ability to create `Batch SQL API jobs <>`__. Below is a sample workflow for how to accomplish queries that would otherwise produce timeout errors with `CartoContext.query`.
+While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`__ jobs can be created through the `CARTO Python SDK <https://carto.com/developers/python-sdk/>`__ -- the CARTO Python package for developers. Below is a sample workflow for how to perform a long running query that would otherwise produce timeout errors with :py:meth:`CartoContext.query <cartoframes.context.CartoContext.query>`.
 
 .. code::
 
