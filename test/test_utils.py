@@ -1,8 +1,11 @@
 """Unit tests for cartoframes.utils"""
 import unittest
+from collections import OrderedDict
+
+import pandas as pd
+
 from cartoframes.utils import (dict_items, cssify, norm_colname,
                                normalize_colnames, importify_params)
-from collections import OrderedDict
 
 
 class TestUtils(unittest.TestCase):
@@ -139,3 +142,60 @@ class TestUtils(unittest.TestCase):
         ans = ('true', 'false', 'true', 'gulab jamon', )
         for idx, p in enumerate(params):
             self.assertTrue(importify_params(p), ans[idx])
+
+    def test_dtypes2pg(self):
+        """utils.dtypes2pg"""
+        from cartoframes.utils import dtypes2pg
+        results = {
+            'float64': 'numeric',
+            'int64': 'numeric',
+            'float32': 'numeric',
+            'int32': 'numeric',
+            'object': 'text',
+            'bool': 'boolean',
+            'datetime64[ns]': 'timestamp',
+            'unknown_dtype': 'text'
+        }
+        for i in results:
+            self.assertEqual(dtypes2pg(i), results[i])
+
+    def test_pg2dtypes(self):
+        """context._pg2dtypes"""
+        from cartoframes.utils import pg2dtypes
+        results = {
+            'date': 'datetime64[ns]',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+            'unknown_pgdata': 'object'
+        }
+        for i in results:
+            result = pg2dtypes(i)
+            self.assertEqual(result, results[i])
+
+    def test_df2pg_schema(self):
+        """utils.df2pg_schema"""
+        from cartoframes.utils import df2pg_schema
+        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
+                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
+                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
+        df = pd.DataFrame(data).astype({'id': 'object',
+                                        'val': float,
+                                        'truth': bool,
+                                        'idnum': int})
+        # specify order of columns
+        df = df[['id', 'val', 'truth', 'idnum']]
+        pgcols = ['id', 'val', 'truth', 'idnum']
+        ans = ('NULLIF("id", \'\')::text AS id, '
+               'NULLIF("val", \'\')::numeric AS val, '
+               'NULLIF("truth", \'\')::boolean AS truth, '
+               'NULLIF("idnum", \'\')::numeric AS idnum')
+
+        self.assertEqual(ans, df2pg_schema(df, pgcols))
+
+        # add the_geom
+        df['the_geom'] = 'Point(0 0)'
+        ans = '\"the_geom\", ' + ans
+        pgcols.append('the_geom')
+        self.assertEqual(ans, df2pg_schema(df, pgcols))

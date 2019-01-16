@@ -1,6 +1,26 @@
 Changelog
 =========
 
+0.9.0
+-----
+
+Release 2019-01-09
+
+Updates
+
+- Adds basic legends for CARTO VL maps (#527)
+- Adds a line to configure tqdm that prevents dependency issues (#528)
+
+0.8.4
+-----
+
+Release 2018-12-18
+
+Updates
+
+- Fixes bug on batch uploads where columns are a subset of util cols (#523)
+- Suppresses IFrame warnings temporarily (#524)
+
 0.8.3
 -----
 

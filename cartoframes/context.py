@@ -64,6 +64,9 @@ CACHE_DIR = user_cache_dir('cartoframes')
 # cartoframes version
 DEFAULT_SQL_ARGS = dict(do_post=False)
 
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
+
 
 class CartoContext(object):
     """CartoContext class for authentication with CARTO and high-level
@@ -525,7 +528,7 @@ class CartoContext(object):
         # combine chunks into final table
         try:
             select_base = 'SELECT {schema} FROM "{{table}}"'.format(
-                schema=_df2pg_schema(df, pgcolnames))
+                schema=utils.df2pg_schema(df, pgcolnames))
             unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
                                                    for t in subtables])
             self._debug_print(unioned=unioned_tables)
@@ -656,7 +659,7 @@ class CartoContext(object):
                       'NULLIF("{col}", \'\')::{ctype}')
         # alter non-util columns that are not type text
         alter_cols = ', '.join(alter_temp.format(col=c,
-                                                 ctype=_dtypes2pg(t))
+                                                 ctype=utils.dtypes2pg(t))
                                for c, t in zip(pgcolnames,
                                                dataframe.dtypes)
                                if c not in util_cols and t != 'object')
@@ -870,6 +873,7 @@ class CartoContext(object):
 
         return df
 
+    @utils.temp_ignore_warnings
     def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None, size=(800, 400),
             ax=None):
@@ -1931,6 +1935,7 @@ class CartoContext(object):
                                           value=str_value))
 
 
+# TODO: move all of the below to the utils module
 def _add_encoded_geom(df, geom_col):
     """Add encoded geometry to DataFrame"""
     # None if not a GeoDataFrame
@@ -1990,42 +1995,3 @@ def _decode_geom(ewkb):
     if ewkb:
         return wkb.loads(ba.unhexlify(ewkb))
     return None
-
-
-def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'numeric',
-        'float32': 'numeric',
-        'int32': 'numeric',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'timestamp',
-    }
-    return mapping.get(str(dtype), 'text')
-
-
-def _pg2dtypes(pgtype):
-    """Returns equivalent dtype for input `pgtype`."""
-    mapping = {
-        'date': 'datetime64[ns]',
-        'number': 'float64',
-        'string': 'object',
-        'boolean': 'bool',
-        'geometry': 'object',
-    }
-    return mapping.get(str(pgtype), 'object')
-
-
-def _df2pg_schema(dataframe, pgcolnames):
-    """Print column names with PostgreSQL schema for the SELECT statement of
-    a SQL query"""
-    schema = ', '.join([
-        'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
-                                                     t=_dtypes2pg(t))
-        for c, t in zip(pgcolnames, dataframe.dtypes)
-        if c not in ('the_geom', 'the_geom_webmercator', 'cartodb_id')])
-    if 'the_geom' in pgcolnames:
-        return '"the_geom", ' + schema
-    return schema
