@@ -451,6 +451,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_query(self):
         """context.CartoContext.query"""
+        from datetime import datetime
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
@@ -461,7 +462,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             '''.format(cols=','.join(cols)))
 
         # ensure columns are in expected order
-        df = df[list(cols) + ['invalid_df_date']]
+        df = df[list(cols) + ['invalid_df_date', ]]
 
         # same number of rows
         self.assertEqual(len(df), 100,
@@ -478,11 +479,11 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'object', 'object', 'float64',
-                           'datetime64[ns]', 'object', )
-        self.assertTupleEqual(expected_dtypes,
-                              tuple(str(d) for d in df.dtypes),
-                              msg='Should have expected schema')
+        expected_dtypes = (str, str, str, float,
+                           datetime, str, )
+        for col, dtype in zip(df.columns, expected_dtypes):
+            self.assertTrue(isinstance(getattr(df, col).iloc[0], dtype),
+                            msg='Should have expected schema')
 
         # empty response
         df_empty = cc.query('''
