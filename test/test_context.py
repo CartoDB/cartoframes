@@ -482,8 +482,11 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         expected_dtypes = (str, str, str, float,
                            datetime, str, )
         for col, dtype in zip(df.columns, expected_dtypes):
-            self.assertTrue(isinstance(getattr(df, col).iloc[0], dtype),
-                            msg='Should have expected schema')
+            self.assertTrue(
+                    isinstance(getattr(df, col).iloc[0], dtype),
+                    msg='Should have expected type: {0} ({1})'.format(
+                        col, str(dtype))
+                )
 
         # empty response
         df_empty = cc.query('''
