@@ -15,7 +15,7 @@
    Experimental Features <contrib>
    Credentials <credentials>
    Batch Jobs <batchjobstatus>
-   Cheat Sheet / Cookbook <cheatsheet>
+   Cookbook <cookbook>
    ETL with CARTOframes <etl>
 
 ******************
