@@ -22,6 +22,7 @@ from utils import _UserUrlLoader
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
 
+
 class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
@@ -70,7 +71,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.valid_columns = set(['affgeoid', 'aland', 'awater', 'created_at',
                                   'csafp', 'geoid', 'lsad', 'name', 'the_geom',
                                   'updated_at'])
-        table_args = dict(ver=pyver, mpl=has_mpl, gpd=has_gpd)
         # torque table
         self.test_point_table = 'tweets_obama'
 
@@ -449,7 +449,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(cc.sync(pd.DataFrame(), 'acadia'))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    def test_cartoframes_query(self):
+    def test_cartocontext_query(self):
         """context.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
@@ -461,7 +461,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             '''.format(cols=','.join(cols)))
 
         # ensure columns are in expected order
-        df = df[list(cols) + ['invalid_df_date']]
+        df = df[list(cols) + ['invalid_df_date', ]]
 
         # same number of rows
         self.assertEqual(len(df), 100,
@@ -479,10 +479,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # should have exected schema
         expected_dtypes = ('object', 'object', 'object', 'float64',
-                           'datetime64[ns]', 'object', )
-        self.assertTupleEqual(expected_dtypes,
-                              tuple(str(d) for d in df.dtypes),
-                              msg='Should have expected schema')
+                           'datetime64[ns, UTC]', 'object', )
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
 
         # empty response
         df_empty = cc.query('''
