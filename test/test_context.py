@@ -481,7 +481,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         expected_dtypes = ('object', 'object', 'object', 'float64',
                            'datetime64[ns, UTC]', 'object', )
         self.assertTupleEqual(
-            (str(d) for d in df.dtypes),
+            tuple(str(d) for d in df.dtypes),
             expected_dtypes,
             msg='Should have same schema/types'
         )
