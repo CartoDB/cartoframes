@@ -479,14 +479,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = (str, str, str, float,
-                           datetime, str, )
-        for col, dtype in zip(df.columns, expected_dtypes):
-            self.assertTrue(
-                    isinstance(getattr(df, col).iloc[0], dtype),
-                    msg='Should have expected type: {0} ({1})'.format(
-                        col, str(dtype))
-                )
+        expected_dtypes = ('object', 'object', 'object', 'float64',
+                           'datetime64[ns, UTC]', 'object', )
+        self.assertTrue(
+                (str(d) for d in df.dtypes),
+                msg='Should have same schema/types'
+            )
 
         # empty response
         df_empty = cc.query('''
