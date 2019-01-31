@@ -1,4 +1,9 @@
-"""CartoContext class"""
+"""
+CartoContext class
+==================
+
+This class is the workhorse of CARTOframes by providing all functionality related to data access to CARTO, map creation, and Data Observatory functionality.
+"""
 from __future__ import absolute_import
 import json
 import os
