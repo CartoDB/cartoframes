@@ -18,7 +18,7 @@ How to get census tracts or counties for a state
 It's a fairly common use case that someone needs the Census tracts for a region. With cartoframes you have a lot of flexibility for obtaining this data.
 
 1. Get bounding box of the region you're interested in. Tools like `Klockan's BoundingBox tool <https://boundingbox.klokantech.com/>`__ with the CSV output are prefect. Alternatively, use a table with the appropriate covering region (e.g., an existing table with polygon(s) of Missouri, its counties, etc.).
-2. Get the FIPS code for the state(s) you're intersted in. The US Census `provides a table <https://www.census.gov/geo/reference/ansi_statetables.html>`__ as do many other sites. In this case, I'm choosing ``29`` for Missouri.
+2. Get the FIPS code for the state(s) you're interested in. The US Census `provides a table <https://www.census.gov/geo/reference/ansi_statetables.html>`__ as do many other sites. In this case, I'm choosing ``29`` for Missouri.
 
 .. code::
 
@@ -256,7 +256,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
 Subdivide Data Observatory search region into sub-regions
 ---------------------------------------------------------
 
-Some geomtries in the Data Observatory are too large, numereous, and/or complex to retrieve in one request. Census tracts (especially if they are shoreline-clipped) is one popular example. To retrieve this data, it helps to first break the search region into subregions, collect the data in each of the subregions, and then combine the data at the end. To avoid duplicate geometries along the sub-region edges, we apply the `DataFrame.drop_duplicates` method for the last step.
+Some geometries in the Data Observatory are too large, numerous, and/or complex to retrieve in one request. Census tracts (especially if they are shoreline-clipped) is one popular example. To retrieve this data, it helps to first break the search region into subregions, collect the data in each of the subregions, and then combine the data at the end. To avoid duplicate geometries along the sub-region edges, we apply the `DataFrame.drop_duplicates` method for the last step.
 
 .. code::
 
