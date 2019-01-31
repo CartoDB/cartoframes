@@ -251,3 +251,47 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
    # if curr_status is 'done' the operation was successful
    # and we can read the table into a dataframe
    geocoded_table = cc.read('really_big_table')
+
+
+Subdivide Data Observatory search region into sub-regions
+---------------------------------------------------------
+
+Some geomtries in the Data Observatory are too large, numereous, and/or complex to retrieve in one request. Census tracts (especially if they are shoreline-clipped) is one popular example. To retrieve this data, it helps to first break the search region into subregions, collect the data in each of the subregions, and then combine the data at the end. To avoid duplicate geometries along the sub-region edges, we apply the `DataFrame.drop_duplicates` method for the last step.
+
+.. code::
+
+   import itertools
+
+   # bbox that encompasses lower 48 states of USA
+   bbox = [
+       -126.8220242454,
+       22.991640246,
+       -64.35549002,
+       51.5559807141
+   ]
+
+   # make these numbers larger if the sub-regions are not small enough
+   # make these numbers smaller to get more data in one call
+   num_divs_lng = 5
+   num_divs_lat = 3
+
+   delta_lng_divs = (bbox[2] - bbox[0]) / num_divs_lng
+   delta_lat_divs = (bbox[3] - bbox[1]) / num_divs_lat
+
+   sub_data = []
+   for p in itertools.product(range(num_divs_lng), range(num_divs_lat)):
+       sub_bbox = (
+           bbox[0] + p[0] * delta_lng_divs,
+           bbox[1] + p[1] * delta_lat_divs,
+           bbox[0] + (p[0] + 1) * delta_lng_divs,
+           bbox[1] + (p[1] + 1) * delta_lat_divs
+       )
+       _df = cc.data_boundaries(
+           region=sub_bbox,
+           boundary='us.census.tiger.census_tract_clipped'
+       )
+       sub_data.append(_df)
+
+   df_all = pd.concat(sub_data)[['geom_refs', 'the_geom']]
+   df_all.drop_duplicates(inplace=True)
+   del sub_data
