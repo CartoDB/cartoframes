@@ -22,7 +22,6 @@ Here is an example using the example CartoContext from the :py:class:`Examples
 """
 import os
 import json
-import logging
 from warnings import warn
 from IPython.display import HTML
 import numpy as np
@@ -82,15 +81,15 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           for the CARTO VL `filter` style attribute. Default is no animation.
         strokeColor (str, optional): Defines the stroke color of polygons.
           Default is white.
-        strokeWidth (float or str, optional): Defines the width of the stroke in
-          pixels. Default is 1.
+        strokeWidth (float or str, optional): Defines the width of the stroke
+          in pixels. Default is 1.
         interactivity (str, list, or dict, optional): This option adds
           interactivity (click or hover) to a layer. Defaults to ``click`` if
           one of the following inputs are specified:
 
-          - dict: If a :obj:`dict`, this must have the key `cols` with its value
-            a list of columns. Optionally add `event` to choose ``hover`` or
-            ``click``. Specifying a `header` key/value pair adds a header to
+          - dict: If a :obj:`dict`, this must have the key `cols` with its
+            value a list of columns. Optionally add `event` to choose ``hover``
+            or ``click``. Specifying a `header` key/value pair adds a header to
             the popup that will be rendered in HTML.
           - list: A list of valid column names in the data used for this layer
           - str: A column name in the data used in this layer
@@ -122,18 +121,21 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
             )
     """
     def __init__(self, query, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
-        strconv = lambda x: str(x) if x is not None else None
+                 strokeColor=None, strokeWidth=None, interactivity=None):
+
+        def convstr(obj):
+            """convert all types to strings or None"""
+            return str(obj) if obj is not None else None
 
         # data source
         self.query = query
 
         # style attributes
         self.color = color
-        self.width = strconv(size)
+        self.width = convstr(size)
         self.filter = time
         self.strokeColor = strokeColor  # pylint: disable=invalid-name
-        self.strokeWidth = strconv(strokeWidth)  # pylint: disable=invalid-name
+        self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
 
         # internal attributes
         self.orig_query = query
@@ -183,6 +185,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
         self.styling = '\n'.join([interactive_cols, self.styling])
 
+
 def _get_html_doc(sources, bounds, creds=None, basemap=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
@@ -202,7 +205,7 @@ def _get_html_doc(sources, bounds, creds=None, basemap=None):
     }
     if isinstance(basemap, dict):
         token = basemap.get('token', '')
-        if not 'style' in basemap:
+        if 'style' not in basemap:
             raise ValueError(
                 'If basemap is a dict, it must have a `style` key'
             )
@@ -215,6 +218,7 @@ def _get_html_doc(sources, bounds, creds=None, basemap=None):
                  .replace('@@MAPBOXTOKEN@@', token) \
                  .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
                  .replace('@@BOUNDS@@', bounds)
+
 
 class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Layer from a table name. See :py:class:`vector.QueryLayer
@@ -252,6 +256,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
             strokeWidth=strokeWidth,
             interactivity=interactivity
         )
+
 
 class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Create a layer from a GeoDataFrame
@@ -297,6 +302,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             interactivity=interactivity
         )
 
+
 @utils.temp_ignore_warnings
 def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
@@ -307,12 +313,14 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
-          A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+          A :py:class:`CartoContext <cartoframes.context.CartoContext>`
+          instance
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
-            If a Mapbox style, the access token is the value of the `token` key.
+            If a Mapbox style, the access token is the value of the `token`
+            key.
 
     Example:
 
@@ -420,7 +428,7 @@ def _get_bounds_local(layers):
         return: dict of bounding box of all bounds in layers
     """
     if not layers:
-        return {'west': -180, 'south': -90, 'east': 180, 'north': 90}
+        return {'west': None, 'south': None, 'east': None, 'north': None}
 
     bounds = layers[0].bounds
 
