@@ -212,6 +212,7 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
             )
         else:
            with self.assertRaises(ImportError):
+               import geopandas as gpd
                _ = vector.LocalLayer(gpd.GeoDataFrame([]))
 
     def test_vector__get_super_bounds(self):
