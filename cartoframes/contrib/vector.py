@@ -121,7 +121,8 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
             )
     """
     def __init__(self, query, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):
+                 strokeColor=None, strokeWidth=None, interactivity=None,
+                 legend=None):  # pylint: disable=invalid-name
 
         def convstr(obj):
             """convert all types to strings or None"""
@@ -136,6 +137,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.filter = time
         self.strokeColor = strokeColor  # pylint: disable=invalid-name
         self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
+        self.legend = legend
 
         # internal attributes
         self.orig_query = query
@@ -244,7 +246,8 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                 example_context)
     """
     def __init__(self, table_name, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
+                 strokeColor=None, strokeWidth=None, interactivity=None,
+                 legend=None):
         self.table_source = table_name
 
         super(Layer, self).__init__(
@@ -254,7 +257,8 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
             time=time,
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
-            interactivity=interactivity
+            interactivity=interactivity,
+            legend=legend
         )
 
 
@@ -282,7 +286,8 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
     def __init__(self, dataframe, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None):  # pylint: disable=invalid-name
+                 strokeColor=None, strokeWidth=None, interactivity=None,
+                 legend=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             # filter out null geometries
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
@@ -299,12 +304,13 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             time=time,
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
-            interactivity=interactivity
+            interactivity=interactivity,
+            legend=legend
         )
 
 
 @utils.temp_ignore_warnings
-def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
+def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
 
     Args:
@@ -383,8 +389,9 @@ def vmap(layers, context, size=(800, 400), basemap=BaseMaps.voyager):
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
-            'source': layer._geojson_str if is_local else layer.query,
-            'interactivity': intera
+            'source': layer.geojson_str if is_local else layer.query,
+            'interactivity': intera,
+            'legend': layer.legend
         })
     html = (
         '<iframe srcdoc="{content}" width={width} height={height}>'

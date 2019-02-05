@@ -1,4 +1,9 @@
-"""CartoContext class"""
+"""
+CartoContext class
+==================
+
+This class is the workhorse of CARTOframes by providing all functionality related to data access to CARTO, map creation, and Data Observatory functionality.
+"""
 from __future__ import absolute_import
 import json
 import os
@@ -58,6 +63,9 @@ CACHE_DIR = user_cache_dir('cartoframes')
 
 # cartoframes version
 DEFAULT_SQL_ARGS = dict(do_post=False)
+
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class CartoContext(object):
