@@ -24,6 +24,7 @@ import os
 import json
 from warnings import warn
 from IPython.display import HTML
+import numpy as np
 try:
     import geopandas
     HAS_GEOPANDAS = True
@@ -80,15 +81,15 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           for the CARTO VL `filter` style attribute. Default is no animation.
         strokeColor (str, optional): Defines the stroke color of polygons.
           Default is white.
-        strokeWidth (float or str, optional): Defines the width of the stroke in
-          pixels. Default is 1.
+        strokeWidth (float or str, optional): Defines the width of the stroke
+          in pixels. Default is 1.
         interactivity (str, list, or dict, optional): This option adds
           interactivity (click or hover) to a layer. Defaults to ``click`` if
           one of the following inputs are specified:
 
-          - dict: If a :obj:`dict`, this must have the key `cols` with its value
-            a list of columns. Optionally add `event` to choose ``hover`` or
-            ``click``. Specifying a `header` key/value pair adds a header to
+          - dict: If a :obj:`dict`, this must have the key `cols` with its
+            value a list of columns. Optionally add `event` to choose ``hover``
+            or ``click``. Specifying a `header` key/value pair adds a header to
             the popup that will be rendered in HTML.
           - list: A list of valid column names in the data used for this layer
           - str: A column name in the data used in this layer
@@ -122,17 +123,20 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
                  legend=None):  # pylint: disable=invalid-name
-        strconv = lambda x: str(x) if x is not None else None
+
+        def convstr(obj):
+            """convert all types to strings or None"""
+            return str(obj) if obj is not None else None
 
         # data source
         self.query = query
 
         # style attributes
         self.color = color
-        self.width = strconv(size)
+        self.width = convstr(size)
         self.filter = time
         self.strokeColor = strokeColor  # pylint: disable=invalid-name
-        self.strokeWidth = strconv(strokeWidth)  # pylint: disable=invalid-name
+        self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
         self.legend = legend
 
         # internal attributes
@@ -183,6 +187,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
         self.styling = '\n'.join([interactive_cols, self.styling])
 
+
 def _get_html_doc(sources, bounds, creds=None, basemap=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
@@ -202,7 +207,7 @@ def _get_html_doc(sources, bounds, creds=None, basemap=None):
     }
     if isinstance(basemap, dict):
         token = basemap.get('token', '')
-        if not 'style' in basemap:
+        if 'style' not in basemap:
             raise ValueError(
                 'If basemap is a dict, it must have a `style` key'
             )
@@ -215,6 +220,7 @@ def _get_html_doc(sources, bounds, creds=None, basemap=None):
                  .replace('@@MAPBOXTOKEN@@', token) \
                  .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
                  .replace('@@BOUNDS@@', bounds)
+
 
 class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Layer from a table name. See :py:class:`vector.QueryLayer
@@ -255,6 +261,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
             legend=legend
         )
 
+
 class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Create a layer from a GeoDataFrame
 
@@ -282,7 +289,10 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
                  strokeColor=None, strokeWidth=None, interactivity=None,
                  legend=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
-            self.geojson_str = dataframe.to_json()
+            # filter out null geometries
+            _df_nonnull = dataframe[~dataframe.geometry.isna()]
+            self._geojson_str = _df_nonnull.to_json()
+            self.bounds = _df_nonnull.total_bounds.tolist()
         else:
             raise ValueError('LocalLayer only works with GeoDataFrames from '
                              'the geopandas package')
@@ -298,6 +308,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             legend=legend
         )
 
+
 @utils.temp_ignore_warnings
 def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
     """CARTO VL-powered interactive map
@@ -308,12 +319,14 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
-          A :py:class:`CartoContext <cartoframes.context.CartoContext>` instance
+          A :py:class:`CartoContext <cartoframes.context.CartoContext>`
+          instance
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
-            If a Mapbox style, the access token is the value of the `token` key.
+            If a Mapbox style, the access token is the value of the `token`
+            key.
 
     Example:
 
@@ -363,16 +376,7 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
                 }
             )
     """
-    non_local_layers = [
-        layer for layer in layers
-        if not isinstance(layer, LocalLayer)
-    ]
-
-    if non_local_layers:
-        bounds = context._get_bounds(non_local_layers)  # pylint: disable=protected-access
-        bounds = '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
-    else:
-        bounds = '[[-180, -85.0511], [180, 85.0511]]'
+    bounds = _get_super_bounds(layers, context)
 
     jslayers = []
     for _, layer in enumerate(layers):
@@ -400,3 +404,95 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
             )
         )
     return HTML(html)
+
+
+def _get_super_bounds(layers, context):
+    """"""
+    hosted_layers = [
+        layer for layer in layers
+        if not isinstance(layer, LocalLayer)
+    ]
+    local_layers = [
+        layer for layer in layers
+        if isinstance(layer, LocalLayer)
+    ]
+    hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
+    local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
+
+    if hosted_layers:
+        hosted_bounds = context._get_bounds(hosted_layers)  # pylint: disable=protected-access
+    if local_layers:
+        local_bounds = _get_bounds_local(local_layers)
+
+    bounds = _combine_bounds(hosted_bounds, local_bounds)
+
+    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+
+
+def _get_bounds_local(layers):
+    """Aggregates bounding boxes of all local layers
+
+        return: dict of bounding box of all bounds in layers
+    """
+    if not layers:
+        return {'west': None, 'south': None, 'east': None, 'north': None}
+
+    bounds = layers[0].bounds
+
+    for layer in layers[1:]:
+        bounds = np.concatenate(
+            (
+                np.minimum(
+                    bounds[:2],
+                    layer.bounds[:2]
+                ),
+                np.maximum(
+                    bounds[2:],
+                    layer.bounds[2:]
+                )
+            )
+        )
+
+    return dict(zip(['west', 'south', 'east', 'north'], bounds))
+
+
+def _combine_bounds(bbox1, bbox2):
+    """Takes two bounding boxes dicts and gives a new bbox that encompasses
+    them both"""
+    WORLD = {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
+    ALL_KEYS = set(WORLD.keys())
+
+    def dict_all_nones(bbox_dict):
+        """Returns True if all dict values are None"""
+        return all(v is None for v in bbox_dict.values())
+
+    # if neither are defined or are all nones, use the world
+    if not bbox1 and not bbox2:
+        return WORLD
+    if dict_all_nones(bbox1) and dict_all_nones(bbox2):
+        print([(v, v is None) for v in bbox1.values()])
+        print([(v, v is None) for v in bbox2.values()])
+        return WORLD
+
+    assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
+        'Input bounding boxes must have the same dictionary keys'
+    outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
+
+    def conv2nan(val):
+        """convert Nones to np.nans"""
+        return np.nan if val is None else val
+
+    def maxcoord(coord1, coord2):
+        """give the max coordinate"""
+        return np.nanmax([conv2nan(coord1), conv2nan(coord2)])
+
+    def mincoord(coord1, coord2):
+        return np.nanmin([conv2nan(coord1), conv2nan(coord2)])
+
+    # set values and/or defaults
+    for coord in ('north', 'east'):
+        outbbox[coord] = maxcoord(bbox1[coord], bbox2[coord])
+    for coord in ('south', 'west'):
+        outbbox[coord] = mincoord(bbox1[coord], bbox2[coord])
+
+    return outbbox
