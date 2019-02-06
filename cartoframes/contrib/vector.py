@@ -459,19 +459,31 @@ def _get_bounds_local(layers):
 def _combine_bounds(bbox1, bbox2):
     """Takes two bounding boxes dicts and gives a new bbox that encompasses
     them both"""
-    # if neither are defined, use the world
-    if not bbox1 and not bbox2:
-        return {'west': -180, 'south': -90, 'east': 180, 'north': 90}
+    WORLD = {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
+    ALL_KEYS = set(WORLD.keys())
 
-    assert bbox1.keys() == bbox2.keys(),\
+    def dict_all_nones(bbox_dict):
+        """Returns True if all dict values are None"""
+        return all(v is None for v in bbox_dict.values())
+
+    # if neither are defined or are all nones, use the world
+    if not bbox1 and not bbox2:
+        return WORLD
+    if dict_all_nones(bbox1) and dict_all_nones(bbox2):
+        print([(v, v is None) for v in bbox1.values()])
+        print([(v, v is None) for v in bbox2.values()])
+        return WORLD
+
+    assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
         'Input bounding boxes must have the same dictionary keys'
     outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
 
     def conv2nan(val):
-        """convert Nones to np.NaNs"""
+        """convert Nones to np.nans"""
         return np.nan if val is None else val
 
     def maxcoord(coord1, coord2):
+        """give the max coordinate"""
         return np.nanmax([conv2nan(coord1), conv2nan(coord2)])
 
     def mincoord(coord1, coord2):
