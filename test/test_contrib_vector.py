@@ -218,46 +218,42 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
             msg='valid bbox and none bbox give valid bbox'
         )
 
+    @unittest.skipIf(not HAS_GEOPANDAS, 'no tests if geopandas is not present')
     def test_vector__get_bounds_local(self):
         """"""
-        if HAS_GEOPANDAS:
-            def makegdf(lats, lngs):
-                """make a geodataframe from coords"""
-                from shapely.geometry import Point
-                df = pd.DataFrame({
-                    'Latitude': lats,
-                    'Longitude': lngs
-                })
-                df['Coordinates'] = list(zip(df.Longitude, df.Latitude))
-                df['Coordinates'] = df['Coordinates'].apply(Point)
-                return gpd.GeoDataFrame(df, geometry='Coordinates')
+        def makegdf(lats, lngs):
+            """make a geodataframe from coords"""
+            from shapely.geometry import Point
+            df = pd.DataFrame({
+                'Latitude': lats,
+                'Longitude': lngs
+            })
+            df['Coordinates'] = list(zip(df.Longitude, df.Latitude))
+            df['Coordinates'] = df['Coordinates'].apply(Point)
+            return gpd.GeoDataFrame(df, geometry='Coordinates')
 
-            # normal usage
-            llayer1 = vector.LocalLayer(makegdf([-10, 0], [-10, 0]))
-            llayer2 = vector.LocalLayer(makegdf([0, 10], [0, 10]))
-            self.assertDictEqual(
-                vector._get_bounds_local([llayer1, llayer2]),
-                {'west': -10, 'south': -10, 'east': 10, 'north': 10},
-                msg='local bounding boxes combine'
-            )
+        # normal usage
+        llayer1 = vector.LocalLayer(makegdf([-10, 0], [-10, 0]))
+        llayer2 = vector.LocalLayer(makegdf([0, 10], [0, 10]))
+        self.assertDictEqual(
+            vector._get_bounds_local([llayer1, llayer2]),
+            {'west': -10, 'south': -10, 'east': 10, 'north': 10},
+            msg='local bounding boxes combine'
+        )
 
-            # single layer
-            llayer1 = vector.LocalLayer(makegdf([-10, 10], [-10, 10]))
-            self.assertDictEqual(
-                vector._get_bounds_local([llayer1, ]),
-                {'west': -10, 'south': -10, 'east': 10, 'north': 10},
-                msg='local bounding boxes combine'
-            )
+        # single layer
+        llayer1 = vector.LocalLayer(makegdf([-10, 10], [-10, 10]))
+        self.assertDictEqual(
+            vector._get_bounds_local([llayer1, ]),
+            {'west': -10, 'south': -10, 'east': 10, 'north': 10},
+            msg='local bounding boxes combine'
+        )
 
-            # no layers
-            self.assertDictEqual(
-                vector._get_bounds_local([]),
-                {'west': None, 'south': None, 'east': None, 'north': None}
-            )
-        else:
-           with self.assertRaises(ImportError):
-               import geopandas as gpd
-               _ = vector.LocalLayer(gpd.GeoDataFrame([]))
+        # no layers
+        self.assertDictEqual(
+            vector._get_bounds_local([]),
+            {'west': None, 'south': None, 'east': None, 'north': None}
+        )
 
     def test_vector__get_super_bounds(self):
         """"""
