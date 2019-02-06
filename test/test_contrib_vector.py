@@ -269,24 +269,33 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
                 SELECT ST_MakeEnvelope(-10, -10, 0, 0, 4326) as the_geom
             ) _w
         ''')
-        ldata = gpd.GeoDataFrame(
-            cc.query(
-                '''
-                SELECT
-                    the_geom,
-                    ST_Transform(the_geom, 3857) as the_geom_webmercator,
-                    1 as cartodb_id
-                FROM (
-                    SELECT ST_MakeEnvelope(0, 0, 10, 10, 4326) as the_geom
-                ) _w
-                ''',
-                decode_geom=True
-            )
-        )
-        llayer = vector.LocalLayer(ldata)
-        ans = '[[-10.0, -10.0], [10.0, 10.0]]'
+
+        ans = '[[-10.0, -10.0], [0.0, 0.0]]'
         self.assertEqual(
             ans,
-            vector._get_super_bounds([qlayer, llayer], cc),
+            vector._get_super_bounds([qlayer, ], cc),
             msg='super bounds are equal'
         )
+
+        if HAS_GEOPANDAS:
+            ldata = gpd.GeoDataFrame(
+                cc.query(
+                    '''
+                    SELECT
+                        the_geom,
+                        ST_Transform(the_geom, 3857) as the_geom_webmercator,
+                        1 as cartodb_id
+                    FROM (
+                        SELECT ST_MakeEnvelope(0, 0, 10, 10, 4326) as the_geom
+                    ) _w
+                    ''',
+                    decode_geom=True
+                )
+            )
+            llayer = vector.LocalLayer(ldata)
+            ans = '[[-10.0, -10.0], [10.0, 10.0]]'
+            self.assertEqual(
+                ans,
+                vector._get_super_bounds([qlayer, llayer], cc),
+                msg='super bounds are equal'
+            )
