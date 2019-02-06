@@ -389,7 +389,7 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
         jslayers.append({
             'is_local': is_local,
             'styling': layer.styling,
-            'source': layer.geojson_str if is_local else layer.query,
+            'source': layer._geojson_str if is_local else layer.query,
             'interactivity': intera,
             'legend': layer.legend
         })
