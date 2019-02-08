@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.9.1
+-----
+
+Release 2019-02-08
+
+Updates
+
+- Moves legends to panels instead of sidebars (#531)
+- Adds auto-centering for vector.LocalLayers (#526)
+- Improves documentation (#522)
+
 0.9.0
 -----
 
