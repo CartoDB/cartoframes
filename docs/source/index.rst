@@ -8,49 +8,15 @@
 .. toctree::
    :maxdepth: 2
 
-*************************
-CARTOframes Functionality
-*************************
-
-CartoContext
-============
-.. autoclass:: cartoframes.context.CartoContext
-    :noindex:
-    :member-order: bysource
-    :members: read, query, delete, map, data_discovery, data, data_boundaries
-
-    .. automethod:: write(df, table_name, temp_dir=SYSTEM_TMP_PATH, overwrite=False, lnglat=None, encode_geom=False, geom_col=None, \*\*kwargs)
-
-Map Layer Classes
-=================
-.. autoclass:: cartoframes.layer.BaseMap
-    :noindex:
-
-.. autoclass:: cartoframes.layer.Layer
-    :inherited-members:
-    :noindex:
-
-.. autoclass:: cartoframes.layer.QueryLayer
-    :noindex:
-
-Map Styling Functions
-=====================
-.. automodule:: cartoframes.styling
-    :noindex:
-    :members:
-    :member-order: bysource
-
-BatchJobStatus
-==============
-.. autoclass:: cartoframes.context.BatchJobStatus
-    :noindex:
-    :members:
-
-Credentials Management
-======================
-.. automodule:: cartoframes.credentials
-    :noindex:
-    :members:
+   CartoContext class <cartocontext>
+   Map Layers <layers>
+   Layer Styling <styling>
+   Example Functionalty <example_context>
+   Experimental Features <contrib>
+   Credentials <credentials>
+   Batch Jobs <batchjobstatus>
+   Cookbook <cookbook>
+   ETL with CARTOframes <etl>
 
 ******************
 Indices and tables
@@ -59,5 +25,9 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+*******
+Version
+*******
 
 :Version: |version|
