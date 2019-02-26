@@ -43,9 +43,9 @@
 
   <script>
     const BASEMAPS = {
-        DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        Voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-        Positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+        DarkMatter: carto.basemaps.darkmatter,
+        Voyager: carto.basemaps.voyager,
+        Positron: carto.basemaps.positron
     };
     if ("@@MAPBOXTOKEN@@") {
       mapboxgl.accessToken = "@@MAPBOXTOKEN@@";
