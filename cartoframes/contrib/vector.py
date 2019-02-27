@@ -466,33 +466,32 @@ def _combine_bounds(bbox1, bbox2):
         """Returns True if all dict values are None"""
         return all(v is None for v in bbox_dict.values())
 
-    # if neither are defined or are all nones, use the world
+    # if neither are defined, use the world
     if not bbox1 and not bbox2:
         return WORLD
+    # if all nones, use the world
     if dict_all_nones(bbox1) and dict_all_nones(bbox2):
-        print([(v, v is None) for v in bbox1.values()])
-        print([(v, v is None) for v in bbox2.values()])
         return WORLD
 
     assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
         'Input bounding boxes must have the same dictionary keys'
+    # create dict with cardinal directions and None-valued keys
     outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
 
     def conv2nan(val):
         """convert Nones to np.nans"""
         return np.nan if val is None else val
 
-    def maxcoord(coord1, coord2):
-        """give the max coordinate"""
-        return np.nanmax([conv2nan(coord1), conv2nan(coord2)])
-
-    def mincoord(coord1, coord2):
-        return np.nanmin([conv2nan(coord1), conv2nan(coord2)])
-
     # set values and/or defaults
     for coord in ('north', 'east'):
-        outbbox[coord] = maxcoord(bbox1[coord], bbox2[coord])
+        outbbox[coord] = np.nanmax([
+                conv2nan(bbox1[coord]),
+                conv2nan(bbox2[coord])
+            ])
     for coord in ('south', 'west'):
-        outbbox[coord] = mincoord(bbox1[coord], bbox2[coord])
+        outbbox[coord] = np.nanmin([
+                conv2nan(bbox1[coord]),
+                conv2nan(bbox2[coord])
+            ])
 
     return outbbox
