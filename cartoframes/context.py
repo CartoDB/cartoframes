@@ -98,7 +98,7 @@ class CartoContext(object):
          keyword argument. This method is more flexible.::
 
             from cartoframes import Credentials
-            creds = Credentials(user='eschbacher', key='abcdefg')
+            creds = Credentials(username='eschbacher', key='abcdefg')
             cc = CartoContext(creds=creds)
 
     Attributes:
