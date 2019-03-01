@@ -291,6 +291,11 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             # filter out null geometries
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
+            # convert time cols to epoch
+            timecols = _df_nonnull.select_dtypes(
+                    include=['datetimetz', 'datetime', 'timedelta']).columns
+            for timecol in timecols:
+                _df_nonnull[timecol] = _df_nonnull[timecol].astype(np.int64)
             self._geojson_str = _df_nonnull.to_json()
             self.bounds = _df_nonnull.total_bounds.tolist()
         else:
