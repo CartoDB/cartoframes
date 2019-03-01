@@ -1,6 +1,18 @@
 Changelog
 =========
 
+0.9.2
+-----
+
+Release 2019-03-01
+
+Updates
+
+- Upgrades CARTO VL version for contrib.vector maps (#546)
+- Fixes a bug where timestamps in LocalLayers raised errors (#550)
+- Fixes a bug where multi-layer vector map legends disappeared (#549)
+- Minor refactors (#545) and doc fixes (#547)
+
 0.9.1
 -----
 
