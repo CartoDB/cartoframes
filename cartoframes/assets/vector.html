@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <!-- Include CARTO VL JS -->
-  <script src="https://libs.cartocdn.com/carto-vl/v1.0.0/carto-vl.min.js"></script>
+  <script src="https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js"></script>
   <!-- Include Mapbox GL JS -->
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js"></script>
   <!-- Include Mapbox GL CSS -->
-  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css" rel="stylesheet" />
   <!-- Include Airship for layouts -->
-  <link rel="stylesheet" href="https://libs.cartocdn.com/airship-style/v1.0.3/airship.css">
+  <link href="https://libs.cartocdn.com/airship-style/v1.0.3/airship.css" rel="stylesheet">
   <!-- Include airship components -->
   <script src="https://libs.cartocdn.com/airship-components/v1.0.3/airship.js"></script>
   <style>
@@ -43,9 +43,9 @@
 
   <script>
     const BASEMAPS = {
-        DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        Voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-        Positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+        DarkMatter: carto.basemaps.darkmatter,
+        Voyager: carto.basemaps.voyager,
+        Positron: carto.basemaps.positron
     };
     if ("@@MAPBOXTOKEN@@") {
       mapboxgl.accessToken = "@@MAPBOXTOKEN@@";
@@ -121,8 +121,6 @@
               document.getElementById('legends').style.display = 'block';
               // Place list items in the content section of the title/legend box
               document.getElementById('legends').innerHTML += legend;
-          } else {
-              document.getElementById('legends').style.display = 'none';
           }
       });
  

@@ -1,0 +1,17 @@
+{
+    "main": {
+        "file": "basic-usage.md"
+    },
+    "categories": [
+        {
+            "title": "Basic",
+            "samples": [
+                {
+                    "title": "Basic usage",
+                    "desc": "Use this notebook to understand CARTOframes basics.",
+                    "file": "basic-usage.md"
+                }
+            ]
+        }
+    ]
+}
