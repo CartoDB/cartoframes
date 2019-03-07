@@ -1,14 +1,24 @@
 cartoframes package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   cartoframes.contrib
+
 Submodules
 ----------
 
 .. toctree::
 
+   cartoframes.analysis
+   cartoframes.batch
    cartoframes.context
    cartoframes.credentials
    cartoframes.dataobs
+   cartoframes.examples
    cartoframes.layer
    cartoframes.maps
    cartoframes.styling
