@@ -8,7 +8,7 @@
 .. toctree::
    :maxdepth: 2
 
-   Overview <../README.rst>
+   Overview <overview>
    CartoContext <cartocontext>
    Map Layers <layers>
    Layer Styling <styling>

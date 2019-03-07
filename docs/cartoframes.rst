@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-   cartoframes.contrib
+    cartoframes.contrib
 
 Submodules
 ----------
