@@ -1,4 +1,4 @@
-carto>=1.1.0
+carto>=1.3.1
 pyrestcli>=0.6.3
 pandas>=0.19.2
 webcolors==1.7

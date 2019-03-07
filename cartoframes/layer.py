@@ -3,12 +3,12 @@
 for example usage for data layers. See `layer.BaseMap <#layer.BaseMap>`__ for
 basemap layers.
 """
-
+from __future__ import absolute_import
 import pandas as pd
 import webcolors
 
-from cartoframes.utils import cssify, join_url, minify_sql
-from cartoframes.styling import BinMethod, mint, antique, get_scheme_cartocss
+from .utils import cssify, join_url, minify_sql
+from .styling import BinMethod, mint, antique, get_scheme_cartocss
 
 # colors map data layers without color specified
 # from CARTOColor vivid scheme
@@ -112,8 +112,8 @@ class QueryLayer(AbstractLayer):
     * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
       1000``)
 
-    Used in the `layers` keyword in `CartoContext.map
-    <#context.CartoContext.map>`__.
+    Used in the `layers` keyword in :py:meth:`CartoContext.map
+    <cartoframes.context.CartoContext.map>`.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
@@ -279,10 +279,12 @@ class QueryLayer(AbstractLayer):
               :obj:`BinMethod` (excluding `category`).
             - bins (`int`, optional): Number of bins to break data into.
               Defaults to 5.
-            - max (`int`, optional): Maximum point width (in pixels). Defaults
-              to 25.
-            - min (`int`, optional): Minimum point width (in pixels). Defaults
-              to 5.
+            - max (`int`, optional): Maximum point width (in pixels). Setting
+              this overrides `range`. Defaults to 25.
+            - min (`int`, optional): Minimum point width (in pixels). Setting
+              this overrides `range`. Defaults to 5.
+            - range (`tuple` or `list`, optional): a `min`/`max` pair. Defaults
+              to `[1, 5]` for lines and `[5, 25]` for points.
 
             .. code::
 
@@ -294,6 +296,8 @@ class QueryLayer(AbstractLayer):
                               'min': 2
                           })
 
+        opacity (float, optional): Opacity of layer from 0 to 1. Defaults to
+          0.9.
         tooltip (tuple, optional): **Not yet implemented.**
         legend: **Not yet implemented.**
 
@@ -308,22 +312,36 @@ class QueryLayer(AbstractLayer):
           requesting a time-based map with a data source that has geometries
           other than points.
     """  # noqa
-    def __init__(self, query, time=None, color=None, size=None,
+    def __init__(self, query, time=None, color=None, size=None, opacity=None,
                  tooltip=None, legend=None):
 
         self.query = query
         self.orig_query = query
+
         # style_cols and geom_type are updated right before layer is `_setup`
+        # because of this, any geometry related styling happens in `_setup`
         # style columns as keys, data types as values
+        # e.g., dict(my_col='numeric', other_col='text')
         self.style_cols = dict()
         self.geom_type = None
         self.cartocss = None
         self.torque_cartocss = None
 
-        # TODO: move these if/else branches to individual methods
-        # color, scheme = self._get_colorscheme()
-        # time = self._get_timescheme()
-        # size = self._get_sizescheme()
+        # setup default styling
+        self.color, self.scheme = self._parse_color(color)
+        self.time = self._parse_time(time)
+        self.size = self._parse_size(size, time is not None)
+        self.opacity = opacity if opacity is not None else 0.9
+
+        # future enhanements
+        self.tooltip = tooltip
+        self.legend = legend
+
+        # validation step
+        self._validate_columns()
+
+    def _parse_color(self, color):
+        """Setup the color scheme"""
         # If column was specified, force a scheme
         # It could be that there is a column named 'blue' for example
         if isinstance(color, dict):
@@ -346,33 +364,41 @@ class QueryLayer(AbstractLayer):
             color = color
             scheme = None
 
-        if time:
-            if isinstance(time, dict):
-                if 'column' not in time:
-                    raise ValueError("`time` must include a 'column' "
-                                     "key/value")
-                time_column = time['column']
-                time_options = time
-            elif isinstance(time, str):
-                time_column = time
-                time_options = {}
-            else:
-                raise ValueError('`time` should be a column name or '
-                                 'dictionary of styling options.')
+        return color, scheme
 
-            self.style_cols[time_column] = None
-            time = {
-                'column': time_column,
-                'method': 'count',
-                'cumulative': False,
-                'frames': 256,
-                'duration': 30,
-                'trails': 2,
-            }
-            time.update(time_options)
+    def _parse_time(self, time):
+        """Parse time inputs"""
+        if time is None:
+            return None
 
-        # assign size defaults if size is not specified
-        if time:
+        if isinstance(time, dict):
+            if 'column' not in time:
+                raise ValueError("`time` must include a 'column' key/value")
+            time_column = time['column']
+            time_options = time
+        elif isinstance(time, str):
+            time_column = time
+            time_options = {}
+        else:
+            raise ValueError(
+                '`time` should be a column name or dictionary of '
+                'styling options.')
+
+        self.style_cols[time_column] = None
+        time = {
+            'column': time_column,
+            'method': 'count',
+            'cumulative': False,
+            'frames': 256,
+            'duration': 30,
+            'trails': 2,
+        }
+        time.update(time_options)
+        return time
+
+    def _parse_size(self, size, has_time=False):
+        """Parse size inputs"""
+        if has_time:
             size = size or 4
         else:
             size = size or 10
@@ -381,7 +407,7 @@ class QueryLayer(AbstractLayer):
         if isinstance(size, dict):
             if 'column' not in size:
                 raise ValueError("`size` must include a 'column' key/value")
-            if time:
+            if has_time:
                 raise ValueError("When time is specified, size can "
                                  "only be a fixed size")
             old_size = size
@@ -403,13 +429,7 @@ class QueryLayer(AbstractLayer):
             size.update(old_size)
             self.style_cols[size['column']] = None
 
-        self.color = color
-        self.scheme = scheme
-        self.size = size
-        self.time = time
-        self.tooltip = tooltip
-        self.legend = legend
-        self._validate_columns()
+        return size
 
     def _validate_columns(self):
         """Validate the options in the styles"""
@@ -421,105 +441,125 @@ class QueryLayer(AbstractLayer):
                                  col=','.join(col_overlap)))
 
     def _setup(self, layers, layer_idx):
+        """Setups layers once geometry types and data types are known, and when
+        a map is requested to be rendered from zero or more data layers"""
         basemap = layers[0]
 
         # if color not specified, choose a default
-        # choose color time default
         if self.time:
-            # default torque color
+            # default time/torque color
             self.color = self.color or '#2752ff'
         else:
             self.color = self.color or DEFAULT_COLORS[layer_idx]
+
+        if isinstance(self.size, (int, float)):
+            if self.geom_type == 'point':
+                self.size = self.size or 4
+            else:
+                self.size = self.size or 1.5
+
         # choose appropriate scheme if not already specified
         if (not self.scheme) and (self.color in self.style_cols):
-            if self.style_cols[self.color] in ('string', 'boolean', ):
-                self.scheme = antique(10)
-            elif self.style_cols[self.color] in ('number', ):
-                self.scheme = mint(5)
-            elif self.style_cols[self.color] in ('date', 'geometry', ):
-                raise ValueError(
-                    'Cannot style column `{col}` of type `{type}`. It must be '
-                    'numeric, text, or boolean.'.format(
-                        col=self.color, type=self.style_cols[self.color]))
+            self._choose_scheme()
 
         if self.time:
-            # validate time column information
-            if self.geom_type != 'point':
-                raise ValueError('Cannot do time-based maps with data in '
-                                 '`{query}` since this table does not contain '
-                                 'point geometries'.format(
-                                     query=self.orig_query))
-            elif self.style_cols[self.time['column']] not in (
-                    'number', 'date', ):
-                raise ValueError('Cannot create an animated map from column '
-                                 '`{col}` because it is of type {t1}. It must '
-                                 'be of type number or date.'.format(
-                                     col=self.time['column'],
-                                     t1=self.style_cols[self.time['column']]))
-
-            # don't use turbo-carto for animated maps
-            column = self.time['column']
-            frames = self.time['frames']
-            method = self.time['method']
-            duration = self.time['duration']
-            if (self.color in self.style_cols and
-                    self.style_cols[self.color] in ('string', 'boolean', )):
-                self.query = minify_sql([
-                    'SELECT',
-                    '    orig.*, __wrap.cf_value_{col}',
-                    'FROM ({query}) AS orig, (',
-                    '    SELECT',
-                    '      row_number() OVER (',
-                    '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
-                    '      {col}',
-                    '    FROM (',
-                    '        SELECT {col}, count({col}) AS val_{col}_cnt',
-                    '        FROM ({query}) as orig',
-                    '        GROUP BY {col}',
-                    '        ORDER BY 2 DESC',
-                    '    ) AS _wrap',
-                    ') AS __wrap',
-                    'WHERE __wrap.{col} = orig.{col}',
-                ]).format(col=self.color, query=self.orig_query)
-                agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
-                self.scheme = {
-                    'bins': [str(i) for i in range(1, 11)],
-                    'name': (self.scheme.get('name') if self.scheme
-                             else 'Bold'),
-                    'bin_method': '', }
-            elif (self.color in self.style_cols and
-                  self.style_cols[self.color] in ('number', )):
-                self.query = ' '.join([
-                    'SELECT *, {col} as value',
-                    'FROM ({query}) as _wrap'
-                ]).format(col=self.color, query=self.orig_query)
-                agg_func = '\'avg({})\''.format(self.color)
-            else:
-                agg_func = "'{method}(cartodb_id)'".format(
-                    method=method)
-            self.torque_cartocss = cssify({
-                'Map': {
-                    '-torque-frame-count': frames,
-                    '-torque-animation-duration': duration,
-                    '-torque-time-attribute': "'{}'".format(column),
-                    '-torque-aggregation-function': agg_func,
-                    '-torque-resolution': 1,
-                    '-torque-data-aggregation': ('cumulative'
-                                                 if self.time['cumulative']
-                                                 else 'linear'),
-                },
-            })
-            self.cartocss = (self.torque_cartocss
-                             + self._get_cartocss(basemap, has_time=True))
+            self._setup_time(basemap)
         else:
             # use turbo-carto for non-animated maps
             self.cartocss = self._get_cartocss(basemap)
 
+    def _choose_scheme(self):
+        """Choose color scheme"""
+        if self.style_cols[self.color] in ('string', 'boolean', ):
+            self.scheme = antique(10)
+        elif self.style_cols[self.color] in ('number', ):
+            self.scheme = mint(5)
+        elif self.style_cols[self.color] in ('date', 'geometry', ):
+            raise ValueError(
+                'Cannot style column `{col}` of type `{type}`. It must be '
+                'numeric, text, or boolean.'.format(
+                    col=self.color, type=self.style_cols[self.color]))
+
+    def _setup_time(self, basemap):
+        """generates CartoCSS for time-based maps (torque)"""
+        # validate time column information
+        if self.geom_type != 'point':
+            raise ValueError('Cannot do time-based maps with data in '
+                             '`{query}` since this table does not contain '
+                             'point geometries'.format(
+                                 query=self.orig_query))
+        elif self.style_cols[self.time['column']] not in (
+                'number', 'date', ):
+            raise ValueError('Cannot create an animated map from column '
+                             '`{col}` because it is of type {t1}. It must '
+                             'be of type number or date.'.format(
+                                 col=self.time['column'],
+                                 t1=self.style_cols[self.time['column']]))
+
+        # don't use turbo-carto for animated maps
+        column = self.time['column']
+        frames = self.time['frames']
+        method = self.time['method']
+        duration = self.time['duration']
+        if (self.color in self.style_cols and
+                self.style_cols[self.color] in ('string', 'boolean', )):
+            self.query = minify_sql([
+                'SELECT',
+                '    orig.*, __wrap.cf_value_{col}',
+                'FROM ({query}) AS orig, (',
+                '    SELECT',
+                '      row_number() OVER (',
+                '        ORDER BY val_{col}_cnt DESC) AS cf_value_{col},',
+                '      {col}',
+                '    FROM (',
+                '        SELECT {col}, count({col}) AS val_{col}_cnt',
+                '        FROM ({query}) as orig',
+                '        GROUP BY {col}',
+                '        ORDER BY 2 DESC',
+                '    ) AS _wrap',
+                ') AS __wrap',
+                'WHERE __wrap.{col} = orig.{col}',
+            ]).format(col=self.color, query=self.orig_query)
+            agg_func = '\'CDB_Math_Mode(cf_value_{})\''.format(self.color)
+            self.scheme = {
+                'bins': [str(i) for i in range(1, 11)],
+                'name': (self.scheme.get('name') if self.scheme
+                         else 'Bold'),
+                'bin_method': '', }
+        elif (self.color in self.style_cols and
+              self.style_cols[self.color] in ('number', )):
+            self.query = ' '.join([
+                'SELECT *, {col} as value',
+                'FROM ({query}) as _wrap'
+            ]).format(col=self.color, query=self.orig_query)
+            agg_func = '\'avg({})\''.format(self.color)
+        else:
+            agg_func = "'{method}(cartodb_id)'".format(
+                method=method)
+        self.torque_cartocss = cssify({
+            'Map': {
+                '-torque-frame-count': frames,
+                '-torque-animation-duration': duration,
+                '-torque-time-attribute': "'{}'".format(column),
+                '-torque-aggregation-function': agg_func,
+                '-torque-resolution': 1,
+                '-torque-data-aggregation': ('cumulative'
+                                             if self.time['cumulative']
+                                             else 'linear'),
+            },
+        })
+        self.cartocss = (self.torque_cartocss
+                         + self._get_cartocss(basemap, has_time=True))
+
     def _get_cartocss(self, basemap, has_time=False):
         """Generate cartocss for class properties"""
-        if isinstance(self.size, int):
-            size_style = self.size or 4
+        if isinstance(self.size, (int, float)):
+            size_style = self.size
         elif isinstance(self.size, dict):
+            self.size['range'] = (
+                [1, 5] if self.size['range'] == [5, 25]
+                else self.size['range']
+            )
             size_style = ('ramp([{column}],'
                           ' range({min_range},{max_range}),'
                           ' {bin_method}({bins}))').format(
@@ -543,7 +583,7 @@ class QueryLayer(AbstractLayer):
                 "#layer": {
                     'marker-width': size_style,
                     'marker-fill': color_style,
-                    'marker-fill-opacity': 0.9,
+                    'marker-fill-opacity': self.opacity,
                     'marker-allow-overlap': 'true',
                     'marker-line-width': 0,
                     'marker-line-color': line_color,
@@ -573,7 +613,7 @@ class QueryLayer(AbstractLayer):
                     "#layer": {
                         'marker-width': size_style,
                         'marker-fill': color_style,
-                        'marker-fill-opacity': '1',
+                        'marker-fill-opacity': self.opacity,
                         'marker-allow-overlap': 'true',
                         'marker-line-width': '0.5',
                         'marker-line-color': line_color,
@@ -585,11 +625,12 @@ class QueryLayer(AbstractLayer):
                             'marker-fill': '#ccc'}
                         })
                 return css
-            elif self.geom_type == 'line':
+            if self.geom_type == 'line':
                 css = cssify({
                     "#layer": {
-                        'line-width': '1.5',
+                        'line-width': size_style,
                         'line-color': color_style,
+                        'line-opacity': self.opacity
                     }})
                 if self.color in self.style_cols:
                     css += cssify({
@@ -597,11 +638,11 @@ class QueryLayer(AbstractLayer):
                             'line-color': '#ccc'}
                         })
                 return css
-            elif self.geom_type == 'polygon':
+            if self.geom_type == 'polygon':
                 css = cssify({
                     "#layer": {
                         'polygon-fill': color_style,
-                        'polygon-opacity': '0.9',
+                        'polygon-opacity': self.opacity,
                         'polygon-gamma': '0.5',
                         'line-color': '#FFF',
                         'line-width': '0.5',
@@ -622,7 +663,8 @@ class QueryLayer(AbstractLayer):
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is used for visualizing individual datasets
-    with `CartoContext.map <#context.CartoContext.map>`__'s `layers`
+    with :py:meth:`CartoContext.map
+    <cartoframes.context.CartoContext.map>`\'s `layers`
     keyword argument.
 
     Example:
@@ -639,13 +681,15 @@ class Layer(QueryLayer):
 
     Args:
         table_name (str): Name of table in CARTO account
-        Styling: See :obj:`QueryLayer` for a full list of all arguments
-          arguments for styling this map data layer.
+        Styling: See :py:class:`QueryLayer <cartoframes.layer.QueryLayer>`
+        for a full list of all arguments arguments for styling this map data
+        layer.
         source (pandas.DataFrame, optional): Not currently implemented
         overwrite (bool, optional): Not currently implemented
     """
     def __init__(self, table_name, source=None, overwrite=False, time=None,
-                 color=None, size=None, tooltip=None, legend=None):
+                 color=None, size=None, opacity=None, tooltip=None,
+                 legend=None):
 
         self.table_name = table_name
         self.source = source
@@ -655,6 +699,7 @@ class Layer(QueryLayer):
                                     time=time,
                                     color=color,
                                     size=size,
+                                    opacity=opacity,
                                     tooltip=tooltip,
                                     legend=legend)
 

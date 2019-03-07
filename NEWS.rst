@@ -1,6 +1,152 @@
 Changelog
 =========
 
+0.9.2
+-----
+
+Release 2019-03-01
+
+Updates
+
+- Upgrades CARTO VL version for contrib.vector maps (#546)
+- Fixes a bug where timestamps in LocalLayers raised errors (#550)
+- Fixes a bug where multi-layer vector map legends disappeared (#549)
+- Minor refactors (#545) and doc fixes (#547)
+
+0.9.1
+-----
+
+Release 2019-02-08
+
+Updates
+
+- Moves legends to panels instead of sidebars (#531)
+- Adds auto-centering for vector.LocalLayers (#526)
+- Improves documentation (#522)
+
+0.9.0
+-----
+
+Release 2019-01-09
+
+Updates
+
+- Adds basic legends for CARTO VL maps (#527)
+- Adds a line to configure tqdm that prevents dependency issues (#528)
+
+0.8.4
+-----
+
+Release 2018-12-18
+
+Updates
+
+- Fixes bug on batch uploads where columns are a subset of util cols (#523)
+- Suppresses IFrame warnings temporarily (#524)
+
+0.8.3
+-----
+
+Release 2018-12-03
+
+Updates
+
+- Adds a module erroneously excluded (#519)
+
+0.8.2
+-----
+
+Release 2018-11-29
+
+Updates
+
+- Refactors how client id is sent to CARTO Python SDK (#516)
+
+0.8.1
+-----
+
+Release 2018-11-26
+
+Updates
+
+- Removes unneeded print statement in QueryLayer
+
+0.8.0
+-----
+
+Release 2018-11-15
+
+Updates
+
+- Adds style by line options to Layer and QueryLayer (through cc.map) (#504)
+- Fixes a problem that prevented vector maps from working with on premises installations (#505)
+- Updates the Mapbox GL and CARTO VL versions for vector maps (#506)
+- Adds custom basemap layer to vector maps (#490)
+- Fixes a bug with authorization in on prems (#493)
+- Multiple documentation updates
+
+
+0.7.3
+-----
+
+Release 2018-10-18
+
+Updates
+
+- Bump carto-python version that fixes auth api bug
+
+0.7.2
+-----
+
+Release 2018-08-27
+
+Updates
+
+- Adds size option for CARTO VL maps
+- Bumps Mapbox GL library so vector maps work correctly
+
+0.7.1
+-----
+
+Release 2018-07-16
+
+Updates
+
+- Fixes issues where contrib wasn't included in distributions (#469)
+
+0.7.0
+-----
+
+Release 2018-06-22
+
+Updates
+
+- Adds example dataset functionality for example notebook and teaching cartoframes without an account (#382)
+- Adds contrib.vector module for bring CARTO VL maps to cartoframes (#446)
+- Bug fix for timespans in geometry fetching (#416)
+- Suppresses warnings emitted from the Carto Python SDK (#456)
+- Moves BatchJobStatus to its own module (#455)
+- Testing updates (#452)
+- Base URL validation to avoid issue of POSTs being converted to GETs (#445)
+
+0.6.2
+-----
+
+Release 2018-05-10
+
+Updates
+
+- Adds opacity styling option to Layer and QueryLayer (#440)
+
+0.6.1
+-----
+
+Release 2018-04-18
+
+Updates
+
+- Lowers row limit for lnglat creation to avoid platform limits on SQL API
+
 0.6.0
 -----
 

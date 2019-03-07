@@ -21,6 +21,7 @@ Features
 - Create customizable, interactive CARTO maps in a Jupyter notebook
 - Interact with CARTO's Data Observatory
 - Use CARTO's spatially-enabled database for analysis
+- Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__
 
 Common Uses
 ===========
@@ -29,6 +30,16 @@ Common Uses
 - Perform cloud-based spatial data processing using CARTO's analysis tools
 - Extract, transform, and Load (ETL) data using the Python ecosystem for getting data into and out of CARTO
 - Data Services integrations using CARTO's `Data Observatory <https://carto.com/data-observatory/>`__ and other `Data Services APIs <https://carto.com/location-data-services/>`__
+
+Try it out
+==========
+
+The easiest way to try out cartoframes is to use the cartoframes example notebooks running in binder: https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples If you already have an API key, you can follow along and complete all of the example notebooks.
+
+If you do not have an API key, you can use the `Example Context <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__ to read the example data, make maps, and run arbitrary queries from the datasets there. The best place to get started is in the "Example Datasets" notebook found when running binder or downloading from the `examples <https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__ directory in the cartoframes GitHub repository.
+
+.. note::
+    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 30 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
 
 More info
 =========
@@ -110,7 +121,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 .. code:: python
 
     import cartoframes
-    # `base_url`s are of the form `http://{username}.carto.com/` for most users
+    # `base_url`s are of the form `https://{username}.carto.com/` for most users
     cc = cartoframes.CartoContext(base_url='https://eschbacher.carto.com/',
                                   api_key=APIKEY)
 
@@ -194,7 +205,7 @@ CARTO Credential Management
 Typical usage
 ^^^^^^^^^^^^^
 
-The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``http://{your_user_name}.carto.com/your_apps``.
+The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
 
 .. code:: python
 
@@ -231,3 +242,17 @@ Once you save your credentials, you can get started in future sessions more quic
     from cartoframes import CartoContext
     cc = CartoContext()  # automatically loads credentials if previously saved
 
+Experimental features
+---------------------
+
+CARTOframes includes experimental features that we are testing for future releases into cartoframes core. These features exist as separate modules in `contrib`. These features are stand-alone other than sometimes relying on some cartoframes utilities, etc. Contrib features will also change often and without notice, so they should never be used in a production environment.
+
+To import an experimental feature, like vector maps, do the following:
+
+.. code:: python
+
+    from cartoframes.contrib import vector
+    from cartoframes import CartoContext
+
+    cc = CartoContext()
+    vector.vmap([vector.Layer('<table name>'), ], context=cc)

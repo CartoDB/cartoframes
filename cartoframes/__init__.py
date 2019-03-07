@@ -1,4 +1,5 @@
-from .context import CartoContext, BatchJobStatus
+from .context import CartoContext
+from .batch import BatchJobStatus
 from .credentials import Credentials
 from .layer import BaseMap, QueryLayer, Layer
 from .styling import BinMethod
