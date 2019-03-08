@@ -8,7 +8,8 @@
 .. toctree::
    :maxdepth: 2
 
-   CartoContext class <cartocontext>
+   Overview <overview>
+   CartoContext <cartocontext>
    Map Layers <layers>
    Layer Styling <styling>
    Example Functionalty <example_context>

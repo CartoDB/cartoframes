@@ -5,6 +5,8 @@ sandbox/
 
 # Misc
 credentials.json
+test/secret.json
+.*.sw[nop]
 
 # OS
 .DS_Store
