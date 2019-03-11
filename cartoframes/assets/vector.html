@@ -97,13 +97,23 @@
               // Create list elements for legend
               colorLegend.data.forEach((legend, index) => {
                   const color = legend.value;
-                  const keyMin = legend.key[0].toFixed(2);
-                  const keyMax = legend.key[1].toFixed(2);
-                  let bucket = `${keyMin} - ${keyMax}`;
-                  if (keyMin === '-Infinity') {
-                    bucket = `< ${keyMax}`;
-                  } else if (keyMax === 'Infinity') {
-                    bucket = `> ${keyMin}`;
+                  
+		  let bucket = legend.key;
+                  if (!isNaN(bucket)) {
+                    bucket = parseFloat(bucket).toFixed(2);
+                  }
+
+                  try {
+                    const keyMin = legend.key[0].toFixed(2);
+                    const keyMax = legend.key[1].toFixed(2);
+                    bucket = `${keyMin} - ${keyMax}`;
+                    if (keyMin === '-Infinity') {
+                      bucket = `< ${keyMax}`;
+                    } else if (keyMax === 'Infinity') {
+                      bucket = `> ${keyMin}`;
+                    }
+                  } catch (notRangeLegend) {
+
                   }
                   // Style for legend items
                   colorLegendList +=
