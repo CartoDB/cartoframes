@@ -120,9 +120,10 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
                 }
             )
     """
+    # TODO: add transform, order, symbol
     def __init__(self, query, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None):  # pylint: disable=invalid-name
+                 legend=None, transform=None, order=None, symbol=None):
 
         def convstr(obj):
             """convert all types to strings or None"""
@@ -137,6 +138,9 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.filter = time
         self.strokeColor = strokeColor  # pylint: disable=invalid-name
         self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
+        self.transform = transform
+        self.order = order
+        self.symbol = symbol
         self.legend = legend
 
         # internal attributes
@@ -155,6 +159,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         """Appends `prop` with `style` to layer styling"""
         valid_styles = (
             'color', 'width', 'filter', 'strokeWidth', 'strokeColor',
+            'transform', 'order', 'symbol'
         )
         self.styling = '\n'.join(
             '{prop}: {style}'.format(prop=s, style=getattr(self, s))
@@ -247,7 +252,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
     """
     def __init__(self, table_name, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None):
+                 legend=None, transform=None, order=None, symbol=None):
         self.table_source = table_name
 
         super(Layer, self).__init__(
@@ -258,6 +263,9 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
             interactivity=interactivity,
+            transform=transform,
+            order=order,
+            symbol=symbol,
             legend=legend
         )
 
@@ -287,7 +295,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """
     def __init__(self, dataframe, color=None, size=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None):
+                 legend=None, transform=None, order=None, symbol=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             # filter out null geometries
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
@@ -310,6 +318,9 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
             interactivity=interactivity,
+            transform=transform,
+            order=order,
+            symbol=symbol,
             legend=legend
         )
 
