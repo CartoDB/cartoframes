@@ -2,7 +2,7 @@
 examples. Try examples by `running the notebooks in binder
 <https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples>`__,
 or trying the `Example Datasets notebook
-<https://github.com/CartoDB/cartoframes/tree/master/examples/Example%20datasets.ipynb>`__.
+<https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__.
 
 In addition to the functions listed below, this examples module provides a
 :py:class:`CartoContext <cartoframes.context.CartoContext>` that is
