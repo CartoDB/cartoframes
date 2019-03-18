@@ -27,6 +27,16 @@
                     "file": "ExampleDatasets.md"
                 }
             ]
+        },
+        {
+            "title": "Advanced",
+            "samples": [
+                {
+                    "title": "Dask and CARTOframes",
+                    "desc": "Using Dask and CARTOframes together.",
+                    "file": "cartoframes-and-dask.md"
+                }
+            ]
         }
     ]
 }
