@@ -283,7 +283,7 @@ cc.map(layers=Layer('coffee_places', color='type', size=3))
 
 
 
-![png](/img/cartoframes/cartoframes-and-dask_8_1.png)
+![png](../img/examples/cartoframes-and-dask_8_1.png)
 
 
 ## Fast Food
