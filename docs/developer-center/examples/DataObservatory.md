@@ -258,7 +258,7 @@ cc.map(layers=Layer(orig_table,
 
 
 
-![png](../img/examples/DataObservatory_9_1.png)
+![Mexico City Metro Stations](../img/examples/DataObservatory_9_1.png)
 
 
 ## Data Observatory measures in the Mexico City area

@@ -220,7 +220,7 @@ cc.map(layers=l,
 
 
 
-![png](../img/examples/BasicUsage_9_1.png)
+![Brooklyn poverty rates](../img/examples/BasicUsage_9_1.png)
 
 
 ### Multiple variables together
@@ -251,7 +251,7 @@ plt.show()
 ```
 
 
-![png](BasicUsage_files/BasicUsage_11_0.png)
+![Brooklyn demographic data in small multiples](BasicUsage_files/BasicUsage_11_0.png)
 
 
 ## NYC Taxi Dataset
@@ -498,7 +498,7 @@ cc.map(layers=Layer('taxi_50k'),
 
 
 
-![png](../img/examples/BasicUsage_16_1.png)
+![NYC Taxi Data Raw](../img/examples/BasicUsage_16_1.png)
 
 
 Oops, there are some zero-valued long/lats in there, so the results are going to [null island](https://en.wikipedia.org/wiki/Null_Island). Let's remove them.
@@ -666,5 +666,5 @@ cc.map(layers=Layer('taxi_50k',
 
 
 
-![png](../img/examples/BasicUsage_22_1.png)
+![JFK pickups styled by fare amount](../img/examples/BasicUsage_22_1.png)
 

@@ -353,7 +353,7 @@ gdf.plot('hr90', linewidth=0.1) # to prove we're in geopandas
 
 
 
-![png](../img/examples/ShapelyGeopandasCartoframes_12_1.png)
+![Homicide rates in 1990, GeoPandas plot](../img/examples/ShapelyGeopandasCartoframes_12_1.png)
 
 
 The nice thing with having the code to serialize/deserialize `shapely` objects is that you can publish directly to CARTO (and make CARTO maps) directly from (geo)pandas:
@@ -374,7 +374,7 @@ cxn.map(layers=Layer('nat', color={'column': 'hr90',
 
 
 
-![png](../img/examples/ShapelyGeopandasCartoframes_14_1.png)
+![Homicide rates in 1990, CARTOframes plot](../img/examples/ShapelyGeopandasCartoframes_14_1.png)
 
 
 You can also create interactive versions of the above map by setting `interactive=True`.
@@ -715,5 +715,5 @@ cxn.map(layers=[BaseMap('light'),
 
 
 
-![png](../img/examples/ShapelyGeopandasCartoframes_23_1.png)
+![Buffered points, using CARTOframes](../img/examples/ShapelyGeopandasCartoframes_23_1.png)
 

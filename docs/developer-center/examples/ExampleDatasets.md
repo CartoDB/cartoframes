@@ -269,7 +269,7 @@ example_context.map(
 
 
 
-![png](../img/examples/ExampleDatasets_8_1.png)
+![Brooklyn poverty rates at the census tract level](../img/examples/ExampleDatasets_8_1.png)
 
 
 ## Taxi Data
@@ -651,7 +651,7 @@ example_context.map(
 
 
 
-![png](../img/examples/ExampleDatasets_15_1.png)
+![Taxi trips colored by fare amount](../img/examples/ExampleDatasets_15_1.png)
 
 
 We can use that same query to get the line geometries, and compare the crow fly distance with the reported distance.
