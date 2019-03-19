@@ -192,9 +192,9 @@ cc.map(layers=Layer(orig_table,
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {&quot;user_name&quot;: &quot;cartoframes&quot;, &quot;maps_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_labels_under/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([linea], cartocolor(Bold), category(10)); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([linea], cartocolor(Bold), category(10));} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([linea], cartocolor(Bold), category(10)); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} &quot;, &quot;sql_0&quot;: &quot;SELECT * FROM coordsmetro_demo&quot;, &quot;west&quot;: -99.2159, &quot;south&quot;: 19.3244, &quot;east&quot;: -98.9609, &quot;north&quot;: 19.5346}}};
+     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_labels_under/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([linea], cartocolor(Bold), category(10)); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([linea], cartocolor(Bold), category(10));} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([linea], cartocolor(Bold), category(10)); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM coordsmetro_demo", "west": -99.2159, "south": 19.3244, "east": -98.9609, "north": 19.5346}}};
      const bounds  = [[19.5346, -98.9609], [19.3244, -99.2159]];
-     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
+     const options = {"filter": ["mapnik", "torque"], "https": true};
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -210,7 +210,7 @@ cc.map(layers=Layer(orig_table,
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
+         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
      }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
@@ -729,9 +729,9 @@ cc.map(layers=[BaseMap('dark'), Layer(new_table,
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {&quot;user_name&quot;: &quot;cartoframes&quot;, &quot;maps_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #000; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=);} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} &quot;, &quot;sql_0&quot;: &quot;SELECT * FROM mexico_metro_augmented&quot;, &quot;west&quot;: -99.2159, &quot;south&quot;: 19.3244, &quot;east&quot;: -98.9609, &quot;north&quot;: 19.5346}}};
+     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #000; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=);} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM mexico_metro_augmented", "west": -99.2159, "south": 19.3244, "east": -98.9609, "north": 19.5346}}};
      const bounds  = [[19.5346, -98.9609], [19.3244, -99.2159]];
-     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
+     const options = {"filter": ["mapnik", "torque"], "https": true};
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -747,7 +747,7 @@ cc.map(layers=[BaseMap('dark'), Layer(new_table,
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
+         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
      }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
