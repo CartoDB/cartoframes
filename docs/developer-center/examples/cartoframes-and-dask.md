@@ -400,9 +400,9 @@ cc.map(layers=Layer('fastfood_dask', size=2))
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_labels_under/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 2; marker-fill: #5D69B1; marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: #5D69B1;} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: #5D69B1; polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM fastfood_dask", "west": -178.8312024, "south": -54.8071336, "east": 178.4835648, "north": 71.6361881}}};
+     const config  = {&quot;copy;user_name&quot;: &quot;cartoframes&quot;, &quot;maps_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_labels_under/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 2; marker-fill: #5D69B1; marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: #5D69B1;} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: #5D69B1; polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} &quot;, &quot;sql_0&quot;: &quot;SELECT * FROM fastfood_dask&quot;, &quot;west&quot;: -178.8312024, &quot;south&quot;: -54.8071336, &quot;east&quot;: 178.4835648, &quot;north&quot;: 71.6361881}}};
      const bounds  = [[71.6361881, 178.4835648], [-54.8071336, -178.8312024]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -418,7 +418,7 @@ cc.map(layers=Layer('fastfood_dask', size=2))
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         attribution: &quot;&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>&quot;
      }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());

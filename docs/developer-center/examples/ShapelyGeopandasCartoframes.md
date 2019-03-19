@@ -427,9 +427,10 @@ cxn.map(layers=Layer('nat', color={'column': 'hr90',
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([hr90], cartocolor(Sunset), quantiles(7)); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #000; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([hr90], cartocolor(Sunset), quantiles(7));} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([hr90], cartocolor(Sunset), quantiles(7)); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM nat", "west": -124.731422424316, "south": 24.9559669494629, "east": -66.9698486328125, "north": 49.3717346191406}}};
+     const config  = {&quot;user_name&quot;: &quot;eschbacher&quot;, &quot;maps_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer {  polygon-fill: ramp([hr90], cartocolor(Sunset), quantiles(7), >); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;}#layer[hr90 = null] {  polygon-fill: #ccc;}&quot;, &quot;sql_0&quot;: &quot;SELECT * FROM nat&quot;, &quot;west&quot;: -124.731422424316, &quot;south&quot;: 24.9559669494629, &quot;east&quot;: -66.9698486328125, &quot;north&quot;: 49.3717346191406}}};
      const bounds  = [[49.3717346191406, -66.9698486328125], [24.9559669494629, -124.731422424316]];
-     const options = {"filter": ["http", "mapnik", "torque"], "https": true};
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
+     var labels_url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -438,6 +439,17 @@ cxn.map(layers=Layer('nat', color={'column': 'hr90',
        zoom: 3,
        center: [0, 0],
      });
+
+     if (L.Browser.retina) {
+         var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+         labels_url = labels_url.replace('.png', '@2x.png');
+     } else {
+         var basemap = config.named_map.params.basemap_url;
+     }
+     L.tileLayer(basemap, {
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
+     }).addTo(map);
+
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));
@@ -447,13 +459,23 @@ cxn.map(layers=Layer('nat', color={'column': 'hr90',
      cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
-              if (bounds.length) {
-                map.fitBounds(bounds);
-              }
-              updateMapInfo();
-              map.on('move', () => {
+                // add labels layer
+                if (labels_url) {
+                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+                    var topLayer = new L.tileLayer(labels_url).addTo(map);
+                    topPane.appendChild(topLayer.getContainer());
+                    topLayer.setZIndex(7);
+                 }
+
+                // fit map to bounds
+                if (bounds.length) {
+                  map.fitBounds(bounds);
+                }
+
                 updateMapInfo();
-              });
+                map.on('move', () => {
+                  updateMapInfo();
+                });
             })
             .error((err) => {
               console.log('ERROR: ', err);

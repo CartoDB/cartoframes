@@ -251,7 +251,7 @@ plt.show()
 ```
 
 
-![Brooklyn demographic data in small multiples](BasicUsage_files/BasicUsage_11_0.png)
+![Brooklyn demographic data in small multiples](../img/BasicUsage_11_0.png)
 
 
 ## NYC Taxi Dataset
@@ -584,9 +584,9 @@ cc.map(layers=Layer('taxi_50k',
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "eschbacher", "maps_api_template": "https://eschbacher.carto.com", "sql_api_template": "https://eschbacher.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0", "params": {"basemap_url": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png", "cartocss_0": "#layer {  marker-width: 4; marker-fill: ramp([fare_amount], cartocolor(Sunset), quantiles(7), >); marker-fill-opacity: 0.9; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;}#layer[fare_amount = null] {  marker-fill: #ccc;}", "sql_0": "SELECT * FROM taxi_50k", "west": -74.6638793945312, "south": 40.5904769897461, "east": -73.5582504272461, "north": 41.1549949645996}}};
+     const config  = {&quot;user_name&quot;: &quot;eschbacher&quot;, &quot;maps_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer {  marker-width: 4; marker-fill: ramp([fare_amount], cartocolor(Sunset), quantiles(7), >); marker-fill-opacity: 0.9; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;}#layer[fare_amount = null] {  marker-fill: #ccc;}&quot;, &quot;sql_0&quot;: &quot;SELECT * FROM taxi_50k&quot;, &quot;west&quot;: -74.6638793945312, &quot;south&quot;: 40.5904769897461, &quot;east&quot;: -73.5582504272461, &quot;north&quot;: 41.1549949645996}}};
      const bounds  = [[41.1549949645996, -73.5582504272461], [40.5904769897461, -74.6638793945312]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
      var labels_url = '';
 
      const adjustLongitude = (lng) => (
@@ -604,7 +604,7 @@ cc.map(layers=Layer('taxi_50k',
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
 
      const updateMapInfo = () => {

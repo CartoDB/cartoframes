@@ -192,17 +192,17 @@ example_context.map(Layer('brooklyn_poverty', color='poverty_per_pop'))
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0", "params": {"basemap_url": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", "cartocss_0": "#layer {  polygon-fill: ramp([poverty_per_pop], cartocolor(Mint), quantiles(5), >); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;}#layer[poverty_per_pop = null] {  polygon-fill: #ccc;}", "sql_0": "SELECT * FROM brooklyn_poverty", "west": -74.041916, "south": 40.569596, "east": -73.833422, "north": 40.739158}}};
-     const bounds  = [[40.739158, -73.833422], [40.569596, -74.041916]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
+     const config  = {&quot;user_name&quot;: &quot;cartoframes&quot;, &quot;maps_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://cartoframes.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom1&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer {  line-width: 10; line-color: ramp([fare_amount], cartocolor(Mint), quantiles(5), >); line-opacity: 0.05;}#layer[fare_amount = null] {  line-color: #ccc;}&quot;, &quot;sql_0&quot;: &quot;\nSELECT\n  *,\n  ST_Transform(the_geom, 3857) as the_geom_webmercator,\n  ST_Length(the_geom::geography) / 1609 as crow_dist\nFROM (\n    SELECT\n      ST_MakeLine(CDB_LatLng(pickup_latitude, pickup_longitude), CDB_LatLng(dropoff_latitude, dropoff_longitude)) as the_geom,\n      cartodb_id,\n      fare_amount,\n      trip_distance\n    FROM taxi_50k\n    WHERE pickup_latitude <> 0 and dropoff_latitude <> 0\n) as _w\n&quot;, &quot;zoom&quot;: 12, &quot;lat&quot;: 40.7504, &quot;lng&quot;: -73.9503}}};
+     const bounds  = [];
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
      var labels_url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
      );
      const map = L.map('map', {
-       zoom: 3,
-       center: [0, 0],
+       zoom: 12,
+       center: [40.7504, -73.9503],
      });
 
      if (L.Browser.retina) {
@@ -212,7 +212,7 @@ example_context.map(Layer('brooklyn_poverty', color='poverty_per_pop'))
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
 
      const updateMapInfo = () => {
@@ -572,59 +572,7 @@ example_context.map(
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom1", "params": {"basemap_url": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", "cartocss_0": "#layer {  line-width: 1.5; line-color: ramp([fare_amount], cartocolor(Mint), quantiles(5), >); line-opacity: 0.05;}#layer[fare_amount = null] {  line-color: #ccc;}", "sql_0": "\nSELECT\n  *,\n  ST_Transform(the_geom, 3857) as the_geom_webmercator,\n  ST_Length(the_geom::geography) / 1609 as crow_dist\nFROM (\n    SELECT\n      ST_MakeLine(CDB_LatLng(pickup_latitude, pickup_longitude), CDB_LatLng(dropoff_latitude, dropoff_longitude)) as the_geom,\n      cartodb_id,\n      fare_amount,\n      trip_distance\n    FROM taxi_50k\n    WHERE pickup_latitude <> 0 and dropoff_latitude <> 0\n) as _w\n", "zoom": 12, "lat": 40.7504, "lng": -73.9503}}};
-     const bounds  = [];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
-     var labels_url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png';
 
-     const adjustLongitude = (lng) => (
-       lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
-     );
-     const map = L.map('map', {
-       zoom: 12,
-       center: [40.7504, -73.9503],
-     });
-
-     if (L.Browser.retina) {
-         var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
-         labels_url = labels_url.replace('.png', '@2x.png');
-     } else {
-         var basemap = config.named_map.params.basemap_url;
-     }
-     L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
-     }).addTo(map);
-
-     const updateMapInfo = () => {
-       $('#zoom').text(map.getZoom());
-       $('#lat').text(map.getCenter().lat.toFixed(4));
-       $('#lon').text(adjustLongitude(map.getCenter().lng).toFixed(4));
-     };
-
-     cartodb.createLayer(map, config, options)
-            .addTo(map)
-            .done((layer) => {
-                // add labels layer
-                if (labels_url) {
-                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
-                    var topLayer = new L.tileLayer(labels_url).addTo(map);
-                    topPane.appendChild(topLayer.getContainer());
-                    topLayer.setZIndex(7);
-                 }
-
-                // fit map to bounds
-                if (bounds.length) {
-                  map.fitBounds(bounds);
-                }
-
-                updateMapInfo();
-                map.on('move', () => {
-                  updateMapInfo();
-                });
-            })
-            .error((err) => {
-              console.log('ERROR: ', err);
-            });
     </script>
 
   </body>
@@ -785,59 +733,7 @@ example_context.map(Layer('nat', color={'column': 'hr90', 'scheme': styling.suns
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0", "params": {"basemap_url": "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", "cartocss_0": "#layer {  polygon-fill: ramp([hr90], cartocolor(Sunset), quantiles(7), >); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;}#layer[hr90 = null] {  polygon-fill: #ccc;}", "sql_0": "SELECT * FROM nat", "west": -124.731422424316, "south": 24.9559669494629, "east": -66.9698486328125, "north": 49.3717346191406}}};
-     const bounds  = [[49.3717346191406, -66.9698486328125], [24.9559669494629, -124.731422424316]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
-     var labels_url = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png';
 
-     const adjustLongitude = (lng) => (
-       lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
-     );
-     const map = L.map('map', {
-       zoom: 3,
-       center: [0, 0],
-     });
-
-     if (L.Browser.retina) {
-         var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
-         labels_url = labels_url.replace('.png', '@2x.png');
-     } else {
-         var basemap = config.named_map.params.basemap_url;
-     }
-     L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
-     }).addTo(map);
-
-     const updateMapInfo = () => {
-       $('#zoom').text(map.getZoom());
-       $('#lat').text(map.getCenter().lat.toFixed(4));
-       $('#lon').text(adjustLongitude(map.getCenter().lng).toFixed(4));
-     };
-
-     cartodb.createLayer(map, config, options)
-            .addTo(map)
-            .done((layer) => {
-                // add labels layer
-                if (labels_url) {
-                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
-                    var topLayer = new L.tileLayer(labels_url).addTo(map);
-                    topPane.appendChild(topLayer.getContainer());
-                    topLayer.setZIndex(7);
-                 }
-
-                // fit map to bounds
-                if (bounds.length) {
-                  map.fitBounds(bounds);
-                }
-
-                updateMapInfo();
-                map.on('move', () => {
-                  updateMapInfo();
-                });
-            })
-            .error((err) => {
-              console.log('ERROR: ', err);
-            });
     </script>
 
   </body>

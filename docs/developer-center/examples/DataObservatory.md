@@ -192,9 +192,10 @@ cc.map(layers=Layer(orig_table,
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_labels_under/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([linea], cartocolor(Bold), category(10)); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([linea], cartocolor(Bold), category(10));} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([linea], cartocolor(Bold), category(10)); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM coordsmetro_demo", "west": -99.2159, "south": 19.3244, "east": -98.9609, "north": 19.5346}}};
+     const config  = {&quot;user_name&quot;: &quot;eschbacher&quot;, &quot;maps_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer {  marker-width: 10; marker-fill: ramp([linea], cartocolor(Bold), category(10), =); marker-fill-opacity: 0.9; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #FFF; marker-line-opacity: 1;}#layer[linea = null] {  marker-fill: #ccc;}&quot;, &quot;sql_0&quot;: &quot;SELECT * FROM coordsmetro_demo&quot;, &quot;west&quot;: -99.2159, &quot;south&quot;: 19.3244, &quot;east&quot;: -98.9609, &quot;north&quot;: 19.5346}}};
      const bounds  = [[19.5346, -98.9609], [19.3244, -99.2159]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
+     var labels_url = '';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -206,12 +207,14 @@ cc.map(layers=Layer(orig_table,
 
      if (L.Browser.retina) {
          var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+         labels_url = labels_url.replace('.png', '@2x.png');
      } else {
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
+
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));
@@ -221,13 +224,23 @@ cc.map(layers=Layer(orig_table,
      cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
-              if (bounds.length) {
-                map.fitBounds(bounds);
-              }
-              updateMapInfo();
-              map.on('move', () => {
+                // add labels layer
+                if (labels_url) {
+                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+                    var topLayer = new L.tileLayer(labels_url).addTo(map);
+                    topPane.appendChild(topLayer.getContainer());
+                    topLayer.setZIndex(7);
+                 }
+
+                // fit map to bounds
+                if (bounds.length) {
+                  map.fitBounds(bounds);
+                }
+
                 updateMapInfo();
-              });
+                map.on('move', () => {
+                  updateMapInfo();
+                });
             })
             .error((err) => {
               console.log('ERROR: ', err);
@@ -729,9 +742,10 @@ cc.map(layers=[BaseMap('dark'), Layer(new_table,
     <script src='https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js'></script>
 
     <script>
-     const config  = {"user_name": "cartoframes", "maps_api_template": "https://cartoframes.carto.com", "sql_api_template": "https://cartoframes.carto.com", "tiler_protocol": "https", "tiler_domain": "carto.com", "tiler_port": "80", "type": "namedmap", "named_map": {"name": "cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0", "params": {"basemap_url": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", "cartocss_0": "#layer[&#92;'mapnik::geometry_type&#92;'=1] {  marker-width: 10; marker-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #000; marker-line-opacity: 1;} #layer[&#92;'mapnik::geometry_type&#92;'=2] {  line-width: 1.5; line-color: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=);} #layer[&#92;'mapnik::geometry_type&#92;'=3] {  polygon-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), <=); polygon-opacity: 0.9; polygon-gamma: 0.5; line-color: #FFF; line-width: 0.5; line-opacity: 0.25; line-comp-op: hard-light;} ", "sql_0": "SELECT * FROM mexico_metro_augmented", "west": -99.2159, "south": 19.3244, "east": -98.9609, "north": 19.5346}}};
+     const config  = {&quot;user_name&quot;: &quot;eschbacher&quot;, &quot;maps_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;sql_api_template&quot;: &quot;https://eschbacher.carto.com&quot;, &quot;tiler_protocol&quot;: &quot;https&quot;, &quot;tiler_domain&quot;: &quot;carto.com&quot;, &quot;tiler_port&quot;: &quot;80&quot;, &quot;type&quot;: &quot;namedmap&quot;, &quot;named_map&quot;: {&quot;name&quot;: &quot;cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0&quot;, &quot;params&quot;: {&quot;basemap_url&quot;: &quot;https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png&quot;, &quot;cartocss_0&quot;: &quot;#layer {  marker-width: 10; marker-fill: ramp([female_employed_incomplete_secondary_education_rate_2010], cartocolor(Sunset), quantiles(7), >); marker-fill-opacity: 0.9; marker-allow-overlap: true; marker-line-width: 0.5; marker-line-color: #000; marker-line-opacity: 1;}#layer[female_employed_incomplete_secondary_education_rate_2010 = null] {  marker-fill: #ccc;}&quot;, &quot;sql_0&quot;: &quot;SELECT * FROM mexico_metro_augmented&quot;, &quot;west&quot;: -99.2159, &quot;south&quot;: 19.3244, &quot;east&quot;: -98.9609, &quot;north&quot;: 19.5346}}};
      const bounds  = [[19.5346, -98.9609], [19.3244, -99.2159]];
-     const options = {"filter": ["mapnik", "torque"], "https": true};
+     const options = {&quot;filter&quot;: [&quot;mapnik&quot;, &quot;torque&quot;], &quot;https&quot;: true};
+     var labels_url = '';
 
      const adjustLongitude = (lng) => (
        lng - ((Math.ceil((lng + 180) / 360) - 1) * 360)
@@ -743,12 +757,14 @@ cc.map(layers=[BaseMap('dark'), Layer(new_table,
 
      if (L.Browser.retina) {
          var basemap = config.named_map.params.basemap_url.replace('.png', '@2x.png');
+         labels_url = labels_url.replace('.png', '@2x.png');
      } else {
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
+
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
        $('#lat').text(map.getCenter().lat.toFixed(4));
@@ -758,13 +774,23 @@ cc.map(layers=[BaseMap('dark'), Layer(new_table,
      cartodb.createLayer(map, config, options)
             .addTo(map)
             .done((layer) => {
-              if (bounds.length) {
-                map.fitBounds(bounds);
-              }
-              updateMapInfo();
-              map.on('move', () => {
+                // add labels layer
+                if (labels_url) {
+                    var topPane = L.DomUtil.create('div', 'leaflet-top-pane', map.getPanes().mapPane);
+                    var topLayer = new L.tileLayer(labels_url).addTo(map);
+                    topPane.appendChild(topLayer.getContainer());
+                    topLayer.setZIndex(7);
+                 }
+
+                // fit map to bounds
+                if (bounds.length) {
+                  map.fitBounds(bounds);
+                }
+
                 updateMapInfo();
-              });
+                map.on('move', () => {
+                  updateMapInfo();
+                });
             })
             .error((err) => {
               console.log('ERROR: ', err);
