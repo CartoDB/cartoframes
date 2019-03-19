@@ -220,7 +220,7 @@ cc.map(layers=l,
 
 
 
-![png](BasicUsage_files/BasicUsage_9_1.png)
+![png](./cartoframes/img/BasicUsage_9_1.png)
 
 
 ### Multiple variables together
@@ -498,7 +498,7 @@ cc.map(layers=Layer('taxi_50k'),
 
 
 
-![png](BasicUsage_files/BasicUsage_16_1.png)
+![png](./cartoframes/img//BasicUsage_16_1.png)
 
 
 Oops, there are some zero-valued long/lats in there, so the results are going to [null island](https://en.wikipedia.org/wiki/Null_Island). Let's remove them.
@@ -666,5 +666,5 @@ cc.map(layers=Layer('taxi_50k',
 
 
 
-![png](BasicUsage_files/BasicUsage_22_1.png)
+![png](./cartoframes/img/BasicUsage_22_1.png)
 

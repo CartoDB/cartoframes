@@ -269,7 +269,7 @@ example_context.map(
 
 
 
-![png](ExampleDatasets_files/ExampleDatasets_8_1.png)
+![png](/cartoframes/img/ExampleDatasets_8_1.png)
 
 
 ## Taxi Data
@@ -651,7 +651,7 @@ example_context.map(
 
 
 
-![png](ExampleDatasets_files/ExampleDatasets_15_1.png)
+![png](/cartoframes/img/ExampleDatasets_15_1.png)
 
 
 We can use that same query to get the line geometries, and compare the crow fly distance with the reported distance.

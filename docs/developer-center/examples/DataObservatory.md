@@ -258,7 +258,7 @@ cc.map(layers=Layer(orig_table,
 
 
 
-![png](DataObservatory_files/DataObservatory_9_1.png)
+![png](./cartoframes/img/DataObservatory_9_1.png)
 
 
 ## Data Observatory measures in the Mexico City area
