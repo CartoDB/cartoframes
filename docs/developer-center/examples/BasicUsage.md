@@ -251,7 +251,7 @@ plt.show()
 ```
 
 
-![Brooklyn demographic data in small multiples](../img/BasicUsage_11_0.png)
+![Brooklyn demographic data in small multiples](../img/examples/BasicUsage_11_0.png)
 
 
 ## NYC Taxi Dataset
