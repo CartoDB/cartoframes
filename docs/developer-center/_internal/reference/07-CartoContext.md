@@ -20,7 +20,7 @@ There are two ways of authenticating against a CARTO account:
 
     ```python
     from cartoframes import Credentials
-    creds = Credentials(user='eschbacher', key='abcdefg')
+    creds = Credentials(username='eschbacher', key='abcdefg')
     cc = CartoContext(creds=creds)
     ```
 
