@@ -330,16 +330,17 @@ def vmap(layers,
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
-        size (integer tuple): size in pixels of the generated iframe with the map.
+        size (integer tuple): size in pixels of the generated iframe with the
+          map.
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
-        bounds (dict): a dict with `east`, `north`, `west` and `south` properties.
-             If not provided the bounds will be automatically calculated to fit all
-             features.
+        bounds (dict): a dict with `east`/`north`/`west`/`south` properties.
+          If not provided the bounds will be automatically calculated to fit all
+          features.
 
     Example:
 
@@ -405,7 +406,10 @@ def vmap(layers,
                 bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
             )
     """
-    bounds = _format_bounds(bounds) if bounds else _get_super_bounds(layers, context)
+    if bounds:
+        bounds = _format_bounds(bounds)
+    else:
+        bounds = _get_super_bounds(layers, context)
 
     jslayers = []
     for _, layer in enumerate(layers):
