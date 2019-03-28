@@ -339,8 +339,8 @@ def vmap(layers,
             If a Mapbox style, the access token is the value of the `token`
             key.
         bounds (dict): a dict with `east`/`north`/`west`/`south` properties.
-          If not provided the bounds will be automatically calculated to fit all
-          features.
+          If not provided the bounds will be automatically calculated to fit
+          all features.
 
     Example:
 
