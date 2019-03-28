@@ -18,7 +18,7 @@ from tqdm import tqdm
 from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
-from carto.sql import SQLClient, BatchSQLClient
+from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
@@ -182,6 +182,7 @@ class CartoContext(object):
                 session=session
             )
         self.sql_client = SQLClient(self.auth_client)
+        self.copyClient = CopySQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
         self.is_org = self._is_org_user()
@@ -234,16 +235,25 @@ class CartoContext(object):
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
-        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
+
+        source = '"{schema}"."{table_name}"'.format(
             table_name=table_name,
             schema=schema)
-        if limit is not None:
-            if isinstance(limit, int) and (limit >= 0):
-                query += ' LIMIT {limit}'.format(limit=limit)
-            else:
-                raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(query, decode_geom=decode_geom)
+        if limit is not None:
+            source = '(SELECT * FROM {source} LIMIT {limit})'.format(
+                source=source,
+                limit=limit)
+
+        query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
+
+        result = self.copyClient.copyto_stream(query)
+        df = pd.read_csv(result)
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
+
+        return df
 
     @utils.temp_ignore_warnings
     def tables(self):
