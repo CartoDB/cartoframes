@@ -315,7 +315,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
 
 @utils.temp_ignore_warnings
-def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
+def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager, bounds=None):
     """CARTO VL-powered interactive map
 
     Args:
@@ -332,6 +332,8 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
+        bounds (dict): a dict with `east`, `north`, `west` and `south` properties. If not provided
+            the bounds will be automatically calculated to fit all features.
 
     Example:
 
@@ -380,8 +382,24 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
                     'token: '<your mapbox token>'
                 }
             )
+
+        Custom bounds
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://<username>.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
+            )
     """
-    bounds = _get_super_bounds(layers, context)
+    bounds = _format_bounds(bounds) if bounds else _get_super_bounds(layers, context)
 
     jslayers = []
     for _, layer in enumerate(layers):
@@ -411,6 +429,10 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
     return HTML(html)
 
 
+def _format_bounds(bounds):
+    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+
+
 def _get_super_bounds(layers, context):
     """"""
     hosted_layers = [
@@ -431,7 +453,7 @@ def _get_super_bounds(layers, context):
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
 
-    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+    return _format_bounds(bounds)
 
 
 def _get_bounds_local(layers):
