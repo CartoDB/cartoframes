@@ -315,7 +315,11 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
 
 @utils.temp_ignore_warnings
-def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager, bounds=None):
+def vmap(layers,
+         context,
+         size=(1024, 632),
+         basemap=BaseMaps.voyager,
+         bounds=None):
     """CARTO VL-powered interactive map
 
     Args:
@@ -326,14 +330,16 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager, bounds=Non
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
+        size (integer tuple): size in pixels of the generated iframe with the map.
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
-        bounds (dict): a dict with `east`, `north`, `west` and `south` properties. If not provided
-            the bounds will be automatically calculated to fit all features.
+        bounds (dict): a dict with `east`, `north`, `west` and `south` properties.
+             If not provided the bounds will be automatically calculated to fit all
+             features.
 
     Example:
 
