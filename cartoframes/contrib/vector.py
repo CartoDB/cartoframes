@@ -338,9 +338,10 @@ def vmap(layers,
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
-        bounds (dict): a dict with `east`/`north`/`west`/`south` properties.
-          If not provided the bounds will be automatically calculated to fit
-          all features.
+        bounds (dict or list): a dict with `east`,`north`,`west`,`south`
+          properties, or a list of floats in the following order: [west,
+          south, east, north]. If not provided the bounds will be automatically
+          calculated to fit all features.
 
     Example:
 
@@ -440,6 +441,31 @@ def vmap(layers,
 
 
 def _format_bounds(bounds):
+    if isinstance(bounds, dict):
+        return _dict_bounds(bounds)
+
+    return _list_bounds(bounds)
+
+
+def _list_bounds(bounds):
+    if len(bounds) != 4:
+        raise ValueError('bounds list must have exactly four values in the '
+                         'order: [west, south, east, north]')
+
+    return _dict_bounds({
+        'west': bounds[0],
+        'south': bounds[1],
+        'east': bounds[2],
+        'north': bounds[3]
+    })
+
+
+def _dict_bounds(bounds):
+    if 'west' not in bounds or 'east' not in bounds or 'north' not in bounds\
+            or 'south' not in bounds:
+        raise ValueError('bounds must have east, west, north and '
+                         'south properties')
+
     return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
 
 
