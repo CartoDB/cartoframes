@@ -16,7 +16,7 @@ import pandas as pd
 
 ```python
 # set carto credentials
-creds = Credentials(key='abcdefg', 
+creds = Credentials(key='abcdefg',
                     username='cartoframes')
 creds.save()
 cxn = CartoContext()
@@ -242,7 +242,7 @@ df.head()
 
 
 
-By default, CARTO uses Well-known-binary (WKB) serialization for geometries that come out of PostGIS. 
+By default, CARTO uses Well-known-binary (WKB) serialization for geometries that come out of PostGIS.
 
 
 ```python
@@ -484,7 +484,7 @@ cxn.map(layers=Layer('nat', color={'column': 'hr90',
 
   </body>
 </html>
-" width=800 height=400>  Preview image: <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2Fcartodb-basemaps-%7Bs%7D.global.ssl.fastly.net%2Fdark_all%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D1%5D+%7B++marker-width%3A+10%3B+marker-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B+marker-fill-opacity%3A+1%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23000%3B+marker-line-opacity%3A+1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D2%5D+%7B++line-width%3A+1.5%3B+line-color%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D3%5D+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D+%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&anti_cache=0.15611993630847742" /></iframe>
+" width="800" height="400">  Preview image: <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid1_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2Fcartodb-basemaps-%7Bs%7D.global.ssl.fastly.net%2Fdark_all%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D1%5D+%7B++marker-width%3A+10%3B+marker-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B+marker-fill-opacity%3A+1%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23000%3B+marker-line-opacity%3A+1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D2%5D+%7B++line-width%3A+1.5%3B+line-color%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D3%5D+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D+%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&anti_cache=0.15611993630847742" /></iframe>
 
 
 
@@ -724,7 +724,7 @@ gdf.head()
 ```python
 from cartoframes import BaseMap, Layer
 cxn.map(layers=[BaseMap('light'),
-                Layer('cartoframes_geopandas_buffered', 
+                Layer('cartoframes_geopandas_buffered',
                          color='gi69')],
         interactive=False)
 ```
@@ -738,4 +738,3 @@ cxn.map(layers=[BaseMap('light'),
 
 
 ![Buffered points, using CARTOframes](../img/examples/ShapelyGeopandasCartoframes_23_1.png)
-
