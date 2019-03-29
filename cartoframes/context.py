@@ -245,8 +245,7 @@ class CartoContext(object):
                 source=source,
                 limit=limit)
 
-        query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'
-            .format(source=source)
+        query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
 
         result = self.copyClient.copyto_stream(query)
         df = pd.read_csv(result)
