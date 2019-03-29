@@ -330,8 +330,8 @@ def vmap(layers,
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
-        size (integer tuple): size in pixels of the generated iframe with the
-          map.
+        size (tuple of int): a (width, height) pair for the size of the map.
+          Default is (1024, 632)
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
