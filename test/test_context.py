@@ -226,7 +226,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         self.assertExistsTable(self.test_write_table)
 
-        import ipdb; ipdb.set_trace(context=30)
         result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL')
         self.assertEquals(result['rows'], 100)
 
@@ -252,7 +251,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     def test_cartocontext_write(self):
         """context.CartoContext.write normal usage"""
 
-        import ipdb; ipdb.set_trace(context=30)
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         from cartoframes.context import MAX_ROWS_LNGLAT
