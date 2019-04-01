@@ -1,4 +1,4 @@
-carto>=1.4.0
+-e git+https://github.com/CartoDB/carto-python.git@104_batch_sync_copy_fail#egg=carto
 pandas>=0.19.2
 webcolors==1.7
 shapely>=1.5.0
