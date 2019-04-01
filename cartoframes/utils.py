@@ -148,6 +148,7 @@ def dtypes2pg(dtype):
         'object': 'text',
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
+        'datetime64[ns, UTC]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
 
@@ -157,6 +158,7 @@ def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
         'date': 'datetime64[ns]',
+        'timestamp': 'datetime64[ns]',
         'number': 'float64',
         'string': 'object',
         'boolean': 'bool',

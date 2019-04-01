@@ -281,12 +281,11 @@ class CartoContext(object):
             self._create_table(df, table_name, lnglat, geom_col)
         else:
             if if_exists == FAIL:
-                raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it').format(table_name=table_name)
+                raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it'.format(table_name=table_name))
             elif if_exists == REPLACE:
                 self._create_table(df, table_name, lnglat, geom_col)
 
         self._copyfrom(df, table_name, lnglat, geom_col)
-
 
         dataset = self._get_dataset(table_name)
         if privacy != None and dataset.privacy.lower() != privacy:
@@ -305,23 +304,27 @@ class CartoContext(object):
         return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')".format(org=(self.creds.username() if self.is_org else 'public'), table_name=table_name)
 
     def _copyfrom(self, df, table_name, lnglat, geom_col):
+        import ipdb; ipdb.set_trace(context=30)
+        geom_col = _get_geom_col_name(df, geom_col)
         util_cols = ['the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,]
 
         copy_client = CopySQLClient(self.auth_client)
         columns = ','.join(utils.norm_colname(c) for c in df.columns if c not in util_cols)
         copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
-               FROM stdin WITH (FORMAT csv, DELIMITER '|')
-             """.format(table_name=table_name, columns=columns)
+               FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=table_name, columns=columns)
             ,
             self._rows(df, df.columns, lnglat, geom_col)
         )
 
     def _rows(self, df, cols, lnglat, geom_col):
+        geom_cols = ['geometry', 'the_geom', 'the_geom_webmercator', geom_col]
         for i, row in df.iterrows():
             csv_row = ''
-            # the_geom_val = None
+            the_geom_val = None
             for col in cols:
+                if lnglat and col in geom_cols or geom_col and col == 'the_geom':
+                    continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
                     val = ''
@@ -343,16 +346,12 @@ class CartoContext(object):
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
+            print(csv_row)
+
             yield csv_row.encode()
 
     def _create_table_query(self, df, table_name, lnglat, geom_col):
-        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,)
-        col = ('{col}  {ctype}')
-        cols = ', '.join(col.format(col=utils.norm_colname(c),
-                                           ctype=utils.dtypes2pg(t))
-                               for c, t in zip(df.columns, df.dtypes) if c not in util_cols)
-
-        if geom_col:
+        if geom_col or getattr(df, '_geometry_column_name', None):
             geom_colname = _get_geom_col_name(df, geom_col)
             geom_type = _get_geom_col_type(df, geom_col)
 
@@ -360,19 +359,25 @@ class CartoContext(object):
             geom_colname = 'the_geom'
             geom_type = 'Point'
 
-        cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname=geom_colname, geom_type=geom_type)
+        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col, geom_colname,)
+        col = ('{col} {ctype}')
+        cols = ', '.join(col.format(col=utils.norm_colname(c),
+                                    ctype=utils.dtypes2pg(t))
+                         for c, t in zip(df.columns, df.dtypes) if c not in util_cols)
 
-        return '''CREATE TABLE {table_name} ({cols})'''.format(table_name=table_name, cols=cols)
+        cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
+
+        create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=table_name, cols=cols)
+        print(create_query)
+        return create_query
 
     def _create_table(self, df, table_name, lnglat, geom_col):
         job = self.batch_sql_client \
-                    .create_and_wait_for_completion(
-                        '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                            .format(drop=self._drop_table_query(table_name),
-                                    create=self._create_table_query(df, table_name, lnglat, geom_col),
-                                    cartodbfy=self._cartodbfy_query(table_name)
-                            )
-                    )
+                  .create_and_wait_for_completion(
+                      '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                      .format(drop=self._drop_table_query(table_name),
+                              create=self._create_table_query(df, table_name, lnglat, geom_col),
+                              cartodbfy=self._cartodbfy_query(table_name)))
 
         if job['status'] != 'done':
             raise CartoException('Cannot create table, please try again.')
@@ -2091,7 +2096,11 @@ def _get_geom_col_type(df, geom_col):
     if geom_col is None:
         return None
 
-    geom = _decode_geom(df[geom_col].loc[~df[geom_col].isnull()].iloc[0])
+    # FIXME if geom_col is None persist with no geom_col
+    try:
+        geom = _decode_geom(df[geom_col].loc[~df[geom_col].isnull()].iloc[0])
+    except IndexError:
+        raise CartoException('Cannot create table with null values in `{}` column'.format(geom_col))
     if geom is None:
         return None
 
@@ -2125,6 +2134,10 @@ def _encode_geom(geom):
 def _decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
+    # it's already a shapely object
+    if hasattr(ewkb, 'geom_type'):
+        return ewkb
+
     from shapely import wkb
     if ewkb:
         try:

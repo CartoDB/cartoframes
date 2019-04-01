@@ -13,11 +13,12 @@ import tempfile
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
+from carto.datasets import DatasetManager
 import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.utils import dict_items
+from cartoframes.utils import dict_items, norm_colname
 from utils import _UserUrlLoader
 
 WILL_SKIP = False
@@ -226,27 +227,121 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         self.assertExistsTable(self.test_write_table)
 
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 100)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_geom_col_null(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        df.rename(columns={'the_geom': 'geometry'}, inplace=True)
+        with self.assertRaises(CartoException):
+            cc.write(df, self.test_write_table, geom_col='geometry')
+
+        self.assertEqual(cc._table_exists(self.test_write_table), False)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_geom_col(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_brooklyn_poverty
+        df = read_brooklyn_poverty(limit=50)
+
+        df.rename(columns={'the_geom': 'geometry'}, inplace=True)
+        cc.write(df, self.test_write_table, geom_col='geometry')
+
+        self.assertExistsTable(self.test_write_table)
+
+        result = self.sql_client.send('SELECT * FROM {} WHERE geoid IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 50)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_geopandas(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        import shapely
+        import geopandas as gpd
+        df = read_taxi(limit=50)
+        gdf = gpd.GeoDataFrame(df.drop(['dropoff_longitude', 'dropoff_latitude'], axis=1),
+                                crs={'init': 'epsg:4326'},
+                                geometry=[shapely.geometry.Point(xy) for xy in zip(df.dropoff_longitude, df.dropoff_latitude)])
+
         import ipdb; ipdb.set_trace(context=30)
-        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL')
-        self.assertEquals(result['rows'], 100)
+        cc.write(gdf, self.test_write_table)
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_geom_col(self):
+        self.assertExistsTable(self.test_write_table)
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_geopandas(self):
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 50)
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_privacy(self):
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_privacy(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_if_exists_fail(self):
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'), privacy='link')
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_if_exists_append(self):
+        self.assertExistsTable(self.test_write_table)
+        import ipdb; ipdb.set_trace(context=30)
+        dataset = DatasetManager(self.auth_client).get(norm_colname(self.test_write_table))
+        self.assertEqual(dataset.privacy.lower(), 'link')
 
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_if_exists_replace(self):
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_if_exists_fail(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+
+        with self.assertRaises(ValueError):
+            cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+
+        self.assertExistsTable(self.test_write_table)
+
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 100)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_if_exists_append(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'), if_exists='append')
+
+        self.assertExistsTable(self.test_write_table)
+
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 200)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_if_exists_replace(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'), if_exists='replace')
+
+        self.assertExistsTable(self.test_write_table)
+
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
