@@ -8,6 +8,7 @@ import json
 import random
 import warnings
 import requests
+import tempfile
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
@@ -215,22 +216,59 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(df, pd.DataFrame)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_cartocontext_write_lnglat(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=100)
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+
+        self.assertExistsTable(self.test_write_table)
+
+        import ipdb; ipdb.set_trace(context=30)
+        result = self.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL')
+        self.assertEquals(result['rows'], 100)
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_geom_col(self):
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_geopandas(self):
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_privacy(self):
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_if_exists_fail(self):
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_if_exists_append(self):
+
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    # def test_cartocontext_write_if_exists_replace(self):
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
         """context.CartoContext.write normal usage"""
+
+        import ipdb; ipdb.set_trace(context=30)
+        from cartoframes.examples import read_brooklyn_poverty
+        df = read_brooklyn_poverty()
         from cartoframes.context import MAX_ROWS_LNGLAT
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        data = {'nums': list(range(100, 0, -1)),
-                'category': [random.choice('abcdefghijklmnop')
-                             for _ in range(100)],
-                'lat': [0.01 * i for i in range(100)],
-                'long': [-0.01 * i for i in range(100)]}
-        schema = {'nums': int,
-                  'category': 'object',
-                  'lat': float,
-                  'long': float}
-        df = pd.DataFrame(data).astype(schema)
-        cc.write(df, self.test_write_table)
+        # data = {'nums': list(range(100, 0, -1)),
+        #         'category': [random.choice('abcdefghijklmnop')
+        #                      for _ in range(100)],
+        #         'lat': [0.01 * i for i in range(100)],
+        #         'long': [-0.01 * i for i in range(100)]}
+        # schema = {'nums': int,
+        #           'category': 'object',
+        #           'lat': float,
+        #           'long': float}
+        # df = pd.DataFrame(data).astype(schema)
+        cc.write(df, self.test_write_table, encode_geom=True, geom_col='the_geom', if_exists='append', privacy='public')
 
         # check if table exists
         resp = self.sql_client.send('''
@@ -241,97 +279,97 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(resp)
 
         # check that table has same number of rows
-        resp = self.sql_client.send('''
-            SELECT count(*)
-            FROM {table}'''.format(table=self.test_write_table))
-        self.assertEqual(resp['rows'][0]['count'], len(df))
+        # resp = self.sql_client.send('''
+        #     SELECT count(*)
+        #     FROM {table}'''.format(table=self.test_write_table))
+        # self.assertEqual(resp['rows'][0]['count'], len(df))
 
-        # should error for existing table
-        with self.assertRaises(NameError):
-            cc.write(df, self.test_read_table, overwrite=False)
+        # # should error for existing table
+        # with self.assertRaises(NameError):
+        #     cc.write(df, self.test_read_table, overwrite=False)
 
-        # overwrite table and create the_geom column
-        cc.write(df, self.test_write_table,
-                 overwrite=True,
-                 lnglat=('long', 'lat'))
+        # # overwrite table and create the_geom column
+        # cc.write(df, self.test_write_table,
+        #          overwrite=True,
+        #          lnglat=('long', 'lat'))
 
-        resp = self.sql_client.send('''
-            SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
-            FROM {table}
-            '''.format(table=self.test_write_table))
-        # number of geoms should equal number of rows
-        self.assertEqual(resp['rows'][0]['num_rows'],
-                         resp['rows'][0]['num_geoms'])
+        # resp = self.sql_client.send('''
+        #     SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
+        #     FROM {table}
+        #     '''.format(table=self.test_write_table))
+        # # number of geoms should equal number of rows
+        # self.assertEqual(resp['rows'][0]['num_rows'],
+        #                  resp['rows'][0]['num_geoms'])
 
-        # test batch lnglat behavior
-        n_rows = MAX_ROWS_LNGLAT + 1
-        df = pd.DataFrame({
-            'latvals': [random.random() for r in range(n_rows)],
-            'lngvals': [random.random() for r in range(n_rows)]
-            })
-        job = cc.write(df, self.test_write_lnglat_table,
-                       lnglat=('lngvals', 'latvals'))
-        self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
+        # # test batch lnglat behavior
+        # n_rows = MAX_ROWS_LNGLAT + 1
+        # df = pd.DataFrame({
+        #     'latvals': [random.random() for r in range(n_rows)],
+        #     'lngvals': [random.random() for r in range(n_rows)]
+        #     })
+        # job = cc.write(df, self.test_write_lnglat_table,
+        #                lnglat=('lngvals', 'latvals'))
+        # self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
 
-        # test batch writes
-        n_rows = 550000
-        df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
+        # # test batch writes
+        # n_rows = 550000
+        # df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
 
-        cc.write(df, self.test_write_batch_table)
+        # cc.write(df, self.test_write_batch_table)
 
-        resp = self.sql_client.send('''
-            SELECT count(*) AS num_rows FROM {table}
-            '''.format(table=self.test_write_batch_table))
-        # number of rows same in dataframe and carto table
-        self.assertEqual(n_rows, resp['rows'][0]['num_rows'])
+        # resp = self.sql_client.send('''
+        #     SELECT count(*) AS num_rows FROM {table}
+        #     '''.format(table=self.test_write_batch_table))
+        # # number of rows same in dataframe and carto table
+        # self.assertEqual(n_rows, resp['rows'][0]['num_rows'])
 
-        cols = self.sql_client.send('''
-            SELECT * FROM {table} LIMIT 1
-        '''.format(table=self.test_write_batch_table))
-        expected_schema = {'vals': {'type': 'number'},
-                           'the_geom': {'type': 'geometry'},
-                           'the_geom_webmercator': {'type': 'geometry'},
-                           'cartodb_id': {'type': 'number'}}
-        # table should be properly created
-        # util columns + new column of type number
-        self.assertDictEqual(cols['fields'], expected_schema)
+        # cols = self.sql_client.send('''
+        #     SELECT * FROM {table} LIMIT 1
+        # '''.format(table=self.test_write_batch_table))
+        # expected_schema = {'vals': {'type': 'number'},
+        #                    'the_geom': {'type': 'geometry'},
+        #                    'the_geom_webmercator': {'type': 'geometry'},
+        #                    'cartodb_id': {'type': 'number'}}
+        # # table should be properly created
+        # # util columns + new column of type number
+        # self.assertDictEqual(cols['fields'], expected_schema)
 
-        # test properly encoding
-        df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
-        cc.write(df, self.test_write_table, overwrite=True)
+        # # test properly encoding
+        # df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
+        # cc.write(df, self.test_write_table, overwrite=True)
 
-        # check if table exists
-        resp = self.sql_client.send('''
-            SELECT *
-            FROM {table}
-            LIMIT 0
-            '''.format(table=self.test_write_table))
-        self.assertIsNotNone(resp)
+        # # check if table exists
+        # resp = self.sql_client.send('''
+        #     SELECT *
+        #     FROM {table}
+        #     LIMIT 0
+        #     '''.format(table=self.test_write_table))
+        # self.assertIsNotNone(resp)
 
-        cc.delete(self.test_write_table)
-        df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
-        df = df.astype({'vals': str, 'ids': str})
-        cc.write(df, self.test_write_table)
-        schema = cc.sql_client.send('select ids, vals from {}'.format(
-            self.test_write_table))['fields']
-        self.assertSetEqual(set([schema[c]['type'] for c in schema]),
-                            set(('string', )))
+        # cc.delete(self.test_write_table)
+        # df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
+        # df = df.astype({'vals': str, 'ids': str})
+        # cc.write(df, self.test_write_table)
+        # schema = cc.sql_client.send('select ids, vals from {}'.format(
+        #     self.test_write_table))['fields']
+        # self.assertSetEqual(set([schema[c]['type'] for c in schema]),
+        #                     set(('string', )))
 
-        df = pd.DataFrame({
-            'vals': list('abcd'),
-            'ids': list('wxyz'),
-            'nums': [1.2 * i for i in range(4)],
-            'boolvals': [True, False, None, True, ],
-            })
-        cc.write(df, self.test_write_table, overwrite=True,
-                 type_guessing='true')
-        resp = cc.sql_client.send('SELECT * FROM {}'.format(
-            self.test_write_table))['fields']
-        schema = {k: v['type'] for k, v in dict_items(resp)}
-        ans = dict(vals='string', ids='string', nums='number',
-                   boolvals='boolean', the_geom='geometry',
-                   the_geom_webmercator='geometry', cartodb_id='number')
-        self.assertDictEqual(schema, ans)
+        # df = pd.DataFrame({
+        #     'vals': list('abcd'),
+        #     'ids': list('wxyz'),
+        #     'nums': [1.2 * i for i in range(4)],
+        #     'boolvals': [True, False, None, True, ],
+        #     })
+        # cc.write(df, self.test_write_table, overwrite=True,
+        #          type_guessing='true')
+        # resp = cc.sql_client.send('SELECT * FROM {}'.format(
+        #     self.test_write_table))['fields']
+        # schema = {k: v['type'] for k, v in dict_items(resp)}
+        # ans = dict(vals='string', ids='string', nums='number',
+        #            boolvals='boolean', the_geom='geometry',
+        #            the_geom_webmercator='geometry', cartodb_id='number')
+        # self.assertDictEqual(schema, ans)
 
     @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
     def test_write_privacy(self):
@@ -1085,3 +1123,11 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(tables[0], cartoframes.analysis.Table)
         self.assertIsNotNone(tables[0].name)
         self.assertIsInstance(tables[0].name, str)
+
+    def assertExistsTable(self, table_name):
+        resp = self.sql_client.send('''
+            SELECT *
+            FROM {table}
+            LIMIT 0
+            '''.format(table=table_name))
+        self.assertIsNotNone(resp)

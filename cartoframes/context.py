@@ -18,7 +18,7 @@ from tqdm import tqdm
 from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
-from carto.sql import SQLClient, BatchSQLClient
+from carto.sql import CopySQLClient, SQLClient, BatchSQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
@@ -60,6 +60,11 @@ CACHE_DIR = user_cache_dir('cartoframes')
 
 # cartoframes version
 DEFAULT_SQL_ARGS = dict(do_post=False)
+
+# if_exists
+FAIL = 'fail'
+REPLACE = 'replace'
+APPEND = 'append'
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -182,6 +187,7 @@ class CartoContext(object):
                 session=session
             )
         self.sql_client = SQLClient(self.auth_client)
+        self.batch_sql_client = BatchSQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
         self.is_org = self._is_org_user()
@@ -241,11 +247,11 @@ class CartoContext(object):
             if isinstance(limit, int) and (limit >= 0):
                 query += ' LIMIT {limit}'.format(limit=limit)
             else:
-                raise ValueError("`limit` parameter must an integer >= 0")
+                raise ValueError("`limit` parameter must be an integer >= 0")
 
         return self.query(query, decode_geom=decode_geom)
 
-    @utils.temp_ignore_warnings
+    # @utils.temp_ignore_warnings
     def tables(self):
         """List all tables in user's CARTO account
 
@@ -265,7 +271,122 @@ class CartoContext(object):
             load_totals='false')
         return [Table.from_dataset(d) for d in datasets]
 
-    def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
+    def write(self, df, table_name, lnglat=None, encode_geom=False, geom_col=None, privacy=None, if_exists=FAIL):
+        table_name = utils.norm_colname(table_name)
+        warn('Table will be named `{}`'.format(table_name))
+
+        table_exists = self._table_exists(table_name)
+
+        if not table_exists:
+            self._create_table(df, table_name, lnglat, geom_col)
+        else:
+            if if_exists == FAIL:
+                raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it').format(table_name=table_name)
+            elif if_exists == REPLACE:
+                self._create_table(df, table_name, lnglat, geom_col)
+
+        self._copyfrom(df, table_name, lnglat, geom_col)
+
+
+        dataset = self._get_dataset(table_name)
+        if privacy != None and dataset.privacy.lower() != privacy:
+            dataset.privacy = privacy
+            dataset.save()
+
+        tqdm.write('Table successfully written to CARTO: {table_url}'.format(
+            table_url=utils.join_url(self.creds.base_url(),
+                                     'dataset',
+                                     table_name)))
+
+    def _cartodbfy(self, table_name):
+        self.sql_client.send(self._cartodbfy_query(table_name))
+
+    def _cartodbfy_query(self, table_name):
+        return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')".format(org=(self.creds.username() if self.is_org else 'public'), table_name=table_name)
+
+    def _copyfrom(self, df, table_name, lnglat, geom_col):
+        util_cols = ['the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,]
+
+        copy_client = CopySQLClient(self.auth_client)
+        columns = ','.join(utils.norm_colname(c) for c in df.columns if c not in util_cols)
+        copy_client.copyfrom(
+            """COPY {table_name}({columns},the_geom)
+               FROM stdin WITH (FORMAT csv, DELIMITER '|')
+             """.format(table_name=table_name, columns=columns)
+            ,
+            self._rows(df, df.columns, lnglat, geom_col)
+        )
+
+    def _rows(self, df, cols, lnglat, geom_col):
+        for i, row in df.iterrows():
+            csv_row = ''
+            # the_geom_val = None
+            for col in cols:
+                val = row[col]
+                if pd.isnull(val) or val is None:
+                    val = ''
+                if lnglat:
+                    if col == lnglat[0]:
+                        lng_val = row[col]
+                    if col == lnglat[1]:
+                        lat_val = row[col]
+                if col == geom_col:
+                    the_geom_val = row[col]
+                else:
+                    csv_row += '{val}|'.format(val=val)
+
+            if the_geom_val is not None:
+                geom = _decode_geom(the_geom_val)
+                if geom:
+                    csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
+            if lnglat is not None:
+                csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
+
+            csv_row += '\n'
+            yield csv_row.encode()
+
+    def _create_table_query(self, df, table_name, lnglat, geom_col):
+        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,)
+        col = ('{col}  {ctype}')
+        cols = ', '.join(col.format(col=utils.norm_colname(c),
+                                           ctype=utils.dtypes2pg(t))
+                               for c, t in zip(df.columns, df.dtypes) if c not in util_cols)
+
+        if geom_col:
+            geom_colname = _get_geom_col_name(df, geom_col)
+            geom_type = _get_geom_col_type(df, geom_col)
+
+        if lnglat:
+            geom_colname = 'the_geom'
+            geom_type = 'Point'
+
+        cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname=geom_colname, geom_type=geom_type)
+
+        return '''CREATE TABLE {table_name} ({cols})'''.format(table_name=table_name, cols=cols)
+
+    def _create_table(self, df, table_name, lnglat, geom_col):
+        job = self.batch_sql_client \
+                    .create_and_wait_for_completion(
+                        '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                            .format(drop=self._drop_table_query(table_name),
+                                    create=self._create_table_query(df, table_name, lnglat, geom_col),
+                                    cartodbfy=self._cartodbfy_query(table_name)
+                            )
+                    )
+
+        if job['status'] != 'done':
+            raise CartoException('Cannot create table, please try again.')
+
+    def _get_dataset(self, dataset_name):
+        try:
+            return DatasetManager(self.auth_client).get(dataset_name)
+        except NotFoundException:
+            return None
+
+    def _drop_table_query(self, table_name):
+        return '''DROP TABLE IF EXISTS {table_name}'''.format(table_name=table_name)
+
+    def write_old(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
@@ -422,7 +543,7 @@ class CartoContext(object):
                                      'dataset',
                                      final_table_name)))
 
-    @utils.temp_ignore_warnings
+    # @utils.temp_ignore_warnings
     def _get_privacy(self, table_name):
         """gets current privacy of a table"""
         ds_manager = DatasetManager(self.auth_client)
@@ -432,7 +553,7 @@ class CartoContext(object):
         except NotFoundException:
             return None
 
-    @utils.temp_ignore_warnings
+    # @utils.temp_ignore_warnings
     def _update_privacy(self, table_name, privacy):
         """Updates the privacy of a dataset"""
         ds_manager = DatasetManager(self.auth_client)
@@ -469,10 +590,7 @@ class CartoContext(object):
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(
                     table_name=table_name),
                 do_post=False)
-            raise NameError(
-                'Table `{table_name}` already exists. '
-                'Run with `overwrite=True` if you wish to replace the '
-                'table.'.format(table_name=table_name))
+            return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
             self._debug_print(err=err)
@@ -870,7 +988,7 @@ class CartoContext(object):
 
         return df
 
-    @utils.temp_ignore_warnings
+    # @utils.temp_ignore_warnings
     def map(self, layers=None, interactive=True,
             zoom=None, lat=None, lng=None, size=(800, 400),
             ax=None):
@@ -1935,13 +2053,23 @@ class CartoContext(object):
 # TODO: move all of the below to the utils module
 def _add_encoded_geom(df, geom_col):
     """Add encoded geometry to DataFrame"""
-    # None if not a GeoDataFrame
+    geom_col = _get_geom_col_name(df, geom_col)
+
+    # updates in place
+    df['the_geom'] = df[geom_col].apply(_encode_geom)
+    return None
+
+def _get_geom_col_name(df, geom_col):
+    geom_col_names = ['geom', 'the_geom', 'geometry']
     is_geopandas = getattr(df, '_geometry_column_name', None)
     if is_geopandas is None and geom_col is None:
         warn('`encode_geom` works best with Geopandas '
              '(http://geopandas.org/) and/or shapely '
              '(https://pypi.python.org/pypi/Shapely).')
-        geom_col = 'geometry' if 'geometry' in df.columns else None
+        try:
+            geom_col = next(x for x in df.columns if x.lower() in geom_col_names)
+        except StopIteration:
+            pass
         if geom_col is None:
             raise KeyError('Geometries were requested to be encoded '
                            'but a geometry column was not found in the '
@@ -1955,10 +2083,19 @@ def _add_encoded_geom(df, geom_col):
                                                 geom_col))
     elif is_geopandas and geom_col is None:
         geom_col = is_geopandas
-    # updates in place
-    df['the_geom'] = df[geom_col].apply(_encode_geom)
-    return None
 
+    return geom_col
+
+def _get_geom_col_type(df, geom_col):
+    geom_col = _get_geom_col_name(df, geom_col)
+    if geom_col is None:
+        return None
+
+    geom = _decode_geom(df[geom_col].loc[~df[geom_col].isnull()].iloc[0])
+    if geom is None:
+        return None
+
+    return geom.geom_type
 
 def _encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
@@ -1990,5 +2127,17 @@ def _decode_geom(ewkb):
     """
     from shapely import wkb
     if ewkb:
-        return wkb.loads(ba.unhexlify(ewkb))
+        try:
+            return wkb.loads(ba.unhexlify(ewkb))
+        except Exception:
+            try:
+                return wkb.loads(ba.unhexlify(ewkb), hex=True)
+            except Exception:
+                try:
+                    return wkb.loads(ewkb, hex=True)
+                except Exception:
+                    try:
+                        return wkb.loads(ewkb)
+                    except:
+                        pass
     return None
