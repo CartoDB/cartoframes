@@ -222,7 +222,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'))
+        cc.write(df, self.test_write_table, lnglat=('dropoff_longitude', 'dropoff_latitude'), if_exists='replace')
 
         self.assertExistsTable(self.test_write_table)
 

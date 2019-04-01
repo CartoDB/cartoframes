@@ -281,7 +281,7 @@ class CartoContext(object):
             self._create_table(df, table_name, lnglat, geom_col)
         else:
             if if_exists == FAIL:
-                raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it').format(table_name=table_name)
+                raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it'.format(table_name=table_name))
             elif if_exists == REPLACE:
                 self._create_table(df, table_name, lnglat, geom_col)
 
