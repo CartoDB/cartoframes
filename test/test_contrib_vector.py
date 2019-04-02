@@ -299,3 +299,29 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
                 vector._get_super_bounds([qlayer, llayer], cc),
                 msg='super bounds are equal'
             )
+
+    def test_vector__dict_bounds(self):
+        with self.assertRaises(ValueError):
+            vector._dict_bounds({})
+
+        bounds = vector._dict_bounds({'east': 2, 'west': 0, 'north': 3,
+                                      'south': 1})
+
+        self.assertEqual(bounds, '[[0, 1], [2, 3]]')
+
+    def test_vector__list_bounds(self):
+        with self.assertRaises(ValueError):
+            vector._list_bounds([0])
+
+        with self.assertRaises(ValueError):
+            vector._list_bounds([0, 1])
+
+        with self.assertRaises(ValueError):
+            vector._list_bounds([0, 1, 2])
+
+        with self.assertRaises(ValueError):
+            vector._list_bounds([0, 1, 2, 3, 4])
+
+        bounds = vector._list_bounds([0, 1, 2, 3])
+
+        self.assertEqual(bounds, '[[0, 1], [2, 3]]')
