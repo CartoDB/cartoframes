@@ -249,7 +249,7 @@ class CartoContext(object):
 
         query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
 
-        result = self._recursiveRead(query, retry_times)
+        result = self._recursive_read(query, retry_times)
         df = pd.read_csv(result)
 
         if decode_geom:
@@ -257,16 +257,16 @@ class CartoContext(object):
 
         return df
 
-    def _recursiveRead(self, query, retry_times):
+    def _recursive_read(self, query, retry_times):
         try:
-            return self.copyClient.copyto_stream(query)
+            return self.copy_client.copyto_stream(query)
         except CartoRateLimitException as err:
             retry_times -= 1
             if retry_times > 0:
-                print('Read call rate limited. Waiting {s} seconds'.format(s=err.retryAfter))
-                time.sleep(err.retryAfter)
+                print('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
                 print('Retrying...')
-                return self._recursiveRead(query, retry_times)
+                return self._recursive_read(query, retry_times)
             else:
                 print('Read call was rate limited. Are you running more read queries at the same time?.')
                 raise err
