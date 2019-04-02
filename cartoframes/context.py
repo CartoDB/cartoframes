@@ -19,7 +19,7 @@ from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
-from carto.exceptions import CartoException
+from carto.exceptions import CartoException, CartoRateLimitException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
 
@@ -206,7 +206,7 @@ class CartoContext(object):
         return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False, shared_user=None):
+             decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -220,6 +220,8 @@ class CartoContext(object):
               <http://geopandas.org/>`__.
             shared_user (str, optional): If a table has been shared with you,
               specify the user name (schema) who shared it.
+            retry_times (str, optional): If the read call is rate limited,
+              number of retries to be made
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -247,13 +249,28 @@ class CartoContext(object):
 
         query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
 
-        result = self.copyClient.copyto_stream(query)
+        result = self._recursiveRead(query, retry_times)
         df = pd.read_csv(result)
 
         if decode_geom:
             df['geometry'] = df.the_geom.apply(_decode_geom)
 
         return df
+
+    def _recursiveRead(self, query, retry_times):
+        try:
+            return self.copyClient.copyto_stream(query)
+        except CartoRateLimitException as err:
+            retry_times -= 1
+            if retry_times > 0:
+                print('Read call rate limited. Waiting {s} seconds'.format(s=err.retryAfter))
+                time.sleep(err.retryAfter)
+                print('Retrying...')
+                return self._recursiveRead(query, retry_times)
+            else:
+                print('Read call was rate limited. Are you running more read queries at the same time?.')
+                raise err
+
 
     @utils.temp_ignore_warnings
     def tables(self):
