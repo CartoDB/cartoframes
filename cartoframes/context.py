@@ -263,12 +263,12 @@ class CartoContext(object):
         except CartoRateLimitException as err:
             retry_times -= 1
             if retry_times > 0:
-                print('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
                 time.sleep(err.retry_after)
-                print('Retrying...')
+                warn('Retrying...')
                 return self._recursive_read(query, retry_times)
             else:
-                print('Read call was rate limited. Are you running more read queries at the same time?.')
+                warn('Read call was rate limited. Are you running more read queries at the same time?.')
                 raise err
 
 
