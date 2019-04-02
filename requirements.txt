@@ -1,4 +1,4 @@
-carto>=1.5.0
+-e git+https://github.com/CartoDB/carto-python.git#egg=carto
 pyrestcli>=0.6.3
 pandas>=0.19.2
 webcolors==1.7

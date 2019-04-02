@@ -182,7 +182,7 @@ class CartoContext(object):
                 session=session
             )
         self.sql_client = SQLClient(self.auth_client)
-        self.copyClient = CopySQLClient(self.auth_client)
+        self.copy_client = CopySQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
         self.is_org = self._is_org_user()
