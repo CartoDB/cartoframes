@@ -315,7 +315,11 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
 
 @utils.temp_ignore_warnings
-def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
+def vmap(layers,
+         context,
+         size=(1024, 632),
+         basemap=BaseMaps.voyager,
+         bounds=None):
     """CARTO VL-powered interactive map
 
     Args:
@@ -326,12 +330,18 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
+        size (tuple of int): a (width, height) pair for the size of the map.
+          Default is (1024, 632)
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
+        bounds (dict or list): a dict with `east`,`north`,`west`,`south`
+          properties, or a list of floats in the following order: [west,
+          south, east, north]. If not provided the bounds will be automatically
+          calculated to fit all features.
 
     Example:
 
@@ -380,8 +390,27 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
                     'token: '<your mapbox token>'
                 }
             )
+
+        Custom bounds
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://<username>.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
+            )
     """
-    bounds = _get_super_bounds(layers, context)
+    if bounds:
+        bounds = _format_bounds(bounds)
+    else:
+        bounds = _get_super_bounds(layers, context)
 
     jslayers = []
     for _, layer in enumerate(layers):
@@ -411,6 +440,35 @@ def vmap(layers, context, size=(1024, 632), basemap=BaseMaps.voyager):
     return HTML(html)
 
 
+def _format_bounds(bounds):
+    if isinstance(bounds, dict):
+        return _dict_bounds(bounds)
+
+    return _list_bounds(bounds)
+
+
+def _list_bounds(bounds):
+    if len(bounds) != 4:
+        raise ValueError('bounds list must have exactly four values in the '
+                         'order: [west, south, east, north]')
+
+    return _dict_bounds({
+        'west': bounds[0],
+        'south': bounds[1],
+        'east': bounds[2],
+        'north': bounds[3]
+    })
+
+
+def _dict_bounds(bounds):
+    if 'west' not in bounds or 'east' not in bounds or 'north' not in bounds\
+            or 'south' not in bounds:
+        raise ValueError('bounds must have east, west, north and '
+                         'south properties')
+
+    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+
+
 def _get_super_bounds(layers, context):
     """"""
     hosted_layers = [
@@ -431,7 +489,7 @@ def _get_super_bounds(layers, context):
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
 
-    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+    return _format_bounds(bounds)
 
 
 def _get_bounds_local(layers):

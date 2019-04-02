@@ -71,7 +71,7 @@ cc = CartoContext(
 
 ```python
 from cartoframes import Credentials, CartoContext
-creds = Credentials(user='<your_user_name>', key='<your_api_key>')
+creds = Credentials(username='<your_user_name>', key='<your_api_key>')
 cc = CartoContext(creds=creds)
 ```
 
@@ -79,7 +79,7 @@ You can also save your credentials to use later, independent of the Python sessi
 
 ```python
 from cartoframes import Credentials, CartoContext
-creds = Credentials(user='<your_user_name>', key='<your_api_key>')
+creds = Credentials(username='<your_user_name>', key='<your_api_key>')
 creds.save()  # save credentials for later use (not dependent on Python session)
 ```
 
@@ -147,6 +147,6 @@ from cartoframes import Layer
 cc.map(layers=Layer('brooklyn_poverty_w_rates', color='poverty_per_pop'))
 ```
 
-![](../../img/guides/01-brooklyn_poverty.png)
+![](../img/guides/01-brooklyn_poverty.png)
 
 Note: Legends are not yet implemented for stable releases of cartoframes. See [this pull request](https://github.com/CartoDB/cartoframes/pull/184) for more information.
