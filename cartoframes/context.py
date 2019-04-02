@@ -61,10 +61,6 @@ CACHE_DIR = user_cache_dir('cartoframes')
 # cartoframes version
 DEFAULT_SQL_ARGS = dict(do_post=False)
 
-# if_exists
-FAIL = 'fail'
-REPLACE = 'replace'
-APPEND = 'append'
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -187,6 +183,7 @@ class CartoContext(object):
                 session=session
             )
         self.sql_client = SQLClient(self.auth_client)
+        self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
@@ -195,6 +192,10 @@ class CartoContext(object):
         self._map_templates = {}
         self._srcdoc = None
         self._verbose = verbose
+
+        self.FAIL = 'fail'
+        self.REPLACE = 'replace'
+        self.APPEND = 'append'
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
@@ -271,7 +272,7 @@ class CartoContext(object):
             load_totals='false')
         return [Table.from_dataset(d) for d in datasets]
 
-    def write(self, df, table_name, lnglat=None, encode_geom=False, geom_col=None, if_exists=FAIL):
+    def write(self, df, table_name, lnglat=None, encode_geom=False, geom_col=None, if_exists='fail'):
         table_name = utils.norm_colname(table_name)
         warn('Table will be named `{}`'.format(table_name))
 
@@ -280,9 +281,9 @@ class CartoContext(object):
         if not table_exists:
             self._create_table(df, table_name, lnglat, geom_col)
         else:
-            if if_exists == FAIL:
+            if if_exists == self.FAIL:
                 raise ValueError('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use if_exists="replace" to overwrite it'.format(table_name=table_name))
-            elif if_exists == REPLACE:
+            elif if_exists == self.REPLACE:
                 self._create_table(df, table_name, lnglat, geom_col)
 
         self._copyfrom(df, table_name, lnglat, geom_col)

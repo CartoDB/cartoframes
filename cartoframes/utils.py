@@ -1,9 +1,24 @@
 """general utility functions"""
 import sys
 from functools import wraps
-from warnings import filterwarnings, catch_warnings
+from warnings import filterwarnings, catch_warnings, simplefilter, warn
 
 from tqdm import tqdm
+
+
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used."""
+    @wraps(func)
+    def new_func(*args, **kwargs):
+        simplefilter('always', DeprecationWarning)  # turn off filter
+        warn("Call to deprecated function {}.".format(func.__name__),
+             category=DeprecationWarning,
+             stacklevel=2)
+        simplefilter('default', DeprecationWarning)  # reset filter
+        return func(*args, **kwargs)
+    return new_func
 
 
 def dict_items(indict):
@@ -53,6 +68,7 @@ def normalize_colnames(columns):
     return normalized_columns
 
 
+@deprecated
 def norm_colname(colname):
     """Given an arbitrary column name, translate to a SQL-normalized column
     name a la CARTO's Import API will translate to
