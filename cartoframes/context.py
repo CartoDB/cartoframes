@@ -271,7 +271,7 @@ class CartoContext(object):
             load_totals='false')
         return [Table.from_dataset(d) for d in datasets]
 
-    def write(self, df, table_name, lnglat=None, encode_geom=False, geom_col=None, privacy=None, if_exists=FAIL):
+    def write(self, df, table_name, lnglat=None, encode_geom=False, geom_col=None, if_exists=FAIL):
         table_name = utils.norm_colname(table_name)
         warn('Table will be named `{}`'.format(table_name))
 
@@ -287,15 +287,12 @@ class CartoContext(object):
 
         self._copyfrom(df, table_name, lnglat, geom_col)
 
-        dataset = self._get_dataset(table_name)
-        if privacy != None and dataset.privacy.lower() != privacy:
-            dataset.privacy = privacy
-            dataset.save()
-
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
                                      table_name)))
+
+        return table_name
 
     def _cartodbfy(self, table_name):
         self.sql_client.send(self._cartodbfy_query(table_name))
@@ -304,7 +301,6 @@ class CartoContext(object):
         return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')".format(org=(self.creds.username() if self.is_org else 'public'), table_name=table_name)
 
     def _copyfrom(self, df, table_name, lnglat, geom_col):
-        import ipdb; ipdb.set_trace(context=30)
         geom_col = _get_geom_col_name(df, geom_col)
         util_cols = ['the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,]
 
@@ -323,7 +319,7 @@ class CartoContext(object):
             csv_row = ''
             the_geom_val = None
             for col in cols:
-                if lnglat and col in geom_cols or geom_col and col == 'the_geom':
+                if lnglat and col in geom_cols:
                     continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
@@ -346,16 +342,14 @@ class CartoContext(object):
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
-            print(csv_row)
 
             yield csv_row.encode()
 
     def _create_table_query(self, df, table_name, lnglat, geom_col):
-        if geom_col or getattr(df, '_geometry_column_name', None):
+        if lnglat is None:
             geom_colname = _get_geom_col_name(df, geom_col)
             geom_type = _get_geom_col_type(df, geom_col)
-
-        if lnglat:
+        else:
             geom_colname = 'the_geom'
             geom_type = 'Point'
 
@@ -365,10 +359,10 @@ class CartoContext(object):
                                     ctype=utils.dtypes2pg(t))
                          for c, t in zip(df.columns, df.dtypes) if c not in util_cols)
 
-        cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
+        if geom_type:
+            cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
 
         create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=table_name, cols=cols)
-        print(create_query)
         return create_query
 
     def _create_table(self, df, table_name, lnglat, geom_col):
@@ -2075,10 +2069,6 @@ def _get_geom_col_name(df, geom_col):
             geom_col = next(x for x in df.columns if x.lower() in geom_col_names)
         except StopIteration:
             pass
-        if geom_col is None:
-            raise KeyError('Geometries were requested to be encoded '
-                           'but a geometry column was not found in the '
-                           'DataFrame.'.format(geom_col=geom_col))
     elif is_geopandas and geom_col:
         warn('Geometry column of the input DataFrame does not '
              'match the geometry column supplied. Using user-supplied '
@@ -2100,7 +2090,9 @@ def _get_geom_col_type(df, geom_col):
     try:
         geom = _decode_geom(df[geom_col].loc[~df[geom_col].isnull()].iloc[0])
     except IndexError:
-        raise CartoException('Cannot create table with null values in `{}` column'.format(geom_col))
+        warn('Dataset with null geometries')
+        geom = None
+
     if geom is None:
         return None
 
@@ -2139,6 +2131,7 @@ def _decode_geom(ewkb):
         return ewkb
 
     from shapely import wkb
+    from shapely import wkt
     if ewkb:
         try:
             return wkb.loads(ba.unhexlify(ewkb))
@@ -2151,6 +2144,9 @@ def _decode_geom(ewkb):
                 except Exception:
                     try:
                         return wkb.loads(ewkb)
-                    except:
-                        pass
+                    except Exception:
+                        try:
+                            return wkt.loads(ewkb)
+                        except Exception:
+                            pass
     return None
