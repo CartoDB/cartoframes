@@ -8,7 +8,6 @@ import json
 import random
 import warnings
 import requests
-import tempfile
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
@@ -18,7 +17,7 @@ import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.utils import dict_items, norm_colname
+from cartoframes.utils import norm_colname
 from utils import _UserUrlLoader
 
 WILL_SKIP = False

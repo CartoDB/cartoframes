@@ -302,7 +302,7 @@ class CartoContext(object):
 
     def _copyfrom(self, df, table_name, lnglat, geom_col):
         geom_col = _get_geom_col_name(df, geom_col)
-        util_cols = ['the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col,]
+        util_cols = ['the_geom', 'the_geom_webmercator', 'cartodb_id', geom_col, ]
 
         copy_client = CopySQLClient(self.auth_client)
         columns = ','.join(utils.norm_colname(c) for c in df.columns if c not in util_cols)
@@ -2058,6 +2058,7 @@ def _add_encoded_geom(df, geom_col):
     df['the_geom'] = df[geom_col].apply(_encode_geom)
     return None
 
+
 def _get_geom_col_name(df, geom_col):
     geom_col_names = ['geom', 'the_geom', 'geometry']
     is_geopandas = getattr(df, '_geometry_column_name', None)
@@ -2081,12 +2082,12 @@ def _get_geom_col_name(df, geom_col):
 
     return geom_col
 
+
 def _get_geom_col_type(df, geom_col):
     geom_col = _get_geom_col_name(df, geom_col)
     if geom_col is None:
         return None
 
-    # FIXME if geom_col is None persist with no geom_col
     try:
         geom = _decode_geom(df[geom_col].loc[~df[geom_col].isnull()].iloc[0])
     except IndexError:
@@ -2097,6 +2098,7 @@ def _get_geom_col_type(df, geom_col):
         return None
 
     return geom.geom_type
+
 
 def _encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
