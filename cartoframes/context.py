@@ -241,9 +241,10 @@ class CartoContext(object):
             schema=schema)
 
         if limit is not None:
-            source = '(SELECT * FROM {source} LIMIT {limit})'.format(
-                source=source,
-                limit=limit)
+            if isinstance(limit, int) and (limit >= 0):
+                source = '(SELECT * FROM {source} LIMIT {limit})'.format(source=source, limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
 
         query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
 
