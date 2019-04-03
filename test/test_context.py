@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Unit tests for cartoframes.context"""
+try:
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+
 import unittest
 import os
 import sys
@@ -541,12 +548,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     def test_cartocontext_map(self):
         """context.CartoContext.map normal usage"""
         from cartoframes import Layer, QueryLayer, BaseMap
-        try:
-            import matplotlib
-            matplotlib.use('agg')
-            import matplotlib.pyplot as plt
-        except ImportError:
-            plt = None
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
