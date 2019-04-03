@@ -205,7 +205,7 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
-    def read(self, table_name, limit=None, decode_geom=False, shared_user=None):
+    def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -251,7 +251,15 @@ class CartoContext(object):
 
         return self._clean_DataFrame_from_carto(df, table_name, schema, decode_geom)
 
-    def _recursive_read(self, query, retry_times):
+    def _recursive_read(self, query, retry_times=3):
+        """
+        Read the data from a query. If the read is rate limited, the request will be repeated retry_times
+
+        :param query: a COPY TO query
+        :type query: str
+        :param retry_times: number of retries if the request is rate limited
+        :type retry_times: int
+        """
         try:
             return self.copy_client.copyto_stream(query)
         except CartoRateLimitException as err:
