@@ -218,7 +218,7 @@ class CartoContext(object):
               <http://geopandas.org/>`__.
             shared_user (str, optional): If a table has been shared with you,
               specify the user name (schema) who shared it.
-            retry_times (str, optional): If the read call is rate limited,
+            retry_times (int, optional): If the read call is rate limited,
               number of retries to be made
 
         Returns:
@@ -263,8 +263,8 @@ class CartoContext(object):
         try:
             return self.copy_client.copyto_stream(query)
         except CartoRateLimitException as err:
-            retry_times -= 1
             if retry_times > 0:
+                retry_times -= 1
                 warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
                 time.sleep(err.retry_after)
                 warn('Retrying...')
