@@ -247,7 +247,7 @@ class CartoContext(object):
         result = self.copy_client.copyto_stream(query)
         df = pd.read_csv(result)
 
-        return self._clean_DataFrame_from_carto(df, table_name, schema)
+        return self._clean_DataFrame_from_carto(df, table_name, schema, decode_geom)
 
     def _clean_DataFrame_from_carto(self, df, table_name, schema='public', decode_geom=False):
         """
