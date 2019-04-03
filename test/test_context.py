@@ -187,12 +187,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                       api_key=self.apikey)
         # fails if limit is smaller than zero
         with self.assertRaises(ValueError):
-            df = cc.read('sea_horses', limit=-10)
+            df = cc.read(self.test_read_table, limit=-10)
         # fails if not an int
         with self.assertRaises(ValueError):
-            df = cc.read('sea_horses', limit=3.14159)
+            df = cc.read(self.test_read_table, limit=3.14159)
         with self.assertRaises(ValueError):
-            df = cc.read('sea_horses', limit='acadia')
+            df = cc.read(self.test_read_table, limit='acadia')
 
         # fails on non-existent table
         with self.assertRaises(CartoException):
