@@ -240,7 +240,7 @@ class CartoContext(object):
         result = self.copy_client.copyto_stream(query)
         df = pd.read_csv(result)
 
-        return self._clean_DataFrame_from_carto(df, table_columns, decode_geom)
+        return self._clean_dataframe_from_carto(df, table_columns, decode_geom)
 
     def _get_read_query(self, table_name, schema, table_columns, limit=None):
         """Create the read (COPY TO) query
@@ -271,7 +271,7 @@ class CartoContext(object):
 
         return 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
 
-    def _clean_DataFrame_from_carto(self, df, table_columns, decode_geom=False):
+    def _clean_dataframe_from_carto(self, df, table_columns, decode_geom=False):
         """Clean a DataFrame with a dataset from CARTO:
             - use cartodb_id as DataFrame index
             - process date columns
