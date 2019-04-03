@@ -418,7 +418,7 @@ cc.map(layers=Layer('fastfood_dask', size=2))
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: &quot;&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>&quot;
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
