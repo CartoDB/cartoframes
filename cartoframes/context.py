@@ -205,15 +205,13 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
-    def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False, shared_user=None, retry_times=3):
+    def read(self, table_name, limit=None, decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
             table_name (str): Name of table in user's CARTO account.
             limit (int, optional): Read only `limit` lines from
                 `table_name`. Defaults to ``None``, which reads the full table.
-            index (str, optional): Not currently in use.
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
@@ -238,24 +236,20 @@ class CartoContext(object):
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
 
-        source = '"{schema}"."{table_name}"'.format(
-            table_name=table_name,
-            schema=schema)
+        source = '"{schema}"."{table_name}"'.format(table_name=table_name, schema=schema)
 
         if limit is not None:
-            source = '(SELECT * FROM {source} LIMIT {limit})'.format(
-                source=source,
-                limit=limit)
+            if isinstance(limit, int) and (limit >= 0):
+                source = '(SELECT * FROM {source} LIMIT {limit})'.format(source=source, limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
 
         query = 'COPY {source} TO stdout WITH (FORMAT csv, HEADER true)'.format(source=source)
 
         result = self._recursive_read(query, retry_times)
         df = pd.read_csv(result)
 
-        if decode_geom:
-            df['geometry'] = df.the_geom.apply(_decode_geom)
-
-        return df
+        return self._clean_DataFrame_from_carto(df, table_name, schema, decode_geom)
 
     def _recursive_read(self, query, retry_times):
         try:
@@ -271,6 +265,60 @@ class CartoContext(object):
                 warn('Read call was rate limited. Are you running more read queries at the same time?.')
                 raise err
 
+    def _clean_DataFrame_from_carto(self, df, table_name, schema='public', decode_geom=False):
+        """
+        Clean a DataFrame with a dataset from CARTO:
+        - remove the_geom_webmercator
+        - use cartodb_id as DataFrame index
+        - process date columns
+        - decode geom
+
+        :param df: DataFrame with a dataset from CARTO
+        :type df: pandas DataFrame
+        :param table: table name in user's CARTO account.
+        :type table: str
+        :param schema: table schema name in user's CARTO account.
+        :type schema: str
+        :param decode_geom: Decodes CARTO's geometries into a `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas <http://geopandas.org/>`__.
+        :type decode_geom: bool, optional
+
+        :return: DataFrame
+        """
+        if 'the_geom_webmercator' in df.columns:
+            df.pop('the_geom_webmercator')
+
+        if 'cartodb_id' in df.columns:
+            df.set_index('cartodb_id', inplace=True)
+
+        table_columns = self._get_table_columns(table_name, schema)
+        if table_columns:
+            for column_name in table_columns:
+                if table_columns[column_name]['type'] == 'date':
+                    df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
+
+        if decode_geom:
+            df['geometry'] = df.the_geom.apply(_decode_geom)
+
+        return df
+
+    def _get_table_columns(self, table, schema='public'):
+        """
+        Get columns names and types from a table
+
+        :param table: table name in user's CARTO account.
+        :type table: str
+        :param schema: table schema name in user's CARTO account.
+        :type schema: str
+
+        :return: object or None
+        """
+        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=table, schema=schema)
+        table_info = self.sql_client.send(query)
+        if 'fields' in table_info:
+            return table_info['fields']
+
+        return None
 
     @utils.temp_ignore_warnings
     def tables(self):
