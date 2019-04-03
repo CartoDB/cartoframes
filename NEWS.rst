@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.10.0
+------
+
+Release 2019-xx-xx
+
+Updates
+
+- max line length from 80 to 120
+
 0.9.2
 -----
 
