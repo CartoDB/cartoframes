@@ -205,15 +205,13 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
-    def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False, shared_user=None):
+    def read(self, table_name, limit=None, decode_geom=False, shared_user=None):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
             table_name (str): Name of table in user's CARTO account.
             limit (int, optional): Read only `limit` lines from
                 `table_name`. Defaults to ``None``, which reads the full table.
-            index (str, optional): Not currently in use.
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
