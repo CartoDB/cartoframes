@@ -11,8 +11,7 @@ from carto.exceptions import CartoException
 import pandas as pd
 
 from cartoframes import CARTOframes
-from cartoframes.context import CartoContext
-from cartoframes.datasets import norm_colname
+from cartoframes.datasets import norm_colname, Dataset
 
 from utils import _UserUrlLoader
 
@@ -21,7 +20,7 @@ warnings.filterwarnings("ignore")
 
 
 class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
-    """Tests for cartoframes.CartoContext"""
+    """Tests for cartoframes.CARTOframes"""
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
@@ -60,8 +59,8 @@ class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
         )
 
         self.baseurl = self.user_url().format(username=self.username)
-        self.cc = CartoContext(base_url=self.baseurl, api_key=self.apikey)
-        self.cf = CARTOframes(self.cc)
+        self.cf = CARTOframes(base_url=self.baseurl, api_key=self.apikey)
+        self.cc = self.cf.cc
 
         self.tearDown()
 
@@ -198,7 +197,8 @@ class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=50)
-        df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'.format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
+        df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'
+                                  .format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
         dataset = self.cf.write(df, self.test_write_table)
         self.test_write_table = dataset.table_name
 
@@ -208,7 +208,7 @@ class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_if_exists_fail(self):
+    def test_cartocontext_write_if_exists_fail_by_default(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_brooklyn_poverty
@@ -231,12 +231,12 @@ class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
         dataset = self.cf.write(df, self.test_write_table)
         self.test_write_table = dataset.table_name
 
-        dataset = self.cf.write(df, self.test_write_table)
+        dataset = self.cf.write(df, self.test_write_table, if_exists=Dataset.APPEND)
 
         self.assertExistsTable(self.test_write_table)
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
-        self.assertEqual(result['total_rows'], 200)
+        self.assertEqual(result['total_rows'], 2049 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write_if_exists_replace(self):
@@ -245,12 +245,12 @@ class TestCARTOframes(unittest.TestCase, _UserUrlLoader):
         dataset = self.cf.write(df, self.test_write_table)
         self.test_write_table = dataset.table_name
 
-        dataset = self.cf.write(df, self.test_write_table)
+        dataset = self.cf.write(df, self.test_write_table, if_exists=Dataset.REPLACE)
 
         self.assertExistsTable(self.test_write_table)
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
-        self.assertEqual(result['total_rows'], 100)
+        self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write_with_encoding(self):

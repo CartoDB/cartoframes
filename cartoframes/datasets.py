@@ -9,6 +9,10 @@ class Dataset(object):
     SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
     UTIL_COLS = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
 
+    FAIL = 'fail'
+    REPLACE = 'replace'
+    APPEND = 'append'
+
     def __init__(self, carto_context, table_name, df=None):
         self.cc = carto_context
         self.table_name = norm_colname(table_name)
@@ -22,11 +26,11 @@ class Dataset(object):
         if not self.exists():
             self._create_table(with_lonlat)
         else:
-            if if_exists == self.cc.FAIL:
+            if if_exists == Dataset.FAIL:
                 raise ValueError(('Table with name {table_name} already exists in CARTO.'
                                   ' Please choose a different `table_name` or use'
                                   ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
-            elif if_exists == self.cc.REPLACE:
+            elif if_exists == Dataset.REPLACE:
                 self._create_table(with_lonlat)
 
         self._copyfrom(with_lonlat)
