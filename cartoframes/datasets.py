@@ -223,16 +223,6 @@ def encode_decode_decorator(func):
 
 
 @encode_decode_decorator
-def encode_geom(geom):
-    """Encode geometries into hex-encoded wkb
-    """
-    from shapely import wkb
-    if geom:
-        return ba.hexlify(wkb.dumps(geom)).decode()
-    return None
-
-
-@encode_decode_decorator
 def decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
@@ -260,8 +250,3 @@ def decode_geom(ewkb):
                         except Exception:
                             pass
     return None
-
-
-def join_url(*parts):
-    """join parts of URL into complete url"""
-    return '/'.join(str(s).strip('/') for s in parts)
