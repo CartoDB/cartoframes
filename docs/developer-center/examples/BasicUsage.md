@@ -16,9 +16,9 @@ import cartoframes
 from cartoframes import Credentials
 import pandas as pd
 
-USERNAME = 'eschbacher'  # <-- replace with your username 
+USERNAME = 'eschbacher'  # <-- replace with your username
 APIKEY = 'abcdefg'       # <-- your CARTO API key
-creds = Credentials(username=USERNAME, 
+creds = Credentials(username=USERNAME,
                     key=APIKEY)
 cc = cartoframes.CartoContext(creds=creds)
 ```
@@ -641,7 +641,7 @@ cc.map(layers=Layer('taxi_50k',
 
   </body>
 </html>
-" width=800 height=400>  Preview image: <img src="https://eschbacher.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+4%3B+marker-fill%3A+ramp%28%5Bfare_amount%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%23layer%5Bfare_amount+%3D+null%5D+%7B++marker-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+taxi_50k%22%7D&anti_cache=0.9585402872421597&bbox=-74.6638793945312%2C40.5904769897461%2C-73.5582504272461%2C41.1549949645996" /></iframe>
+" width="100%" height="400">  Preview image: <img src="https://eschbacher.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+4%3B+marker-fill%3A+ramp%28%5Bfare_amount%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%23layer%5Bfare_amount+%3D+null%5D+%7B++marker-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+taxi_50k%22%7D&anti_cache=0.9585402872421597&bbox=-74.6638793945312%2C40.5904769897461%2C-73.5582504272461%2C41.1549949645996" /></iframe>
 
 
 
@@ -667,4 +667,3 @@ cc.map(layers=Layer('taxi_50k',
 
 
 ![JFK pickups styled by fare amount](../img/examples/BasicUsage_22_1.png)
-

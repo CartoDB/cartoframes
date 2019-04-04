@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Unit tests for cartoframes.context"""
+try:
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+
 import unittest
 import os
 import sys
@@ -8,6 +15,7 @@ import json
 import random
 import warnings
 import requests
+import time
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
@@ -217,7 +225,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
         """context.CartoContext.write normal usage"""
-        from cartoframes.context import MAX_ROWS_LNGLAT
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
         data = {'nums': list(range(100, 0, -1)),
@@ -230,7 +237,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                   'lat': float,
                   'long': float}
         df = pd.DataFrame(data).astype(schema)
-        cc.write(df, self.test_write_table)
+        dataset = cc.write(df, self.test_write_table)
+        self.test_write_table = dataset.table_name
 
         # check if table exists
         resp = self.sql_client.send('''
@@ -263,51 +271,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(resp['rows'][0]['num_rows'],
                          resp['rows'][0]['num_geoms'])
 
-        # test batch lnglat behavior
-        n_rows = MAX_ROWS_LNGLAT + 1
-        df = pd.DataFrame({
-            'latvals': [random.random() for r in range(n_rows)],
-            'lngvals': [random.random() for r in range(n_rows)]
-            })
-        job = cc.write(df, self.test_write_lnglat_table,
-                       lnglat=('lngvals', 'latvals'))
-        self.assertIsInstance(job, cartoframes.context.BatchJobStatus)
-
-        # test batch writes
-        n_rows = 550000
-        df = pd.DataFrame({'vals': [random.random() for r in range(n_rows)]})
-
-        cc.write(df, self.test_write_batch_table)
-
-        resp = self.sql_client.send('''
-            SELECT count(*) AS num_rows FROM {table}
-            '''.format(table=self.test_write_batch_table))
-        # number of rows same in dataframe and carto table
-        self.assertEqual(n_rows, resp['rows'][0]['num_rows'])
-
-        cols = self.sql_client.send('''
-            SELECT * FROM {table} LIMIT 1
-        '''.format(table=self.test_write_batch_table))
-        expected_schema = {'vals': {'type': 'number'},
-                           'the_geom': {'type': 'geometry'},
-                           'the_geom_webmercator': {'type': 'geometry'},
-                           'cartodb_id': {'type': 'number'}}
-        # table should be properly created
-        # util columns + new column of type number
-        self.assertDictEqual(cols['fields'], expected_schema)
-
-        # test properly encoding
-        df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
-        cc.write(df, self.test_write_table, overwrite=True)
-
-        # check if table exists
-        resp = self.sql_client.send('''
-            SELECT *
-            FROM {table}
-            LIMIT 0
-            '''.format(table=self.test_write_table))
-        self.assertIsNotNone(resp)
-
         cc.delete(self.test_write_table)
         df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
         df = df.astype({'vals': str, 'ids': str})
@@ -317,14 +280,13 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertSetEqual(set([schema[c]['type'] for c in schema]),
                             set(('string', )))
 
-        df = pd.DataFrame({
-            'vals': list('abcd'),
-            'ids': list('wxyz'),
-            'nums': [1.2 * i for i in range(4)],
-            'boolvals': [True, False, None, True, ],
-            })
-        cc.write(df, self.test_write_table, overwrite=True,
-                 type_guessing='true')
+        df = pd.DataFrame({'vals': list('abcd'),
+                           'ids': list('wxyz'),
+                           'nums': [1.2 * i for i in range(4)],
+                           'boolvals': [True, False, None, True, ],
+                           })
+        df['boolvals'] = df['boolvals'].astype(bool)
+        cc.write(df, self.test_write_table, overwrite=True)
         resp = cc.sql_client.send('SELECT * FROM {}'.format(
             self.test_write_table))['fields']
         schema = {k: v['type'] for k, v in dict_items(resp)}
@@ -342,7 +304,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         ds_manager = DatasetManager(self.auth_client)
 
         df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
-        cc.write(df, self.test_write_table)
+        dataset = cc.write(df, self.test_write_table)
+        self.test_write_table = dataset.table_name
         dataset = ds_manager.get(self.test_write_table)
         self.assertEqual(dataset.privacy.lower(), 'private')
 
@@ -397,7 +360,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 'col2': ['a', 'b', 'c']}
         df = pd.DataFrame(data)
 
-        cc.write(df, self.test_delete_table)
+        dataset = cc.write(df, self.test_delete_table)
+        self.test_delete_table = dataset.table_name
         cc.delete(self.test_delete_table)
 
         # check that querying recently deleted table raises an exception
@@ -405,17 +369,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             cc.sql_client.send('select * from {}'.format(
                 self.test_delete_table))
 
-        # try to delete a table that does not exists
-        with warnings.catch_warnings(record=True) as w:
-            # Cause all warnings to always be triggered.
-            warnings.simplefilter("always")
-            # Trigger a warning.
-            cc.delete('non_existent_table')
-            # Verify one warning, subclass is UserWarning, and expected message
-            # is in warning
-            assert len(w) == 1
-            assert issubclass(w[-1].category, UserWarning)
-            assert "Failed to delete" in str(w[-1].message)
+        cc.delete('non_existent_table')
 
     def test_cartocontext_send_dataframe(self):
         """context.CartoContext._send_dataframe"""
@@ -541,12 +495,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     def test_cartocontext_map(self):
         """context.CartoContext.map normal usage"""
         from cartoframes import Layer, QueryLayer, BaseMap
-        try:
-            import matplotlib
-            matplotlib.use('agg')
-            import matplotlib.pyplot as plt
-        except ImportError:
-            plt = None
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 

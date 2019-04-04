@@ -32,6 +32,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .batch import BatchJobStatus
 from .__version__ import __version__
+from .datasets import Dataset
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -183,6 +184,7 @@ class CartoContext(object):
             )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
+        self.batch_sql_client = BatchSQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
         self.is_org = self._is_org_user()
@@ -401,11 +403,7 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`BatchJobStatus <cartoframes.batch.BatchJobStatus>` or
-            None: If `lnglat` flag is set and the DataFrame has more than
-            100,000 rows, a :py:class:`BatchJobStatus
-            <cartoframes.batch.BatchJobStatus>` instance is returned.
-            Otherwise, None.
+            :py:class:`Dataset <cartoframes.datasets.Dataset>`
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
@@ -413,86 +411,24 @@ class CartoContext(object):
             the length of the DataFrame.
         """  # noqa
         # work on a copy to avoid changing the original
-        _df = df.copy()
-        if not os.path.exists(temp_dir):
-            self._debug_print(temp_dir='creating directory at ' + temp_dir)
-            os.makedirs(temp_dir)
-        if encode_geom:
-            _add_encoded_geom(_df, geom_col)
+        tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
+        dataset = Dataset(self, table_name, df=df)
 
-        if not overwrite:
-            # error if table exists and user does not want to overwrite
-            self._table_exists(table_name)
-        elif kwargs.get('privacy') is None:
-            # get privacy so it's not overwritten on write
-            privacy = self._get_privacy(table_name)
-            if privacy:
-                kwargs['privacy'] = privacy
+        if_exists = Dataset.FAIL
+        if overwrite:
+            if_exists = Dataset.REPLACE
 
-        # issue warning if the index is anything but the pandas default
-        #  range index
-        if not _df.index.equals(pd.RangeIndex(0, _df.shape[0], 1)):
-            _df.reset_index(inplace=True)
-
-        pgcolnames = utils.normalize_colnames(_df.columns)
-        if table_name != utils.norm_colname(table_name):
-            table_name = utils.norm_colname(table_name)
-            warn('Table will be named `{}`'.format(table_name))
-
-        if _df.shape[0] > MAX_IMPORT_ROWS:
-            # NOTE: schema is set using different method than in _set_schema
-            # send placeholder table
-            final_table_name = self._send_dataframe(_df.iloc[0:0], table_name,
-                                                    temp_dir, geom_col,
-                                                    pgcolnames, kwargs)
-            # send dataframe in batches, combine into placeholder table
-            final_table_name = self._send_batches(_df, table_name, temp_dir,
-                                                  geom_col, pgcolnames, kwargs)
-        else:
-            final_table_name = self._send_dataframe(_df, table_name, temp_dir,
-                                                    geom_col, pgcolnames,
-                                                    kwargs)
-            self._set_schema(_df, final_table_name, pgcolnames)
-
-        if kwargs.get('privacy'):
-            self._update_privacy(final_table_name, kwargs.get('privacy'))
-
-        # create geometry column from long/lats if requested
-        if lnglat:
-            query = utils.minify_sql((
-                'UPDATE "{table_name}"',
-                'SET the_geom = CDB_LatLng("{lat}"::numeric,',
-                '                          "{lng}"::numeric);',
-                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
-                )).format(table_name=final_table_name,
-                          lng=utils.norm_colname(lnglat[0]),
-                          lat=utils.norm_colname(lnglat[1]))
-            if _df.shape[0] > MAX_ROWS_LNGLAT:
-                batch_client = BatchSQLClient(self.auth_client)
-                status = batch_client.create([query, ])
-                tqdm.write(
-                    'Table successfully written to CARTO: {table_url}\n'
-                    '`the_geom` column is being populated from `{lnglat}`. '
-                    'Check the status of the operation with:\n'
-                    '    \033[1mBatchJobStatus(CartoContext(), \'{job_id}\''
-                    ').status()\033[0m\n'
-                    'or try reading the table from CARTO in a couple of '
-                    'minutes.\n'
-                    '\033[1mNote:\033[0m `CartoContext.map` will not work on '
-                    'this table until its geometries are created.'.format(
-                        table_url=utils.join_url(self.creds.base_url(),
-                                                 'dataset',
-                                                 final_table_name),
-                        job_id=status.get('job_id'),
-                        lnglat=str(lnglat)))
-                return BatchJobStatus(self, status)
-
-            self.sql_client.send(query, do_post=False)
+        privacy = Dataset.PRIVATE
+        if kwargs and kwargs['privacy']:
+            privacy = kwargs['privacy']
+        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists, privacy=privacy)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
-                                     final_table_name)))
+                                     dataset.table_name)))
+
+        return dataset
 
     @utils.temp_ignore_warnings
     def _get_privacy(self, table_name):
@@ -1216,7 +1152,7 @@ class CartoContext(object):
 
             img_html = html
             html = (
-                '<iframe srcdoc="{content}" width={width} height={height}>'
+                '<iframe srcdoc="{content}" width="{width}" height="{height}">'
                 '  Preview image: {img_html}'
                 '</iframe>'
             ).format(content=utils.safe_quotes(content),
