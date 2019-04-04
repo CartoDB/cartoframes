@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 
 class Dataset(object):
     SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
-    UTIL_COLS = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
+    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
 
     FAIL = 'fail'
     REPLACE = 'replace'
@@ -110,7 +110,6 @@ class Dataset(object):
         return '''DROP TABLE IF EXISTS {table_name}'''.format(table_name=self.table_name)
 
     def _create_table_query(self, with_lonlat=None):
-        util_cols = Dataset.UTIL_COLS
         if with_lonlat is None:
             geom_type = _get_geom_col_type(self.df)
         else:
@@ -119,7 +118,7 @@ class Dataset(object):
         col = ('{col} {ctype}')
         cols = ', '.join(col.format(col=_norm_colname(c),
                                     ctype=_dtypes2pg(t))
-                         for c, t in zip(self.df.columns, self.df.dtypes) if c not in util_cols)
+                         for c, t in zip(self.df.columns, self.df.dtypes) if c not in Dataset.RESERVED_COLUMN_NAMES)
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
