@@ -82,34 +82,34 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # for writing to carto
         self.test_write_table = norm_colname(
-            'cf_test_table_{}'
-        ).format(test_slug)
+            'cf_test_table_{}'.format(test_slug)
+        )
 
         self.mixed_case_table = norm_colname(
-            'AbCdEfG_{}'
-        ).format(test_slug)
+            'AbCdEfG_{}'.format(test_slug)
+        )
 
         # for batch writing to carto
         self.test_write_batch_table = norm_colname(
-            'cf_testbatch_table_{}'
-        ).format(test_slug)
+            'cf_testbatch_table_{}'.format(test_slug)
+        )
 
         self.test_write_lnglat_table = norm_colname(
-            'cf_testwrite_lnglat_table_{}'
-        ).format(test_slug)
+            'cf_testwrite_lnglat_table_{}'.format(test_slug)
+        )
 
         self.write_named_index = norm_colname(
-            'cf_testwrite_non_default_index_{}'
-        ).format(test_slug)
+            'cf_testwrite_non_default_index_{}'.format(test_slug)
+        )
 
         # for queries
         self.test_query_table = norm_colname(
-            'cf_testquery_table_{}'
-        ).format(test_slug)
+            'cf_testquery_table_{}'.format(test_slug)
+        )
 
         self.test_delete_table = norm_colname(
-            'cf_testdelete_table_{}'
-        ).format(test_slug)
+            'cf_testdelete_table_{}'.format(test_slug)
+        )
 
         # for data observatory
         self.test_data_table = 'carto_usa_offices'
