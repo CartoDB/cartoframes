@@ -60,7 +60,7 @@ Linux:
 
   pipenv install jupyter
 
-6. Install cartoframes in dev mode using pipenv
+6. Install cartoframes package in dev mode using pipenv
 
 .. code::
 
