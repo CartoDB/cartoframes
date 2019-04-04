@@ -111,7 +111,7 @@ Let's clone the Airship repository as well.
   cd airship
 
 
-The local instalation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__ 
+The local installation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__ 
 
 Run all the projects
 ^^^^^^^^^^^^^^^^^^^^
