@@ -152,7 +152,7 @@ class Dataset(object):
                 warn('Retrying...')
                 return self._recursive_read(query, retry_times)
             else:
-                warn('Read call was rate limited. Are you running more read queries at the same time?.')
+                warn('Read call was rate-limited. This usually happens when there are multiple queries being read at the same time.')
                 raise err
 
     def _get_read_query(self, table_columns, limit=None):
