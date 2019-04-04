@@ -19,7 +19,7 @@ from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
-from carto.exceptions import CartoException, CartoRateLimitException
+from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
 

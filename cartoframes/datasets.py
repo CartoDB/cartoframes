@@ -2,7 +2,7 @@ import binascii as ba
 from warnings import warn
 
 import pandas as pd
-from carto.exceptions import CartoException
+from carto.exceptions import CartoException, CartoRateLimitException
 
 
 class Dataset(object):
@@ -42,11 +42,11 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False):
+    def download(self, limit=None, decode_geom=False, retry_times=3):
         table_columns = self._get_table_columns()
 
         query = self._get_read_query(table_columns, limit)
-        result = self.cc.copy_client.copyto_stream(query)
+        result = self._recursive_read(query, retry_times)
         df = pd.read_csv(result)
 
         return _clean_dataframe_from_carto(df, table_columns, decode_geom)
@@ -139,6 +139,20 @@ class Dataset(object):
 
         create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self.table_name, cols=cols)
         return create_query
+
+    def _recursive_read(self, query, retry_times=3):
+        try:
+            return self.cc.copy_client.copyto_stream(query)
+        except CartoRateLimitException as err:
+            if retry_times > 0:
+                retry_times -= 1
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+                return self._recursive_read(query, retry_times)
+            else:
+                warn('Read call was rate limited. Are you running more read queries at the same time?.')
+                raise err
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
