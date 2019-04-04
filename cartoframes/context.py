@@ -18,7 +18,7 @@ from tqdm import tqdm
 from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
-from carto.sql import SQLClient, BatchSQLClient
+from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoException
 from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
@@ -30,8 +30,8 @@ from .layer import BaseMap, AbstractLayer
 from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
-from .batch import BatchJobStatus
 from .__version__ import __version__
+from .datasets import Dataset
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -182,6 +182,8 @@ class CartoContext(object):
                 session=session
             )
         self.sql_client = SQLClient(self.auth_client)
+        self.copy_client = CopySQLClient(self.auth_client)
+        self.batch_sql_client = BatchSQLClient(self.auth_client)
         self.creds.username(self.auth_client.username)
         self._is_authenticated()
         self.is_org = self._is_org_user()
@@ -329,98 +331,28 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`BatchJobStatus <cartoframes.batch.BatchJobStatus>` or
-            None: If `lnglat` flag is set and the DataFrame has more than
-            100,000 rows, a :py:class:`BatchJobStatus
-            <cartoframes.batch.BatchJobStatus>` instance is returned.
-            Otherwise, None.
+            :py:class:`Dataset <cartoframes.datasets.Dataset>`
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
             an index called `cartodb_id` for every table that runs from 1 to
             the length of the DataFrame.
         """  # noqa
-        # work on a copy to avoid changing the original
-        _df = df.copy()
-        if not os.path.exists(temp_dir):
-            self._debug_print(temp_dir='creating directory at ' + temp_dir)
-            os.makedirs(temp_dir)
-        if encode_geom:
-            _add_encoded_geom(_df, geom_col)
+        tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
+        dataset = Dataset(self, table_name, df=df)
 
-        if not overwrite:
-            # error if table exists and user does not want to overwrite
-            self._table_exists(table_name)
-        elif kwargs.get('privacy') is None:
-            # get privacy so it's not overwritten on write
-            privacy = self._get_privacy(table_name)
-            if privacy:
-                kwargs['privacy'] = privacy
+        if_exists = Dataset.FAIL
+        if overwrite:
+            if_exists = Dataset.REPLACE
 
-        # issue warning if the index is anything but the pandas default
-        #  range index
-        if not _df.index.equals(pd.RangeIndex(0, _df.shape[0], 1)):
-            _df.reset_index(inplace=True)
-
-        pgcolnames = utils.normalize_colnames(_df.columns)
-        if table_name != utils.norm_colname(table_name):
-            table_name = utils.norm_colname(table_name)
-            warn('Table will be named `{}`'.format(table_name))
-
-        if _df.shape[0] > MAX_IMPORT_ROWS:
-            # NOTE: schema is set using different method than in _set_schema
-            # send placeholder table
-            final_table_name = self._send_dataframe(_df.iloc[0:0], table_name,
-                                                    temp_dir, geom_col,
-                                                    pgcolnames, kwargs)
-            # send dataframe in batches, combine into placeholder table
-            final_table_name = self._send_batches(_df, table_name, temp_dir,
-                                                  geom_col, pgcolnames, kwargs)
-        else:
-            final_table_name = self._send_dataframe(_df, table_name, temp_dir,
-                                                    geom_col, pgcolnames,
-                                                    kwargs)
-            self._set_schema(_df, final_table_name, pgcolnames)
-
-        if kwargs.get('privacy'):
-            self._update_privacy(final_table_name, kwargs.get('privacy'))
-
-        # create geometry column from long/lats if requested
-        if lnglat:
-            query = utils.minify_sql((
-                'UPDATE "{table_name}"',
-                'SET the_geom = CDB_LatLng("{lat}"::numeric,',
-                '                          "{lng}"::numeric);',
-                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
-                )).format(table_name=final_table_name,
-                          lng=utils.norm_colname(lnglat[0]),
-                          lat=utils.norm_colname(lnglat[1]))
-            if _df.shape[0] > MAX_ROWS_LNGLAT:
-                batch_client = BatchSQLClient(self.auth_client)
-                status = batch_client.create([query, ])
-                tqdm.write(
-                    'Table successfully written to CARTO: {table_url}\n'
-                    '`the_geom` column is being populated from `{lnglat}`. '
-                    'Check the status of the operation with:\n'
-                    '    \033[1mBatchJobStatus(CartoContext(), \'{job_id}\''
-                    ').status()\033[0m\n'
-                    'or try reading the table from CARTO in a couple of '
-                    'minutes.\n'
-                    '\033[1mNote:\033[0m `CartoContext.map` will not work on '
-                    'this table until its geometries are created.'.format(
-                        table_url=utils.join_url(self.creds.base_url(),
-                                                 'dataset',
-                                                 final_table_name),
-                        job_id=status.get('job_id'),
-                        lnglat=str(lnglat)))
-                return BatchJobStatus(self, status)
-
-            self.sql_client.send(query, do_post=False)
+        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
-                                     final_table_name)))
+                                     dataset.table_name)))
+
+        return dataset
 
     @utils.temp_ignore_warnings
     def _get_privacy(self, table_name):
@@ -476,199 +408,6 @@ class CartoContext(object):
             # If table doesn't exist, we get an error from the SQL API
             self._debug_print(err=err)
             return False
-
-    def _send_batches(self, df, table_name, temp_dir, geom_col, pgcolnames,
-                      kwargs):
-        """Batch sending a dataframe in chunks that are then recombined.
-
-        Args:
-            df (pandas.DataFrame): DataFrame that will be batched up for
-                sending to CARTO
-            table_name (str): Name of table to send DataFrame to
-            temp_dir (str): Local directory for temporary storage of DataFrame
-                written to file that will be sent to CARTO
-            geom_col (str): Name of encoded geometry column (if any) that will
-                be dropped or converted to `the_geom` column
-            pgcolnames (list of str): List of SQL-normalized column names
-
-        Returns:
-            final_table_name (str): Final table name on CARTO that the
-            DataFrame is stored in
-        """
-        subtables = []
-        # generator for accessing chunks of original dataframe
-        df_gen = df.groupby(list(i // MAX_IMPORT_ROWS
-                                 for i in range(df.shape[0])))
-        for chunk_num, chunk in tqdm(df_gen.__iter__(),
-                                     total=df.shape[0] // MAX_IMPORT_ROWS + 1,
-                                     desc='Uploading in batches'):
-            temp_table = '{orig}_cartoframes_temp_{chunk}'.format(
-                orig=table_name[:40],
-                chunk=chunk_num)
-            try:
-                # send dataframe chunk, get new name if collision
-                temp_table = self._send_dataframe(chunk, temp_table, temp_dir,
-                                                  geom_col, pgcolnames, kwargs)
-            except CartoException as err:
-                for table in subtables:
-                    self.delete(table)
-                self.delete(table_name)
-                raise CartoException(err)
-
-            if temp_table:
-                subtables.append(temp_table)
-            self._debug_print(chunk_num=chunk_num,
-                              chunk_shape=str(chunk.shape),
-                              temp_table=temp_table)
-
-        # combine chunks into final table
-        try:
-            select_base = 'SELECT {schema} FROM "{{table}}"'.format(
-                schema=utils.df2pg_schema(df, pgcolnames))
-            unioned_tables = '\nUNION ALL\n'.join([select_base.format(table=t)
-                                                   for t in subtables])
-            self._debug_print(unioned=unioned_tables)
-            drop_tables = '\n'.join(
-                'DROP TABLE IF EXISTS "{table}";'.format(table=table)
-                for table in subtables)
-            # 1. create temp table for all the data
-            # 2. drop all previous temp tables
-            # 3. drop placeholder table and move temp table into it's place
-            # 4. cartodb-fy table, register it with metadata
-            # TODO: use Import API here instead with a combo of sql/table_name
-            #       and collision_strategy=overwrite?
-            query = utils.minify_sql((
-                'CREATE TABLE "{table_name}_temp" As {unioned_tables};',
-                'ALTER TABLE "{table_name}_temp"',
-                '      DROP COLUMN IF EXISTS cartodb_id;',
-                '{drop_tables}',
-                'DROP TABLE IF EXISTS "{table_name}";',
-                'ALTER TABLE "{table_name}_temp" RENAME TO "{table_name}";',
-                'SELECT CDB_CartoDBFYTable(\'{org}\', \'{table_name}\');',
-                'SELECT CDB_TableMetadataTouch(\'{table_name}\'::regclass);',
-            )).format(table_name=table_name,
-                      unioned_tables=unioned_tables,
-                      org=(self.creds.username()
-                           if self.is_org else 'public'),
-                      drop_tables=drop_tables)
-            self._debug_print(query=query)
-            batch_client = BatchSQLClient(self.auth_client)
-            status = batch_client.create([query, ])
-            batchjob = BatchJobStatus(self, status)
-            while batchjob.status()['status'] in ('running', 'pending', ):
-                time.sleep(1)
-        except CartoException as err:
-            for table in subtables:
-                self.delete(table)
-            self.delete(table_name)
-            raise Exception('Failed to upload dataframe: {}'.format(err))
-
-        return table_name
-
-    def _send_dataframe(self, df, table_name, temp_dir, geom_col, pgcolnames,
-                        kwargs):
-        """Send a DataFrame to CARTO to be imported as a SQL table. Index of
-            DataFrame not included.
-
-        Note:
-            Schema from ``df`` is not enforced with this method. Use
-            ``self._set_schema`` to enforce the schema.
-
-        Args:
-            df (pandas.DataFrame): DataFrame that is will be sent to CARTO
-            table_name (str): Name on CARTO for the table that will have the
-                data from ``df``
-            temp_dir (str): Name of directory used for temporarily storing the
-                DataFrame file to sent to CARTO
-            geom_col (str): Name of geometry column
-
-        Returns:
-            final_table_name (str): Name of final table. This method will
-            overwrite the table `table_name` if it already exists.
-        """
-        def remove_tempfile(filepath):
-            """removes temporary file"""
-            os.remove(filepath)
-
-        file_name = '{table_name}.{ext}'.format(
-            table_name=table_name,
-            ext='csv.gz' if kwargs.get('compression') else 'csv')
-        tempfile = os.path.join(temp_dir, file_name)
-
-        self._debug_print(tempfile=tempfile)
-        df.drop(labels=[geom_col], axis=1, errors='ignore')\
-            .to_csv(
-                path_or_buf=tempfile,
-                na_rep='',
-                header=pgcolnames,
-                index=False,
-                encoding='utf-8',
-                compression='gzip' if kwargs.get('compression') else None)
-
-        with open(tempfile, 'rb') as f:
-            params = {'type_guessing': False}
-            params.update(kwargs)
-            params = {k: utils.importify_params(v)
-                      for k, v in utils.dict_items(params)}
-            res = self._auth_send('api/v1/imports', 'POST',
-                                  files={'file': f},
-                                  params=params,
-                                  stream=True)
-            self._debug_print(res=res)
-
-            if not res.get('success'):
-                remove_tempfile(tempfile)
-                raise CartoException('Failed to send DataFrame')
-            import_id = res['item_queue_id']
-
-        remove_tempfile(tempfile)
-        final_table_name = table_name
-        while True:
-            import_job = self._check_import(import_id)
-            self._debug_print(import_job=import_job)
-            final_table_name = self._handle_import(import_job, table_name)
-            if import_job['state'] == 'complete':
-                break
-            # Wait a second before doing another request
-            time.sleep(1.0)
-
-        return final_table_name
-
-    def _set_schema(self, dataframe, table_name, pgcolnames):
-        """Update a table associated with a dataframe to have the equivalent
-        schema
-
-        Args:
-            dataframe (pandas.DataFrame): Dataframe that CARTO table is cloned
-                from
-            table_name (str): Table name where schema is being altered
-            pgcolnames (list of str): List of column names from ``dataframe``
-                as they appear in the database
-        Returns:
-            None
-        """
-        # if there's nothing to change, exit
-        if set(str(s) for s in dataframe.dtypes) == set(('object', )):
-            return None
-        util_cols = ('the_geom', 'the_geom_webmercator', 'cartodb_id', )
-        alter_temp = ('ALTER COLUMN "{col}" TYPE {ctype} USING '
-                      'NULLIF("{col}", \'\')::{ctype}')
-        # alter non-util columns that are not type text
-        alter_cols = ', '.join(alter_temp.format(col=c,
-                                                 ctype=utils.dtypes2pg(t))
-                               for c, t in zip(pgcolnames,
-                                               dataframe.dtypes)
-                               if c not in util_cols and t != 'object')
-        alter_query = 'ALTER TABLE "{table}" {alter_cols};'.format(
-            table=table_name,
-            alter_cols=alter_cols)
-        self._debug_print(alter_query=alter_query)
-        try:
-            self.sql_client.send(alter_query, **DEFAULT_SQL_ARGS)
-        except CartoException as err:
-            warn('DataFrame written to CARTO but the table schema failed to '
-                 'update to match DataFrame. All columns in CARTO table have '
-                 'data type `text`. CARTO error: `{err}`.'.format(err=err))
 
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
