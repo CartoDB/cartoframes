@@ -42,12 +42,7 @@ class Dataset(object):
         return self
 
     def delete(self):
-        if self.exists():
-            query = 'DROP TABLE {table}'.format(table=self.table_name)
-            self.cc.sql_client.send(query)
-            return True
-
-        return False
+        self.cc.sql_client.send(self._drop_table_query())
 
     def exists(self):
         """Checks to see if table exists"""
