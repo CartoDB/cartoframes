@@ -78,7 +78,7 @@ Linux:
 
   source env/bin/activate
 
-9. Launch jupyter notebook
+9. Launch Jupyter notebook
 
 .. code::
 
