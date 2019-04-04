@@ -428,7 +428,7 @@ def vmap(layers,
             'legend': layer.legend
         })
     html = (
-        '<iframe srcdoc="{content}" width={width} height={height}>'
+        '<iframe srcdoc="{content}" width="{width}" height="{height}">'
         '</iframe>'
         ).format(
             width=size[0],
