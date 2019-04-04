@@ -206,7 +206,7 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
-    def read(self, table_name, limit=None, decode_geom=False, shared_user=None):
+    def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
@@ -219,6 +219,8 @@ class CartoContext(object):
               <http://geopandas.org/>`__.
             shared_user (str, optional): If a table has been shared with you,
               specify the user name (schema) who shared it.
+            retry_times (int, optional): If the read call is rate limited,
+              number of retries to be made
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -236,7 +238,7 @@ class CartoContext(object):
             shared_user or self.creds.username())
 
         dataset = Dataset(self, table_name, schema)
-        return dataset.download(limit, decode_geom)
+        return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
     def tables(self):
