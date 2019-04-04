@@ -447,20 +447,19 @@ class CartoContext(object):
             table_name (str): Name of table to delete
 
         Returns:
-            None
+            Boolean: True if table is removed
         """
         try:
-            resp = self.auth_client.send(
-                'api/v1/viz/{table_name}'.format(table_name=table_name),
-                http_method='DELETE'
-            )
-            resp.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            warn('Failed to delete the following table from CARTO '
-                 'account: `{table_name}`. ({err})'.format(
-                     table_name=table_name,
-                     err=err))
-        return None
+            table_exists = self._table_exists(table_name)
+        except NameError as err:
+            table_exists = True
+
+        if table_exists:
+            query = 'DROP TABLE {table}'.format(table=table_name)
+            self.sql_client.send(query)
+            return True
+
+        return False
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
