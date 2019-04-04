@@ -206,21 +206,21 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
-    def read(self, table_name, limit=None, index='cartodb_id',
-             decode_geom=False, shared_user=None):
+    def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames.
 
         Args:
             table_name (str): Name of table in user's CARTO account.
             limit (int, optional): Read only `limit` lines from
                 `table_name`. Defaults to ``None``, which reads the full table.
-            index (str, optional): Not currently in use.
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
             shared_user (str, optional): If a table has been shared with you,
               specify the user name (schema) who shared it.
+            retry_times (int, optional): If the read call is rate limited,
+              number of retries to be made
 
         Returns:
             pandas.DataFrame: DataFrame representation of `table_name` from
@@ -236,16 +236,9 @@ class CartoContext(object):
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
-        query = 'SELECT * FROM "{schema}"."{table_name}"'.format(
-            table_name=table_name,
-            schema=schema)
-        if limit is not None:
-            if isinstance(limit, int) and (limit >= 0):
-                query += ' LIMIT {limit}'.format(limit=limit)
-            else:
-                raise ValueError("`limit` parameter must an integer >= 0")
 
-        return self.query(query, decode_geom=decode_geom)
+        dataset = Dataset(self, table_name, schema)
+        return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
     def tables(self):

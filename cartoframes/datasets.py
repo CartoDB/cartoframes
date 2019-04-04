@@ -1,8 +1,9 @@
 import binascii as ba
 from warnings import warn
-
 import pandas as pd
-from carto.exceptions import CartoException
+import time
+
+from carto.exceptions import CartoException, CartoRateLimitException
 
 
 class Dataset(object):
@@ -17,9 +18,10 @@ class Dataset(object):
     PUBLIC = 'public'
     LINK = 'link'
 
-    def __init__(self, carto_context, table_name, df=None):
+    def __init__(self, carto_context, table_name, schema='public', df=None):
         self.cc = carto_context
         self.table_name = _norm_colname(table_name)
+        self.schema = schema
         self.df = df
         warn('Table will be named `{}`'.format(table_name))
 
@@ -40,6 +42,15 @@ class Dataset(object):
         self._copyfrom(with_lonlat)
 
         return self
+
+    def download(self, limit=None, decode_geom=False, retry_times=3):
+        table_columns = self._get_table_columns()
+
+        query = self._get_read_query(table_columns, limit)
+        result = self._recursive_read(query, retry_times)
+        df = pd.read_csv(result)
+
+        return _clean_dataframe_from_carto(df, table_columns, decode_geom)
 
     def delete(self):
         self.cc.sql_client.send(self._drop_table_query())
@@ -132,6 +143,47 @@ class Dataset(object):
 
         create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self.table_name, cols=cols)
         return create_query
+
+    def _recursive_read(self, query, retry_times=3):
+        try:
+            return self.cc.copy_client.copyto_stream(query)
+        except CartoRateLimitException as err:
+            if retry_times > 0:
+                retry_times -= 1
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+                return self._recursive_read(query, retry_times)
+            else:
+                warn('Read call was rate-limited. This usually happens when there are multiple queries being read at the same time.')
+                raise err
+
+    def _get_read_query(self, table_columns, limit=None):
+        """Create the read (COPY TO) query"""
+        query_columns = list(table_columns.keys())
+        query_columns.remove('the_geom_webmercator')
+
+        query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
+            table_name=self.table_name,
+            schema=self.schema,
+            columns=', '.join(query_columns))
+
+        if limit is not None:
+            if isinstance(limit, int) and (limit >= 0):
+                query += ' LIMIT {limit}'.format(limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
+
+        return 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+
+    def _get_table_columns(self):
+        """Get column names and types from a table"""
+        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
+        table_info = self.cc.sql_client.send(query)
+        if 'fields' in table_info:
+            return table_info['fields']
+
+        return None
 
 
 def _norm_colname(colname):
@@ -254,3 +306,33 @@ def _decode_geom(ewkb):
                         except Exception:
                             pass
     return None
+
+
+def _clean_dataframe_from_carto(df, table_columns, decode_geom=False):
+    """Clean a DataFrame with a dataset from CARTO:
+        - use cartodb_id as DataFrame index
+        - process date columns
+        - decode geom
+
+    Args:
+        df (pandas.DataFrame): DataFrame with a dataset from CARTO.
+        table_columns (dict): column names and types from a table.
+        decode_geom (bool, optional): Decodes CARTO's geometries into a
+            `Shapely <https://github.com/Toblerity/Shapely>`__
+            object that can be used, for example, in `GeoPandas
+            <http://geopandas.org/>`__.
+
+    Returns:
+        pandas.DataFrame
+    """
+    if 'cartodb_id' in df.columns:
+        df.set_index('cartodb_id', inplace=True)
+
+    for column_name in table_columns:
+        if table_columns[column_name]['type'] == 'date':
+            df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
+
+    if decode_geom:
+        df['geometry'] = df.the_geom.apply(_decode_geom)
+
+    return df
