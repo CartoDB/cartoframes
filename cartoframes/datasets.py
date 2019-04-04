@@ -67,10 +67,9 @@ class Dataset(object):
                     table_name=self.table_name)
 
     def _copyfrom(self, with_lonlat=None):
-        util_cols = Dataset.UTIL_COLS
         geom_col = get_geom_col_name(self.df)
 
-        columns = ','.join(norm_colname(c) for c in self.df.columns if c not in util_cols)
+        columns = ','.join(norm_colname(c) for c in self.df.columns if c not in Dataset.UTIL_COLS)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -78,12 +77,11 @@ class Dataset(object):
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
-        geom_cols = Dataset.SUPPORTED_GEOM_COL_NAMES
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
             for col in cols:
-                if with_lonlat and col in geom_cols:
+                if with_lonlat and col in Dataset.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
