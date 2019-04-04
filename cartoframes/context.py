@@ -339,7 +339,6 @@ class CartoContext(object):
             an index called `cartodb_id` for every table that runs from 1 to
             the length of the DataFrame.
         """  # noqa
-        # work on a copy to avoid changing the original
         tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
         dataset = Dataset(self, table_name, df=df)
 
