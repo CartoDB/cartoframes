@@ -15,7 +15,7 @@ class Dataset(object):
 
     def __init__(self, carto_context, table_name, df=None):
         self.cc = carto_context
-        self.table_name = norm_colname(table_name)
+        self.table_name = _norm_colname(table_name)
         self.df = df
         warn('Table will be named `{}`'.format(table_name))
 
@@ -67,9 +67,9 @@ class Dataset(object):
                     table_name=self.table_name)
 
     def _copyfrom(self, with_lonlat=None):
-        geom_col = get_geom_col_name(self.df)
+        geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(norm_colname(c) for c in self.df.columns if c not in Dataset.UTIL_COLS)
+        columns = ','.join(_norm_colname(c) for c in self.df.columns if c not in Dataset.UTIL_COLS)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -97,7 +97,7 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                geom = decode_geom(the_geom_val)
+                geom = _decode_geom(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
             if with_lonlat is not None:
@@ -112,13 +112,13 @@ class Dataset(object):
     def _create_table_query(self, with_lonlat=None):
         util_cols = Dataset.UTIL_COLS
         if with_lonlat is None:
-            geom_type = get_geom_col_type(self.df)
+            geom_type = _get_geom_col_type(self.df)
         else:
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
-        cols = ', '.join(col.format(col=norm_colname(c),
-                                    ctype=dtypes2pg(t))
+        cols = ', '.join(col.format(col=_norm_colname(c),
+                                    ctype=_dtypes2pg(t))
                          for c, t in zip(self.df.columns, self.df.dtypes) if c not in util_cols)
 
         if geom_type:
@@ -128,7 +128,7 @@ class Dataset(object):
         return create_query
 
 
-def norm_colname(colname):
+def _norm_colname(colname):
     """Given an arbitrary column name, translate to a SQL-normalized column
     name a la CARTO's Import API will translate to
 
@@ -159,7 +159,7 @@ def norm_colname(colname):
     return final_name
 
 
-def dtypes2pg(dtype):
+def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
         'float64': 'numeric',
@@ -174,7 +174,7 @@ def dtypes2pg(dtype):
     return mapping.get(str(dtype), 'text')
 
 
-def get_geom_col_name(df):
+def _get_geom_col_name(df):
     geom_col = getattr(df, '_geometry_column_name', None)
     if geom_col is None:
         try:
@@ -185,13 +185,13 @@ def get_geom_col_name(df):
     return geom_col
 
 
-def get_geom_col_type(df):
-    geom_col = get_geom_col_name(df)
+def _get_geom_col_type(df):
+    geom_col = _get_geom_col_name(df)
     if geom_col is None:
         return None
 
     try:
-        geom = decode_geom(first_not_null_value(df, geom_col))
+        geom = _decode_geom(_first_not_null_value(df, geom_col))
     except IndexError:
         warn('Dataset with null geometries')
         geom = None
@@ -202,11 +202,11 @@ def get_geom_col_type(df):
     return geom.geom_type
 
 
-def first_not_null_value(df, col):
+def _first_not_null_value(df, col):
     return df[col].loc[~df[col].isnull()].iloc[0]
 
 
-def encode_decode_decorator(func):
+def _encode_decode_decorator(func):
     """decorator for encoding and decoding geoms"""
     def wrapper(*args):
         """error catching"""
@@ -220,8 +220,8 @@ def encode_decode_decorator(func):
     return wrapper
 
 
-@encode_decode_decorator
-def decode_geom(ewkb):
+@_encode_decode_decorator
+def _decode_geom(ewkb):
     """Decode encoded wkb into a shapely geometry
     """
     # it's already a shapely object
