@@ -15,7 +15,6 @@ import json
 import random
 import warnings
 import requests
-import time
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
@@ -55,8 +54,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.user_url = self.user_url()
 
         if self.username and self.apikey:
-            self.baseurl = self.user_url.format(
-                    username=self.username)
+            self.baseurl = self.user_url.format(username=self.username)
             self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
                                                 api_key=self.apikey)
             self.sql_client = SQLClient(self.auth_client)
@@ -174,7 +172,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     def test_cartocontext_authenticated(self):
         """context.CartoContext._is_authenticated"""
         with self.assertRaises(ValueError):
-            cc = cartoframes.CartoContext(
+            cartoframes.CartoContext(
                 base_url=self.baseurl.replace('https', 'http'),
                 api_key=self.apikey
             )
@@ -322,11 +320,8 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         """context.CartoContext.write with non-default index"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        df = pd.DataFrame({
-                    'vals': range(3),
-                    'ids': list('abc')
-                },
-                index=list('xyz'))
+        df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
+                          index=list('xyz'))
         df.index.name = 'named_index'
         cc.write(df, self.write_named_index)
 
@@ -604,9 +599,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         cat_map = cc.map(layers=Layer(self.test_point_table,
                                       time='actor_postedtime',
                                       color='twitter_lang'))
-        self.assertRegexpMatches(
-                cat_map.__html__(),
-                '.*CDB_Math_Mode\(cf_value_twitter_lang\).*')
+        self.assertRegexpMatches(cat_map.__html__(), '.*CDB_Math_Mode\(cf_value_twitter_lang\).*')
 
         with self.assertRaises(
                 ValueError,
@@ -739,7 +732,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc._check_query(success_query, style_cols=fail_cols)
 
-
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_add_encoded_geom(self):
         """context._add_encoded_geom"""
@@ -758,8 +750,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         _add_encoded_geom(df, 'geometry')
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(
-                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         # don't specify geometry column (should exist since decode_geom==True)
         df = cc.read(self.test_read_table, limit=5,
@@ -770,8 +761,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         _add_encoded_geom(df, None)
 
         # geometry column should equal the_geom after function call
-        self.assertTrue(
-                df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
+        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
 
         df = cc.read(self.test_read_table, limit=5)
 
@@ -896,25 +886,23 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                  keywords=('poverty', ),
                                  time=('2010 - 2014', ))
         meta_columns = set((
-                'denom_aggregate', 'denom_colname', 'denom_description',
-                'denom_geomref_colname', 'denom_id', 'denom_name',
-                'denom_reltype', 'denom_t_description', 'denom_tablename',
-                'denom_type', 'geom_colname', 'geom_description',
-                'geom_geomref_colname', 'geom_id', 'geom_name',
-                'geom_t_description', 'geom_tablename', 'geom_timespan',
-                'geom_type', 'id', 'max_score_rank', 'max_timespan_rank',
-                'normalization', 'num_geoms', 'numer_aggregate',
-                'numer_colname', 'numer_description', 'numer_geomref_colname',
-                'numer_id', 'numer_name', 'numer_t_description',
-                'numer_tablename', 'numer_timespan', 'numer_type', 'score',
-                'score_rank', 'score_rownum', 'suggested_name', 'target_area',
-                'target_geoms', 'timespan_rank', 'timespan_rownum'))
+            'denom_aggregate', 'denom_colname', 'denom_description',
+            'denom_geomref_colname', 'denom_id', 'denom_name',
+            'denom_reltype', 'denom_t_description', 'denom_tablename',
+            'denom_type', 'geom_colname', 'geom_description',
+            'geom_geomref_colname', 'geom_id', 'geom_name',
+            'geom_t_description', 'geom_tablename', 'geom_timespan',
+            'geom_type', 'id', 'max_score_rank', 'max_timespan_rank',
+            'normalization', 'num_geoms', 'numer_aggregate',
+            'numer_colname', 'numer_description', 'numer_geomref_colname',
+            'numer_id', 'numer_name', 'numer_t_description',
+            'numer_tablename', 'numer_timespan', 'numer_type', 'score',
+            'score_rank', 'score_rownum', 'suggested_name', 'target_area',
+            'target_geoms', 'timespan_rank', 'timespan_rownum'))
         self.assertSetEqual(set(meta.columns), meta_columns,
                             msg='metadata columns are all there')
         self.assertTrue((meta['numer_timespan'] == '2010 - 2014').all())
-        self.assertTrue(
-                (meta['numer_description'].str.contains('poverty')).all()
-        )
+        self.assertTrue((meta['numer_description'].str.contains('poverty')).all())
 
         # test region = list of lng/lats
         with self.assertRaises(ValueError):
@@ -928,9 +916,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         dd = cc.data_discovery('Australia',
                                regex='.*Torres Strait Islander.*')
         for nid in dd['numer_id'].values:
-            self.assertRegexpMatches(
-                    nid,
-                    '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
+            self.assertRegexpMatches(nid, '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
 
         with self.assertRaises(CartoException):
             cc.data_discovery('non_existent_table_abcdefg')
