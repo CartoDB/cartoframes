@@ -202,13 +202,12 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.styling = '\n'.join([interactive_cols, self.styling])
 
 
-def _get_html_doc(
-    sources, 
-    bounds, 
-    carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-    creds=None,
-    basemap=None,
-    airship_path=None):
+def _get_html_doc(sources,
+                  bounds,
+                  carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+                  creds=None,
+                  basemap=None,
+                  airship_path=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
         '..',
@@ -350,14 +349,13 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         )
 
 @utils.temp_ignore_warnings
-def vmap(
-    layers,
-    context,
-    carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-    airship_path=None,
-    size=(1024, 632),
-    basemap=BaseMaps.voyager,
-    bounds=None):
+def vmap(layers,
+         context,
+         carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+         airship_path=None,
+         size=(1024, 632),
+         basemap=BaseMaps.voyager,
+         bounds=None):
 
     """CARTO VL-powered interactive map
 
