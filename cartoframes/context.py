@@ -347,10 +347,7 @@ class CartoContext(object):
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        privacy = Dataset.PRIVATE
-        if kwargs and kwargs['privacy']:
-            privacy = kwargs['privacy']
-        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists, privacy=privacy)
+        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),

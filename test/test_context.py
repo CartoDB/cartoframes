@@ -23,7 +23,7 @@ import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.utils import dict_items
+from cartoframes.utils import dict_items, norm_colname
 from utils import _UserUrlLoader
 
 WILL_SKIP = False
@@ -81,33 +81,33 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
-        self.test_write_table = (
+        self.test_write_table = norm_colname(
             'cf_test_table_{}'
         ).format(test_slug)
 
-        self.mixed_case_table = (
+        self.mixed_case_table = norm_colname(
             'AbCdEfG_{}'
         ).format(test_slug)
 
         # for batch writing to carto
-        self.test_write_batch_table = (
+        self.test_write_batch_table = norm_colname(
             'cf_testbatch_table_{}'
         ).format(test_slug)
 
-        self.test_write_lnglat_table = (
+        self.test_write_lnglat_table = norm_colname(
             'cf_testwrite_lnglat_table_{}'
         ).format(test_slug)
 
-        self.write_named_index = (
+        self.write_named_index = norm_colname(
             'cf_testwrite_non_default_index_{}'
         ).format(test_slug)
 
         # for queries
-        self.test_query_table = (
+        self.test_query_table = norm_colname(
             'cf_testquery_table_{}'
         ).format(test_slug)
 
-        self.test_delete_table = (
+        self.test_delete_table = norm_colname(
             'cf_testdelete_table_{}'
         ).format(test_slug)
 
@@ -272,7 +272,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         cc.delete(self.test_write_table)
         df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
         df = df.astype({'vals': str, 'ids': str})
-        cc.write(df, self.test_write_table)
+        cc.write(df, self.test_write_table, overwrite=True)
         schema = cc.sql_client.send('select ids, vals from {}'.format(
             self.test_write_table))['fields']
         self.assertSetEqual(set([schema[c]['type'] for c in schema]),
@@ -293,41 +293,44 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                    the_geom_webmercator='geometry', cartodb_id='number')
         self.assertDictEqual(schema, ans)
 
-    @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
-    def test_write_privacy(self):
-        """context.CartoContext.write Updates the privacy of a dataset"""
-        from carto.datasets import DatasetManager
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        ds_manager = DatasetManager(self.auth_client)
+    # FIXME in https://github.com/CartoDB/cartoframes/issues/579
+    # @unittest.skipIf(WILL_SKIP, 'updates privacy of existing dataset')
+    # def test_write_privacy(self):
+    #     """context.CartoContext.write Updates the privacy of a dataset"""
+    #     from carto.datasets import DatasetManager
+    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
+    #                                   api_key=self.apikey)
+    #     ds_manager = DatasetManager(self.auth_client)
 
-        df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
-        dataset = cc.write(df, self.test_write_table)
-        self.test_write_table = dataset.table_name
-        dataset = ds_manager.get(self.test_write_table)
-        self.assertEqual(dataset.privacy.lower(), 'private')
+    #     df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
+    #     dataset = cc.write(df, self.test_write_table)
+    #     self.test_write_table = dataset.table_name
+    #     dataset = ds_manager.get(self.test_write_table)
+    #     self.assertEqual(dataset.privacy.lower(), 'private')
 
-        df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
-        cc.write(df, self.test_write_table, overwrite=True, privacy='public')
-        dataset = ds_manager.get(self.test_write_table)
-        self.assertEqual(dataset.privacy.lower(), 'public')
+    #     df = pd.DataFrame({'ids': list('efgh'), 'vals': range(4, 8)})
+    #     cc.write(df, self.test_write_table, overwrite=True, privacy='public')
+    #     dataset = ds_manager.get(self.test_write_table)
+    #     self.assertEqual(dataset.privacy.lower(), 'public')
 
-        privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
-        self.assertIsNone(privacy)
+    #     privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
+    #     self.assertIsNone(privacy)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    def test_cartocontext_write_index(self):
-        """context.CartoContext.write with non-default index"""
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
-                          index=list('xyz'))
-        df.index.name = 'named_index'
-        cc.write(df, self.write_named_index)
+    # FIXME in https://github.com/CartoDB/cartoframes/issues/580
+    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    # def test_cartocontext_write_index(self):
+    #     """context.CartoContext.write with non-default index"""
+    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
+    #                                   api_key=self.apikey)
+    #     df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
+    #                       index=list('xyz'))
+    #     df.index.name = 'named_index'
+    #     dataset = cc.write(df, self.write_named_index)
+    #     self.write_named_index = dataset.table_name
 
-        df_index = cc.read(self.write_named_index)
-        self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
-                            set(df_index.columns))
+    #     df_index = cc.read(self.write_named_index))
+    #     self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
+    #                         set(df_index.columns))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_mixed_case(self):
@@ -355,7 +358,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 'col2': ['a', 'b', 'c']}
         df = pd.DataFrame(data)
 
-        dataset = cc.write(df, self.test_delete_table)
+        dataset = cc.write(df, self.test_delete_table, overwrite=True)
         self.test_delete_table = dataset.table_name
         cc.delete(self.test_delete_table)
 
