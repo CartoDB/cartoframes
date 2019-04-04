@@ -16,7 +16,7 @@ Here is an example using the example CartoContext from the :py:class:`Examples
         [vector.Layer(
             'nat',
             color='ramp(globalEqIntervals($hr90, 7), sunset)',
-            strokeWidth=0),
+            stroke_width_=0),
         ],
         example_context)
 """
@@ -66,27 +66,26 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           following columns included to successfully have a map rendered:
           `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
           used in styling, they must be included in this query as well.
-        color (str, optional): CARTO VL color styling for this layer. Valid
+        color_ (str, optional): CARTO VL color styling for this layer. Valid
           inputs are simple web color names and hex values. For more advanced
           styling, see the CARTO VL guide on styling for more information:
           https://carto.com/developers/carto-vl/guides/styling-points/
-        size (float or str, optional): CARTO VL width styling for this layer if
+        width_ (float or str, optional): CARTO VL width styling for this layer if
           points or lines (which are not yet implemented). Valid inputs are
           positive numbers or text expressions involving variables. To remain
           consistent with cartoframes' raster-based :py:class:`Layer
           <cartoframes.layer.Layer>` API, `size` is used here in place of
           `width`, which is the CARTO VL variable name for controlling the
           width of a point or line. Default size is 7 pixels wide.
-        time (str, optional): Time expression to animate data. This is an alias
+        filter_ (str, optional): Time expression to animate data. This is an alias
           for the CARTO VL `filter` style attribute. Default is no animation.
-        strokeColor (str, optional): Defines the stroke color of polygons.
+        stroke_color_ (str, optional): Defines the stroke color of polygons.
           Default is white.
-        strokeWidth (float or str, optional): Defines the width of the stroke
+        stroke_width_ (float or str, optional): Defines the width of the stroke
           in pixels. Default is 1.
         interactivity (str, list, or dict, optional): This option adds
           interactivity (click or hover) to a layer. Defaults to ``click`` if
           one of the following inputs are specified:
-
           - dict: If a :obj:`dict`, this must have the key `cols` with its
             value a list of columns. Optionally add `event` to choose ``hover``
             or ``click``. Specifying a `header` key/value pair adds a header to
@@ -123,16 +122,16 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
     def __init__(self,
                  query,
-                 color=None,
-                 width=None,
-                 time=None,
-                 strokeColor=None,
-                 strokeWidth=None,
+                 color_=None,
+                 width_=None,
+                 filter_=None,
+                 stroke_color_=None,
+                 stroke_width_=None,
+                 transform_=None,
+                 order_=None,
+                 symbol_=None,
                  interactivity=None,
-                 legend=None,
-                 transform=None,
-                 order=None,
-                 symbol=None):
+                 legend=None):
 
         def convstr(obj):
             """convert all types to strings or None"""
@@ -142,14 +141,16 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.query = query
 
         # style attributes
-        self.color = color
-        self.width = convstr(width)
-        self.filter = time
-        self.strokeColor = strokeColor  # pylint: disable=invalid-name
-        self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
-        self.transform = transform
-        self.order = order
-        self.symbol = symbol
+        self.color_ = color_
+        self.width_ = convstr(width_)
+        self.filter_ = filter_
+        self.stroke_color_ = stroke_color_  # pylint: disable=invalid-name
+        self.stroke_width_ = convstr(stroke_width_)  # pylint: disable=invalid-name
+        self.transform_ = transform_
+        self.order_ = order_
+        self.symbol_ = symbol_
+
+        # legends
         self.legend = legend
 
         # internal attributes
@@ -167,13 +168,20 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
     def _compose_style(self):
         """Appends `prop` with `style` to layer styling"""
         valid_styles = (
-            'color', 'width', 'filter', 'strokeWidth', 'strokeColor',
-            'transform', 'order', 'symbol'
+            'color',
+            'width',
+            'filter',
+            'stroke_width',
+            'stroke_color',
+            'transform',
+            'order',
+            'symbol'
         )
         self.styling = '\n'.join(
-            '{prop}: {style}'.format(prop=s, style=getattr(self, s))
+            '{prop}: {style}'.format(prop=to_camel_case(s),
+                                     style=getattr(self, s + '_'))
             for s in valid_styles
-            if getattr(self, s) is not None
+            if getattr(self, s + '_') is not None
         )
 
     def _set_interactivity(self, interactivity):
@@ -255,27 +263,37 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                 [vector.Layer(
                     'nat',
                     color='ramp(globalEqIntervals($hr90, 7), sunset)',
-                    strokeWidth=0),
+                    stroke_width_=0),
                 ],
                 example_context)
     """
-    def __init__(self, table_name, color=None, width=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None, transform=None, order=None, symbol=None):
+    def __init__(self,
+                 table_name,
+                 color_=None,
+                 width_=None,
+                 filter_=None,
+                 stroke_color_=None,
+                 stroke_width_=None,
+                 transform_=None,
+                 order_=None,
+                 symbol_=None,
+                 legend=None,
+                 interactivity=None):
+
         self.table_source = table_name
 
         super(Layer, self).__init__(
             'SELECT * FROM {}'.format(table_name),
-            color=color,
-            width=width,
-            time=time,
-            strokeColor=strokeColor,
-            strokeWidth=strokeWidth,
-            interactivity=interactivity,
-            transform=transform,
-            order=order,
-            symbol=symbol,
-            legend=legend
+            color_=color_,
+            width_=width_,
+            filter_=filter_,
+            stroke_color_=stroke_color_,
+            stroke_width_=stroke_width_,
+            transform_=transform_,
+            order_=order_,
+            symbol_=symbol_,
+            legend=legend,
+            interactivity=interactivity
         )
 
 
@@ -302,9 +320,18 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
-    def __init__(self, dataframe, color=None, width=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None, transform=None, order=None, symbol=None):
+    def __init__(self,
+                 dataframe,
+                 color_=None,
+                 width_=None,
+                 filter_=None,
+                 stroke_color_=None,
+                 stroke_width_=None,
+                 transform_=None,
+                 order_=None,
+                 symbol_=None,
+                 legend=None,
+                 interactivity=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             # filter out null geometries
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
@@ -321,16 +348,16 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
         super(LocalLayer, self).__init__(
             query=None,
-            color=color,
-            width=width,
-            time=time,
-            strokeColor=strokeColor,
-            strokeWidth=strokeWidth,
-            interactivity=interactivity,
-            transform=transform,
-            order=order,
-            symbol=symbol,
-            legend=legend
+            color_=color_,
+            width_=width_,
+            filter_=filter_,
+            stroke_color_=stroke_color_,
+            stroke_width_=stroke_width_,
+            transform_=transform_,
+            order_=order_,
+            symbol_=symbol_,
+            legend=legend,
+            interactivity=interactivity
         )
 
 
@@ -578,3 +605,9 @@ def _combine_bounds(bbox1, bbox2):
             ])
 
     return outbbox
+
+def to_camel_case(snake_str):
+    components = snake_str.split('_')
+    # We capitalize the first letter of each component except the first one
+    # with the 'title' method and join them together.
+    return components[0] + ''.join(x.title() for x in components[1:])
