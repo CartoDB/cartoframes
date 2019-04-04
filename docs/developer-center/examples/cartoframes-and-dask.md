@@ -1,7 +1,7 @@
 
 # CARTOframes with Dask
 
-This notebook recreate the workflow from <https://jakevdp.github.io/blog/2015/08/14/out-of-core-dataframes-in-python/>, where the author explores [`dask`](http://dask.pydata.org/en/latest/) for splitting up the computations across multiple cores in a machine to complete tasks more quickly. 
+This notebook recreate the workflow from <https://jakevdp.github.io/blog/2015/08/14/out-of-core-dataframes-in-python/>, where the author explores [`dask`](http://dask.pydata.org/en/latest/) for splitting up the computations across multiple cores in a machine to complete tasks more quickly.
 
 ## Basics
 
@@ -418,7 +418,7 @@ cc.map(layers=Layer('fastfood_dask', size=2))
          var basemap = config.named_map.params.basemap_url;
      }
      L.tileLayer(basemap, {
-         attribution: &quot;&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>&quot;
+         attribution: &quot;&copy; <a href=\&quot;http://www.openstreetmap.org/copyright\&quot;>OpenStreetMap</a>&quot;
      }).addTo(map);
      const updateMapInfo = () => {
        $('#zoom').text(map.getZoom());
@@ -444,7 +444,7 @@ cc.map(layers=Layer('fastfood_dask', size=2))
 
   </body>
 </html>
-" width=800 height=400>  Preview image: <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2Fcartodb-basemaps-%7Bs%7D.global.ssl.fastly.net%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D1%5D+%7B++marker-width%3A+2%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+1%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D2%5D+%7B++line-width%3A+1.5%3B+line-color%3A+%235D69B1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D3%5D+%7B++polygon-fill%3A+%235D69B1%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D+%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+fastfood_dask%22%7D&anti_cache=0.44686802321019237&bbox=-178.8312024%2C-54.8071336%2C178.4835648%2C71.6361881" /></iframe>
+" width="100%" height="400">  Preview image: <img src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2Fcartodb-basemaps-%7Bs%7D.global.ssl.fastly.net%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D1%5D+%7B++marker-width%3A+2%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+1%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D2%5D+%7B++line-width%3A+1.5%3B+line-color%3A+%235D69B1%3B%7D+%23layer%5B%27mapnik%3A%3Ageometry_type%27%3D3%5D+%7B++polygon-fill%3A+%235D69B1%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D+%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+fastfood_dask%22%7D&anti_cache=0.44686802321019237&bbox=-178.8312024%2C-54.8071336%2C178.4835648%2C71.6361881" /></iframe>
 
 
 
@@ -601,5 +601,3 @@ coffee_augmented.head()
   </tbody>
 </table>
 </div>
-
-
