@@ -341,34 +341,33 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                              'B': list('abc')})
         cc.write(pd.DataFrame(data), self.mixed_case_table, overwrite=True)
 
-    # FIXME in https://github.com/CartoDB/cartoframes/issues/585
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    # def test_cartocontext_table_exists(self):
-    #     """context.CartoContext._table_exists"""
-    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
-    #                                   api_key=self.apikey)
-    #     self.assertFalse(cc._table_exists('acadia_biodiversity'))
-    #     with self.assertRaises(NameError):
-    #         cc._table_exists(self.test_read_table)
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_table_exists(self):
+        """context.CartoContext._table_exists"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        self.assertFalse(cc._table_exists('acadia_biodiversity'))
+        with self.assertRaises(NameError):
+            cc._table_exists(self.test_read_table)
 
-    # def test_cartocontext_delete(self):
-    #     """context.CartoContext.delete"""
-    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
-    #                                   api_key=self.apikey)
-    #     data = {'col1': [1, 2, 3],
-    #             'col2': ['a', 'b', 'c']}
-    #     df = pd.DataFrame(data)
+    def test_cartocontext_delete(self):
+        """context.CartoContext.delete"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        data = {'col1': [1, 2, 3],
+                'col2': ['a', 'b', 'c']}
+        df = pd.DataFrame(data)
 
-    #     dataset = cc.write(df, self.test_delete_table, overwrite=True)
-    #     self.test_delete_table = dataset.table_name
-    #     cc.delete(self.test_delete_table)
+        dataset = cc.write(df, self.test_delete_table, overwrite=True)
+        self.test_delete_table = dataset.table_name
+        cc.delete(self.test_delete_table)
 
-    #     # check that querying recently deleted table raises an exception
-    #     with self.assertRaises(CartoException):
-    #         cc.sql_client.send('select * from {}'.format(
-    #             self.test_delete_table))
+        # check that querying recently deleted table raises an exception
+        with self.assertRaises(CartoException):
+            cc.sql_client.send('select * from {}'.format(
+                self.test_delete_table))
 
-    #     cc.delete('non_existent_table')
+        cc.delete('non_existent_table')
 
     def test_cartocontext_send_dataframe(self):
         """context.CartoContext._send_dataframe"""
