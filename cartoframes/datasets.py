@@ -320,6 +320,7 @@ def _decode_geom(ewkb):
                             pass
     return None
 
+
 def _clean_dataframe_from_carto(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
