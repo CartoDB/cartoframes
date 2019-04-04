@@ -381,17 +381,8 @@ class CartoContext(object):
         Returns:
             Boolean: True if table is removed
         """
-        try:
-            table_exists = self._table_exists(table_name)
-        except NameError:
-            table_exists = True
-
-        if table_exists:
-            query = 'DROP TABLE {table}'.format(table=table_name)
-            self.sql_client.send(query)
-            return True
-
-        return False
+        dataset = Dataset(self, table_name)
+        return dataset.delete()
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
