@@ -1,7 +1,8 @@
 import binascii as ba
 from warnings import warn
-
 import pandas as pd
+import time
+
 from carto.exceptions import CartoException, CartoRateLimitException
 
 
