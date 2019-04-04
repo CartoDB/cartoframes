@@ -75,6 +75,7 @@ class Dataset(object):
             dataset = self._do_get_carto_dataset()
             if dataset is not None:
                 break
+            retry += 1
             time.sleep(Dataset.WAIT_TIME)
 
         return dataset
