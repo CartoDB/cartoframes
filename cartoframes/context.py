@@ -451,7 +451,7 @@ class CartoContext(object):
         """
         try:
             table_exists = self._table_exists(table_name)
-        except NameError as err:
+        except NameError:
             table_exists = True
 
         if table_exists:
