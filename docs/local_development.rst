@@ -97,7 +97,7 @@ We're going to clone the repository. We can do it in the jupyter-cartoframes dir
   cd carto-vl
 
 
-The local instalation of CARTO VL is explained `in this guide <https://github.com/CartoDB/carto-vl/blob/master/DEVELOPERS.md/>`__ 
+The local installation of CARTO VL is explained `in this guide <https://github.com/CartoDB/carto-vl/blob/master/DEVELOPERS.md/>`__ 
 
 Airship
 ^^^^^^^^
