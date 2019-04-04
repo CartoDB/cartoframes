@@ -1,4 +1,3 @@
-from .cartoframes import CartoFrames
 from .context import CartoContext
 from .batch import BatchJobStatus
 from .credentials import Credentials

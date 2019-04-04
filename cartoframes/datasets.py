@@ -1,8 +1,11 @@
 import binascii as ba
 from warnings import warn
+import time
 
 import pandas as pd
 from carto.exceptions import CartoException
+from carto.datasets import DatasetManager
+from pyrestcli.exceptions import NotFoundException
 
 
 class Dataset(object):
@@ -13,13 +16,20 @@ class Dataset(object):
     REPLACE = 'replace'
     APPEND = 'append'
 
+    PRIVATE = 'private'
+    PUBLIC = 'public'
+    LINK = 'link'
+
+    MAX_RETRY_COUNT = 3
+    WAIT_TIME = 3
+
     def __init__(self, carto_context, table_name, df=None):
         self.cc = carto_context
         self.table_name = _norm_colname(table_name)
         self.df = df
         warn('Table will be named `{}`'.format(table_name))
 
-    def upload(self, with_lonlat=None, if_exists='fail'):
+    def upload(self, with_lonlat=None, if_exists='fail', privacy='private'):
         if self.df is None:
             raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
 
@@ -27,13 +37,18 @@ class Dataset(object):
             self._create_table(with_lonlat)
         else:
             if if_exists == Dataset.FAIL:
-                raise ValueError(('Table with name {table_name} already exists in CARTO.'
-                                  ' Please choose a different `table_name` or use'
-                                  ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
+                raise NameError(('Table with name {table_name} already exists in CARTO.'
+                                 ' Please choose a different `table_name` or use'
+                                 ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
             elif if_exists == Dataset.REPLACE:
                 self._create_table(with_lonlat)
 
         self._copyfrom(with_lonlat)
+
+        dataset = self.get_carto_dataset()
+        if dataset is not None:
+            dataset.privacy = privacy
+            dataset.save()
 
         return self
 
@@ -49,6 +64,26 @@ class Dataset(object):
             # If table doesn't exist, we get an error from the SQL API
             self.cc._debug_print(err=err)
             return False
+
+    def get_carto_dataset(self):
+        dataset = self._do_get_carto_dataset()
+        if dataset is not None:
+            return dataset
+
+        retry = 0
+        while retry <= Dataset.MAX_RETRY_COUNT:
+            dataset = self._do_get_carto_dataset()
+            if dataset is not None:
+                break
+            time.sleep(Dataset.WAIT_TIME)
+
+        return dataset
+
+    def _do_get_carto_dataset(self):
+        try:
+            return DatasetManager(self.cc.auth_client).get(self.table_name)
+        except NotFoundException:
+            return None
 
     def _create_table(self, with_lonlat=None):
         job = self.cc.batch_sql_client \
@@ -69,7 +104,7 @@ class Dataset(object):
     def _copyfrom(self, with_lonlat=None):
         geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(_norm_colname(c) for c in self.df.columns if c not in Dataset.UTIL_COLS)
+        columns = ','.join(_norm_colname(c) for c in self.df.columns if c not in Dataset.RESERVED_COLUMN_NAMES)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
