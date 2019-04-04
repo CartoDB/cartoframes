@@ -120,10 +120,19 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
                 }
             )
     """
-    # TODO: add transform, order, symbol
-    def __init__(self, query, color=None, size=None, time=None,
-                 strokeColor=None, strokeWidth=None, interactivity=None,
-                 legend=None, transform=None, order=None, symbol=None):
+
+    def __init__(self,
+                 query,
+                 color=None,
+                 width=None,
+                 time=None,
+                 strokeColor=None,
+                 strokeWidth=None,
+                 interactivity=None,
+                 legend=None,
+                 transform=None,
+                 order=None,
+                 symbol=None):
 
         def convstr(obj):
             """convert all types to strings or None"""
@@ -134,7 +143,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
         # style attributes
         self.color = color
-        self.width = convstr(size)
+        self.width = convstr(width)
         self.filter = time
         self.strokeColor = strokeColor  # pylint: disable=invalid-name
         self.strokeWidth = convstr(strokeWidth)  # pylint: disable=invalid-name
@@ -250,7 +259,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                 ],
                 example_context)
     """
-    def __init__(self, table_name, color=None, size=None, time=None,
+    def __init__(self, table_name, color=None, width=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
                  legend=None, transform=None, order=None, symbol=None):
         self.table_source = table_name
@@ -258,7 +267,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
         super(Layer, self).__init__(
             'SELECT * FROM {}'.format(table_name),
             color=color,
-            size=size,
+            width=width,
             time=time,
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
@@ -293,7 +302,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
-    def __init__(self, dataframe, color=None, size=None, time=None,
+    def __init__(self, dataframe, color=None, width=None, time=None,
                  strokeColor=None, strokeWidth=None, interactivity=None,
                  legend=None, transform=None, order=None, symbol=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
@@ -313,7 +322,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         super(LocalLayer, self).__init__(
             query=None,
             color=color,
-            size=size,
+            width=width,
             time=time,
             strokeColor=strokeColor,
             strokeWidth=strokeWidth,
