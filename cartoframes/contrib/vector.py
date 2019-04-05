@@ -351,11 +351,10 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 @utils.temp_ignore_warnings
 def vmap(layers,
          context,
-         _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-         _airship_path=None,
          size=(1024, 632),
          basemap=BaseMaps.voyager,
-         bounds=None):
+         bounds=None,
+         **kwargs):
 
     """CARTO VL-powered interactive map
 
@@ -464,6 +463,10 @@ def vmap(layers,
             'interactivity': intera,
             'legend': layer.legend
         })
+
+    _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+    _airship_path = kwargs.get('_airship_path', None)
+
     html = (
         '<iframe srcdoc="{content}" width="{width}" height="{height}">'
         '</iframe>'
