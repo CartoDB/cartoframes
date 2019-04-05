@@ -31,7 +31,6 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-import pdb;
 from .. import utils
 
 
