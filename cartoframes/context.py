@@ -1549,15 +1549,14 @@ class CartoContext(object):
                              'combine resulting DataFrames using '
                              '`pandas.concat`')
 
-        tablecols = get_columns(
-            self,
-            'SELECT * FROM {table_name} LIMIT 0'.format(table_name=table_name)
-        ).keys()
+        # get column names except the_geom_webmercator
+        dataset = Dataset(self, table_name)
+        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
         for suggested in _meta['suggested_name']:
-            if suggested in tablecols:
-                names[suggested] = utils.unique_colname(suggested, tablecols)
+            if suggested in table_columns:
+                names[suggested] = utils.unique_colname(suggested, table_columns)
                 warn(
                     '{s0} was augmented as {s1} because of name '
                     'collision'.format(s0=suggested, s1=names[suggested])
@@ -1575,10 +1574,6 @@ class CartoContext(object):
 
         if len(drop_columns) > 0:
             _meta.drop(drop_columns, axis=1, inplace=True)
-
-        # get column names except the_geom_webmercator
-        dataset = Dataset(self, table_name)
-        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
