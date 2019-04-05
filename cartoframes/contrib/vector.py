@@ -211,6 +211,9 @@ def _get_html_doc(
         sources,
         bounds,
         carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+        lat=None,
+        lng=None,
+        zoom=None,
         creds=None,
         basemap=None,
         airship_path=None):
@@ -253,16 +256,19 @@ def _get_html_doc(
     return template.render(
         width=size[0],
         height=size[1],
-        SOURCES=json.dumps(sources),
-        BASEMAPSTYLE=basemap,
-        MAPBOXTOKEN=token,
-        CREDENTIALS=json.dumps(credentials),
-        BOUNDS=bounds,
-        CARTO_VL_PATH=carto_vl_path,
-        AIRSHIP_COMPONENTS_PATH=airship_components_path,
-        AIRSHIP_BRIDGE_PATH=airship_bridge_path,
-        AIRSHIP_STYLES_PATH=airship_styles_path,
-        AIRSHIP_ICONS_PATH=airship_icons_path
+        sources=json.dumps(sources),
+        basemapstyle=basemap,
+        mapboxtoken=token,
+        credentials=json.dumps(credentials),
+        bounds=bounds,
+        lng=lng,
+        lat=lat,
+        zoom=zoom,
+        carto_vl_path=carto_vl_path,
+        airship_components_path=airship_components_path,
+        airship_bridge_path=airship_bridge_path,
+        airship_styles_path=airship_styles_path,
+        airship_icons_path=airship_icons_path
     )
 
 
@@ -366,7 +372,10 @@ def vmap(
         airship_path=None,
         size=(1024, 632),
         basemap=BaseMaps.voyager,
-        bounds=None):
+        bounds=None,
+        lng=None,
+        lat=None,
+        zoom=None):
     """CARTO VL-powered interactive map
 
     Args:
@@ -389,6 +398,9 @@ def vmap(
           properties, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
+        lng (float): Longitude to center the map on. Requires also setting lng and zoom
+        lat (float): Latitude to center the map on. Requires also setting lat and zoom
+        zoom (float): Zoom level to center the map on. Requires setting lat and lng as well.
 
     Example:
 
@@ -453,6 +465,24 @@ def vmap(
                 context=cc,
                 bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
             )
+
+        Centering the map can be done via lng, lat and zoom. You need to specify all three.
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://<username>.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                lng=10
+                lat=-10
+                zoom=5
+            )
     """
     if bounds:
         bounds = _format_bounds(bounds)
@@ -479,7 +509,10 @@ def vmap(
             jslayers,
             bounds,
             carto_vl_path,
-            context.creds,
+            creds=context.creds,
+            lat=lat,
+            lng=lng,
+            zoom=zoom,
             basemap=basemap,
             airship_path=airship_path)
     return HTML(html)
