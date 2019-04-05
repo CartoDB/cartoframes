@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .datasets import Dataset
+from .datasets import Dataset, recursive_read, clean_dataframe_from_carto, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -472,6 +472,64 @@ class CartoContext(object):
             Not yet implemented.
         """
         pass
+
+    def fetch(self, query, decode_geom=False):
+        """Pull the result from an arbitrary SQL query from a CARTO account
+        into a pandas DataFrame.
+
+        Args:
+            query (str): Query to run against CARTO user database. This data
+              will then be converted into a pandas DataFrame.
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of query supplied.
+            Pandas data types are inferred from PostgreSQL data types.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
+
+        Examples:
+            This query gets the 10 highest values from a table and
+            returns a dataframe.
+
+            .. code:: python
+
+                topten_df = cc.query(
+                    '''
+                      SELECT * FROM
+                      my_table
+                      ORDER BY value_column DESC
+                      LIMIT 10
+                    '''
+                )
+
+            This query joins points to polygons based on intersection, and
+            aggregates by summing the values of the points in each polygon. The
+            query returns a dataframe, with a geometry column that contains
+            polygons.
+
+            .. code:: python
+
+                points_aggregated_to_polygons = cc.query(
+                    '''
+                      SELECT polygons.*, sum(points.values)
+                      FROM polygons JOIN points
+                      ON ST_Intersects(points.the_geom, polygons.the_geom)
+                      GROUP BY polygons.the_geom, polygons.cartodb_id
+                    ''',
+                    decode_geom=True
+                )
+
+        """
+        copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+        query_columns = get_columns(self, query)
+        result = recursive_read(self, copy_query)
+        df = pd.read_csv(result)
+
+        return clean_dataframe_from_carto(df, query_columns, decode_geom)
 
     def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
