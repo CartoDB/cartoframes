@@ -47,12 +47,9 @@ class Dataset(object):
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
         table_columns = self._get_table_columns()
-
         query = self._get_read_query(table_columns, limit)
-        result = recursive_read(self.cc, query, retry_times=retry_times)
-        df = pd.read_csv(result)
 
-        return clean_dataframe_from_carto(df, table_columns, decode_geom)
+        return self.cc.fetch(query, decode_geom=decode_geom, query_columns=table_columns)
 
     def exists(self):
         """Checks to see if table exists"""

@@ -473,7 +473,7 @@ class CartoContext(object):
         """
         pass
 
-    def fetch(self, query, decode_geom=False):
+    def fetch(self, query, decode_geom=False, query_columns=None):
         """Pull the result from an arbitrary SQL query from a CARTO account
         into a pandas DataFrame.
 
@@ -484,6 +484,8 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
+          query_columns (object, optional): The SQLClient `fields` attribute
+              in case you want to avoid the method to retrieve the columns itself
 
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
@@ -525,7 +527,8 @@ class CartoContext(object):
 
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        query_columns = get_columns(self, query)
+        if query_columns is None:
+            query_columns = get_columns(self, query)
         result = recursive_read(self, copy_query)
         df = pd.read_csv(result)
 
