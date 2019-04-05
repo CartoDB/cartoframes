@@ -1565,7 +1565,7 @@ class CartoContext(object):
             else:
                 names[suggested] = suggested
 
-        # drop unneeded columns to lighten the query
+        # drop description columns to lighten the query
         meta_columns = _meta.columns.values
         drop_columns = []
         for meta_column in meta_columns:
