@@ -1531,13 +1531,6 @@ class CartoContext(object):
         return self.query(query,
                           table_name=persist_as)
 
-    # backwards compatibility
-    def data_augment(self, table_name, metadata):
-        """DEPRECATED. Use `CartoContext.data` instead"""
-        warn('This function is being deprecated. Use `CartoContext.data` '
-             'instead.', DeprecationWarning)
-        return self.data(table_name, metadata, persist_as=table_name)
-
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
                           http_method=http_method,
