@@ -101,6 +101,7 @@ class Map(object):
             )
     """
 
+    @utils.temp_ignore_warnings
     def __init__(self,
                  layers,
                  context,
