@@ -7,17 +7,12 @@ from IPython.display import HTML
 
 from ..carto import utils
 from ..basemap.basemap import Basemap
-from ..layer.layer import Layer as layer
+from ..layer.layer import Layer
 from ..layer.local_layer import LocalLayer
 from ..layer.query_layer import QueryLayer
 
 
-@utils.temp_ignore_warnings
-def map(layers,
-        context,
-        size=(1024, 632),
-        basemap=Basemap.voyager,
-        bounds=None):
+class Map(object):
     """CARTO VL-powered interactive map
 
     Args:
@@ -105,37 +100,62 @@ def map(layers,
                 bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
             )
     """
-    if bounds:
-        bounds = _format_bounds(bounds)
-    else:
-        bounds = _get_super_bounds(layers, context)
 
-    jslayers = []
-    for _, layer in enumerate(layers):
-        is_local = isinstance(layer, LocalLayer)
-        intera = (
-            dict(event=layer.interactivity, header=layer.header)
-            if layer.interactivity is not None
-            else None
-        )
-        jslayers.append({
-            'is_local': is_local,
-            'styling': layer.styling,
-            'source': layer._geojson_str if is_local else layer.query,
-            'interactivity': intera,
-            'legend': layer.legend
-        })
-    html = (
-        '<iframe srcdoc="{content}" width="{width}" height="{height}">'
-        '</iframe>'
-        ).format(
-            width=size[0],
-            height=size[1],
-            content=utils.safe_quotes(
-                _get_html_doc(jslayers, bounds, context.creds, basemap=basemap)
+    def __init__(self,
+                 layers,
+                 context,
+                 size=(1024, 632),
+                 basemap=Basemap.voyager,
+                 bounds=None,
+                 template=None):
+
+        self.layers = layers
+        self.context = context
+        self.size = size
+        self.basemap = basemap
+        self.bounds = bounds
+        self.template = template
+
+        if bounds:
+            bounds = _format_bounds(bounds)
+        else:
+            bounds = _get_super_bounds(layers, context)
+
+        jslayers = []
+
+        for _, layer in enumerate(layers):
+            is_local = isinstance(layer, LocalLayer)
+            intera = (
+                dict(event=layer.interactivity, header=layer.header)
+                if layer.interactivity is not None
+                else None
             )
-        )
-    return HTML(html)
+            jslayers.append({
+                'is_local': is_local,
+                'styling': layer.styling,
+                'source': layer._geojson_str if is_local else layer.query,
+                'interactivity': intera,
+                'legend': layer.legend
+            })
+
+        html = (
+            '<iframe srcdoc="{content}" width="{width}" height="{height}">'
+            '</iframe>'
+            ).format(
+                width=size[0],
+                height=size[1],
+                content=utils.safe_quotes(
+                    _get_html_doc(jslayers,
+                                  bounds,
+                                  context.creds,
+                                  basemap=basemap)
+                )
+            )
+
+        self.template = HTML(html)
+
+    def init(self):
+        return self.template
 
 
 def _get_html_doc(sources, bounds, creds=None, basemap=None):
