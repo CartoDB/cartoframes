@@ -1566,6 +1566,7 @@ class CartoContext(object):
                 names[suggested] = suggested
 
         # drop description columns to lighten the query
+        # FIXME https://github.com/CartoDB/cartoframes/issues/593
         meta_columns = _meta.columns.values
         drop_columns = []
         for meta_column in meta_columns:
