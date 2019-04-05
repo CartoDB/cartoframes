@@ -1166,7 +1166,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             msg='Should have same schema/types'
         )
 
-
     # FIXME: https://github.com/CartoDB/cartoframes/issues/594
     # def test_column_name_collision_do_enrichement(self):
     #     """context.CartoContext.data column collision"""
