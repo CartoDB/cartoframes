@@ -156,7 +156,7 @@ class Dataset(object):
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+        return query
 
     def _get_table_columns(self):
         """Get column names and types from a table"""
