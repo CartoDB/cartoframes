@@ -9,6 +9,7 @@ Release 2019-xx-xx
 Updates
 
 - max line length from 80 to 120
+- Rewrite context.read method using COPY TO (#570)
 
 0.9.2
 -----
