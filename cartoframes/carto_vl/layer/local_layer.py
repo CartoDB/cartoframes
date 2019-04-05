@@ -32,6 +32,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """
     def __init__(self,
                  dataframe,
+                 viz=None,
                  color_=None,
                  width_=None,
                  filter_=None,
@@ -59,6 +60,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
         super(LocalLayer, self).__init__(
             query=None,
+            viz=viz,
             color_=color_,
             width_=width_,
             filter_=filter_,

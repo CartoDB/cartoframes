@@ -26,6 +26,7 @@ class Layer(QueryLayer):
     """
     def __init__(self,
                  table_name,
+                 viz=None,
                  color_=None,
                  width_=None,
                  filter_=None,
@@ -42,6 +43,7 @@ class Layer(QueryLayer):
 
         super(Layer, self).__init__(
             'SELECT * FROM {}'.format(table_name),
+            viz=viz,
             color_=color_,
             width_=width_,
             filter_=filter_,

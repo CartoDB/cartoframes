@@ -62,6 +62,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
     def __init__(self,
                  query,
+                 viz=None,
                  color_=None,
                  width_=None,
                  filter_=None,
@@ -80,6 +81,9 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
         # data source
         self.query = query
+
+        # viz string
+        self.viz = viz
 
         # style attributes
         self.color_ = color_
@@ -101,13 +105,14 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.interactivity = None
         self.header = None
 
-        self._compose_style()
-
-        # variables
-        self._set_variables(variables)
-
-        # interactivity options
-        self._set_interactivity(interactivity)
+        if (self.viz is None):
+            self._compose_style()
+            # variables
+            self._set_variables(variables)
+            # interactivity options
+            self._set_interactivity(interactivity)
+        else:
+            self.styling = self.viz
 
     def _compose_style(self):
         """Appends `prop` with `style` to layer styling"""
