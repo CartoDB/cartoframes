@@ -1102,8 +1102,7 @@ class CartoContext(object):
             boundaries in `region` (or the world if `region` is ``None``)
         """
         # TODO: create a function out of this?
-        if (isinstance(region, collections.Iterable)
-                and not isinstance(region, str)):
+        if (isinstance(region, collections.Iterable) and not isinstance(region, str)):
             if len(region) != 4:
                 raise ValueError(
                     '`region` should be a list of the geographic bounds of a '
@@ -1152,9 +1151,8 @@ class CartoContext(object):
                 '{filters}')).format(
                     bounds=bounds,
                     timespan=utils.pgquote(timespan),
-                    filters='WHERE {}'.format(filters) if filters else ''
-                )
-            return self.query(query)
+                    filters='WHERE {}'.format(filters) if filters else '')
+            return self.fetch(query)
 
         query = utils.minify_sql((
             'SELECT the_geom, geom_refs',
@@ -1165,7 +1163,7 @@ class CartoContext(object):
                 bounds=bounds,
                 boundary=utils.pgquote(boundary),
                 time=utils.pgquote(timespan))
-        return self.query(query, decode_geom=decode_geom)
+        return self.fetch(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None, include_quantiles=False):
@@ -1297,7 +1295,7 @@ class CartoContext(object):
             except ValueError:
                 # TODO: make this work for general queries
                 # see if it's a table
-                self.sql_client.send(
+                self.batch_sql_client.create_and_wait_for_completion(
                     'EXPLAIN SELECT * FROM {}'.format(region))
                 boundary = (
                     'SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, '
@@ -1428,8 +1426,7 @@ class CartoContext(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         self._debug_print(query=query)
-        resp = self.sql_client.send(query)
-        return pd.DataFrame(resp['rows'])
+        return self.fetch(query)
 
     def data(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -1539,8 +1536,7 @@ class CartoContext(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            resp = self.sql_client.send(query)
-            _meta = pd.DataFrame(resp['rows'])
+            _meta = self.fetch(query)
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -1553,10 +1549,10 @@ class CartoContext(object):
                              'combine resulting DataFrames using '
                              '`pandas.concat`')
 
-        tablecols = self.sql_client.send(
-            'SELECT * FROM {table_name} LIMIT 0'.format(table_name=table_name),
-            **DEFAULT_SQL_ARGS
-        )['fields'].keys()
+        tablecols = get_columns(
+            self,
+            'SELECT * FROM {table_name} LIMIT 0'.format(table_name=table_name)
+        ).keys()
 
         names = {}
         for suggested in _meta['suggested_name']:
@@ -1569,6 +1565,20 @@ class CartoContext(object):
             else:
                 names[suggested] = suggested
 
+        # drop unneeded columns to lighten the query
+        meta_columns = _meta.columns.values
+        drop_columns = []
+        for meta_column in meta_columns:
+            if meta_column.endswith('_description'):
+                drop_columns.append(meta_column)
+
+        if len(drop_columns) > 0:
+            _meta.drop(drop_columns, axis=1, inplace=True)
+
+        # get column names except the_geom_webmercator
+        dataset = Dataset(self, table_name)
+        table_columns = list(set(dataset.get_table_columns().keys()) - set(['the_geom_webmercator']))
+
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
                 n=row[0],
@@ -1576,7 +1586,7 @@ class CartoContext(object):
                 col=names[row[1]['suggested_name']])
             for row in _meta.iterrows())
         query = utils.minify_sql((
-            'SELECT t.*, {cols}',
+            'SELECT {table_cols}, {cols}',
             '  FROM OBS_GetData(',
             '       (SELECT array_agg({how})',
             '        FROM "{tablename}"),',
@@ -1588,9 +1598,14 @@ class CartoContext(object):
                 tablename=table_name,
                 rowid='cartodb_id' if how == 'the_geom' else how,
                 cols=cols,
+                table_cols=','.join('t.{}'.format(c) for c in table_columns),
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
-        return self.query(query,
-                          table_name=persist_as)
+
+        result = self.fetch(query)
+        if persist_as:
+            self.write(result, persist_as, overwrite=True)
+
+        return result
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,

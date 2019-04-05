@@ -46,7 +46,7 @@ class Dataset(object):
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
-        table_columns = self._get_table_columns()
+        table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
 
         return self.cc.fetch(query, decode_geom=decode_geom, query_columns=table_columns)
@@ -158,7 +158,7 @@ class Dataset(object):
 
         return query
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         """Get column names and types from a table"""
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
         return get_columns(self.cc, query)
@@ -334,6 +334,8 @@ def clean_dataframe_from_carto(df, table_columns, decode_geom=False):
     for column_name in table_columns:
         if table_columns[column_name]['type'] == 'date':
             df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
+        elif table_columns[column_name]['type'] == 'boolean':
+            df[column_name] = df[column_name].eq('t')
 
     if decode_geom:
         df['geometry'] = df.the_geom.apply(_decode_geom)
