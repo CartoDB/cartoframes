@@ -5,7 +5,7 @@ import json
 from warnings import warn
 from IPython.display import HTML
 
-from .. import utils
+from cartoframes import utils
 from ..basemap.basemap import Basemap
 from ..layer.layer import Layer
 from ..layer.local_layer import LocalLayer
