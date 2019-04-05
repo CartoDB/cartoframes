@@ -422,7 +422,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
-                              'Should be a pandas DantaFrame')
+                              'Should be a pandas DataFrame')
         # same column names
         requested_cols = {'link', 'body', 'displayname', 'friendscount',
                           'postedtime', 'invalid_df_date', }
