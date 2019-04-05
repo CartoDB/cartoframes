@@ -152,7 +152,7 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
   from cartoframes import CartoContext
 
   context = CartoContext(
-      base_url='https://username.carto.com/', 
+      base_url='https://cartoframes.carto.com/', # or https://cartovl.carto.com/
       api_key='default_public'
   )
 
@@ -162,6 +162,8 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
       carto_vl_path='http://localhost:8080/dist/carto-vl.js',
       airship_path='http://localhost:5050'
   )
+
+We've a lot of public datasets in both `cartoframes` and `cartovl` accounts that we use for the examples, but I've you've a personal CARTO account you can use your credentials.
 
 Reload changes
 ^^^^^^^^^^^^^^

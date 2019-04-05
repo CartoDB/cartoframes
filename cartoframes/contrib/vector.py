@@ -204,10 +204,10 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
 def _get_html_doc(sources,
                   bounds,
-                  carto_vl_path=_DEFAULT_CARTO_VL_PATH,
                   creds=None,
                   basemap=None,
-                  airship_path=None):
+                  _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+                  _airship_path=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
         '..',
@@ -234,23 +234,23 @@ def _get_html_doc(sources,
             warn('A Mapbox style usually needs a token')
         basemap = basemap.get('style')
 
-    if (airship_path is None):
+    if (_airship_path is None):
         airship_components_path = _DEFAULT_AIRSHIP_COMPONENTS_PATH
         airship_bridge_path = _DEFAULT_AIRSHIP_BRIDGE_PATH
         airship_styles_path = _DEFAULT_AIRSHIP_STYLES_PATH
         airship_icons_path = _DEFAULT_AIRSHIP_ICONS_PATH
     else:
-        airship_components_path = airship_path + _AIRSHIP_SCRIPT
-        airship_bridge_path = airship_path + _AIRSHIP_BRIDGE_SCRIPT
-        airship_styles_path = airship_path + _AIRSHIP_STYLE
-        airship_icons_path = airship_path + _AIRSHIP_ICONS_STYLE
+        airship_components_path = _airship_path + _AIRSHIP_SCRIPT
+        airship_bridge_path = _airship_path + _AIRSHIP_BRIDGE_SCRIPT
+        airship_styles_path = _airship_path + _AIRSHIP_STYLE
+        airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
 
     return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
         .replace('@@BASEMAPSTYLE@@', basemap) \
         .replace('@@MAPBOXTOKEN@@', token) \
         .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
         .replace('@@BOUNDS@@', bounds) \
-        .replace('@@CARTO_VL_PATH@@', carto_vl_path) \
+        .replace('@@CARTO_VL_PATH@@', _carto_vl_path) \
         .replace('@@AIRSHIP_COMPONENTS_PATH@@', airship_components_path) \
         .replace('@@AIRSHIP_BRIDGE_PATH@@', airship_bridge_path) \
         .replace('@@AIRSHIP_STYLES_PATH@@', airship_styles_path) \
@@ -351,8 +351,8 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 @utils.temp_ignore_warnings
 def vmap(layers,
          context,
-         carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-         airship_path=None,
+         _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+         _airship_path=None,
          size=(1024, 632),
          basemap=BaseMaps.voyager,
          bounds=None):
@@ -474,10 +474,10 @@ def vmap(layers,
                 _get_html_doc(
                     jslayers,
                     bounds,
-                    carto_vl_path,
                     context.creds,
                     basemap=basemap,
-                    airship_path=airship_path)
+                    _carto_vl_path=_carto_vl_path,
+                    _airship_path=_airship_path)
             )
         )
     return HTML(html)
