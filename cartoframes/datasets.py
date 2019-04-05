@@ -163,6 +163,16 @@ class Dataset(object):
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
         return get_columns(self.cc, query)
 
+    def get_table_column_names(self, exclude=None):
+        """Get column names and types from a table"""
+        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
+        columns = get_columns(self.cc, query).keys()
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
 
 def get_columns(context, query):
         """Get column names and types from a query"""

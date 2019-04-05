@@ -1577,7 +1577,7 @@ class CartoContext(object):
 
         # get column names except the_geom_webmercator
         dataset = Dataset(self, table_name)
-        table_columns = list(set(dataset.get_table_columns().keys()) - set(['the_geom_webmercator']))
+        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
