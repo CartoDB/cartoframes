@@ -31,6 +31,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
+import pdb;
 from .. import utils
 
 
@@ -130,6 +131,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
                  transform_=None,
                  order_=None,
                  symbol_=None,
+                 variables=None,
                  interactivity=None,
                  legend=None):
 
@@ -162,6 +164,9 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
         self._compose_style()
 
+        # variables
+        self._set_variables(variables)
+
         # interactivity options
         self._set_interactivity(interactivity)
 
@@ -184,30 +189,34 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
             if getattr(self, s + '_') is not None
         )
 
+    def _set_variables(self, variables):
+        # TODO add check
+        if variables is None:
+            self.variables = None
+            return
+        elif isinstance(variables, (list)):
+            self.variables = variables
+            variables_list = '\n'.join(
+                '{name}: {value}'.format(
+                    name=variable[0],
+                    value=variable[1]
+                ) for variable in variables
+            )
+        else:
+            raise ValueError('`variables` must be a list of [ name, value ]')
+
+        self.styling = '\n'.join([variables_list, self.styling])
+
     def _set_interactivity(self, interactivity):
         """Adds interactivity syntax to the styling"""
         event_default = 'hover'
         if interactivity is None:
             return
-        if isinstance(interactivity, (tuple, list)):
-            self.interactivity = event_default
-            interactive_cols = '\n'.join(
-                '@{0}: ${0}'.format(col) for col in interactivity
-            )
-        elif isinstance(interactivity, str):
-            self.interactivity = event_default
-            interactive_cols = '@{0}: ${0}'.format(interactivity)
         elif isinstance(interactivity, dict):
             self.interactivity = interactivity.get('event', event_default)
             self.header = interactivity.get('header')
-            interactive_cols = '\n'.join(
-                '@{0}: ${0}'.format(col) for col in interactivity['cols']
-            )
         else:
-            raise ValueError('`interactivity` must be a str, a list of str, '
-                             'or a dict with a `cols` key')
-
-        self.styling = '\n'.join([interactive_cols, self.styling])
+            raise ValueError('`interactivity` must be a dictionary')
 
 
 def _get_html_doc(sources, bounds, creds=None, basemap=None):
@@ -277,6 +286,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                  transform_=None,
                  order_=None,
                  symbol_=None,
+                 variables=None,
                  legend=None,
                  interactivity=None):
 
@@ -292,6 +302,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
             transform_=transform_,
             order_=order_,
             symbol_=symbol_,
+            variables=variables,
             legend=legend,
             interactivity=interactivity
         )
@@ -330,6 +341,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
                  transform_=None,
                  order_=None,
                  symbol_=None,
+                 variables=None,
                  legend=None,
                  interactivity=None):
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
@@ -356,6 +368,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             transform_=transform_,
             order_=order_,
             symbol_=symbol_,
+            variables=variables,
             legend=legend,
             interactivity=interactivity
         )
@@ -606,8 +619,7 @@ def _combine_bounds(bbox1, bbox2):
 
     return outbbox
 
+
 def to_camel_case(snake_str):
     components = snake_str.split('_')
-    # We capitalize the first letter of each component except the first one
-    # with the 'title' method and join them together.
     return components[0] + ''.join(x.title() for x in components[1:])

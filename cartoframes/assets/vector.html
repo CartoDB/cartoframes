@@ -79,12 +79,15 @@
         temp_source = new carto.source.SQL(elem.source);
       }
       const viz = new carto.Viz(elem['styling']);
+      
       let temp = new carto.Layer(
           'layer' + idx,
           temp_source,
           viz
       );
+      
       var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
+      
       temp.addTo(map);
  
       // When layer loads, trigger legend event
@@ -107,71 +110,86 @@
                   }
                   // Style for legend items
                   colorLegendList +=
-                          `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item"><span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">${bucket}</span></li>\n`;
+                    `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item">
+                      <span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">
+                        ${bucket}
+                      </span>
+                    </li>\n`;
               });
  
-              const legend = `<section class="as-box">
+              const legend = `
+                <section class="as-box">
                   <h1 class="as-subheader">${elem.legend || 'Layer ' + idx}</h1>
                   <div class="legend as-body">
                     <ul class="as-list">
-    				${colorLegendList}
+    				          ${colorLegendList}
                     </ul>
                   </div>
-    			</section>`;
+    			      </section>`;
               document.getElementById('legends').style.display = 'block';
-              // Place list items in the content section of the title/legend box
               document.getElementById('legends').innerHTML += legend;
           }
       });
  
       if (elem.interactivity) {
-        let interactivity = new carto.Interactivity(temp);
-        let tempPopup = new mapboxgl.Popup({
-                  closeButton: false,
-                  closeOnClick: false
-                });
+        const interactivity = new carto.Interactivity(temp);
+        const tempPopup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false
+        });
+
         if (elem.interactivity.event == 'click') {
           setPopupsClick(tempPopup, interactivity, elem.interactivity.header);
         } else if (elem.interactivity.event == 'hover') {
           setPopupsHover(tempPopup, interactivity, elem.interactivity.header);
         }
       }
-    });
-    function setPopupsClick(tempPopup, intera, popupHeader) {
-      intera.off('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader)
-      });
-      intera.on('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader, popupHeader)
-      });
-    }
-    function setPopupsHover(tempPopup, intera, popupHeader) {
-      intera.off('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader)
-      });
-      intera.on('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader)
-      });
-    }
-    function updatePopup(layer_popup, event, popupHeader) {
-      if (event.features.length > 0) {
-        const vars = event.features[0].variables;
-        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
-        Object.keys(vars).forEach((varName) => {
-            popupHTML += `
-                <h3 class="h3">${varName}</h3>
-                <p class="description open-sans">${vars[varName].value}</p>
-            `;
+
+      function setPopupsClick(tempPopup, intera, popupHeader) {
+        intera.off('featureHover', (event) => {
+            updatePopup(tempPopup, event, popupHeader)
         });
-        layer_popup.setLngLat([event.coordinates.lng, event.coordinates.lat])
-             .setHTML(`<div>${popupHTML}</div>`);
-        if (!layer_popup.isOpen()) {
-          layer_popup.addTo(map);
-        }
-      } else {
-        layer_popup.remove();
+        intera.on('featureClick', (event) => {
+            updatePopup(tempPopup, event, popupHeader, popupHeader)
+        });
       }
-    }
+      
+      function setPopupsHover(tempPopup, intera, popupHeader) {
+        intera.off('featureClick', (event) => {
+            updatePopup(tempPopup, event, popupHeader)
+        });
+        intera.on('featureHover', (event) => {
+            updatePopup(tempPopup, event, popupHeader)
+        });
+      }
+
+      function updatePopup(layer_popup, event, popupHeader) {
+        if (event.features.length > 0) {
+          const feature = event.features[0];
+          const vars = feature.variables;
+          let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
+          
+          Object.keys(feature.variables).forEach((name) => {
+              const variable = feature.variables[name];
+
+              popupHTML += `
+                <h3 class="h3">${name}</h3>
+                <p class="description open-sans">${JSON.stringify(variable.value)}</p>
+              `;
+          });
+          
+          layer_popup
+              .setLngLat([event.coordinates.lng, event.coordinates.lat])
+              .setHTML(`<div>${popupHTML}</div>`);
+          
+          if (!layer_popup.isOpen()) {
+            layer_popup.addTo(map);
+          }
+        } else {
+          layer_popup.remove();
+        }
+      }
+    });
    </script>
 </body>
 </html>
