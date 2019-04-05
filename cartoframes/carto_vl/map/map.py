@@ -6,7 +6,7 @@ from warnings import warn
 from IPython.display import HTML
 
 from ..carto import utils
-from ..basemap import Basemap
+from ..basemap.basemap import Basemap
 from ..layer.layer import Layer as layer
 from ..layer.local_layer import LocalLayer
 from ..layer.query_layer import QueryLayer
@@ -141,6 +141,7 @@ def map(layers,
 def _get_html_doc(sources, bounds, creds=None, basemap=None):
     html_template = os.path.join(
         os.path.dirname(__file__),
+        '..',
         '..',
         'assets',
         'vector.html'
