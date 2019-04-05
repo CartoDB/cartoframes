@@ -80,7 +80,7 @@
 
         var sources = {{sources}};
 
-        {% if lat != None and lng != None and zoom != None %}
+        {% if lat != none and lng != none and zoom != none %}
           map.flyTo({
             center: [{{lng}}, {{lat}}],
             zoom: {{zoom}}
