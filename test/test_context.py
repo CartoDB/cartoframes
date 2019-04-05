@@ -1125,6 +1125,48 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
+    def test_data_with_persist_as(self):
+        """context.CartoContext.data"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols)
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta, persist_as=self.test_write_table)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols)
+
+        df = cc.read(self.test_write_table)
+
+        # same number of rows
+        self.assertEqual(len(df), len(data),
+                         msg='Expected number or rows')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        self.assertSetEqual(set(data.columns.values),
+                            set(df.columns.values),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        self.assertEqual(
+            sorted(tuple(str(d) for d in df.dtypes)),
+            sorted(tuple(str(d) for d in data.dtypes)),
+            msg='Should have same schema/types'
+        )
+
+
     def test_column_name_collision_do_enrichement(self):
         """context.CartoContext.data column collision"""
         dup_col = 'female_third_level_studies_2011_by_female_pop'
