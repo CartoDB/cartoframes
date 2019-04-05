@@ -20,7 +20,6 @@ Here is an example using the example CartoContext from the :py:class:`Examples
         ],
         example_context)
 """
-import os
 import json
 from warnings import warn
 from IPython.display import HTML
@@ -32,6 +31,7 @@ except ImportError:
     HAS_GEOPANDAS = False
 
 from .. import utils
+from jinja2 import Environment, PackageLoader
 
 # CARTO VL
 _DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.2.3/carto-vl.min.js'
@@ -202,23 +202,27 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.styling = '\n'.join([interactive_cols, self.styling])
 
 
-def _get_html_doc(
-    sources, 
-    bounds, 
-    carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-    creds=None,
-    basemap=None,
-    airship_path=None):
-    html_template = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        'assets',
-        'vector.html'
-    )
-    token = ''
+def _quote_filter(value):
+    return utils.safe_quotes(value.unescape())
 
-    with open(html_template, 'r') as html_file:
-        srcdoc = html_file.read()
+
+def _get_html_doc(
+        size,
+        sources,
+        bounds,
+        carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+        creds=None,
+        basemap=None,
+        airship_path=None):
+
+    # We should move this to a class eventually, and not load it each time
+    templates_env = Environment(
+        loader=PackageLoader('cartoframes', 'assets/templates'),
+        autoescape=True
+    )
+    templates_env.filters['quot'] = _quote_filter
+    template = templates_env.get_template('vector/basic.html')
+    token = ''
 
     credentials = {
         'username': creds.username(),
@@ -246,16 +250,20 @@ def _get_html_doc(
         airship_styles_path = airship_path + _AIRSHIP_STYLE
         airship_icons_path = airship_path + _AIRSHIP_ICONS_STYLE
 
-    return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
-        .replace('@@BASEMAPSTYLE@@', basemap) \
-        .replace('@@MAPBOXTOKEN@@', token) \
-        .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
-        .replace('@@BOUNDS@@', bounds) \
-        .replace('@@CARTO_VL_PATH@@', carto_vl_path) \
-        .replace('@@AIRSHIP_COMPONENTS_PATH@@', airship_components_path) \
-        .replace('@@AIRSHIP_BRIDGE_PATH@@', airship_bridge_path) \
-        .replace('@@AIRSHIP_STYLES_PATH@@', airship_styles_path) \
-        .replace('@@AIRSHIP_ICONS_PATH@@', airship_icons_path)
+    return template.render(
+        width=size[0],
+        height=size[1],
+        SOURCES=json.dumps(sources),
+        BASEMAPSTYLE=basemap,
+        MAPBOXTOKEN=token,
+        CREDENTIALS=json.dumps(credentials),
+        BOUNDS=bounds,
+        CARTO_VL_PATH=carto_vl_path,
+        AIRSHIP_COMPONENTS_PATH=airship_components_path,
+        AIRSHIP_BRIDGE_PATH=airship_bridge_path,
+        AIRSHIP_STYLES_PATH=airship_styles_path,
+        AIRSHIP_ICONS_PATH=airship_icons_path
+    )
 
 
 class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
@@ -349,15 +357,16 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             legend=legend
         )
 
+
 @utils.temp_ignore_warnings
 def vmap(
-    layers,
-    context,
-    carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-    airship_path=None,
-    size=(1024, 632),
-    basemap=BaseMaps.voyager,
-    bounds=None):
+        layers,
+        context,
+        carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+        airship_path=None,
+        size=(1024, 632),
+        basemap=BaseMaps.voyager,
+        bounds=None):
     """CARTO VL-powered interactive map
 
     Args:
@@ -465,22 +474,14 @@ def vmap(
             'interactivity': intera,
             'legend': layer.legend
         })
-    html = (
-        '<iframe srcdoc="{content}" width={width} height={height}>'
-        '</iframe>'
-        ).format(
-            width=size[0],
-            height=size[1],
-            content=utils.safe_quotes(
-                _get_html_doc(
-                    jslayers,
-                    bounds,
-                    carto_vl_path,
-                    context.creds,
-                    basemap=basemap,
-                    airship_path=airship_path)
-            )
-        )
+    html = _get_html_doc(
+            size,
+            jslayers,
+            bounds,
+            carto_vl_path,
+            context.creds,
+            basemap=basemap,
+            airship_path=airship_path)
     return HTML(html)
 
 
