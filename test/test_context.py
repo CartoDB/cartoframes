@@ -422,7 +422,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
-                              'Should be a pandas DataFrame')
+                              'Should be a pandas DantaFrame')
         # same column names
         requested_cols = {'link', 'body', 'displayname', 'friendscount',
                           'postedtime', 'invalid_df_date', }
@@ -479,6 +479,150 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         # see what happens if a query fails after 100 successful rows
         with self.assertRaises(CartoException):
             cc.query('''
+                WITH cte AS (
+                    SELECT CDB_LatLng(0, 0) as the_geom, i
+                    FROM generate_series(1, 110) as m(i)
+                    UNION ALL
+                    SELECT ST_Buffer(CDB_LatLng(0, 0), 0.1) as the_geom, i
+                    FROM generate_series(111, 120) as i
+                )
+                SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+                FROM cte
+            ''')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch(self):
+        """context.CartoContext.fetch"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
+        df = cc.fetch('''
+            SELECT {cols}, '02-06-1429'::date as invalid_df_date
+            FROM tweets_obama
+            LIMIT 100
+            '''.format(cols=','.join(cols)))
+
+        # ensure columns are in expected order
+        df = df[list(cols) + ['invalid_df_date', ]]
+
+        # same number of rows
+        self.assertEqual(len(df), 100,
+                         msg='Expected number or rows')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        requested_cols = {'link', 'body', 'displayname', 'friendscount',
+                          'postedtime', 'invalid_df_date', }
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('object', 'object', 'object', 'float64',
+                           'datetime64[ns, UTC]', 'object', )
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_empty(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # empty response
+        df_empty = cc.fetch('''
+            SELECT 1
+            LIMIT 0
+            ''')
+
+        # no rows, one column
+        self.assertTupleEqual(df_empty.shape, (0, 1))
+
+        # is a DataFrame
+        self.assertIsInstance(df_empty, pd.DataFrame)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_cte(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = cc.fetch('''
+            WITH cte AS (
+                SELECT CDB_LatLng(0.1, 0) as the_geom, i
+                FROM generate_series(1, 110) as m(i)
+            )
+            SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+            FROM cte
+        ''')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        requested_cols = {'xval', 'yval'}
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('int64', 'float64')
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+        # same number of rows
+        self.assertEqual(len(df), 110,
+                         msg='Expected number or rows')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_decode_geom(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = cc.fetch('''
+            SELECT CDB_LatLng(0.1, 0) as the_geom, i
+            FROM generate_series(1, 110) as m(i)
+        ''', decode_geom=True)
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+
+        # same column names
+        requested_cols = {'the_geom', 'i', 'geometry'}
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('object', 'int64', 'object')
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+        # same number of rows
+        self.assertEqual(len(df), 110,
+                         msg='Expected number or rows')
+
+        self.assertEqual(df.loc[0].geometry.wkt, 'POINT (0 0.1)')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_exception(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # see what happens if a query fails after 100 successful rows
+        with self.assertRaises(CartoException):
+            cc.fetch('''
                 WITH cte AS (
                     SELECT CDB_LatLng(0, 0) as the_geom, i
                     FROM generate_series(1, 110) as m(i)
