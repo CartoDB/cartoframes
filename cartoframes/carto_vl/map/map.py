@@ -6,7 +6,7 @@ from warnings import warn
 from IPython.display import HTML
 
 from cartoframes import utils
-from ..basemap.basemap import Basemap
+from ..basemap.basemaps import Basemaps
 from ..layer.layer import Layer
 from ..layer.local_layer import LocalLayer
 from ..layer.query_layer import QueryLayer
@@ -120,7 +120,7 @@ class Map(object):
                  layers,
                  context,
                  size=(1024, 632),
-                 basemap=Basemap.voyager,
+                 basemap=Basemaps.voyager,
                  bounds=None,
                  template=None,
                  **kwargs):
@@ -174,7 +174,7 @@ class Map(object):
                     _airship_path=_airship_path)
             )
         )
-        
+
         self.template = HTML(html)
 
     def init(self):
