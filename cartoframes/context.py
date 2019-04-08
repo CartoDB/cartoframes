@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .datasets import Dataset, recursive_read, clean_dataframe_from_carto, get_columns
+from .datasets import Dataset, recursive_read, postprocess_dataframe, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -473,19 +473,17 @@ class CartoContext(object):
         """
         pass
 
-    def fetch(self, query, decode_geom=False, query_columns=None):
-        """Pull the result from an arbitrary SQL query from a CARTO account
+    def fetch(self, query, decode_geom=False):
+        """Pull the result from an arbitrary SELECT SQL query from a CARTO account
         into a pandas DataFrame.
 
         Args:
-            query (str): Query to run against CARTO user database. This data
+            query (str): SELECT query to run against CARTO user database. This data
               will then be converted into a pandas DataFrame.
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
-          query_columns (object, optional): The SQLClient `fields` attribute
-              in case you want to avoid the method to retrieve the columns itself
 
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
@@ -527,12 +525,11 @@ class CartoContext(object):
 
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        if query_columns is None:
-            query_columns = get_columns(self, query)
+        query_columns = get_columns(self, query)
         result = recursive_read(self, copy_query)
         df = pd.read_csv(result)
 
-        return clean_dataframe_from_carto(df, query_columns, decode_geom)
+        return postprocess_dataframe(df, query_columns, decode_geom)
 
     def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
