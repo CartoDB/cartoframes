@@ -22,6 +22,7 @@ _DEFAULT_AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components
 _DEFAULT_AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v1.0.3/asbridge.js'
 _DEFAULT_AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v1.0.3/airship.css'
 _DEFAULT_AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v1.0.3/icons.css'
+_HTML_TEMPLATE = '<iframe srcdoc="{content}" width="{width}" height="{height}"></iframe>'
 
 
 class Map(object):
@@ -144,40 +145,40 @@ class Map(object):
         self.context = context
         self.size = size
         self.basemap = basemap
-        self.bounds = bounds
+        self.bounds = _get_bounds(bounds, layers, context)
         self.template = template
+        self._carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+        self._airship_path = kwargs.get('_airship_path', None)
 
-        _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
-        _airship_path = kwargs.get('_airship_path', None)
+    @utils.temp_ignore_warnings
+    def init(self):
+        map_layers = _get_map_layers(self.layers)
 
-        if bounds:
-            bounds = _format_bounds(bounds)
-        else:
-            bounds = _get_super_bounds(layers, context)
-
-        map_layers = _get_map_layers(layers)
-
-        html = (
-            '<iframe srcdoc="{content}" width="{width}" height="{height}">'
-            '</iframe>'
-        ).format(
-            width=size[0],
-            height=size[1],
+        html = (_HTML_TEMPLATE).format(
+            width=self.size[0],
+            height=self.size[1],
             content=utils.safe_quotes(
                 _get_html_doc(
                     map_layers,
-                    bounds,
-                    context.creds,
-                    basemap=basemap,
-                    _carto_vl_path=_carto_vl_path,
-                    _airship_path=_airship_path)
+                    bounds=self.bounds,
+                    creds=self.context.creds,
+                    basemap=self.basemap,
+                    _carto_vl_path=self._carto_vl_path,
+                    _airship_path=self._airship_path)
             )
         )
 
         self.template = HTML(html)
 
-    def init(self):
         return self.template
+
+
+def _get_bounds(bounds, layers, context):
+    return (
+        _format_bounds(bounds)
+        if bounds
+        else _get_super_bounds(layers, context)
+    )
 
 
 def _get_map_layers(layers):
