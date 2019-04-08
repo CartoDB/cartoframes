@@ -206,6 +206,13 @@ def _quote_filter(value):
     return utils.safe_quotes(value.unescape())
 
 
+def _iframe_size_filter(value):
+    if isinstance(value, str):
+        return value
+
+    return '%spx;' % value
+
+
 def _get_html_doc(
         size,
         sources,
@@ -224,8 +231,16 @@ def _get_html_doc(
         autoescape=True
     )
     templates_env.filters['quot'] = _quote_filter
+    templates_env.filters['iframe_size'] = _iframe_size_filter
     template = templates_env.get_template('vector/basic.html')
     token = ''
+
+    width = None
+    height = None
+
+    if size is not None:
+        width = size[0]
+        height = size[1]
 
     credentials = {
         'username': creds.username(),
@@ -254,8 +269,8 @@ def _get_html_doc(
         airship_icons_path = airship_path + _AIRSHIP_ICONS_STYLE
 
     return template.render(
-        width=size[0],
-        height=size[1],
+        width=width,
+        height=height,
         sources=json.dumps(sources),
         basemapstyle=basemap,
         mapboxtoken=token,
@@ -370,7 +385,7 @@ def vmap(
         context,
         carto_vl_path=_DEFAULT_CARTO_VL_PATH,
         airship_path=None,
-        size=(1024, 632),
+        size=None,
         basemap=BaseMaps.voyager,
         bounds=None,
         lng=None,
@@ -386,8 +401,10 @@ def vmap(
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
-        size (tuple of int): a (width, height) pair for the size of the map.
-          Default is (1024, 632)
+        size (tuple of int or str): a (width, height) pair for the size of the map.
+          Default is None, which makes the map 100% wide and 640px tall. If specified as int,
+          will be used as pixels, but you can also use string values for the CSS attributes.
+          So, you could specify it as size=('75%', 250).
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class

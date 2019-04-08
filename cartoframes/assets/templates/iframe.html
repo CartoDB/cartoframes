@@ -1,3 +1,8 @@
-<iframe width="{{ width }}" height="{{ height }}" srcDoc="{% filter quot %}{% block srcDoc %}{% endblock %}{% endfilter %}">
+<iframe
+  style="
+    width: {% if width %}{{ width | iframe_size }};{% else %}100%;{% endif %}
+    height: {% if height %}{{ height | iframe_size }};{% else %}632px;{% endif %}
+    "
+  srcDoc="{% filter quot %}{% block srcDoc %}{% endblock %}{% endfilter %}">
 {% block preview %}{% endblock %}
 </iframe>
