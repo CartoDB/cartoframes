@@ -18,6 +18,7 @@
    Batch Jobs <batchjobstatus>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
+   Local Development Setup <local_development>
 
 ******************
 Indices and tables

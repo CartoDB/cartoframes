@@ -5,20 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <!-- Include CARTO VL JS -->
-  <script src="https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js"></script>
+  <script src="@@CARTO_VL_PATH@@"></script>
   <!-- Include Mapbox GL JS -->
   <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js"></script>
   <!-- Include Mapbox GL CSS -->
   <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css" rel="stylesheet" />
-  <!-- Include Airship for layouts -->
-  <link href="https://libs.cartocdn.com/airship-style/v1.0.3/airship.css" rel="stylesheet">
-  <!-- Include airship components -->
-  <script src="https://libs.cartocdn.com/airship-components/v1.0.3/airship.js"></script>
+
+  <!-- Include Airship -->
+  <script src="@@AIRSHIP_COMPONENTS_PATH@@"></script>
+  <script src="@@AIRSHIP_BRIDGE_PATH@@"></script>
+  <link href="@@AIRSHIP_STYLES_PATH@@" rel="stylesheet">
+  <link href="@@AIRSHIP_ICONS_PATH@@" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
       padding: 0;
     }
+
     #map {
       position: absolute;
       height: 100%;
