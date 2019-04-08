@@ -17,12 +17,12 @@ class Layer(QueryLayer):
             from cartoframes import CartoContext
 
             context = CartoContext(
-                base_url='https://cartovl.carto.com/', 
+                base_url='https://cartovl.carto.com/',
                 api_key='default_public'
             )
 
             carto.Map(
-                [carto.Layer('populated_places')], 
+                [carto.Layer('populated_places')],
                 context=context
             ).init()
     """

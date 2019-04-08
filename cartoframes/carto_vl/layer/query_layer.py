@@ -178,6 +178,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         else:
             raise ValueError('`interactivity` must be a dictionary')
 
+
 def _to_camel_case(snake_str):
     components = snake_str.split('_')
     return components[0] + ''.join(x.title() for x in components[1:])

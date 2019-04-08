@@ -7,9 +7,7 @@ from IPython.display import HTML
 
 from cartoframes import utils
 from ..basemap.basemaps import Basemaps
-from ..layer.layer import Layer
 from ..layer.local_layer import LocalLayer
-from ..layer.query_layer import QueryLayer
 
 # CARTO VL
 _DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js'
@@ -174,7 +172,7 @@ class Map(object):
                 'interactivity': intera,
                 'legend': layer.legend
             })
-    
+
         html = (
             '<iframe srcdoc="{content}" width="{width}" height="{height}">'
             '</iframe>'
