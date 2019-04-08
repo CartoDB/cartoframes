@@ -49,7 +49,7 @@ class Dataset(object):
         table_columns = self._get_table_columns()
         query = self._get_read_query(table_columns, limit)
 
-        return self.cc.fetch(query, decode_geom=decode_geom, query_columns=table_columns)
+        return self.cc.fetch(query, decode_geom=decode_geom)
 
     def exists(self):
         """Checks to see if table exists"""
@@ -311,11 +311,11 @@ def _decode_geom(ewkb):
     return None
 
 
-def clean_dataframe_from_carto(df, table_columns, decode_geom=False):
+def postprocess_dataframe(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
         - process date columns
-        - decode geom
+        - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
 
     Args:
         df (pandas.DataFrame): DataFrame with a dataset from CARTO.
