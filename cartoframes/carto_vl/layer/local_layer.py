@@ -29,13 +29,13 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             from cartoframes.carto_vl import carto
 
             geodataframe = geopandas.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
-            
+
             carto.Map(
                 [carto.LocalLayer(geodataframe)],
                 context=example_context
             ).init()
 
-        
+
         It's also posible to load a local `.geojson` file by using `geopandas.read_file`
         method.
 

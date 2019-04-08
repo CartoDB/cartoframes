@@ -54,7 +54,7 @@ class Map(object):
 
             from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            
+
             context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
@@ -68,7 +68,7 @@ class Map(object):
 
             from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            
+
             context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
@@ -87,7 +87,7 @@ class Map(object):
 
             from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            
+
             context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
@@ -110,7 +110,7 @@ class Map(object):
 
             from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            
+
             context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
@@ -155,23 +155,7 @@ class Map(object):
         else:
             bounds = _get_super_bounds(layers, context)
 
-        jslayers = []
-
-        for _, layer in enumerate(layers):
-            is_local = isinstance(layer, LocalLayer)
-            intera = (
-                dict(event=layer.interactivity, header=layer.header)
-                if layer.interactivity is not None
-                else None
-            )
-
-            jslayers.append({
-                'is_local': is_local,
-                'styling': layer.styling,
-                'source': layer._geojson_str if is_local else layer.query,
-                'interactivity': intera,
-                'legend': layer.legend
-            })
+        map_layers = _get_map_layers(layers)
 
         html = (
             '<iframe srcdoc="{content}" width="{width}" height="{height}">'
@@ -181,7 +165,7 @@ class Map(object):
             height=size[1],
             content=utils.safe_quotes(
                 _get_html_doc(
-                    jslayers,
+                    map_layers,
                     bounds,
                     context.creds,
                     basemap=basemap,
@@ -194,6 +178,31 @@ class Map(object):
 
     def init(self):
         return self.template
+
+
+def _get_map_layers(layers):
+    return list(map(_add_map_layer, layers))
+
+
+def _add_map_layer(layer):
+    is_local = isinstance(layer, LocalLayer)
+    interactivity = _is_interactivity_enabled(layer)
+
+    return ({
+        'interactivity': interactivity,
+        'is_local': is_local,
+        'legend': layer.legend,
+        'source': layer._geojson_str if is_local else layer.query,
+        'styling': layer.styling
+    })
+
+
+def _is_interactivity_enabled(layer):
+    return (
+        dict(event=layer.interactivity, header=layer.header)
+        if layer.interactivity is not None
+        else None
+    )
 
 
 def _get_html_doc(sources,
@@ -210,6 +219,7 @@ def _get_html_doc(sources,
         'assets',
         'vector.html'
     )
+
     token = ''
 
     with open(html_template, 'r') as html_file:
