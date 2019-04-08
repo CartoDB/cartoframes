@@ -54,6 +54,12 @@ Linux:
   
   python3 -m virtualenv <your env name>
 
+or 
+
+.. code::
+
+  pipenv --three
+
 5. Install jupyter 
 
 .. code::
@@ -72,13 +78,7 @@ Linux:
 
   pipenv shell
 
-8. Activate the virtual environment
-
-.. code::
-
-  source env/bin/activate
-
-9. Launch Jupyter notebook
+8. Launch Jupyter notebook
 
 .. code::
 
