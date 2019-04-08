@@ -324,7 +324,7 @@ def _decode_geom(ewkb):
 def postprocess_dataframe(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
-        - process date columns
+        - process date and bool columns
         - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
 
     Args:
