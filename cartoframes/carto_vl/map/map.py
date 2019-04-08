@@ -122,7 +122,8 @@ class Map(object):
                  size=(1024, 632),
                  basemap=Basemap.voyager,
                  bounds=None,
-                 template=None):
+                 template=None,
+                 **kwargs):
 
         self.layers = layers
         self.context = context
@@ -156,31 +157,28 @@ class Map(object):
                 'interactivity': intera,
                 'legend': layer.legend
             })
-
-        html = ("""
-            <iframe
-                srcdoc="{content}"
-                width="{width}"
-                height="{height}">
-            </iframe>
-        """)
-
-        html_doc = _get_html_doc(
-            jslayers,
-            bounds,
-            context.creds,
-            basemap,
-            _carto_vl_path,
-            _airship_path)
-
-        content = utils.safe_quotes(html_doc)
-        html.format(width=size[0], height=size[1], content)
-
+    
+        html = (
+            '<iframe srcdoc="{content}" width="{width}" height="{height}">'
+            '</iframe>'
+        ).format(
+            width=size[0],
+            height=size[1],
+            content=utils.safe_quotes(
+                _get_html_doc(
+                    jslayers,
+                    bounds,
+                    context.creds,
+                    basemap=basemap,
+                    _carto_vl_path=_carto_vl_path,
+                    _airship_path=_airship_path)
+            )
+        )
+        
         self.template = HTML(html)
 
-
-def init(self):
-    return self.template
+    def init(self):
+        return self.template
 
 
 def _get_html_doc(sources,
