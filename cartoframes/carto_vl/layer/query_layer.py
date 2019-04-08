@@ -6,6 +6,8 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           following columns included to successfully have a map rendered:
           `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
           used in styling, they must be included in this query as well.
+        viz (str, optional): Instead of declaring style properties one by one,
+          you can make use of CARTO VL `vizString` through this parameter.
         color_ (str, optional): CARTO VL color styling for this layer. Valid
           inputs are simple web color names and hex values. For more advanced
           styling, see the CARTO VL guide on styling for more information:
@@ -23,6 +25,18 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           Default is white.
         stroke_width_ (float or str, optional): Defines the width of the stroke
           in pixels. Default is 1.
+        symbol_ (str, optional): Show an image instead in the place of points
+        symbol_placement_ (str, optional): When using symbol , offset to apply to the image
+        order_ (str, optional): Rendering order of the features, only applicable to points.
+        transform_ (str, optional): Apply a rotation or a translation to the feature.
+        resolution_ (float or str, optional): resolution of the property-aggregation functions,
+          only applicable to points.
+          Default resolution is 1.
+          Custom values must be greater than 0 and lower than 256.
+          A resolution of N means points are aggregated to grid cells NxN pixels.
+          Unlinke Torque resolution, the aggregated points are placed in the centroid of
+          the cluster, not in the center of the grid cell.
+        variables (list, optional): When you have to define variables to be reused
         interactivity (str, list, or dict, optional): This option adds
           interactivity (click or hover) to a layer. Defaults to ``click`` if
           one of the following inputs are specified:
@@ -38,9 +52,10 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         .. code::
 
             from cartoframes.examples import example_context
-            from cartoframes.contrib import vector
+            from cartoframes.carto_vl import carto
             # create geometries from lng/lat columns
-            q = '''
+
+            query = '''
                SELECT *, ST_Transform(the_geom, 3857) as the_geom_webmercator
                FROM (
                    SELECT
@@ -50,11 +65,12 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
                    FROM taxi_50k
                ) as _w
             '''
-            vector.vmap(
-                [vector.QueryLayer(q), ],
+
+            carto.Map(
+                [carto.QueryLayer(query)],
                 example_context,
                 interactivity={
-                    'cols': ['fare_amount', ],
+                    'cols': ['fare_amount'],
                     'event': 'hover'
                 }
             )

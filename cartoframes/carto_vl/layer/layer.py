@@ -2,27 +2,29 @@ from .query_layer import QueryLayer
 
 
 class Layer(QueryLayer):
-    """Layer from a table name. See :py:class:`vector.QueryLayer
-    <cartoframes.contrib.vector.QueryLayer>` for docs on the style attributes.
+    """Layer from a table name. See :py:class:`carto.QueryLayer
+    <cartoframes.carto_vl.carto.QueryLayer>` for docs on the style attributes.
 
     Example:
 
-        Visualize data from a table. Here we're using the example CartoContext.
-        To use this with your account, replace the `example_context` with your
-        :py:class:`CartoContext <cartoframes.context.CartoContext>` and a table
-        in the account you authenticate against.
+        Visualize data from a table. You have to initialize the CartoContext
+        :py:class:`CartoContext <cartoframes.context.CartoContext>` with your
+        credentials and a table in the account you authenticate against.
 
         .. code::
 
-            from cartoframes.examples import example_context
-            from cartoframes.contrib import vector
-            vector.vmap(
-                [vector.Layer(
-                    'nat',
-                    color='ramp(globalEqIntervals($hr90, 7), sunset)',
-                    stroke_width_=0),
-                ],
-                example_context)
+            from cartoframes.carto_vl import carto
+            from cartoframes import CartoContext
+
+            context = CartoContext(
+                base_url='https://cartovl.carto.com/', 
+                api_key='default_public'
+            )
+
+            carto.Map(
+                [carto.Layer('populated_places')], 
+                context=context
+            ).init()
     """
     def __init__(self,
                  table_name,

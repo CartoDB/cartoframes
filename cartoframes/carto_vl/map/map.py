@@ -54,28 +54,32 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.contrib import vector
+            from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            cc = CartoContext(
+            
+            context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            vector.vmap([vector.Layer('table in your account'), ], cc)
+
+            carto.Map([carto.Layer('table in your account')], context)
 
         CARTO basemap style.
 
         .. code::
 
-            from cartoframes.contrib import vector
+            from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            cc = CartoContext(
+            
+            context = CartoContext(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            vector.vmap(
-                [vector.Layer('table in your account'), ],
-                context=cc,
-                basemap=vector.BaseMaps.darkmatter
+
+            carto.Map(
+                [carto.Layer('table in your account')],
+                context,
+                basemap=vector.Basemaps.darkmatter
             )
 
         Custom basemap style. Here we use the Mapbox streets style, which
@@ -83,35 +87,48 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.contrib import vector
+            from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            cc = CartoContext(
-                base_url='https://<username>.carto.com',
+            
+            context = CartoContext(
+                base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            vector.vmap(
-                [vector.Layer('table in your account'), ],
-                context=cc,
-                basemap={
-                    'style': 'mapbox://styles/mapbox/streets-v9',
-                    'token: '<your mapbox token>'
-                }
+
+            basemap = {
+                'style': 'mapbox://styles/mapbox/streets-v9',
+                'token: '<your mapbox token>'
+            }
+
+            carto.Map(
+                [carto.Layer('table in your account')],
+                context,
+                basemap
             )
 
         Custom bounds
 
         .. code::
 
-            from cartoframes.contrib import vector
+            from cartoframes.carto_vl import carto
             from cartoframes import CartoContext
-            cc = CartoContext(
-                base_url='https://<username>.carto.com',
+            
+            context = CartoContext(
+                base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            vector.vmap(
-                [vector.Layer('table in your account'), ],
-                context=cc,
-                bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
+
+            bounds = {
+                'west': -10,
+                'east': 10,
+                'north': -10,
+                'south': 10
+            }
+
+            carto.Map(
+                [carto.Layer('table in your account')],
+                context,
+                bounds
             )
     """
 

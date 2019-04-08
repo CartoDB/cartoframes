@@ -10,7 +10,7 @@ except ImportError:
 class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
     """Create a layer from a GeoDataFrame
 
-    TODO: add support for filepath to a GeoJSON file, JSON/dict, or string
+    TODO: add support JSON/dict or string
 
     See :obj:`QueryLayer` for the full styling documentation.
 
@@ -20,15 +20,38 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         City. Using the `decode_geom=True` argument, we decode the geometries
         into a form that works with GeoPandas. Finally, we pass the
         GeoDataFrame into :py:class:`LocalLayer
-        <cartoframes.contrib.vector.LocalLayer>` to visualize.
+        <cartoframes.carto_vl.carto.LocalLayer>` to visualize.
 
         .. code::
 
-            import geopandas as gpd
+            import geopandas
             from cartoframes.examples import read_mcdonalds_nyc, example_context
-            from cartoframes.contrib import vector
-            gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
-            vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
+            from cartoframes.carto_vl import carto
+
+            geodataframe = geopandas.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
+            
+            carto.Map(
+                [carto.LocalLayer(geodataframe)],
+                context=example_context
+            ).init()
+
+        
+        It's also posible to load a local `.geojson` file by using `geopandas.read_file`
+        method.
+
+        .. code::
+
+            import json
+            import geopandas
+            from cartoframes.examples import example_context
+            from cartoframes.carto_vl import carto
+
+            geojson = geopandas.read_file('points.geojson')
+
+            carto.Map(
+                [carto.LocalLayer(geojson)],
+                context=example_context
+            ).init()
     """
     def __init__(self,
                  dataframe,
