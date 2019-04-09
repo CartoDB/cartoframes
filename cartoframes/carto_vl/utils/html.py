@@ -4,7 +4,7 @@ from cartoframes import utils
 import os
 import json
 
-_HTML_TEMPLATE = '<iframe srcdoc="{content}" width="{width}" height="{height}"></iframe>'
+_HTML_TEMPLATE = '<iframe srcdoc="{srcdoc}" width="{width}" height="{height}"></iframe>'
 
 # CARTO VL
 _DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js'
@@ -25,7 +25,7 @@ class HTMLMap(object):
     def __init__(self):
         self.width = None
         self.height = None
-        self.content = None
+        self.srcdoc = None
 
     def set_content(
         self, width, height, sources, bounds, creds=None, basemap=None,
@@ -36,7 +36,7 @@ class HTMLMap(object):
 
         self.width = width
         self.height = height
-        self.content = utils.safe_quotes(html)
+        self.srcdoc = utils.safe_quotes(html)
 
     def _parse_html_content(
         self, sources, bounds, creds=None, basemap=None,
@@ -96,4 +96,7 @@ class HTMLMap(object):
             .replace('@@AIRSHIP_ICONS_PATH@@', airship_icons_path)
 
     def _repr_html_(self):
-        return (_HTML_TEMPLATE).format(self.width, self.height, self.content)
+        return (_HTML_TEMPLATE).format(
+            width=self.width,
+            height=self.height,
+            srcdoc=self.srcdoc)
