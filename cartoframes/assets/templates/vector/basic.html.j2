@@ -1,4 +1,4 @@
-{% extends "iframe.html" %}
+{% extends "iframe.html.j2" %}
 {% block srcDoc %}
   <!DOCTYPE html>
   <html lang="en">
@@ -46,7 +46,7 @@
     </as-responsive-content>
 
     <script>
-      {% include 'vector/scripts/map.js' %}
+      {% include 'vector/scripts/map.js.j2' %}
     </script>
   </body>
   </html>

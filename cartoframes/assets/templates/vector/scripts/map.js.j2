@@ -19,7 +19,7 @@ function onReady() {
     dragRotate: false
   });
 
-  let credentials = {{credentials}};
+  const credentials = {{credentials}};
 
   carto.setDefaultAuth({
     username: credentials['username'],
@@ -30,7 +30,7 @@ function onReady() {
       serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
   });
 
-  var sources = {{sources}};
+  const sources = {{sources}};
 
   map.fitBounds({{bounds}}, {animate: false});
 
@@ -47,16 +47,16 @@ function onReady() {
       temp_source = new carto.source.SQL(elem.source);
     }
     const viz = new carto.Viz(elem['styling']);
-    let temp = new carto.Layer(
+    const layer = new carto.Layer(
         'layer' + idx,
         temp_source,
         viz
     );
-    var last_source = idx === 0 ? 'watername_ocean' : 'layer' + (idx - 1);
-    temp.addTo(map);
+
+    layer.addTo(map);
 
     // When layer loads, trigger legend event
-    temp.on('loaded', () => {
+    layer.on('loaded', () => {
         // Request data for legend from the layer viz
         if (viz.color.getLegendData) {
             const colorLegend = viz.color.getLegendData();
@@ -93,7 +93,7 @@ function onReady() {
     });
 
     if (elem.interactivity) {
-      let interactivity = new carto.Interactivity(temp);
+      let interactivity = new carto.Interactivity(layer);
       let tempPopup = new mapboxgl.Popup({
                 closeButton: false,
                 closeOnClick: false
