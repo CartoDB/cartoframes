@@ -217,13 +217,13 @@ def _get_html_doc(
         size,
         sources,
         bounds,
-        carto_vl_path=_DEFAULT_CARTO_VL_PATH,
         lat=None,
         lng=None,
         zoom=None,
         creds=None,
         basemap=None,
-        airship_path=None):
+        _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+        _airship_path=None):
 
     # We should move this to a class eventually, and not load it each time
     templates_env = Environment(
@@ -257,16 +257,16 @@ def _get_html_doc(
             warn('A Mapbox style usually needs a token')
         basemap = basemap.get('style')
 
-    if (airship_path is None):
+    if (_airship_path is None):
         airship_components_path = _DEFAULT_AIRSHIP_COMPONENTS_PATH
         airship_bridge_path = _DEFAULT_AIRSHIP_BRIDGE_PATH
         airship_styles_path = _DEFAULT_AIRSHIP_STYLES_PATH
         airship_icons_path = _DEFAULT_AIRSHIP_ICONS_PATH
     else:
-        airship_components_path = airship_path + _AIRSHIP_SCRIPT
-        airship_bridge_path = airship_path + _AIRSHIP_BRIDGE_SCRIPT
-        airship_styles_path = airship_path + _AIRSHIP_STYLE
-        airship_icons_path = airship_path + _AIRSHIP_ICONS_STYLE
+        airship_components_path = _airship_path + _AIRSHIP_SCRIPT
+        airship_bridge_path = _airship_path + _AIRSHIP_BRIDGE_SCRIPT
+        airship_styles_path = _airship_path + _AIRSHIP_STYLE
+        airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
 
     return template.render(
         width=width,
@@ -279,7 +279,7 @@ def _get_html_doc(
         lng=lng,
         lat=lat,
         zoom=zoom,
-        carto_vl_path=carto_vl_path,
+        carto_vl_path=_carto_vl_path,
         airship_components_path=airship_components_path,
         airship_bridge_path=airship_bridge_path,
         airship_styles_path=airship_styles_path,
@@ -380,17 +380,15 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
 
 @utils.temp_ignore_warnings
-def vmap(
-        layers,
-        context,
-        carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-        airship_path=None,
-        size=None,
-        basemap=BaseMaps.voyager,
-        bounds=None,
-        lng=None,
-        lat=None,
-        zoom=None):
+def vmap(layers,
+         context,
+         size=None,
+         basemap=BaseMaps.voyager,
+         bounds=None,
+         lng=None,
+         lat=None,
+         zoom=None,
+         **kwargs):
     """CARTO VL-powered interactive map
 
     Args:
@@ -521,17 +519,21 @@ def vmap(
             'interactivity': intera,
             'legend': layer.legend
         })
+
+    _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+    _airship_path = kwargs.get('_airship_path', None)
+
     html = _get_html_doc(
             size,
             jslayers,
             bounds,
-            carto_vl_path,
             creds=context.creds,
             lat=lat,
             lng=lng,
             zoom=zoom,
             basemap=basemap,
-            airship_path=airship_path)
+            _carto_vl_path=_carto_vl_path,
+            _airship_path=_airship_path)
     return HTML(html)
 
 

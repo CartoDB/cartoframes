@@ -130,6 +130,20 @@ class Examples(CartoContext):
         """
         return self.read('brooklyn_poverty', limit, **kwargs)
 
+    def read_ne_50m_graticules_15(self, limit=None, **kwargs):
+        """50m world Mercator grid
+        <cartoframes.examples.read_ne_50m_graticules_15>` for more information.
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import example_context
+            df = example_context.read_ne_50m_graticules_15()
+
+        """
+        return self.read('ne_50m_graticules_15', limit, **kwargs)
+
     def read_mcdonalds_nyc(self, limit=None, **kwargs):
         """McDonald's locations for New York City, USA. See the function
         :py:func:`read_mcdonalds_nyc
@@ -215,6 +229,34 @@ class Examples(CartoContext):
 
 
 example_context = Examples()
+
+
+def read_ne_50m_graticules_15(limit=None, **kwargs):
+    """Read the dataset `ne_50m_graticules_15` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/ne_50m_graticules_15/public
+    This dataset contains a 50m world Mercator grid
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `ne_50m_graticules_15` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_ne_50m_graticules_15
+        df = read_ne_50m_graticules_15()
+
+    """
+    return example_context.read_ne_50m_graticules_15(limit=limit, **kwargs)
 
 
 def read_brooklyn_poverty(limit=None, **kwargs):
