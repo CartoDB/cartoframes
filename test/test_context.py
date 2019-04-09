@@ -1102,7 +1102,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                  time=('2010 - 2014', ))
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(data.columns) - origcols)
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
@@ -1135,7 +1135,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                  time=('2010 - 2014', ))
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(data.columns) - origcols)
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
@@ -1145,7 +1145,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertSetEqual(set(('median_income_2011_2015', )),
                             set(data.columns) - origcols)
 
-        df = cc.read(self.test_write_table)
+        df = cc.read(self.test_write_table, decode_geom=True)
 
         # same number of rows
         self.assertEqual(len(df), len(data),

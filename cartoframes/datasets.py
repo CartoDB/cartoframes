@@ -27,6 +27,18 @@ class Dataset(object):
         self.df = df
         warn('Table will be named `{}`'.format(table_name))
 
+    @staticmethod
+    def from_query(cart_context, query, table_name):
+        dataset = Dataset(cart_context, table_name)
+        dataset.cc.batch_sql_client \
+               .create_and_wait_for_completion(
+                   '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                   .format(drop=dataset._drop_table_query(),
+                           create=dataset._create_table_from_query(query),
+                           cartodbfy=dataset._cartodbfy_query()))
+
+        return dataset
+
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.df is None:
             raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
@@ -122,6 +134,10 @@ class Dataset(object):
 
     def _drop_table_query(self):
         return '''DROP TABLE IF EXISTS {table_name}'''.format(table_name=self.table_name)
+
+    def _create_table_from_query(self, query):
+        create_query = '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=query)
+        return create_query
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
@@ -347,7 +363,7 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
         elif table_columns[column_name]['type'] == 'boolean':
             df[column_name] = df[column_name].eq('t')
 
-    if decode_geom:
+    if decode_geom and 'the_geom' in df.columns:
         df['geometry'] = df.the_geom.apply(_decode_geom)
 
     return df

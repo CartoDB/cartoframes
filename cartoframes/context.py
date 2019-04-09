@@ -387,22 +387,6 @@ class CartoContext(object):
                      err=err))
         return None
 
-    def _table_exists(self, table_name):
-        """Checks to see if table exists"""
-        try:
-            self.sql_client.send(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=table_name),
-                do_post=False)
-            raise NameError(
-                'Table `{table_name}` already exists. '
-                'Run with `overwrite=True` if you wish to replace the '
-                'table.'.format(table_name=table_name))
-        except CartoException as err:
-            # If table doesn't exist, we get an error from the SQL API
-            self._debug_print(err=err)
-            return False
-
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
 
@@ -1099,18 +1083,7 @@ class CartoContext(object):
             boundaries in `region` (or the world if `region` is ``None``)
         """
         # TODO: create a function out of this?
-        if (isinstance(region, collections.Iterable) and not isinstance(region, str)):
-            if len(region) != 4:
-                raise ValueError(
-                    '`region` should be a list of the geographic bounds of a '
-                    'region in the following order: western longitude, '
-                    'southern latitude, eastern longitude, and northern '
-                    'latitude. For example, Switerland fits in '
-                    '``[5.9559111595,45.8179931641,10.4920501709,'
-                    '47.808380127]``.')
-            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
-                *region)
-        elif isinstance(region, str):
+        if isinstance(region, str):
             # see if it's a table
             try:
                 geom_type = self._geom_type(region)
@@ -1125,7 +1098,17 @@ class CartoContext(object):
                 regionsearch = '"geom_tags"::text ilike \'%{}%\''.format(
                     get_countrytag(region))
                 bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
-
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    '`region` should be a list of the geographic bounds of a '
+                    'region in the following order: western longitude, '
+                    'southern latitude, eastern longitude, and northern '
+                    'latitude. For example, Switerland fits in '
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.')
+            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
+                *region)
         elif region is None:
             bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
         else:
@@ -1149,7 +1132,7 @@ class CartoContext(object):
                     bounds=bounds,
                     timespan=utils.pgquote(timespan),
                     filters='WHERE {}'.format(filters) if filters else '')
-            return self.fetch(query)
+            return self.fetch(query, decode_geom=True)
 
         query = utils.minify_sql((
             'SELECT the_geom, geom_refs',
@@ -1292,7 +1275,7 @@ class CartoContext(object):
             except ValueError:
                 # TODO: make this work for general queries
                 # see if it's a table
-                self.batch_sql_client.create_and_wait_for_completion(
+                self.sql_client.send(
                     'EXPLAIN SELECT * FROM {}'.format(region))
                 boundary = (
                     'SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, '
@@ -1423,7 +1406,7 @@ class CartoContext(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         self._debug_print(query=query)
-        return self.fetch(query)
+        return self.fetch(query, decode_geom=True)
 
     def data(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -1594,9 +1577,11 @@ class CartoContext(object):
                 table_cols=','.join('t.{}'.format(c) for c in table_columns),
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
-        result = self.fetch(query)
         if persist_as:
-            self.write(result, persist_as, overwrite=True)
+            dataset = Dataset.from_query(self, query, persist_as)
+            result = dataset.download(decode_geom=True)
+        else:
+            result = self.fetch(query, decode_geom=True)
 
         return result
 
