@@ -134,7 +134,7 @@ class Map(object):
     @utils.temp_ignore_warnings
     def __init__(self,
                  layers,
-                 context,
+                 context=None,
                  size=(1024, 632),
                  basemap=Basemaps.voyager,
                  bounds=None,
@@ -153,7 +153,7 @@ class Map(object):
     @utils.temp_ignore_warnings
     def init(self):
         map_layers = _get_map_layers(self.layers)
-
+        creds = self.context.creds if self.context else None
         html = (_HTML_TEMPLATE).format(
             width=self.size[0],
             height=self.size[1],
@@ -161,7 +161,7 @@ class Map(object):
                 _get_html_doc(
                     map_layers,
                     bounds=self.bounds,
-                    creds=self.context.creds,
+                    creds=creds,
                     basemap=self.basemap,
                     _carto_vl_path=self._carto_vl_path,
                     _airship_path=self._airship_path)
@@ -226,11 +226,18 @@ def _get_html_doc(sources,
     with open(html_template, 'r') as html_file:
         srcdoc = html_file.read()
 
-    credentials = {
-        'username': creds.username(),
-        'api_key': creds.key(),
-        'base_url': creds.base_url()
-    }
+    if creds is not None:
+        credentials = {
+            'username': creds.username(),
+            'api_key': creds.key(),
+            'base_url': creds.base_url()
+        }
+    else:
+        credentials = {
+            'username': 'cartovl',
+            'api_key': 'default_public',
+            'base_url': ''
+        }
 
     if isinstance(basemap, dict):
         token = basemap.get('token', '')
@@ -307,10 +314,14 @@ def _get_super_bounds(layers, context):
     hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
     local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
 
-    if hosted_layers:
-        hosted_bounds = context._get_bounds(hosted_layers)
+    if context is None and local_layers:
+        local_bounds = _get_bounds_local(local_layers)
+        return _format_bounds(local_bounds)
+
     if local_layers:
         local_bounds = _get_bounds_local(local_layers)
+    if hosted_bounds:
+        hosted_bounds = context._get_bounds(hosted_layers)
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
 
