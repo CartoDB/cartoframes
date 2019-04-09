@@ -3,7 +3,7 @@ import os
 import json
 
 from warnings import warn
-from IPython.display import HTML
+from ..utils.html import HTMLMap
 
 from cartoframes import utils
 from ..basemap.basemaps import Basemaps
@@ -158,7 +158,7 @@ class Map(object):
             width=self.size[0],
             height=self.size[1],
             content=utils.safe_quotes(
-                _get_html_doc(
+                _parse_html_doc(
                     map_layers,
                     bounds=self.bounds,
                     creds=creds,
@@ -168,7 +168,7 @@ class Map(object):
             )
         )
 
-        self.template = HTML(html)
+        self.template = HTMLMap(html)
 
         return self.template
 
@@ -206,12 +206,12 @@ def _is_interactivity_enabled(layer):
     )
 
 
-def _get_html_doc(sources,
-                  bounds,
-                  creds=None,
-                  basemap=None,
-                  _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-                  _airship_path=None):
+def _parse_html_doc(sources,
+                    bounds,
+                    creds=None,
+                    basemap=None,
+                    _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+                    _airship_path=None):
 
     html_template = os.path.join(
         os.path.dirname(__file__),
