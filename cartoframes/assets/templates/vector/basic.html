@@ -80,13 +80,10 @@
 
         var sources = {{sources}};
 
-        {% if lat != none and lng != none and zoom != none %}
-          map.flyTo({
-            center: [{{lng}}, {{lat}}],
-            zoom: {{zoom}}
-          });
-        {% else %}
-          map.fitBounds({{bounds}}, {animate: false});
+        map.fitBounds({{bounds}}, {animate: false});
+
+        {% if camera != none %}
+          map.flyTo({{ camera|clear_none|tojson }});
         {% endif %}
     
         sources.forEach((elem, idx) => {

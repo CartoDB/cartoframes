@@ -213,13 +213,22 @@ def _iframe_size_filter(value):
     return '%spx;' % value
 
 
+def _clear_none_filter(value):
+    return dict(filter(lambda item: item[1] is not None, value.items()))
+
+
+def _get_center(center):
+    if 'lng' not in center or 'lat' not in center:
+        return None
+
+    return [center.get('lng'), center.get('lat')]
+
+
 def _get_html_doc(
         size,
         sources,
         bounds,
-        lat=None,
-        lng=None,
-        zoom=None,
+        viewport=None,
         creds=None,
         basemap=None,
         _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
@@ -232,6 +241,7 @@ def _get_html_doc(
     )
     templates_env.filters['quot'] = _quote_filter
     templates_env.filters['iframe_size'] = _iframe_size_filter
+    templates_env.filters['clear_none'] = _clear_none_filter
     template = templates_env.get_template('vector/basic.html')
     token = ''
 
@@ -268,6 +278,15 @@ def _get_html_doc(
         airship_styles_path = _airship_path + _AIRSHIP_STYLE
         airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
 
+    camera = None
+    if viewport is not None:
+        camera = {
+            'center': _get_center(viewport),
+            'zoom': viewport.get('zoom'),
+            'bearing': viewport.get('bearing'),
+            'pitch': viewport.get('pitch')
+        }
+
     return template.render(
         width=width,
         height=height,
@@ -276,9 +295,7 @@ def _get_html_doc(
         mapboxtoken=token,
         credentials=json.dumps(credentials),
         bounds=bounds,
-        lng=lng,
-        lat=lat,
-        zoom=zoom,
+        camera=camera,
         carto_vl_path=_carto_vl_path,
         airship_components_path=airship_components_path,
         airship_bridge_path=airship_bridge_path,
@@ -385,9 +402,7 @@ def vmap(layers,
          size=None,
          basemap=BaseMaps.voyager,
          bounds=None,
-         lng=None,
-         lat=None,
-         zoom=None,
+         viewport=None,
          **kwargs):
     """CARTO VL-powered interactive map
 
@@ -413,9 +428,12 @@ def vmap(layers,
           properties, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
-        lng (float): Longitude to center the map on. Requires also setting lng and zoom
-        lat (float): Latitude to center the map on. Requires also setting lat and zoom
-        zoom (float): Zoom level to center the map on. Requires setting lat and lng as well.
+        viewport (dict): Configure where and how map will be centered.
+            - lng (float): Longitude to center the map on.
+            - lat (float): Latitude to center the map on.
+            - zoom (float): Zoom level.
+            - bearing (float): Bearing of the map, in degrees. 0 means north is 'up'.
+            - pitch (float): Pitch of the map, in degrees.
 
     Example:
 
@@ -481,7 +499,7 @@ def vmap(layers,
                 bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
             )
 
-        Centering the map can be done via lng, lat and zoom. You need to specify all three.
+        Adjusting the map's viewport.
 
         .. code::
 
@@ -494,9 +512,7 @@ def vmap(layers,
             vector.vmap(
                 [vector.Layer('table in your account'), ],
                 context=cc,
-                lng=10
-                lat=-10
-                zoom=5
+                viewport={'lng': 10, 'lat': 15, 'zoom': 10, 'bearing': 90, 'pitch': 45}
             )
     """
     if bounds:
@@ -528,9 +544,7 @@ def vmap(layers,
             jslayers,
             bounds,
             creds=context.creds,
-            lat=lat,
-            lng=lng,
-            zoom=zoom,
+            viewport=viewport,
             basemap=basemap,
             _carto_vl_path=_carto_vl_path,
             _airship_path=_airship_path)
