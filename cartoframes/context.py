@@ -372,7 +372,7 @@ class CartoContext(object):
             table_name (str): Name of table to delete
 
         Returns:
-            bool: `True` if table es removed
+            bool: `True` if table is removed
 
         """
         dataset = Dataset(self, table_name)
