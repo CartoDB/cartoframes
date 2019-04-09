@@ -1,10 +1,5 @@
 import numpy as np
-import os
-import json
-
-from warnings import warn
 from ..utils.html import HTMLMap
-
 from cartoframes import utils
 from ..basemap.basemaps import Basemaps
 from ..layer.local_layer import LocalLayer
@@ -150,25 +145,18 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
 
-    @utils.temp_ignore_warnings
     def init(self):
-        map_layers = _get_map_layers(self.layers)
-        creds = self.context.creds if self.context else None
-        html = (_HTML_TEMPLATE).format(
+        self.template = HTMLMap()
+
+        self.template.set_content(
             width=self.size[0],
             height=self.size[1],
-            content=utils.safe_quotes(
-                _parse_html_doc(
-                    map_layers,
-                    bounds=self.bounds,
-                    creds=creds,
-                    basemap=self.basemap,
-                    _carto_vl_path=self._carto_vl_path,
-                    _airship_path=self._airship_path)
-            )
-        )
-
-        self.template = HTMLMap(html)
+            sources=_get_map_layers(self.layers),
+            bounds=self.bounds,
+            creds=self.context.creds if self.context else None,
+            basemap=self.basemap,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
 
         return self.template
 
@@ -204,72 +192,6 @@ def _is_interactivity_enabled(layer):
         if layer.interactivity is not None
         else None
     )
-
-
-def _parse_html_doc(sources,
-                    bounds,
-                    creds=None,
-                    basemap=None,
-                    _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
-                    _airship_path=None):
-
-    html_template = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        '..',
-        'assets',
-        'vector.html'
-    )
-
-    token = ''
-
-    with open(html_template, 'r') as html_file:
-        srcdoc = html_file.read()
-
-    if creds is not None:
-        credentials = {
-            'username': creds.username(),
-            'api_key': creds.key(),
-            'base_url': creds.base_url()
-        }
-    else:
-        credentials = {
-            'username': 'cartovl',
-            'api_key': 'default_public',
-            'base_url': ''
-        }
-
-    if isinstance(basemap, dict):
-        token = basemap.get('token', '')
-        if 'style' not in basemap:
-            raise ValueError(
-                'If basemap is a dict, it must have a `style` key'
-            )
-        if not token and basemap.get('style').startswith('mapbox://'):
-            warn('A Mapbox style usually needs a token')
-        basemap = basemap.get('style')
-
-    if (_airship_path is None):
-        airship_components_path = _DEFAULT_AIRSHIP_COMPONENTS_PATH
-        airship_bridge_path = _DEFAULT_AIRSHIP_BRIDGE_PATH
-        airship_styles_path = _DEFAULT_AIRSHIP_STYLES_PATH
-        airship_icons_path = _DEFAULT_AIRSHIP_ICONS_PATH
-    else:
-        airship_components_path = _airship_path + _AIRSHIP_SCRIPT
-        airship_bridge_path = _airship_path + _AIRSHIP_BRIDGE_SCRIPT
-        airship_styles_path = _airship_path + _AIRSHIP_STYLE
-        airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
-
-    return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
-        .replace('@@BASEMAPSTYLE@@', basemap) \
-        .replace('@@MAPBOXTOKEN@@', token) \
-        .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
-        .replace('@@BOUNDS@@', bounds) \
-        .replace('@@CARTO_VL_PATH@@', _carto_vl_path) \
-        .replace('@@AIRSHIP_COMPONENTS_PATH@@', airship_components_path) \
-        .replace('@@AIRSHIP_BRIDGE_PATH@@', airship_bridge_path) \
-        .replace('@@AIRSHIP_STYLES_PATH@@', airship_styles_path) \
-        .replace('@@AIRSHIP_ICONS_PATH@@', airship_icons_path)
 
 
 def _format_bounds(bounds):
