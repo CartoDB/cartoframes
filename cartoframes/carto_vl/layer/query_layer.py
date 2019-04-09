@@ -157,10 +157,16 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         elif isinstance(variables, (list)):
             self.variables = variables
             variables_list = '\n'.join(
-                '{name}: {value}'.format(
+                '@{name}: {value}'.format(
                     name=variable[0],
                     value=variable[1]
                 ) for variable in variables
+            )
+        elif isinstance(variables, dict):
+            self.variables = variables
+            variables_list = '\n'.join(
+                '@{name}: ${value}'.format(variable)
+                for variable in variables
             )
         else:
             raise ValueError('`variables` must be a list of [ name, value ]')
