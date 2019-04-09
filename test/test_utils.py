@@ -1,9 +1,12 @@
+# coding=UTF-8
+
 """Unit tests for cartoframes.utils"""
 import unittest
 from collections import OrderedDict
 
 import pandas as pd
 
+from cartoframes.columns import Column
 from cartoframes.utils import (dict_items, cssify, norm_colname,
                                normalize_colnames, importify_params)
 
@@ -56,10 +59,34 @@ class TestUtils(unittest.TestCase):
                 ('line-comp-op', 'hard-light')]))
         ])
 
-        self.cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3',
-                     'old_soaker', '_testingTesting', 1, 1.0]
-        self.cols_ans = ['unnamed_0', '_201moore', 'acadia_1_2_3',
-                         'old_soaker', '_testingtesting', '_1', '_1_0']
+        self.cols = ['Unnamed: 0',
+                     '201moore',
+                     '201moore',
+                     'Acadia 1.2.3',
+                     'old_soaker',
+                     '_testingTesting',
+                     1,
+                     1.0,
+                     'public',
+                     'à',
+                     '_a',
+                     'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow',
+                     'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow',
+                     'all']
+        self.cols_ans = ['unnamed_0',
+                         '_201moore',
+                         '_201moore_1',
+                         'acadia_1_2_3',
+                         'old_soaker',
+                         '_testingtesting',
+                         '_1',
+                         '_1_0',
+                         'public',
+                         '_a',
+                         '_a_1',
+                         'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
+                         'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesp_1',
+                         '_all']
 
     def test_dict_items(self):
         """utils.dict_items"""
@@ -123,9 +150,13 @@ class TestUtils(unittest.TestCase):
         """utils.norm_colname"""
         for c, a in zip(self.cols, self.cols_ans):
             # changed cols should match answers
-            self.assertEqual(norm_colname(c), a)
+            column = Column(c)
+            a_column = Column(a)
+            column.normalize()
+            a_column.normalize()
+            self.assertEqual(column.name, a)
             # already sql-normed cols should match themselves
-            self.assertEqual(norm_colname(a), a)
+            self.assertEqual(a.column_name, a)
 
     def test_normalize_colnames(self):
         """utils.normalize_colnames"""
