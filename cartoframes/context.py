@@ -372,10 +372,15 @@ class CartoContext(object):
             table_name (str): Name of table to delete
 
         Returns:
-            None
+            bool: `True` if table es removed
+
         """
         dataset = Dataset(self, table_name)
-        return dataset.delete()
+        deleted = dataset.delete()
+        if deleted:
+            return deleted
+
+        raise CartoException('''The table `{}` doesn't exist'''.format(table_name))
 
     def _table_exists(self, table_name):
         """Checks to see if table exists"""
