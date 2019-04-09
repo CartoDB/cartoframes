@@ -128,8 +128,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             cc = cartoframes.CartoContext(base_url=self.baseurl,
                                           api_key=self.apikey)
             for table in tables:
-                cc.delete(table)
-                cc.sql_client.send(sql_drop.format(table))
+                try:
+                    cc.delete(table)
+                    cc.sql_client.send(sql_drop.format(table))
+                except CartoException:
+                    warnings.warn('Error deleting tables')
+
         # TODO: remove the named map templates
 
     def add_map_template(self):
@@ -367,7 +371,15 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             cc.sql_client.send('select * from {}'.format(
                 self.test_delete_table))
 
-        cc.delete('non_existent_table')
+    def test_cartocontext_delete_non_existent_table(self):
+        """context.CartoContext.delete"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl, api_key=self.apikey)
+        table_name = 'non_existent_table'
+
+        with self.assertRaises(
+                CartoException,
+                msg='''The table `{}` doesn't exist'''.format(table_name)):
+            cc.delete(table_name)
 
     def test_cartocontext_send_dataframe(self):
         """context.CartoContext._send_dataframe"""
