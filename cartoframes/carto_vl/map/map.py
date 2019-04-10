@@ -1,6 +1,7 @@
 import numpy as np
-from ..utils.html import HTMLMap
+import collections
 from cartoframes import utils
+from ..utils.html import HTMLMap
 from ..basemap.basemaps import Basemaps
 from ..layer.local_layer import LocalLayer
 
@@ -142,6 +143,7 @@ class Map(object):
         self.basemap = basemap
         self.bounds = _get_bounds(bounds, layers, context)
         self.template = template
+        self.sources = _get_map_layers(layers),
         self._carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
 
@@ -151,7 +153,7 @@ class Map(object):
         self.template.set_content(
             width=self.size[0],
             height=self.size[1],
-            sources=_get_map_layers(self.layers),
+            sources=self.sources,
             bounds=self.bounds,
             creds=self.context.creds if self.context else None,
             basemap=self.basemap,
@@ -170,10 +172,15 @@ def _get_bounds(bounds, layers, context):
 
 
 def _get_map_layers(layers):
-    return list(map(_add_map_layer, layers))
+    if layers is None:
+        return []
+    elif not isinstance(layers, collections.Iterable):
+        return [_set_map_layer(layers)]
+    else:
+        return list(map(_set_map_layer, layers)).reverse()
 
 
-def _add_map_layer(layer):
+def _set_map_layer(layer):
     is_local = isinstance(layer, LocalLayer)
     interactivity = _is_interactivity_enabled(layer)
 
