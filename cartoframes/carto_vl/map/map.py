@@ -2,9 +2,9 @@ import numpy as np
 import collections
 from cartoframes import utils
 from ..utils.html import HTMLMap
-from ..utils import defaults
 from ..basemap.basemaps import Basemaps
 from ..layer.local_layer import LocalLayer
+from .. import defaults
 
 
 class Map(object):

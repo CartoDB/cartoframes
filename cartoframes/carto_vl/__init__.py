@@ -1,4 +1,4 @@
-from .utils import defaults
+from . import defaults
 from .utils.html import HTMLMap
 from .basemap.basemaps import Basemaps
 from .map.map import Map

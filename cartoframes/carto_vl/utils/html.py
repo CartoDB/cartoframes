@@ -1,6 +1,6 @@
 from warnings import warn
 from cartoframes import utils
-from . import defaults
+from .. import defaults
 
 import os
 import json
