@@ -14,11 +14,16 @@ _AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
 _AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
 _AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
 _AIRSHIP_ICONS_STYLE = '/packages/icons/dist/icons.css'
-
 _DEFAULT_AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/v1.0.3/airship.js'
 _DEFAULT_AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v1.0.3/asbridge.js'
 _DEFAULT_AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v1.0.3/airship.css'
 _DEFAULT_AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v1.0.3/icons.css'
+
+_DEFAULT_CREDENTIALS = {
+  'username': 'cartoframes',
+  'api_key': 'default_public',
+  'base_url': ''
+}
 
 
 class HTMLMap(object):
@@ -57,11 +62,7 @@ class HTMLMap(object):
                 'base_url': creds.base_url()
             }
         else:
-            credentials = {
-                'username': 'cartovl',
-                'api_key': 'default_public',
-                'base_url': ''
-            }
+            credentials = _DEFAULT_CREDENTIALS
 
         if isinstance(basemap, dict):
             token = basemap.get('token', '')
