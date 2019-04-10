@@ -42,8 +42,6 @@ class Column(object):
 
         if self._is_reserved() or self._is_unsupported():
             self.name = '_{}'.format(self.name)
-        else:
-            self.name
 
     def _is_reserved(self):
         return self.name.upper() in Column.RESERVED_WORDS
