@@ -428,9 +428,12 @@ def vmap(layers,
           properties, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
-        viewport (dict): Configure where and how map will be centered.
-            - lng (float): Longitude to center the map on.
-            - lat (float): Latitude to center the map on.
+        viewport (dict): Configure where and how map will be centered. If not specified, or
+            specified without lat / lng, automatic bounds or the bounds argument will be used
+            to center the map. You can specify only zoom, bearing or pitch if you desire
+            automatic bounds but want to tweak the viewport.
+            - lng (float): Longitude to center the map on. Must specify lat as well.
+            - lat (float): Latitude to center the map on. Must specify lng as well.
             - zoom (float): Zoom level.
             - bearing (float): A bearing, or heading, is the direction you’re facing,
                 measured clockwise as an angle from true north on a compass.
