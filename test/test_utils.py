@@ -6,9 +6,7 @@ from collections import OrderedDict
 
 import pandas as pd
 
-from cartoframes.columns import Column
-from cartoframes.utils import (dict_items, cssify, norm_colname,
-                               normalize_colnames, importify_params)
+from cartoframes.utils import (dict_items, cssify, importify_params)
 
 
 class TestUtils(unittest.TestCase):
@@ -58,35 +56,6 @@ class TestUtils(unittest.TestCase):
                 ('line-opacity', '0.25'),
                 ('line-comp-op', 'hard-light')]))
         ])
-
-        self.cols = ['Unnamed: 0',
-                     '201moore',
-                     '201moore',
-                     'Acadia 1.2.3',
-                     'old_soaker',
-                     '_testingTesting',
-                     1,
-                     1.0,
-                     'public',
-                     'à',
-                     '_a',
-                     'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow',
-                     'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow',
-                     'all']
-        self.cols_ans = ['unnamed_0',
-                         '_201moore',
-                         '_201moore_1',
-                         'acadia_1_2_3',
-                         'old_soaker',
-                         '_testingtesting',
-                         '_1',
-                         '_1_0',
-                         'public',
-                         '_a',
-                         '_a_1',
-                         'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
-                         'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesp_1',
-                         '_all']
 
     def test_dict_items(self):
         """utils.dict_items"""
@@ -145,29 +114,6 @@ class TestUtils(unittest.TestCase):
                           "0.5; line-opacity: 0.25; "
                           "line-comp-op: hard-light;}"),
                          msg="multi-layer styling")
-
-    def test_norm_colname(self):
-        """utils.norm_colname"""
-        other_cols = []
-        for c, a in zip(self.cols, self.cols_ans):
-            # changed cols should match answers
-            column = Column(c)
-            a_column = Column(a)
-            column.normalize(other_cols)
-            a_column.normalize(other_cols)
-            self.assertEqual(column.name, a)
-            # already sql-normed cols should match themselves
-            self.assertEqual(a_column.name, a)
-            other_cols.append(column.name)
-
-    def test_normalize_colnames(self):
-        """utils.normalize_colnames"""
-        self.assertListEqual(normalize_colnames(self.cols),
-                             self.cols_ans,
-                             msg='unnormalized should be SQL-normalized')
-        self.assertListEqual(normalize_colnames(self.cols_ans),
-                             self.cols_ans,
-                             msg='already normalize columns should not change')
 
     def test_importify_params(self):
         """utils.importify_params"""
