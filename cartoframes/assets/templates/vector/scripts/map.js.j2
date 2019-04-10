@@ -19,7 +19,7 @@ function onReady() {
     dragRotate: false
   });
 
-  const credentials = {{credentials}};
+  const credentials = {{credentials|tojson}};
 
   carto.setDefaultAuth({
     username: credentials['username'],
@@ -30,7 +30,7 @@ function onReady() {
       serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
   });
 
-  const sources = {{sources}};
+  const sources = {{sources|tojson}};
 
   map.fitBounds({{bounds}}, {animate: false});
 

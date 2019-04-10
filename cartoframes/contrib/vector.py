@@ -20,7 +20,6 @@ Here is an example using the example CartoContext from the :py:class:`Examples
         ],
         example_context)
 """
-import json
 from warnings import warn
 from IPython.display import HTML
 import numpy as np
@@ -290,10 +289,10 @@ def _get_html_doc(
     return template.render(
         width=width,
         height=height,
-        sources=json.dumps(sources),
+        sources=sources,
         basemapstyle=basemap,
         mapboxtoken=token,
-        credentials=json.dumps(credentials),
+        credentials=credentials,
         bounds=bounds,
         camera=camera,
         carto_vl_path=_carto_vl_path,
