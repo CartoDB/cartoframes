@@ -97,7 +97,7 @@ class Dataset(object):
     def _copyfrom(self, with_lonlat=None):
         geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(_normalize_column_names(self.df))
+        columns = ','.join(norm for norm, orig in _normalize_column_names(self.df))
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -146,9 +146,9 @@ class Dataset(object):
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
-        cols = ', '.join(col.format(col=c,
-                                    ctype=_dtypes2pg(self.df.dtypes[c]))
-                         for c in _normalize_column_names(self.df))
+        cols = ', '.join(col.format(col=norm,
+                                    ctype=_dtypes2pg(self.df.dtypes[orig]))
+                         for norm, orig in _normalize_column_names(self.df))
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
@@ -202,17 +202,19 @@ def _normalize_column_names(df):
     column_names = [c for c in df.columns if c not in Dataset.RESERVED_COLUMN_NAMES]
     normalized_columns = normalize_names(column_names)
 
+    column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
+
     changed_cols = '\n'.join([
         '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
-            orig=c,
-            new=normalized_columns[i])
-        for i, c in enumerate(column_names) if c != normalized_columns[i]])
+            orig=orig,
+            new=norm)
+        for norm, orig in column_tuples if norm != orig])
 
     if changed_cols != '':
         tqdm.write('The following columns were changed in the CARTO '
                    'copy of this dataframe:\n{0}'.format(changed_cols))
 
-    return normalized_columns
+    return column_tuples
 
 
 def _dtypes2pg(dtype):
