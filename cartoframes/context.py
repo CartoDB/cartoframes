@@ -171,16 +171,17 @@ class CartoContext(object):
 
         self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
         self.auth_client = APIKeyAuthClient(
-                base_url=self.creds.base_url(),
-                api_key=self.creds.key(),
-                session=session,
-                client_id='cartoframes_{}'.format(__version__)
-            )
+            base_url=self.creds.base_url(),
+            api_key=self.creds.key(),
+            session=session,
+            client_id='cartoframes_{}'.format(__version__),
+            user_agent='cartoframes_{}'.format(__version__)
+        )
         self.auth_api_client = AuthAPIClient(
-                base_url=self.creds.base_url(),
-                api_key=self.creds.key(),
-                session=session
-            )
+            base_url=self.creds.base_url(),
+            api_key=self.creds.key(),
+            session=session
+        )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
