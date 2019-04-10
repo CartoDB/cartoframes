@@ -1,5 +1,6 @@
 # coding=UTF-8
 
+import unicodedata
 import re
 
 
@@ -24,70 +25,19 @@ class Column(object):
 
         self.name = str(name)
 
-    def normalize(self):
+    def normalize(self, other_columns):
         self._sanitize()
-        self.name = self._truncate()
+        self._truncate()
+        i = 1
+        while self.name in other_columns:
+            self.name = '{}_{}'.format(self._truncate(length=Column.MAX_LENGTH - 3), str(i))
+            i += 1
+
+        return self.name
 
     def _sanitize(self):
-        name = self.name
-        name = re.sub(r'/<[^>]+>/m', '', name)
-        name = name.lower().encode()
-        name = re.sub(r'/[àáâãäåāă]/', 'a', name)
-        name = re.sub(r'/æ/', 'ae', name)
-        name = re.sub(r'/[ďđ]/', 'd', name)
-        name = re.sub(r'/[çćčĉċ]/', 'c', name)
-        name = re.sub(r'/[èéêëēęěĕė]/', 'e', name)
-        name = re.sub(r'/ƒ/', 'f', name)
-        name = re.sub(r'/[ĝğġģ]/', 'g', name)
-        name = re.sub(r'/[ĥħ]/', 'h', name)
-        name = re.sub(r'/[ììíîïīĩĭ]/', 'i', name)
-        name = re.sub(r'/[įıĳĵ]/', 'j', name)
-        name = re.sub(r'/[ķĸ]/', 'k', name)
-        name = re.sub(r'/[łľĺļŀ]/', 'l', name)
-        name = re.sub(r'/[ñńňņŉŋ]/', 'n', name)
-        name = re.sub(r'/[òóôõöøōőŏŏ]/', 'o', name)
-        name = re.sub(r'/œ/', 'oe', name)
-        name = re.sub(r'/ą/', 'q', name)
-        name = re.sub(r'/[ŕřŗ]/', 'r', name)
-        name = re.sub(r'/[śšşŝș]/', 's', name)
-        name = re.sub(r'/[ťţŧț]/', 't', name)
-        name = re.sub(r'/[ùúûüūůűŭũų]/', 'u', name)
-        name = re.sub(r'/ŵ/', 'w', name)
-        name = re.sub(r'/[ýÿŷ]/', 'y', name)
-        name = re.sub(r'/[žżź]/', 'z', name)
-        name = re.sub(r'/[ÀÁÂÃÄÅĀĂ]/i', 'A', name)
-        name = re.sub(r'/Æ/i', 'AE', name)
-        name = re.sub(r'/[ĎĐ]/i', 'D', name)
-        name = re.sub(r'/[ÇĆČĈĊ]/i', 'C', name)
-        name = re.sub(r'/[ÈÉÊËĒĘĚĔĖ]/i', 'E', name)
-        name = re.sub(r'/Ƒ/i', 'F', name)
-        name = re.sub(r'/[ĜĞĠĢ]/i', 'G', name)
-        name = re.sub(r'/[ĤĦ]/i', 'H', name)
-        name = re.sub(r'/[ÌÌÍÎÏĪĨĬ]/i', 'I', name)
-        name = re.sub(r'/[ĲĴ]/i', 'J', name)
-        name = re.sub(r'/[Ķĸ]/i', 'J', name)
-        name = re.sub(r'/[ŁĽĹĻĿ]/i', 'L', name)
-        name = re.sub(r'/[ÑŃŇŅŉŊ]/i', 'M', name)
-        name = re.sub(r'/[ÒÓÔÕÖØŌŐŎŎ]/i', 'N', name)
-        name = re.sub(r'/Œ/i', 'OE', name)
-        name = re.sub(r'/Ą/i', 'Q', name)
-        name = re.sub(r'/[ŔŘŖ]/i', 'R', name)
-        name = re.sub(r'/[ŚŠŞŜȘ]/i', 'S', name)
-        name = re.sub(r'/[ŤŢŦȚ]/i', 'T', name)
-        name = re.sub(r'/[ÙÚÛÜŪŮŰŬŨŲ]/i', 'U', name)
-        name = re.sub(r'/Ŵ/i', 'W', name)
-        name = re.sub(r'/[ÝŸŶ]/i', 'Y', name)
-        name = re.sub(r'/[ŽŻŹ]/i', 'Z', name)
+        self.name = self._slugify(self.name)
 
-        name = re.sub(r'/&.+?;/', '-', name)
-        name = re.sub(r'/[^a-z0-9 _-]/', '-', name)
-        name = re.sub(r'/\s+/', '-', name)
-        name = re.sub(r'/-+/', '-', name)
-        name = re.sub(r'/-/', ' ', name)
-        name = re.sub(r'/ /', '-', name)
-        name = re.sub(r'/-/', '_', name)
-
-        self.name = name
         if self._is_reserved() or self._is_unsupported():
             self.name = '_{}'.format(self.name)
         else:
@@ -97,7 +47,16 @@ class Column(object):
         return self.name.upper() in Column.RESERVED_WORDS
 
     def _is_unsupported(self):
-        return not re.match(r'/^[a-zA-Z_]/', self.name)
+        return not re.match(r'^[a-zA-Z_]+[a-zA-Z_0-9]*$', self.name)
 
     def _truncate(self, length=MAX_LENGTH):
         return self.name[:length]
+
+    def _slugify(self, value, allow_unicode=False):
+        value = str(value).decode()
+        if allow_unicode:
+            value = unicodedata.normalize('NFKC', value)
+        else:
+            value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+        value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+        return re.sub(r'[-\s]+', '_', value)

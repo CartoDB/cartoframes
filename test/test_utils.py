@@ -148,15 +148,17 @@ class TestUtils(unittest.TestCase):
 
     def test_norm_colname(self):
         """utils.norm_colname"""
+        other_cols = []
         for c, a in zip(self.cols, self.cols_ans):
             # changed cols should match answers
             column = Column(c)
             a_column = Column(a)
-            column.normalize()
-            a_column.normalize()
+            column.normalize(other_cols)
+            a_column.normalize(other_cols)
             self.assertEqual(column.name, a)
             # already sql-normed cols should match themselves
-            self.assertEqual(a.column_name, a)
+            self.assertEqual(a_column.name, a)
+            other_cols.append(column.name)
 
     def test_normalize_colnames(self):
         """utils.normalize_colnames"""
