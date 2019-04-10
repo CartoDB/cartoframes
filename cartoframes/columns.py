@@ -86,9 +86,7 @@ def normalize_names(column_names):
             * 1.0 -> '_1_0',
             * 'public' -> 'public',
             * 'SELECT' -> '_select',
-            * 'à' -> 'aa',
-            * 'aa' -> 'aa_1',
-            * '_a' -> '_a',
+            * 'à' -> 'a',
             * 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -> \
              'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
             * 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -> \
