@@ -1,6 +1,7 @@
 # coding=UTF-8
 
 import re
+import sys
 
 from unidecode import unidecode
 
@@ -56,7 +57,11 @@ class Column(object):
 
     def _slugify(self, value):
         value = str(value).lower()
-        value = unidecode(value.decode('utf-8'))
+
+        if sys.version_info[0] < 3:
+            value = unidecode(value.decode('utf-8'))
+        else:
+            value = unidecode(value)
 
         value = re.sub(r'<[^>]+>', '', value)
         value = re.sub(r'&.+?;', '-', value)
