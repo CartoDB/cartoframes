@@ -129,7 +129,7 @@ class Map(object):
 
     @utils.temp_ignore_warnings
     def __init__(self,
-                 layers,
+                 layers=None,
                  context=None,
                  size=(1024, 632),
                  basemap=Basemaps.voyager,
@@ -137,13 +137,12 @@ class Map(object):
                  template=None,
                  **kwargs):
 
-        self.layers = layers
+        self.layers = _init_layers(layers)
         self.context = context
         self.size = size
         self.basemap = basemap
-        self.bounds = _get_bounds(bounds, layers, context)
+        self.bounds = bounds
         self.template = template
-        self.sources = _get_map_layers(layers),
         self._carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
 
@@ -153,8 +152,8 @@ class Map(object):
         self.template.set_content(
             width=self.size[0],
             height=self.size[1],
-            sources=self.sources,
-            bounds=self.bounds,
+            sources=_get_map_layers(self.layers),
+            bounds=_get_bounds(self.bounds, self.layers, self.context),
             creds=self.context.creds if self.context else None,
             basemap=self.basemap,
             _carto_vl_path=self._carto_vl_path,
@@ -171,13 +170,15 @@ def _get_bounds(bounds, layers, context):
     )
 
 
-def _get_map_layers(layers):
-    if layers is None:
-        return []
-    elif not isinstance(layers, collections.Iterable):
-        return [_set_map_layer(layers)]
+def _init_layers(layers):
+    if not isinstance(layers, collections.Iterable):
+        return [layers]
     else:
-        return list(map(_set_map_layer, layers)).reverse()
+        return layers.reverse()
+
+
+def _get_map_layers(layers):
+    return list(map(_set_map_layer, layers))
 
 
 def _set_map_layer(layer):
