@@ -434,7 +434,7 @@ def vmap(layers,
             - lng (float): Longitude to center the map on. Must specify lat as well.
             - lat (float): Latitude to center the map on. Must specify lng as well.
             - zoom (float): Zoom level.
-            - bearing (float): A bearing, or heading, is the direction you’re facing,
+            - bearing (float): A bearing, or heading, is the direction you're facing,
                 measured clockwise as an angle from true north on a compass.
                 (north is 0°, east is 90°, south is 180°, and west is 270°).
             - pitch (float): The angle towards the horizon measured in degrees, with a
