@@ -1,29 +1,9 @@
 from warnings import warn
 from cartoframes import utils
+from . import defaults
 
 import os
 import json
-
-_HTML_TEMPLATE = '<iframe srcdoc="{srcdoc}" width="{width}" height="{height}"></iframe>'
-
-# CARTO VL
-_DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js'
-
-# AIRSHIP
-_AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
-_AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
-_AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
-_AIRSHIP_ICONS_STYLE = '/packages/icons/dist/icons.css'
-_DEFAULT_AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/v1.0.3/airship.js'
-_DEFAULT_AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v1.0.3/asbridge.js'
-_DEFAULT_AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v1.0.3/airship.css'
-_DEFAULT_AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v1.0.3/icons.css'
-
-_DEFAULT_CREDENTIALS = {
-  'username': 'cartoframes',
-  'api_key': 'default_public',
-  'base_url': ''
-}
 
 
 class HTMLMap(object):
@@ -34,7 +14,7 @@ class HTMLMap(object):
 
     def set_content(
         self, width, height, sources, bounds, creds=None, basemap=None,
-            _carto_vl_path=_DEFAULT_CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         html = self._parse_html_content(
             sources, bounds, creds, basemap, _carto_vl_path, _airship_path)
@@ -45,7 +25,7 @@ class HTMLMap(object):
 
     def _parse_html_content(
         self, sources, bounds, creds=None, basemap=None,
-            _carto_vl_path=_DEFAULT_CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         html_template = os.path.join(
             os.path.dirname(__file__), '..', '..', 'assets', 'vector.html')
@@ -62,7 +42,7 @@ class HTMLMap(object):
                 'base_url': creds.base_url()
             }
         else:
-            credentials = _DEFAULT_CREDENTIALS
+            credentials = defaults._CREDENTIALS
 
         if isinstance(basemap, dict):
             token = basemap.get('token', '')
@@ -75,15 +55,15 @@ class HTMLMap(object):
             basemap = basemap.get('style')
 
         if (_airship_path is None):
-            airship_components_path = _DEFAULT_AIRSHIP_COMPONENTS_PATH
-            airship_bridge_path = _DEFAULT_AIRSHIP_BRIDGE_PATH
-            airship_styles_path = _DEFAULT_AIRSHIP_STYLES_PATH
-            airship_icons_path = _DEFAULT_AIRSHIP_ICONS_PATH
+            airship_components_path = defaults._AIRSHIP_COMPONENTS_PATH
+            airship_bridge_path = defaults._AIRSHIP_BRIDGE_PATH
+            airship_styles_path = defaults._AIRSHIP_STYLES_PATH
+            airship_icons_path = defaults._AIRSHIP_ICONS_PATH
         else:
-            airship_components_path = _airship_path + _AIRSHIP_SCRIPT
-            airship_bridge_path = _airship_path + _AIRSHIP_BRIDGE_SCRIPT
-            airship_styles_path = _airship_path + _AIRSHIP_STYLE
-            airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
+            airship_components_path = _airship_path + defaults._AIRSHIP_SCRIPT
+            airship_bridge_path = _airship_path + defaults._AIRSHIP_BRIDGE_SCRIPT
+            airship_styles_path = _airship_path + defaults._AIRSHIP_STYLE
+            airship_icons_path = _airship_path + defaults._AIRSHIP_ICONS_STYLE
 
         return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
             .replace('@@BASEMAPSTYLE@@', basemap) \
@@ -97,7 +77,7 @@ class HTMLMap(object):
             .replace('@@AIRSHIP_ICONS_PATH@@', airship_icons_path)
 
     def _repr_html_(self):
-        return (_HTML_TEMPLATE).format(
+        return (defaults._HTML_TEMPLATE).format(
             width=self.width,
             height=self.height,
             srcdoc=self.srcdoc)

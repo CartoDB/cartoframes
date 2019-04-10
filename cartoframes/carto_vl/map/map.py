@@ -2,23 +2,9 @@ import numpy as np
 import collections
 from cartoframes import utils
 from ..utils.html import HTMLMap
+from ..utils import defaults
 from ..basemap.basemaps import Basemaps
 from ..layer.local_layer import LocalLayer
-
-# CARTO VL
-_DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.1.1/carto-vl.min.js'
-
-# AIRSHIP
-_AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
-_AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
-_AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
-_AIRSHIP_ICONS_STYLE = '/packages/icons/dist/icons.css'
-
-_DEFAULT_AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/v1.0.3/airship.js'
-_DEFAULT_AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v1.0.3/asbridge.js'
-_DEFAULT_AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v1.0.3/airship.css'
-_DEFAULT_AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v1.0.3/icons.css'
-_HTML_TEMPLATE = '<iframe srcdoc="{content}" width="{width}" height="{height}"></iframe>'
 
 
 class Map(object):
@@ -138,22 +124,25 @@ class Map(object):
                  **kwargs):
 
         self.layers = _init_layers(layers)
+        self.sources = None
         self.context = context
         self.size = size
         self.basemap = basemap
         self.bounds = bounds
         self.template = template
-        self._carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+        self._carto_vl_path = kwargs.get('_carto_vl_path', defaults._CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
 
     def init(self):
         self.template = HTMLMap()
+        self.sources = _get_map_layers(self.layers)
+        self.bounds = _get_bounds(self.bounds, self.layers, self.context)
 
         self.template.set_content(
             width=self.size[0],
             height=self.size[1],
-            sources=_get_map_layers(self.layers),
-            bounds=_get_bounds(self.bounds, self.layers, self.context),
+            sources=self.sources,
+            bounds=self.bounds,
             creds=self.context.creds if self.context else None,
             basemap=self.basemap,
             _carto_vl_path=self._carto_vl_path,
@@ -171,13 +160,17 @@ def _get_bounds(bounds, layers, context):
 
 
 def _init_layers(layers):
+    if layers is None:
+        return None
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
-        return layers.reverse()
+        return layers[::-1]
 
 
 def _get_map_layers(layers):
+    if layers is None:
+        return None
     return list(map(_set_map_layer, layers))
 
 
@@ -233,14 +226,19 @@ def _dict_bounds(bounds):
 
 def _get_super_bounds(layers, context):
     """"""
-    hosted_layers = [
-        layer for layer in layers
-        if not isinstance(layer, LocalLayer)
-    ]
-    local_layers = [
-        layer for layer in layers
-        if isinstance(layer, LocalLayer)
-    ]
+    if layers:
+        hosted_layers = [
+            layer for layer in layers
+            if not isinstance(layer, LocalLayer)
+        ]
+        local_layers = [
+            layer for layer in layers
+            if isinstance(layer, LocalLayer)
+        ]
+    else:
+        hosted_layers = []
+        local_layers = []
+
     hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
     local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
 
@@ -250,7 +248,7 @@ def _get_super_bounds(layers, context):
 
     if local_layers:
         local_bounds = _get_bounds_local(local_layers)
-    if hosted_bounds:
+    if hosted_bounds and context:
         hosted_bounds = context._get_bounds(hosted_layers)
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
@@ -291,15 +289,11 @@ def _combine_bounds(bbox1, bbox2):
     WORLD = {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
     ALL_KEYS = set(WORLD.keys())
 
-    def dict_all_nones(bbox_dict):
-        """Returns True if all dict values are None"""
-        return all(v is None for v in bbox_dict.values())
-
     # if neither are defined, use the world
     if not bbox1 and not bbox2:
         return WORLD
     # if all nones, use the world
-    if dict_all_nones(bbox1) and dict_all_nones(bbox2):
+    if _dict_all_nones(bbox1) and _dict_all_nones(bbox2):
         return WORLD
 
     assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
@@ -307,20 +301,26 @@ def _combine_bounds(bbox1, bbox2):
     # create dict with cardinal directions and None-valued keys
     outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
 
-    def conv2nan(val):
-        """convert Nones to np.nans"""
-        return np.nan if val is None else val
-
     # set values and/or defaults
     for coord in ('north', 'east'):
         outbbox[coord] = np.nanmax([
-                conv2nan(bbox1[coord]),
-                conv2nan(bbox2[coord])
+                _conv2nan(bbox1[coord]),
+                _conv2nan(bbox2[coord])
             ])
     for coord in ('south', 'west'):
         outbbox[coord] = np.nanmin([
-                conv2nan(bbox1[coord]),
-                conv2nan(bbox2[coord])
+                _conv2nan(bbox1[coord]),
+                _conv2nan(bbox2[coord])
             ])
 
     return outbbox
+
+
+def _dict_all_nones(bbox_dict):
+    """Returns True if all dict values are None"""
+    return all(v is None for v in bbox_dict.values())
+
+
+def _conv2nan(val):
+    """convert Nones to np.nans"""
+    return np.nan if val is None else val

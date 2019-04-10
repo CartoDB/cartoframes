@@ -610,7 +610,7 @@ class CartoContext(object):
 
         Examples:
             Create a map with two data :py:class:`Layer
-            <cartoframes.layer.Layer>`\s, and one :py:class:`BaseMap
+            <cartoframes.layer.Layer>`\\s, and one :py:class:`BaseMap
             <cartoframes.layer.BaseMap>` layer::
 
                 import cartoframes
