@@ -29,6 +29,14 @@ def cssify(css_dict):
     return css.strip()
 
 
+def unique_colname(suggested, existing):
+    """Given a suggested column name and a list of existing names, returns
+    a name that is not present at existing by prepending _ characters."""
+    while suggested in existing:
+        suggested = '_{0}'.format(suggested)
+    return suggested
+
+
 def importify_params(param_arg):
     """Convert parameter arguments to what CARTO's Import API expects"""
     if isinstance(param_arg, bool):
