@@ -23,7 +23,8 @@ import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.utils import dict_items, norm_colname
+from cartoframes.columns import normalize_name
+from cartoframes.utils import dict_items
 from utils import _UserUrlLoader
 
 WILL_SKIP = False
@@ -81,33 +82,33 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
-        self.test_write_table = norm_colname(
+        self.test_write_table = normalize_name(
             'cf_test_table_{}'.format(test_slug)
         )
 
-        self.mixed_case_table = norm_colname(
+        self.mixed_case_table = normalize_name(
             'AbCdEfG_{}'.format(test_slug)
         )
 
         # for batch writing to carto
-        self.test_write_batch_table = norm_colname(
+        self.test_write_batch_table = normalize_name(
             'cf_testbatch_table_{}'.format(test_slug)
         )
 
-        self.test_write_lnglat_table = norm_colname(
+        self.test_write_lnglat_table = normalize_name(
             'cf_testwrite_lnglat_table_{}'.format(test_slug)
         )
 
-        self.write_named_index = norm_colname(
+        self.write_named_index = normalize_name(
             'cf_testwrite_non_default_index_{}'.format(test_slug)
         )
 
         # for queries
-        self.test_query_table = norm_colname(
+        self.test_query_table = normalize_name(
             'cf_testquery_table_{}'.format(test_slug)
         )
 
-        self.test_delete_table = norm_colname(
+        self.test_delete_table = normalize_name(
             'cf_testdelete_table_{}'.format(test_slug)
         )
 
