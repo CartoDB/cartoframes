@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .query_layer import QueryLayer
 import numpy as np
 try:
