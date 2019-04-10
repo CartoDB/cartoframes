@@ -70,8 +70,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         if self.apikey and self.baseurl:
             for table in tables:
-                self.cc.delete(table)
-                self.cc.sql_client.send(sql_drop.format(table))
+                try:
+                    self.cc.delete(table)
+                    self.cc.sql_client.send(sql_drop.format(table))
+                except CartoException:
+                    warnings.warn('Error deleting tables')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write_points_dataset(self):
