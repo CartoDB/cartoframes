@@ -6,3 +6,4 @@ tqdm>=4.14.0
 IPython>=5.0.0,<6.0.0;python_version<="2.7"
 IPython>=6.0.0;python_version>="3.0"
 appdirs>=1.4.3
+unidecode>=1.0.23

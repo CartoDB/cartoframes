@@ -2,6 +2,8 @@
 
 import re
 
+from unidecode import unidecode
+
 
 class Column(object):
     MAX_LENGTH = 63
@@ -54,31 +56,9 @@ class Column(object):
 
     def _slugify(self, value):
         value = str(value).lower()
-        value = re.sub(r'<[^>]+>', '', value)
-        value = re.sub(r'[àáâãäåāă]', 'a', value)
-        value = re.sub(r'æ', 'ae', value)
-        value = re.sub(r'[ďđ]', 'd', value)
-        value = re.sub(r'[çćčĉċ]', 'c', value)
-        value = re.sub(r'[èéêëēęěĕė]', 'e', value)
-        value = re.sub(r'ƒ', 'f', value)
-        value = re.sub(r'[ĝğġģ]', 'g', value)
-        value = re.sub(r'[ĥħ]', 'h', value)
-        value = re.sub(r'[ììíîïīĩĭ]', 'i', value)
-        value = re.sub(r'[įıĳĵ]', 'j', value)
-        value = re.sub(r'[ķĸ]', 'k', value)
-        value = re.sub(r'[łľĺļŀ]', 'l', value)
-        value = re.sub(r'[ñńňņŉŋ]', 'n', value)
-        value = re.sub(r'[òóôõöøōőŏŏ]', 'o', value)
-        value = re.sub(r'œ', 'oe', value)
-        value = re.sub(r'ą', 'q', value)
-        value = re.sub(r'[ŕřŗ]', 'r', value)
-        value = re.sub(r'[śšşŝș]', 's', value)
-        value = re.sub(r'[ťţŧț]', 't', value)
-        value = re.sub(r'[ùúûüūůűŭũų]', 'u', value)
-        value = re.sub(r'ŵ', 'w', value)
-        value = re.sub(r'[ýÿŷ]', 'y', value)
-        value = re.sub(r'[žżź]', 'z', value)
+        value = unidecode(value.decode('utf-8'))
 
+        value = re.sub(r'<[^>]+>', '', value)
         value = re.sub(r'&.+?;', '-', value)
         value = re.sub(r'[^a-z0-9 _-]', '-', value).strip().lower()
         value = re.sub(r'\s+', '-', value)
