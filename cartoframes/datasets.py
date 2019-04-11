@@ -52,6 +52,13 @@ class Dataset(object):
 
         return _clean_dataframe_from_carto(df, table_columns, decode_geom)
 
+    def delete(self):
+        if self.exists():
+            self.cc.sql_client.send(self._drop_table_query(False))
+            return True
+
+        return False
+
     def exists(self):
         """Checks to see if table exists"""
         try:
@@ -121,8 +128,10 @@ class Dataset(object):
             csv_row += '\n'
             yield csv_row.encode()
 
-    def _drop_table_query(self):
-        return '''DROP TABLE IF EXISTS {table_name}'''.format(table_name=self.table_name)
+    def _drop_table_query(self, if_exists=True):
+        return '''DROP TABLE {if_exists} {table_name}'''.format(
+            table_name=self.table_name,
+            if_exists='IF EXISTS' if if_exists else '')
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
