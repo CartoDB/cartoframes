@@ -372,20 +372,15 @@ class CartoContext(object):
             table_name (str): Name of table to delete
 
         Returns:
-            None
+            bool: `True` if table is removed
+
         """
-        try:
-            resp = self.auth_client.send(
-                'api/v1/viz/{table_name}'.format(table_name=table_name),
-                http_method='DELETE'
-            )
-            resp.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            warn('Failed to delete the following table from CARTO '
-                 'account: `{table_name}`. ({err})'.format(
-                     table_name=table_name,
-                     err=err))
-        return None
+        dataset = Dataset(self, table_name)
+        deleted = dataset.delete()
+        if deleted:
+            return deleted
+
+        raise CartoException('''The table `{}` doesn't exist'''.format(table_name))
 
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
@@ -610,7 +605,7 @@ class CartoContext(object):
         dataframe = None
         if is_select:
             if table_name:
-                dataset = Dataset.from_query(self, query, table_name)
+                dataset = Dataset.create_from_query(self, query, table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
             else:
                 dataframe = self.fetch(query, decode_geom=decode_geom)
@@ -1552,13 +1547,7 @@ class CartoContext(object):
                 table_cols=','.join('t.{}'.format(c) for c in table_columns),
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
-        if persist_as:
-            dataset = Dataset.from_query(self, query, persist_as)
-            result = dataset.download(decode_geom=True)
-        else:
-            result = self.fetch(query, decode_geom=True)
-
-        return result
+        return self.query(query, table_name=persist_as, decode_geom=False, is_select=True)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,

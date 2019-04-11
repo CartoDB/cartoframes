@@ -20,8 +20,6 @@ Here is an example using the example CartoContext from the :py:class:`Examples
         ],
         example_context)
 """
-import os
-import json
 from warnings import warn
 from IPython.display import HTML
 import numpy as np
@@ -32,6 +30,21 @@ except ImportError:
     HAS_GEOPANDAS = False
 
 from .. import utils
+from jinja2 import Environment, PackageLoader
+
+# CARTO VL
+_DEFAULT_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.2.3/carto-vl.min.js'
+
+# AIRSHIP
+_AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
+_AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
+_AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
+_AIRSHIP_ICONS_STYLE = '/packages/icons/dist/icons.css'
+
+_DEFAULT_AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/v2/airship.js'
+_DEFAULT_AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v2/asbridge.js'
+_DEFAULT_AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2/airship.css'
+_DEFAULT_AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2/icons.css'
 
 
 class BaseMaps(object):  # pylint: disable=too-few-public-methods
@@ -188,17 +201,55 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         self.styling = '\n'.join([interactive_cols, self.styling])
 
 
-def _get_html_doc(sources, bounds, creds=None, basemap=None):
-    html_template = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        'assets',
-        'vector.html'
+def _quote_filter(value):
+    return utils.safe_quotes(value.unescape())
+
+
+def _iframe_size_filter(value):
+    if isinstance(value, str):
+        return value
+
+    return '%spx;' % value
+
+
+def _clear_none_filter(value):
+    return dict(filter(lambda item: item[1] is not None, value.items()))
+
+
+def _get_center(center):
+    if 'lng' not in center or 'lat' not in center:
+        return None
+
+    return [center.get('lng'), center.get('lat')]
+
+
+def _get_html_doc(
+        size,
+        sources,
+        bounds,
+        viewport=None,
+        creds=None,
+        basemap=None,
+        _carto_vl_path=_DEFAULT_CARTO_VL_PATH,
+        _airship_path=None):
+
+    # We should move this to a class eventually, and not load it each time
+    templates_env = Environment(
+        loader=PackageLoader('cartoframes', 'assets/templates'),
+        autoescape=True
     )
+    templates_env.filters['quot'] = _quote_filter
+    templates_env.filters['iframe_size'] = _iframe_size_filter
+    templates_env.filters['clear_none'] = _clear_none_filter
+    template = templates_env.get_template('vector/basic.html.j2')
     token = ''
 
-    with open(html_template, 'r') as html_file:
-        srcdoc = html_file.read()
+    width = None
+    height = None
+
+    if size is not None:
+        width = size[0]
+        height = size[1]
 
     credentials = {
         'username': creds.username(),
@@ -215,11 +266,41 @@ def _get_html_doc(sources, bounds, creds=None, basemap=None):
             warn('A Mapbox style usually needs a token')
         basemap = basemap.get('style')
 
-    return srcdoc.replace('@@SOURCES@@', json.dumps(sources)) \
-                 .replace('@@BASEMAPSTYLE@@', basemap) \
-                 .replace('@@MAPBOXTOKEN@@', token) \
-                 .replace('@@CREDENTIALS@@', json.dumps(credentials)) \
-                 .replace('@@BOUNDS@@', bounds)
+    if (_airship_path is None):
+        airship_components_path = _DEFAULT_AIRSHIP_COMPONENTS_PATH
+        airship_bridge_path = _DEFAULT_AIRSHIP_BRIDGE_PATH
+        airship_styles_path = _DEFAULT_AIRSHIP_STYLES_PATH
+        airship_icons_path = _DEFAULT_AIRSHIP_ICONS_PATH
+    else:
+        airship_components_path = _airship_path + _AIRSHIP_SCRIPT
+        airship_bridge_path = _airship_path + _AIRSHIP_BRIDGE_SCRIPT
+        airship_styles_path = _airship_path + _AIRSHIP_STYLE
+        airship_icons_path = _airship_path + _AIRSHIP_ICONS_STYLE
+
+    camera = None
+    if viewport is not None:
+        camera = {
+            'center': _get_center(viewport),
+            'zoom': viewport.get('zoom'),
+            'bearing': viewport.get('bearing'),
+            'pitch': viewport.get('pitch')
+        }
+
+    return template.render(
+        width=width,
+        height=height,
+        sources=sources,
+        basemapstyle=basemap,
+        mapboxtoken=token,
+        credentials=credentials,
+        bounds=bounds,
+        camera=camera,
+        carto_vl_path=_carto_vl_path,
+        airship_components_path=airship_components_path,
+        airship_bridge_path=airship_bridge_path,
+        airship_styles_path=airship_styles_path,
+        airship_icons_path=airship_icons_path
+    )
 
 
 class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
@@ -317,9 +398,11 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 @utils.temp_ignore_warnings
 def vmap(layers,
          context,
-         size=(1024, 632),
+         size=None,
          basemap=BaseMaps.voyager,
-         bounds=None):
+         bounds=None,
+         viewport=None,
+         **kwargs):
     """CARTO VL-powered interactive map
 
     Args:
@@ -330,8 +413,10 @@ def vmap(layers,
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
-        size (tuple of int): a (width, height) pair for the size of the map.
-          Default is (1024, 632)
+        size (tuple of int or str): a (width, height) pair for the size of the map.
+          Default is None, which makes the map 100% wide and 640px tall. If specified as int,
+          will be used as pixels, but you can also use string values for the CSS attributes.
+          So, you could specify it as size=('75%', 250).
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
@@ -342,6 +427,20 @@ def vmap(layers,
           properties, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
+        viewport (dict): Configure where and how map will be centered. If not specified, or
+            specified without lat / lng, automatic bounds or the bounds argument will be used
+            to center the map. You can specify only zoom, bearing or pitch if you desire
+            automatic bounds but want to tweak the viewport.
+            - lng (float): Longitude to center the map on. Must specify lat as well.
+            - lat (float): Latitude to center the map on. Must specify lng as well.
+            - zoom (float): Zoom level.
+            - bearing (float): A bearing, or heading, is the direction you're facing,
+                measured clockwise as an angle from true north on a compass.
+                (north is 0, east is 90, south is 180, and west is 270).
+            - pitch (float): The angle towards the horizon measured in degrees, with a
+                range between 0 and 60 degrees. Zero degrees results in a two-dimensional
+                map, as if your line of sight forms a perpendicular angle with
+                the earth's surface.
 
     Example:
 
@@ -406,6 +505,22 @@ def vmap(layers,
                 context=cc,
                 bounds={'west': -10, 'east': 10, 'north': -10, 'south': 10}
             )
+
+        Adjusting the map's viewport.
+
+        .. code::
+
+            from cartoframes.contrib import vector
+            from cartoframes import CartoContext
+            cc = CartoContext(
+                base_url='https://<username>.carto.com',
+                api_key='your api key'
+            )
+            vector.vmap(
+                [vector.Layer('table in your account'), ],
+                context=cc,
+                viewport={'lng': 10, 'lat': 15, 'zoom': 10, 'bearing': 90, 'pitch': 45}
+            )
     """
     if bounds:
         bounds = _format_bounds(bounds)
@@ -427,16 +542,19 @@ def vmap(layers,
             'interactivity': intera,
             'legend': layer.legend
         })
-    html = (
-        '<iframe srcdoc="{content}" width="{width}" height="{height}">'
-        '</iframe>'
-        ).format(
-            width=size[0],
-            height=size[1],
-            content=utils.safe_quotes(
-                _get_html_doc(jslayers, bounds, context.creds, basemap=basemap)
-            )
-        )
+
+    _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+    _airship_path = kwargs.get('_airship_path', None)
+
+    html = _get_html_doc(
+            size,
+            jslayers,
+            bounds,
+            creds=context.creds,
+            viewport=viewport,
+            basemap=basemap,
+            _carto_vl_path=_carto_vl_path,
+            _airship_path=_airship_path)
     return HTML(html)
 
 
