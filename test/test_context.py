@@ -23,6 +23,7 @@ import pandas as pd
 import IPython
 
 import cartoframes
+from cartoframes.datasets import Dataset
 from cartoframes.utils import dict_items, norm_colname
 from utils import _UserUrlLoader
 
@@ -633,6 +634,35 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
                 FROM cte
             ''')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_execute(self):
+        """context.CartoContext.execute"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
+        df = df.astype({'vals': str, 'ids': str})
+        cc.write(df, self.test_write_table, overwrite=True)
+
+        self.assertEquals(Dataset(cc, self.test_write_table).exists(), True)
+
+        cc.execute('''
+            DROP TABLE {table_name}
+            '''.format(table_name=self.test_write_table))
+
+        self.assertEquals(Dataset(cc, self.test_write_table).exists(), False)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_execute_wrong_query(self):
+        """context.CartoContext.execute"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        with self.assertRaises(CartoException):
+            cc.execute('''
+                DROPP TABLE {table_name}
+                '''.format(table_name=self.test_write_table))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map(self):
