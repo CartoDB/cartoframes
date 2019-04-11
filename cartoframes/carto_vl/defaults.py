@@ -16,3 +16,10 @@ _CREDENTIALS = {
   'api_key': 'default_public',
   'base_url': ''
 }
+
+_WORLD_BOUNDS = {
+  'west': -180,
+  'south': -85.1,
+  'east': 180,
+  'north': 85.1
+}

@@ -142,35 +142,40 @@
           closeOnClick: false
         });
 
-        if (elem.interactivity.event == 'click') {
-          setPopupsClick(tempPopup, interactivity, elem.interactivity.header);
-        } else if (elem.interactivity.event == 'hover') {
-          setPopupsHover(tempPopup, interactivity, elem.interactivity.header);
+        const { event, header, values} = elem.interactivity;
+
+        if (event === 'click') {
+          setPopupsClick(tempPopup, interactivity, header, values);
+        } else if (event === 'hover') {
+          setPopupsHover(tempPopup, interactivity, header, values);
         }
       }
 
-      function setPopupsClick(tempPopup, intera, popupHeader) {
-        intera.off('featureHover', (event) => {
-            updatePopup(tempPopup, event, popupHeader)
+      function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
+        interactivity.off('featureHover', (event) => {
+            updatePopup(tempPopup, event, popupHeader, values)
         });
-        intera.on('featureClick', (event) => {
-            updatePopup(tempPopup, event, popupHeader, popupHeader)
+        interactivity.on('featureClick', (event) => {
+            updatePopup(tempPopup, event, popupHeader, values)
         });
       }
       
-      function setPopupsHover(tempPopup, intera, popupHeader) {
-        intera.off('featureClick', (event) => {
-            updatePopup(tempPopup, event, popupHeader)
+      function setPopupsHover(tempPopup, interactivity, popupHeader, values) {
+        interactivity.off('featureClick', (event) => {
+            updatePopup(tempPopup, event, popupHeader, values)
         });
-        intera.on('featureHover', (event) => {
-            updatePopup(tempPopup, event, popupHeader)
+        interactivity.on('featureHover', (event) => {
+            updatePopup(tempPopup, event, popupHeader, values)
         });
       }
 
-      function updatePopup(layer_popup, event, popupHeader) {
+      function updatePopup(layer_popup, event, popupHeader, values) {
         if (event.features.length > 0) {
           const feature = event.features[0];
-          const vars = feature.variables;
+          const variables = values.length
+            ? Object.keys(feature.variables).filter(variable => values.include(variable))
+            : Object.keys(feature.variables);
+
           let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
           
           Object.keys(feature.variables).forEach((name) => {

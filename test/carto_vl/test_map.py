@@ -64,6 +64,34 @@ class TestMapLocalLayers(unittest.TestCase):
         ])
         self.assertEqual(len(carto_vl_map.sources), 2)
 
+    def test_interactive_layer(self):
+        """should indicate if the layer has interactivity enabled"""
+        layer_1 = _build_local_source([-10, 0], [-10, 0])
+        interactivity = {'event': 'click'}
+        carto_vl_local_layer = carto_vl.LocalLayer(
+            layer_1,
+            interactivity=interactivity
+        )
+
+        carto_vl_map = carto_vl.Map(carto_vl_local_layer)
+        carto_vl_map.init()
+        self.assertTrue(carto_vl_map.sources[0].get('interactivity'))
+
+    def test_default_interactive_layer(self):
+        """should get the default event if the interactivity is set to True"""
+        layer_1 = _build_local_source([-10, 0], [-10, 0])
+        interactivity = True
+        carto_vl_local_layer = carto_vl.LocalLayer(
+            layer_1,
+            interactivity=interactivity
+        )
+
+        carto_vl_map = carto_vl.Map(carto_vl_local_layer)
+        carto_vl_map.init()
+        layer_interactivity = carto_vl_map.sources[0].get('interactivity')
+        self.assertTrue(layer_interactivity)
+        self.assertEqual(layer_interactivity.get('event'), 'hover')
+
 
 class TestMapDevelopmentPath(unittest.TestCase):
     def test_default_carto_vl_path(self):

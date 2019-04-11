@@ -179,8 +179,15 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         if interactivity is None:
             return
         elif isinstance(interactivity, dict):
-            self.interactivity = interactivity.get('event', event_default)
-            self.header = interactivity.get('header')
+            self.interactivity = {
+              'event': interactivity.get('event', event_default),
+              'header': interactivity.get('header', None),
+              'values': interactivity.get('values', None)
+            }
+        elif interactivity is True:
+            self.interactivity = {
+              'event': event_default,
+            }
         else:
             raise ValueError('`interactivity` must be a dictionary')
 

@@ -178,23 +178,15 @@ def _get_map_layers(layers):
 
 def _set_map_layer(layer):
     is_local = isinstance(layer, LocalLayer)
-    interactivity = _is_interactivity_enabled(layer)
+    source = layer._geojson_str if is_local else layer.query
 
     return ({
-        'interactivity': interactivity,
+        'interactivity': layer.interactivity,
         'is_local': is_local,
         'legend': layer.legend,
-        'source': layer._geojson_str if is_local else layer.query,
+        'source': source,
         'styling': layer.styling
     })
-
-
-def _is_interactivity_enabled(layer):
-    return (
-        dict(event=layer.interactivity, header=layer.header)
-        if layer.interactivity is not None
-        else None
-    )
 
 
 def _format_bounds(bounds):
