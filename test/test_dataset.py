@@ -10,7 +10,8 @@ import warnings
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.datasets import _norm_colname, Dataset
+from cartoframes.datasets import Dataset
+from cartoframes.columns import normalize_name
 
 from utils import _UserUrlLoader
 
@@ -53,7 +54,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         )
 
         # for writing to carto
-        self.test_write_table = _norm_colname(
+        self.test_write_table = normalize_name(
             'cf_test_table_{}'.format(test_slug)
         )
 
