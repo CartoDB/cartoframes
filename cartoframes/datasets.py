@@ -24,6 +24,8 @@ class Dataset(object):
     PUBLIC = 'public'
     LINK = 'link'
 
+    DEFAULT_RETRY_TIMES = 3
+
     def __init__(self, carto_context, table_name, schema='public', df=None):
         self.cc = carto_context
         self.table_name = normalize_name(table_name)
@@ -51,14 +53,11 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False, retry_times=3):
+    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
         table_columns = self._get_table_columns()
-
         query = self._get_read_query(table_columns, limit)
-        result = self._recursive_read(query, retry_times)
-        df = pd.read_csv(result)
 
-        return _clean_dataframe_from_carto(df, table_columns, decode_geom)
+        return self.cc.fetch(query, decode_geom=decode_geom)
 
     def delete(self):
         if self.exists():
@@ -158,20 +157,6 @@ class Dataset(object):
         create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self.table_name, cols=cols)
         return create_query
 
-    def _recursive_read(self, query, retry_times=3):
-        try:
-            return self.cc.copy_client.copyto_stream(query)
-        except CartoRateLimitException as err:
-            if retry_times > 0:
-                retry_times -= 1
-                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-                time.sleep(err.retry_after)
-                warn('Retrying...')
-                return self._recursive_read(query, retry_times)
-            else:
-                warn('Read call was rate-limited. This usually happens when there are multiple queries being read at the same time.')
-                raise err
-
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
         query_columns = list(table_columns.keys())
@@ -188,16 +173,37 @@ class Dataset(object):
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+        return query
 
     def _get_table_columns(self):
         """Get column names and types from a table"""
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        table_info = self.cc.sql_client.send(query)
+        return get_columns(self.cc, query)
+
+
+def get_columns(context, query):
+        """Get column names and types from a query"""
+        table_info = context.sql_client.send(query)
         if 'fields' in table_info:
             return table_info['fields']
 
         return None
+
+
+def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
+    try:
+        return context.copy_client.copyto_stream(query)
+    except CartoRateLimitException as err:
+        if retry_times > 0:
+            retry_times -= 1
+            warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+            time.sleep(err.retry_after)
+            warn('Retrying...')
+            return recursive_read(context, query, retry_times=retry_times)
+        else:
+            warn(('Read call was rate-limited. '
+                  'This usually happens when there are multiple queries being read at the same time.'))
+            raise err
 
 
 def _normalize_column_names(df):
@@ -310,11 +316,11 @@ def _decode_geom(ewkb):
     return None
 
 
-def _clean_dataframe_from_carto(df, table_columns, decode_geom=False):
+def postprocess_dataframe(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
         - process date columns
-        - decode geom
+        - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
 
     Args:
         df (pandas.DataFrame): DataFrame with a dataset from CARTO.
