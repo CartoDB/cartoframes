@@ -106,6 +106,8 @@ class Dataset(object):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
+            lng_val = None
+            lat_val = None
             for col in cols:
                 if with_lonlat and col in Dataset.SUPPORTED_GEOM_COL_NAMES:
                     continue
@@ -126,7 +128,7 @@ class Dataset(object):
                 geom = _decode_geom(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lonlat is not None:
+            if with_lonlat is not None and lng_val is not None and lat_val is not None:
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
