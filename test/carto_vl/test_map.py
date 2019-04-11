@@ -19,15 +19,13 @@ class TestMapInitialization(unittest.TestCase):
     def test_size(self):
         """should set the size by default"""
         carto_vl_map = carto_vl.Map()
-        self.assertEqual(carto_vl_map.size, (1024, 632))
+        self.assertIsNone(carto_vl_map.size)
 
     def test__init(self):
         """should return a valid template"""
         carto_vl_map = carto_vl.Map()
         template = carto_vl_map.init()
-        self.assertIsNotNone(template.srcdoc)
-        self.assertEqual(template.width, 1024)
-        self.assertEqual(template.height, 632)
+        self.assertIsNotNone(template._html)
 
 
 class TestMapLocalLayers(unittest.TestCase):
@@ -98,33 +96,33 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """should use default paths if none are given"""
         carto_vl_map = carto_vl.Map()
         template = carto_vl_map.init()
-        self.assertTrue(defaults._CARTO_VL_PATH in template.srcdoc)
+        self.assertTrue(defaults._CARTO_VL_PATH in template._html)
 
     def test_custom_carto_vl_path(self):
         """should use custom paths"""
         _carto_vl_path = 'custom_carto_vl_path'
         carto_vl_map = carto_vl.Map(_carto_vl_path=_carto_vl_path)
         template = carto_vl_map.init()
-        self.assertTrue(_carto_vl_path in template.srcdoc)
+        self.assertTrue(_carto_vl_path in template._html)
 
     def test_default_airship_path(self):
         """should use default paths if none are given"""
         carto_vl_map = carto_vl.Map()
         template = carto_vl_map.init()
-        self.assertTrue(defaults._AIRSHIP_COMPONENTS_PATH in template.srcdoc)
-        self.assertTrue(defaults._AIRSHIP_BRIDGE_PATH in template.srcdoc)
-        self.assertTrue(defaults._AIRSHIP_STYLES_PATH in template.srcdoc)
-        self.assertTrue(defaults._AIRSHIP_ICONS_PATH in template.srcdoc)
+        self.assertTrue(defaults._AIRSHIP_COMPONENTS_PATH in template._html)
+        self.assertTrue(defaults._AIRSHIP_BRIDGE_PATH in template._html)
+        self.assertTrue(defaults._AIRSHIP_STYLES_PATH in template._html)
+        self.assertTrue(defaults._AIRSHIP_ICONS_PATH in template._html)
 
     def test_custom_airship_path(self):
         """should use custom paths"""
         _airship_path = 'custom_airship_path'
         carto_vl_map = carto_vl.Map(_airship_path=_airship_path)
         template = carto_vl_map.init()
-        self.assertTrue(_airship_path + defaults._AIRSHIP_SCRIPT in template.srcdoc)
-        self.assertTrue(_airship_path + defaults._AIRSHIP_BRIDGE_SCRIPT in template.srcdoc)
-        self.assertTrue(_airship_path + defaults._AIRSHIP_STYLE in template.srcdoc)
-        self.assertTrue(_airship_path + defaults._AIRSHIP_ICONS_STYLE in template.srcdoc)
+        self.assertTrue(_airship_path + defaults._AIRSHIP_SCRIPT in template._html)
+        self.assertTrue(_airship_path + defaults._AIRSHIP_BRIDGE_SCRIPT in template._html)
+        self.assertTrue(_airship_path + defaults._AIRSHIP_STYLE in template._html)
+        self.assertTrue(_airship_path + defaults._AIRSHIP_ICONS_STYLE in template._html)
 
 
 def _build_local_source(lats, lngs):

@@ -10,7 +10,6 @@ function onReady() {
   if ("{{mapboxtoken}}") {
     mapboxgl.accessToken = "{{mapboxtoken}}";
   }
-
   // Fetch CARTO basemap if it's there, else try to use other supplied style
   const map = new mapboxgl.Map({
     container: 'map',
@@ -75,71 +74,91 @@ function onReady() {
                 }
                 // Style for legend items
                 colorLegendList +=
-                        `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item"><span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">${bucket}</span></li>\n`;
+                  `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item">
+                    <span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">
+                      ${bucket}
+                    </span>
+                  </li>\n`;
             });
 
-            const legend = `<section class="as-box">
+            const legend = `
+              <section class="as-box">
                 <h1 class="as-subheader">${elem.legend || 'Layer ' + idx}</h1>
                 <div class="legend as-body">
                   <ul class="as-list">
-          ${colorLegendList}
+                    ${colorLegendList}
                   </ul>
                 </div>
-        </section>`;
+              </section>`;
             document.getElementById('legends').style.display = 'block';
-            // Place list items in the content section of the title/legend box
             document.getElementById('legends').innerHTML += legend;
         }
     });
 
     if (elem.interactivity) {
-      let interactivity = new carto.Interactivity(layer);
-      let tempPopup = new mapboxgl.Popup({
-                closeButton: false,
-                closeOnClick: false
-              });
-      if (elem.interactivity.event == 'click') {
-        setPopupsClick(tempPopup, interactivity, elem.interactivity.header);
-      } else if (elem.interactivity.event == 'hover') {
-        setPopupsHover(tempPopup, interactivity, elem.interactivity.header);
+      const interactivity = new carto.Interactivity(layer);
+      const tempPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+      const { event, header, values} = elem.interactivity;
+
+      if (event === 'click') {
+        setPopupsClick(tempPopup, interactivity, header, values);
+      } else if (event === 'hover') {
+        setPopupsHover(tempPopup, interactivity, header, values);
+      }
+    }
+
+    function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
+      interactivity.off('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader, values)
+      });
+      interactivity.on('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader, values)
+      });
+    }
+    
+    function setPopupsHover(tempPopup, interactivity, popupHeader, values) {
+      interactivity.off('featureClick', (event) => {
+          updatePopup(tempPopup, event, popupHeader, values)
+      });
+      interactivity.on('featureHover', (event) => {
+          updatePopup(tempPopup, event, popupHeader, values)
+      });
+    }
+
+    function updatePopup(layer_popup, event, popupHeader, values) {
+      if (event.features.length > 0) {
+        const feature = event.features[0];
+        const variables = values && values.length
+          ? Object.keys(feature.variables).filter(variable => values.include(variable))
+          : Object.keys(feature.variables);
+
+        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
+        
+        Object.keys(feature.variables).forEach((name) => {
+            const variable = feature.variables[name];
+
+            popupHTML += `
+              <h3 class="h3">${name}</h3>
+              <p class="description open-sans">${JSON.stringify(variable.value)}</p>
+            `;
+        });
+        
+        layer_popup
+            .setLngLat([event.coordinates.lng, event.coordinates.lat])
+            .setHTML(`<div>${popupHTML}</div>`);
+        
+        if (!layer_popup.isOpen()) {
+          layer_popup.addTo(map);
+        }
+      } else {
+        layer_popup.remove();
       }
     }
   });
-  function setPopupsClick(tempPopup, intera, popupHeader) {
-    intera.off('featureHover', (event) => {
-        updatePopup(tempPopup, event, popupHeader)
-    });
-    intera.on('featureClick', (event) => {
-        updatePopup(tempPopup, event, popupHeader, popupHeader)
-    });
-  }
-  function setPopupsHover(tempPopup, intera, popupHeader) {
-    intera.off('featureClick', (event) => {
-        updatePopup(tempPopup, event, popupHeader)
-    });
-    intera.on('featureHover', (event) => {
-        updatePopup(tempPopup, event, popupHeader)
-    });
-  }
-  function updatePopup(layer_popup, event, popupHeader) {
-    if (event.features.length > 0) {
-      const vars = event.features[0].variables;
-      let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
-      Object.keys(vars).forEach((varName) => {
-          popupHTML += `
-              <h3 class="h3">${varName}</h3>
-              <p class="description open-sans">${vars[varName].value}</p>
-          `;
-      });
-      layer_popup.setLngLat([event.coordinates.lng, event.coordinates.lat])
-          .setHTML(`<div>${popupHTML}</div>`);
-      if (!layer_popup.isOpen()) {
-        layer_popup.addTo(map);
-      }
-    } else {
-      layer_popup.remove();
-    }
-  }
 }
 
 responsive.addEventListener('ready', onReady);

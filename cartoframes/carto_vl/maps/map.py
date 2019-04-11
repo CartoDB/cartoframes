@@ -119,9 +119,10 @@ class Map(object):
     def __init__(self,
                  layers=None,
                  context=None,
-                 size=(1024, 632),
+                 size=None,
                  basemap=Basemaps.voyager,
                  bounds=None,
+                 viewport=None,
                  template=None,
                  **kwargs):
 
@@ -131,26 +132,27 @@ class Map(object):
         self.size = size
         self.basemap = basemap
         self.bounds = bounds
+        self.viewport = viewport
         self.template = template
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults._CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
 
     def init(self):
-        self.template = HTMLMap()
+        self.htmlMap = HTMLMap()
         self.sources = _get_map_layers(self.layers)
         self.bounds = _get_bounds(self.bounds, self.layers, self.context)
 
-        self.template.set_content(
-            width=self.size[0],
-            height=self.size[1],
+        self.htmlMap.set_content(
+            size=self.size,
             sources=self.sources,
             bounds=self.bounds,
+            viewport=self.viewport,
             creds=self.context.creds if self.context else None,
             basemap=self.basemap,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-        return self.template
+        return self.htmlMap
 
 
 def _get_bounds(bounds, layers, context):
