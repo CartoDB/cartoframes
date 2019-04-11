@@ -14,7 +14,7 @@ class Layer(QueryLayer):
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
 
             context = CartoContext(
@@ -22,8 +22,8 @@ class Layer(QueryLayer):
                 api_key='default_public'
             )
 
-            carto.Map(
-                [carto.Layer('populated_places')],
+            vl.Map(
+                [vl.Layer('populated_places')],
                 context=context
             ).init()
     """

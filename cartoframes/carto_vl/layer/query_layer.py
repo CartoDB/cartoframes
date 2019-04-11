@@ -52,7 +52,7 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
         .. code::
 
             from cartoframes.examples import example_context
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             # create geometries from lng/lat columns
 
             query = '''
@@ -66,9 +66,12 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
                ) as _w
             '''
 
-            carto.Map(
-                [carto.QueryLayer(query)],
+            vl.Map(
+                [vl.QueryLayer(query)],
                 example_context,
+                variables={
+                  'fare_amount': 'fare_amount'
+                },
                 interactivity={
                     'cols': ['fare_amount'],
                     'event': 'hover'

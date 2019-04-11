@@ -37,7 +37,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
 
             context = CartoContext(
@@ -45,13 +45,13 @@ class Map(object):
                 api_key='your api key'
             )
 
-            carto.Map([carto.Layer('table in your account')], context)
+            vl.Map([vl.Layer('table in your account')], context)
 
         CARTO basemap style.
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
 
             context = CartoContext(
@@ -59,8 +59,8 @@ class Map(object):
                 api_key='your api key'
             )
 
-            carto.Map(
-                [carto.Layer('table in your account')],
+            vl.Map(
+                [vl.Layer('table in your account')],
                 context,
                 basemap=vector.Basemaps.darkmatter
             )
@@ -70,7 +70,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
 
             context = CartoContext(
@@ -83,8 +83,8 @@ class Map(object):
                 'token: '<your mapbox token>'
             }
 
-            carto.Map(
-                [carto.Layer('table in your account')],
+            vl.Map(
+                [vl.Layer('table in your account')],
                 context,
                 basemap
             )
@@ -93,7 +93,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
 
             context = CartoContext(
@@ -108,8 +108,8 @@ class Map(object):
                 'south': 10
             }
 
-            carto.Map(
-                [carto.Layer('table in your account')],
+            vl.Map(
+                [vl.Layer('table in your account')],
                 context,
                 bounds
             )
@@ -244,7 +244,7 @@ def _get_super_bounds(layers, context):
 
     if local_layers:
         local_bounds = _get_bounds_local(local_layers)
-    if hosted_bounds and context:
+    if hosted_layers and context:
         hosted_bounds = context._get_bounds(hosted_layers)
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)

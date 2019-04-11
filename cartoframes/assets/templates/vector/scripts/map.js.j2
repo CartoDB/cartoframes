@@ -54,47 +54,6 @@ function onReady() {
 
     layer.addTo(map);
 
-    // When layer loads, trigger legend event
-    layer.on('loaded', () => {
-        // Request data for legend from the layer viz
-        if (viz.color.getLegendData) {
-            const colorLegend = viz.color.getLegendData();
-            let colorLegendList = '';
-
-            // Create list elements for legend
-            colorLegend.data.forEach((legend, index) => {
-                const color = legend.value;
-                const keyMin = legend.key[0].toFixed(2);
-                const keyMax = legend.key[1].toFixed(2);
-                let bucket = `${keyMin} - ${keyMax}`;
-                if (keyMin === '-Infinity') {
-                  bucket = `< ${keyMax}`;
-                } else if (keyMax === 'Infinity') {
-                  bucket = `> ${keyMin}`;
-                }
-                // Style for legend items
-                colorLegendList +=
-                  `<li style="color: rgb(${color.r}, ${color.g}, ${color.b}); font-size: 300%;" class="as-list__item">
-                    <span style="vertical-align: middle;" class="as-color--type-01 as-body as-font--medium">
-                      ${bucket}
-                    </span>
-                  </li>\n`;
-            });
-
-            const legend = `
-              <section class="as-box">
-                <h1 class="as-subheader">${elem.legend || 'Layer ' + idx}</h1>
-                <div class="legend as-body">
-                  <ul class="as-list">
-                    ${colorLegendList}
-                  </ul>
-                </div>
-              </section>`;
-            document.getElementById('legends').style.display = 'block';
-            document.getElementById('legends').innerHTML += legend;
-        }
-    });
-
     if (elem.interactivity) {
       const interactivity = new carto.Interactivity(layer);
       const tempPopup = new mapboxgl.Popup({

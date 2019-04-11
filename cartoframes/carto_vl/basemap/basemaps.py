@@ -12,10 +12,10 @@ class Basemaps(object):  # pylint: disable=too-few-public-methods
 
         .. code::
 
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
             from cartoframes import CartoContext
             context = CartoContext()
-            carto.Map([], context, basemap=carto.Basemaps.positron)
+            vl.Map([], context, basemap=vl.basemaps.positron)
     """
     positron = 'Positron'
     darkmatter = 'DarkMatter'

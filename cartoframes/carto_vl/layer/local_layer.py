@@ -27,12 +27,12 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
             import geopandas
             from cartoframes.examples import read_mcdonalds_nyc, example_context
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
 
             geodataframe = geopandas.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
 
-            carto.Map(
-                [carto.LocalLayer(geodataframe)],
+            vl.Map(
+                [vl.LocalLayer(geodataframe)],
                 context=example_context
             ).init()
 
@@ -45,12 +45,12 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             import json
             import geopandas
             from cartoframes.examples import example_context
-            from cartoframes.carto_vl import carto
+            from cartoframes import carto_vl as vl
 
             geojson = geopandas.read_file('points.geojson')
 
-            carto.Map(
-                [carto.LocalLayer(geojson)],
+            vl.Map(
+                [vl.LocalLayer(geojson)],
                 context=example_context
             ).init()
     """
