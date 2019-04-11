@@ -36,7 +36,7 @@ class Dataset(object):
         warn('Table will be named `{}`'.format(table_name))
 
     @staticmethod
-    def from_query(cart_context, query, table_name):
+    def create_from_query(cart_context, query, table_name):
         dataset = Dataset(cart_context, table_name)
         dataset.cc.batch_sql_client \
                .create_and_wait_for_completion(
