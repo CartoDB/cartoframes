@@ -371,30 +371,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
     #     cc.delete('non_existent_table')
 
-    def test_cartocontext_send_dataframe(self):
-        """context.CartoContext._send_dataframe"""
-        pass
-
-    def test_cartocontext_handle_import(self):
-        """context.CartoContext._handle_import"""
-
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        import_failures = (
-            dict(error_code=8001, state='failure'),
-            dict(error_code=6668, state='failure'),
-            dict(error_code=1234, state='failure'),
-        )
-
-        for import_job in import_failures:
-            with self.assertRaises(CartoException):
-                cc._handle_import(import_job, 'foo')
-
-        diff_table_err = dict(state='complete',
-                              table_name='bar')
-        with self.assertRaises(Exception):
-            cc._handle_import(diff_table_err, 'foo')
-
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_sync(self):
         """context.CartoContext.sync"""
