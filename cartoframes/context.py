@@ -607,17 +607,17 @@ class CartoContext(object):
                 )
 
         """
-        result = None
+        dataframe = None
         if is_select:
             if table_name:
                 dataset = Dataset.from_query(self, query, table_name)
-                result = dataset.download(decode_geom=decode_geom)
+                dataframe = dataset.download(decode_geom=decode_geom)
             else:
-                result = self.fetch(query, decode_geom=decode_geom)
+                dataframe = self.fetch(query, decode_geom=decode_geom)
         else:
             self.execute(query)
 
-        return result
+        return dataframe
 
     @utils.temp_ignore_warnings
     def map(self, layers=None, interactive=True,
