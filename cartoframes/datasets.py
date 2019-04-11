@@ -2,8 +2,14 @@ import binascii as ba
 from warnings import warn
 import pandas as pd
 import time
+from tqdm import tqdm
+
+from .columns import normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
+
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class Dataset(object):
@@ -22,9 +28,11 @@ class Dataset(object):
 
     def __init__(self, carto_context, table_name, schema='public', df=None):
         self.cc = carto_context
-        self.table_name = _norm_colname(table_name)
+        self.table_name = normalize_name(table_name)
         self.schema = schema
         self.df = df
+        if self.df is not None:
+            self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
 
     def upload(self, with_lonlat=None, if_exists='fail'):
@@ -50,6 +58,13 @@ class Dataset(object):
         query = self._get_read_query(table_columns, limit)
 
         return self.cc.fetch(query, decode_geom=decode_geom)
+
+    def delete(self):
+        if self.exists():
+            self.cc.sql_client.send(self._drop_table_query(False))
+            return True
+
+        return False
 
     def exists(self):
         """Checks to see if table exists"""
@@ -83,7 +98,7 @@ class Dataset(object):
     def _copyfrom(self, with_lonlat=None):
         geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(_norm_colname(c) for c in self.df.columns if c not in Dataset.RESERVED_COLUMN_NAMES)
+        columns = ','.join(norm for norm, orig in self.normalized_column_names)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -120,8 +135,10 @@ class Dataset(object):
             csv_row += '\n'
             yield csv_row.encode()
 
-    def _drop_table_query(self):
-        return '''DROP TABLE IF EXISTS {table_name}'''.format(table_name=self.table_name)
+    def _drop_table_query(self, if_exists=True):
+        return '''DROP TABLE {if_exists} {table_name}'''.format(
+            table_name=self.table_name,
+            if_exists='IF EXISTS' if if_exists else '')
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
@@ -130,9 +147,9 @@ class Dataset(object):
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
-        cols = ', '.join(col.format(col=_norm_colname(c),
-                                    ctype=_dtypes2pg(t))
-                         for c, t in zip(self.df.columns, self.df.dtypes) if c not in Dataset.RESERVED_COLUMN_NAMES)
+        cols = ', '.join(col.format(col=norm,
+                                    ctype=_dtypes2pg(self.df.dtypes[orig]))
+                         for norm, orig in self.normalized_column_names)
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
@@ -189,35 +206,23 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
             raise err
 
 
-def _norm_colname(colname):
-    """Given an arbitrary column name, translate to a SQL-normalized column
-    name a la CARTO's Import API will translate to
+def _normalize_column_names(df):
+    column_names = [c for c in df.columns if c not in Dataset.RESERVED_COLUMN_NAMES]
+    normalized_columns = normalize_names(column_names)
 
-    Examples
-        * 'Field: 2' -> 'field_2'
-        * '2 Items' -> '_2_items'
+    column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
 
-    Args:
-        colname (str): Column name that will be SQL normalized
-    Returns:
-        str: SQL-normalized column name
-    """
-    last_char_special = False
-    char_list = []
-    for colchar in str(colname):
-        if colchar.isalnum():
-            char_list.append(colchar.lower())
-            last_char_special = False
-        else:
-            if not last_char_special:
-                char_list.append('_')
-                last_char_special = True
-            else:
-                last_char_special = False
-    final_name = ''.join(char_list)
-    if final_name[0].isdigit():
-        return '_' + final_name
-    return final_name
+    changed_cols = '\n'.join([
+        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
+            orig=orig,
+            new=norm)
+        for norm, orig in column_tuples if norm != orig])
+
+    if changed_cols != '':
+        tqdm.write('The following columns were changed in the CARTO '
+                   'copy of this dataframe:\n{0}'.format(changed_cols))
+
+    return column_tuples
 
 
 def _dtypes2pg(dtype):

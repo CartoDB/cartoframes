@@ -29,61 +29,6 @@ def cssify(css_dict):
     return css.strip()
 
 
-def normalize_colnames(columns):
-    """SQL-normalize columns in `dataframe` to reflect changes made through
-    CARTO's SQL API.
-
-    Args:
-        columns (list of str): List of column names
-
-    Returns:
-        list of str: Normalized column names
-    """
-    normalized_columns = [norm_colname(c) for c in columns]
-    changed_cols = '\n'.join([
-        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
-            orig=c,
-            new=normalized_columns[i])
-        for i, c in enumerate(columns)
-        if c != normalized_columns[i]])
-    if changed_cols != '':
-        tqdm.write('The following columns were changed in the CARTO '
-                   'copy of this dataframe:\n{0}'.format(changed_cols))
-
-    return normalized_columns
-
-
-def norm_colname(colname):
-    """Given an arbitrary column name, translate to a SQL-normalized column
-    name a la CARTO's Import API will translate to
-
-    Examples
-        * 'Field: 2' -> 'field_2'
-        * '2 Items' -> '_2_items'
-
-    Args:
-        colname (str): Column name that will be SQL normalized
-    Returns:
-        str: SQL-normalized column name
-    """
-    last_char_special = False
-    char_list = []
-    for colchar in str(colname):
-        if colchar.isalnum():
-            char_list.append(colchar.lower())
-            last_char_special = False
-        else:
-            if not last_char_special:
-                char_list.append('_')
-                last_char_special = True
-            else:
-                last_char_special = False
-    final_name = ''.join(char_list)
-    if final_name[0].isdigit():
-        return '_' + final_name
-    return final_name
-
-
 def unique_colname(suggested, existing):
     """Given a suggested column name and a list of existing names, returns
     a name that is not present at existing by prepending _ characters."""
