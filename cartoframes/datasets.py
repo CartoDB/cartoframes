@@ -29,6 +29,8 @@ class Dataset(object):
         self.table_name = normalize_name(table_name)
         self.schema = schema
         self.df = df
+        if self.df is not None:
+            self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
 
     def upload(self, with_lonlat=None, if_exists='fail'):
@@ -97,7 +99,7 @@ class Dataset(object):
     def _copyfrom(self, with_lonlat=None):
         geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(norm for norm, orig in _normalize_column_names(self.df))
+        columns = ','.join(norm for norm, orig in self.normalized_column_names)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -148,7 +150,7 @@ class Dataset(object):
         col = ('{col} {ctype}')
         cols = ', '.join(col.format(col=norm,
                                     ctype=_dtypes2pg(self.df.dtypes[orig]))
-                         for norm, orig in _normalize_column_names(self.df))
+                         for norm, orig in self.normalized_column_names)
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
