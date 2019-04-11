@@ -346,15 +346,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                              'B': list('abc')})
         cc.write(pd.DataFrame(data), self.mixed_case_table, overwrite=True)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    def test_cartocontext_table_exists(self):
-        """context.CartoContext._table_exists"""
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        self.assertFalse(cc._table_exists('acadia_biodiversity'))
-        with self.assertRaises(NameError):
-            cc._table_exists(self.test_read_table)
-
     def test_cartocontext_delete(self):
         """context.CartoContext.delete"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -1114,7 +1105,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                  time=('2010 - 2014', ))
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(cc.read(self.test_data_table, limit=1).columns)
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(data.columns) - origcols)
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
@@ -1137,36 +1128,79 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-    def test_column_name_collision_do_enrichement(self):
-        """context.CartoContext.data column collision"""
-        dup_col = 'female_third_level_studies_2011_by_female_pop'
-        self.sql_client.send(
-            """
-            create table {table} as (
-                select cdb_latlng(40.4165,-3.70256) the_geom,
-                       1 {dup_col})
-            """.format(
-                dup_col=dup_col,
-                table=self.test_write_table
-            )
-        )
-        self.sql_client.send(
-            "select cdb_cartodbfytable('public', '{table}')".format(
-                table=self.test_write_table
-            )
-        )
-
+    def test_data_with_persist_as(self):
+        """context.CartoContext.data"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        meta = cc.data_discovery(region=self.test_write_table,
-                                 keywords='female')
-        meta = meta[meta.suggested_name == dup_col]
-        data = cc.data(
-            self.test_write_table,
-            meta[meta.suggested_name == dup_col]
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols)
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta, persist_as=self.test_write_table)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols)
+
+        df = cc.read(self.test_write_table, decode_geom=True)
+
+        # same number of rows
+        self.assertEqual(len(df), len(data),
+                         msg='Expected number or rows')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        self.assertSetEqual(set(data.columns.values),
+                            set(df.columns.values),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        self.assertEqual(
+            sorted(tuple(str(d) for d in df.dtypes)),
+            sorted(tuple(str(d) for d in data.dtypes)),
+            msg='Should have same schema/types'
         )
 
-        self.assertIn('_' + dup_col, data.keys())
+    # FIXME: https://github.com/CartoDB/cartoframes/issues/594
+    # def test_column_name_collision_do_enrichement(self):
+    #     """context.CartoContext.data column collision"""
+    #     import ipdb; ipdb.set_trace(context=30)
+    #     dup_col = 'female_third_level_studies_2011_by_female_pop'
+    #     self.sql_client.send(
+    #         """
+    #         create table {table} as (
+    #             select cdb_latlng(40.4165,-3.70256) the_geom,
+    #                    1 {dup_col})
+    #         """.format(
+    #             dup_col=dup_col,
+    #             table=self.test_write_table
+    #         )
+    #     )
+    #     self.sql_client.send(
+    #         "select cdb_cartodbfytable('public', '{table}')".format(
+    #             table=self.test_write_table
+    #         )
+    #     )
+
+    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
+    #                                   api_key=self.apikey)
+    #     meta = cc.data_discovery(region=self.test_write_table,
+    #                              keywords='female')
+    #     meta = meta[meta.suggested_name == dup_col]
+    #     data = cc.data(
+    #         self.test_write_table,
+    #         meta[meta.suggested_name == dup_col]
+    #     )
+
+    #     self.assertIn('_' + dup_col, data.keys())
 
     def test_tables(self):
         """context.CartoContext.tables normal usage"""

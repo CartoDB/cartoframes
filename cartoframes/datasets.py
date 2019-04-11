@@ -35,6 +35,18 @@ class Dataset(object):
             self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
 
+    @staticmethod
+    def create_from_query(cart_context, query, table_name):
+        dataset = Dataset(cart_context, table_name)
+        dataset.cc.batch_sql_client \
+               .create_and_wait_for_completion(
+                   '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                   .format(drop=dataset._drop_table_query(),
+                           create=dataset._create_table_from_query(query),
+                           cartodbfy=dataset._cartodbfy_query()))
+
+        return dataset
+
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.df is None:
             raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
@@ -54,7 +66,7 @@ class Dataset(object):
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
-        table_columns = self._get_table_columns()
+        table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
 
         return self.cc.fetch(query, decode_geom=decode_geom)
@@ -140,6 +152,10 @@ class Dataset(object):
             table_name=self.table_name,
             if_exists='IF EXISTS' if if_exists else '')
 
+    def _create_table_from_query(self, query):
+        create_query = '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=query)
+        return create_query
+
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
             geom_type = _get_geom_col_type(self.df)
@@ -175,10 +191,20 @@ class Dataset(object):
 
         return query
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         """Get column names and types from a table"""
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
         return get_columns(self.cc, query)
+
+    def get_table_column_names(self, exclude=None):
+        """Get column names and types from a table"""
+        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
+        columns = get_columns(self.cc, query).keys()
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
 
 
 def get_columns(context, query):
@@ -319,7 +345,7 @@ def _decode_geom(ewkb):
 def postprocess_dataframe(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
-        - process date columns
+        - process date and bool columns
         - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
 
     Args:
@@ -339,8 +365,10 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
     for column_name in table_columns:
         if table_columns[column_name]['type'] == 'date':
             df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
+        elif table_columns[column_name]['type'] == 'boolean':
+            df[column_name] = df[column_name].eq('t')
 
-    if decode_geom:
+    if decode_geom and 'the_geom' in df.columns:
         df['geometry'] = df.the_geom.apply(_decode_geom)
 
     return df
