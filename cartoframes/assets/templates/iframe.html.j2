@@ -1,0 +1,10 @@
+<iframe
+  frameborder="0"
+  style="
+    border: 1px solid #cfcfcf;
+    width: {% if width %}{{ width | iframe_size }}{% else %}100%{% endif %};
+    height: {% if height %}{{ height | iframe_size }}{% else %}632px{% endif %};
+    "
+  srcDoc="{% filter quot %}{% block srcDoc %}{% endblock %}{% endfilter %}">
+{% block preview %}{% endblock %}
+</iframe>
