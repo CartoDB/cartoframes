@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from tqdm import tqdm
 
-from .columns import normalize_names, normalize_name
+from .columns import Column, normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
@@ -177,7 +177,7 @@ class Dataset(object):
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
-        query_columns = list(table_columns.keys())
+        query_columns = [column.name for column in table_columns]
         query_columns.remove('the_geom_webmercator')
 
         query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
@@ -201,7 +201,7 @@ class Dataset(object):
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        columns = get_columns(self.cc, query).keys()
+        columns = get_column_names(self.cc, query).keys()
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
@@ -210,6 +210,15 @@ class Dataset(object):
 
 
 def get_columns(context, query):
+        """Get list of cartoframes.columns.Column"""
+        table_info = context.sql_client.send(query)
+        if 'fields' in table_info:
+            return Column.from_sql_api_fields(table_info['fields'])
+
+        return None
+
+
+def get_column_names(context, query):
         """Get column names and types from a query"""
         table_info = context.sql_client.send(query)
         if 'fields' in table_info:
@@ -352,7 +361,7 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
 
     Args:
         df (pandas.DataFrame): DataFrame with a dataset from CARTO.
-        table_columns (dict): column names and types from a table.
+        table_columns (list of cartoframes.columns.Column): column names and types from a table.
         decode_geom (bool, optional): Decodes CARTO's geometries into a
             `Shapely <https://github.com/Toblerity/Shapely>`__
             object that can be used, for example, in `GeoPandas
@@ -364,11 +373,11 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
     if 'cartodb_id' in df.columns:
         df.set_index('cartodb_id', inplace=True)
 
-    for column_name in table_columns:
-        if table_columns[column_name]['type'] == 'date':
-            df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
-        elif table_columns[column_name]['type'] == 'boolean':
-            df[column_name] = df[column_name].eq('t')
+    for column in table_columns:
+        if column.pgtype == 'date':
+            df[column.name] = pd.to_datetime(df[column.name], errors='ignore')
+        elif column.pgtype == 'boolean':
+            df[column.name] = df[column.name].eq('t')
 
     if decode_geom and 'the_geom' in df.columns:
         df['geometry'] = df.the_geom.apply(_decode_geom)
