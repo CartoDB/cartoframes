@@ -62,7 +62,7 @@ class Map(object):
             vl.Map(
                 [vl.Layer('table in your account')],
                 context,
-                basemap=vector.Basemaps.darkmatter
+                basemap=vector.basemaps.darkmatter
             )
 
         Custom basemap style. Here we use the Mapbox streets style, which
