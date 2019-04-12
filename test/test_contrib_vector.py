@@ -60,7 +60,7 @@ class TestContribVector(unittest.TestCase, _UserUrlLoader):
 
         # sets skip value
         WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
-        
+
         self.points = 'tweets_obama'
         self.polys = 'nat'
         self.local = 'cb_2013_us_csa_500k'
