@@ -200,5 +200,7 @@ def _parse_interactivity(interactivity):
 def _set_viz(variables, style):
     if variables and style:
         return '\n'.join([variables, style])
+    elif variables:
+        return variables
     else:
         return style

@@ -1,9 +1,7 @@
 import unittest
-from pandas import DataFrame
-from geopandas import GeoDataFrame
 from cartoframes import carto_vl
-from shapely.geometry import Point
 from cartoframes.carto_vl import defaults
+from utils import build_local_source
 
 
 class TestMap(unittest.TestCase):
@@ -26,7 +24,7 @@ class TestMapInitialization(unittest.TestCase):
 class TestMapLocalLayers(unittest.TestCase):
     def test_one_layer(self):
         """should be able to initialize one local layer"""
-        layer_1 = _build_local_source([-10, 0], [-10, 0])
+        layer_1 = build_local_source([-10, 0], [-10, 0])
         carto_vl_local_layer = carto_vl.LocalLayer(layer_1)
         carto_vl_map = carto_vl.Map(carto_vl_local_layer)
 
@@ -40,8 +38,8 @@ class TestMapLocalLayers(unittest.TestCase):
 
     def test_two_layers(self):
         """should be able to initialize two local layer in the correct order"""
-        layer_1 = _build_local_source([-10, 0], [-10, 0])
-        layer_2 = _build_local_source([0, 10], [10, 0])
+        layer_1 = build_local_source([-10, 0], [-10, 0])
+        layer_2 = build_local_source([0, 10], [10, 0])
         carto_vl_local_layer_1 = carto_vl.Layer(layer_1)
         carto_vl_local_layer_2 = carto_vl.Layer(layer_2)
         carto_vl_map = carto_vl.Map([
@@ -57,7 +55,7 @@ class TestMapLocalLayers(unittest.TestCase):
 
     def test_interactive_layer(self):
         """should indicate if the layer has interactivity enabled"""
-        layer_1 = _build_local_source([-10, 0], [-10, 0])
+        layer_1 = build_local_source([-10, 0], [-10, 0])
         interactivity = {'event': 'click'}
         carto_vl_local_layer = carto_vl.LocalLayer(
             layer_1,
@@ -69,7 +67,7 @@ class TestMapLocalLayers(unittest.TestCase):
 
     def test_default_interactive_layer(self):
         """should get the default event if the interactivity is set to True"""
-        layer_1 = _build_local_source([-10, 0], [-10, 0])
+        layer_1 = build_local_source([-10, 0], [-10, 0])
         interactivity = True
         carto_vl_local_layer = carto_vl.LocalLayer(
             layer_1,
@@ -114,16 +112,3 @@ class TestMapDevelopmentPath(unittest.TestCase):
         self.assertTrue(_airship_path + defaults._AIRSHIP_BRIDGE_SCRIPT in template)
         self.assertTrue(_airship_path + defaults._AIRSHIP_STYLE in template)
         self.assertTrue(_airship_path + defaults._AIRSHIP_ICONS_STYLE in template)
-
-
-def _build_local_source(lats, lngs):
-    coordinates = {
-        'Latitude': lats,
-        'Longitude': lngs
-    }
-
-    dataframe = DataFrame(coordinates)
-    dataframe['Coordinates'] = list(zip(dataframe.Longitude, dataframe.Latitude))
-    dataframe['Coordinates'] = dataframe['Coordinates'].apply(Point)
-
-    return GeoDataFrame(dataframe, geometry='Coordinates')
