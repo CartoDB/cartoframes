@@ -21,6 +21,7 @@ class Column(object):
                       'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
                       'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
 
+    @staticmethod
     def from_sql_api_fields(sql_api_fields):
         return [Column(column, normalize=False, pgtype=sql_api_fields[column]['type']) for column in sql_api_fields]
 
@@ -34,13 +35,13 @@ class Column(object):
         if normalize:
             self.normalize()
 
-    def normalize(self, forbidden_columns=None):
+    def normalize(self, forbidden_column_names=None):
         self._sanitize()
         self.name = self._truncate()
 
-        if forbidden_columns:
+        if forbidden_column_names:
             i = 1
-            while self.name in forbidden_columns:
+            while self.name in forbidden_column_names:
                 self.name = '{}_{}'.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
                 i += 1
 
@@ -111,7 +112,7 @@ def normalize_names(column_names):
     """
     result = []
     for column_name in column_names:
-        column = Column(column_name).normalize(forbidden_columns=result)
+        column = Column(column_name).normalize(forbidden_column_names=result)
         result.append(column.name)
 
     return result
@@ -121,7 +122,7 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns):
+def dtypes(columns, exclude_dates=False):
     return dict((x.name, x.dtype) for x in columns)
 
 
