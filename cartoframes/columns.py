@@ -21,12 +21,18 @@ class Column(object):
                       'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
                       'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
 
-    def __init__(self, name):
+    def from_sql_api_fields(sql_api_fields):
+        return [Column(column, normalize=False, pgtype=sql_api_fields[column]['type']) for column in sql_api_fields]
+
+    def __init__(self, name, normalize=True, pgtype=None):
         if not name:
             raise ValueError('Column name cannot be null or empty')
 
         self.name = str(name)
-        self.normalize()
+        self.pgtype = pgtype
+        self.dtype = pg2dtypes(pgtype)
+        if normalize:
+            self.normalize()
 
     def normalize(self, forbidden_columns=None):
         self._sanitize()
@@ -113,3 +119,19 @@ def normalize_names(column_names):
 
 def normalize_name(column_name):
     return normalize_names([column_name])[0]
+
+
+def dtypes(columns):
+    return dict((x.name, x.dtype) for x in columns)
+
+
+def pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'date': 'datetime64[ns]',
+        'number': 'float64',
+        'string': 'object',
+        'boolean': 'bool',
+        'geometry': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')
