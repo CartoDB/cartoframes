@@ -30,7 +30,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .columns import dtypes
+from .columns import dtypes, date_columns_names
 from .datasets import Dataset, get_columns, recursive_read, postprocess_dataframe
 
 if sys.version_info >= (3, 0):
@@ -449,7 +449,8 @@ class CartoContext(object):
         query_columns = get_columns(self, query)
         result = recursive_read(self, copy_query)
 
-        df = pd.read_csv(result, dtype=dtypes(query_columns))
+        df = pd.read_csv(result, dtype=dtypes(query_columns, exclude_dates=True),
+                         parse_dates=date_columns_names(query_columns))
 
         return postprocess_dataframe(df, query_columns, decode_geom)
 
