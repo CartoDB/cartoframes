@@ -10,46 +10,56 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
           following columns included to successfully have a map rendered:
           `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
           used in styling, they must be included in this query as well.
-        viz (str, optional): Instead of declaring style properties one by one,
-          you can make use of CARTO VL `vizString` through this parameter.
-        color_ (str, optional): CARTO VL color styling for this layer. Valid
-          inputs are simple web color names and hex values. For more advanced
-          styling, see the CARTO VL guide on styling for more information:
-          https://carto.com/developers/carto-vl/guides/styling-points/
-        width_ (float or str, optional): CARTO VL width styling for this layer if
-          points or lines (which are not yet implemented). Valid inputs are
-          positive numbers or text expressions involving variables. To remain
-          consistent with cartoframes' raster-based :py:class:`Layer
-          <cartoframes.layer.Layer>` API, `size` is used here in place of
-          `width`, which is the CARTO VL variable name for controlling the
-          width of a point or line. Default size is 7 pixels wide.
-        filter_ (str, optional): Time expression to animate data. This is an alias
-          for the CARTO VL `filter` style attribute. Default is no animation.
-        stroke_color_ (str, optional): Defines the stroke color of polygons.
-          Default is white.
-        stroke_width_ (float or str, optional): Defines the width of the stroke
-          in pixels. Default is 1.
-        symbol_ (str, optional): Show an image instead in the place of points
-        symbol_placement_ (str, optional): When using symbol , offset to apply to the image
-        order_ (str, optional): Rendering order of the features, only applicable to points.
-        transform_ (str, optional): Apply a rotation or a translation to the feature.
-        resolution_ (float or str, optional): resolution of the property-aggregation functions,
-          only applicable to points.
-          Default resolution is 1.
-          Custom values must be greater than 0 and lower than 256.
-          A resolution of N means points are aggregated to grid cells NxN pixels.
-          Unlinke Torque resolution, the aggregated points are placed in the centroid of
-          the cluster, not in the center of the grid cell.
-        variables (list, optional): When you have to define variables to be reused
+        style (dict, tuple, list, optional): Style of the visualization. It
+          can contain the following values:
+
+          - color (str, optional): CARTO VL color styling for this layer. Valid
+            inputs are simple web color names and hex values. For more advanced
+            styling, see the CARTO VL guide on styling for more information:
+            https://carto.com/developers/carto-vl/guides/styling-points/
+
+          - width (float or str, optional): CARTO VL width styling for this layer if
+            points or lines (which are not yet implemented). Valid inputs are
+            positive numbers or text expressions involving variables. To remain
+            consistent with cartoframes' raster-based :py:class:`Layer
+            <cartoframes.layer.Layer>` API, `size` is used here in place of
+            `width`, which is the CARTO VL variable name for controlling the
+            width of a point or line. Default size is 7 pixels wide.
+
+          - filter (str, optional): Time expression to animate data. This is an alias
+            for the CARTO VL `filter` style attribute. Default is no animation.
+
+          - stroke-color (str, optional): Defines the stroke color of polygons.
+            Default is white.
+
+          - stroke-width (float or str, optional): Defines the width of the stroke
+            in pixels. Default is 1.
+
+          - symbol (str, optional): Show an image instead in the place of points
+
+          - symbol-placement: (str, optional): When using symbol , offset to apply to the image
+
+          - order: (str, optional): Rendering order of the features, only applicable to points.
+            transform_ (str, optional): Apply a rotation or a translation to the feature.
+
+          - resolution: (float or str, optional): resolution of the property-aggregation functions,
+            only applicable to points. Default resolution is 1.
+            Custom values must be greater than 0 and lower than 256.
+            A resolution of N means points are aggregated to grid cells NxN pixels.
+            Unlinke Torque resolution, the aggregated points are placed in the centroid of
+            the cluster, not in the center of the grid cell.
+
+        variables (list, optional): When you have to define variables to be reused. They're needed
+            for showing information in popups shown by the interactivity.
+
         interactivity (str, list, or dict, optional): This option adds
-          interactivity (click or hover) to a layer. Defaults to ``click`` if
-          one of the following inputs are specified:
+          interactivity (click or hover) to a layer to show popups.
+          Defaults to ``hover`` if one of the following inputs are specified:
+
           - dict: If a :obj:`dict`, this must have the key `cols` with its
             value a list of columns. Optionally add `event` to choose ``hover``
             or ``click``. Specifying a `header` key/value pair adds a header to
             the popup that will be rendered in HTML.
-          - list: A list of valid column names in the data used for this layer
-          - str: A column name in the data used in this layer
 
     Example:
 
@@ -73,6 +83,9 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
             vl.Map(
                 [vl.QueryLayer(query)],
                 example_context,
+                style={
+                  'color': 'blue'
+                },
                 variables={
                   'fare_amount': 'fare_amount'
                 },
