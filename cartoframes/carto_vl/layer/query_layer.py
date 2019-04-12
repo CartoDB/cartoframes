@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from .. import defaults
+from ..utils import defaults
 
 
 class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from . import defaults
 from cartoframes import utils
 from warnings import warn
 from jinja2 import Environment, PackageLoader

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from . import defaults
 from .basemap.basemaps import Basemaps as basemaps
+from .utils import defaults
 from .utils.html import HTMLMap
 from .maps.map import Map
 from .layer.layer import Layer
