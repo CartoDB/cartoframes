@@ -21,14 +21,14 @@ class HTMLMap(object):
         self._env.filters['iframe_size'] = _iframe_size_filter
         self._env.filters['clear_none'] = _clear_none_filter
 
-        self._html = None
+        self.html = None
         self._template = self._env.get_template('vector/basic.html.j2')
 
     def set_content(
         self, size, sources, bounds, viewport=None, creds=None, basemap=None,
             _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
-        self._html = self._parse_html_content(
+        self.html = self._parse_html_content(
             size, sources, bounds, viewport, creds, basemap,
             _carto_vl_path, _airship_path)
 
@@ -94,7 +94,7 @@ class HTMLMap(object):
         )
 
     def _repr_html_(self):
-        return self._html
+        return self.html
 
 
 def _quote_filter(value):

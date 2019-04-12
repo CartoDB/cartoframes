@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from .. import defaults
+
+
 class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """CARTO VL layer based on an arbitrary query against user database
 
@@ -81,120 +85,120 @@ class QueryLayer(object):  # pylint: disable=too-few-public-methods,too-many-ins
 
     def __init__(self,
                  query,
-                 viz=None,
-                 color_=None,
-                 width_=None,
-                 filter_=None,
-                 stroke_color_=None,
-                 stroke_width_=None,
-                 transform_=None,
-                 order_=None,
-                 symbol_=None,
+                 style=None,
                  variables=None,
                  interactivity=None,
                  legend=None):
 
-        def convstr(obj):
-            """convert all types to strings or None"""
-            return str(obj) if obj is not None else None
-
-        # data source
-        self.query = query
-
-        # viz string
-        self.viz = viz
-
-        # style attributes
-        self.color_ = color_
-        self.width_ = convstr(width_)
-        self.filter_ = filter_
-        self.stroke_color_ = stroke_color_
-        self.stroke_width_ = convstr(stroke_width_)
-        self.transform_ = transform_
-        self.order_ = order_
-        self.symbol_ = symbol_
-
-        # legends
-        self.legend = legend
-
-        # internal attributes
+        # context attributes
         self.orig_query = query
         self.is_basemap = False
-        self.styling = ''
-        self.interactivity = None
-        self.header = None
 
-        if (self.viz is None):
-            self._compose_style()
-            # variables
-            self._set_variables(variables)
-            # interactivity options
-            self._set_interactivity(interactivity)
-        else:
-            self.styling = self.viz
-
-    def _compose_style(self):
-        """Appends `prop` with `style` to layer styling"""
-        valid_styles = (
-            'color',
-            'width',
-            'filter',
-            'stroke_width',
-            'stroke_color',
-            'transform',
-            'order',
-            'symbol'
-        )
-
-        self.styling = '\n'.join(
-            '{prop}: {style}'.format(
-              prop=_to_camel_case(s),
-              style=getattr(self, s + '_')
-            ) for s in valid_styles if getattr(self, s + '_') is not None
-        )
-
-    def _set_variables(self, variables):
-        if variables is None:
-            self.variables = None
-            return
-        elif isinstance(variables, (list)):
-            self.variables = variables
-            variables_list = '\n'.join(
-                '@{name}: {value}'.format(
-                    name=variable[0],
-                    value=variable[1]
-                ) for variable in variables
-            )
-        elif isinstance(variables, dict):
-            self.variables = variables
-            variables_list = '\n'.join(
-                '@{name}: ${value}'.format(variable)
-                for variable in variables
-            )
-        else:
-            raise ValueError('`variables` must be a list of [ name, value ]')
-
-        self.styling = '\n'.join([variables_list, self.styling])
-
-    def _set_interactivity(self, interactivity):
-        """Adds interactivity syntax to the styling"""
-        event_default = 'hover'
-        if interactivity is None:
-            return
-        elif isinstance(interactivity, dict):
-            self.interactivity = {
-              'event': interactivity.get('event', event_default),
-              'header': interactivity.get('header', None),
-              'values': interactivity.get('values', None)
-            }
-        elif interactivity is True:
-            self.interactivity = {
-              'event': event_default,
-            }
-        else:
-            raise ValueError('`interactivity` must be a dictionary')
+        # map attributes
+        self.query = query
+        self.style = _parse_style_properties(style)
+        self.variables = _parse_variables(variables)
+        self.interactivity = _parse_interactivity(interactivity)
+        self.legend = legend
+        self.viz = _set_viz(self.variables, self.style)
 
 
-def _to_camel_case(snake_str):
-    components = snake_str.split('_')
+def _convstr(obj):
+    """convert all types to strings or None"""
+    return str(obj) if obj is not None else None
+
+
+def _to_camel_case(text):
+    """convert properties to camelCase"""
+    components = text.split('-')
     return components[0] + ''.join(x.title() for x in components[1:])
+
+
+def _parse_style_properties(style):
+    """Adds style properties to the styling"""
+    if style is None:
+        return ''
+    elif isinstance(style, dict):
+        return _parse_style_properties_dict(style)
+    elif isinstance(style, (tuple, list)):
+        return _parse_style_properties_list(style)
+    elif isinstance(style, str):
+        return style
+    else:
+        raise ValueError('`style` must be a dictionary, a list or a string')
+
+
+def _parse_style_properties_dict(style):
+    return '\n'.join(
+        '{name}: {value}'.format(
+          name=_to_camel_case(style_prop),
+          value=_convstr(style.get(style_prop))
+        )
+        for style_prop in style
+        if style_prop in defaults._STYLE_PROPERTIES
+        and style.get(style_prop) is not None
+        )
+
+
+def _parse_style_properties_list(style):
+    return '\n'.join(
+      '{name}: {value}'.format(
+          name=_to_camel_case(style_prop[0]),
+          value=_convstr(style_prop[1])
+      ) for style_prop in style if style_prop[0] in defaults._STYLE_PROPERTIES)
+
+
+def _parse_variables(variables):
+    """Adds variables to the styling"""
+    if variables is None:
+        return None
+    elif isinstance(variables, (tuple, list)):
+        return _parse_variables_list(variables)
+    elif isinstance(variables, dict):
+        return _parse_variables_dict(variables)
+    else:
+        raise ValueError('`variables` must be a list of [ name, value ]')
+
+
+def _parse_variables_list(variables):
+    return '\n'.join(
+        '@{name}: {value}'.format(
+            name=variable[0],
+            value=variable[1]
+        ) for variable in variables)
+
+
+def _parse_variables_dict(variables):
+    return '\n'.join(
+        '@{name}: {value}'.format(
+          name=variable,
+          value=variables.get(variable)
+        )
+        for variable in variables)
+
+
+def _parse_interactivity(interactivity):
+    """Adds interactivity syntax to the styling"""
+    event_default = 'hover'
+
+    if interactivity is None:
+        return None
+    elif isinstance(interactivity, dict):
+        return {
+          'event': interactivity.get('event', event_default),
+          'header': interactivity.get('header', None),
+          'values': interactivity.get('values', None)
+        }
+    elif interactivity is True:
+        return {
+          'event': event_default,
+        }
+    else:
+        raise ValueError('`interactivity` must be a dictionary')
+
+
+def _set_viz(variables, style):
+    if variables and style:
+        return '\n'.join([variables, style])
+    else:
+        return style

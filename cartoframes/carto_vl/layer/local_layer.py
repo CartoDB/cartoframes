@@ -34,7 +34,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             vl.Map(
                 [vl.LocalLayer(geodataframe)],
                 context=example_context
-            ).init()
+            )
 
 
         It's also posible to load a local `.geojson` file by using `geopandas.read_file`
@@ -52,22 +52,15 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             vl.Map(
                 [vl.LocalLayer(geojson)],
                 context=example_context
-            ).init()
+            )
     """
     def __init__(self,
                  dataframe,
-                 viz=None,
-                 color_=None,
-                 width_=None,
-                 filter_=None,
-                 stroke_color_=None,
-                 stroke_width_=None,
-                 transform_=None,
-                 order_=None,
-                 symbol_=None,
+                 style=None,
                  variables=None,
-                 legend=None,
-                 interactivity=None):
+                 interactivity=None,
+                 legend=None):
+
         if HAS_GEOPANDAS and isinstance(dataframe, geopandas.GeoDataFrame):
             # filter out null geometries
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
@@ -84,15 +77,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
 
         super(LocalLayer, self).__init__(
             query=None,
-            viz=viz,
-            color_=color_,
-            width_=width_,
-            filter_=filter_,
-            stroke_color_=stroke_color_,
-            stroke_width_=stroke_width_,
-            transform_=transform_,
-            order_=order_,
-            symbol_=symbol_,
+            style=style,
             variables=variables,
             legend=legend,
             interactivity=interactivity

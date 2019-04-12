@@ -127,22 +127,18 @@ class Map(object):
                  **kwargs):
 
         self.layers = _init_layers(layers)
-        self.sources = None
         self.context = context
         self.size = size
         self.basemap = basemap
-        self.bounds = bounds
         self.viewport = viewport
         self.template = template
+        self.sources = _get_map_layers(self.layers)
+        self.bounds = _get_bounds(bounds, self.layers, self.context)
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults._CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
+        self._htmlMap = HTMLMap()
 
-    def init(self):
-        self.htmlMap = HTMLMap()
-        self.sources = _get_map_layers(self.layers)
-        self.bounds = _get_bounds(self.bounds, self.layers, self.context)
-
-        self.htmlMap.set_content(
+        self._htmlMap.set_content(
             size=self.size,
             sources=self.sources,
             bounds=self.bounds,
@@ -152,7 +148,8 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-        return self.htmlMap
+    def _repr_html_(self):
+        return self._htmlMap.html
 
 
 def _get_bounds(bounds, layers, context):
@@ -187,7 +184,7 @@ def _set_map_layer(layer):
         'is_local': is_local,
         'legend': layer.legend,
         'source': source,
-        'styling': layer.styling
+        'viz': layer.viz
     })
 
 

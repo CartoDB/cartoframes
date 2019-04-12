@@ -12,8 +12,8 @@ _AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2.0/airship.css
 _AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2.0/icons.css'
 
 _CREDENTIALS = {
-  'username': 'cartoframes',
-  'api_key': 'default_public',
+  'username': '',
+  'api_key': '',
   'base_url': ''
 }
 
@@ -23,3 +23,14 @@ _WORLD_BOUNDS = {
   'east': 180,
   'north': 85.1
 }
+
+_STYLE_PROPERTIES = (
+    'color',
+    'width',
+    'filter',
+    'stroke-width',
+    'stroke-color',
+    'transform',
+    'order',
+    'symbol'
+)

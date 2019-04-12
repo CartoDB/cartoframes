@@ -25,37 +25,21 @@ class Layer(QueryLayer):
             vl.Map(
                 [vl.Layer('populated_places')],
                 context=context
-            ).init()
+            )
     """
     def __init__(self,
-                 table_name,
-                 viz=None,
-                 color_=None,
-                 width_=None,
-                 filter_=None,
-                 stroke_color_=None,
-                 stroke_width_=None,
-                 transform_=None,
-                 order_=None,
-                 symbol_=None,
+                 query,
+                 style=None,
                  variables=None,
-                 legend=None,
-                 interactivity=None):
+                 interactivity=None,
+                 legend=None):
 
-        self.table_source = table_name
+        self.table_source = query
 
         super(Layer, self).__init__(
-            'SELECT * FROM {}'.format(table_name),
-            viz=viz,
-            color_=color_,
-            width_=width_,
-            filter_=filter_,
-            stroke_color_=stroke_color_,
-            stroke_width_=stroke_width_,
-            transform_=transform_,
-            order_=order_,
-            symbol_=symbol_,
+            'SELECT * FROM {}'.format(query),
+            style=style,
             variables=variables,
-            legend=legend,
-            interactivity=interactivity
+            interactivity=interactivity,
+            legend=legend
         )
