@@ -551,7 +551,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('int64', 'float64')
+        expected_dtypes = ('float64', 'float64')
         self.assertTupleEqual(
             tuple(str(d) for d in df.dtypes),
             expected_dtypes,
