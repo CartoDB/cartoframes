@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .datasets import Dataset
+from .datasets import Dataset, recursive_read, postprocess_dataframe, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -171,16 +171,17 @@ class CartoContext(object):
 
         self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
         self.auth_client = APIKeyAuthClient(
-                base_url=self.creds.base_url(),
-                api_key=self.creds.key(),
-                session=session,
-                client_id='cartoframes_{}'.format(__version__)
-            )
+            base_url=self.creds.base_url(),
+            api_key=self.creds.key(),
+            session=session,
+            client_id='cartoframes_{}'.format(__version__),
+            user_agent='cartoframes_{}'.format(__version__)
+        )
         self.auth_api_client = AuthAPIClient(
-                base_url=self.creds.base_url(),
-                api_key=self.creds.key(),
-                session=session
-            )
+            base_url=self.creds.base_url(),
+            api_key=self.creds.key(),
+            session=session
+        )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
@@ -382,22 +383,6 @@ class CartoContext(object):
 
         raise CartoException('''The table `{}` doesn't exist'''.format(table_name))
 
-    def _table_exists(self, table_name):
-        """Checks to see if table exists"""
-        try:
-            self.sql_client.send(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=table_name),
-                do_post=False)
-            raise NameError(
-                'Table `{table_name}` already exists. '
-                'Run with `overwrite=True` if you wish to replace the '
-                'table.'.format(table_name=table_name))
-        except CartoException as err:
-            # If table doesn't exist, we get an error from the SQL API
-            self._debug_print(err=err)
-            return False
-
     def _check_import(self, import_id):
         """Check the status of an Import API job"""
 
@@ -467,6 +452,64 @@ class CartoContext(object):
             Not yet implemented.
         """
         pass
+
+    def fetch(self, query, decode_geom=False):
+        """Pull the result from an arbitrary SELECT SQL query from a CARTO account
+        into a pandas DataFrame.
+
+        Args:
+            query (str): SELECT query to run against CARTO user database. This data
+              will then be converted into a pandas DataFrame.
+            decode_geom (bool, optional): Decodes CARTO's geometries into a
+              `Shapely <https://github.com/Toblerity/Shapely>`__
+              object that can be used, for example, in `GeoPandas
+              <http://geopandas.org/>`__.
+
+        Returns:
+            pandas.DataFrame: DataFrame representation of query supplied.
+            Pandas data types are inferred from PostgreSQL data types.
+            In the case of PostgreSQL date types, dates are attempted to be
+            converted, but on failure a data type 'object' is used.
+
+        Examples:
+            This query gets the 10 highest values from a table and
+            returns a dataframe.
+
+            .. code:: python
+
+                topten_df = cc.query(
+                    '''
+                      SELECT * FROM
+                      my_table
+                      ORDER BY value_column DESC
+                      LIMIT 10
+                    '''
+                )
+
+            This query joins points to polygons based on intersection, and
+            aggregates by summing the values of the points in each polygon. The
+            query returns a dataframe, with a geometry column that contains
+            polygons.
+
+            .. code:: python
+
+                points_aggregated_to_polygons = cc.query(
+                    '''
+                      SELECT polygons.*, sum(points.values)
+                      FROM polygons JOIN points
+                      ON ST_Intersects(points.the_geom, polygons.the_geom)
+                      GROUP BY polygons.the_geom, polygons.cartodb_id
+                    ''',
+                    decode_geom=True
+                )
+
+        """
+        copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+        query_columns = get_columns(self, query)
+        result = recursive_read(self, copy_query)
+        df = pd.read_csv(result)
+
+        return postprocess_dataframe(df, query_columns, decode_geom)
 
     def query(self, query, table_name=None, decode_geom=False):
         """Pull the result from an arbitrary SQL query from a CARTO account
@@ -1036,19 +1079,7 @@ class CartoContext(object):
             boundaries in `region` (or the world if `region` is ``None``)
         """
         # TODO: create a function out of this?
-        if (isinstance(region, collections.Iterable)
-                and not isinstance(region, str)):
-            if len(region) != 4:
-                raise ValueError(
-                    '`region` should be a list of the geographic bounds of a '
-                    'region in the following order: western longitude, '
-                    'southern latitude, eastern longitude, and northern '
-                    'latitude. For example, Switerland fits in '
-                    '``[5.9559111595,45.8179931641,10.4920501709,'
-                    '47.808380127]``.')
-            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
-                *region)
-        elif isinstance(region, str):
+        if isinstance(region, str):
             # see if it's a table
             try:
                 geom_type = self._geom_type(region)
@@ -1063,7 +1094,17 @@ class CartoContext(object):
                 regionsearch = '"geom_tags"::text ilike \'%{}%\''.format(
                     get_countrytag(region))
                 bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
-
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    '`region` should be a list of the geographic bounds of a '
+                    'region in the following order: western longitude, '
+                    'southern latitude, eastern longitude, and northern '
+                    'latitude. For example, Switerland fits in '
+                    '``[5.9559111595,45.8179931641,10.4920501709,'
+                    '47.808380127]``.')
+            bounds = ('ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)').format(
+                *region)
         elif region is None:
             bounds = 'ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)'
         else:
@@ -1086,9 +1127,8 @@ class CartoContext(object):
                 '{filters}')).format(
                     bounds=bounds,
                     timespan=utils.pgquote(timespan),
-                    filters='WHERE {}'.format(filters) if filters else ''
-                )
-            return self.query(query)
+                    filters='WHERE {}'.format(filters) if filters else '')
+            return self.fetch(query, decode_geom=True)
 
         query = utils.minify_sql((
             'SELECT the_geom, geom_refs',
@@ -1099,7 +1139,7 @@ class CartoContext(object):
                 bounds=bounds,
                 boundary=utils.pgquote(boundary),
                 time=utils.pgquote(timespan))
-        return self.query(query, decode_geom=decode_geom)
+        return self.fetch(query, decode_geom=decode_geom)
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None, include_quantiles=False):
@@ -1362,8 +1402,7 @@ class CartoContext(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         self._debug_print(query=query)
-        resp = self.sql_client.send(query)
-        return pd.DataFrame(resp['rows'])
+        return self.fetch(query, decode_geom=True)
 
     def data(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -1473,8 +1512,7 @@ class CartoContext(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            resp = self.sql_client.send(query)
-            _meta = pd.DataFrame(resp['rows'])
+            _meta = self.fetch(query)
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -1487,21 +1525,31 @@ class CartoContext(object):
                              'combine resulting DataFrames using '
                              '`pandas.concat`')
 
-        tablecols = self.sql_client.send(
-            'SELECT * FROM {table_name} LIMIT 0'.format(table_name=table_name),
-            **DEFAULT_SQL_ARGS
-        )['fields'].keys()
+        # get column names except the_geom_webmercator
+        dataset = Dataset(self, table_name)
+        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
         for suggested in _meta['suggested_name']:
-            if suggested in tablecols:
-                names[suggested] = utils.unique_colname(suggested, tablecols)
+            if suggested in table_columns:
+                names[suggested] = utils.unique_colname(suggested, table_columns)
                 warn(
                     '{s0} was augmented as {s1} because of name '
                     'collision'.format(s0=suggested, s1=names[suggested])
                 )
             else:
                 names[suggested] = suggested
+
+        # drop description columns to lighten the query
+        # FIXME https://github.com/CartoDB/cartoframes/issues/593
+        meta_columns = _meta.columns.values
+        drop_columns = []
+        for meta_column in meta_columns:
+            if meta_column.endswith('_description'):
+                drop_columns.append(meta_column)
+
+        if len(drop_columns) > 0:
+            _meta.drop(drop_columns, axis=1, inplace=True)
 
         cols = ', '.join(
             '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
@@ -1510,7 +1558,7 @@ class CartoContext(object):
                 col=names[row[1]['suggested_name']])
             for row in _meta.iterrows())
         query = utils.minify_sql((
-            'SELECT t.*, {cols}',
+            'SELECT {table_cols}, {cols}',
             '  FROM OBS_GetData(',
             '       (SELECT array_agg({how})',
             '        FROM "{tablename}"),',
@@ -1522,16 +1570,16 @@ class CartoContext(object):
                 tablename=table_name,
                 rowid='cartodb_id' if how == 'the_geom' else how,
                 cols=cols,
+                table_cols=','.join('t.{}'.format(c) for c in table_columns),
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
-        return self.query(query,
-                          table_name=persist_as)
 
-    # backwards compatibility
-    def data_augment(self, table_name, metadata):
-        """DEPRECATED. Use `CartoContext.data` instead"""
-        warn('This function is being deprecated. Use `CartoContext.data` '
-             'instead.', DeprecationWarning)
-        return self.data(table_name, metadata, persist_as=table_name)
+        if persist_as:
+            dataset = Dataset.create_from_query(self, query, persist_as)
+            result = dataset.download(decode_geom=True)
+        else:
+            result = self.fetch(query, decode_geom=True)
+
+        return result
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
