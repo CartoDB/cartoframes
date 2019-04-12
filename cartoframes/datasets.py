@@ -356,7 +356,6 @@ def _decode_geom(ewkb):
 def postprocess_dataframe(df, table_columns, decode_geom=False):
     """Clean a DataFrame with a dataset from CARTO:
         - use cartodb_id as DataFrame index
-        - process bool columns
         - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
 
     Args:
@@ -372,10 +371,6 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
     """
     if 'cartodb_id' in df.columns:
         df.set_index('cartodb_id', inplace=True)
-
-    for column in table_columns:
-        if column.pgtype == 'boolean':
-            df[column.name] = df[column.name].eq('t')
 
     if decode_geom and 'the_geom' in df.columns:
         df['geometry'] = df.the_geom.apply(_decode_geom)

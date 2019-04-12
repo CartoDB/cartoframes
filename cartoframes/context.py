@@ -450,7 +450,9 @@ class CartoContext(object):
         result = recursive_read(self, copy_query)
 
         df = pd.read_csv(result, dtype=dtypes(query_columns, exclude_dates=True),
-                         parse_dates=date_columns_names(query_columns))
+                         parse_dates=date_columns_names(query_columns),
+                         true_values=['t'],
+                         false_values=['f'])
 
         return postprocess_dataframe(df, query_columns, decode_geom)
 
