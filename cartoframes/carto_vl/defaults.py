@@ -12,8 +12,8 @@ _AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2.0/airship.css
 _AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2.0/icons.css'
 
 _CREDENTIALS = {
-  'username': '',
-  'api_key': '',
+  'username': 'default',
+  'api_key': 'default_public',
   'base_url': ''
 }
 
@@ -32,5 +32,6 @@ _STYLE_PROPERTIES = (
     'stroke-color',
     'transform',
     'order',
-    'symbol'
+    'symbol',
+    'symbol-placement',
 )
