@@ -1113,14 +1113,14 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(data.columns) - origcols)
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
         data = cc.data(self.test_data_table, meta)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(data.columns) - origcols)
+                            set(data.columns) - origcols - {'the_geom'})
 
         # with self.assertRaises(NotImplementedError):
         #     cc.data(self.test_data_table, meta, how='geom_ref')
@@ -1146,14 +1146,14 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(data.columns) - origcols)
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
         data = cc.data(self.test_data_table, meta, persist_as=self.test_write_table)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(data.columns) - origcols)
+                            set(data.columns) - origcols - {'the_geom'})
 
         df = cc.read(self.test_write_table, decode_geom=False)
 
