@@ -137,18 +137,3 @@ class TestUtils(unittest.TestCase):
         }
         for i in results:
             self.assertEqual(dtypes2pg(i), results[i])
-
-    def test_pg2dtypes(self):
-        """context._pg2dtypes"""
-        from cartoframes.utils import pg2dtypes
-        results = {
-            'date': 'datetime64[ns]',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-            'unknown_pgdata': 'object'
-        }
-        for i in results:
-            result = pg2dtypes(i)
-            self.assertEqual(result, results[i])
