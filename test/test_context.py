@@ -3,7 +3,7 @@
 """Unit tests for cartoframes.context"""
 try:
     import matplotlib
-    # matplotlib.use('agg')
+    matplotlib.use('agg')
     import matplotlib.pyplot as plt
 except RuntimeError:
     plt = None
@@ -889,64 +889,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         # table exists but columns don't
         with self.assertRaises(ValueError):
             cc._check_query(success_query, style_cols=fail_cols)
-
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_add_encoded_geom(self):
-        """context._add_encoded_geom"""
-        from cartoframes.context import _add_encoded_geom, _encode_geom
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-
-        # encode_geom=True adds a column called 'geometry'
-        df = cc.read(self.test_read_table, limit=5,
-                     decode_geom=True)
-
-        # alter the geometry
-        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.1))
-
-        # the_geom should reflect encoded 'geometry' column
-        _add_encoded_geom(df, 'geometry')
-
-        # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
-
-        # don't specify geometry column (should exist since decode_geom==True)
-        df = cc.read(self.test_read_table, limit=5,
-                     decode_geom=True)
-        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.2))
-
-        # the_geom should reflect encoded 'geometry' column
-        _add_encoded_geom(df, None)
-
-        # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
-
-        df = cc.read(self.test_read_table, limit=5)
-
-        # raise error if 'geometry' column does not exist
-        with self.assertRaises(KeyError):
-            _add_encoded_geom(df, None)
-
-    def test_decode_geom(self):
-        """context._decode_geom"""
-        from cartoframes.context import _decode_geom
-        # Point (0, 0) without SRID
-        ewkb = '010100000000000000000000000000000000000000'
-        decoded_geom = _decode_geom(ewkb)
-        self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
-        self.assertIsNone(_decode_geom(None))
-
-    def test_encode_geom(self):
-        """context._encode_geom"""
-        from cartoframes.context import _encode_geom
-        from shapely import wkb
-        import binascii as ba
-        # Point (0 0) without SRID
-        ewkb = '010100000000000000000000000000000000000000'
-        geom = wkb.loads(ba.unhexlify(ewkb))
-        ewkb_resp = _encode_geom(geom)
-        self.assertEqual(ewkb_resp, ewkb)
-        self.assertIsNone(_encode_geom(None))
 
     def test_debug_print(self):
         """context._debug_print"""
