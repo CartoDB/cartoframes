@@ -456,7 +456,7 @@ class CartoContext(object):
                          true_values=['t'],
                          false_values=['f'],
                          index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
-                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else None})
+                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
 
         if decode_geom:
             df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
