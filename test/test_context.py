@@ -583,7 +583,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'int64', 'object')
+        expected_dtypes = ('object', 'float64', 'object')
         self.assertTupleEqual(
             tuple(str(d) for d in df.dtypes),
             expected_dtypes,
@@ -1155,7 +1155,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertSetEqual(set(('median_income_2011_2015', )),
                             set(data.columns) - origcols)
 
-        df = cc.read(self.test_write_table, decode_geom=True)
+        df = cc.read(self.test_write_table, decode_geom=False)
 
         # same number of rows
         self.assertEqual(len(df), len(data),
