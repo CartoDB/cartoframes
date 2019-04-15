@@ -28,6 +28,7 @@ WILL_SKIP = False
 warnings.filterwarnings("ignore")
 
 
+@unittest.skip("Move test to test/carto_vl folder")
 class TestContribVector(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
     def setUp(self):
