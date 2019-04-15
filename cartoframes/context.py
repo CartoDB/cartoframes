@@ -596,7 +596,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.execute(
+                cc.query(
                     '''
                       DROP TABLE my_table
                     '''
