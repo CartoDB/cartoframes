@@ -123,8 +123,7 @@ def normalize_name(column_name):
 
 
 def dtypes(columns, exclude_dates=False):
-    return dict((x.name, x.dtype) for x in columns
-                if (x.pgtype != 'date' and exclude_dates is True) or exclude_dates is False)
+    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.pgtype == 'date')}
 
 
 def date_columns_names(columns):
