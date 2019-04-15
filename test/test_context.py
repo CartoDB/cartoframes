@@ -577,13 +577,13 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                               'Should be a pandas DataFrame')
 
         # same column names
-        requested_cols = {'the_geom', 'i', 'geometry'}
+        requested_cols = {'geometry', 'i'}
         self.assertSetEqual(requested_cols,
                             set(df.columns),
                             msg='Should have the columns requested')
 
         # should have exected schema
-        expected_dtypes = ('object', 'float64', 'object')
+        expected_dtypes = ('object', 'float64')
         self.assertTupleEqual(
             tuple(str(d) for d in df.dtypes),
             expected_dtypes,

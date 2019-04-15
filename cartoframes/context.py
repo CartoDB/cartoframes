@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .datasets import Dataset, get_columns, recursive_read, postprocess_dataframe
+from .datasets import Dataset, get_columns, recursive_read, _decode_geom
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -447,24 +447,21 @@ class CartoContext(object):
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
         query_columns = get_columns(self, query)
-        query_columns_names = [c.name for c in query_columns]
-
-        index = False
-        try:
-            query_columns_names.index('cartodb_id')
-            index = 'cartodb_id'
-        except ValueError:
-            pass
 
         result = recursive_read(self, copy_query)
+        df_types = dtypes(query_columns, exclude_dates=True)
 
-        df = pd.read_csv(result, dtype=dtypes(query_columns, exclude_dates=True),
+        df = pd.read_csv(result, dtype=df_types,
                          parse_dates=date_columns_names(query_columns),
                          true_values=['t'],
                          false_values=['f'],
-                         index_col=index)
+                         index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else None})
 
-        return postprocess_dataframe(df, query_columns, decode_geom)
+        if decode_geom:
+            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+        return df
 
     def execute(self, query):
         """Runs an arbitrary query to a CARTO account.

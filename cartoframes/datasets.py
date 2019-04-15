@@ -352,24 +352,3 @@ def _decode_geom(ewkb):
                         except Exception:
                             pass
     return None
-
-
-def postprocess_dataframe(df, table_columns, decode_geom=False):
-    """Clean a DataFrame with a dataset from CARTO:
-        - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
-
-    Args:
-        df (pandas.DataFrame): DataFrame with a dataset from CARTO.
-        table_columns (list of cartoframes.columns.Column): column names and types from a table.
-        decode_geom (bool, optional): Decodes CARTO's geometries into a
-            `Shapely <https://github.com/Toblerity/Shapely>`__
-            object that can be used, for example, in `GeoPandas
-            <http://geopandas.org/>`__.
-
-    Returns:
-        pandas.DataFrame
-    """
-    if decode_geom and 'the_geom' in df.columns:
-        df['geometry'] = df.the_geom.apply(_decode_geom)
-
-    return df
