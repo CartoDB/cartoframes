@@ -3,9 +3,9 @@
 """Unit tests for cartoframes.context"""
 try:
     import matplotlib
-    matplotlib.use('agg')
+    # matplotlib.use('agg')
     import matplotlib.pyplot as plt
-except ImportError:
+except RuntimeError:
     plt = None
 
 import unittest
@@ -452,7 +452,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         # should be specified length
         self.assertEqual(len(df), 100)
         # should have requested columns + utility columns from CARTO
-        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
+        self.assertSetEqual({'body', 'displayname', 'cartodb_id', 'link', 'friendscount',
                              'the_geom', },
                             set(df.columns),
                             msg='Should have the columns requested')

@@ -31,6 +31,7 @@ class Dataset(object):
         self.table_name = normalize_name(table_name)
         self.schema = schema
         self.df = df
+        self.normalized_column_names = None
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
@@ -368,6 +369,10 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
     Returns:
         pandas.DataFrame
     """
+
+    if 'cartodb_id' in df.columns:
+        df.set_index('cartodb_id', inplace=True)
+
     if decode_geom and 'the_geom' in df.columns:
         df['geometry'] = df.the_geom.apply(_decode_geom)
 

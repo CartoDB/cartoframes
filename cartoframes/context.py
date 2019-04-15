@@ -447,21 +447,13 @@ class CartoContext(object):
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
         query_columns = get_columns(self, query)
-        query_columns_names = [c.name for c in query_columns]
-
-        index = False
-        try:
-            index = query_columns_names.index('cartodb_id')
-        except ValueError:
-            pass
 
         result = recursive_read(self, copy_query)
 
         df = pd.read_csv(result, dtype=dtypes(query_columns, exclude_dates=True),
                          parse_dates=date_columns_names(query_columns),
                          true_values=['t'],
-                         false_values=['f'],
-                         index_col=index)
+                         false_values=['f'])
 
         return postprocess_dataframe(df, query_columns, decode_geom)
 
