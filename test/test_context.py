@@ -452,7 +452,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         # should be specified length
         self.assertEqual(len(df), 100)
         # should have requested columns + utility columns from CARTO
-        self.assertSetEqual({'body', 'displayname', 'cartodb_id', 'link', 'friendscount',
+        self.assertSetEqual({'body', 'displayname', 'link', 'friendscount',
                              'the_geom', },
                             set(df.columns),
                             msg='Should have the columns requested')
