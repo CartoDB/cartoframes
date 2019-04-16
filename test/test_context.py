@@ -469,7 +469,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 )
                 SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
                 FROM cte
-            ''')
+            ''', is_select=True)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_fetch(self):

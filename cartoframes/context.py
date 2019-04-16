@@ -513,7 +513,7 @@ class CartoContext(object):
         """
         self.batch_sql_client.create_and_wait_for_completion(query)
 
-    def query(self, query, table_name=None, decode_geom=False, is_select=True):
+    def query(self, query, table_name=None, decode_geom=False, is_select=None):
         """Pull the result from an arbitrary SQL SELECT query from a CARTO account
         into a pandas DataFrame. This is the default behavior, when `is_select=True`
 
@@ -543,6 +543,9 @@ class CartoContext(object):
               pandas DataFrame.
               When an arbitrary SQL query (`is_select=False`) it will perform a database
               operation (UPDATE, DROP, INSERT, etc.)
+              By default `is_select=None` that means that the method will return a dataframe if
+              the `query` starts with a `select` clause, otherwise it will just execute the query
+              and return `None`
 
         Returns:
             pandas.DataFrame: When `is_select=True` and the query is actually a SELECT query
@@ -614,7 +617,9 @@ class CartoContext(object):
 
         """
         dataframe = None
-        if is_select:
+
+        is_select_query = is_select or (is_select is None and query.strip().lower().startswith('select'))
+        if is_select_query:
             if table_name:
                 dataset = Dataset.create_from_query(self, query, table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
