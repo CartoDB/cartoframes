@@ -6,9 +6,7 @@ import json
 import os
 import random
 import sys
-import time
 import collections
-import binascii as ba
 from warnings import warn
 
 import requests
@@ -31,7 +29,8 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .datasets import Dataset, recursive_read, postprocess_dataframe, get_columns
+from .columns import dtypes, date_columns_names
+from .datasets import Dataset, get_columns, recursive_read, _decode_geom
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -383,65 +382,6 @@ class CartoContext(object):
 
         raise CartoException('''The table `{}` doesn't exist'''.format(table_name))
 
-    def _check_import(self, import_id):
-        """Check the status of an Import API job"""
-
-        res = self._auth_send('api/v1/imports/{}'.format(import_id),
-                              'GET')
-        return res
-
-    def _handle_import(self, import_job, table_name):
-        """Handle state of import job"""
-        if import_job['state'] == 'failure':
-            if import_job['error_code'] == 8001:
-                raise CartoException(
-                    'Over CARTO account storage limit for user `{}`. Try '
-                    'subsetting your DataFrame or dropping columns to reduce '
-                    'the data size.'.format(self.creds.username())
-                )
-            elif import_job['error_code'] == 6668:
-                raise CartoException(
-                    'Too many rows in DataFrame. Try subsetting '
-                    'DataFrame before writing to CARTO.'
-                )
-            else:
-                raise CartoException(
-                    'Error code: `{}`. See CARTO Import API error '
-                    'documentation for more information: '
-                    'https://carto.com/developers/import-api/support/'
-                    'import-errors/'.format(import_job['error_code'])
-                )
-        elif import_job['state'] == 'complete':
-            import_job_table_name = import_job['table_name']
-            self._debug_print(final_table=import_job_table_name)
-            if import_job_table_name != table_name:
-                try:
-                    res = self.sql_client.send(
-                        utils.minify_sql((
-                            'DROP TABLE IF EXISTS {orig_table};',
-                            'ALTER TABLE {dupe_table} RENAME TO {orig_table};',
-                            'SELECT CDB_TableMetadataTouch(',
-                            '           \'{orig_table}\'::regclass);',
-                            )).format(
-                                orig_table=table_name,
-                                dupe_table=import_job_table_name),
-                        do_post=False)
-
-                    self._debug_print(res=res)
-                except Exception as err:
-                    self._debug_print(err=err)
-                    raise Exception(
-                        'Cannot overwrite table `{table_name}` ({err}). '
-                        'DataFrame was written to `{new_table}` '
-                        'instead.'.format(
-                            table_name=table_name,
-                            err=err,
-                            new_table=import_job_table_name)
-                    )
-                finally:
-                    self.delete(import_job_table_name)
-        return table_name
-
     def sync(self, dataframe, table_name):
         """Depending on the size of the DataFrame or CARTO table, perform
         granular operations on a DataFrame to only update the changed cells
@@ -506,32 +446,117 @@ class CartoContext(object):
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
         query_columns = get_columns(self, query)
+
         result = recursive_read(self, copy_query)
-        df = pd.read_csv(result)
+        df_types = dtypes(query_columns, exclude_dates=True)
 
-        return postprocess_dataframe(df, query_columns, decode_geom)
+        df = pd.read_csv(result, dtype=df_types,
+                         parse_dates=date_columns_names(query_columns),
+                         true_values=['t'],
+                         false_values=['f'],
+                         index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
 
-    def query(self, query, table_name=None, decode_geom=False):
-        """Pull the result from an arbitrary SQL query from a CARTO account
-        into a pandas DataFrame. Can also be used to perform database
-        operations (creating/dropping tables, adding columns, updates, etc.).
+        if decode_geom:
+            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+        return df
+
+    def execute(self, query):
+        """Runs an arbitrary query to a CARTO account.
+
+           This method is specially useful for queries that do not return any data and just
+           perform a database operation like:
+
+             - INSERT, UPDATE, DROP, CREATE, ALTER, stored procedures, etc.
+
+           Queries are run using a `Batch SQL API job
+           <https://carto.com/developers/sql-api/guides/batch-queries/>`__
+           in the user account
+
+           The execution of the queries is asynchronous but this method automatically
+           waits for its completion (or failure). The `job_id` of the Batch SQL API job
+           will be printed. In case there's any issue you can contact the CARTO support team
+           specifying that `job_id`.
+
+        Args:
+            query (str): An SQL query to run against CARTO user database.
+
+        Returns:
+            None
+
+        Raises:
+            CartoException: If the query fails to execute
+
+        Examples:
+
+            Drops `my_table`
+
+            .. code:: python
+
+                cc.execute(
+                    '''
+                      DROP TABLE my_table
+                    '''
+                )
+
+            Updates the column `my_column` in the table `my_table`
+
+            .. code:: python
+
+                cc.query(
+                    '''
+                      UPDATE my_table SET my_column = 1
+                    '''
+                )
+
+        """
+        self.batch_sql_client.create_and_wait_for_completion(query)
+
+    def query(self, query, table_name=None, decode_geom=False, is_select=None):
+        """Pull the result from an arbitrary SQL SELECT query from a CARTO account
+        into a pandas DataFrame. This is the default behavior, when `is_select=True`
+
+        Can also be used to perform database operations (creating/dropping tables,
+        adding columns, updates, etc.). In this case, you have to explicitly
+        specify `is_select=False`
+
+        This method is a helper for the `CartoContext.fetch` and `CartoContext.execute`
+        methods. We strongly encourage you to use any of those methods depending on the
+        type of query you want to run. If you want to get the results of a `SELECT` query
+        into a pandas DataFrame, then use `CartoContext.fetch`. For any other query that
+        performs an operation into the CARTO database, use `CartoContext.execute`
 
         Args:
             query (str): Query to run against CARTO user database. This data
               will then be converted into a pandas DataFrame.
-            table_name (str, optional): If set, this will create a new
-              table in the user's CARTO account that is the result of the
-              query. Defaults to None (no table created).
+            table_name (str, optional): If set (and `is_select=True`), this will create a new
+              table in the user's CARTO account that is the result of the SELECT
+              query provided. Defaults to None (no table created).
             decode_geom (bool, optional): Decodes CARTO's geometries into a
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
-              <http://geopandas.org/>`__.
+              <http://geopandas.org/>`__. It only works for SELECT queries when `is_select=True`
+            is_select (bool, optional): This argument has to be set depending on the query
+              performed. True for SELECT queries, False for any other query.
+              For the case of a SELECT SQL query (`is_select=True`) the result will be stored into a
+              pandas DataFrame.
+              When an arbitrary SQL query (`is_select=False`) it will perform a database
+              operation (UPDATE, DROP, INSERT, etc.)
+              By default `is_select=None` that means that the method will return a dataframe if
+              the `query` starts with a `select` clause, otherwise it will just execute the query
+              and return `None`
 
         Returns:
-            pandas.DataFrame: DataFrame representation of query supplied.
+            pandas.DataFrame: When `is_select=True` and the query is actually a SELECT query
+            this method returns a pandas DataFrame representation of query supplied otherwise
+            returns None.
             Pandas data types are inferred from PostgreSQL data types.
             In the case of PostgreSQL date types, dates are attempted to be
             converted, but on failure a data type 'object' is used.
+
+        Raises:
+            CartoException: If there's any error when executing the query
 
         Examples:
             Query a table in CARTO and write a new table that is result of
@@ -570,75 +595,40 @@ class CartoContext(object):
                     decode_geom=True
                 )
 
+            Drops `my_table`
+
+            .. code:: python
+
+                cc.query(
+                    '''
+                      DROP TABLE my_table
+                    '''
+                )
+
+            Updates the column `my_column` in the table `my_table`
+
+            .. code:: python
+
+                cc.query(
+                    '''
+                      UPDATE my_table SET my_column = 1
+                    '''
+                )
+
         """
-        self._debug_print(query=query)
-        if table_name:
-            # TODO: replace the following error catching with Import API
-            #  checking once Import API sql/table_name collision_strategy=skip
-            #  bug is fixed ref: support/1127
-            try:
-                self.sql_client.send('''
-                    CREATE TABLE {0} AS SELECT 1;
-                    DROP TABLE {0};
-                '''.format(table_name))
-                resp = self._auth_send(
-                    'api/v1/imports', 'POST',
-                    params=dict(table_name=table_name),
-                    json=dict(sql=query),
-                    # collision_strategy='',
-                    headers={'Content-Type': 'application/json'})
-            except CartoException as err:
-                raise CartoException(
-                    'Cannot create table `{0}`: {1}'.format(table_name, err))
+        dataframe = None
 
-            while True:
-                import_job = self._check_import(resp['item_queue_id'])
-                self._debug_print(import_job=import_job)
-                final_table_name = self._handle_import(import_job, table_name)
-                if import_job['state'] == 'complete':
-
-                    print('Table successfully written to CARTO: '
-                          '{table_url}'.format(
-                              table_url=utils.join_url(self.creds.base_url(),
-                                                       'dataset',
-                                                       final_table_name)))
-                    break
-                time.sleep(1.0)
-
-            select_res = self.sql_client.send(
-                'SELECT * FROM {table_name}'.format(
-                    table_name=final_table_name),
-                skipfields='the_geom_webmercator',
-                **DEFAULT_SQL_ARGS)
+        is_select_query = is_select or (is_select is None and query.strip().lower().startswith('select'))
+        if is_select_query:
+            if table_name:
+                dataset = Dataset.create_from_query(self, query, table_name)
+                dataframe = dataset.download(decode_geom=decode_geom)
+            else:
+                dataframe = self.fetch(query, decode_geom=decode_geom)
         else:
-            select_res = self.sql_client.send(
-                query,
-                skipfields='the_geom_webmercator',
-                **DEFAULT_SQL_ARGS)
-            if 'error' in select_res:
-                raise CartoException(str(select_res['error']))
+            self.execute(query)
 
-        self._debug_print(select_res=select_res)
-
-        fields = select_res['fields']
-        if select_res['total_rows'] == 0:
-            return pd.DataFrame(columns=set(fields.keys()) - {'cartodb_id'})
-
-        df = pd.DataFrame(data=select_res['rows'])
-        for field in fields:
-            if fields[field]['type'] == 'date':
-                df[field] = pd.to_datetime(df[field], errors='ignore')
-
-        self._debug_print(columns=df.columns,
-                          dtypes=df.dtypes)
-
-        if 'cartodb_id' in fields:
-            df.set_index('cartodb_id', inplace=True)
-
-        if decode_geom:
-            df['geometry'] = df.the_geom.apply(_decode_geom)
-
-        return df
+        return dataframe
 
     @utils.temp_ignore_warnings
     def map(self, layers=None, interactive=True,
@@ -1573,13 +1563,7 @@ class CartoContext(object):
                 table_cols=','.join('t.{}'.format(c) for c in table_columns),
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
-        if persist_as:
-            dataset = Dataset.create_from_query(self, query, persist_as)
-            result = dataset.download(decode_geom=True)
-        else:
-            result = self.fetch(query, decode_geom=True)
-
-        return result
+        return self.query(query, table_name=persist_as, decode_geom=False, is_select=True)
 
     def _auth_send(self, relative_path, http_method, **kwargs):
         self._debug_print(relative_path=relative_path,
@@ -1705,65 +1689,3 @@ class CartoContext(object):
                                                      str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
-
-
-# TODO: move all of the below to the utils module
-def _add_encoded_geom(df, geom_col):
-    """Add encoded geometry to DataFrame"""
-    # None if not a GeoDataFrame
-    is_geopandas = getattr(df, '_geometry_column_name', None)
-    if is_geopandas is None and geom_col is None:
-        warn('`encode_geom` works best with Geopandas '
-             '(http://geopandas.org/) and/or shapely '
-             '(https://pypi.python.org/pypi/Shapely).')
-        geom_col = 'geometry' if 'geometry' in df.columns else None
-        if geom_col is None:
-            raise KeyError('Geometries were requested to be encoded '
-                           'but a geometry column was not found in the '
-                           'DataFrame.'.format(geom_col=geom_col))
-    elif is_geopandas and geom_col:
-        warn('Geometry column of the input DataFrame does not '
-             'match the geometry column supplied. Using user-supplied '
-             'column...\n'
-             '\tGeopandas geometry column: {}\n'
-             '\tSupplied `geom_col`: {}'.format(is_geopandas,
-                                                geom_col))
-    elif is_geopandas and geom_col is None:
-        geom_col = is_geopandas
-    # updates in place
-    df['the_geom'] = df[geom_col].apply(_encode_geom)
-    return None
-
-
-def _encode_decode_decorator(func):
-    """decorator for encoding and decoding geoms"""
-    def wrapper(*args):
-        """error catching"""
-        try:
-            processed_geom = func(*args)
-            return processed_geom
-        except ImportError as err:
-            raise ImportError('The Python package `shapely` needs to be '
-                              'installed to encode or decode geometries. '
-                              '({})'.format(err))
-    return wrapper
-
-
-@_encode_decode_decorator
-def _encode_geom(geom):
-    """Encode geometries into hex-encoded wkb
-    """
-    from shapely import wkb
-    if geom:
-        return ba.hexlify(wkb.dumps(geom)).decode()
-    return None
-
-
-@_encode_decode_decorator
-def _decode_geom(ewkb):
-    """Decode encoded wkb into a shapely geometry
-    """
-    from shapely import wkb
-    if ewkb:
-        return wkb.loads(ba.unhexlify(ewkb))
-    return None

@@ -21,20 +21,27 @@ class Column(object):
                       'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
                       'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
 
-    def __init__(self, name):
+    @staticmethod
+    def from_sql_api_fields(sql_api_fields):
+        return [Column(column, normalize=False, pgtype=sql_api_fields[column]['type']) for column in sql_api_fields]
+
+    def __init__(self, name, normalize=True, pgtype=None):
         if not name:
             raise ValueError('Column name cannot be null or empty')
 
         self.name = str(name)
-        self.normalize()
+        self.pgtype = pgtype
+        self.dtype = pg2dtypes(pgtype)
+        if normalize:
+            self.normalize()
 
-    def normalize(self, forbidden_columns=None):
+    def normalize(self, forbidden_column_names=None):
         self._sanitize()
         self.name = self._truncate()
 
-        if forbidden_columns:
+        if forbidden_column_names:
             i = 1
-            while self.name in forbidden_columns:
+            while self.name in forbidden_column_names:
                 self.name = '{}_{}'.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
                 i += 1
 
@@ -105,7 +112,7 @@ def normalize_names(column_names):
     """
     result = []
     for column_name in column_names:
-        column = Column(column_name).normalize(forbidden_columns=result)
+        column = Column(column_name).normalize(forbidden_column_names=result)
         result.append(column.name)
 
     return result
@@ -113,3 +120,23 @@ def normalize_names(column_names):
 
 def normalize_name(column_name):
     return normalize_names([column_name])[0]
+
+
+def dtypes(columns, exclude_dates=False):
+    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.pgtype == 'date')}
+
+
+def date_columns_names(columns):
+    return [x.name for x in columns if x.pgtype == 'date']
+
+
+def pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'date': 'datetime64[ns]',
+        'number': 'float64',
+        'string': 'object',
+        'boolean': 'bool',
+        'geometry': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')

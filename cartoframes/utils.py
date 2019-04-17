@@ -3,8 +3,6 @@ import sys
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
-from tqdm import tqdm
-
 
 def dict_items(indict):
     """function for iterating through dict items compatible with py2 and 3
@@ -95,32 +93,3 @@ def dtypes2pg(dtype):
         'datetime64[ns]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
-
-
-# NOTE: this is not currently used anywhere
-def pg2dtypes(pgtype):
-    """Returns equivalent dtype for input `pgtype`."""
-    mapping = {
-        'date': 'datetime64[ns]',
-        'number': 'float64',
-        'string': 'object',
-        'boolean': 'bool',
-        'geometry': 'object',
-    }
-    return mapping.get(str(pgtype), 'object')
-
-
-def df2pg_schema(dataframe, pgcolnames):
-    """Print column names with PostgreSQL schema for the SELECT statement of
-    a SQL query"""
-    util_cols = set(('the_geom', 'the_geom_webmercator', 'cartodb_id'))
-    if set(dataframe.columns).issubset(util_cols):
-        return ', '.join(dataframe.columns)
-    schema = ', '.join([
-        'NULLIF("{col}", \'\')::{t} AS {col}'.format(col=c,
-                                                     t=dtypes2pg(t))
-        for c, t in zip(pgcolnames, dataframe.dtypes)
-        if c not in util_cols])
-    if 'the_geom' in pgcolnames:
-        return '"the_geom", ' + schema
-    return schema
