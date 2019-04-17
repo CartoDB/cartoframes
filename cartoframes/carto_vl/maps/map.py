@@ -2,14 +2,12 @@ from __future__ import absolute_import
 
 import numpy as np
 import collections
-import logging
 from cartoframes import utils
 from ..utils.html import HTMLMap
 from ..utils import defaults
 from ..basemap.basemaps import Basemaps
 from ..layer.local_layer import LocalLayer
 
-logger = logging.Logger('catch_all')
 
 class Map(object):
     """CARTO VL-powered interactive map
@@ -151,10 +149,7 @@ class Map(object):
             _airship_path=self._airship_path)
 
     def _repr_html_(self):
-        try:
-            return self._htmlMap.html
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        return self._htmlMap.html
 
 
 def _get_bounds(bounds, layers, context):
