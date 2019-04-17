@@ -1,3 +1,4 @@
+
 const responsive = document.querySelector('as-responsive-content');
 
 function onReady() {
@@ -122,4 +123,18 @@ function onReady() {
   });
 }
 
-responsive.addEventListener('ready', onReady);
+function setReady () {
+  try {
+    onReady()
+  } catch (e) {
+    const error$ = document.getElementById('error-container');
+    const errors$ = error$.getElementsByTagName('span');
+
+    errors$[0].innerHTML = e.name;
+    errors$[1].innerHTML = e.type;
+    errors$[2].innerHTML = e.message;
+
+    error$.style.visibility = 'visible';
+  }
+}
+responsive.addEventListener('ready', setReady);

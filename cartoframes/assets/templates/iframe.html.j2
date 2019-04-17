@@ -1,5 +1,6 @@
 <iframe
   frameborder="0"
+  name="{% if name %}{{ name }}{% else %}testframe{% endif %};"
   style="
     border: 1px solid #cfcfcf;
     width: {% if width %}{{ width | iframe_size }}{% else %}100%{% endif %};

@@ -23,13 +23,38 @@
         margin: 0;
         padding: 0;
       }
+
       #map {
         position: absolute;
         height: 100%;
         width: 100%;
       }
+
+      #error-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: WHITE;
+        visibility: hidden;
+        padding: 1em;
+        font-family: "Courier New", Courier, monospace;
+        margin: 0 auto;
+        font-size: 14px;
+      }
+
+      #error-container #error-title {}
+
+      #error-container #error-type {
+        color: #008000;
+      }
+
+      #error-container #error-name {
+        color: #ba2121;
+        text-decoration: underline;
+      }
     </style>
   </head>
+
   <body class="as-app-body as-app">
     <as-responsive-content>
       <main class="as-main">
@@ -44,6 +69,8 @@
         </div> <!-- as-map-area -->
       </main> <!-- as-main -->
     </as-responsive-content>
+
+    {% include 'error/basic.html.j2' %}
 
     <script>
       {% include 'vector/scripts/map.js.j2' %}
