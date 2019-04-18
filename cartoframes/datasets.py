@@ -201,8 +201,17 @@ class Dataset(object):
             WHERE table_name = '{table}' AND table_schema = '{schema}'
         '''.format(table=self.table_name, schema=self.schema)
 
-        table_info = self.cc.sql_client.send(query)
-        return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+        try:
+            table_info = self.cc.sql_client.send(query)
+            return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+        except CartoException as e:
+            if str(e) == 'Access denied':
+                query = '''
+                    SELECT *
+                    FROM "{schema}"."{table}" LIMIT 0
+                '''.format(table=self.table_name, schema=self.schema)
+                table_info = self.cc.sql_client.send(query)
+                return Column.from_sql_api_fields(table_info['fields'])
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
