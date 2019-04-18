@@ -404,6 +404,28 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
+            query_columns (list, optional): A list of `cartoframes.column.Column` to infer data types. You should
+              create `Column` instances this way: Column('column_name', pgtype='the_database_type') where
+              `the_database_type` is mapped using this dictionary:
+
+              .. code:: python
+
+                {'bigint': 'int64',
+                 'boolean': 'bool',
+                 'date': 'datetime64[ns]',
+                 'double precision': 'float64',
+                 'geometry': 'object',
+                 'int': 'int64',
+                 'integer': 'int64',
+                 'number': 'float64',
+                 'numeric': 'float64',
+                 'real': 'float64',
+                 'smallint': 'int32',
+                 'string': 'object',
+                 'timestamp': 'datetime64[ns]',
+                 'timestamp with time zone': 'datetime64[ns]',
+                 'timestamp without time zone': 'datetime64[ns]',
+                 'USER-DEFINED': 'object',}
 
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
@@ -550,6 +572,28 @@ class CartoContext(object):
               By default `is_select=None` that means that the method will return a dataframe if
               the `query` starts with a `select` clause, otherwise it will just execute the query
               and return `None`
+            query_columns (list, optional): A list of `cartoframes.column.Column` to infer data types. You should
+              create `Column` instances this way: Column('column_name', pgtype='the_database_type') where
+              `the_database_type` is mapped using this dictionary:
+
+              .. code:: python
+
+                {'bigint': 'int64',
+                 'boolean': 'bool',
+                 'date': 'datetime64[ns]',
+                 'double precision': 'float64',
+                 'geometry': 'object',
+                 'int': 'int64',
+                 'integer': 'int64',
+                 'number': 'float64',
+                 'numeric': 'float64',
+                 'real': 'float64',
+                 'smallint': 'int32',
+                 'string': 'object',
+                 'timestamp': 'datetime64[ns]',
+                 'timestamp with time zone': 'datetime64[ns]',
+                 'timestamp without time zone': 'datetime64[ns]',
+                 'USER-DEFINED': 'object',}
 
         Returns:
             pandas.DataFrame: When `is_select=True` and the query is actually a SELECT query
