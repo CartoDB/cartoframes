@@ -207,7 +207,8 @@ class CartoContext(object):
         return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
-        """Read a table from CARTO into a pandas DataFrames.
+        """Read a table from CARTO into a pandas DataFrames. Column types are inferred from database types, to
+          avoid problems with integer columns with NA or null values, they are automatically retrieved as float64
 
         Args:
             table_name (str): Name of table in user's CARTO account.
@@ -410,17 +411,17 @@ class CartoContext(object):
 
               .. code:: python
 
-                {'bigint': 'int64',
+                {'bigint': 'float64',
                  'boolean': 'bool',
                  'date': 'datetime64[ns]',
                  'double precision': 'float64',
                  'geometry': 'object',
                  'int': 'int64',
-                 'integer': 'int64',
+                 'integer': 'float64',
                  'number': 'float64',
                  'numeric': 'float64',
                  'real': 'float64',
-                 'smallint': 'int32',
+                 'smallint': 'float64',
                  'string': 'object',
                  'timestamp': 'datetime64[ns]',
                  'timestamp with time zone': 'datetime64[ns]',
@@ -578,17 +579,17 @@ class CartoContext(object):
 
               .. code:: python
 
-                {'bigint': 'int64',
+                {'bigint': 'float64',
                  'boolean': 'bool',
                  'date': 'datetime64[ns]',
                  'double precision': 'float64',
                  'geometry': 'object',
                  'int': 'int64',
-                 'integer': 'int64',
+                 'integer': 'float64',
                  'number': 'float64',
                  'numeric': 'float64',
                  'real': 'float64',
-                 'smallint': 'int32',
+                 'smallint': 'float64',
                  'string': 'object',
                  'timestamp': 'datetime64[ns]',
                  'timestamp with time zone': 'datetime64[ns]',

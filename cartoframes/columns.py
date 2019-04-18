@@ -123,7 +123,8 @@ def normalize_name(column_name):
 
 
 def dtypes(columns, exclude_dates=False):
-    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.dtype == 'datetime64[ns]')}
+    return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
+            for x in columns if not (exclude_dates is True and x.dtype == 'datetime64[ns]')}
 
 
 def date_columns_names(columns):
@@ -133,17 +134,17 @@ def date_columns_names(columns):
 def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
-        'bigint': 'int64',
+        'bigint': 'float64',
         'boolean': 'bool',
         'date': 'datetime64[ns]',
         'double precision': 'float64',
         'geometry': 'object',
         'int': 'int64',
-        'integer': 'int64',
+        'integer': 'float64',
         'number': 'float64',
         'numeric': 'float64',
         'real': 'float64',
-        'smallint': 'int32',
+        'smallint': 'float64',
         'string': 'object',
         'timestamp': 'datetime64[ns]',
         'timestamp with time zone': 'datetime64[ns]',

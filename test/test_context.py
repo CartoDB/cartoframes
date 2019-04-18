@@ -246,7 +246,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         read_df.drop('the_geom', axis=1, inplace=True)
         self.assertSetEqual(set(df.columns), set(read_df.columns))
         self.assertTupleEqual(
-            tuple(str(d) for d in df.dtypes),
+            tuple('float64' if str(d) == 'int64' else 'float64' for d in df.dtypes),
             tuple(str(d) for d in read_df.dtypes),
             msg='Should have same schema/types'
         )
