@@ -30,7 +30,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .datasets import Dataset, get_columns, recursive_read, _decode_geom
+from .datasets import Dataset, recursive_read, _decode_geom
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -393,7 +393,7 @@ class CartoContext(object):
         """
         pass
 
-    def fetch(self, query, decode_geom=False):
+    def fetch(self, query, decode_geom=False, query_columns=None):
         """Pull the result from an arbitrary SELECT SQL query from a CARTO account
         into a pandas DataFrame.
 
@@ -445,13 +445,17 @@ class CartoContext(object):
 
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        query_columns = get_columns(self, query)
-
         result = recursive_read(self, copy_query)
-        df_types = dtypes(query_columns, exclude_dates=True)
+
+        df_types = {}
+        date_column_names = None
+
+        if query_columns:
+            df_types = dtypes(query_columns, exclude_dates=True)
+            date_column_names = date_columns_names(query_columns)
 
         df = pd.read_csv(result, dtype=df_types,
-                         parse_dates=date_columns_names(query_columns),
+                         parse_dates=date_column_names,
                          true_values=['t'],
                          false_values=['f'],
                          index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
@@ -513,7 +517,7 @@ class CartoContext(object):
         """
         self.batch_sql_client.create_and_wait_for_completion(query)
 
-    def query(self, query, table_name=None, decode_geom=False, is_select=None):
+    def query(self, query, table_name=None, decode_geom=False, is_select=None, query_columns=None):
         """Pull the result from an arbitrary SQL SELECT query from a CARTO account
         into a pandas DataFrame. This is the default behavior, when `is_select=True`
 
@@ -624,7 +628,7 @@ class CartoContext(object):
                 dataset = Dataset.create_from_query(self, query, table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
             else:
-                dataframe = self.fetch(query, decode_geom=decode_geom)
+                dataframe = self.fetch(query, decode_geom=decode_geom, query_columns=query_columns)
         else:
             self.execute(query)
 

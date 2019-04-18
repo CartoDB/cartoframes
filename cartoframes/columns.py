@@ -123,20 +123,31 @@ def normalize_name(column_name):
 
 
 def dtypes(columns, exclude_dates=False):
-    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.pgtype == 'date')}
+    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.dtype == 'datetime64[ns]')}
 
 
 def date_columns_names(columns):
-    return [x.name for x in columns if x.pgtype == 'date']
+    return [x.name for x in columns if x.dtype == 'datetime64[ns]']
 
 
 def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
-        'date': 'datetime64[ns]',
-        'number': 'float64',
-        'string': 'object',
+        'bigint': 'int64',
         'boolean': 'bool',
+        'date': 'datetime64[ns]',
+        'double precision': 'float64',
         'geometry': 'object',
+        'int': 'int64',
+        'integer': 'int64',
+        'number': 'float64',
+        'numeric': 'float64',
+        'real': 'float64',
+        'smallint': 'int32',
+        'string': 'object',
+        'timestamp': 'datetime64[ns]',
+        'timestamp with time zone': 'datetime64[ns]',
+        'timestamp without time zone': 'datetime64[ns]',
+        'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')

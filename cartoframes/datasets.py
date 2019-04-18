@@ -70,7 +70,7 @@ class Dataset(object):
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
 
-        return self.cc.fetch(query, decode_geom=decode_geom)
+        return self.cc.fetch(query, decode_geom=decode_geom, query_columns=table_columns)
 
     def delete(self):
         if self.exists():
@@ -178,8 +178,7 @@ class Dataset(object):
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
-        query_columns = [column.name for column in table_columns]
-        query_columns.remove('the_geom_webmercator')
+        query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
 
         query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
             table_name=self.table_name,
@@ -196,36 +195,23 @@ class Dataset(object):
 
     def get_table_columns(self):
         """Get column names and types from a table"""
-        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        return get_columns(self.cc, query)
+        query = '''
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = '{table}' AND table_schema = '{schema}'
+        '''.format(table=self.table_name, schema=self.schema)
+
+        table_info = self.cc.sql_client.send(query)
+        return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
-        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        columns = get_column_names(self.cc, query).keys()
+        columns = [c.name for c in self.get_table_columns()]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
 
         return columns
-
-
-def get_columns(context, query):
-        """Get list of cartoframes.columns.Column"""
-        table_info = context.sql_client.send(query)
-        if 'fields' in table_info:
-            return Column.from_sql_api_fields(table_info['fields'])
-
-        return None
-
-
-def get_column_names(context, query):
-        """Get column names and types from a query"""
-        table_info = context.sql_client.send(query)
-        if 'fields' in table_info:
-            return table_info['fields']
-
-        return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
@@ -267,9 +253,9 @@ def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
         'float64': 'numeric',
-        'int64': 'numeric',
+        'int64': 'integer',
         'float32': 'numeric',
-        'int32': 'numeric',
+        'int32': 'integer',
         'object': 'text',
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
