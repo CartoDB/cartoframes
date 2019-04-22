@@ -1,11 +1,12 @@
+# coding=UTF-8
+
 """Unit tests for cartoframes.utils"""
 import unittest
 from collections import OrderedDict
 
 import pandas as pd
 
-from cartoframes.utils import (dict_items, cssify, norm_colname,
-                               normalize_colnames, importify_params)
+from cartoframes.utils import (dict_items, cssify, importify_params)
 
 
 class TestUtils(unittest.TestCase):
@@ -55,11 +56,6 @@ class TestUtils(unittest.TestCase):
                 ('line-opacity', '0.25'),
                 ('line-comp-op', 'hard-light')]))
         ])
-
-        self.cols = ['Unnamed: 0', '201moore', 'Acadia 1.2.3',
-                     'old_soaker', '_testingTesting', 1, 1.0]
-        self.cols_ans = ['unnamed_0', '_201moore', 'acadia_1_2_3',
-                         'old_soaker', '_testingtesting', '_1', '_1_0']
 
     def test_dict_items(self):
         """utils.dict_items"""
@@ -119,23 +115,6 @@ class TestUtils(unittest.TestCase):
                           "line-comp-op: hard-light;}"),
                          msg="multi-layer styling")
 
-    def test_norm_colname(self):
-        """utils.norm_colname"""
-        for c, a in zip(self.cols, self.cols_ans):
-            # changed cols should match answers
-            self.assertEqual(norm_colname(c), a)
-            # already sql-normed cols should match themselves
-            self.assertEqual(norm_colname(a), a)
-
-    def test_normalize_colnames(self):
-        """utils.normalize_colnames"""
-        self.assertListEqual(normalize_colnames(self.cols),
-                             self.cols_ans,
-                             msg='unnormalized should be SQL-normalized')
-        self.assertListEqual(normalize_colnames(self.cols_ans),
-                             self.cols_ans,
-                             msg='already normalize columns should not change')
-
     def test_importify_params(self):
         """utils.importify_params"""
         params = [True, False, 'true', 'Gulab Jamon', ]
@@ -158,44 +137,3 @@ class TestUtils(unittest.TestCase):
         }
         for i in results:
             self.assertEqual(dtypes2pg(i), results[i])
-
-    def test_pg2dtypes(self):
-        """context._pg2dtypes"""
-        from cartoframes.utils import pg2dtypes
-        results = {
-            'date': 'datetime64[ns]',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-            'unknown_pgdata': 'object'
-        }
-        for i in results:
-            result = pg2dtypes(i)
-            self.assertEqual(result, results[i])
-
-    def test_df2pg_schema(self):
-        """utils.df2pg_schema"""
-        from cartoframes.utils import df2pg_schema
-        data = [{'id': 'a', 'val': 1.1, 'truth': True, 'idnum': 1},
-                {'id': 'b', 'val': 2.2, 'truth': True, 'idnum': 2},
-                {'id': 'c', 'val': 3.3, 'truth': False, 'idnum': 3}]
-        df = pd.DataFrame(data).astype({'id': 'object',
-                                        'val': float,
-                                        'truth': bool,
-                                        'idnum': int})
-        # specify order of columns
-        df = df[['id', 'val', 'truth', 'idnum']]
-        pgcols = ['id', 'val', 'truth', 'idnum']
-        ans = ('NULLIF("id", \'\')::text AS id, '
-               'NULLIF("val", \'\')::numeric AS val, '
-               'NULLIF("truth", \'\')::boolean AS truth, '
-               'NULLIF("idnum", \'\')::numeric AS idnum')
-
-        self.assertEqual(ans, df2pg_schema(df, pgcols))
-
-        # add the_geom
-        df['the_geom'] = 'Point(0 0)'
-        ans = '\"the_geom\", ' + ans
-        pgcols.append('the_geom')
-        self.assertEqual(ans, df2pg_schema(df, pgcols))

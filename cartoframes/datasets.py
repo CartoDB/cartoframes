@@ -2,8 +2,14 @@ import binascii as ba
 from warnings import warn
 import pandas as pd
 import time
+from tqdm import tqdm
+
+from .columns import Column, normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
+
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class Dataset(object):
@@ -18,12 +24,29 @@ class Dataset(object):
     PUBLIC = 'public'
     LINK = 'link'
 
+    DEFAULT_RETRY_TIMES = 3
+
     def __init__(self, carto_context, table_name, schema='public', df=None):
         self.cc = carto_context
-        self.table_name = _norm_colname(table_name)
+        self.table_name = normalize_name(table_name)
         self.schema = schema
         self.df = df
+        self.normalized_column_names = None
+        if self.df is not None:
+            self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
+
+    @staticmethod
+    def create_from_query(cart_context, query, table_name):
+        dataset = Dataset(cart_context, table_name)
+        dataset.cc.batch_sql_client \
+               .create_and_wait_for_completion(
+                   '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                   .format(drop=dataset._drop_table_query(),
+                           create=dataset._create_table_from_query(query),
+                           cartodbfy=dataset._cartodbfy_query()))
+
+        return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.df is None:
@@ -43,14 +66,11 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False, retry_times=3):
-        table_columns = self._get_table_columns()
-
+    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+        table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
-        result = self._recursive_read(query, retry_times)
-        df = pd.read_csv(result)
 
-        return _clean_dataframe_from_carto(df, table_columns, decode_geom)
+        return self.cc.fetch(query, decode_geom=decode_geom)
 
     def delete(self):
         if self.exists():
@@ -91,7 +111,7 @@ class Dataset(object):
     def _copyfrom(self, with_lonlat=None):
         geom_col = _get_geom_col_name(self.df)
 
-        columns = ','.join(_norm_colname(c) for c in self.df.columns if c not in Dataset.RESERVED_COLUMN_NAMES)
+        columns = ','.join(norm for norm, orig in self.normalized_column_names)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
@@ -102,6 +122,8 @@ class Dataset(object):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
+            lng_val = None
+            lat_val = None
             for col in cols:
                 if with_lonlat and col in Dataset.SUPPORTED_GEOM_COL_NAMES:
                     continue
@@ -122,7 +144,7 @@ class Dataset(object):
                 geom = _decode_geom(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lonlat is not None:
+            if with_lonlat is not None and lng_val is not None and lat_val is not None:
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
@@ -133,6 +155,10 @@ class Dataset(object):
             table_name=self.table_name,
             if_exists='IF EXISTS' if if_exists else '')
 
+    def _create_table_from_query(self, query):
+        create_query = '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=query)
+        return create_query
+
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
             geom_type = _get_geom_col_type(self.df)
@@ -140,9 +166,9 @@ class Dataset(object):
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
-        cols = ', '.join(col.format(col=_norm_colname(c),
-                                    ctype=_dtypes2pg(t))
-                         for c, t in zip(self.df.columns, self.df.dtypes) if c not in Dataset.RESERVED_COLUMN_NAMES)
+        cols = ', '.join(col.format(col=norm,
+                                    ctype=_dtypes2pg(self.df.dtypes[orig]))
+                         for norm, orig in self.normalized_column_names)
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
@@ -150,23 +176,9 @@ class Dataset(object):
         create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self.table_name, cols=cols)
         return create_query
 
-    def _recursive_read(self, query, retry_times=3):
-        try:
-            return self.cc.copy_client.copyto_stream(query)
-        except CartoRateLimitException as err:
-            if retry_times > 0:
-                retry_times -= 1
-                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-                time.sleep(err.retry_after)
-                warn('Retrying...')
-                return self._recursive_read(query, retry_times)
-            else:
-                warn('Read call was rate-limited. This usually happens when there are multiple queries being read at the same time.')
-                raise err
-
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
-        query_columns = list(table_columns.keys())
+        query_columns = [column.name for column in table_columns]
         query_columns.remove('the_geom_webmercator')
 
         query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
@@ -180,47 +192,75 @@ class Dataset(object):
             else:
                 raise ValueError("`limit` parameter must an integer >= 0")
 
-        return 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+        return query
 
-    def _get_table_columns(self):
+    def get_table_columns(self):
         """Get column names and types from a table"""
         query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        table_info = self.cc.sql_client.send(query)
+        return get_columns(self.cc, query)
+
+    def get_table_column_names(self, exclude=None):
+        """Get column names and types from a table"""
+        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
+        columns = get_column_names(self.cc, query).keys()
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
+
+def get_columns(context, query):
+        """Get list of cartoframes.columns.Column"""
+        table_info = context.sql_client.send(query)
+        if 'fields' in table_info:
+            return Column.from_sql_api_fields(table_info['fields'])
+
+        return None
+
+
+def get_column_names(context, query):
+        """Get column names and types from a query"""
+        table_info = context.sql_client.send(query)
         if 'fields' in table_info:
             return table_info['fields']
 
         return None
 
 
-def _norm_colname(colname):
-    """Given an arbitrary column name, translate to a SQL-normalized column
-    name a la CARTO's Import API will translate to
-
-    Examples
-        * 'Field: 2' -> 'field_2'
-        * '2 Items' -> '_2_items'
-
-    Args:
-        colname (str): Column name that will be SQL normalized
-    Returns:
-        str: SQL-normalized column name
-    """
-    last_char_special = False
-    char_list = []
-    for colchar in str(colname):
-        if colchar.isalnum():
-            char_list.append(colchar.lower())
-            last_char_special = False
+def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
+    try:
+        return context.copy_client.copyto_stream(query)
+    except CartoRateLimitException as err:
+        if retry_times > 0:
+            retry_times -= 1
+            warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+            time.sleep(err.retry_after)
+            warn('Retrying...')
+            return recursive_read(context, query, retry_times=retry_times)
         else:
-            if not last_char_special:
-                char_list.append('_')
-                last_char_special = True
-            else:
-                last_char_special = False
-    final_name = ''.join(char_list)
-    if final_name[0].isdigit():
-        return '_' + final_name
-    return final_name
+            warn(('Read call was rate-limited. '
+                  'This usually happens when there are multiple queries being read at the same time.'))
+            raise err
+
+
+def _normalize_column_names(df):
+    column_names = [c for c in df.columns if c not in Dataset.RESERVED_COLUMN_NAMES]
+    normalized_columns = normalize_names(column_names)
+
+    column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
+
+    changed_cols = '\n'.join([
+        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
+            orig=orig,
+            new=norm)
+        for norm, orig in column_tuples if norm != orig])
+
+    if changed_cols != '':
+        tqdm.write('The following columns were changed in the CARTO '
+                   'copy of this dataframe:\n{0}'.format(changed_cols))
+
+    return column_tuples
 
 
 def _dtypes2pg(dtype):
@@ -312,33 +352,3 @@ def _decode_geom(ewkb):
                         except Exception:
                             pass
     return None
-
-
-def _clean_dataframe_from_carto(df, table_columns, decode_geom=False):
-    """Clean a DataFrame with a dataset from CARTO:
-        - use cartodb_id as DataFrame index
-        - process date columns
-        - decode geom
-
-    Args:
-        df (pandas.DataFrame): DataFrame with a dataset from CARTO.
-        table_columns (dict): column names and types from a table.
-        decode_geom (bool, optional): Decodes CARTO's geometries into a
-            `Shapely <https://github.com/Toblerity/Shapely>`__
-            object that can be used, for example, in `GeoPandas
-            <http://geopandas.org/>`__.
-
-    Returns:
-        pandas.DataFrame
-    """
-    if 'cartodb_id' in df.columns:
-        df.set_index('cartodb_id', inplace=True)
-
-    for column_name in table_columns:
-        if table_columns[column_name]['type'] == 'date':
-            df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
-
-    if decode_geom:
-        df['geometry'] = df.the_geom.apply(_decode_geom)
-
-    return df

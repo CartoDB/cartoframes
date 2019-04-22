@@ -5,7 +5,7 @@ try:
     import matplotlib
     matplotlib.use('agg')
     import matplotlib.pyplot as plt
-except ImportError:
+except RuntimeError:
     plt = None
 
 import unittest
@@ -23,7 +23,10 @@ import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.utils import dict_items, norm_colname
+from cartoframes.datasets import Dataset
+from cartoframes.columns import normalize_name
+from cartoframes.utils import dict_items
+
 from utils import _UserUrlLoader
 
 WILL_SKIP = False
@@ -81,33 +84,33 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.test_point_table = 'tweets_obama'
 
         # for writing to carto
-        self.test_write_table = norm_colname(
+        self.test_write_table = normalize_name(
             'cf_test_table_{}'.format(test_slug)
         )
 
-        self.mixed_case_table = norm_colname(
+        self.mixed_case_table = normalize_name(
             'AbCdEfG_{}'.format(test_slug)
         )
 
         # for batch writing to carto
-        self.test_write_batch_table = norm_colname(
+        self.test_write_batch_table = normalize_name(
             'cf_testbatch_table_{}'.format(test_slug)
         )
 
-        self.test_write_lnglat_table = norm_colname(
+        self.test_write_lnglat_table = normalize_name(
             'cf_testwrite_lnglat_table_{}'.format(test_slug)
         )
 
-        self.write_named_index = norm_colname(
+        self.write_named_index = normalize_name(
             'cf_testwrite_non_default_index_{}'.format(test_slug)
         )
 
         # for queries
-        self.test_query_table = norm_colname(
+        self.test_query_table = normalize_name(
             'cf_testquery_table_{}'.format(test_slug)
         )
 
-        self.test_delete_table = norm_colname(
+        self.test_delete_table = normalize_name(
             'cf_testdelete_table_{}'.format(test_slug)
         )
 
@@ -345,15 +348,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                              'B': list('abc')})
         cc.write(pd.DataFrame(data), self.mixed_case_table, overwrite=True)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    def test_cartocontext_table_exists(self):
-        """context.CartoContext._table_exists"""
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        self.assertFalse(cc._table_exists('acadia_biodiversity'))
-        with self.assertRaises(NameError):
-            cc._table_exists(self.test_read_table)
-
     def test_cartocontext_delete(self):
         """context.CartoContext.delete"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -380,30 +374,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 CartoException,
                 msg='''The table `{}` doesn't exist'''.format(table_name)):
             cc.delete(table_name)
-
-    def test_cartocontext_send_dataframe(self):
-        """context.CartoContext._send_dataframe"""
-        pass
-
-    def test_cartocontext_handle_import(self):
-        """context.CartoContext._handle_import"""
-
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-        import_failures = (
-            dict(error_code=8001, state='failure'),
-            dict(error_code=6668, state='failure'),
-            dict(error_code=1234, state='failure'),
-        )
-
-        for import_job in import_failures:
-            with self.assertRaises(CartoException):
-                cc._handle_import(import_job, 'foo')
-
-        diff_table_err = dict(state='complete',
-                              table_name='bar')
-        with self.assertRaises(Exception):
-            cc._handle_import(diff_table_err, 'foo')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartoframes_sync(self):
@@ -482,7 +452,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         # should be specified length
         self.assertEqual(len(df), 100)
         # should have requested columns + utility columns from CARTO
-        self.assertSetEqual({'link', 'body', 'displayname', 'friendscount',
+        self.assertSetEqual({'body', 'displayname', 'link', 'friendscount',
                              'the_geom', },
                             set(df.columns),
                             msg='Should have the columns requested')
@@ -499,7 +469,180 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                 )
                 SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
                 FROM cte
+            ''', is_select=True)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch(self):
+        """context.CartoContext.fetch"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
+        df = cc.fetch('''
+            SELECT {cols}, '02-06-1429'::date as invalid_df_date
+            FROM tweets_obama
+            LIMIT 100
+            '''.format(cols=','.join(cols)))
+
+        # ensure columns are in expected order
+        df = df[list(cols) + ['invalid_df_date', ]]
+
+        # same number of rows
+        self.assertEqual(len(df), 100,
+                         msg='Expected number or rows')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        requested_cols = {'link', 'body', 'displayname', 'friendscount',
+                          'postedtime', 'invalid_df_date', }
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('object', 'object', 'object', 'float64',
+                           'datetime64[ns, UTC]', 'object', )
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_empty(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # empty response
+        df_empty = cc.fetch('''
+            SELECT 1
+            LIMIT 0
             ''')
+
+        # no rows, one column
+        self.assertTupleEqual(df_empty.shape, (0, 1))
+
+        # is a DataFrame
+        self.assertIsInstance(df_empty, pd.DataFrame)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_cte(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = cc.fetch('''
+            WITH cte AS (
+                SELECT CDB_LatLng(0.1, 0) as the_geom, i
+                FROM generate_series(1, 110) as m(i)
+            )
+            SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+            FROM cte
+        ''')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        requested_cols = {'xval', 'yval'}
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('float64', 'float64')
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+        # same number of rows
+        self.assertEqual(len(df), 110,
+                         msg='Expected number or rows')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_decode_geom(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = cc.fetch('''
+            SELECT CDB_LatLng(0.1, 0) as the_geom, i
+            FROM generate_series(1, 110) as m(i)
+        ''', decode_geom=True)
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+
+        # same column names
+        requested_cols = {'geometry', 'i'}
+        self.assertSetEqual(requested_cols,
+                            set(df.columns),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        expected_dtypes = ('object', 'float64')
+        self.assertTupleEqual(
+            tuple(str(d) for d in df.dtypes),
+            expected_dtypes,
+            msg='Should have same schema/types'
+        )
+
+        # same number of rows
+        self.assertEqual(len(df), 110,
+                         msg='Expected number or rows')
+
+        self.assertEqual(df.loc[0].geometry.wkt, 'POINT (0 0.1)')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_fetch_with_exception(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        # see what happens if a query fails after 100 successful rows
+        with self.assertRaises(CartoException):
+            cc.fetch('''
+                WITH cte AS (
+                    SELECT CDB_LatLng(0, 0) as the_geom, i
+                    FROM generate_series(1, 110) as m(i)
+                    UNION ALL
+                    SELECT ST_Buffer(CDB_LatLng(0, 0), 0.1) as the_geom, i
+                    FROM generate_series(111, 120) as i
+                )
+                SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
+                FROM cte
+            ''')
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_execute(self):
+        """context.CartoContext.execute"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
+        df = df.astype({'vals': str, 'ids': str})
+        cc.write(df, self.test_write_table, overwrite=True)
+
+        self.assertEquals(Dataset(cc, self.test_write_table).exists(), True)
+
+        cc.execute('''
+            DROP TABLE {table_name}
+            '''.format(table_name=self.test_write_table))
+
+        self.assertEquals(Dataset(cc, self.test_write_table).exists(), False)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_execute_wrong_query(self):
+        """context.CartoContext.execute"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+
+        with self.assertRaises(CartoException):
+            cc.execute('''
+                DROPP TABLE {table_name}
+                '''.format(table_name=self.test_write_table))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_map(self):
@@ -747,64 +890,6 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             cc._check_query(success_query, style_cols=fail_cols)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_add_encoded_geom(self):
-        """context._add_encoded_geom"""
-        from cartoframes.context import _add_encoded_geom, _encode_geom
-        cc = cartoframes.CartoContext(base_url=self.baseurl,
-                                      api_key=self.apikey)
-
-        # encode_geom=True adds a column called 'geometry'
-        df = cc.read(self.test_read_table, limit=5,
-                     decode_geom=True)
-
-        # alter the geometry
-        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.1))
-
-        # the_geom should reflect encoded 'geometry' column
-        _add_encoded_geom(df, 'geometry')
-
-        # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
-
-        # don't specify geometry column (should exist since decode_geom==True)
-        df = cc.read(self.test_read_table, limit=5,
-                     decode_geom=True)
-        df['geometry'] = df['geometry'].apply(lambda x: x.buffer(0.2))
-
-        # the_geom should reflect encoded 'geometry' column
-        _add_encoded_geom(df, None)
-
-        # geometry column should equal the_geom after function call
-        self.assertTrue(df['the_geom'].equals(df['geometry'].apply(_encode_geom)))
-
-        df = cc.read(self.test_read_table, limit=5)
-
-        # raise error if 'geometry' column does not exist
-        with self.assertRaises(KeyError):
-            _add_encoded_geom(df, None)
-
-    def test_decode_geom(self):
-        """context._decode_geom"""
-        from cartoframes.context import _decode_geom
-        # Point (0, 0) without SRID
-        ewkb = '010100000000000000000000000000000000000000'
-        decoded_geom = _decode_geom(ewkb)
-        self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
-        self.assertIsNone(_decode_geom(None))
-
-    def test_encode_geom(self):
-        """context._encode_geom"""
-        from cartoframes.context import _encode_geom
-        from shapely import wkb
-        import binascii as ba
-        # Point (0 0) without SRID
-        ewkb = '010100000000000000000000000000000000000000'
-        geom = wkb.loads(ba.unhexlify(ewkb))
-        ewkb_resp = _encode_geom(geom)
-        self.assertEqual(ewkb_resp, ewkb)
-        self.assertIsNone(_encode_geom(None))
-
     def test_debug_print(self):
         """context._debug_print"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
@@ -969,15 +1054,15 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                  time=('2010 - 2014', ))
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(cc.read(self.test_data_table, limit=1).columns)
-        self.assertSetEqual(anscols, set(data.columns) - origcols)
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
         data = cc.data(self.test_data_table, meta)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(data.columns) - origcols)
+                            set(data.columns) - origcols - {'the_geom'})
 
         # with self.assertRaises(NotImplementedError):
         #     cc.data(self.test_data_table, meta, how='geom_ref')
@@ -992,36 +1077,79 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                                      keywords='education')
             cc.data(self.test_read_table, meta)
 
-    def test_column_name_collision_do_enrichement(self):
-        """context.CartoContext.data column collision"""
-        dup_col = 'female_third_level_studies_2011_by_female_pop'
-        self.sql_client.send(
-            """
-            create table {table} as (
-                select cdb_latlng(40.4165,-3.70256) the_geom,
-                       1 {dup_col})
-            """.format(
-                dup_col=dup_col,
-                table=self.test_write_table
-            )
-        )
-        self.sql_client.send(
-            "select cdb_cartodbfytable('public', '{table}')".format(
-                table=self.test_write_table
-            )
-        )
-
+    def test_data_with_persist_as(self):
+        """context.CartoContext.data"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        meta = cc.data_discovery(region=self.test_write_table,
-                                 keywords='female')
-        meta = meta[meta.suggested_name == dup_col]
-        data = cc.data(
-            self.test_write_table,
-            meta[meta.suggested_name == dup_col]
+
+        meta = cc.data_discovery(self.test_read_table,
+                                 keywords=('poverty', ),
+                                 time=('2010 - 2014', ))
+        data = cc.data(self.test_data_table, meta)
+        anscols = set(meta['suggested_name'])
+        origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
+
+        meta = [{'numer_id': 'us.census.acs.B19013001',
+                 'geom_id': 'us.census.tiger.block_group',
+                 'numer_timespan': '2011 - 2015'}, ]
+        data = cc.data(self.test_data_table, meta, persist_as=self.test_write_table)
+        self.assertSetEqual(set(('median_income_2011_2015', )),
+                            set(data.columns) - origcols - {'the_geom'})
+
+        df = cc.read(self.test_write_table, decode_geom=False)
+
+        # same number of rows
+        self.assertEqual(len(df), len(data),
+                         msg='Expected number or rows')
+
+        # same type of object
+        self.assertIsInstance(df, pd.DataFrame,
+                              'Should be a pandas DataFrame')
+        # same column names
+        self.assertSetEqual(set(data.columns.values),
+                            set(df.columns.values),
+                            msg='Should have the columns requested')
+
+        # should have exected schema
+        self.assertEqual(
+            sorted(tuple(str(d) for d in df.dtypes)),
+            sorted(tuple(str(d) for d in data.dtypes)),
+            msg='Should have same schema/types'
         )
 
-        self.assertIn('_' + dup_col, data.keys())
+    # FIXME: https://github.com/CartoDB/cartoframes/issues/594
+    # def test_column_name_collision_do_enrichement(self):
+    #     """context.CartoContext.data column collision"""
+    #     import ipdb; ipdb.set_trace(context=30)
+    #     dup_col = 'female_third_level_studies_2011_by_female_pop'
+    #     self.sql_client.send(
+    #         """
+    #         create table {table} as (
+    #             select cdb_latlng(40.4165,-3.70256) the_geom,
+    #                    1 {dup_col})
+    #         """.format(
+    #             dup_col=dup_col,
+    #             table=self.test_write_table
+    #         )
+    #     )
+    #     self.sql_client.send(
+    #         "select cdb_cartodbfytable('public', '{table}')".format(
+    #             table=self.test_write_table
+    #         )
+    #     )
+
+    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
+    #                                   api_key=self.apikey)
+    #     meta = cc.data_discovery(region=self.test_write_table,
+    #                              keywords='female')
+    #     meta = meta[meta.suggested_name == dup_col]
+    #     data = cc.data(
+    #         self.test_write_table,
+    #         meta[meta.suggested_name == dup_col]
+    #     )
+
+    #     self.assertIn('_' + dup_col, data.keys())
 
     def test_tables(self):
         """context.CartoContext.tables normal usage"""
