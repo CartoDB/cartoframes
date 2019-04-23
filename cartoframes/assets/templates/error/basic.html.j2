@@ -1,8 +1,5 @@
 <div id="error-container" class="error">
-  <div class="error-title">⚠️</div>
-    <p>
-      <span id="error-name">{% if name is defined %}{{ name }}{% endif %}</span>
-      <span id="error-type">{% if type is defined %}{{ type }}{% endif %}</span>
-      <span id="error-message">{% if message is defined %}{{ message }}{% endif %}</span>
-    </p>
+  <span id="error-name">{% if name is defined %}{{ name }}{% endif %}</span>
+  <span id="error-type">{% if type is defined %}{{ type }}{% endif %}</span>
+  <span id="error-message">{% if message is defined %}{{ message }}{% endif %}</span>
 </div>
