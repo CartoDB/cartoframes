@@ -58,7 +58,7 @@ function onReady() {
     );
 
     try {
-      layer.updateLayer.catch(displayError);
+      layer._updateLayer.catch(displayError);
     } catch (err) {
       throw err;
     }
