@@ -52,14 +52,18 @@ function onReady() {
     const viz = new carto.Viz(elem['viz']);
 
     const layer = new carto.Layer(
-        'layer' + idx,
-        temp_source,
-        viz
+      'layer' + idx,
+      temp_source,
+      viz
     );
 
-    layer
-      .addTo(map)
-      .catch(displayError);
+    try {
+      layer.updateLayer.catch(displayError);
+    } catch (err) {
+      throw err;
+    }
+
+    layer.addTo(map);
 
     if (elem.interactivity) {
       const interactivity = new carto.Interactivity(layer);
