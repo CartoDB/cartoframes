@@ -13,8 +13,7 @@ function parse(stackString) {
     const parseResult =
       parseChrome(line) ||
       parseWinjs(line) ||
-      parseGecko(line) ||
-      parseNode(line);
+      parseGecko(line);
 
     if (parseResult) {
       stack.push(parseResult);
@@ -98,23 +97,5 @@ function parseGecko(line) {
     arguments: parts[2] ? parts[2].split(',') : [],
     lineNumber: parts[4] ? +parts[4] : null,
     column: parts[5] ? +parts[5] : null,
-  };
-}
-
-const nodeRe = /^\s*at (?:((?:\[object object\])?\S+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-
-function parseNode(line) {
-  const parts = nodeRe.exec(line);
-
-  if (!parts) {
-    return null;
-  }
-
-  return {
-    file: parts[2],
-    methodName: parts[1] || UNKNOWN_FUNCTION,
-    arguments: [],
-    lineNumber: +parts[3],
-    column: parts[4] ? +parts[4] : null,
   };
 }
