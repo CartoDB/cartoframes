@@ -1,6 +1,7 @@
 {% include 'error/parser.js.j2' %}
 
 const responsive = document.querySelector('as-responsive-content');
+const wf = window.frameElement.contentWindow;
 
 function onReady() {
   const BASEMAPS = {
@@ -25,7 +26,7 @@ function onReady() {
   carto.setDefaultAuth({
     username: credentials['username'],
     apiKey: credentials['api_key'] || 'default_public'
-  });
+  });  
 
   carto.setDefaultConfig({
       serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
@@ -56,7 +57,9 @@ function onReady() {
         viz
     );
 
-    layer.addTo(map);
+    layer
+      .addTo(map)
+      .catch(displayError);
 
     if (elem.interactivity) {
       const interactivity = new carto.Interactivity(layer);
@@ -128,27 +131,31 @@ function setReady () {
   try {
     onReady()
   } catch (e) {
-    const error$ = document.getElementById('error-container');
-    const errors$ = error$.getElementsByClassName('errors');
-    const stacktrace$ = document.getElementById('error-stacktrace');
-
-    errors$[0].innerHTML = e.name;
-    errors$[1].innerHTML = e.name;
-    errors$[2].innerHTML = e.type;
-    errors$[3].innerHTML = e.message.replace(e.type, '');
-
-    error$.style.visibility = 'visible';
-
-    const stack = parse(e.stack);
-    const list = stack.map(item => {
-      return `<li>
-        at <span class="stacktrace-method">${item.methodName}:</span>
-        (${item.file}:${item.lineNumber}:${item.column})
-      </li>`;
-    });
-
-    stacktrace$.innerHTML = list.join('\n');
+    displayError(e);
   }
+}
+
+function displayError(e) {
+  const error$ = document.getElementById('error-container');
+  const errors$ = error$.getElementsByClassName('errors');
+  const stacktrace$ = document.getElementById('error-stacktrace');
+
+  errors$[0].innerHTML = e.name;
+  errors$[1].innerHTML = e.name;
+  errors$[2].innerHTML = e.type;
+  errors$[3].innerHTML = e.message.replace(e.type, '');
+
+  error$.style.visibility = 'visible';
+
+  const stack = parse(e.stack);
+  const list = stack.map(item => {
+    return `<li>
+      at <span class="stacktrace-method">${item.methodName}:</span>
+      (${item.file}:${item.lineNumber}:${item.column})
+    </li>`;
+  });
+
+  stacktrace$.innerHTML = list.join('\n');
 }
 
 responsive.addEventListener('ready', setReady);
