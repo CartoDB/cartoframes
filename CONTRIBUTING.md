@@ -40,6 +40,14 @@ CARTOframes documentation is located inline in the functions, classes, and metho
 
 **Tip:** A convenient, easy way of proposing changes in documentation is by using the GitHub editor directly on the web. You can easily create a branch with your changes and make a PR from there.
 
+## Releases
+
+To release a new version of cartoframes, create a new branch off of `master` called `vX.Y.Z_release`, where `X.Y.Z` should be replaced with the specific version to be released (e.g., 0.10.1). After this branch is created, update the following files:
+
+1. ``cartoframes/__version__.py`` should have the newest version number in the ``__version__`` variable
+2. NEWS.rst should be updated with all of the changes happening in this version. It should include the release number and the date of the release
+3. The README.rst should be updated so that the mybinder tag at the top of the file is the release number/tag
+
 ## Submitting contributions
 
 You will need to sign a Contributor License Agreement (CLA) before making a submission. [Learn more here](https://carto.com/contributions).
