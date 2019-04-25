@@ -176,14 +176,11 @@ def _get_map_layers(layers):
 
 
 def _set_map_layer(layer):
-    is_local = isinstance(layer, LocalLayer)
-    source = layer._geojson_str if is_local else layer.query
-
     return ({
         'interactivity': layer.interactivity,
-        'is_local': is_local,
+        'is_local': isinstance(layer, LocalLayer),
         'legend': layer.legend,
-        'source': source,
+        'source': layer.source,
         'viz': layer.viz
     })
 
