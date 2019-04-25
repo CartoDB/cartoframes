@@ -1,6 +1,6 @@
 _HTML_TEMPLATE = '<iframe srcdoc="{srcdoc}" width="{width}" height="{height}"></iframe>'
 
-_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.2.4/carto-vl.min.js'
+_CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.2.5/carto-vl.min.js'
 
 _AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
 _AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
