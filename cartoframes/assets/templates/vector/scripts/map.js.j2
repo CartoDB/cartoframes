@@ -1,7 +1,6 @@
 {% include 'error/parser.js.j2' %}
 
 const responsive = document.querySelector('as-responsive-content');
-const wf = window.frameElement.contentWindow;
 
 function onReady() {
   const BASEMAPS = {
@@ -26,7 +25,7 @@ function onReady() {
   carto.setDefaultAuth({
     username: credentials['username'],
     apiKey: credentials['api_key'] || 'default_public'
-  });  
+  });
 
   carto.setDefaultConfig({
       serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
