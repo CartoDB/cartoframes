@@ -45,8 +45,29 @@ CARTOframes documentation is located inline in the functions, classes, and metho
 To release a new version of cartoframes, create a new branch off of `master` called `vX.Y.Z_release`, where `X.Y.Z` should be replaced with the specific version to be released (e.g., 0.10.1). After this branch is created, update the following files:
 
 1. ``cartoframes/__version__.py`` should have the newest version number in the ``__version__`` variable
-2. NEWS.rst should be updated with all of the changes happening in this version. It should include the release number and the date of the release
+2. NEWS.rst should be updated with all of the changes happening in this version. It should include the release number and the date of the release. Looking at merged pull requests sorted by last updated is a good way to ensure features are not missed.
 3. The README.rst should be updated so that the mybinder tag at the top of the file is the release number/tag
+
+Ensure that documentation is building correctly by building this branch in readthedocs. If not, this is a good time to fix documentation before publishing. You needed to be added as a contributor on readthedocs to be able to configure builds.
+
+After the tests pass, merge into master. Next, we publish a release to [PyPi](https://pypi.org/project/cartoframes/) and [GitHub](https://github.com/CartoDB/cartoframes/releases).
+
+### Documentation (readthedocs)
+
+This step needs to be completed before any releases, but is here as a reminder that documentation should not be ignored. Docs are built with [ReadTheDocs](https://cartoframes.readthedocs.io/en/stable/) automatically from any tagged release and a few select branches. ``master`` is the docs build for ``latest``. Once docs are working from master from the previous step, ensure that the version shows up in the default docs page: https://cartoframes.readthedocs.io/en/stable/
+
+### PyPi release
+
+Run `make publish` in the base cartoframes directory. For a new release to be published on PyPi you need to be added as an author on the [PyPi's cartoframes project](https://pypi.org/project/cartoframes/). Also make sure that [`twine`](https://pypi.org/project/twine/) is installed.
+
+
+### GitHub release
+
+1. Make sure `master` is fresh from the `vX.Y.Z_release` merge
+2. Title release `vX.Y.Z Release`
+3. Add latest entry from NEWS.rst
+4. Add the dist files from `make dist` (``cartoframes-X.Y.Z-py2-py3-none-any.whl`` and ``cartoframes-X.Y.Z.tar.gz``)
+5. Select pre-release (for now)
 
 ## Submitting contributions
 
