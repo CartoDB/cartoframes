@@ -20,12 +20,13 @@ class Layer(object):
 
         self.orig_query = source
         self.is_basemap = False
-        self.source = source # check instance of Source
+        self.source = source  # check instance of Source
         self.style = _parse_style_properties(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
         self.viz = _set_viz(self.variables, self.style)
+
 
 def _convstr(obj):
     """convert all types to strings or None"""
