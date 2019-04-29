@@ -18,9 +18,10 @@ class Layer(object):
                  interactivity=None,
                  legend=None):
 
-        self.orig_query = source
+        self.orig_query = source.query
         self.is_basemap = False
-        self.source = source  # check instance of Source
+        self.source = source  # TO DO check instance of Source
+        self.bounds = source.bounds
         self.style = _parse_style_properties(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)

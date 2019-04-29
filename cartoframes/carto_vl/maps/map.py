@@ -6,7 +6,7 @@ from cartoframes import utils
 from ..utils.html import HTMLMap
 from ..utils import defaults
 from ..basemap.basemaps import Basemaps
-from ..layer.local_layer import LocalLayer
+from ..source.geojson import GeoJSON
 
 
 class Map(object):
@@ -16,7 +16,7 @@ class Map(object):
         layers (list of Layer-types): List of layers. One or more of
           :py:class:`Layer <cartoframes.contrib.vector.Layer>`,
           :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
-          :py:class:`LocalLayer <cartoframes.contrib.vector.LocalLayer>`.
+          :py:class:`Layer <cartoframes.contrib.vector.Layer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
           instance
@@ -178,9 +178,9 @@ def _get_map_layers(layers):
 def _set_map_layer(layer):
     return ({
         'interactivity': layer.interactivity,
-        'is_local': isinstance(layer, LocalLayer),
+        'is_local': isinstance(layer.source, GeoJSON),
         'legend': layer.legend,
-        'source': layer.source,
+        'source': layer.source.query,
         'viz': layer.viz
     })
 
@@ -219,11 +219,11 @@ def _get_super_bounds(layers, context):
     if layers:
         hosted_layers = [
             layer for layer in layers
-            if not isinstance(layer, LocalLayer)
+            if not isinstance(layer.source, GeoJSON)
         ]
         local_layers = [
             layer for layer in layers
-            if isinstance(layer, LocalLayer)
+            if isinstance(layer.source, GeoJSON)
         ]
     else:
         hosted_layers = []

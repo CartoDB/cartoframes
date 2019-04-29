@@ -15,18 +15,25 @@ class GeoJSON(Source):
     """
 
     def __init__(self, data):
-        if HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
-            filtered_geometries = _filter_null_geometries(data)
-            geometries = _set_time_cols_epoc(filtered_geometries)
-            query = geometries.to_json()
-        else:
+        if not HAS_GEOPANDAS:
             raise ValueError(
               """
                 GeoJSON source only works with GeoDataFrames from
-                the geopandas package
+                the geopandas package http://geopandas.org/data_structures.html#geodataframe
               """)
 
-        super(GeoJSON, self).__init__(query)
+        if isinstance(data, str):
+            source = geopandas.read_file(data)
+        elif isinstance(data, geopandas.GeoDataFrame):
+            source = data
+
+        filtered_geometries = _filter_null_geometries(source)
+        geometries = _set_time_cols_epoc(filtered_geometries)
+        query = geometries.to_json()
+        _df_nonnull = source[~source.geometry.isna()]
+        bounds = _df_nonnull.total_bounds.tolist()
+
+        super(GeoJSON, self).__init__(query, bounds)
 
 
 def _filter_null_geometries(data):

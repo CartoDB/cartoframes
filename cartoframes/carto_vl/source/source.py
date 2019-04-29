@@ -6,5 +6,6 @@ class Source(object):
       TODO
     """
 
-    def __init__(self, query):
+    def __init__(self, query, bounds=None):
         self.query = query
+        self.bounds = bounds
