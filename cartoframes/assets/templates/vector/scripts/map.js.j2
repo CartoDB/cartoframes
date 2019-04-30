@@ -38,21 +38,10 @@ function onReady() {
   {% endif %}
 
   sources.forEach((elem, idx) => {
-    let temp_source = null;
-    if (elem.is_local) {
-      let local_json = JSON.parse(elem.source);
-      temp_source = new carto.source.GeoJSON(local_json);
-    } else {
-      temp_source = new carto.source.SQL(elem.source);
-    }
-
+    const factory = new SourceFactory();
+    const source = factory.createSource(elem.source, elem.query);
     const viz = new carto.Viz(elem['viz']);
-
-    const layer = new carto.Layer(
-        'layer' + idx,
-        temp_source,
-        viz
-    );
+    const layer = new carto.Layer(`layer${idx}`, source, viz);
 
     layer.addTo(map);
 
@@ -117,6 +106,18 @@ function onReady() {
         }
       } else {
         layer_popup.remove();
+      }
+    }
+
+    function SourceFactory() {
+      const sourceTypes = {
+        GeoJSON: (query) => new carto.source.GeoJSON(JSON.parse(query)),
+        Query: (query) => new carto.source.SQL(query),
+        MVT: (query) => new carto.source.MVT(query.file, JSON.parse(query.metadata)),
+      }
+
+      this.createSource = (sourceType, query) => {
+        return sourceTypes[sourceType](query);
       }
     }
   });

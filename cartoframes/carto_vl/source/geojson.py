@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from .source import Source
+from .source_types import SourceTypes
 import numpy as np
 
 try:
@@ -10,11 +11,27 @@ except ImportError:
 
 
 class GeoJSON(Source):
-    """
-      TODO
+    """Source that parses a GeoJSON
+
+        Args:
+            geojson (DataFrame, str): The geojson argument can be a string that refers to the
+                GeoJSON file or a geopandas GeoDataFrame
+
+        Example:
+
+            .. code::
+                from cartoframes import carto_vl as vl
+
+                vl.Map([
+                    vl.Layer(
+                        vl.source.GeoJSON('points.geojson')
+                    )]
+                )
     """
 
-    def __init__(self, data):
+    source_type = SourceTypes.GeoJSON
+
+    def __init__(self, geojson):
         if not HAS_GEOPANDAS:
             raise ValueError(
               """
@@ -22,16 +39,20 @@ class GeoJSON(Source):
                 the geopandas package http://geopandas.org/data_structures.html#geodataframe
               """)
 
-        if isinstance(data, str):
-            source = geopandas.read_file(data)
-        elif isinstance(data, geopandas.GeoDataFrame):
-            source = data
+        if isinstance(geojson, str):
+            data = geopandas.read_file(geojson)
+        elif isinstance(geojson, geopandas.GeoDataFrame):
+            data = geopandas.GeoDataFrame.from_features(geojson['features'])
+        else:
+            raise ValueError(
+              """
+                GeoJSON source only works with GeoDataFrames from
+                the geopandas package http://geopandas.org/data_structures.html#geodataframe
+              """)
 
-        filtered_geometries = _filter_null_geometries(source)
-        geometries = _set_time_cols_epoc(filtered_geometries)
-        query = geometries.to_json()
-        _df_nonnull = source[~source.geometry.isna()]
-        bounds = _df_nonnull.total_bounds.tolist()
+        filtered_geometries = _filter_null_geometries(data)
+        bounds = filtered_geometries.total_bounds.tolist()
+        query = _set_time_cols_epoc(filtered_geometries).to_json()
 
         super(GeoJSON, self).__init__(query, bounds)
 

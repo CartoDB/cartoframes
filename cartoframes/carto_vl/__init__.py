@@ -5,9 +5,7 @@ from .utils import defaults
 from .utils.html import HTMLMap
 from .maps.map import Map
 from .layer.layer import Layer
-from .source.dataset import Dataset
-from .source.sql import SQL
-from .source.geojson import GeoJSON
+from .sources import Sources as source
 
 
 __all__ = [
@@ -18,5 +16,6 @@ __all__ = [
   "Layer",
   "Dataset",
   "SQL",
-  "GeoJSON"
+  "GeoJSON",
+  "source"
 ]

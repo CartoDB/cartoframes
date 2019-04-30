@@ -6,12 +6,6 @@ class TestLayers(unittest.TestCase):
     def test_is_layer_defined(self):
         self.assertNotEqual(carto_vl.Layer, None)
 
-    def test_is_local_layer_defined(self):
-        self.assertNotEqual(carto_vl.LocalLayer, None)
-
-    def test_is_query_layer_defined(self):
-        self.assertNotEqual(carto_vl.QueryLayer, None)
-
     def test_initialization(self):
         """should initialize layer attributes"""
         carto_layer = carto_vl.Layer('layer_source')

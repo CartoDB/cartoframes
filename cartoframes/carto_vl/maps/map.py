@@ -178,9 +178,9 @@ def _get_map_layers(layers):
 def _set_map_layer(layer):
     return ({
         'interactivity': layer.interactivity,
-        'is_local': isinstance(layer.source, GeoJSON),
+        'source': layer.source.source_type,
         'legend': layer.legend,
-        'source': layer.source.query,
+        'query': layer.source.query,
         'viz': layer.viz
     })
 
