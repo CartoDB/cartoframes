@@ -20,7 +20,7 @@ class SQL(Source):
               from cartoframes import CartoContext
 
               context = CartoContext(
-                    base_url='https://cartovl.carto.com/', 
+                    base_url='https://cartovl.carto.com/',
                     api_key='default_public'
               )
 
