@@ -8,7 +8,7 @@ class TestLayers(unittest.TestCase):
 
     def test_initialization(self):
         """should initialize layer attributes"""
-        carto_layer = carto_vl.Layer('layer_source')
+        carto_layer = carto_vl.Layer(carto_vl.source.Dataset('layer_source'))
 
         self.assertEqual(carto_layer.orig_query, 'SELECT * FROM layer_source')
         self.assertFalse(carto_layer.is_basemap)
@@ -23,7 +23,7 @@ class TestLayersStyle(unittest.TestCase):
     def test_style_dict(self):
         """should set the style when it is a dict"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.source.Dataset('layer_source'),
             style={
                 'color': 'blue',
                 'width': 10,
@@ -40,7 +40,7 @@ class TestLayersStyle(unittest.TestCase):
     def test_style_dict_valid_properties(self):
         """should set only the valid properties"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.source.Dataset('layer_source'),
             style={
                 'invalid': 1
             }
@@ -50,7 +50,7 @@ class TestLayersStyle(unittest.TestCase):
     def test_style_list(self):
         """should set the style when it is a dict"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.sources.Dataset('layer_source'),
             style=[
                 ['color', 'blue'],
                 ['width', 10],
@@ -67,7 +67,7 @@ class TestLayersStyle(unittest.TestCase):
     def test_style_list_valid_properties(self):
         """should set only the valid properties"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.sources.Dataset('layer_source'),
             style=[
                 ['invalid', 1]
             ]
@@ -79,7 +79,7 @@ class TestLayersVariables(unittest.TestCase):
     def test_variables_dict(self):
         """should set the style when it is a dict"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.sources.Dataset('layer_source'),
             variables={
                 'var_color': 'blue',
                 'var_width': 10
@@ -92,7 +92,7 @@ class TestLayersVariables(unittest.TestCase):
     def test_style_list(self):
         """should set the style when it is a dict"""
         carto_layer = carto_vl.Layer(
-            'layer_source',
+            carto_vl.sources.Dataset('layer_source'),
             variables=[
                 ['var_color', 'blue'],
                 ['var_width', 10]
