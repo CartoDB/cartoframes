@@ -20,16 +20,16 @@ class SQL(Source):
               from cartoframes import CartoContext
 
               context = CartoContext(
-                  base_url='https://cartovl.carto.com/', 
-                  api_key='default_public'
+                    base_url='https://cartovl.carto.com/', 
+                    api_key='default_public'
               )
 
               vl.Map([
-                  vl.Layer(
-                      vl.source.SQL('SELECT * FROM populated_places WHERE adm0name = \'Spain\'')
-                  )],
-                  context=context
-              )
+                vl.Layer(
+                    vl.source.SQL('SELECT * FROM populated_places WHERE adm0name = \'Spain\'')
+                )],
+                context=context
+            )
     """
 
     source_type = SourceTypes.Query

@@ -20,7 +20,6 @@ class Dataset(Source):
                     api_key='default_public'
                 )
 
-
                 vl.Map([
                     vl.Layer(
                         vl.source.Dataset('populated_places')
