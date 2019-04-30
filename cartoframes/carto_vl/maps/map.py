@@ -14,8 +14,6 @@ class Map(object):
 
     Args:
         layers (list of Layer-types): List of layers. One or more of
-          :py:class:`Layer <cartoframes.contrib.vector.Layer>`,
-          :py:class:`QueryLayer <cartoframes.contrib.vector.QueryLayer>`, or
           :py:class:`Layer <cartoframes.contrib.vector.Layer>`.
         context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
           A :py:class:`CartoContext <cartoframes.context.CartoContext>`
