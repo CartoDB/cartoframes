@@ -5,7 +5,6 @@ from cartoframes import utils
 from warnings import warn
 from jinja2 import Environment, PackageLoader
 
-
 class HTMLMap(object):
     def __init__(self):
         self.width = None
