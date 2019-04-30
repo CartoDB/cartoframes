@@ -7,7 +7,10 @@ class SQL(Source):
     """Source that uses an SQL Query
 
         Args:
-            query (str)
+            query (str): Query against user database. This query must have the
+                following columns included to successfully have a map rendered:
+                `the_geom`, `the_geom_webmercator`, and `cartodb_id`. If columns are
+                used in styling, they must be included in this query as well.
 
         Example:
 

@@ -6,9 +6,40 @@ class Layer(object):
     """CARTO VL layer
 
     Args:
-      TODO
+        source (Source): The source data. It can be GeoJSON, SQL or Dataset.
+        style (dict, tuple, list, optional): Style of the visualization. It
+            can contain the following values:
+        variables (list, optional): When you have to define variables to be reused. They're needed
+                for showing information in popups shown by the interactivity.
+        interactivity (str, list, or dict, optional): This option adds
+            interactivity (click or hover) to a layer to show popups.
+            Defaults to ``hover`` if one of the following inputs are specified:
+                - dict: If a :obj:`dict`, this must have the key `cols` with its
+                value a list of columns. Optionally add `event` to choose ``hover``
+                or ``click``. Specifying a `header` key/value pair adds a header to
+                the popup that will be rendered in HTML.
+
     Example:
-      TODO
+
+        .. code::
+
+            from cartoframes import carto_vl as vl
+            from cartoframes import CartoContext
+
+            context = CartoContext(
+                base_url='https://cartovl.carto.com/',
+                api_key='default_public'
+            )
+
+            vl.Map([
+                vl.Layer(
+                    source=vl.source.SQL('SELECT * FROM populated_places WHERE adm0name = \'Spain\''),
+                    style={
+                        'color': 'red'
+                    }
+                )],
+                context=context
+            )
     """
 
     def __init__(self,
