@@ -1,4 +1,5 @@
 {% include 'error/parser.js.j2' %}
+{% include 'utils/base64.js.j2' %}
 
 const responsive = document.querySelector('as-responsive-content');
 
@@ -119,7 +120,7 @@ function onReady() {
 
     function SourceFactory() {
       const sourceTypes = {
-        GeoJSON: (query) => new carto.source.GeoJSON(JSON.parse(query)),
+        GeoJSON: (query) => new carto.source.GeoJSON(_decodeJSONQuery(query)),
         Query: (query) => new carto.source.SQL(query),
         MVT: (query) => new carto.source.MVT(query.file, JSON.parse(query.metadata)),
       }
@@ -160,6 +161,10 @@ function displayError(e) {
   });
 
   stacktrace$.innerHTML = list.join('\n');
+}
+
+function _decodeJSONQuery(query) {
+  return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')))
 }
 
 responsive.addEventListener('ready', setReady);
