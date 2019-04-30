@@ -34,4 +34,5 @@ _STYLE_PROPERTIES = (
     'order',
     'symbol',
     'symbol-placement',
+    'resolution'
 )
