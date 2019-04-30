@@ -42,7 +42,7 @@ class GeoJSON(Source):
         if isinstance(geojson, str):
             data = geopandas.read_file(geojson)
         elif isinstance(geojson, geopandas.GeoDataFrame):
-            data = geopandas.GeoDataFrame.from_features(geojson['features'])
+            data = geopandas.GeoDataFrame.from_features(geojson)
         else:
             raise ValueError(
               """
