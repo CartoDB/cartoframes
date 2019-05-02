@@ -437,16 +437,16 @@ class CartoContext(object):
             result = recursive_read(self, copy_query)
 
             query_columns = get_columns(self, query)
-            df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=decode_geom)
+            df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True)
             date_column_names = date_columns_names(query_columns)
 
             c = 0
             for chunk in pd.read_csv(result, dtype=df_types,
                                      chunksize=CHUNK_ROW_SIZE,
-                                     parse_dates=date_columns_names(query_columns),
+                                     parse_dates=date_column_names,
                                      true_values=['t'],
                                      false_values=['f'],
-                                     index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                                     index_col='cartodb_id' if 'cartodb_id' in df_types else False,
                                      converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x}):
                 if c == 0:
                     t.set_description('Downloading data from CARTO to a dataframe')
