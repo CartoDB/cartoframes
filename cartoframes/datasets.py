@@ -110,10 +110,11 @@ class Dataset(object):
         geom_col = _get_geom_col_name(self.df)
 
         columns = ','.join(norm for norm, orig in self.normalized_column_names)
+        orig_columns = [orig for norm, orig in self.normalized_column_names] + ['the_geom']
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, [c for c in self.df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
+            self._rows(self.df, orig_columns, with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
