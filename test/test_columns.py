@@ -71,7 +71,7 @@ class TestColumns(unittest.TestCase):
 
     def test_pg2dtypes(self):
         results = {
-            'date': 'datetime64[ns]',
+            'date': 'datetime64[D]',
             'number': 'float64',
             'string': 'object',
             'boolean': 'bool',
