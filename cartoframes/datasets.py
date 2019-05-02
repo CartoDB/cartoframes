@@ -34,7 +34,8 @@ class Dataset(object):
         self.normalized_column_names = None
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
-        warn('Table will be named `{}`'.format(table_name))
+        if self.table_name != table_name:
+            warn('Table will be named `{}`'.format(table_name))
 
     @staticmethod
     def create_from_query(cart_context, query, table_name):
