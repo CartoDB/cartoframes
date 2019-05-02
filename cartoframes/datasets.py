@@ -116,7 +116,7 @@ class Dataset(object):
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, self.df.columns, with_lonlat, geom_col)
+            self._rows(self.df, [c for c in self.df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
