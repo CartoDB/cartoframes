@@ -1611,13 +1611,14 @@ class CartoContext(object):
                 'api/v1/map/named', 'POST',
                 headers={'Content-Type': 'application/json'},
                 data=get_map_template(layers, has_zoom=has_zoom))
-            # TODO: remove this after testing
             if 'errors' in resp:
                 resp = self._auth_send(
                     'api/v1/map/named/{}'.format(map_name),
                     'PUT',
                     headers={'Content-Type': 'application/json'},
                     data=get_map_template(layers, has_zoom=has_zoom))
+                if 'errors' in resp:
+                    raise CartoException(resp)
 
             self._map_templates[map_name] = True
         return map_name
