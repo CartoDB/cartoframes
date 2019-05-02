@@ -423,7 +423,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
             LIMIT 100
-            '''.format(cols=','.join(cols)), query_columns=columns)
+            '''.format(cols=','.join(cols)))
 
         # ensure columns are in expected order
         df = df[list(cols) + ['invalid_df_date', ]]
@@ -518,7 +518,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
             LIMIT 100
-            '''.format(cols=','.join(cols)), query_columns=columns)
+            '''.format(cols=','.join(cols)))
 
         # ensure columns are in expected order
         df = df[list(cols) + ['invalid_df_date', ]]
@@ -575,7 +575,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             )
             SELECT ST_X(the_geom) as xval, ST_Y(the_geom) as yval
             FROM cte
-        ''', query_columns=(Column('xval', pgtype='number'), Column('yval', pgtype='number')))
+        ''')
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,
@@ -606,7 +606,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         df = cc.fetch('''
             SELECT CDB_LatLng(0.1, 0) as the_geom, i
             FROM generate_series(1, 110) as m(i)
-        ''', decode_geom=True, query_columns=(Column('the_geom'), Column('i', pgtype='number')))
+        ''', decode_geom=True)
 
         # same type of object
         self.assertIsInstance(df, pd.DataFrame,

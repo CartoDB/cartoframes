@@ -13,9 +13,6 @@ tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class Dataset(object):
-    SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
-    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
-
     FAIL = 'fail'
     REPLACE = 'replace'
     APPEND = 'append'
@@ -70,7 +67,7 @@ class Dataset(object):
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
 
-        return self.cc.fetch(query, decode_geom=decode_geom, query_columns=table_columns)
+        return self.cc.fetch(query, decode_geom=decode_geom)
 
     def delete(self):
         if self.exists():
@@ -125,7 +122,7 @@ class Dataset(object):
             lng_val = None
             lat_val = None
             for col in cols:
-                if with_lonlat and col in Dataset.SUPPORTED_GEOM_COL_NAMES:
+                if with_lonlat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
@@ -205,13 +202,13 @@ class Dataset(object):
             table_info = self.cc.sql_client.send(query)
             return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
         except CartoException as e:
+            # this may happen when using the default_public API key
             if str(e) == 'Access denied':
                 query = '''
                     SELECT *
                     FROM "{schema}"."{table}" LIMIT 0
                 '''.format(table=self.table_name, schema=self.schema)
-                table_info = self.cc.sql_client.send(query)
-                return Column.from_sql_api_fields(table_info['fields'])
+                return get_columns(self.cc, query)
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
@@ -239,8 +236,14 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
             raise err
 
 
+def get_columns(context, query):
+    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
+    table_info = context.sql_client.send(col_query)
+    return Column.from_sql_api_fields(table_info['fields'])
+
+
 def _normalize_column_names(df):
-    column_names = [c for c in df.columns if c not in Dataset.RESERVED_COLUMN_NAMES]
+    column_names = [c for c in df.columns if c not in Column.RESERVED_COLUMN_NAMES]
     normalized_columns = normalize_names(column_names)
 
     column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
@@ -277,7 +280,7 @@ def _get_geom_col_name(df):
     geom_col = getattr(df, '_geometry_column_name', None)
     if geom_col is None:
         try:
-            geom_col = next(x for x in df.columns if x.lower() in Dataset.SUPPORTED_GEOM_COL_NAMES)
+            geom_col = next(x for x in df.columns if x.lower() in Column.SUPPORTED_GEOM_COL_NAMES)
         except StopIteration:
             pass
 

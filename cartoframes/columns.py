@@ -7,7 +7,9 @@ from unidecode import unidecode
 
 
 class Column(object):
-    DATETIME_DTYPES = ['datetime64[ns]', 'datetime64[ns, UTC]']
+    DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
+    SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
+    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
     MAX_LENGTH = 63
     MAX_COLLISION_LENGTH = MAX_LENGTH - 4
     RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
@@ -123,9 +125,10 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns, exclude_dates=False):    
+def dtypes(columns, exclude_dates=False, exclude_the_geom=False):
     return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
-            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)}
+            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
+            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)}
 
 
 def date_columns_names(columns):

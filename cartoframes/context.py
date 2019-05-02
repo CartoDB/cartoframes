@@ -30,7 +30,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .datasets import Dataset, recursive_read, _decode_geom
+from .datasets import Dataset, recursive_read, _decode_geom, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -397,7 +397,7 @@ class CartoContext(object):
         """
         pass
 
-    def fetch(self, query, decode_geom=False, query_columns=None):
+    def fetch(self, query, decode_geom=False):
         """Pull the result from an arbitrary SELECT SQL query from a CARTO account
         into a pandas DataFrame.
 
@@ -408,29 +408,6 @@ class CartoContext(object):
               `Shapely <https://github.com/Toblerity/Shapely>`__
               object that can be used, for example, in `GeoPandas
               <http://geopandas.org/>`__.
-            query_columns (list, optional): A list of `cartoframes.column.Column` to infer data types. You should
-              create `Column` instances this way: Column('column_name', pgtype='the_database_type') where
-              `the_database_type` is mapped using this dictionary:
-
-              .. code:: python
-
-                {'bigint': 'float64',
-                 'boolean': 'bool',
-                 'date': 'datetime64[D]',
-                 'double precision': 'float64',
-                 'geometry': 'object',
-                 'int': 'int64',
-                 'integer': 'float64',
-                 'number': 'float64',
-                 'numeric': 'float64',
-                 'real': 'float64',
-                 'smallint': 'float64',
-                 'string': 'object',
-                 'timestamp': 'datetime64[ns]',
-                 'timestampz': 'datetime64[ns]',
-                 'timestamp with time zone': 'datetime64[ns]',
-                 'timestamp without time zone': 'datetime64[ns]',
-                 'USER-DEFINED': 'object',}
 
         Returns:
             pandas.DataFrame: DataFrame representation of query supplied.
@@ -474,12 +451,9 @@ class CartoContext(object):
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
         result = recursive_read(self, copy_query)
 
-        df_types = {}
-        date_column_names = None
-
-        if query_columns:
-            df_types = dtypes(query_columns, exclude_dates=True)
-            date_column_names = date_columns_names(query_columns)
+        query_columns = get_columns(self, query)
+        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=decode_geom)
+        date_column_names = date_columns_names(query_columns)
 
         df = pd.read_csv(result, dtype=df_types,
                          parse_dates=date_column_names,
@@ -544,7 +518,7 @@ class CartoContext(object):
         """
         self.batch_sql_client.create_and_wait_for_completion(query)
 
-    def query(self, query, table_name=None, decode_geom=False, is_select=None, query_columns=None):
+    def query(self, query, table_name=None, decode_geom=False, is_select=None):
         """Pull the result from an arbitrary SQL SELECT query from a CARTO account
         into a pandas DataFrame. This is the default behavior, when `is_select=True`
 
@@ -577,29 +551,6 @@ class CartoContext(object):
               By default `is_select=None` that means that the method will return a dataframe if
               the `query` starts with a `select` clause, otherwise it will just execute the query
               and return `None`
-            query_columns (list, optional): A list of `cartoframes.column.Column` to infer data types. You should
-              create `Column` instances this way: Column('column_name', pgtype='the_database_type') where
-              `the_database_type` is mapped using this dictionary:
-
-              .. code:: python
-
-                {'bigint': 'float64',
-                 'boolean': 'bool',
-                 'date': 'datetime64[D]',
-                 'double precision': 'float64',
-                 'geometry': 'object',
-                 'int': 'int64',
-                 'integer': 'float64',
-                 'number': 'float64',
-                 'numeric': 'float64',
-                 'real': 'float64',
-                 'smallint': 'float64',
-                 'string': 'object',
-                 'timestamp': 'datetime64[ns]',
-                 'timestampz': 'datetime64[ns]',
-                 'timestamp with time zone': 'datetime64[ns]',
-                 'timestamp without time zone': 'datetime64[ns]',
-                 'USER-DEFINED': 'object',}
 
         Returns:
             pandas.DataFrame: When `is_select=True` and the query is actually a SELECT query
@@ -678,7 +629,7 @@ class CartoContext(object):
                 dataset = Dataset.create_from_query(self, query, table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
             else:
-                dataframe = self.fetch(query, decode_geom=decode_geom, query_columns=query_columns)
+                dataframe = self.fetch(query, decode_geom=decode_geom)
         else:
             self.execute(query)
 
