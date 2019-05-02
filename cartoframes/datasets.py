@@ -246,10 +246,11 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
 
 
 def _save_index_as_column(df):
-    if df.index.name is not None:
-        index_name = df.index.name
-        df.reset_index(inplace=True)
-        df.set_index(index_name, drop=False, inplace=True)
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)
 
 
 def _normalize_column_names(df):
