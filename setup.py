@@ -6,6 +6,16 @@ import io
 from codecs import open
 from setuptools import setup, find_packages
 
+def walk_subpkg(name):
+    data_files = []
+    package_dir = 'cartoframes'
+    for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
+        # Remove package_dir from the path.
+        sub_dir = os.sep.join(parent.split(os.sep)[1:])
+        for f in files:
+            data_files.append(os.path.join(sub_dir, f))
+    return data_files
+
 REQUIRES = [
     'pandas>=0.20.1',
     'webcolors>=1.7.0',
@@ -31,7 +41,7 @@ PACKAGE_DATA = {
     'cartoframes': [
         'assets/*',
         'assets/*.j2'
-    ],
+    ] + walk_subpkg('assets'),
 }
 
 here = os.path.abspath(os.path.dirname(__file__))
