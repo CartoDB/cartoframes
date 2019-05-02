@@ -33,6 +33,7 @@ class Dataset(object):
         self.df = df
         self.normalized_column_names = None
         if self.df is not None:
+            _save_index_as_column(self.df)
             self.normalized_column_names = _normalize_column_names(self.df)
         warn('Table will be named `{}`'.format(table_name))
 
@@ -242,6 +243,13 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
             warn(('Read call was rate-limited. '
                   'This usually happens when there are multiple queries being read at the same time.'))
             raise err
+
+
+def _save_index_as_column(df):
+    if df.index.name is not None:
+        index_name = df.index.name
+        df.reset_index(inplace=True)
+        df.set_index(index_name, drop=False, inplace=True)
 
 
 def _normalize_column_names(df):

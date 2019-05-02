@@ -323,21 +323,20 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     #     privacy = cc._get_privacy('i_am_not_a_table_in_this_account')
     #     self.assertIsNone(privacy)
 
-    # FIXME in https://github.com/CartoDB/cartoframes/issues/580
-    # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    # def test_cartocontext_write_index(self):
-    #     """context.CartoContext.write with non-default index"""
-    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
-    #                                   api_key=self.apikey)
-    #     df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
-    #                       index=list('xyz'))
-    #     df.index.name = 'named_index'
-    #     dataset = cc.write(df, self.write_named_index)
-    #     self.write_named_index = dataset.table_name
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
+    def test_cartocontext_write_index(self):
+        """context.CartoContext.write with non-default index"""
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
+                          index=list('xyz'))
+        df.index.name = 'named_index'
+        dataset = cc.write(df, self.write_named_index)
+        self.write_named_index = dataset.table_name
 
-    #     df_index = cc.read(self.write_named_index))
-    #     self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
-    #                         set(df_index.columns))
+        df_index = cc.read(self.write_named_index)
+        self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
+                            set(df_index.columns))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_cartocontext_mixed_case(self):
