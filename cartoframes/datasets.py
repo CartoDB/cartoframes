@@ -116,36 +116,38 @@ class Dataset(object):
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
-        for i, row in df.iterrows():
-            csv_row = ''
-            the_geom_val = None
-            lng_val = None
-            lat_val = None
-            for col in cols:
-                if with_lonlat and col in Column.SUPPORTED_GEOM_COL_NAMES:
-                    continue
-                val = row[col]
-                if pd.isnull(val) or val is None:
-                    val = ''
-                if with_lonlat:
-                    if col == with_lonlat[0]:
-                        lng_val = row[col]
-                    if col == with_lonlat[1]:
-                        lat_val = row[col]
-                if col == geom_col:
-                    the_geom_val = row[col]
-                else:
-                    csv_row += '{val}|'.format(val=val)
+        with tqdm(total=df.shape[0], desc='Importing `{}` to CARTO'.format(self.table_name), unit='rows') as t:
+            for i, row in df.iterrows():
+                csv_row = ''
+                the_geom_val = None
+                lng_val = None
+                lat_val = None
+                for col in cols:
+                    if with_lonlat and col in Column.SUPPORTED_GEOM_COL_NAMES:
+                        continue
+                    val = row[col]
+                    if pd.isnull(val) or val is None:
+                        val = ''
+                    if with_lonlat:
+                        if col == with_lonlat[0]:
+                            lng_val = row[col]
+                        if col == with_lonlat[1]:
+                            lat_val = row[col]
+                    if col == geom_col:
+                        the_geom_val = row[col]
+                    else:
+                        csv_row += '{val}|'.format(val=val)
 
-            if the_geom_val is not None:
-                geom = _decode_geom(the_geom_val)
-                if geom:
-                    csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lonlat is not None and lng_val is not None and lat_val is not None:
-                csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
+                if the_geom_val is not None:
+                    geom = _decode_geom(the_geom_val)
+                    if geom:
+                        csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
+                if with_lonlat is not None and lng_val is not None and lat_val is not None:
+                    csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
-            csv_row += '\n'
-            yield csv_row.encode()
+                csv_row += '\n'
+                yield csv_row.encode()
+                t.update(1)
 
     def _drop_table_query(self, if_exists=True):
         return '''DROP TABLE {if_exists} {table_name}'''.format(

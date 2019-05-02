@@ -13,7 +13,6 @@ import requests
 from IPython.display import HTML, Image
 import pandas as pd
 from tqdm import tqdm
-from appdirs import user_cache_dir
 
 from carto.auth import APIKeyAuthClient, AuthAPIClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
@@ -47,18 +46,7 @@ except (ImportError, RuntimeError):
     plt = None
 HAS_MATPLOTLIB = plt is not None
 
-# Choose constant to avoid overview generation which are triggered at a
-# half million rows
-MAX_IMPORT_ROWS = 499999
-
-# threshold for using batch sql api or not for geometry creation
-MAX_ROWS_LNGLAT = 1000
-
-# Cache directory for temporary data operations
-CACHE_DIR = user_cache_dir('cartoframes')
-
-# cartoframes version
-DEFAULT_SQL_ARGS = dict(do_post=False)
+CHUNK_ROW_SIZE = 100
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -201,8 +189,7 @@ class CartoContext(object):
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
-        res = self.sql_client.send("select unnest(current_schemas('f'))",
-                                   **DEFAULT_SQL_ARGS)
+        res = self.sql_client.send("select unnest(current_schemas('f'))")
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
@@ -261,7 +248,7 @@ class CartoContext(object):
             load_totals='false')
         return [Table.from_dataset(d) for d in datasets]
 
-    def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
+    def write(self, df, table_name, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
         """Write a DataFrame to a CARTO table.
 
@@ -295,10 +282,7 @@ class CartoContext(object):
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
                 CARTO account
-            table_name (str): Table to write ``df`` to in CARTO.
-            temp_dir (str, optional): Directory for temporary storage of data
-                that is sent to CARTO. Defaults are defined by `appdirs
-                <https://github.com/ActiveState/appdirs/blob/master/README.rst>`__.
+            table_name (str): Table to write ``df`` to in CARTO.            
             overwrite (bool, optional): Behavior for overwriting ``table_name``
                 if it exits on CARTO. Defaults to ``False``.
             lnglat (tuple, optional): lng/lat pair that can be used for
@@ -448,24 +432,36 @@ class CartoContext(object):
                 )
 
         """
-        copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        result = recursive_read(self, copy_query)
+        with tqdm(desc='Executing query, please wait...', unit='rows') as t:
+            copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
+            result = recursive_read(self, copy_query)
 
-        query_columns = get_columns(self, query)
-        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=decode_geom)
-        date_column_names = date_columns_names(query_columns)
+            query_columns = get_columns(self, query)
+            df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=decode_geom)
+            date_column_names = date_columns_names(query_columns)
 
-        df = pd.read_csv(result, dtype=df_types,
-                         parse_dates=date_column_names,
-                         true_values=['t'],
-                         false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
+            c = 0
+            for chunk in pd.read_csv(result, dtype=df_types,
+                                     chunksize=CHUNK_ROW_SIZE,
+                                     parse_dates=date_columns_names(query_columns),
+                                     true_values=['t'],
+                                     false_values=['f'],
+                                     index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                                     converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x}):
+                if c == 0:
+                    t.set_description('Downloading data from CARTO to a dataframe')
+                    df = chunk
+                    c += 1
+                else:
+                    df = df.append(chunk)
+                    c += 1
 
-        if decode_geom:
-            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+                t.update(CHUNK_ROW_SIZE)
 
-        return df
+            if decode_geom:
+                df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+            return df
 
     def execute(self, query):
         """Runs an arbitrary query to a CARTO account.
@@ -774,8 +770,7 @@ class CartoContext(object):
                             'LIMIT 0',
                         )).format(cols=','.join(layer.style_cols),
                                   comma=',' if layer.style_cols else '',
-                                  query=layer.orig_query),
-                        **DEFAULT_SQL_ARGS)
+                                  query=layer.orig_query))
                     self._debug_print(layer_fields=resp)
                     for stylecol, coltype in utils.dict_items(resp['fields']):
                         layer.style_cols[stylecol] = coltype['type']
@@ -960,8 +955,7 @@ class CartoContext(object):
                 'WHERE the_geom IS NOT NULL',
                 'GROUP BY 1',
                 'ORDER BY 2 DESC',
-            )).format(query=query),
-            **DEFAULT_SQL_ARGS)
+            )).format(query=query))
         if resp['total_rows'] > 1:
             warn('There are multiple geometry types in {query}: '
                  '{geoms}. Styling by `{common_geom}`, the most common'.format(
