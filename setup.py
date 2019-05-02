@@ -30,6 +30,7 @@ PACKAGE_DATA = {
     ],
     'cartoframes': [
         'assets/*',
+        'assets/*.j2'
     ],
 }
 
