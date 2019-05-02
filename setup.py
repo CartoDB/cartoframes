@@ -6,6 +6,7 @@ import io
 from codecs import open
 from setuptools import setup, find_packages
 
+
 def walk_subpkg(name):
     data_files = []
     package_dir = 'cartoframes'
