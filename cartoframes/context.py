@@ -289,6 +289,9 @@ class CartoContext(object):
                 cc.map(layers=Layer('life_expectancy',
                                     color='both_sexes_life_expectancy'))
 
+        .. warning:: datetime64[ns] column will lose precision sending a dataframe to CARTO
+                     because postgresql has millisecond resolution while pandas does nanoseconds
+
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
                 CARTO account
@@ -413,7 +416,7 @@ class CartoContext(object):
 
                 {'bigint': 'float64',
                  'boolean': 'bool',
-                 'date': 'datetime64[ns]',
+                 'date': 'datetime64[D]',
                  'double precision': 'float64',
                  'geometry': 'object',
                  'int': 'int64',
@@ -424,6 +427,7 @@ class CartoContext(object):
                  'smallint': 'float64',
                  'string': 'object',
                  'timestamp': 'datetime64[ns]',
+                 'timestampz': 'datetime64[ns]',
                  'timestamp with time zone': 'datetime64[ns]',
                  'timestamp without time zone': 'datetime64[ns]',
                  'USER-DEFINED': 'object',}
@@ -481,7 +485,7 @@ class CartoContext(object):
                          parse_dates=date_column_names,
                          true_values=['t'],
                          false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
                          converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
 
         if decode_geom:
@@ -581,7 +585,7 @@ class CartoContext(object):
 
                 {'bigint': 'float64',
                  'boolean': 'bool',
-                 'date': 'datetime64[ns]',
+                 'date': 'datetime64[D]',
                  'double precision': 'float64',
                  'geometry': 'object',
                  'int': 'int64',
@@ -592,6 +596,7 @@ class CartoContext(object):
                  'smallint': 'float64',
                  'string': 'object',
                  'timestamp': 'datetime64[ns]',
+                 'timestampz': 'datetime64[ns]',
                  'timestamp with time zone': 'datetime64[ns]',
                  'timestamp without time zone': 'datetime64[ns]',
                  'USER-DEFINED': 'object',}

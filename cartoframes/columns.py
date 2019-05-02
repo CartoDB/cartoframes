@@ -7,6 +7,7 @@ from unidecode import unidecode
 
 
 class Column(object):
+    DATETIME_DTYPES = ['datetime64[ns]', 'datetime64[ns, UTC]']
     MAX_LENGTH = 63
     MAX_COLLISION_LENGTH = MAX_LENGTH - 4
     RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
@@ -122,13 +123,13 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns, exclude_dates=False):
+def dtypes(columns, exclude_dates=False):    
     return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
-            for x in columns if not (exclude_dates is True and x.dtype == 'datetime64[ns]')}
+            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)}
 
 
 def date_columns_names(columns):
-    return [x.name for x in columns if x.dtype == 'datetime64[ns]']
+    return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
 
 
 def pg2dtypes(pgtype):
@@ -136,7 +137,7 @@ def pg2dtypes(pgtype):
     mapping = {
         'bigint': 'float64',
         'boolean': 'bool',
-        'date': 'datetime64[ns]',
+        'date': 'datetime64[D]',
         'double precision': 'float64',
         'geometry': 'object',
         'int': 'int64',
@@ -147,6 +148,7 @@ def pg2dtypes(pgtype):
         'smallint': 'float64',
         'string': 'object',
         'timestamp': 'datetime64[ns]',
+        'timestampz': 'datetime64[ns]',
         'timestamp with time zone': 'datetime64[ns]',
         'timestamp without time zone': 'datetime64[ns]',
         'USER-DEFINED': 'object',
