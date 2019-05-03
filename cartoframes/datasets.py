@@ -33,6 +33,7 @@ class Dataset(object):
         self.df = df
         self.normalized_column_names = None
         if self.df is not None:
+            _save_index_as_column(self.df)
             self.normalized_column_names = _normalize_column_names(self.df)
         if self.table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
@@ -116,7 +117,7 @@ class Dataset(object):
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, self.df.columns, with_lonlat, geom_col)
+            self._rows(self.df, [c for c in self.df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
@@ -243,6 +244,14 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
             warn(('Read call was rate-limited. '
                   'This usually happens when there are multiple queries being read at the same time.'))
             raise err
+
+
+def _save_index_as_column(df):
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)
 
 
 def _normalize_column_names(df):
