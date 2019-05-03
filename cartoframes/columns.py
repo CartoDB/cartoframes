@@ -156,4 +156,4 @@ def pg2dtypes(pgtype):
         'timestamp without time zone': 'datetime64[ns]',
         'USER-DEFINED': 'object',
     }
-    return mapping.get(str(pgtype), 'object')
+    return mapping.get(str(pgtype), None)
