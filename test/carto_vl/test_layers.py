@@ -27,9 +27,26 @@ class TestLayersStyle(unittest.TestCase):
             style={
                 'color': 'blue',
                 'width': 10,
-                'stroke-color': 'black',
-                'stroke-width': 1
+                'strokeColor': 'black',
+                'strokeWidth': 1
             }
+        )
+
+        self.assertTrue('color: blue' in carto_layer.viz)
+        self.assertTrue('width: 10' in carto_layer.viz)
+        self.assertTrue('strokeColor: black' in carto_layer.viz)
+        self.assertTrue('strokeWidth: 1' in carto_layer.viz)
+
+    def test_style_str(self):
+        """should set the style when it is a dict"""
+        carto_layer = carto_vl.Layer(
+            carto_vl.source.Dataset('layer_source'),
+            style="""
+                color: 'blue'
+                width: 10
+                strokeColor': 'black'
+                strokeWidth': 1
+            """
         )
 
         self.assertTrue('color: blue' in carto_layer.viz)
@@ -44,33 +61,6 @@ class TestLayersStyle(unittest.TestCase):
             style={
                 'invalid': 1
             }
-        )
-        self.assertFalse('invalid: 1' in carto_layer.viz)
-
-    def test_style_list(self):
-        """should set the style when it is a dict"""
-        carto_layer = carto_vl.Layer(
-            carto_vl.sources.Dataset('layer_source'),
-            style=[
-                ['color', 'blue'],
-                ['width', 10],
-                ['stroke-color', 'black'],
-                ['stroke-width', 1]
-            ]
-        )
-
-        self.assertTrue('color: blue' in carto_layer.viz)
-        self.assertTrue('width: 10' in carto_layer.viz)
-        self.assertTrue('strokeColor: black' in carto_layer.viz)
-        self.assertTrue('strokeWidth: 1' in carto_layer.viz)
-
-    def test_style_list_valid_properties(self):
-        """should set only the valid properties"""
-        carto_layer = carto_vl.Layer(
-            carto_vl.sources.Dataset('layer_source'),
-            style=[
-                ['invalid', 1]
-            ]
         )
         self.assertFalse('invalid: 1' in carto_layer.viz)
 
