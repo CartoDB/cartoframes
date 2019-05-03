@@ -440,7 +440,8 @@ class CartoContext(object):
             df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True)
             date_column_names = date_columns_names(query_columns)
 
-            c = 0
+            list_df = []
+            t.set_description('Downloading data from CARTO to a dataframe')
             for chunk in pd.read_csv(result, dtype=df_types,
                                      chunksize=CHUNK_ROW_SIZE,
                                      parse_dates=date_column_names,
@@ -448,15 +449,9 @@ class CartoContext(object):
                                      false_values=['f'],
                                      index_col='cartodb_id' if 'cartodb_id' in df_types else False,
                                      converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x}):
-                if c == 0:
-                    t.set_description('Downloading data from CARTO to a dataframe')
-                    df = chunk
-                    c += 1
-                else:
-                    df = df.append(chunk)
-                    c += 1
-
+                list_df.append(chunk)
                 t.update(CHUNK_ROW_SIZE)
+            df = pd.concat(list_df)
 
             if decode_geom:
                 df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
