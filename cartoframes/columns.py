@@ -7,6 +7,9 @@ from unidecode import unidecode
 
 
 class Column(object):
+    DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
+    SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
+    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
     MAX_LENGTH = 63
     MAX_COLLISION_LENGTH = MAX_LENGTH - 4
     RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
@@ -122,21 +125,35 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns, exclude_dates=False):
-    return {x.name: x.dtype for x in columns if not (exclude_dates is True and x.pgtype == 'date')}
+def dtypes(columns, exclude_dates=False, exclude_the_geom=False):
+    return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
+            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
+            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)}
 
 
 def date_columns_names(columns):
-    return [x.name for x in columns if x.pgtype == 'date']
+    return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
 
 
 def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
-        'date': 'datetime64[ns]',
-        'number': 'float64',
-        'string': 'object',
+        'bigint': 'float64',
         'boolean': 'bool',
+        'date': 'datetime64[D]',
+        'double precision': 'float64',
         'geometry': 'object',
+        'int': 'int64',
+        'integer': 'float64',
+        'number': 'float64',
+        'numeric': 'float64',
+        'real': 'float64',
+        'smallint': 'float64',
+        'string': 'object',
+        'timestamp': 'datetime64[ns]',
+        'timestampz': 'datetime64[ns]',
+        'timestamp with time zone': 'datetime64[ns]',
+        'timestamp without time zone': 'datetime64[ns]',
+        'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')

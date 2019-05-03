@@ -30,7 +30,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .datasets import Dataset, get_columns, recursive_read, _decode_geom
+from .datasets import Dataset, recursive_read, _decode_geom, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -207,7 +207,8 @@ class CartoContext(object):
         return res['rows'][0]['unnest'] != 'public'
 
     def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
-        """Read a table from CARTO into a pandas DataFrames.
+        """Read a table from CARTO into a pandas DataFrames. Column types are inferred from database types, to
+          avoid problems with integer columns with NA or null values, they are automatically retrieved as float64
 
         Args:
             table_name (str): Name of table in user's CARTO account.
@@ -287,6 +288,9 @@ class CartoContext(object):
                          privacy='public')
                 cc.map(layers=Layer('life_expectancy',
                                     color='both_sexes_life_expectancy'))
+
+        .. warning:: datetime64[ns] column will lose precision sending a dataframe to CARTO
+                     because postgresql has millisecond resolution while pandas does nanoseconds
 
         Args:
             df (pandas.DataFrame): DataFrame to write to ``table_name`` in user
@@ -445,16 +449,17 @@ class CartoContext(object):
 
         """
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        query_columns = get_columns(self, query)
-
         result = recursive_read(self, copy_query)
-        df_types = dtypes(query_columns, exclude_dates=True)
+
+        query_columns = get_columns(self, query)
+        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True)
+        date_column_names = date_columns_names(query_columns)
 
         df = pd.read_csv(result, dtype=df_types,
-                         parse_dates=date_columns_names(query_columns),
+                         parse_dates=date_column_names,
                          true_values=['t'],
                          false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types.keys() else False,
+                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
                          converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
 
         if decode_geom:
@@ -1531,7 +1536,6 @@ class CartoContext(object):
                 names[suggested] = suggested
 
         # drop description columns to lighten the query
-        # FIXME https://github.com/CartoDB/cartoframes/issues/593
         meta_columns = _meta.columns.values
         drop_columns = []
         for meta_column in meta_columns:

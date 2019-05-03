@@ -15,6 +15,7 @@ import json
 import random
 import warnings
 import requests
+from datetime import datetime
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
@@ -24,7 +25,7 @@ import IPython
 
 import cartoframes
 from cartoframes.datasets import Dataset
-from cartoframes.columns import normalize_name
+from cartoframes.columns import Column, normalize_name
 from cartoframes.utils import dict_items
 
 from utils import _UserUrlLoader
@@ -227,6 +228,31 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(len(df), 0)
         self.assertIsInstance(df, pd.DataFrame)
 
+    def test_cartocontext_read_with_same_schema(self):
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        df = pd.DataFrame({'fips': ['01'],
+                           'cfips': ['0001'],
+                           'intval': [1],
+                           'floatval': [1.0],
+                           'boolval': [True],
+                           'textval': ['text'],
+                           'dateval': datetime.now()
+                           })
+        df['boolval'] = df['boolval'].astype(bool)
+        cc.write(df, self.test_write_table, overwrite=True)
+        read_df = cc.read(self.test_write_table)
+
+        read_df.drop('the_geom', axis=1, inplace=True)
+        self.assertSetEqual(set(df.columns), set(read_df.columns))
+        self.assertTupleEqual(
+            tuple('float64' if str(d) == 'int64' else str(d) for d in df.dtypes),
+            tuple(str(d) for d in read_df.dtypes),
+            msg='Should have same schema/types'
+        )
+        self.assertEqual(read_df.index.name, 'cartodb_id')
+        self.assertEqual(read_df.index.dtype, 'int64')
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write(self):
         """context.CartoContext.write normal usage"""
@@ -386,7 +412,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         """context.CartoContext.query"""
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
-        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
+        columns = (Column('link', pgtype='string'),
+                   Column('body', pgtype='string'),
+                   Column('displayname', pgtype='string'),
+                   Column('friendscount', pgtype='number'),
+                   Column('postedtime', pgtype='date'), )
+        cols = [col.name for col in columns]
         df = cc.query('''
             SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
@@ -476,7 +507,12 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         cc = cartoframes.CartoContext(base_url=self.baseurl,
                                       api_key=self.apikey)
 
-        cols = ('link', 'body', 'displayname', 'friendscount', 'postedtime', )
+        columns = (Column('link', pgtype='string'),
+                   Column('body', pgtype='string'),
+                   Column('displayname', pgtype='string'),
+                   Column('friendscount', pgtype='number'),
+                   Column('postedtime', pgtype='date'), )
+        cols = [col.name for col in columns]
         df = cc.fetch('''
             SELECT {cols}, '02-06-1429'::date as invalid_df_date
             FROM tweets_obama
@@ -1054,17 +1090,14 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
         data = cc.data(self.test_data_table, meta)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(data.columns) - origcols - {'the_geom'})
-
-        # with self.assertRaises(NotImplementedError):
-        #     cc.data(self.test_data_table, meta, how='geom_ref')
+                            set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         with self.assertRaises(ValueError, msg='no measures'):
             meta = cc.data_discovery('United States', keywords='not a measure')
@@ -1087,16 +1120,21 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         data = cc.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(cc.read(self.test_data_table, limit=1, decode_geom=True).columns)
-        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom'})
+        self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
         data = cc.data(self.test_data_table, meta, persist_as=self.test_write_table)
         self.assertSetEqual(set(('median_income_2011_2015', )),
-                            set(data.columns) - origcols - {'the_geom'})
+                            set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
+        self.assertEqual(data.index.name, 'cartodb_id')
+        self.assertEqual(data.index.dtype, 'int64')
 
         df = cc.read(self.test_write_table, decode_geom=False)
+
+        self.assertEqual(df.index.name, 'cartodb_id')
+        self.assertEqual(data.index.dtype, 'int64')
 
         # same number of rows
         self.assertEqual(len(df), len(data),
