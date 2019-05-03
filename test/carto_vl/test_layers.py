@@ -20,6 +20,17 @@ class TestLayers(unittest.TestCase):
 
 
 class TestLayersStyle(unittest.TestCase):
+    def test_style_instance(self):
+        """should create a Style instance by default"""
+        carto_layer = carto_vl.Layer(
+            carto_vl.source.Dataset('layer_source'),
+            style={
+                'color': 'blue'
+            }
+        )
+
+        self.assertTrue(isinstance(carto_layer.style, carto_vl.Style))
+
     def test_style_dict(self):
         """should set the style when it is a dict"""
         carto_layer = carto_vl.Layer(
@@ -42,10 +53,10 @@ class TestLayersStyle(unittest.TestCase):
         carto_layer = carto_vl.Layer(
             carto_vl.source.Dataset('layer_source'),
             style="""
-                color: 'blue'
+                color: blue
                 width: 10
-                strokeColor': 'black'
-                strokeWidth': 1
+                strokeColor: black
+                strokeWidth: 1
             """
         )
 

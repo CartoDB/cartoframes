@@ -53,11 +53,20 @@ class Layer(object):
         self.is_basemap = False
         self.source = source  # TO DO check instance of Source
         self.bounds = source.bounds
-        self.style = style if isinstance(style, Style) else Style(style)
+        self.style = _set_style(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
         self.viz = _get_viz(self.variables, self.style)
+
+
+def _set_style(style):
+    if style is None:
+        return ''
+    elif isinstance(style, Style):
+        return style
+    else:
+        return Style(style)
 
 
 def _parse_variables(variables):
@@ -114,5 +123,7 @@ def _get_viz(variables, style):
         return '\n'.join([variables, style.viz])
     elif variables:
         return variables
-    else:
+    elif style and style.viz:
         return style.viz
+    else:
+        return ''
