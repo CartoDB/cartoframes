@@ -5,8 +5,8 @@ from .utils import defaults
 from .utils.html import HTMLMap
 from .maps.map import Map
 from .layer.layer import Layer
+from .styles.style import Style
 from .sources import Sources as source
-from .styles import Style
 
 
 __all__ = [

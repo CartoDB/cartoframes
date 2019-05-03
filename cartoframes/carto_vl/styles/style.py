@@ -3,20 +3,20 @@ from ..utils import defaults
 
 class Style(object):
     def __init__(self, style=None):
-        self.style = self._init_style(style)
+        self.viz = self._init_style(style)
 
     def _init_style(self, style):
         """Adds style properties to the styling"""
         if style is None:
             return ''
         elif isinstance(style, dict):
-            return self. _parse_style_properties_dict(style)
+            return self._parse_style_properties_dict(style)
         elif isinstance(style, str):
             return style
         else:
             raise ValueError('`style` must be a dictionary or a viz string')
 
-    def _parse_style_properties_dict(style):
+    def _parse_style_properties_dict(self, style):
         return '\n'.join(
             '{name}: {value}'.format(
                 name=_to_camel_case(style_prop),

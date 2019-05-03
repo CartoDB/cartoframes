@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from ..style import Style
+from ..styles.style import Style
 
 
 class Layer(object):
@@ -57,7 +57,7 @@ class Layer(object):
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
-        self.viz = _set_viz(self.variables, self.style)
+        self.viz = _get_viz(self.variables, self.style)
 
 
 def _parse_variables(variables):
@@ -109,10 +109,10 @@ def _parse_interactivity(interactivity):
         raise ValueError('`interactivity` must be a dictionary')
 
 
-def _set_viz(variables, style):
+def _get_viz(variables, style):
     if variables and style:
-        return '\n'.join([variables, style])
+        return '\n'.join([variables, style.viz])
     elif variables:
         return variables
     else:
-        return style
+        return style.viz
