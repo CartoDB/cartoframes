@@ -6,6 +6,7 @@ from .utils.html import HTMLMap
 from .maps.map import Map
 from .layer.layer import Layer
 from .sources import Sources as source
+from .styles import Style
 
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
   "Dataset",
   "SQL",
   "GeoJSON",
-  "source"
+  "source",
+  "Style"
 ]

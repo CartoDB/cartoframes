@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from ..utils import defaults
+from ..style import Style
 
 
 class Layer(object):
@@ -53,56 +53,11 @@ class Layer(object):
         self.is_basemap = False
         self.source = source  # TO DO check instance of Source
         self.bounds = source.bounds
-        self.style = _parse_style_properties(style)
+        self.style = style if isinstance(style, Style) else Style(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
         self.viz = _set_viz(self.variables, self.style)
-
-
-def _convstr(obj):
-    """convert all types to strings or None"""
-    return str(obj) if obj is not None else None
-
-
-def _to_camel_case(text):
-    """convert properties to camelCase"""
-    components = text.split('-')
-    return components[0] + ''.join(x.title() for x in components[1:])
-
-
-def _parse_style_properties(style):
-    """Adds style properties to the styling"""
-    if style is None:
-        return ''
-    elif isinstance(style, dict):
-        return _parse_style_properties_dict(style)
-    elif isinstance(style, (tuple, list)):
-        return _parse_style_properties_list(style)
-    elif isinstance(style, str):
-        return style
-    else:
-        raise ValueError('`style` must be a dictionary, a list or a string')
-
-
-def _parse_style_properties_dict(style):
-    return '\n'.join(
-        '{name}: {value}'.format(
-          name=_to_camel_case(style_prop),
-          value=_convstr(style.get(style_prop))
-        )
-        for style_prop in style
-        if style_prop in defaults._STYLE_PROPERTIES
-        and style.get(style_prop) is not None
-        )
-
-
-def _parse_style_properties_list(style):
-    return '\n'.join(
-      '{name}: {value}'.format(
-          name=_to_camel_case(style_prop[0]),
-          value=_convstr(style_prop[1])
-      ) for style_prop in style if style_prop[0] in defaults._STYLE_PROPERTIES)
 
 
 def _parse_variables(variables):
