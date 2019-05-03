@@ -28,10 +28,10 @@ _STYLE_PROPERTIES = (
     'color',
     'width',
     'filter',
-    'stroke-width',
-    'stroke-color',
+    'strokeWidth',
+    'strokeColor',
     'transform',
     'order',
     'symbol',
-    'symbol-placement',
+    'symbolPlacement',
 )
