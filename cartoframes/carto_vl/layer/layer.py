@@ -34,9 +34,9 @@ class Layer(object):
             vl.Map([
                 vl.Layer(
                     source=vl.source.SQL('SELECT * FROM populated_places WHERE adm0name = \'Spain\''),
-                    style={
+                    style=vl.Style({
                         'color': 'red'
-                    }
+                    })
                 )],
                 context=context
             )
