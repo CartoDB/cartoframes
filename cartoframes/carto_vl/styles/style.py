@@ -6,7 +6,7 @@ class Style(object):
     """CARTO VL Style
 
     Args:
-        style (dict, string): The style for a layer. It can be a dictionary or a viz string.
+        style (dict, string): The style for the layer. It can be a dictionary or a viz string.
             If a dict or a string are assigned to the Layer's style, it is casted to a Style.
 
     Attributes:
@@ -45,9 +45,9 @@ class Style(object):
               vl.Map([
                   vl.Layer(
                       source=vl.source.Dataset('populated_places'),
-                      style=vl.Style(\"\"\"
+                      style=vl.Style('''
                         color: red
-                      \"\"\")
+                      ''')
                   )],
                   context=context
               )
@@ -68,17 +68,23 @@ class Style(object):
             raise ValueError('`style` must be a dictionary or a viz string')
 
     def _parse_style_properties_dict(self, style):
-        return '\n'.join(
-            '{name}: {value}'.format(
-                name=style_prop,
-                value=_convstr(style.get(style_prop))
-            )
-            for style_prop in style
-            if style_prop in defaults._STYLE_PROPERTIES
-            and style.get(style_prop) is not None
-        )
+        style_properties = []
+
+        for prop in style:
+            if prop in defaults._STYLE_PROPERTIES and style.get(prop) is not None:
+                style_properties.append(
+                    '{name}: {value}'.format(
+                        name=prop,
+                        value=_convstr(style.get(prop))
+                    )
+                )
+            else:
+                raise ValueError('Style property "' + prop + '" is not valid. Valid style properties are: ' +
+                                 ', '.join(defaults._STYLE_PROPERTIES))
+
+        return '\n'.join(style_properties)
 
 
 def _convstr(obj):
-    """convert all types to strings or None"""
+    """Converts all types to strings or None"""
     return str(obj) if obj is not None else None
