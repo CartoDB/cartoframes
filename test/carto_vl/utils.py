@@ -3,7 +3,7 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point
 
 
-def build_local_source(lats, lngs):
+def build_geojson(lats, lngs):
     coordinates = {
         'Latitude': lats,
         'Longitude': lngs

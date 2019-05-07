@@ -5,8 +5,7 @@ from .utils import defaults
 from .utils.html import HTMLMap
 from .maps.map import Map
 from .layer.layer import Layer
-from .layer.local_layer import LocalLayer
-from .layer.query_layer import QueryLayer
+from .sources import Sources as source
 
 
 __all__ = [
@@ -15,6 +14,8 @@ __all__ = [
   "HTMLMap",
   "Map",
   "Layer",
-  "LocalLayer",
-  "QueryLayer"
+  "Dataset",
+  "SQL",
+  "GeoJSON",
+  "source"
 ]

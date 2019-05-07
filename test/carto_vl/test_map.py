@@ -1,7 +1,7 @@
 import unittest
 from cartoframes import carto_vl
 from cartoframes.carto_vl import defaults
-from utils import build_local_source
+from utils import build_geojson
 
 
 class TestMap(unittest.TestCase):
@@ -21,60 +21,60 @@ class TestMapInitialization(unittest.TestCase):
         self.assertIsNotNone(carto_vl_map._htmlMap)
 
 
-class TestMapLocalLayers(unittest.TestCase):
+class TestMapLayer(unittest.TestCase):
     def test_one_layer(self):
         """should be able to initialize one local layer"""
-        layer_1 = build_local_source([-10, 0], [-10, 0])
-        carto_vl_local_layer = carto_vl.LocalLayer(layer_1)
-        carto_vl_map = carto_vl.Map(carto_vl_local_layer)
+        source_1 = carto_vl.source.GeoJSON(build_geojson([-10, 0], [-10, 0]))
+        carto_vl_layer = carto_vl.Layer(source_1)
+        carto_vl_map = carto_vl.Map(carto_vl_layer)
 
-        self.assertEqual(carto_vl_map.layers, [carto_vl_local_layer])
+        self.assertEqual(carto_vl_map.layers, [carto_vl_layer])
         self.assertEqual(len(carto_vl_map.sources), 1)
         self.assertFalse(carto_vl_map.sources[0].get('interactivity'))
-        self.assertTrue(carto_vl_map.sources[0].get('is_local'))
         self.assertIsNone(carto_vl_map.sources[0].get('legend'))
         self.assertIsNotNone(carto_vl_map.sources[0].get('source'))
+        self.assertIsNotNone(carto_vl_map.sources[0].get('query'))
         self.assertIsNotNone(carto_vl_map.sources[0].get('viz'))
 
     def test_two_layers(self):
         """should be able to initialize two local layer in the correct order"""
-        layer_1 = build_local_source([-10, 0], [-10, 0])
-        layer_2 = build_local_source([0, 10], [10, 0])
-        carto_vl_local_layer_1 = carto_vl.Layer(layer_1)
-        carto_vl_local_layer_2 = carto_vl.Layer(layer_2)
+        source_1 = carto_vl.source.GeoJSON(build_geojson([-10, 0], [-10, 0]))
+        source_2 = carto_vl.source.GeoJSON(build_geojson([0, 10], [10, 0]))
+        carto_vl_layer_1 = carto_vl.Layer(source_1)
+        carto_vl_layer_2 = carto_vl.Layer(source_2)
         carto_vl_map = carto_vl.Map([
-            carto_vl_local_layer_1,
-            carto_vl_local_layer_2
+            carto_vl_layer_1,
+            carto_vl_layer_2
         ])
 
         self.assertEqual(carto_vl_map.layers, [
-            carto_vl_local_layer_2,
-            carto_vl_local_layer_1,
+            carto_vl_layer_2,
+            carto_vl_layer_1,
         ])
         self.assertEqual(len(carto_vl_map.sources), 2)
 
     def test_interactive_layer(self):
         """should indicate if the layer has interactivity enabled"""
-        layer_1 = build_local_source([-10, 0], [-10, 0])
+        source_1 = carto_vl.source.GeoJSON(build_geojson([-10, 0], [-10, 0]))
         interactivity = {'event': 'click'}
-        carto_vl_local_layer = carto_vl.LocalLayer(
-            layer_1,
+        carto_vl_layer = carto_vl.Layer(
+            source_1,
             interactivity=interactivity
         )
 
-        carto_vl_map = carto_vl.Map(carto_vl_local_layer)
+        carto_vl_map = carto_vl.Map(carto_vl_layer)
         self.assertTrue(carto_vl_map.sources[0].get('interactivity'))
 
     def test_default_interactive_layer(self):
         """should get the default event if the interactivity is set to True"""
-        layer_1 = build_local_source([-10, 0], [-10, 0])
+        source_1 = carto_vl.source.GeoJSON(build_geojson([-10, 0], [-10, 0]))
         interactivity = True
-        carto_vl_local_layer = carto_vl.LocalLayer(
-            layer_1,
+        carto_vl_layer = carto_vl.Layer(
+            source_1,
             interactivity=interactivity
         )
 
-        carto_vl_map = carto_vl.Map(carto_vl_local_layer)
+        carto_vl_map = carto_vl.Map(carto_vl_layer)
         layer_interactivity = carto_vl_map.sources[0].get('interactivity')
         self.assertTrue(layer_interactivity)
         self.assertEqual(layer_interactivity.get('event'), 'hover')
