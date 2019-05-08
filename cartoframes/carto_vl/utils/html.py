@@ -26,14 +26,15 @@ class HTMLMap(object):
 
     def set_content(
         self, size, sources, bounds, viewport=None, creds=None, basemap=None,
+            default_legend=None,
             _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, creds, basemap,
+            size, sources, bounds, viewport, creds, basemap, default_legend,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
-        self, size, sources, bounds, viewport, creds=None, basemap=None,
+        self, size, sources, bounds, viewport, creds=None, basemap=None, default_legend=None,
             _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         token = ''
@@ -77,6 +78,8 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
+        has_legends = any(source['legend'] is not None for source in sources) or default_legend
+
         return self._template.render(
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
@@ -87,6 +90,8 @@ class HTMLMap(object):
             bounds=bounds,
             camera=camera,
             carto_vl_path=_carto_vl_path,
+            has_legends=has_legends,
+            default_legend=default_legend,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,

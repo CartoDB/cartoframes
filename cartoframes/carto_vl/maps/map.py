@@ -122,6 +122,7 @@ class Map(object):
                  bounds=None,
                  viewport=None,
                  template=None,
+                 default_legend=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -136,6 +137,11 @@ class Map(object):
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
 
+        if default_legend is None and all(layer.legend is None for layer in self.layers):
+            self.default_legend = True
+        else:
+            self.default_legend = default_legend
+
         self._htmlMap.set_content(
             size=self.size,
             sources=self.sources,
@@ -143,6 +149,7 @@ class Map(object):
             viewport=self.viewport,
             creds=self.context.creds if self.context else None,
             basemap=self.basemap,
+            default_legend=self.default_legend,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
