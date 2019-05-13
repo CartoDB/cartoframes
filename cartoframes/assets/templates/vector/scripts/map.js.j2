@@ -23,7 +23,7 @@ function onReady() {
 
   const sources = {{sources|tojson}};
 
-  map.fitBounds({{bounds}}, {animate: false});
+  map.fitBounds({{bounds}}, {animate: false, padding: 50});
 
   {% if camera != none %}
     map.flyTo({{ camera|clear_none|tojson }});
