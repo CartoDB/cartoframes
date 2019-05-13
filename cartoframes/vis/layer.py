@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
+from .source import Source
 from .style import Style
+from ..dataset import Dataset
 
 
 class Layer(object):
@@ -49,11 +51,19 @@ class Layer(object):
                  variables=None,
                  interactivity=None,
                  legend=None):
+    
+        if isinstance(source, (str, Dataset)):
+            self.source = Source(source)
+
+        elif isinstance(source, Source):
+            self.source = source
+
+        else:
+            raise ValueError('Wrong source')
 
         self.is_basemap = False
-        self.source = source  # TO DO check instance of Source
-        self.bounds = source.bounds
-        self.orig_query = source.query
+        self.bounds = self.source.bounds
+        self.orig_query = self.source.query
         self.style = _set_style(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)
