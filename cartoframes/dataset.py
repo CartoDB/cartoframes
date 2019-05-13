@@ -16,7 +16,7 @@ tqdm(disable=True, total=0)  # initialise internal lock
 default_context = None
 
 
-def setDefaultContext(context):
+def set_default_context(context):
     global default_context
     default_context = context
 
