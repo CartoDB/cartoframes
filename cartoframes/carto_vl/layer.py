@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-from ..style.style import Style
+
+from .style import Style
 
 
 class Layer(object):

@@ -3,9 +3,9 @@ from __future__ import absolute_import
 import numpy as np
 import collections
 from cartoframes import utils
-from ..utils.html import HTMLMap
-from ..utils import defaults
-from ..basemap.basemaps import Basemaps
+from .utils.html import HTMLMap
+from .utils import defaults
+from .basemaps import Basemaps
 
 
 class Map(object):

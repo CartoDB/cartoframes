@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-from ..utils import defaults
+
+from .utils import defaults
 
 
 class Style(object):
