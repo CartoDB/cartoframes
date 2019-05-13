@@ -12,6 +12,7 @@ REQUIRES = [
     'carto>=1.4.0',
     'tqdm>=4.14.0',
     'appdirs>=1.4.3',
+    'https://github.com/CartoDB/kart-oku/tarball/master#egg=analysis_api&subdirectory=api-client'
 ]
 
 EXTRAS_REQUIRE = {

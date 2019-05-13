@@ -36,6 +36,8 @@ from .analysis import Table
 from .batch import BatchJobStatus
 from .__version__ import __version__
 
+from .analysis_api import analysis_api
+
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
 else:
@@ -192,6 +194,9 @@ class CartoContext(object):
         self._map_templates = {}
         self._srcdoc = None
         self._verbose = verbose
+
+    def analysis_api(self):
+        return analysis_api(self)
 
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
