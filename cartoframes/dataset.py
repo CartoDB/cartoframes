@@ -48,20 +48,20 @@ class Dataset(object):
             self.normalized_column_names = _normalize_column_names(self.df)
         # warn('Table will be named `{}`'.format(table_name))
 
-    @staticmethod
-    def create_from_table(table_name, context=None):
-        dataset = Dataset('SELECT * FROM {}'.format(table_name), 'Query', context)
+    @classmethod
+    def from_table(cls, table_name, context=None):
+        dataset = cls('SELECT * FROM {}'.format(table_name), 'Query', context)
         return dataset
 
-    @staticmethod
-    def create_from_query(query, context=None):
-        dataset = Dataset(query, 'Query', context)
+    @classmethod
+    def from_query(cls, query, context=None):
+        dataset = cls(query, 'Query', context)
         return dataset
 
-    @staticmethod
-    def create_from_geojson(geojson):
+    @classmethod
+    def from_geojson(cls, geojson):
         query, bounds = load_geojson(geojson)
-        dataset = Dataset(query, 'GeoJSON', bounds=bounds)
+        dataset = cls(query, 'GeoJSON', bounds=bounds)
         return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):

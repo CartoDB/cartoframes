@@ -20,16 +20,16 @@ class Source(object):
         if isinstance(data, str):
 
             if _check_sql_query(data):
-                self.dataset = Dataset.create_from_query(data, context)
+                self.dataset = Dataset.from_query(data, context)
 
             elif _check_geojson_file(data):
-                self.dataset = Dataset.create_from_geojson(data)
+                self.dataset = Dataset.from_geojson(data)
 
             elif _check_table_name(data):
-                self.dataset = Dataset.create_from_table(data, context)
+                self.dataset = Dataset.from_table(data, context)
 
         elif isinstance(data, geopandas.GeoDataFrame):
-            self.dataset = Dataset.create_from_geojson(data)
+            self.dataset = Dataset.from_geojson(data)
 
         elif isinstance(data, Dataset):
             self.dataset = data
@@ -57,7 +57,7 @@ def _check_table_name(data):
 
 
 def _check_sql_query(data):
-    return re.match(r'^\s*SELECT\s+', data, re.IGNORECASE)
+    return re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
 
 
 def _check_geojson_file(data):
