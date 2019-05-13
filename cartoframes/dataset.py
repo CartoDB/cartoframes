@@ -13,6 +13,13 @@ from .carto_vl.utils.geojson import load_geojson
 tqdm(disable=True, total=0)  # initialise internal lock
 
 
+default_context = None
+
+def setDefaultContext(context):
+    global default_context
+    default_context = context
+
+
 class Dataset(object):
     SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
     RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
@@ -28,7 +35,7 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, query, data_type, context=None, bounds=None, schema='public', df=None):
-        self.cc = context
+        self.cc = context or default_context
         self.query = query
         self.type = data_type
         self.bounds = bounds
@@ -41,12 +48,12 @@ class Dataset(object):
         # warn('Table will be named `{}`'.format(table_name))
 
     @staticmethod
-    def create_from_table(table_name, context):
+    def create_from_table(table_name, context=None):
         dataset = Dataset('SELECT * FROM {}'.format(table_name), 'Query', context)
         return dataset
 
     @staticmethod
-    def create_from_query(query, context):
+    def create_from_query(query, context=None):
         dataset = Dataset(query, 'Query', context)
         return dataset
 
