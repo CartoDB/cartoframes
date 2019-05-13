@@ -108,6 +108,7 @@ class Examples(CartoContext):
     below.
 
     """
+
     def __init__(self):
         super(Examples, self).__init__(
             base_url=EXAMPLE_BASE_URL,

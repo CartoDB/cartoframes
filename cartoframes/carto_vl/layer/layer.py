@@ -92,8 +92,8 @@ def _parse_variables_list(variables):
 def _parse_variables_dict(variables):
     return '\n'.join(
         '@{name}: {value}'.format(
-          name=variable,
-          value=variables.get(variable)
+            name=variable,
+            value=variables.get(variable)
         )
         for variable in variables)
 
@@ -106,13 +106,13 @@ def _parse_interactivity(interactivity):
         return None
     elif isinstance(interactivity, dict):
         return {
-          'event': interactivity.get('event', event_default),
-          'header': interactivity.get('header', None),
-          'values': interactivity.get('values', None)
+            'event': interactivity.get('event', event_default),
+            'header': interactivity.get('header', None),
+            'values': interactivity.get('values', None)
         }
     elif interactivity is True:
         return {
-          'event': event_default,
+            'event': event_default,
         }
     else:
         raise ValueError('`interactivity` must be a dictionary')

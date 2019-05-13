@@ -356,6 +356,7 @@ class Layer(QueryLayer):  # pylint: disable=too-few-public-methods
                 ],
                 example_context)
     """
+
     def __init__(self,
                  table_name,
                  color_=None,
@@ -411,6 +412,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             gdf = gpd.GeoDataFrame(read_mcdonalds_nyc(decode_geom=True))
             vector.vmap([vector.LocalLayer(gdf), ], context=example_context)
     """
+
     def __init__(self,
                  dataframe,
                  color_=None,
@@ -429,7 +431,7 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
             _df_nonnull = dataframe[~dataframe.geometry.isna()]
             # convert time cols to epoch
             timecols = _df_nonnull.select_dtypes(
-                    include=['datetimetz', 'datetime', 'timedelta']).columns
+                include=['datetimetz', 'datetime', 'timedelta']).columns
             for timecol in timecols:
                 _df_nonnull[timecol] = _df_nonnull[timecol].astype(np.int64)
             self._geojson_str = _df_nonnull.to_json()
@@ -606,14 +608,14 @@ def vmap(layers,
     _airship_path = kwargs.get('_airship_path', None)
 
     html = _get_html_doc(
-            size,
-            jslayers,
-            bounds,
-            creds=context.creds,
-            viewport=viewport,
-            basemap=basemap,
-            _carto_vl_path=_carto_vl_path,
-            _airship_path=_airship_path)
+        size,
+        jslayers,
+        bounds,
+        creds=context.creds,
+        viewport=viewport,
+        basemap=basemap,
+        _carto_vl_path=_carto_vl_path,
+        _airship_path=_airship_path)
     return HTML(html)
 
 
@@ -725,14 +727,14 @@ def _combine_bounds(bbox1, bbox2):
     # set values and/or defaults
     for coord in ('north', 'east'):
         outbbox[coord] = np.nanmax([
-                conv2nan(bbox1[coord]),
-                conv2nan(bbox2[coord])
-            ])
+            conv2nan(bbox1[coord]),
+            conv2nan(bbox2[coord])
+        ])
     for coord in ('south', 'west'):
         outbbox[coord] = np.nanmin([
-                conv2nan(bbox1[coord]),
-                conv2nan(bbox2[coord])
-            ])
+            conv2nan(bbox1[coord]),
+            conv2nan(bbox2[coord])
+        ])
 
     return outbbox
 

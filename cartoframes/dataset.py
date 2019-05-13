@@ -15,6 +15,7 @@ tqdm(disable=True, total=0)  # initialise internal lock
 
 default_context = None
 
+
 def setDefaultContext(context):
     global default_context
     default_context = context
@@ -224,12 +225,12 @@ class Dataset(object):
 
 
 def get_columns(context, query):
-        """Get column names and types from a query"""
-        table_info = context.sql_client.send(query)
-        if 'fields' in table_info:
-            return table_info['fields']
+    """Get column names and types from a query"""
+    table_info = context.sql_client.send(query)
+    if 'fields' in table_info:
+        return table_info['fields']
 
-        return None
+    return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):

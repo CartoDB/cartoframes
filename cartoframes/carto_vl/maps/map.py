@@ -226,7 +226,7 @@ def _get_super_bounds(layers):
 
     hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
     local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
-        
+
     if hosted_layers:
         hosted_bounds = _get_bounds_hosted(hosted_layers)
 
@@ -264,7 +264,7 @@ def _get_bounds_local(layers):
 
     if not bounds:
         return {'west': None, 'south': None, 'east': None, 'north': None}
-        
+
     return dict(zip(['west', 'south', 'east', 'north'], bounds))
 
 
@@ -312,14 +312,14 @@ def _combine_bounds(bbox1, bbox2):
     # set values and/or defaults
     for coord in ('north', 'east'):
         outbbox[coord] = np.nanmax([
-                _conv2nan(bbox1[coord]),
-                _conv2nan(bbox2[coord])
-            ])
+            _conv2nan(bbox1[coord]),
+            _conv2nan(bbox2[coord])
+        ])
     for coord in ('south', 'west'):
         outbbox[coord] = np.nanmin([
-                _conv2nan(bbox1[coord]),
-                _conv2nan(bbox2[coord])
-            ])
+            _conv2nan(bbox1[coord]),
+            _conv2nan(bbox2[coord])
+        ])
 
     return outbbox
 

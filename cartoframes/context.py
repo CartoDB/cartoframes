@@ -166,6 +166,7 @@ class CartoContext(object):
             )
 
     """
+
     def __init__(self, base_url=None, api_key=None, creds=None, session=None,
                  verbose=0):
 
@@ -422,9 +423,9 @@ class CartoContext(object):
                             'ALTER TABLE {dupe_table} RENAME TO {orig_table};',
                             'SELECT CDB_TableMetadataTouch(',
                             '           \'{orig_table}\'::regclass);',
-                            )).format(
-                                orig_table=table_name,
-                                dupe_table=import_job_table_name),
+                        )).format(
+                            orig_table=table_name,
+                            dupe_table=import_job_table_name),
                         do_post=False)
 
                     self._debug_print(res=res)

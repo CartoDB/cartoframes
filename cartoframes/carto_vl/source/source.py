@@ -16,7 +16,7 @@ class Source(object):
         self.type = dataset.type
         self.query = dataset.query
         self.context = dataset.cc
-        
+
         if dataset.cc and dataset.cc.creds:
             self.credentials = {
                 'username': dataset.cc.creds.username(),
@@ -25,5 +25,3 @@ class Source(object):
             }
         else:
             self.credentials = defaults._CREDENTIALS
-
-

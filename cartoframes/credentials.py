@@ -1,4 +1,5 @@
 """Credentials management for cartoframes usage."""
+import appdirs
 import os
 import json
 import sys
@@ -7,7 +8,6 @@ if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
 else:
     from urlparse import urlparse
-import appdirs
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR,
@@ -49,6 +49,7 @@ class Credentials(object):
             cc = CartoContext(creds=creds)
 
     """
+
     def __init__(self, creds=None, key=None, username=None, base_url=None,
                  cred_file=None):
         self._key = None
@@ -271,9 +272,9 @@ class Credentials(object):
             # POSTs need to be over HTTPS (e.g., Import API reverts to a GET)
             if urlparse(base_url).scheme != 'https':
                 raise ValueError(
-		    '`base_url`s need to be over `https`. Update your '
+                    '`base_url`s need to be over `https`. Update your '
                     '`base_url`.'
-		)
+                )
             self._base_url = base_url
         else:
             return self._base_url

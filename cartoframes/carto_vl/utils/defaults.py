@@ -12,16 +12,16 @@ _AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2.0/airship.css
 _AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2.0/icons.css'
 
 _CREDENTIALS = {
-  'username': 'default',
-  'api_key': 'default_public',
-  'base_url': ''
+    'username': 'default',
+    'api_key': 'default_public',
+    'base_url': ''
 }
 
 _WORLD_BOUNDS = {
-  'west': -180,
-  'south': -85.1,
-  'east': 180,
-  'north': 85.1
+    'west': -180,
+    'south': -85.1,
+    'east': 180,
+    'north': 85.1
 }
 
 _STYLE_PROPERTIES = (
