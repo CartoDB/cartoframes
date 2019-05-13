@@ -145,6 +145,9 @@ class Map(object):
     def _repr_html_(self):
         return self._htmlMap.html
 
+    def publish(self):
+        pass
+
 
 def _get_bounds(bounds, layers):
     return (
