@@ -26,25 +26,26 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, carto_context, table_name, schema='public', df=None):
-        self.cc = carto_context
-        self.table_name = normalize_name(table_name)
+    def __init__(self, query, context, data_type, schema='public', df=None):
+        self.cc = context
+        self.query = query
+        self.type = data_type
+        self.table_name = ''
+        # self.table_name = normalize_name(table_name)
         self.schema = schema
         self.df = df
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
-        warn('Table will be named `{}`'.format(table_name))
+        # warn('Table will be named `{}`'.format(table_name))
 
     @staticmethod
-    def create_from_query(cart_context, query, table_name):
-        dataset = Dataset(cart_context, table_name)
-        dataset.cc.batch_sql_client \
-               .create_and_wait_for_completion(
-                   '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                   .format(drop=dataset._drop_table_query(),
-                           create=dataset._create_table_from_query(query),
-                           cartodbfy=dataset._cartodbfy_query()))
+    def create_from_table(table_name, context):
+        dataset = Dataset('SELECT * FROM {}'.format(table_name), context, 'Query')
+        return dataset
 
+    @staticmethod
+    def create_from_query(query, context):
+        dataset = Dataset(query, context, 'Query')
         return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):

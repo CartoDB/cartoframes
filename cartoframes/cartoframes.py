@@ -1,4 +1,4 @@
-from .datasets import Dataset
+from .dataset import Dataset
 from .context import CartoContext
 
 

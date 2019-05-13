@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from ..styles.style import Style
+from ..style.style import Style
 
 
 class Layer(object):
@@ -49,10 +49,10 @@ class Layer(object):
                  interactivity=None,
                  legend=None):
 
-        self.orig_query = source.query
         self.is_basemap = False
         self.source = source  # TO DO check instance of Source
         self.bounds = source.bounds
+        self.orig_query = source.query
         self.style = _set_style(style)
         self.variables = _parse_variables(variables)
         self.interactivity = _parse_interactivity(interactivity)

@@ -2,16 +2,15 @@ from __future__ import absolute_import
 
 
 class Source(object):
-    """Data source. Parent class for CARTO VL related source types:
-      - :py:class:`SQL <cartoframes.carto_vl.source.SQL>`.
-      - :py:class:`Dataset <cartoframes.carto_vl.source.Dataset>`.
-      - :py:class:`GeoJSON <cartoframes.carto_vl.source.GeoJSON>`.
+    """CARTO VL Source:
 
       Args:
-        - query (str, GeoDataFrame): Source query for the data.
+        - dataset.
         - bounds (dict): Viewport bounds.
     """
 
-    def __init__(self, query, bounds=None):
-        self.query = query
+    def __init__(self, dataset, bounds=None):
+        self.dataset = dataset
         self.bounds = bounds
+        self.type = dataset.type
+        self.query = dataset.query

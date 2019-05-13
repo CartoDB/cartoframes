@@ -176,7 +176,7 @@ def _get_map_layers(layers):
 def _set_map_layer(layer):
     return ({
         'interactivity': layer.interactivity,
-        'source': layer.source.source_type,
+        'source': layer.source.type,
         'legend': layer.legend,
         'query': layer.source.query,
         'viz': layer.viz
