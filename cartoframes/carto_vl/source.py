@@ -21,13 +21,13 @@ class Source(object):
 
             if _check_sql_query(data):
                 self.dataset = Dataset.create_from_query(data, context)
-    
+
             elif _check_geojson_file(data):
                 self.dataset = Dataset.create_from_geojson(data)
-    
+
             elif _check_table_name(data):
                 self.dataset = Dataset.create_from_table(data, context)
-    
+
         elif isinstance(data, geopandas.GeoDataFrame):
             self.dataset = Dataset.create_from_geojson(data)
 
