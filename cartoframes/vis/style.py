@@ -69,10 +69,20 @@ class Style(object):
             raise ValueError('`style` must be a dictionary or a viz string')
 
     def _parse_style_properties_dict(self, style):
+        style_variables = []
         style_properties = []
 
         for prop in style:
-            if prop in defaults._STYLE_PROPERTIES and style.get(prop) is not None:
+            if prop == 'vars':
+                variables = style.get(prop)
+                for var in variables:
+                    style_variables.append(
+                        '@{name}: {value}'.format(
+                            name=var,
+                            value=_convstr(variables.get(var))
+                        )
+                    )
+            elif prop in defaults._STYLE_PROPERTIES and style.get(prop) is not None:
                 style_properties.append(
                     '{name}: {value}'.format(
                         name=prop,
@@ -83,7 +93,7 @@ class Style(object):
                 raise ValueError('Style property "' + prop + '" is not valid. Valid style properties are: ' +
                                  ', '.join(defaults._STYLE_PROPERTIES))
 
-        return '\n'.join(style_properties)
+        return '\n'.join(style_variables).join(style_properties)
 
 
 def _convstr(obj):

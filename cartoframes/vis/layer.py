@@ -51,17 +51,9 @@ class Layer(object):
                  variables=None,
                  interactivity=None,
                  legend=None):
-    
-        if isinstance(source, (str, Dataset)):
-            self.source = Source(source)
-
-        elif isinstance(source, Source):
-            self.source = source
-
-        else:
-            raise ValueError('Wrong source')
 
         self.is_basemap = False
+        self.source = _set_source(source)
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
@@ -70,14 +62,21 @@ class Layer(object):
         self.legend = legend
         self.viz = _get_viz(self.variables, self.style)
 
+def _set_source(source):
+    if isinstance(source, (str, Dataset)):
+        return Source(source)
+    elif isinstance(source, Source):
+        return source
+    else:
+        raise ValueError('Wrong source')
 
 def _set_style(style):
-    if style is None:
-        return ''
+    if isinstance(style, (str, dict)):
+        return Style(style)
     elif isinstance(style, Style):
         return style
     else:
-        return Style(style)
+        return ''
 
 
 def _parse_variables(variables):
