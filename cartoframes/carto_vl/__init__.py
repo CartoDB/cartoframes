@@ -10,11 +10,11 @@ from .source.source import Source
 
 
 __all__ = [
-    "defaults",
-    "basemaps",
-    "HTMLMap",
-    "Map",
-    "Layer",
-    "Source",
-    "Style"
+    'defaults',
+    'basemaps',
+    'HTMLMap',
+    'Map',
+    'Layer',
+    'Source',
+    'Style'
 ]

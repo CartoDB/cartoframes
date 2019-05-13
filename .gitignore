@@ -6,6 +6,7 @@ sandbox/
 # Misc
 credentials.json
 test/secret.json
+__pycache__
 .*.sw[nop]
 
 # OS
