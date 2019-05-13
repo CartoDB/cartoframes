@@ -12,8 +12,6 @@ class Layer(object):
         source (Source): The source data. It can be GeoJSON, SQL or Dataset.
         style (dict, tuple, list, optional): Style of the visualization. It
             can contain the following values:
-        variables (list, optional): When you have to define variables to be reused. They're needed
-                for showing information in popups shown by the interactivity.
         interactivity (str, list, or dict, optional): This option adds
             interactivity (click or hover) to a layer to show popups.
             Defaults to ``hover`` if one of the following inputs are specified:
@@ -48,7 +46,6 @@ class Layer(object):
     def __init__(self,
                  source,
                  style=None,
-                 variables=None,
                  interactivity=None,
                  legend=None):
 
@@ -57,10 +54,10 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
-        self.variables = _parse_variables(variables)
+        self.viz = self.style.viz
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
-        self.viz = _get_viz(self.variables, self.style)
+
 
 def _set_source(source):
     if isinstance(source, (str, Dataset)):
@@ -70,6 +67,7 @@ def _set_source(source):
     else:
         raise ValueError('Wrong source')
 
+
 def _set_style(style):
     if isinstance(style, (str, dict)):
         return Style(style)
@@ -77,35 +75,6 @@ def _set_style(style):
         return style
     else:
         return ''
-
-
-def _parse_variables(variables):
-    """Adds variables to the styling"""
-    if variables is None:
-        return None
-    elif isinstance(variables, (tuple, list)):
-        return _parse_variables_list(variables)
-    elif isinstance(variables, dict):
-        return _parse_variables_dict(variables)
-    else:
-        raise ValueError('`variables` must be a list of [ name, value ]')
-
-
-def _parse_variables_list(variables):
-    return '\n'.join(
-        '@{name}: {value}'.format(
-            name=variable[0],
-            value=variable[1]
-        ) for variable in variables)
-
-
-def _parse_variables_dict(variables):
-    return '\n'.join(
-        '@{name}: {value}'.format(
-            name=variable,
-            value=variables.get(variable)
-        )
-        for variable in variables)
 
 
 def _parse_interactivity(interactivity):
@@ -117,8 +86,8 @@ def _parse_interactivity(interactivity):
     elif isinstance(interactivity, dict):
         return {
             'event': interactivity.get('event', event_default),
-            'header': interactivity.get('header', None),
-            'values': interactivity.get('values', None)
+            'header': interactivity.get('header'),
+            'values': interactivity.get('values')
         }
     elif interactivity is True:
         return {
@@ -126,14 +95,3 @@ def _parse_interactivity(interactivity):
         }
     else:
         raise ValueError('`interactivity` must be a dictionary')
-
-
-def _get_viz(variables, style):
-    if variables and style:
-        return '\n'.join([variables, style.viz])
-    elif variables:
-        return variables
-    elif style and style.viz:
-        return style.viz
-    else:
-        return ''
