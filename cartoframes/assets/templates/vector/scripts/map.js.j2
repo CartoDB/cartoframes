@@ -21,17 +21,6 @@ function onReady() {
     dragRotate: false
   });
 
-  const credentials = {{credentials|tojson}};
-
-  carto.setDefaultAuth({
-    username: credentials['username'],
-    apiKey: credentials['api_key'] || 'default_public'
-  });
-
-  carto.setDefaultConfig({
-      serverURL: credentials['base_url'] || `https://${credentials['user']}.carto.com/`
-  });
-
   const sources = {{sources|tojson}};
 
   map.fitBounds({{bounds}}, {animate: false});
@@ -41,8 +30,8 @@ function onReady() {
   {% endif %}
 
   sources.forEach((elem, idx) => {
-    const factory = new SourceFactory();
-    const source = factory.createSource(elem.source, elem.query);
+    const factory = new SourceFactory(elem.credentials);
+    const source = factory.createSource(elem.type, elem.query);
     const viz = new carto.Viz(elem['viz']);
     const layer = new carto.Layer(`layer${idx}`, source, viz);
 
@@ -118,10 +107,17 @@ function onReady() {
       }
     }
 
-    function SourceFactory() {
+    function SourceFactory(credentials) {
+      const auth = {
+        username: credentials['username'],
+        apiKey: credentials['api_key'] || 'default_public'
+      };
+      const config = {
+        serverURL: credentials['base_url'] || `https://${credentials['username']}.carto.com/`
+      };
       const sourceTypes = {
         GeoJSON: (query) => new carto.source.GeoJSON(_decodeJSONQuery(query)),
-        Query: (query) => new carto.source.SQL(query),
+        Query: (query) => new carto.source.SQL(query, auth, config),
         MVT: (query) => new carto.source.MVT(query.file, JSON.parse(query.metadata)),
       }
 

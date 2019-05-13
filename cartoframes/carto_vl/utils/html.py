@@ -25,27 +25,18 @@ class HTMLMap(object):
         self._template = self._env.get_template('vector/basic.html.j2')
 
     def set_content(
-        self, size, sources, bounds, viewport=None, creds=None, basemap=None,
+        self, size, sources, bounds, viewport=None, basemap=None,
             _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, creds, basemap,
+            size, sources, bounds, viewport, basemap,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
-        self, size, sources, bounds, viewport, creds=None, basemap=None,
+        self, size, sources, bounds, viewport, basemap=None,
             _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
 
         token = ''
-
-        if creds is not None:
-            credentials = {
-                'username': creds.username(),
-                'api_key': creds.key(),
-                'base_url': creds.base_url()
-            }
-        else:
-            credentials = defaults._CREDENTIALS
 
         if isinstance(basemap, dict):
             token = basemap.get('token', '')
@@ -83,7 +74,6 @@ class HTMLMap(object):
             sources=sources,
             basemapstyle=basemap,
             mapboxtoken=token,
-            credentials=credentials,
             bounds=bounds,
             camera=camera,
             carto_vl_path=_carto_vl_path,

@@ -116,7 +116,6 @@ class Map(object):
     @utils.temp_ignore_warnings
     def __init__(self,
                  layers=None,
-                 context=None,
                  size=None,
                  basemap=Basemaps.voyager,
                  bounds=None,
@@ -125,13 +124,12 @@ class Map(object):
                  **kwargs):
 
         self.layers = _init_layers(layers)
-        self.context = context
         self.size = size
         self.basemap = basemap
         self.viewport = viewport
         self.template = template
         self.sources = _get_map_layers(self.layers)
-        self.bounds = _get_bounds(bounds, self.layers, self.context)
+        self.bounds = _get_bounds(bounds, self.layers)
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults._CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
@@ -141,7 +139,6 @@ class Map(object):
             sources=self.sources,
             bounds=self.bounds,
             viewport=self.viewport,
-            creds=self.context.creds if self.context else None,
             basemap=self.basemap,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
@@ -150,11 +147,11 @@ class Map(object):
         return self._htmlMap.html
 
 
-def _get_bounds(bounds, layers, context):
+def _get_bounds(bounds, layers):
     return (
         _format_bounds(bounds)
         if bounds
-        else _get_super_bounds(layers, context)
+        else _get_super_bounds(layers)
     )
 
 
@@ -175,10 +172,11 @@ def _get_map_layers(layers):
 
 def _set_map_layer(layer):
     return ({
-        'interactivity': layer.interactivity,
-        'source': layer.source.type,
-        'legend': layer.legend,
+        'type': layer.source.type,
         'query': layer.source.query,
+        'credentials': layer.source.credentials,
+        'legend': layer.legend,
+        'interactivity': layer.interactivity,
         'viz': layer.viz
     })
 
@@ -212,7 +210,7 @@ def _dict_bounds(bounds):
     return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
 
 
-def _get_super_bounds(layers, context):
+def _get_super_bounds(layers):
     """"""
     if layers:
         hosted_layers = [
@@ -229,15 +227,12 @@ def _get_super_bounds(layers, context):
 
     hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
     local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
-
-    if context is None and local_layers:
-        local_bounds = _get_bounds_local(local_layers)
-        return _format_bounds(local_bounds)
+        
+    if hosted_layers:
+        hosted_bounds = _get_bounds_hosted(hosted_layers)
 
     if local_layers:
         local_bounds = _get_bounds_local(local_layers)
-    if hosted_layers and context:
-        hosted_bounds = context._get_bounds(hosted_layers)
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
 
@@ -271,6 +266,25 @@ def _get_bounds_local(layers):
     return dict(zip(['west', 'south', 'east', 'north'], bounds))
 
 
+def _get_bounds_hosted(layers):
+    """Aggregates bounding boxes of all hosted layers
+
+        return: dict of bounding box of all bounds in layers
+    """
+    if not layers:
+        return {'west': None, 'south': None, 'east': None, 'north': None}
+
+    context = layers[0].source.context
+    bounds = context._get_bounds([layers[0]])
+
+    for layer in layers[1:]:
+        context = layer.source.context
+        next_bounds = context._get_bounds(layer)
+        bounds = _combine_bounds(bounds, next_bounds)
+
+    return bounds
+
+
 def _combine_bounds(bbox1, bbox2):
     """Takes two bounding boxes dicts and gives a new bbox that encompasses
     them both"""
@@ -283,6 +297,10 @@ def _combine_bounds(bbox1, bbox2):
     # if all nones, use the world
     if _dict_all_nones(bbox1) and _dict_all_nones(bbox2):
         return WORLD
+
+    # if one is none return the other
+    if not bbox1 or not bbox2:
+        return bbox1 or bbox2
 
     assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
         'Input bounding boxes must have the same dictionary keys'
@@ -306,7 +324,7 @@ def _combine_bounds(bbox1, bbox2):
 
 def _dict_all_nones(bbox_dict):
     """Returns True if all dict values are None"""
-    return all(v is None for v in bbox_dict.values())
+    return bbox_dict and all(v is None for v in bbox_dict.values())
 
 
 def _conv2nan(val):
