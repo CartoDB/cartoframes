@@ -7,7 +7,7 @@ from tqdm import tqdm
 from .columns import normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
-from .carto_vl.utils.geojson import load_geojson
+from .geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock

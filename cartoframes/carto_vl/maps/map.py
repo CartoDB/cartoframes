@@ -277,11 +277,11 @@ def _get_bounds_hosted(layers):
         return {'west': None, 'south': None, 'east': None, 'north': None}
 
     context = layers[0].source.context
-    bounds = context._get_bounds([layers[0]])
+    bounds = context and context._get_bounds([layers[0]])
 
     for layer in layers[1:]:
         context = layer.source.context
-        next_bounds = context._get_bounds(layer)
+        next_bounds = context and context._get_bounds(layer)
         bounds = _combine_bounds(bounds, next_bounds)
 
     return bounds
