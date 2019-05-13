@@ -6,7 +6,6 @@ from cartoframes import utils
 from ..utils.html import HTMLMap
 from ..utils import defaults
 from ..basemap.basemaps import Basemaps
-from ..source.geojson import GeoJSON
 
 
 class Map(object):
@@ -215,11 +214,11 @@ def _get_super_bounds(layers):
     if layers:
         hosted_layers = [
             layer for layer in layers
-            if not isinstance(layer.source, GeoJSON)
+            if layer.source.type != 'GeoJSON'
         ]
         local_layers = [
             layer for layer in layers
-            if isinstance(layer.source, GeoJSON)
+            if layer.source.type == 'GeoJSON'
         ]
     else:
         hosted_layers = []
@@ -263,6 +262,9 @@ def _get_bounds_local(layers):
             )
         )
 
+    if not bounds:
+        return {'west': None, 'south': None, 'east': None, 'north': None}
+        
     return dict(zip(['west', 'south', 'east', 'north'], bounds))
 
 

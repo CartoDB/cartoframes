@@ -12,12 +12,12 @@ class Source(object):
 
     def __init__(self, dataset, bounds=None):
         self.dataset = dataset
-        self.bounds = bounds
+        self.bounds = bounds or dataset.bounds
         self.type = dataset.type
         self.query = dataset.query
         self.context = dataset.cc
         
-        if dataset.cc.creds is not None:
+        if dataset.cc and dataset.cc.creds:
             self.credentials = {
                 'username': dataset.cc.creds.username(),
                 'api_key': dataset.cc.creds.key(),

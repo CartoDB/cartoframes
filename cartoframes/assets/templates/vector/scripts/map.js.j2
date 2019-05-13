@@ -30,8 +30,8 @@ function onReady() {
   {% endif %}
 
   sources.forEach((elem, idx) => {
-    const factory = new SourceFactory(elem.credentials);
-    const source = factory.createSource(elem.type, elem.query);
+    const factory = new SourceFactory();
+    const source = factory.createSource(elem);
     const viz = new carto.Viz(elem['viz']);
     const layer = new carto.Layer(`layer${idx}`, source, viz);
 
@@ -107,22 +107,24 @@ function onReady() {
       }
     }
 
-    function SourceFactory(credentials) {
-      const auth = {
-        username: credentials['username'],
-        apiKey: credentials['api_key'] || 'default_public'
-      };
-      const config = {
-        serverURL: credentials['base_url'] || `https://${credentials['username']}.carto.com/`
-      };
+    function SourceFactory() {
       const sourceTypes = {
-        GeoJSON: (query) => new carto.source.GeoJSON(_decodeJSONQuery(query)),
-        Query: (query) => new carto.source.SQL(query, auth, config),
-        MVT: (query) => new carto.source.MVT(query.file, JSON.parse(query.metadata)),
+        GeoJSON: (elem) => new carto.source.GeoJSON(_decodeJSONQuery(elem.query)),
+        Query: (elem) => {
+          const auth = {
+            username: elem.credentials['username'],
+            apiKey: elem.credentials['api_key'] || 'default_public'
+          };
+          const config = {
+            serverURL: elem.credentials['base_url'] || `https://${elem.credentials['username']}.carto.com/`
+          };
+          return new carto.source.SQL(elem.query, auth, config)
+        },
+        MVT: (elem) => new carto.source.MVT(elem.query.file, JSON.parse(elem.query.metadata)),
       }
 
-      this.createSource = (sourceType, query) => {
-        return sourceTypes[sourceType](query);
+      this.createSource = (elem) => {
+        return sourceTypes[elem.type](elem);
       }
     }
   });

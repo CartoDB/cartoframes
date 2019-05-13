@@ -7,6 +7,7 @@ from tqdm import tqdm
 from .columns import normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
+from .carto_vl.utils.geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -26,10 +27,11 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, query, context, data_type, schema='public', df=None):
+    def __init__(self, query, data_type, context=None, bounds=None, schema='public', df=None):
         self.cc = context
         self.query = query
         self.type = data_type
+        self.bounds = bounds
         self.table_name = ''
         # self.table_name = normalize_name(table_name)
         self.schema = schema
@@ -40,12 +42,18 @@ class Dataset(object):
 
     @staticmethod
     def create_from_table(table_name, context):
-        dataset = Dataset('SELECT * FROM {}'.format(table_name), context, 'Query')
+        dataset = Dataset('SELECT * FROM {}'.format(table_name), 'Query', context)
         return dataset
 
     @staticmethod
     def create_from_query(query, context):
-        dataset = Dataset(query, context, 'Query')
+        dataset = Dataset(query, 'Query', context)
+        return dataset
+
+    @staticmethod
+    def create_from_geojson(geojson):
+        query, bounds = load_geojson(geojson)
+        dataset = Dataset(query, 'GeoJSON', bounds=bounds)
         return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):
