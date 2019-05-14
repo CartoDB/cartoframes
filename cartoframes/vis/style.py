@@ -8,7 +8,7 @@ class Style(object):
 
     Args:
         style (str, dict): The style for the layer. It can be a dictionary or a viz string.
-          More info at 
+          More info at
           `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
 
     Example:
