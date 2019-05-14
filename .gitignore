@@ -46,3 +46,7 @@ CARTOCREDS.json
 SITEKEY.txt
 test/secret.json
 examples/scratch/*
+
+# Tests
+.coverage
+test_*.json

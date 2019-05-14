@@ -174,11 +174,11 @@ def _get_map_layers(layers):
 
 def _set_map_layer(layer):
     return ({
-        'type': layer.source.type,
-        'query': layer.source.query,
         'credentials': layer.source.credentials,
-        'legend': layer.legend,
         'interactivity': layer.interactivity,
+        'legend': layer.legend,
+        'query': layer.source.query,
+        'type': layer.source.type,
         'viz': layer.viz
     })
 

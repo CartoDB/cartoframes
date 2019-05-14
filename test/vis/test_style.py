@@ -1,20 +1,20 @@
 import unittest
-from cartoframes import carto_vl
+from cartoframes import vis
 
 
-class TestStyles(unittest.TestCase):
+class TestStyle(unittest.TestCase):
     def test_is_style_defined(self):
-        self.assertNotEqual(carto_vl.Style, None)
+        self.assertNotEqual(vis.Style, None)
 
     def test_style_string(self):
         """should initialize style attributes from a string"""
-        style = carto_vl.Style('color: red')
+        style = vis.Style('color: red')
 
         self.assertEqual(style.viz, 'color: red')
 
     def test_style_dictionary(self):
         """should initialize style attributes from a dict"""
-        style = carto_vl.Style({'color': 'red'})
+        style = vis.Style({'color': 'red'})
 
         self.assertEqual(style.viz, 'color: red')
 
@@ -22,4 +22,4 @@ class TestStyles(unittest.TestCase):
         """should raise an error if style property is not valid"""
 
         with self.assertRaises(ValueError):
-            carto_vl.Style({'wrong': 'red'})
+            vis.Style({'wrong': 'red'})
