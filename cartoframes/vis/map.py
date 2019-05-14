@@ -10,16 +10,11 @@ from .basemaps import Basemaps
 
 
 class Map(object):
-    """CARTO VL-powered interactive map
+    """Map
 
     Args:
         layers (list of Layer-types): List of layers. One or more of
-          :py:class:`Layer <cartoframes.contrib.vector.Layer>`.
-        context (:py:class:`CartoContext <cartoframes.context.CartoContext>`):
-          A :py:class:`CartoContext <cartoframes.context.CartoContext>`
-          instance
-        size (tuple of int): a (width, height) pair for the size of the map.
-          Default is (1024, 632)
+          :py:class:`Layer <cartoframes.vis.Layer>`.
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
@@ -30,37 +25,40 @@ class Map(object):
           properties, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
+        size (tuple of int): a (width, height) pair for the size of the map.
+          Default is (1024, 632)
 
     Example:
 
         .. code::
 
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer
 
-            context = CartoContext(
+            context = Context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
+            set_default_context(context)
 
-            vl.Map([vl.Layer('table in your account')], context)
+            Map(Layer('table in your account'))
 
         CARTO basemap style.
 
         .. code::
 
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer, basemaps
 
-            context = CartoContext(
+            context = Context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
+            set_default_context(context)
 
-            vl.Map(
-                [vl.Layer('table in your account')],
-                context,
-                basemap=vector.basemaps.darkmatter
+            Map(
+                Layer('table in your account'),
+                basemaps.darkmatter
             )
 
         Custom basemap style. Here we use the Mapbox streets style, which
@@ -68,36 +66,37 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer, basemaps
 
-            context = CartoContext(
+            context = Context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
+            set_default_context(context)
 
             basemap = {
                 'style': 'mapbox://styles/mapbox/streets-v9',
                 'token: '<your mapbox token>'
             }
 
-            vl.Map(
-                [vl.Layer('table in your account')],
-                context,
+            Map(
+                Layer('table in your account'),
                 basemap
             )
 
-        Custom bounds
+        Custom bounds.
 
         .. code::
 
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer
 
-            context = CartoContext(
+            context = Context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
+            set_default_context(context)
 
             bounds = {
                 'west': -10,
@@ -106,26 +105,25 @@ class Map(object):
                 'south': 10
             }
 
-            vl.Map(
-                [vl.Layer('table in your account')],
-                context,
-                bounds
+            Map(
+                Layer('table in your account'),
+                bounds=bounds
             )
     """
 
     @utils.temp_ignore_warnings
     def __init__(self,
                  layers=None,
-                 size=None,
                  basemap=Basemaps.voyager,
                  bounds=None,
+                 size=None,
                  viewport=None,
                  template=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
-        self.size = size
         self.basemap = basemap
+        self.size = size
         self.viewport = viewport
         self.template = template
         self.sources = _get_map_layers(self.layers)
@@ -399,6 +397,9 @@ class HTMLMap(object):
                 'bearing': viewport.get('bearing'),
                 'pitch': viewport.get('pitch')
             }
+
+        print('MOMO')
+        print(basemap)
 
         return self._template.render(
             width=size[0] if size is not None else None,

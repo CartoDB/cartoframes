@@ -3,8 +3,6 @@ import sys
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
-from tqdm import tqdm
-
 
 def dict_items(indict):
     """function for iterating through dict items compatible with py2 and 3

@@ -4,54 +4,46 @@ from . import defaults
 
 
 class Style(object):
-    """CARTO VL Style
+    """Style
 
     Args:
-        style (dict, string): The style for the layer. It can be a dictionary or a viz string.
-            If a dict or a string are assigned to the Layer's style, it is casted to a Style.
-
-    Attributes:
-        viz: The viz style
+        style (str, dict): The style for the layer. It can be a dictionary or a viz string.
+          More info at
+          `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
 
     Example:
 
-        .. code::
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
-
-            context = CartoContext(
-                base_url='https://cartovl.carto.com/',
-                api_key='default_public'
-            )
-
-            vl.Map([
-                vl.Layer(
-                    source=vl.source.Dataset('populated_places'),
-                    style=vl.Style({
-                        'color': 'red'
-                    })
-                )],
-                context=context
-            )
+        String API.
 
         .. code::
-              from cartoframes import carto_vl as vl
-              from cartoframes import CartoContext
+            from cartoframes.vis import Style
 
-              context = CartoContext(
-                  base_url='https://cartovl.carto.com/',
-                  api_key='default_public'
-              )
+            Style('color: blue')
 
-              vl.Map([
-                  vl.Layer(
-                      source=vl.source.Dataset('populated_places'),
-                      style=vl.Style('''
-                        color: red
-                      ''')
-                  )],
-                  context=context
-              )
+            Style('''
+                @sum: sqrt($pop_max) / 100
+                @grad: [red, blue, green]
+                color: ramp(globalEqIntervals($pop_min, 3), @grad)
+                filter: @sum > 20
+            ''')
+
+        Dict API.
+
+        .. code::
+            from cartoframes.vis import Style
+
+            Style({
+                'color': 'blue'
+            })
+
+            Style({
+                'vars': {
+                    'sum': 'sqrt($pop_max) / 100',
+                    'grad': '[red, blue, green]'
+                },
+                'color': 'ramp(globalEqIntervals($pop_min, 3), @grad)',
+                'filter': '@sum > 20'
+            })
     """
 
     def __init__(self, style=None):
