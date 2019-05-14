@@ -1,11 +1,11 @@
 from __future__ import absolute_import
 
+import re
+import geopandas
+
 from . import defaults
 from ..dataset import Dataset
 from ..geojson import get_query_and_bounds
-
-import re
-import geopandas
 
 
 class Source(object):
