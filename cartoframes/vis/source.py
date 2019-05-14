@@ -5,6 +5,7 @@ import geopandas
 
 from . import defaults
 from ..dataset import Dataset
+from ..geojson import get_query_and_bounds
 
 
 class Source(object):
@@ -146,19 +147,23 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
-        self.bounds = bounds or self.dataset.bounds
-        self.type = self.dataset.type
-        self.query = self.dataset.query
+        self.type = _map_dataset_type(self.dataset.type)
         self.context = self.dataset.cc
+        self.query = self.dataset.get_data()
+        self.bounds = bounds
 
-        if self.dataset.cc and self.dataset.cc.creds:
+        if self.context and self.context.creds:
             self.credentials = {
-                'username': self.dataset.cc.creds.username(),
-                'api_key': self.dataset.cc.creds.key(),
-                'base_url': self.dataset.cc.creds.base_url()
+                'username': self.context.creds.username(),
+                'api_key': self.context.creds.key(),
+                'base_url': self.context.creds.base_url()
             }
         else:
             self.credentials = defaults._CREDENTIALS
+
+        # For GeoJSON data obtain adapted query and bounds
+        if self.dataset.type == Dataset.GEODATAFRAME_TYPE:
+            self.query, self.bounds = get_query_and_bounds(self.dataset.data)
 
 
 def _check_table_name(data):
@@ -171,3 +176,11 @@ def _check_sql_query(data):
 
 def _check_geojson_file(data):
     return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
+
+
+def _map_dataset_type(type):
+    return {
+        Dataset.TABLE_TYPE: 'Query',
+        Dataset.QUERY_TYPE: 'Query',
+        Dataset.GEODATAFRAME_TYPE: 'GeoJSON'
+    }[type]

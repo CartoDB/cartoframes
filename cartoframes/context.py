@@ -1576,7 +1576,9 @@ class CartoContext(object):
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
         if persist_as:
-            dataset = Dataset.from_query(self, query, persist_as)
+            dataset = Dataset.from_query(context=self, query=query)
+            dataset.table_name = persist_as
+            dataset.upload()
             result = dataset.download(decode_geom=True)
         else:
             result = self.fetch(query, decode_geom=True)

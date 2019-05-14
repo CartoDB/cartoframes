@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 import base64
 import numpy as np
 
@@ -28,6 +29,10 @@ def load_geojson(geojson):
             the geopandas package http://geopandas.org/data_structures.html#geodataframe
             """)
 
+    return data
+
+
+def get_query_and_bounds(data):
     filtered_geometries = _filter_null_geometries(data)
     bounds = filtered_geometries.total_bounds.tolist()
     data = _set_time_cols_epoc(filtered_geometries).to_json()
