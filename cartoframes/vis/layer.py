@@ -21,6 +21,11 @@ class Layer(object):
             value a list of columns. Optionally add `event` to choose ``hover``
             or ``click``. Specifying a `header` key/value pair adds a header to
             the popup that will be rendered in HTML.
+        context (:py:class:`Context <cartoframes.Context>`):
+          A Conext instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.vis.Source>` is pased as source,
+          this context is simply ignored. If not provided the context will be
+          automatically obtained from the default context.
 
     Example:
 
@@ -39,15 +44,34 @@ class Layer(object):
                 'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
                 'color': 'red'
             )
+
+        Setting the context.
+
+        .. code::
+
+            from cartoframes import Context
+            from cartoframes.vis import Layer
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            Layer(
+                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
+                'color': 'red',
+                context=context
+            )
     """
 
     def __init__(self,
                  source,
                  style=None,
                  interactivity=None,
-                 legend=None):
+                 legend=None,
+                 context=None):
 
-        self.source = _set_source(source)
+        self.source = _set_source(source, context)
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
@@ -56,10 +80,10 @@ class Layer(object):
         self.legend = legend
 
 
-def _set_source(source):
+def _set_source(source, context):
     """Set a Source object from the input"""
     if isinstance(source, (str, Dataset)):
-        return Source(source)
+        return Source(source, context)
     elif isinstance(source, Source):
         return source
     else:
