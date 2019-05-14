@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .utils import defaults
+from . import defaults
 from ..dataset import Dataset
 
 import re

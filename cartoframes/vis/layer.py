@@ -74,7 +74,7 @@ def _set_style(style):
     elif isinstance(style, Style):
         return style
     else:
-        return ''
+        return Style()
 
 
 def _parse_interactivity(interactivity):
@@ -95,6 +95,7 @@ def _parse_interactivity(interactivity):
         }
     else:
         raise ValueError('`interactivity` must be a dictionary')
+
 
 def _get_viz(style):
     if style and style.viz:
