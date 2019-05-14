@@ -98,10 +98,20 @@ class Dataset(object):
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
-        table_columns = self.get_table_columns()
-        query = self._get_read_query(table_columns, limit)
+        if self.type == Dataset.TABLE_TYPE:
+            table_columns = self.get_table_columns()
+            query = self._get_read_query(table_columns, limit)
+            return self.cc.fetch(query, decode_geom=decode_geom)
 
-        return self.cc.fetch(query, decode_geom=decode_geom)
+        elif self.type == Dataset.QUERY_TYPE
+            # TODO: get Dataframe
+            self.cc.batch_sql_client.create_and_wait_for_completion(
+                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                .format(drop=dataset._drop_table_query(),
+                        create=dataset._create_table_from_query(query),
+                        cartodbfy=dataset._cartodbfy_query()))
+        else:
+            raise CartoException('Dataset is not sync. You should upload it first.')
 
     def delete(self):
         if self.exists():
