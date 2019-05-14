@@ -163,7 +163,7 @@ class Source(object):
 
         # For GeoJSON data obtain adapted query and bounds
         if self.dataset.type == Dataset.GEODATAFRAME_TYPE:
-            self.query, self.bounds = get_query_and_bounds(self.dataset.geodf)
+            self.query, self.bounds = get_query_and_bounds(self.dataset.data)
 
 
 def _check_table_name(data):

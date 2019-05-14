@@ -40,55 +40,47 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geodf=None):
+    def __init__(self, type, data, context=None, schema='public'):
+        self.type = type
+        self.data = data
+        self.schema = schema
         self.cc = context or default_context
-
-        self.type = Dataset.TABLE_TYPE
-        if query is not None:
-            self.type = Dataset.QUERY_TYPE
-        elif df is not None:
-            self.type = Dataset.DATAFRAME_TYPE
-        elif geodf is not None:
-            self.type = Dataset.GEODATAFRAME_TYPE
-
-        if table_name is not None:
-            self.table_name = normalize_name(table_name)
+    
+        if type == Dataset.TABLE_TYPE:
+            self.table_name = normalize_name(data)
         else:
             self.table_name = None
-        self.schema = schema
-        self.query = query
-        self.df = df
-        self.geodf = geodf
 
-        if self.df is not None:
-            self.normalized_column_names = _normalize_column_names(self.df)
-        # warn('Table will be named `{}`'.format(table_name))
+        if type == Dataset.DATAFRAME_TYPE:
+            self.normalized_column_names = _normalize_column_names(data)
+
+        # warn('Table will be named `{}`'.format(self.table_name))
 
     @classmethod
     def from_table(cls, table_name, context=None):
-        return cls(context, table_name)
+        return cls(Dataset.TABLE_TYPE, table_name, context)
 
     @classmethod
     def from_query(cls, query, context=None):
-        return cls(context, query=query)
+        return cls(Dataset.QUERY_TYPE, query, context)
 
     @classmethod
-    def from_dataframe(cls, df):
-        return cls(None, df=df)
+    def from_dataframe(cls, dataframe):
+        return cls(Dataset.DATAFRAME_TYPE, dataframe)
 
     @classmethod
     def from_geojson(cls, geojson):
-        return cls(None, geodf=load_geojson(geojson))
+        return cls(Dataset.GEODATAFRAME_TYPE, load_geojson(geojson))
 
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.type == Dataset.QUERY_TYPE and self.table_name is not None and not self.exists():
             self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
-                        create=self._create_table_from_query(self.query),
+                        create=self._create_table_from_query(self.data),
                         cartodbfy=self._cartodbfy_query()))
-        else:
-            if self.df is None:
+        elif type == Dataset.DATAFRAME_TYPE:
+            if self.data is None:
                 raise ValueError('You have to create a `Dataset` with a pandas.DataFrame to upload it to CARTO')
 
             if not self.exists():
@@ -131,13 +123,13 @@ class Dataset(object):
 
     def get_data(self):
         if self.type == Dataset.TABLE_TYPE:
-            return 'SELECT * FROM "{schema}"."{table_name}"'.format(table_name=self.table_name, schema=self.schema)
+            return 'SELECT * FROM "{schema}"."{table_name}"'.format(schema=self.schema, table_name=self.data)
         elif self.type == Dataset.QUERY_TYPE:
-            return self.query
+            return self.data
         elif self.type == Dataset.DATAFRAME_TYPE:
-            return self.df
+            return self.data
         elif self.type == Dataset.GEODATAFRAME_TYPE:
-            return self.geodf
+            return self.data
         else:
             raise CartoException('Invalid type')
 
@@ -158,13 +150,16 @@ class Dataset(object):
                     table_name=self.table_name)
 
     def _copyfrom(self, with_lonlat=None):
-        geom_col = _get_geom_col_name(self.df)
+        if self.type != Dataset.DATAFRAME_TYPE:
+            return
+
+        geom_col = _get_geom_col_name(self.data)
 
         columns = ','.join(norm for norm, orig in self.normalized_column_names)
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, self.df.columns, with_lonlat, geom_col)
+            self._rows(self.data, self.data.columns, with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
@@ -207,14 +202,17 @@ class Dataset(object):
         return create_query
 
     def _create_table_query(self, with_lonlat=None):
+        if self.type != Dataset.DATAFRAME_TYPE:
+            return
+    
         if with_lonlat is None:
-            geom_type = _get_geom_col_type(self.df)
+            geom_type = _get_geom_col_type(self.data)
         else:
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
         cols = ', '.join(col.format(col=norm,
-                                    ctype=_dtypes2pg(self.df.dtypes[orig]))
+                                    ctype=_dtypes2pg(self.data.dtypes[orig]))
                          for norm, orig in self.normalized_column_names)
 
         if geom_type:
