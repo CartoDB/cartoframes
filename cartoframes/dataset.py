@@ -37,18 +37,17 @@ class Dataset(object):
     QUERY_TYPE = 'Query'
     DATAFRAME_TYPE = 'DataFrame'
     GEOJSON_TYPE = 'GeoJSON'
-    VALID_TYPES = [TABLE_TYPE, QUERY_TYPE, DATAFRAME_TYPE, GEOJSON_TYPE]
 
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geojson=None):
-        self.type = TABLE_TYPE
+        self.type = Dataset.TABLE_TYPE
         if query is not None:
-            self.type = QUERY_TYPE
+            self.type = Dataset.QUERY_TYPE
         elif df is not None:
-            self.type = DATAFRAME_TYPE
+            self.type = Dataset.DATAFRAME_TYPE
         elif geojson is not None:
-            self.type = GEOJSON_TYPE
+            self.type = Dataset.GEOJSON_TYPE
 
         self.cc = context or default_context
         self.table_name = normalize_name(table_name)
