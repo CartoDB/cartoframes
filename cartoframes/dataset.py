@@ -129,6 +129,18 @@ class Dataset(object):
             self.cc._debug_print(err=err)
             return False
 
+    def get_data(self):
+        if self.type == TABLE_TYPE:
+            return 'SELECT * FROM "{schema}"."{table_name}"'.format(table_name=self.table_name, schema=self.schema)
+        elif self.type == QUERY_TYPE:
+            return self.query
+        elif self.type == DATAFRAME_TYPE:
+            return self.df
+        elif self.type == GEODATAFRAME_TYPE:
+            return self.geodf
+        else:
+            raise CartoException('Invalid type')
+
     def _create_table(self, with_lonlat=None):
         job = self.cc.batch_sql_client \
                   .create_and_wait_for_completion(
