@@ -130,13 +130,13 @@ class Dataset(object):
             return False
 
     def get_data(self):
-        if self.type == TABLE_TYPE:
+        if self.type == Dataset.TABLE_TYPE:
             return 'SELECT * FROM "{schema}"."{table_name}"'.format(table_name=self.table_name, schema=self.schema)
-        elif self.type == QUERY_TYPE:
+        elif self.type == Dataset.QUERY_TYPE:
             return self.query
-        elif self.type == DATAFRAME_TYPE:
+        elif self.type == Dataset.DATAFRAME_TYPE:
             return self.df
-        elif self.type == GEODATAFRAME_TYPE:
+        elif self.type == Dataset.GEODATAFRAME_TYPE:
             return self.geodf
         else:
             raise CartoException('Invalid type')
