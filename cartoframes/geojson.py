@@ -30,6 +30,7 @@ def load_geojson(geojson):
 
     return data
 
+
 def get_query_and_bounds(data):
     filtered_geometries = _filter_null_geometries(data)
     bounds = filtered_geometries.total_bounds.tolist()

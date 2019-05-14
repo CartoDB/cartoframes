@@ -89,15 +89,15 @@ class Dataset(object):
                         cartodbfy=self._cartodbfy_query()))
         else:
             if self.df is None:
-                raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
+                raise ValueError('You have to create a `Dataset` with a pandas.DataFrame to upload it to CARTO')
 
             if not self.exists():
                 self._create_table(with_lonlat)
             else:
                 if if_exists == Dataset.FAIL:
                     raise NameError(('Table with name {table_name} already exists in CARTO.'
-                                    ' Please choose a different `table_name` or use'
-                                    ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
+                                        ' Please choose a different `table_name` or use'
+                                        ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
                 elif if_exists == Dataset.REPLACE:
                     self._create_table(with_lonlat)
             self._copyfrom(with_lonlat)
