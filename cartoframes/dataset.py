@@ -33,35 +33,51 @@ class Dataset(object):
     PUBLIC = 'public'
     LINK = 'link'
 
+    TABLE_TYPE = 'Table'
+    QUERY_TYPE = 'Query'
+    DATAFRAME_TYPE = 'DataFrame'
+    GEOJSON_TYPE = 'GeoJSON'
+    VALID_TYPES = [TABLE_TYPE, QUERY_TYPE, DATAFRAME_TYPE, GEOJSON_TYPE]
+
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, query, data_type, context=None, bounds=None, schema='public', df=None):
+    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geojson=None):
+        self.type = TABLE_TYPE
+        if query is not None:
+            self.type = QUERY_TYPE
+        elif df is not None:
+            self.type = DATAFRAME_TYPE
+        elif geojson is not None:
+            self.type = GEOJSON_TYPE
+
         self.cc = context or default_context
-        self.query = query
-        self.type = data_type
-        self.bounds = bounds
-        self.table_name = ''
-        # self.table_name = normalize_name(table_name)
+        self.table_name = normalize_name(table_name)
         self.schema = schema
+        self.query = query
         self.df = df
+        self.geojson = geojson
+
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
         # warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
     def from_table(cls, table_name, context=None):
-        dataset = cls('SELECT * FROM {}'.format(table_name), 'Query', context)
-        return dataset
+        query = 'SELECT * FROM {}'.format(table_name)
+        return cls(context, table_name, query=query)
 
     @classmethod
     def from_query(cls, query, context=None):
-        dataset = cls(query, 'Query', context)
-        return dataset
+        return cls(context, query=query)
+
+    @classmethod
+    def from_dataframe(cls, df):
+        return cls(None, df=df)
 
     @classmethod
     def from_geojson(cls, geojson):
         query, bounds = load_geojson(geojson)
-        dataset = cls(query, 'GeoJSON', bounds=bounds)
+        dataset = cls(None, geojson=query)
         return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):
