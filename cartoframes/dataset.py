@@ -45,7 +45,7 @@ class Dataset(object):
         self.data = data
         self.schema = schema
         self.cc = context or default_context
-    
+
         if type == Dataset.TABLE_TYPE:
             self.table_name = normalize_name(data)
         else:
@@ -204,7 +204,7 @@ class Dataset(object):
     def _create_table_query(self, with_lonlat=None):
         if self.type != Dataset.DATAFRAME_TYPE:
             return
-    
+
         if with_lonlat is None:
             geom_type = _get_geom_col_type(self.data)
         else:
