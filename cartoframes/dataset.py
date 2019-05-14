@@ -40,7 +40,7 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, type, data, context=None, schema='public'):
+    def __init__(self, type, data, context=None, schema='public', table_name=None):
         self.type = type
         self.data = data
         self.schema = schema
@@ -48,13 +48,15 @@ class Dataset(object):
 
         if type == Dataset.TABLE_TYPE:
             self.table_name = normalize_name(data)
-        else:
-            self.table_name = None
+            if self.table_name != data:
+                warn('Table will be named `{}`'.format(data))
+        elif table_name:
+            self.table_name = normalize_name(table_name)
+            if self.table_name != table_name:
+                warn('Table will be named `{}`'.format(table_name))
 
-        if type == Dataset.DATAFRAME_TYPE:
+        if type == Dataset.DATAFRAME_TYPE or type == Dataset.GEODATAFRAME_TYPE:
             self.normalized_column_names = _normalize_column_names(data)
-
-        # warn('Table will be named `{}`'.format(self.table_name))
 
     @classmethod
     def from_table(cls, table_name, context=None):
@@ -79,7 +81,7 @@ class Dataset(object):
                 .format(drop=self._drop_table_query(),
                         create=self._create_table_from_query(self.data),
                         cartodbfy=self._cartodbfy_query()))
-        elif type == Dataset.DATAFRAME_TYPE:
+        elif self.type == Dataset.DATAFRAME_TYPE or self.type == Dataset.GEODATAFRAME_TYPE:
             if self.data is None:
                 raise ValueError('You have to create a `Dataset` with a pandas.DataFrame to upload it to CARTO')
 
@@ -150,7 +152,7 @@ class Dataset(object):
                     table_name=self.table_name)
 
     def _copyfrom(self, with_lonlat=None):
-        if self.type != Dataset.DATAFRAME_TYPE:
+        if self.type != Dataset.DATAFRAME_TYPE and self.type != Dataset.GEODATAFRAME_TYPE:
             return
 
         geom_col = _get_geom_col_name(self.data)
@@ -202,9 +204,6 @@ class Dataset(object):
         return create_query
 
     def _create_table_query(self, with_lonlat=None):
-        if self.type != Dataset.DATAFRAME_TYPE:
-            return
-
         if with_lonlat is None:
             geom_type = _get_geom_col_type(self.data)
         else:
