@@ -11,7 +11,7 @@ class TestLayer(unittest.TestCase):
         """vis.Layer should initialize layer attributes"""
         layer = vis.Layer(vis.Source('layer_source'))
 
-        self.assertEqual(layer.orig_query, 'SELECT * FROM layer_source')
+        self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
         self.assertFalse(layer.is_basemap)
         self.assertTrue(isinstance(layer.style, vis.Style))
         self.assertEqual(layer.viz, '')
@@ -22,7 +22,7 @@ class TestLayer(unittest.TestCase):
         """vis.Layer should initialize layer attributes"""
         layer = vis.Layer('layer_source', '')
 
-        self.assertEqual(layer.orig_query, 'SELECT * FROM layer_source')
+        self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
         self.assertFalse(layer.is_basemap)
         self.assertTrue(isinstance(layer.style, vis.Style))
         self.assertEqual(layer.viz, '')
