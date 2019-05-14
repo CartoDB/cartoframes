@@ -149,7 +149,7 @@ class Credentials(object):
             os.remove(path_to_remove)
             print('Credentials at {} successfully removed.'.format(
                 path_to_remove))
-        except OSError as err:
+        except OSError:
             warnings.warn('No credential file found at {}.'.format(
                 path_to_remove))
 

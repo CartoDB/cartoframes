@@ -71,6 +71,7 @@ class Layer(object):
                  legend=None,
                  context=None):
 
+        self.is_basemap = False
         self.source = _set_source(source, context)
         self.bounds = self.source.bounds
         self.orig_query = self.source.query

@@ -40,6 +40,7 @@ def get_query_and_bounds(data):
 
     return query, bounds
 
+
 def _filter_null_geometries(data):
     return data[~data.geometry.isna()]
 
