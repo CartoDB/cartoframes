@@ -54,7 +54,7 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
-        self.viz = self.style.viz
+        self.viz = _get_viz(self.style)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
 
@@ -74,7 +74,7 @@ def _set_style(style):
     elif isinstance(style, Style):
         return style
     else:
-        return ''
+        return Style()
 
 
 def _parse_interactivity(interactivity):
@@ -95,3 +95,10 @@ def _parse_interactivity(interactivity):
         }
     else:
         raise ValueError('`interactivity` must be a dictionary')
+
+
+def _get_viz(style):
+    if style and style.viz:
+        return style.viz
+    else:
+        return ''
