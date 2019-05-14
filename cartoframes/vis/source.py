@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from .utils import defaults
 from ..dataset import Dataset
+from ..geojson import get_query_and_bounds
 
 import re
 import geopandas
@@ -20,16 +21,16 @@ class Source(object):
         if isinstance(data, str):
 
             if _check_sql_query(data):
-                self.dataset = Dataset.from_query(data, context)
+                self.dataset = Dataset.from_query(context, query=data)
 
             elif _check_geojson_file(data):
-                self.dataset = Dataset.from_geojson(data)
+                self.dataset = Dataset.from_geojson(None, geodf=data)
 
             elif _check_table_name(data):
-                self.dataset = Dataset.from_table(data, context)
+                self.dataset = Dataset.from_table(context, table_name=data)
 
         elif isinstance(data, geopandas.GeoDataFrame):
-            self.dataset = Dataset.from_geojson(data)
+            self.dataset = Dataset.from_geojson(None, geodf=data)
 
         elif isinstance(data, Dataset):
             self.dataset = data
@@ -37,11 +38,13 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
-        self.bounds = bounds or self.dataset.bounds
         self.type = self.dataset.type
-        self.query = self.dataset.query
-        self.context = self.dataset.cc
+        self.query = self.dataset.get_data()
+        self.bounds = bounds
+        if self.type == Dataset.GEODATAFRAME_TYPE:
+            self.query, self.bounds = get_query_and_bounds(self.dataset.geodf)
 
+        self.context = self.dataset.cc
         if self.dataset.cc and self.dataset.cc.creds:
             self.credentials = {
                 'username': self.dataset.cc.creds.username(),
