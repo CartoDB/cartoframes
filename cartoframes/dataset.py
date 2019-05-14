@@ -7,7 +7,6 @@ from tqdm import tqdm
 from .columns import normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
-from .geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -65,8 +64,7 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context=None):
-        query = 'SELECT * FROM {}'.format(table_name)
-        return cls(context, table_name, query=query)
+        return cls(context, table_name)
 
     @classmethod
     def from_query(cls, query, context=None):
@@ -78,9 +76,7 @@ class Dataset(object):
 
     @classmethod
     def from_geojson(cls, geojson):
-        query, bounds = load_geojson(geojson)
-        dataset = cls(None, geojson=query)
-        return dataset
+        return cls(None, geojson=geojson)
 
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.type == Dataset.QUERY_TYPE and self.table_name is not None and not self.exists():
