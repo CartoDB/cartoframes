@@ -271,7 +271,7 @@ def _get_html_doc(
     templates_env.filters['quot'] = _quote_filter
     templates_env.filters['iframe_size'] = _iframe_size_filter
     templates_env.filters['clear_none'] = _clear_none_filter
-    template = templates_env.get_template('vector/basic.html.j2')
+    template = templates_env.get_template('vis/basic.html.j2')
     token = ''
 
     width = None

@@ -22,7 +22,7 @@ class HTMLMap(object):
         self._env.filters['clear_none'] = _clear_none_filter
 
         self.html = None
-        self._template = self._env.get_template('vector/basic.html.j2')
+        self._template = self._env.get_template('vis/basic.html.j2')
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
