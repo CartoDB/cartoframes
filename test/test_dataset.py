@@ -10,7 +10,7 @@ import warnings
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.datasets import Dataset
+from cartoframes.dataset import Dataset
 from cartoframes.columns import normalize_name
 
 from utils import _UserUrlLoader
