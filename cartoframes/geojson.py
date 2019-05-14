@@ -28,13 +28,15 @@ def load_geojson(geojson):
             the geopandas package http://geopandas.org/data_structures.html#geodataframe
             """)
 
+    return data
+
+def get_query_and_bounds(data)
     filtered_geometries = _filter_null_geometries(data)
     bounds = filtered_geometries.total_bounds.tolist()
     data = _set_time_cols_epoc(filtered_geometries).to_json()
     query = base64.b64encode(data.encode('utf-8')).decode('utf-8')
 
     return query, bounds
-
 
 def _filter_null_geometries(data):
     return data[~data.geometry.isna()]
