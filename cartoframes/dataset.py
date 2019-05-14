@@ -7,6 +7,7 @@ from tqdm import tqdm
 from .columns import normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
+from .geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -35,20 +36,21 @@ class Dataset(object):
     TABLE_TYPE = 'Table'
     QUERY_TYPE = 'Query'
     DATAFRAME_TYPE = 'DataFrame'
-    GEOJSON_TYPE = 'GeoJSON'
+    GEODATAFRAME_TYPE = 'GeoDataFrame'
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geopandas=None):
+    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geodf=None):
+        self.cc = context or default_context
+
         self.type = Dataset.TABLE_TYPE
         if query is not None:
             self.type = Dataset.QUERY_TYPE
         elif df is not None:
             self.type = Dataset.DATAFRAME_TYPE
-        elif geojson is not None:
-            self.type = Dataset.GEOJSON_TYPE
+        elif geodf is not None:
+            self.type = Dataset.GEODATAFRAME_TYPE
 
-        self.cc = context or default_context
         if table_name is not None:
             self.table_name = normalize_name(table_name)
         else:
@@ -56,7 +58,7 @@ class Dataset(object):
         self.schema = schema
         self.query = query
         self.df = df
-        self.geopandas = geopandas
+        self.geodf = geodf
 
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
@@ -76,7 +78,7 @@ class Dataset(object):
 
     @classmethod
     def from_geojson(cls, geojson):
-        return cls(None, geopandas=load_geojson(geojson))
+        return cls(None, geodf=load_geojson(geojson))
 
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.type == Dataset.QUERY_TYPE and self.table_name is not None and not self.exists():
