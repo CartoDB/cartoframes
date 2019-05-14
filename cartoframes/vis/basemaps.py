@@ -1,5 +1,5 @@
 class Basemaps(object):  # pylint: disable=too-few-public-methods
-    """Supported CARTO vector basemaps. Read more about the styles in the
+    """Supported CARTO basemaps. Read more about the styles in the
     `CARTO Basemaps repository <https://github.com/CartoDB/basemap-styles>`__.
 
     Attributes:
@@ -12,10 +12,8 @@ class Basemaps(object):  # pylint: disable=too-few-public-methods
 
         .. code::
 
-            from cartoframes import carto_vl as vl
-            from cartoframes import CartoContext
-            context = CartoContext()
-            vl.Map([], context, basemap=vl.basemaps.positron)
+            from cartoframes.vis import basemaps, Map
+            Map([], basemap=basemaps.positron)
     """
     positron = 'Positron'
     darkmatter = 'DarkMatter'
