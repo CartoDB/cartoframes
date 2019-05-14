@@ -10,24 +10,24 @@ class Layer(object):
 
     Args:
         source (str, :py:class:`Dataset <cartoframes.Dataset>`,
-         :py:class:`Source <cartoframes.vis.Source>`): The source data.
+          :py:class:`Source <cartoframes.vis.Source>`): The source data.
         style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
-         optional): The style of the visualization: `CARTO VL styling
-         <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
+          optional): The style of the visualization: `CARTO VL styling
+          <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
         interactivity (str, list, or dict, optional): This option adds
-            interactivity (click or hover) to a layer to show popups.
-            Defaults to ``hover`` if one of the following inputs are specified:
-                - dict: If a :obj:`dict`, this must have the key `cols` with its
-                value a list of columns. Optionally add `event` to choose ``hover``
-                or ``click``. Specifying a `header` key/value pair adds a header to
-                the popup that will be rendered in HTML.
+          interactivity (click or hover) to a layer to show popups.
+          Defaults to ``hover`` if one of the following inputs are specified:
+            - dict: If a :obj:`dict`, this must have the key `cols` with its
+            value a list of columns. Optionally add `event` to choose ``hover``
+            or ``click``. Specifying a `header` key/value pair adds a header to
+            the popup that will be rendered in HTML.
 
     Example:
 
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer
+            from cartoframes.vis import Layer
 
             context = Context(
                 base_url='https://cartovl.carto.com/',
@@ -35,9 +35,10 @@ class Layer(object):
             )
             set_default_context(context)
 
-            Map(Layer(
+            Layer(
                 'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
-                'color': 'red'))
+                'color': 'red'
+            )
     """
 
     def __init__(self,
@@ -74,12 +75,14 @@ def _set_style(style):
     else:
         return Style()
 
+
 def _get_viz(style):
     """Obtain the style vis object"""
     if style and style.viz:
         return style.viz
     else:
         return ''
+
 
 def _parse_interactivity(interactivity):
     """Add interactivity syntax to the styling"""

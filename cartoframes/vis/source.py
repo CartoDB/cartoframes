@@ -8,11 +8,120 @@ import geopandas
 
 
 class Source(object):
-    """CARTO VL Source:
+    """Source
 
-      Args:
-        - data.
-        - bounds (dict): Viewport bounds.
+    Args:
+        data (str, :py:class:`GeoFrame <geopandas.GeoDataFrame>`,
+          :py:class:`Dataset <cartoframes.vis.Dataset>` ): a table name, SQL query
+          ,GeoJSON file, GeoFrame object or Dataset object.
+        context (:py:class:`Context <cartoframes.Context>`):
+          A Conext instance. If not provided the context will be automatically
+          obtained from the default context.
+        bounds (dict or list): a dict with `east`,`north`,`west`,`south`
+          properties, or a list of floats in the following order: [west,
+          south, east, north]. If not provided the bounds will be automatically
+          calculated to fit all features.
+
+    Example:
+
+        Table name.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Source
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Source('table_name')
+
+        SQL query.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Source
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Source('SELECT * FROM table_name')
+
+        GeoJSON file.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Source
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Source('path/to/file.geojson')
+
+        Dataset object.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Source
+            from cartoframes import Dataset
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            ds = Dataset.from_table('table_name')
+
+            Source(ds)
+
+        Setting the context.
+
+        .. code::
+
+            from cartoframes import Context
+            from cartoframes.vis import Source
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            Source('table_name', context)
+
+        Setting the bounds.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Source
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            bounds = {
+                'west': -10,
+                'east': 10,
+                'north': -10,
+                'south': 10
+            }
+
+            Source('table_name', bounds=bounds)
     """
 
     def __init__(self, data, context=None, bounds=None):

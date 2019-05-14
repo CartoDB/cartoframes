@@ -85,12 +85,12 @@ class Map(object):
                 basemap
             )
 
-        Custom bounds
+        Custom bounds.
 
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.vis import Map, Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
