@@ -50,7 +50,10 @@ class Dataset(object):
             self.type = Dataset.GEOJSON_TYPE
 
         self.cc = context or default_context
-        self.table_name = normalize_name(table_name)
+        if table_name is not None:
+            self.table_name = normalize_name(table_name)
+        else:
+            self.table_name = None
         self.schema = schema
         self.query = query
         self.df = df
@@ -80,38 +83,33 @@ class Dataset(object):
         return dataset
 
     def upload(self, with_lonlat=None, if_exists='fail'):
-        if self.df is None:
-            raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
-
-        if not self.exists():
-            self._create_table(with_lonlat)
-        else:
-            if if_exists == Dataset.FAIL:
-                raise NameError(('Table with name {table_name} already exists in CARTO.'
-                                 ' Please choose a different `table_name` or use'
-                                 ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
-            elif if_exists == Dataset.REPLACE:
-                self._create_table(with_lonlat)
-
-        self._copyfrom(with_lonlat)
-
-        return self
-
-    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
-        if self.type == Dataset.TABLE_TYPE:
-            table_columns = self.get_table_columns()
-            query = self._get_read_query(table_columns, limit)
-            return self.cc.fetch(query, decode_geom=decode_geom)
-
-        elif self.type == Dataset.QUERY_TYPE:
-            # TODO: get Dataframe
+        if self.type == Dataset.QUERY_TYPE and self.table_name is not None and not self.exists():
             self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
                         create=self._create_table_from_query(self.query),
                         cartodbfy=self._cartodbfy_query()))
         else:
-            raise CartoException('Dataset is not sync. You should upload it first.')
+            if self.df is None:
+                raise ValueError('You have to create a `Dataset` with a pandas DataFrame in order to upload it to CARTO')
+
+            if not self.exists():
+                self._create_table(with_lonlat)
+            else:
+                if if_exists == Dataset.FAIL:
+                    raise NameError(('Table with name {table_name} already exists in CARTO.'
+                                    ' Please choose a different `table_name` or use'
+                                    ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
+                elif if_exists == Dataset.REPLACE:
+                    self._create_table(with_lonlat)
+            self._copyfrom(with_lonlat)
+
+        return self
+
+    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+        table_columns = self.get_table_columns()
+        query = self._get_read_query(table_columns, limit)
+        return self.cc.fetch(query, decode_geom=decode_geom)
 
     def delete(self):
         if self.exists():
