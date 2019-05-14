@@ -39,7 +39,7 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geojson=None):
+    def __init__(self, context=None, table_name=None, schema='public', query=None, df=None, geopandas=None):
         self.type = Dataset.TABLE_TYPE
         if query is not None:
             self.type = Dataset.QUERY_TYPE
@@ -56,7 +56,7 @@ class Dataset(object):
         self.schema = schema
         self.query = query
         self.df = df
-        self.geojson = geojson
+        self.geopandas = geopandas
 
         if self.df is not None:
             self.normalized_column_names = _normalize_column_names(self.df)
@@ -76,7 +76,7 @@ class Dataset(object):
 
     @classmethod
     def from_geojson(cls, geojson):
-        return cls(None, geojson=geojson)
+        return cls(None, geopandas=load_geojson(geojson))
 
     def upload(self, with_lonlat=None, if_exists='fail'):
         if self.type == Dataset.QUERY_TYPE and self.table_name is not None and not self.exists():
