@@ -103,7 +103,7 @@ class Dataset(object):
             query = self._get_read_query(table_columns, limit)
             return self.cc.fetch(query, decode_geom=decode_geom)
 
-        elif self.type == Dataset.QUERY_TYPE
+        elif self.type == Dataset.QUERY_TYPE:
             # TODO: get Dataframe
             self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
