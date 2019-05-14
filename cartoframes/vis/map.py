@@ -1,12 +1,15 @@
 from __future__ import absolute_import
 
-from jinja2 import Environment, PackageLoader
-from warnings import warn
-import numpy as np
 import collections
-from .. import utils
+import numpy as np
+from warnings import warn
+from jinja2 import Environment, PackageLoader
+
 from . import defaults
 from .basemaps import Basemaps
+from .. import utils
+
+# TODO: refactor
 
 
 class Map(object):
@@ -111,7 +114,6 @@ class Map(object):
             )
     """
 
-    @utils.temp_ignore_warnings
     def __init__(self,
                  layers=None,
                  basemap=Basemaps.voyager,
@@ -397,9 +399,6 @@ class HTMLMap(object):
                 'bearing': viewport.get('bearing'),
                 'pitch': viewport.get('pitch')
             }
-
-        print('MOMO')
-        print(basemap)
 
         return self._template.render(
             width=size[0] if size is not None else None,

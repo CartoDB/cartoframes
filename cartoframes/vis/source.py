@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from . import defaults
-from ..dataset import Dataset
-
 import re
 import geopandas
+
+from . import defaults
+from ..dataset import Dataset
 
 
 class Source(object):

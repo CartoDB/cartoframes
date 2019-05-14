@@ -19,8 +19,8 @@
 
 from __future__ import absolute_import
 
-from .basemaps import Basemaps as basemaps
 from . import defaults
+from .basemaps import Basemaps as basemaps
 from .map import Map
 from .layer import Layer
 from .source import Source

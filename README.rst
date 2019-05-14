@@ -245,9 +245,9 @@ Once you save your credentials, you can get started in future sessions more quic
 Experimental features
 ---------------------
 
-CARTOframes includes experimental features that we are testing for future releases into cartoframes core. These features exist as separate modules in `contrib`. These features are stand-alone other than sometimes relying on some cartoframes utilities, etc. Contrib features will also change often and without notice, so they should never be used in a production environment.
+CARTOframes includes experimental features that we are testing for future releases into cartoframes core. These features exist as separate modules in `vis`. These features are stand-alone other than sometimes relying on some cartoframes utilities, etc. Vis features will also change often and without notice, so they should never be used in a production environment.
 
-To import an experimental feature, like vector maps, do the following:
+To import an experimental feature, like new vector maps, do the following:
 
 .. code:: python
 
