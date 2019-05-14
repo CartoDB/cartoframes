@@ -234,7 +234,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self.cc, table_name=self.test_write_table).upload()
         self.test_write_table = dataset.table_name
 
-        dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self.cc, table_name=self.test_write_table).upload(if_exists=Dataset.APPEND)
+        dataset = Dataset(
+            Dataset.DATAFRAME_TYPE, df, context=self.cc,
+            table_name=self.test_write_table).upload(if_exists=Dataset.APPEND)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -248,7 +250,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self.cc, table_name=self.test_write_table).upload()
         self.test_write_table = dataset.table_name
 
-        dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self.cc, table_name=self.test_write_table).upload(if_exists=Dataset.REPLACE)
+        dataset = Dataset(
+            Dataset.DATAFRAME_TYPE, df, context=self.cc,
+            table_name=self.test_write_table).upload(if_exists=Dataset.REPLACE)
 
         self.assertExistsTable(self.test_write_table)
 
