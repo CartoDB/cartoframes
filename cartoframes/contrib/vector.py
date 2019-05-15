@@ -22,6 +22,9 @@ Here is an example using the example CartoContext from the :py:class:`Examples
 """
 from warnings import warn
 from IPython.display import HTML
+from carto.maps import NamedMapManager, NamedMap
+from datetime import datetime
+import os
 import numpy as np
 try:
     import geopandas
@@ -395,6 +398,73 @@ class LocalLayer(QueryLayer):  # pylint: disable=too-few-public-methods
         )
 
 
+def publish(map,context):
+    """Publish a map into CARTO"""
+    import json
+    named_map_id = "cartoframes_viz_{}".format(int(datetime.timestamp(datetime.now())))
+    layers = [{"query":'select * from brooklyn_poverty_w_rates'}]
+    map_config_template = os.path.join(os.path.dirname(__file__),
+                                       '..',
+                                       'assets',
+                                       'vector',
+                                       'map_config.json')
+    with open(map_config_template) as f:
+        map_config = json.load(f)
+        map_config["name"] = named_map_id
+        map_config["auth"]["valid_tokens"].append('patatin')
+        for layer in layers:
+            map_config["layergroup"]["layers"].append({
+                "type": "cartodb",
+                "options": {
+                    "sql": layer["query"]
+                }
+            })
+        named_map_manager = NamedMapManager(context.auth_client)
+        named_map = named_map_manager.create(template=map_config)
+        import ipdb; ipdb.set_trace()
+        print("pepito")
+
+def _build_vmap(layers,
+         context,
+         size=None,
+         basemap=BaseMaps.voyager,
+         bounds=None,
+         viewport=None,
+         **kwargs):
+    if bounds:
+        bounds = _format_bounds(bounds)
+    else:
+        bounds = _get_super_bounds(layers, context)
+
+    jslayers = []
+    for _, layer in enumerate(layers):
+        is_local = isinstance(layer, LocalLayer)
+        intera = (
+            dict(event=layer.interactivity, header=layer.header)
+            if layer.interactivity is not None
+            else None
+        )
+        jslayers.append({
+            'is_local': is_local,
+            'styling': layer.styling,
+            'source': layer._geojson_str if is_local else layer.query,
+            'interactivity': intera,
+            'legend': layer.legend
+        })
+
+    _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
+    _airship_path = kwargs.get('_airship_path', None)
+
+    return _get_html_doc(
+            size,
+            jslayers,
+            bounds,
+            creds=context.creds,
+            viewport=viewport,
+            basemap=basemap,
+            _carto_vl_path=_carto_vl_path,
+            _airship_path=_airship_path)
+
 @utils.temp_ignore_warnings
 def vmap(layers,
          context,
@@ -522,40 +592,13 @@ def vmap(layers,
                 viewport={'lng': 10, 'lat': 15, 'zoom': 10, 'bearing': 90, 'pitch': 45}
             )
     """
-    if bounds:
-        bounds = _format_bounds(bounds)
-    else:
-        bounds = _get_super_bounds(layers, context)
-
-    jslayers = []
-    for _, layer in enumerate(layers):
-        is_local = isinstance(layer, LocalLayer)
-        intera = (
-            dict(event=layer.interactivity, header=layer.header)
-            if layer.interactivity is not None
-            else None
-        )
-        jslayers.append({
-            'is_local': is_local,
-            'styling': layer.styling,
-            'source': layer._geojson_str if is_local else layer.query,
-            'interactivity': intera,
-            'legend': layer.legend
-        })
-
-    _carto_vl_path = kwargs.get('_carto_vl_path', _DEFAULT_CARTO_VL_PATH)
-    _airship_path = kwargs.get('_airship_path', None)
-
-    html = _get_html_doc(
-            size,
-            jslayers,
-            bounds,
-            creds=context.creds,
-            viewport=viewport,
-            basemap=basemap,
-            _carto_vl_path=_carto_vl_path,
-            _airship_path=_airship_path)
-    return HTML(html)
+    return HTML(_build_vmap(layers,
+                            context,
+                            size=None,
+                            basemap=BaseMaps.voyager,
+                            bounds=None,
+                            viewport=None,
+                            **kwargs))
 
 
 def _format_bounds(bounds):

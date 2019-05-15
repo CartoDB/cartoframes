@@ -1,0 +1,27 @@
+{
+    "version": "0.0.1",
+    "name": "",
+    "auth": {
+        "method": "token",
+        "valid_tokens": []
+    },
+    "placeholders": {},
+    "layergroup": {
+        "version": "1.0.1",
+        "layers": [
+        ]
+    },
+    "view": {
+        "zoom": 4,
+        "center": {
+            "lng": 0,
+            "lat": 0
+        },
+        "bounds": {
+            "west": -45,
+            "south": -45,
+            "east": 45,
+            "north": 45
+        }
+    }
+}
