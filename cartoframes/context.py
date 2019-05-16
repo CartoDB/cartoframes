@@ -240,7 +240,7 @@ class CartoContext(object):
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
 
-        dataset = Dataset(Dataset.TABLE_TYPE, table_name, context=self, schema=schema)
+        dataset = Dataset.from_table(table_name, schema=schema, context=self)
         return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
@@ -335,7 +335,7 @@ class CartoContext(object):
             the length of the DataFrame.
         """  # noqa
         tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
-        dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self, table_name=table_name)
+        dataset = Dataset.from_dataframe(df, table_name=table_name, context=self)
 
         if_exists = Dataset.FAIL
         if overwrite:
@@ -378,7 +378,7 @@ class CartoContext(object):
             bool: `True` if table is removed
 
         """
-        dataset = Dataset(Dataset.TABLE_TYPE, table_name, context=self)
+        dataset = Dataset.from_table(table_name, context=self)
         deleted = dataset.delete()
         if deleted:
             return deleted
@@ -1528,7 +1528,7 @@ class CartoContext(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(Dataset.TABLE_TYPE, table_name, context=self)
+        dataset = Dataset.from_table(table_name, context=self)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
@@ -1576,7 +1576,7 @@ class CartoContext(object):
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
         if persist_as:
-            dataset = Dataset.from_query(context=self, query=query)
+            dataset = Dataset.from_query(query, context=self)
             dataset.table_name = persist_as
             dataset.upload()
             result = dataset.download(decode_geom=True)

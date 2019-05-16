@@ -8,5 +8,5 @@ class CartoFrames(object):
         self.cc = CartoContext(base_url=base_url, api_key=api_key, creds=creds, session=session, verbose=verbose)
 
     def write(self, df, table_name, with_lonlat=None, if_exists=Dataset.FAIL):
-        dataset = Dataset(Dataset.DATAFRAME_TYPE, df, context=self.cc, table_name=table_name)
+        dataset = Dataset.from_dataframe(df, table_name=table_name, context=self.cc)
         return dataset.upload(with_lonlat=with_lonlat, if_exists=if_exists)

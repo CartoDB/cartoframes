@@ -1,11 +1,16 @@
 from __future__ import absolute_import
 
 import re
-import geopandas
 
 from . import defaults
 from ..dataset import Dataset
 from ..geojson import get_encoded_data, get_bounds
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 
 
 class SourceType:
@@ -130,32 +135,57 @@ class Source(object):
             Source('table_name', bounds=bounds)
     """
 
-    def __init__(self, data, context=None, bounds=None):
+    def __init__(self, data, context=None, bounds=None, schema='public'):
 
         if isinstance(data, str):
 
             if _check_sql_query(data):
+                self.type = SourceType.QUERY
                 self.dataset = Dataset.from_query(data, context)
+                self.query = self.dataset.query
+                self.bounds = bounds
 
             elif _check_geojson_file(data):
+                self.type = SourceType.GEOJSON
                 self.dataset = Dataset.from_geojson(data)
+                self.query = get_encoded_data(self.dataset.gdf)
+                self.bounds = bounds or get_bounds(self.dataset.gdf)
 
             elif _check_table_name(data):
-                self.dataset = Dataset.from_table(data, context)
+                self.type = SourceType.QUERY
+                query = 'SELECT * FROM "{0}"."{1}"'.format(schema, data)
+                self.dataset = Dataset.from_query(query, context)
+                self.query = self.dataset.query
+                self.bounds = bounds
 
-        elif isinstance(data, geopandas.GeoDataFrame):
+        elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
+            self.type = SourceType.GEOJSON
             self.dataset = Dataset.from_geojson(data)
+            self.query = get_encoded_data(self.dataset.gdf)
+            self.bounds = bounds or get_bounds(self.dataset.gdf)
 
         elif isinstance(data, Dataset):
+            self.type = _map_dataset_state(data.state)
             self.dataset = data
+    
+            if self.dataset.state == Dataset.STATE_REMOTE:
+                self.bounds = bounds
+                if self.dataset.query:
+                    self.query = self.dataset.query
+                else:
+                    self.query = 'SELECT * FROM "{0}"."{1}"'.format(self.dataset.schema, self.dataset.table_name)
+            elif self.dataset.state == Dataset.STATE_LOCAL:
+                if self.dataset.gdf:
+                    self.query = get_encoded_data(self.dataset.gdf)
+                    self.bounds = bounds or get_bounds(self.dataset.gdf)
+                else:
+                    # TODO: Dataframe
+                    pass
 
         else:
             raise ValueError('Wrong source input')
 
-        self.type = _map_dataset_type(self.dataset.type)
         self.context = self.dataset.cc
-        self.query = self.dataset.get_data()
-        self.bounds = bounds
 
         if self.context and self.context.creds:
             self.credentials = {
@@ -165,11 +195,6 @@ class Source(object):
             }
         else:
             self.credentials = defaults._CREDENTIALS
-
-        # For GeoJSON data obtain adapted query and bounds
-        if self.dataset.type == Dataset.GEODATAFRAME_TYPE:
-            self.query = get_encoded_data(self.dataset.data)
-            self.bounds = get_bounds(self.dataset.data)
 
 
 def _check_table_name(data):
@@ -184,9 +209,8 @@ def _check_geojson_file(data):
     return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
 
 
-def _map_dataset_type(type):
+def _map_dataset_state(state):
     return {
-        Dataset.TABLE_TYPE: SourceType.QUERY,
-        Dataset.QUERY_TYPE: SourceType.QUERY,
-        Dataset.GEODATAFRAME_TYPE: SourceType.GEOJSON
-    }[type]
+        Dataset.STATE_REMOTE: SourceType.QUERY,
+        Dataset.STATE_LOCAL: SourceType.GEOJSON
+    }[state]
