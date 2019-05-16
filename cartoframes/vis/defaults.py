@@ -12,7 +12,7 @@ _AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2.0/airship.css
 _AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2.0/icons.css'
 
 _CREDENTIALS = {
-    'username': 'default',
+    'username': 'cartoframes',
     'api_key': 'default_public',
     'base_url': ''
 }

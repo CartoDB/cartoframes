@@ -5,7 +5,12 @@ import geopandas
 
 from . import defaults
 from ..dataset import Dataset
-from ..geojson import get_query_and_bounds
+from ..geojson import get_encoded_data, get_bounds
+
+
+class SourceType:
+    QUERY = 'Query'
+    GEOJSON = 'GeoJSON'
 
 
 class Source(object):
@@ -163,7 +168,8 @@ class Source(object):
 
         # For GeoJSON data obtain adapted query and bounds
         if self.dataset.type == Dataset.GEODATAFRAME_TYPE:
-            self.query, self.bounds = get_query_and_bounds(self.dataset.data)
+            self.query = get_encoded_data(self.dataset.data)
+            self.bounds = get_bounds(self.dataset.data)
 
 
 def _check_table_name(data):
@@ -180,7 +186,7 @@ def _check_geojson_file(data):
 
 def _map_dataset_type(type):
     return {
-        Dataset.TABLE_TYPE: 'Query',
-        Dataset.QUERY_TYPE: 'Query',
-        Dataset.GEODATAFRAME_TYPE: 'GeoJSON'
+        Dataset.TABLE_TYPE: SourceType.QUERY,
+        Dataset.QUERY_TYPE: SourceType.QUERY,
+        Dataset.GEODATAFRAME_TYPE: SourceType.GEOJSON
     }[type]

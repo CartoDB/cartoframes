@@ -7,6 +7,7 @@ from jinja2 import Environment, PackageLoader
 
 from . import defaults
 from .basemaps import Basemaps
+from .source import SourceType
 from .. import utils
 
 # TODO: refactor
@@ -174,14 +175,14 @@ def _get_map_layers(layers):
 
 
 def _set_map_layer(layer):
-    return ({
+    return {
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
         'legend': layer.legend,
         'query': layer.source.query,
         'type': layer.source.type,
         'viz': layer.viz
-    })
+    }
 
 
 def _format_bounds(bounds):
@@ -215,14 +216,16 @@ def _dict_bounds(bounds):
 
 def _get_super_bounds(layers):
     """"""
+    # TODO: refactor this method:
+    # Compute the bounds in the source class
     if layers:
         hosted_layers = [
             layer for layer in layers
-            if layer.source.type != 'GeoJSON'
+            if layer.source.type != SourceType.GEOJSON
         ]
         local_layers = [
             layer for layer in layers
-            if layer.source.type == 'GeoJSON'
+            if layer.source.type == SourceType.GEOJSON
         ]
     else:
         hosted_layers = []

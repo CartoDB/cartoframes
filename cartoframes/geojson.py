@@ -32,13 +32,19 @@ def load_geojson(geojson):
     return data
 
 
-def get_query_and_bounds(data):
+def get_encoded_data(data):
+    filtered_geometries = _filter_null_geometries(data)
+    data = _set_time_cols_epoc(filtered_geometries).to_json()
+    encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
+
+    return encoded_data
+
+
+def get_bounds(data):
     filtered_geometries = _filter_null_geometries(data)
     bounds = filtered_geometries.total_bounds.tolist()
-    data = _set_time_cols_epoc(filtered_geometries).to_json()
-    query = base64.b64encode(data.encode('utf-8')).decode('utf-8')
 
-    return query, bounds
+    return bounds
 
 
 def _filter_null_geometries(data):

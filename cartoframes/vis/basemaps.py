@@ -13,7 +13,7 @@ class Basemaps(object):  # pylint: disable=too-few-public-methods
         .. code::
 
             from cartoframes.vis import basemaps, Map
-            Map([], basemap=basemaps.positron)
+            Map(basemap=basemaps.positron)
     """
     positron = 'Positron'
     darkmatter = 'DarkMatter'
