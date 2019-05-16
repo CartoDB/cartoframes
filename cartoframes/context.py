@@ -1,5 +1,6 @@
 """
-This class is the workhorse of CARTOframes by providing all functionality related to data access to CARTO, map creation, and Data Observatory functionality.
+This class is the workhorse of CARTOframes by providing all functionality related to
+data access to CARTO, map creation, and Data Observatory functionality.
 """
 from __future__ import absolute_import
 import json
@@ -31,7 +32,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .datasets import Dataset, recursive_read, postprocess_dataframe, get_columns
+from .dataset import Dataset, recursive_read, postprocess_dataframe, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -166,6 +167,7 @@ class CartoContext(object):
             )
 
     """
+
     def __init__(self, base_url=None, api_key=None, creds=None, session=None,
                  verbose=0):
 
@@ -238,7 +240,7 @@ class CartoContext(object):
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
 
-        dataset = Dataset(self, table_name, schema)
+        dataset = Dataset.from_table(table_name, schema=schema, context=self)
         return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
@@ -333,7 +335,7 @@ class CartoContext(object):
             the length of the DataFrame.
         """  # noqa
         tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
-        dataset = Dataset(self, table_name, df=df)
+        dataset = Dataset.from_dataframe(df, table_name=table_name, context=self)
 
         if_exists = Dataset.FAIL
         if overwrite:
@@ -376,7 +378,7 @@ class CartoContext(object):
             bool: `True` if table is removed
 
         """
-        dataset = Dataset(self, table_name)
+        dataset = Dataset.from_table(table_name, context=self)
         deleted = dataset.delete()
         if deleted:
             return deleted
@@ -422,9 +424,9 @@ class CartoContext(object):
                             'ALTER TABLE {dupe_table} RENAME TO {orig_table};',
                             'SELECT CDB_TableMetadataTouch(',
                             '           \'{orig_table}\'::regclass);',
-                            )).format(
-                                orig_table=table_name,
-                                dupe_table=import_job_table_name),
+                        )).format(
+                            orig_table=table_name,
+                            dupe_table=import_job_table_name),
                         do_post=False)
 
                     self._debug_print(res=res)
@@ -1526,7 +1528,7 @@ class CartoContext(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(self, table_name)
+        dataset = Dataset.from_table(table_name, context=self)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
@@ -1574,7 +1576,9 @@ class CartoContext(object):
                 meta=_meta.to_json(orient='records').replace('\'', '\'\''))
 
         if persist_as:
-            dataset = Dataset.create_from_query(self, query, persist_as)
+            dataset = Dataset.from_query(query, context=self)
+            dataset.table_name = persist_as
+            dataset.upload()
             result = dataset.download(decode_geom=True)
         else:
             result = self.fetch(query, decode_geom=True)

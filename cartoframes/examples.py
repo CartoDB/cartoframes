@@ -64,7 +64,7 @@ good method:
             'taxi_data_examples_acct',
             lnglat=('pickup_latitude', 'pickup_longitude')
         )
-"""
+"""  # noqa
 from cartoframes import CartoContext
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
@@ -108,6 +108,7 @@ class Examples(CartoContext):
     below.
 
     """
+
     def __init__(self):
         super(Examples, self).__init__(
             base_url=EXAMPLE_BASE_URL,
@@ -287,7 +288,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
 
-    """
+    """  # noqa
     return example_context.read_brooklyn_poverty(limit=limit, **kwargs)
 
 
@@ -320,7 +321,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
         from cartoframes.examples import read_mcdonalds_nyc
         df = read_mcdonalds_nyc()
 
-    """
+    """  # noqa
     return example_context.read_mcdonalds_nyc(limit=limit, **kwargs)
 
 
@@ -353,7 +354,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
         from cartoframes.examples import read_nyc_census_tracts
         df = read_nyc_census_tracts()
 
-    """
+    """  # noqa
     return example_context.read_nyc_census_tracts(limit=limit, **kwargs)
 
 
@@ -405,7 +406,7 @@ def read_taxi(limit=None, **kwargs):
         from cartoframes.examples import read_taxi
         df = read_taxi()
 
-    """
+    """  # noqa
     return example_context.read_taxi(limit=limit, **kwargs)
 
 
@@ -438,5 +439,5 @@ def read_nat(limit=None, **kwargs):
         from cartoframes.examples import read_nat
         df = read_nat()
 
-    """
+    """  # noqa
     return example_context.read_nat(limit=limit, **kwargs)

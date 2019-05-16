@@ -10,6 +10,25 @@ Updates
 
 - max line length from 80 to 120
 - Rewrite context.read method using COPY TO (#570)
+- Add new visualization API (#662)
+  - Add Source class (with param detection)
+  - Add Dataset methods
+    .from_table(name, context)
+    .from_query(query, context)
+    .from_geojson(data)
+    .from_dataframe(data)
+  - Add set_default_context methods
+  - Add Context in cartoframes namespace
+  - Add Map, Layer, Source, Style in cartoframes.vis namespace
+  - Use sources' context (credentials, bounds)
+  - Fix Style class API for variables
+  - Remove Dataset, SQL, GeoJSON sources
+  - Remove sources namespace
+  - Remove context from Map
+  - Remove contrib namespace
+  - Update docs in vis classes
+  - Add/Update vis tests
+  - Pass PEP 8
 
 0.9.2
 -----

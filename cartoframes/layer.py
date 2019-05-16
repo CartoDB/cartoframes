@@ -312,6 +312,7 @@ class QueryLayer(AbstractLayer):
           requesting a time-based map with a data source that has geometries
           other than points.
     """  # noqa
+
     def __init__(self, query, time=None, color=None, size=None, opacity=None,
                  tooltip=None, legend=None):
 
@@ -595,7 +596,7 @@ class QueryLayer(AbstractLayer):
                 css += cssify({
                     '#layer[{} = null]'.format(self.color): {
                         'marker-fill': '#666'}
-                    })
+                })
             for trail_num in range(1, self.time['trails'] + 1):
                 # Trails decay as 1/2^n, and grow 30% at each step
                 trail_temp = cssify({
@@ -623,7 +624,7 @@ class QueryLayer(AbstractLayer):
                     css += cssify({
                         '#layer[{} = null]'.format(self.color): {
                             'marker-fill': '#ccc'}
-                        })
+                    })
                 return css
             if self.geom_type == 'line':
                 css = cssify({
@@ -636,7 +637,7 @@ class QueryLayer(AbstractLayer):
                     css += cssify({
                         '#layer[{} = null]'.format(self.color): {
                             'line-color': '#ccc'}
-                        })
+                    })
                 return css
             if self.geom_type == 'polygon':
                 css = cssify({
@@ -653,7 +654,7 @@ class QueryLayer(AbstractLayer):
                     css += cssify({
                         '#layer[{} = null]'.format(self.color): {
                             'polygon-fill': '#ccc'}
-                        })
+                    })
                 return css
             else:
                 raise ValueError('Unsupported geometry type: {}'.format(
@@ -687,6 +688,7 @@ class Layer(QueryLayer):
         source (pandas.DataFrame, optional): Not currently implemented
         overwrite (bool, optional): Not currently implemented
     """
+
     def __init__(self, table_name, source=None, overwrite=False, time=None,
                  color=None, size=None, opacity=None, tooltip=None,
                  legend=None):

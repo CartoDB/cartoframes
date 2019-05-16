@@ -13,7 +13,6 @@
    Map Layers <layers>
    Layer Styling <styling>
    Example Functionalty <example_context>
-   Experimental Features <contrib>
    Credentials <credentials>
    Batch Jobs <batchjobstatus>
    Cookbook <cookbook>

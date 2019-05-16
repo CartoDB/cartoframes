@@ -6,6 +6,7 @@ in its `GitHub repository <https://github.com/Carto-color/>`__.
     :alt: CARTOColors
 """  # noqa
 
+
 class BinMethod:
     """Data classification methods used for the styling of data on maps.
 

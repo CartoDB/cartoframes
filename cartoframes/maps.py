@@ -6,11 +6,13 @@ def non_basemap_layers(layers):
     """Retrieve all map layers which are not basemaps"""
     return [layer for layer in layers if not layer.is_basemap]
 
+
 def top_basemap_layer_url(layers):
     """Returns the URL of the top map layer if it exists"""
     if layers[-1].is_basemap and len(layers) > 1:
         return layers[-1].url
     return None
+
 
 def has_time_layer(layers):
     """Returns `True` if there is a time/torque layer in `layers.
@@ -40,7 +42,7 @@ def get_map_name(layers, has_zoom):
                 baseid=basemap_id,
                 has_labels=('1' if has_labels else '0'),
                 has_zoom=('1' if has_zoom else '0')
-            )
+    )
 
 
 def get_map_template(layers, has_zoom):
@@ -101,7 +103,7 @@ def get_map_template(layers, has_zoom):
                         "1 AS cartodb_id, "
                         "ST_PointFromText('Point(0 0)', 3857) AS "
                         "the_geom_webmercator"
-                    ),
+                ),
             },
             # [BUG] No [] for templating
             # 'interactivity_{idx}'.format(idx=idx): {

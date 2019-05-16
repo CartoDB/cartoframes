@@ -111,5 +111,8 @@ def normalize_names(column_names):
     return result
 
 
-def normalize_name(column_name):
-    return normalize_names([column_name])[0]
+def normalize_name(name):
+    if name is None:
+        return None
+
+    return normalize_names([name])[0]
