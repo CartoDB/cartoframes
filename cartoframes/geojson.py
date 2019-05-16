@@ -41,7 +41,7 @@ def load_geojson(input_data):
                 'properties': {},
                 'geometry': input_data
             }])
-    
+
     elif isinstance(input_data, geopandas.GeoDataFrame):
         # GeoDataFrame
         data = geopandas.GeoDataFrame.from_features(input_data)

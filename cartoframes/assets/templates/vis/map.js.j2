@@ -81,7 +81,7 @@ function onReady() {
       if (event.features.length > 0) {
         const feature = event.features[0];
         const variables = values && values.length
-          ? Object.keys(feature.variables).filter(variable => values.include(variable))
+          ? Object.keys(feature.variables).filter(variable => values.includes(variable))
           : Object.keys(feature.variables);
 
         let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
