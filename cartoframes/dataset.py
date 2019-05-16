@@ -39,13 +39,9 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
-        # TODO: error control
+        # TODO: error control (https://github.com/CartoDB/cartoframes/issues/669)
 
-        if table_name:
-            self.table_name = normalize_name(table_name)
-        else:
-            self.table_name = None
-
+        self.table_name = normalize_name(table_name)
         self.schema = schema
         self.query = query
         self.df = df
