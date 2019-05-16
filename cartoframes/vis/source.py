@@ -136,65 +136,57 @@ class Source(object):
     """
 
     def __init__(self, data, context=None, bounds=None, schema='public'):
-
         if isinstance(data, str):
-
             if _check_sql_query(data):
-                self.type = SourceType.QUERY
-                self.dataset = Dataset.from_query(data, context)
-                self.query = self.dataset.query
-                self.bounds = bounds
-
+                self._init_source_query(data, context, bounds)
+    
             elif _check_geojson_file(data):
-                self.type = SourceType.GEOJSON
-                self.dataset = Dataset.from_geojson(data)
-                self.query = get_encoded_data(self.dataset.gdf)
-                self.bounds = bounds or get_bounds(self.dataset.gdf)
-
+                self._init_source_geojson(data, bounds)
+        
             elif _check_table_name(data):
-                self.type = SourceType.QUERY
-                query = 'SELECT * FROM "{0}"."{1}"'.format(schema, data)
-                self.dataset = Dataset.from_query(query, context)
-                self.query = self.dataset.query
-                self.bounds = bounds
+                self._init_source_query(_format_query(data, schema), context, bounds)
 
         elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
-            self.type = SourceType.GEOJSON
-            self.dataset = Dataset.from_geojson(data)
-            self.query = get_encoded_data(self.dataset.gdf)
-            self.bounds = bounds or get_bounds(self.dataset.gdf)
+            self._init_source_geojson(data, bounds)
 
         elif isinstance(data, Dataset):
-            self.type = _map_dataset_state(data.state)
-            self.dataset = data
-    
-            if self.dataset.state == Dataset.STATE_REMOTE:
-                self.bounds = bounds
-                if self.dataset.query:
-                    self.query = self.dataset.query
-                else:
-                    self.query = 'SELECT * FROM "{0}"."{1}"'.format(self.dataset.schema, self.dataset.table_name)
-            elif self.dataset.state == Dataset.STATE_LOCAL:
-                if self.dataset.gdf:
-                    self.query = get_encoded_data(self.dataset.gdf)
-                    self.bounds = bounds or get_bounds(self.dataset.gdf)
-                else:
-                    # TODO: Dataframe
-                    pass
+            self._init_source_dataset(data, bounds)
 
         else:
             raise ValueError('Wrong source input')
 
         self.context = self.dataset.cc
+        self.credentials = _get_credentials(self.context)
 
-        if self.context and self.context.creds:
-            self.credentials = {
-                'username': self.context.creds.username(),
-                'api_key': self.context.creds.key(),
-                'base_url': self.context.creds.base_url()
-            }
-        else:
-            self.credentials = defaults._CREDENTIALS
+    def _init_source_query(self, data, context, bounds):
+        self.dataset = Dataset.from_query(data, context)
+        self.type = SourceType.QUERY
+        self.query = self.dataset.query
+        self.bounds = bounds
+
+    def _init_source_geojson(self, data, bounds):
+        self.dataset = Dataset.from_geojson(data)
+        self.type = SourceType.GEOJSON
+        self.query = get_encoded_data(self.dataset.gdf)
+        self.bounds = bounds or get_bounds(self.dataset.gdf)
+
+    def _init_source_dataset(self, data, bounds):
+        self.dataset = data
+        self.type = _map_dataset_state(self.dataset.state)
+
+        if self.dataset.state == Dataset.STATE_REMOTE:
+            self.bounds = bounds
+            if self.dataset.query:
+                self.query = self.dataset.query
+            else:
+                self.query = _format_query(self.dataset.table_name, self.dataset.schema)
+        elif self.dataset.state == Dataset.STATE_LOCAL:
+            if self.dataset.gdf:
+                self.query = get_encoded_data(self.dataset.gdf)
+                self.bounds = bounds or get_bounds(self.dataset.gdf)
+            else:
+                # TODO: Dataframe
+                pass
 
 
 def _check_table_name(data):
@@ -209,8 +201,23 @@ def _check_geojson_file(data):
     return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
 
 
+def _format_query(table_name, schema='public'):
+    return 'SELECT * FROM "{0}"."{1}"'.format(schema, table_name)
+
+
 def _map_dataset_state(state):
     return {
         Dataset.STATE_REMOTE: SourceType.QUERY,
         Dataset.STATE_LOCAL: SourceType.GEOJSON
     }[state]
+
+def _get_credentials(context):
+    if context and context.creds:
+        return {
+            'username': context.creds.username(),
+            'api_key': context.creds.key(),
+            'base_url': context.creds.base_url()
+        }
+    else:
+        return defaults._CREDENTIALS
+
