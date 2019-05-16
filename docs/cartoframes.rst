@@ -1,13 +1,6 @@
 cartoframes package
 ===================
 
-Subpackages
------------
-
-.. toctree::
-
-    cartoframes.contrib
-
 Submodules
 ----------
 
