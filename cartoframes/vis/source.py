@@ -146,7 +146,7 @@ class Source(object):
             elif _check_table_name(data):
                 self._init_source_query(_format_query(data, schema), context, bounds)
 
-        elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
+        elif HAS_GEOPANDAS and isinstance(data, (list, dict, geopandas.GeoDataFrame)):
             self._init_source_geojson(data, bounds)
 
         elif isinstance(data, Dataset):

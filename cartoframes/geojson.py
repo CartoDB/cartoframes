@@ -10,7 +10,7 @@ except ImportError:
     HAS_GEOPANDAS = False
 
 
-def load_geojson(geojson):
+def load_geojson(input_data):
     if not HAS_GEOPANDAS:
         raise ValueError(
             """
@@ -18,10 +18,34 @@ def load_geojson(geojson):
             the geopandas package http://geopandas.org/data_structures.html#geodataframe
             """)
 
-    if isinstance(geojson, str):
-        data = geopandas.read_file(geojson)
-    elif isinstance(geojson, geopandas.GeoDataFrame):
-        data = geopandas.GeoDataFrame.from_features(geojson)
+    if isinstance(input_data, str):
+        # File name
+        data = geopandas.read_file(input_data)
+
+    elif isinstance(input_data, list):
+        # List of features
+        data = geopandas.GeoDataFrame.from_features(input_data)
+
+    elif isinstance(input_data, dict):
+        # GeoJSON object
+        if input_data.get('features'):
+            # From features
+            data = geopandas.GeoDataFrame.from_features(input_data['features'])
+        elif input_data.get('type') == 'Feature':
+            # From feature
+            data = geopandas.GeoDataFrame.from_features([input_data])
+        elif input_data.get('type'):
+            # From geometry
+            data = geopandas.GeoDataFrame.from_features([{
+                'type': 'Feature',
+                'properties': {},
+                'geometry': input_data
+            }])
+    
+    elif isinstance(input_data, geopandas.GeoDataFrame):
+        # GeoDataFrame
+        data = geopandas.GeoDataFrame.from_features(input_data)
+
     else:
         raise ValueError(
             """

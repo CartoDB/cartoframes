@@ -83,7 +83,7 @@ class Layer(object):
 
 def _set_source(source, context):
     """Set a Source object from the input"""
-    if isinstance(source, (str, Dataset)):
+    if isinstance(source, (str, list, dict, Dataset)):
         return Source(source, context)
     elif isinstance(source, Source):
         return source
