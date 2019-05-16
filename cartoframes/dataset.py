@@ -41,11 +41,11 @@ class Dataset(object):
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
         # TODO: error control
 
-        if table_name: 
+        if table_name:
             self.table_name = normalize_name(table_name)
         else:
             self.table_name = None
-    
+
         self.schema = schema
         self.query = query
         self.df = df

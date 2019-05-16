@@ -139,10 +139,10 @@ class Source(object):
         if isinstance(data, str):
             if _check_sql_query(data):
                 self._init_source_query(data, context, bounds)
-    
+
             elif _check_geojson_file(data):
                 self._init_source_geojson(data, bounds)
-        
+
             elif _check_table_name(data):
                 self._init_source_query(_format_query(data, schema), context, bounds)
 
@@ -211,6 +211,7 @@ def _map_dataset_state(state):
         Dataset.STATE_LOCAL: SourceType.GEOJSON
     }[state]
 
+
 def _get_credentials(context):
     if context and context.creds:
         return {
@@ -220,4 +221,3 @@ def _get_credentials(context):
         }
     else:
         return defaults._CREDENTIALS
-
