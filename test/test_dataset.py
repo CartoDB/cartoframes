@@ -76,6 +76,28 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
+    def test_cartocontext_constructor_validation(self):
+        table_name = 'fake_table'
+        schema = 'fake_schema'
+        query = 'select * from fake_table'
+        df = {}
+        gdf = {}
+
+        with self.assertRaises(CartoException):
+            dataset = Dataset(table_name=table_name, schema=schema, query=query)
+
+        with self.assertRaises(CartoException):
+            dataset = Dataset(table_name=table_name, schema=schema, df=df)
+
+        with self.assertRaises(CartoException):
+            dataset = Dataset(table_name=table_name, schema=schema, gdf=gdf)
+
+        with self.assertRaises(CartoException):
+            dataset = Dataset(query=query, df=df)
+
+        with self.assertRaises(CartoException):
+            dataset = Dataset(df=df, gdf=gdf)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_cartocontext_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)

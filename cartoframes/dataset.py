@@ -39,13 +39,17 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
-        # TODO: error control (https://github.com/CartoDB/cartoframes/issues/669)
-
         self.table_name = normalize_name(table_name)
         self.schema = schema
         self.query = query
         self.df = df
         self.gdf = gdf
+
+        if not self._validate_init():
+            raise CartoException('Invalid number of parameters in Dataset creation.'
+                                 'You should use of the class methods:'
+                                 'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
         self.state = state
         self.cc = context or default_context
 
@@ -138,6 +142,15 @@ class Dataset(object):
 
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
+
+    def _validate_init(self):
+        inputs = [self.table_name, self.query, self.df, self.gdf]
+        inputs_number = sum(x is not None for x in inputs)
+
+        if inputs_number != 1:
+            return False
+
+        return True
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
