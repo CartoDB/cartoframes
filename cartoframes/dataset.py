@@ -46,7 +46,7 @@ class Dataset(object):
         self.gdf = gdf
 
         if not self._validate_init():
-            raise CartoException('Wrong Dataset creation. You should use of the class methods:'
+            raise CartoException('Wrong Dataset creation. You should use one of the class methods:'
                                  'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
@@ -79,7 +79,7 @@ class Dataset(object):
 
     def upload(self, with_lonlat=None, if_exists='fail', table_name=None, schema=None, context=None):
         if table_name:
-            self.table_name = table_name
+            self.table_name = normalize_name(table_name)
         if schema:
             self.schema = schema
         if context:
