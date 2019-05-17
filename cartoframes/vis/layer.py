@@ -76,7 +76,7 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
-        self.viz = _get_viz(self.style)
+        self.viz = self.style.compute_viz(self.source.geom_type)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
 
@@ -99,14 +99,6 @@ def _set_style(style):
         return style
     else:
         return Style()
-
-
-def _get_viz(style):
-    """Obtain the style vis object"""
-    if style and style.viz:
-        return style.viz
-    else:
-        return ''
 
 
 def _parse_interactivity(interactivity):
