@@ -47,20 +47,28 @@ class Style(object):
     """
 
     def __init__(self, style=None):
-        self.viz = self._init_style(style)
+        self._data = self._init_style(style)
 
     def _init_style(self, style):
-        """Adds style properties to the viz"""
         if style is None:
-            return ''
-        elif isinstance(style, dict):
-            return self._parse_style_properties_dict(style)
-        elif isinstance(style, str):
+            return defaults._STYLE_DEFAULTS
+        elif isinstance(style, (str, dict)):
             return style
         else:
-            raise ValueError('`style` must be a dictionary or a viz string')
+            raise ValueError('`style` must be a string or a dictionary')
 
-    def _parse_style_properties_dict(self, style):
+    def compute_viz(self, geom=None):
+        if isinstance(self._data, dict):
+            if geom and geom in self._data:
+                return self._parse_style_dict(self._data.get(geom))
+            else:
+                return self._parse_style_dict(self._data)
+        elif isinstance(self._data, str):
+            return self._data
+        else:
+            raise ValueError('`style` must be a string or a dictionary')
+
+    def _parse_style_dict(self, style):
         style_variables = []
         style_properties = []
 
