@@ -165,6 +165,7 @@ def _init_layers(layers):
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
+        # Reverse layers
         return layers[::-1]
 
 
@@ -288,7 +289,7 @@ def _get_bounds_hosted(layers):
 
     for layer in layers[1:]:
         context = layer.source.context
-        next_bounds = context and context._get_bounds(layer)
+        next_bounds = context and context._get_bounds([layer])
         bounds = _combine_bounds(bounds, next_bounds)
 
     return bounds
