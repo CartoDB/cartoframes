@@ -12,6 +12,7 @@ from carto.exceptions import CartoException
 from cartoframes.context import CartoContext
 from cartoframes import Dataset
 from cartoframes.columns import normalize_name
+from cartoframes.geojson import load_geojson
 
 from utils import _UserUrlLoader
 
@@ -60,6 +61,23 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.baseurl = self.user_url().format(username=self.username)
         self.cc = CartoContext(base_url=self.baseurl, api_key=self.apikey)
+
+        self.test_geojson = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -3.1640625,
+                            42.032974332441405
+                        ]
+                    }
+                }
+            ]
+        }
 
         self.tearDown()
 
@@ -123,13 +141,49 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dataset.cc, self.cc)
         self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
 
+    def test_dataset_from_dataframe(self):
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset.from_dataframe(df=df)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.df)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.gdf)
+        self.assertIsNone(dataset.cc)
+        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+
+    def test_dataset_from_geodataframe(self):
+        gdf = load_geojson(self.test_geojson)
+        dataset = Dataset.from_geodataframe(gdf=gdf)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.gdf)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.df)
+        self.assertIsNone(dataset.cc)
+        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+
+    def test_dataset_from_geojson(self):
+        geojson = self.test_geojson
+        dataset = Dataset.from_geojson(geojson=geojson)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.gdf)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.df)
+        self.assertIsNone(dataset.cc)
+        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_mcdonalds_nyc
         df = read_mcdonalds_nyc(limit=100)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
@@ -141,7 +195,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_ne_50m_graticules_15
         df = read_ne_50m_graticules_15()
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
@@ -153,7 +207,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
@@ -165,8 +219,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc) \
-            .upload(with_lonlat=('dropoff_longitude', 'dropoff_latitude'))
+        lonlat = ('dropoff_longitude', 'dropoff_latitude')
+        dataset = Dataset.from_dataframe(df).upload(
+            with_lonlat=lonlat, table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -180,7 +235,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -195,7 +250,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         df.rename(columns={'the_geom': 'geometry'}, inplace=True)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -211,7 +266,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
 
         df.rename(columns={'the_geom': 'geom'}, inplace=True)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -234,7 +289,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                                          zip(df.dropoff_longitude, df.dropoff_latitude)])
 
         # TODO: use from_geodataframe
-        dataset = Dataset.from_dataframe(gdf, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(gdf).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -250,7 +305,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_taxi(limit=50)
         df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'
                                   .format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
@@ -264,11 +319,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         with self.assertRaises(NameError):
-            dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+            dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -279,11 +334,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table,
-                                         context=self.cc).upload(if_exists=Dataset.APPEND)
+        dataset = Dataset.from_dataframe(df).upload(
+            if_exists=Dataset.APPEND, table_name=self.test_write_table, context=self.cc)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -294,11 +349,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_write_if_exists_replace(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
-        dataset = Dataset.from_dataframe(df, table_name=self.test_write_table,
-                                         context=self.cc).upload(if_exists=Dataset.REPLACE)
+        dataset = Dataset.from_dataframe(df).upload(
+            if_exists=Dataset.REPLACE, table_name=self.test_write_table, context=self.cc)
 
         self.assertExistsTable(self.test_write_table)
 
