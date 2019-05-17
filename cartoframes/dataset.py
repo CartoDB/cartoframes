@@ -21,6 +21,12 @@ def set_default_context(context):
     default_context = context
 
 
+class DatasetGeom:
+    POINT = 'point'
+    LINE = 'line'
+    POLYGON = 'polygon'
+
+
 class Dataset(object):
     SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
     RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
@@ -48,6 +54,7 @@ class Dataset(object):
         self.gdf = gdf
         self.state = state
         self.cc = context or default_context
+        self.geom = self._compute_geom()
 
         if df is not None:
             self.normalized_column_names = _normalize_column_names(df)
@@ -243,6 +250,21 @@ class Dataset(object):
 
         return columns
 
+    def _compute_geom(self):
+        """Compute the geometry based on the data"""
+
+        if self.state == Dataset.STATE_REMOTE:
+            # Fetch geom
+            if self.query:
+                return _fetch_geom(self.query)
+            elif self.table_name and self.schema:
+                query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
+                return _fetch_geom(query)
+
+        elif self.state == Dataset.STATE_LOCAL:
+            # Detect geom
+            return DatasetGeom.POINT
+
 
 def get_columns(context, query):
     """Get column names and types from a query"""
@@ -409,3 +431,7 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
         df['geometry'] = df.the_geom.apply(_decode_geom)
 
     return df
+
+
+def _fetch_geom(query):
+    return DatasetGeom.POINT

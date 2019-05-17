@@ -18,12 +18,6 @@ class SourceType:
     GEOJSON = 'GeoJSON'
 
 
-class SourceGeom:
-    POINT = 'point'
-    LINE = 'line'
-    POLYGON = 'polygon'
-
-
 class Source(object):
     """Source
 
@@ -161,11 +155,9 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
+        self.geom = self.dataset.geom
         self.context = self.dataset.cc
         self.credentials = _get_credentials(self.context)
-
-        # TODO: obtain from the Dataset
-        self.geom = SourceGeom.POINT
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)
