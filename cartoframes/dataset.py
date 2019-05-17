@@ -79,7 +79,7 @@ class Dataset(object):
 
     def upload(self, with_lonlat=None, if_exists='fail', table_name=None, schema=None, context=None):
         if table_name:
-            self.table_name = table_name
+            self.table_name = normalize_name(table_name)
         if schema:
             self.schema = schema
         if context:
