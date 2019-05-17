@@ -46,8 +46,7 @@ class Dataset(object):
         self.gdf = gdf
 
         if not self._validate_init():
-            raise CartoException('Invalid number of parameters in Dataset creation.'
-                                 'You should use of the class methods:'
+            raise CartoException('Wrong Dataset creation. You should use of the class methods:'
                                  'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
@@ -67,21 +66,25 @@ class Dataset(object):
         return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
-    def from_dataframe(cls, df, table_name=None, schema='public', context=None):
-        return cls(
-            df=df, table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_dataframe(cls, df):
+        return cls(df=df, state=cls.STATE_LOCAL)
 
     @classmethod
-    def from_geodataframe(cls, gdf, table_name=None, schema='public', context=None):
-        return cls(
-            gdf=gdf, table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_geodataframe(cls, gdf):
+        return cls(gdf=gdf, state=cls.STATE_LOCAL)
 
     @classmethod
-    def from_geojson(cls, geojson, table_name=None, schema='public', context=None):
-        return cls(
-            gdf=load_geojson(geojson), table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_geojson(cls, geojson):
+        return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    def upload(self, with_lonlat=None, if_exists='fail'):
+    def upload(self, with_lonlat=None, if_exists='fail', table_name=None, schema=None, context=None):
+        if table_name:
+            self.table_name = table_name
+        if schema:
+            self.schema = schema
+        if context:
+            self.cc = context
+
         if self.query and self.table_name is not None and not self.exists():
             self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
