@@ -216,7 +216,7 @@ class Dataset(object):
                         create=self._get_query_for_create_table_from_query(),
                         cartodbfy=self._cartodbfy_query()))
 
-    def _get_query_for_create_table_from_query(self):
+    def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=self.query)
 
     def _create_table_query(self, with_lonlat=None):
