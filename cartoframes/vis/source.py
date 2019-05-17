@@ -223,5 +223,6 @@ def _get_credentials(context):
     else:
         return defaults.CREDENTIALS
 
+
 def _get_geom_type(dataset):
     return dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
