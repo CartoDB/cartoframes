@@ -85,7 +85,10 @@ class Dataset(object):
         if context:
             self.cc = context
 
-        if self.query and self.table_name is not None and not self.exists():
+        if table_name is None or context is None:
+            raise CartoException('You should provide a table_name and context to upload data')
+
+        if self.query and not self.exists():
             self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
