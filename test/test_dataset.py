@@ -206,6 +206,27 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
             dataset.upload(table_name=self.test_write_table, context=self.cc)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_dataset_download_validations(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset.from_dataframe(df=df)
+        with self.assertRaises(CartoException, msg='You should provide a context and a table_name or query to download data.'):
+            dataset.download()
+
+        query = 'SELECT 1 as fakec'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+
+        dataset.table_name = 'non_used_table'
+        df = dataset.download()
+        self.assertEqual('fakec' in df.columns, True)
+
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        df = dataset.download()
+        self.assertEqual('fakec' in df.columns, True)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 

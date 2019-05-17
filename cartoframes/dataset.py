@@ -77,7 +77,7 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    def upload(self, with_lonlat=None, if_exists='fail', table_name=None, schema=None, context=None):
+    def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self.table_name = normalize_name(table_name)
         if schema:
@@ -114,10 +114,15 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+    def download(self, limit=None, decode_geom=False):
+        if self.cc is None or (self.table_name is None and self.query is None):
+            raise CartoException('You should provide a context and a table_name or query to download data.')
+
+        # priority order: query, table
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
-        return self.cc.fetch(query, decode_geom=decode_geom)
+        self.df = self.cc.fetch(query, decode_geom=decode_geom)
+        return self.df
 
     def delete(self):
         if self.exists():
@@ -239,12 +244,18 @@ class Dataset(object):
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
         query_columns = list(table_columns.keys())
-        query_columns.remove('the_geom_webmercator')
+        if 'the_geom_webmercator' in query_columns:
+            query_columns.remove('the_geom_webmercator')
 
-        query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
-            table_name=self.table_name,
-            schema=self.schema,
-            columns=', '.join(query_columns))
+        if self.query is not None:
+            query = 'SELECT {columns} FROM ({query}) _q'.format(
+                query=self.query,
+                columns=', '.join(query_columns))
+        else:
+            query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
+                table_name=self.table_name,
+                schema=self.schema,
+                columns=', '.join(query_columns))
 
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
@@ -255,8 +266,11 @@ class Dataset(object):
         return query
 
     def get_table_columns(self):
-        """Get column names and types from a table"""
-        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
+        """Get column names and types from a table or a query result"""
+        if self.query is not None:
+            query = 'SELECT * FROM ({}) _q limit 0'.format(self.query)
+        else:
+            query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
         return get_columns(self.cc, query)
 
     def get_table_column_names(self, exclude=None):
