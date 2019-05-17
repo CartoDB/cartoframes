@@ -177,25 +177,33 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.cc)
         self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_upload_validations(self):
+        self.assertNotExistsTable(self.test_write_table)
+
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         with self.assertRaises(CartoException, msg='Nothing to upload.'):
             dataset.upload()
 
-        query = 'SELECT * FROM {}'.format(self.test_write_table)
+        query = 'SELECT 1'
         dataset = Dataset.from_query(query=query, context=self.cc)
         with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
+
+        dataset.upload(table_name=self.test_write_table)
         with self.assertRaises(NameError):
             dataset.upload(table_name=self.test_write_table)
+        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
 
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
         with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
-        with self.assertRaises(NameError):
+        with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload(table_name=self.test_write_table)
+        with self.assertRaises(NameError):
+            dataset.upload(table_name=self.test_write_table, context=self.cc)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
