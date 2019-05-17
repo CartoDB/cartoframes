@@ -211,7 +211,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
-        with self.assertRaises(CartoException, msg='You should provide a context and a table_name or query to download data.'):
+        error_msg = 'You should provide a context and a table_name or query to download data.'
+        with self.assertRaises(CartoException, msg=error_msg):
             dataset.download()
 
         query = 'SELECT 1 as fakec'
