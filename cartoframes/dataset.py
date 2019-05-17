@@ -86,28 +86,31 @@ class Dataset(object):
             self.cc = context
 
         if self.table_name is None or self.cc is None:
-            raise CartoException('You should provide a table_name and context to upload data')
+            raise CartoException('You should provide a table_name and context to upload data.')
 
-        if self.query and not self.exists():
-            self.cc.batch_sql_client.create_and_wait_for_completion(
-                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                .format(drop=self._drop_table_query(),
-                        create=self._create_table_from_query(self.query),
-                        cartodbfy=self._cartodbfy_query()))
-        else:
-            if self.df is None:
-                raise ValueError('You have to create a `Dataset` with a pandas.DataFrame to upload it to CARTO')
+        if self.gdf is None and self.df is None and self.query is None:
+            raise CartoException('Nothing to upload.')
 
-            if not self.exists():
+        already_exists_error = NameError('Table with name {table_name} already exists in CARTO.'
+                                         ' Please choose a different `table_name` or use'
+                                         ' if_exists="replace" to overwrite it'.format(table_name=self.table_name))
+
+        # priority order: gdf, df, query
+        if self.gdf is not None:
+            warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+
+        if self.df is not None:
+            if not self.exists() or if_exists == Dataset.REPLACE:
                 self._create_table(with_lonlat)
-            else:
-                if if_exists == Dataset.FAIL:
-                    raise NameError(('Table with name {table_name} already exists in CARTO.'
-                                     ' Please choose a different `table_name` or use'
-                                     ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
-                elif if_exists == Dataset.REPLACE:
-                    self._create_table(with_lonlat)
-            self._copyfrom(with_lonlat)
+                self._copyfrom(with_lonlat)
+            elif if_exists == Dataset.FAIL:
+                raise already_exists_error
+
+        elif self.query is not None:
+            if not self.exists() or if_exists == Dataset.REPLACE:
+                self._create_table_from_query()
+            elif if_exists == Dataset.FAIL:
+                raise already_exists_error
 
         return self
 
@@ -206,9 +209,15 @@ class Dataset(object):
             table_name=self.table_name,
             if_exists='IF EXISTS' if if_exists else '')
 
-    def _create_table_from_query(self, query):
-        create_query = '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=query)
-        return create_query
+    def _create_table_from_query(self):
+        self.cc.batch_sql_client.create_and_wait_for_completion(
+                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                .format(drop=self._drop_table_query(),
+                        create=self._get_query_for_create_table_from_query(),
+                        cartodbfy=self._cartodbfy_query()))
+
+    def _get_query_for_create_table_from_query(self):
+        return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=self.query)
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
