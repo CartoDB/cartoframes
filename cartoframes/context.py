@@ -335,13 +335,13 @@ class CartoContext(object):
             the length of the DataFrame.
         """  # noqa
         tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
-        dataset = Dataset.from_dataframe(df, table_name=table_name, context=self)
+        dataset = Dataset.from_dataframe(df)
 
         if_exists = Dataset.FAIL
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists)
+        dataset = dataset.upload(with_lonlat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
@@ -1577,8 +1577,7 @@ class CartoContext(object):
 
         if persist_as:
             dataset = Dataset.from_query(query, context=self)
-            dataset.table_name = persist_as
-            dataset.upload()
+            dataset.upload(table_name=persist_as)
             result = dataset.download(decode_geom=True)
         else:
             result = self.fetch(query, decode_geom=True)
