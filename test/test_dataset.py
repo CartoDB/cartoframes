@@ -98,6 +98,31 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException):
             dataset = Dataset(df=df, gdf=gdf)
 
+    def test_dataset_from_table(self):
+        table_name = 'fake_table'
+        dataset = Dataset.from_table(table_name=table_name, context=self.cc)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(dataset.table_name, table_name)
+        self.assertEqual(dataset.schema, 'public')
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.df)
+        self.assertIsNone(dataset.gdf)
+        self.assertEqual(dataset.cc, self.cc)
+        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+
+    def test_dataset_from_query(self):
+        query = 'SELECT * FROM fake_table'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(dataset.query, query)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.df)
+        self.assertIsNone(dataset.gdf)
+        self.assertEqual(dataset.cc, self.cc)
+        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
