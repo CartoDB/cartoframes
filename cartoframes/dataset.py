@@ -59,14 +59,12 @@ class Dataset(object):
             self.normalized_column_names = _normalize_column_names(gdf)
 
     @classmethod
-    def from_table(cls, table_name, schema='public', context=None):
-        return cls(
-            table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
+    def from_table(cls, table_name, context, schema='public'):
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
-    def from_query(cls, query, context=None):
-        return cls(
-            query=query, context=context, state=cls.STATE_REMOTE)
+    def from_query(cls, query, context):
+        return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_dataframe(cls, df, table_name=None, schema='public', context=None):
