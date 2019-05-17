@@ -86,7 +86,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """vis.Map dev path should use default paths if none are given"""
         map = vis.Map()
         template = map._htmlMap.html
-        self.assertTrue(vis.defaults._CARTO_VL_PATH in template)
+        self.assertTrue(vis.defaults.CARTO_VL_PATH in template)
 
     def test_custom_carto_vl_path(self):
         """vis.Map dev path should use custom paths"""
@@ -99,17 +99,17 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """vis.Map dev path should use default paths if none are given"""
         map = vis.Map()
         template = map._htmlMap.html
-        self.assertTrue(vis.defaults._AIRSHIP_COMPONENTS_PATH in template)
-        self.assertTrue(vis.defaults._AIRSHIP_BRIDGE_PATH in template)
-        self.assertTrue(vis.defaults._AIRSHIP_STYLES_PATH in template)
-        self.assertTrue(vis.defaults._AIRSHIP_ICONS_PATH in template)
+        self.assertTrue(vis.defaults.AIRSHIP_COMPONENTS_PATH in template)
+        self.assertTrue(vis.defaults.AIRSHIP_BRIDGE_PATH in template)
+        self.assertTrue(vis.defaults.AIRSHIP_STYLES_PATH in template)
+        self.assertTrue(vis.defaults.AIRSHIP_ICONS_PATH in template)
 
     def test_custom_airship_path(self):
         """vis.Map dev path should use custom paths"""
         _airship_path = 'custom_airship_path'
         map = vis.Map(_airship_path=_airship_path)
         template = map._htmlMap.html
-        self.assertTrue(_airship_path + vis.defaults._AIRSHIP_SCRIPT in template)
-        self.assertTrue(_airship_path + vis.defaults._AIRSHIP_BRIDGE_SCRIPT in template)
-        self.assertTrue(_airship_path + vis.defaults._AIRSHIP_STYLE in template)
-        self.assertTrue(_airship_path + vis.defaults._AIRSHIP_ICONS_STYLE in template)
+        self.assertTrue(_airship_path + vis.defaults.AIRSHIP_SCRIPT in template)
+        self.assertTrue(_airship_path + vis.defaults.AIRSHIP_BRIDGE_SCRIPT in template)
+        self.assertTrue(_airship_path + vis.defaults.AIRSHIP_STYLE in template)
+        self.assertTrue(_airship_path + vis.defaults.AIRSHIP_ICONS_STYLE in template)

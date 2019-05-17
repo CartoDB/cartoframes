@@ -51,7 +51,7 @@ class Style(object):
 
     def _init_style(self, style):
         if style is None:
-            return defaults._STYLE_DEFAULTS
+            return defaults.STYLE_DEFAULTS
         elif isinstance(style, (str, dict)):
             return style
         else:
@@ -82,7 +82,7 @@ class Style(object):
                             value=_convstr(variables.get(var))
                         )
                     )
-            elif prop in defaults._STYLE_PROPERTIES and style.get(prop) is not None:
+            elif prop in defaults.STYLE_PROPERTIES and style.get(prop) is not None:
                 style_properties.append(
                     '{name}: {value}'.format(
                         name=prop,
@@ -91,7 +91,7 @@ class Style(object):
                 )
             else:
                 raise ValueError('Style property "' + prop + '" is not valid. Valid style properties are: ' +
-                                 ', '.join(defaults._STYLE_PROPERTIES))
+                                 ', '.join(defaults.STYLE_PROPERTIES))
 
         return '\n'.join(style_variables).join(style_properties)
 

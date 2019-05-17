@@ -131,7 +131,7 @@ class Map(object):
         self.template = template
         self.sources = _get_map_layers(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
-        self._carto_vl_path = kwargs.get('_carto_vl_path', defaults._CARTO_VL_PATH)
+        self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
 
@@ -362,7 +362,7 @@ class HTMLMap(object):
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
-            _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
             size, sources, bounds, viewport, basemap,
@@ -370,7 +370,7 @@ class HTMLMap(object):
 
     def _parse_html_content(
         self, size, sources, bounds, viewport, basemap=None,
-            _carto_vl_path=defaults._CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
 
@@ -385,15 +385,15 @@ class HTMLMap(object):
             basemap = basemap.get('style')
 
         if (_airship_path is None):
-            airship_components_path = defaults._AIRSHIP_COMPONENTS_PATH
-            airship_bridge_path = defaults._AIRSHIP_BRIDGE_PATH
-            airship_styles_path = defaults._AIRSHIP_STYLES_PATH
-            airship_icons_path = defaults._AIRSHIP_ICONS_PATH
+            airship_components_path = defaults.AIRSHIP_COMPONENTS_PATH
+            airship_bridge_path = defaults.AIRSHIP_BRIDGE_PATH
+            airship_styles_path = defaults.AIRSHIP_STYLES_PATH
+            airship_icons_path = defaults.AIRSHIP_ICONS_PATH
         else:
-            airship_components_path = _airship_path + defaults._AIRSHIP_SCRIPT
-            airship_bridge_path = _airship_path + defaults._AIRSHIP_BRIDGE_SCRIPT
-            airship_styles_path = _airship_path + defaults._AIRSHIP_STYLE
-            airship_icons_path = _airship_path + defaults._AIRSHIP_ICONS_STYLE
+            airship_components_path = _airship_path + defaults.AIRSHIP_SCRIPT
+            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_SCRIPT
+            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE
+            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_STYLE
 
         camera = None
         if viewport is not None:

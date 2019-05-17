@@ -229,4 +229,4 @@ def _get_credentials(context):
             'base_url': context.creds.base_url()
         }
     else:
-        return defaults._CREDENTIALS
+        return defaults.CREDENTIALS
