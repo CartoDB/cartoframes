@@ -102,19 +102,19 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         gdf = {}
 
         with self.assertRaises(CartoException):
-            dataset = Dataset(table_name=table_name, schema=schema, query=query)
+            Dataset(table_name=table_name, schema=schema, query=query)
 
         with self.assertRaises(CartoException):
-            dataset = Dataset(table_name=table_name, schema=schema, df=df)
+            Dataset(table_name=table_name, schema=schema, df=df)
 
         with self.assertRaises(CartoException):
-            dataset = Dataset(table_name=table_name, schema=schema, gdf=gdf)
+            Dataset(table_name=table_name, schema=schema, gdf=gdf)
 
         with self.assertRaises(CartoException):
-            dataset = Dataset(query=query, df=df)
+            Dataset(query=query, df=df)
 
         with self.assertRaises(CartoException):
-            dataset = Dataset(df=df, gdf=gdf)
+            Dataset(df=df, gdf=gdf)
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'
