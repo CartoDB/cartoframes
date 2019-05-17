@@ -102,9 +102,10 @@ class Dataset(object):
         if self.df is not None:
             if not self.exists() or if_exists == Dataset.REPLACE:
                 self._create_table(with_lonlat)
-                self._copyfrom(with_lonlat)
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
+
+            self._copyfrom(with_lonlat)
 
         elif self.query is not None:
             if not self.exists() or if_exists == Dataset.REPLACE:
