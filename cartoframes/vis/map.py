@@ -117,7 +117,7 @@ class Map(object):
 
     def __init__(self,
                  layers=None,
-                 basemap=Basemaps.voyager,
+                 basemap=Basemaps.darkmatter,
                  bounds=None,
                  size=None,
                  viewport=None,
@@ -408,7 +408,7 @@ class HTMLMap(object):
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
             sources=sources,
-            basemapstyle=basemap,
+            basemap=basemap,
             mapboxtoken=token,
             bounds=bounds,
             camera=camera,
