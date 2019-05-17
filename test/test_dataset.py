@@ -76,7 +76,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
-    def test_cartocontext_constructor_validation(self):
+    def test_dataset_constructor_validation(self):
         table_name = 'fake_table'
         schema = 'fake_schema'
         query = 'select * from fake_table'
@@ -99,7 +99,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
             dataset = Dataset(df=df, gdf=gdf)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_points_dataset(self):
+    def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_mcdonalds_nyc
@@ -111,7 +111,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_lines_dataset(self):
+    def test_dataset_write_lines_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_ne_50m_graticules_15
@@ -123,7 +123,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 35)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_polygons_dataset(self):
+    def test_dataset_write_polygons_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_brooklyn_poverty
@@ -135,7 +135,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_lnglat_dataset(self):
+    def test_dataset_write_lnglat_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
@@ -150,7 +150,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_null_geometry_column(self):
+    def test_dataset_write_null_geometry_column(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
@@ -164,7 +164,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_with_different_geometry_column(self):
+    def test_dataset_write_with_different_geometry_column(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_brooklyn_poverty
@@ -179,7 +179,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_with_different_geom_column(self):
+    def test_dataset_write_with_different_geom_column(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_brooklyn_poverty
@@ -195,7 +195,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_geopandas(self):
+    def test_dataset_write_geopandas(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
@@ -218,7 +218,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_wkt(self):
+    def test_dataset_write_wkt(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
@@ -234,7 +234,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_if_exists_fail_by_default(self):
+    def test_dataset_write_if_exists_fail_by_default(self):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_brooklyn_poverty
@@ -251,7 +251,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_if_exists_append(self):
+    def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
@@ -266,7 +266,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 2049 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_cartocontext_write_if_exists_replace(self):
+    def test_dataset_write_if_exists_replace(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df, table_name=self.test_write_table, context=self.cc).upload()
@@ -283,7 +283,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)
     # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    # def test_cartocontext_write_with_encoding(self):
+    # def test_dataset_write_with_encoding(self):
     #     df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
     #     dataset = self.cc.write(df, self.test_write_table)
     #     self.test_write_table = dataset.table_name
