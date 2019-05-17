@@ -115,7 +115,7 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False):
+    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
         if self.cc is None or (self.table_name is None and self.query is None):
             raise CartoException('You should provide a context and a table_name or query to download data.')
 
