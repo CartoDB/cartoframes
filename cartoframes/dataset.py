@@ -250,37 +250,44 @@ class Dataset(object):
 
     def _compute_geom_type(self):
         """Compute the geometry type from the data"""
-
+    
         if self.state == Dataset.STATE_REMOTE:
-            # Fetch geom type
             if self.query:
-                return self._fetch_geom_type(self.query)
+                return self._get_remote_geom_type(self.query)
             elif self.table_name and self.schema:
                 query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
-                return self._fetch_geom_type(query)
+                return self._get_remote_geom_type(query)
 
         elif self.state == Dataset.STATE_LOCAL:
-            # Detect geom type
-            return Dataset.GEOM_TYPE_POINT
+            if self.gdf is not None:
+                return self._get_local_geom_type(self.gdf)
 
-    def _fetch_geom_type(self, query):
+    def _get_remote_geom_type(self, query):
+        """Fetch geom type of a remote table"""
         response = self.cc.sql_client.send('''
-        SELECT distinct ST_GeometryType(the_geom) AS geom_type
-        FROM ({}) q
-        LIMIT 5'''.format(query))
+            SELECT distinct ST_GeometryType(the_geom) AS geom_type
+            FROM ({}) q
+            LIMIT 5
+        '''.format(query))
         if response and response.get('rows') and len(response.get('rows')) > 0:
             st_geom_type = response.get('rows')[0].get('geom_type')
-            return self._map_geom_type(st_geom_type)
+            return self._map_geom_type(st_geom_type[3:])
 
-    def _map_geom_type(self, st_geom_type):
+    def _get_local_geom_type(self, gdf):
+        """Compute geom type of the local dataframe"""
+        if len(gdf.geometry) > 0:
+            geom_type = gdf.geometry[0].type
+            return self._map_geom_type(geom_type)
+
+    def _map_geom_type(self, geom_type):
         return {
-            'ST_Point': Dataset.GEOM_TYPE_POINT,
-            'ST_MultiPoint': Dataset.GEOM_TYPE_POINT,
-            'ST_LineString': Dataset.GEOM_TYPE_LINE,
-            'ST_MultiLineString': Dataset.GEOM_TYPE_LINE,
-            'ST_Polygon': Dataset.GEOM_TYPE_POLYGON,
-            'ST_MultiPolygon': Dataset.GEOM_TYPE_POLYGON
-        }[st_geom_type]
+            'Point': Dataset.GEOM_TYPE_POINT,
+            'MultiPoint': Dataset.GEOM_TYPE_POINT,
+            'LineString': Dataset.GEOM_TYPE_LINE,
+            'MultiLineString': Dataset.GEOM_TYPE_LINE,
+            'Polygon': Dataset.GEOM_TYPE_POLYGON,
+            'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
+        }[geom_type]
 
 
 def get_columns(context, query):
