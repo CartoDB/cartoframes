@@ -46,7 +46,7 @@ class Dataset(object):
         self.gdf = gdf
 
         if not self._validate_init():
-            raise CartoException('Wrong Dataset creation. You should use of the class methods:'
+            raise CartoException('Wrong Dataset creation. You should use one of the class methods:'
                                  'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
