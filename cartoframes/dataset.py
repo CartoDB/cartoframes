@@ -52,7 +52,6 @@ class Dataset(object):
         self.gdf = gdf
         self.state = state
         self.cc = context or default_context
-        self.geom_type = self._compute_geom_type()
 
         if df is not None:
             self.normalized_column_names = _normalize_column_names(df)
@@ -248,9 +247,9 @@ class Dataset(object):
 
         return columns
 
-    def _compute_geom_type(self):
+    def compute_geom_type(self):
         """Compute the geometry type from the data"""
-    
+
         if self.state == Dataset.STATE_REMOTE:
             if self.query:
                 return self._get_remote_geom_type(self.query)
@@ -264,20 +263,23 @@ class Dataset(object):
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
-        response = self.cc.sql_client.send('''
-            SELECT distinct ST_GeometryType(the_geom) AS geom_type
-            FROM ({}) q
-            LIMIT 5
-        '''.format(query))
-        if response and response.get('rows') and len(response.get('rows')) > 0:
-            st_geom_type = response.get('rows')[0].get('geom_type')
-            return self._map_geom_type(st_geom_type[3:])
+        if self.cc:
+            response = self.cc.sql_client.send('''
+                SELECT distinct ST_GeometryType(the_geom) AS geom_type
+                FROM ({}) q
+                LIMIT 5
+            '''.format(query))
+            if response and response.get('rows') and len(response.get('rows')) > 0:
+                st_geom_type = response.get('rows')[0].get('geom_type')
+                if st_geom_type:
+                    return self._map_geom_type(st_geom_type[3:])
 
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
         if len(gdf.geometry) > 0:
             geom_type = gdf.geometry[0].type
-            return self._map_geom_type(geom_type)
+            if geom_type:
+                return self._map_geom_type(geom_type)
 
     def _map_geom_type(self, geom_type):
         return {
