@@ -21,12 +21,6 @@ def set_default_context(context):
     default_context = context
 
 
-class DatasetGeom:
-    POINT = 'point'
-    LINE = 'line'
-    POLYGON = 'polygon'
-
-
 class Dataset(object):
     SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
     RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
@@ -42,6 +36,10 @@ class Dataset(object):
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
 
+    GEOM_TYPE_POINT = 'point'
+    GEOM_TYPE_LINE = 'line'
+    GEOM_TYPE_POLYGON = 'polygon'
+
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
@@ -54,7 +52,7 @@ class Dataset(object):
         self.gdf = gdf
         self.state = state
         self.cc = context or default_context
-        self.geom = self._compute_geom()
+        self.geom_type = self._compute_geom_type()
 
         if df is not None:
             self.normalized_column_names = _normalize_column_names(df)
@@ -250,20 +248,39 @@ class Dataset(object):
 
         return columns
 
-    def _compute_geom(self):
-        """Compute the geometry based on the data"""
+    def _compute_geom_type(self):
+        """Compute the geometry type from the data"""
 
         if self.state == Dataset.STATE_REMOTE:
-            # Fetch geom
+            # Fetch geom type
             if self.query:
-                return _fetch_geom(self.query)
+                return self._fetch_geom_type(self.query)
             elif self.table_name and self.schema:
                 query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
-                return _fetch_geom(query)
+                return self._fetch_geom_type(query)
 
         elif self.state == Dataset.STATE_LOCAL:
-            # Detect geom
-            return DatasetGeom.POINT
+            # Detect geom type
+            return Dataset.GEOM_TYPE_POINT
+
+    def _fetch_geom_type(self, query):
+        response = self.cc.sql_client.send('''
+        SELECT distinct ST_GeometryType(the_geom) AS geom_type
+        FROM ({}) q
+        LIMIT 5'''.format(query))
+        if response and response.get('rows') and len(response.get('rows')) > 0:
+            st_geom_type = response.get('rows')[0].get('geom_type')
+            return self._map_geom_type(st_geom_type)
+
+    def _map_geom_type(self, st_geom_type):
+        return {
+            'ST_Point': Dataset.GEOM_TYPE_POINT,
+            'ST_MultiPoint': Dataset.GEOM_TYPE_POINT,
+            'ST_LineString': Dataset.GEOM_TYPE_LINE,
+            'ST_MultiLineString': Dataset.GEOM_TYPE_LINE,
+            'ST_Polygon': Dataset.GEOM_TYPE_POLYGON,
+            'ST_MultiPolygon': Dataset.GEOM_TYPE_POLYGON
+        }[st_geom_type]
 
 
 def get_columns(context, query):
@@ -431,7 +448,3 @@ def postprocess_dataframe(df, table_columns, decode_geom=False):
         df['geometry'] = df.the_geom.apply(_decode_geom)
 
     return df
-
-
-def _fetch_geom(query):
-    return DatasetGeom.POINT

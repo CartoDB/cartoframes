@@ -76,7 +76,7 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
         self.style = _set_style(style)
-        self.viz = self.style.compute_viz(self.source.geom)
+        self.viz = self.style.compute_viz(self.source.geom_type)
         self.interactivity = _parse_interactivity(interactivity)
         self.legend = legend
 

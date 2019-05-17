@@ -155,9 +155,9 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
-        self.geom = self.dataset.geom
         self.context = self.dataset.cc
         self.credentials = _get_credentials(self.context)
+        self.geom_type = self.dataset.geom_type
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)

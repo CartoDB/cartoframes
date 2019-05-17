@@ -57,10 +57,10 @@ class Style(object):
         else:
             raise ValueError('`style` must be a string or a dictionary')
 
-    def compute_viz(self, geom=None):
+    def compute_viz(self, geom_type='point'):
         if isinstance(self._data, dict):
-            if geom and geom in self._data:
-                return self._parse_style_dict(self._data.get(geom))
+            if geom_type and geom_type in self._data:
+                return self._parse_style_dict(self._data.get(geom_type))
             else:
                 return self._parse_style_dict(self._data)
         elif isinstance(self._data, str):
