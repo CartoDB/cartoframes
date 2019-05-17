@@ -85,7 +85,7 @@ class Dataset(object):
         if context:
             self.cc = context
 
-        if table_name is None or context is None:
+        if self.table_name is None or self.cc is None:
             raise CartoException('You should provide a table_name and context to upload data')
 
         if self.query and not self.exists():
