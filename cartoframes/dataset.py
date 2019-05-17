@@ -213,7 +213,7 @@ class Dataset(object):
         self.cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
-                        create=self._get_query_for_create_table_from_query(),
+                        create=self._get_query_to_create_table_from_query(),
                         cartodbfy=self._cartodbfy_query()))
 
     def _get_query_to_create_table_from_query(self):
