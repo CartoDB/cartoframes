@@ -100,7 +100,7 @@ class Dataset(object):
             warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
 
         if self.df is not None:
-            if not self.exists() or if_exists == Dataset.REPLACE:
+            if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
