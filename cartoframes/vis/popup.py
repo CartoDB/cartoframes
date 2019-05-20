@@ -14,56 +14,56 @@ class Popup(object):
     """
 
     def __init__(self, data=None):
-        self._click = [
-            'sqrt($pop_max)'
-        ]
-        self._hover = [
-            '$pop_max'
-        ]
+        if data is None:
+            self._click = []
+            self._hover = []
+    
+        elif isinstance(data, dict):
+            # TODO: error control
 
-        # if isinstance(data, dict):
-        #     # TODO: error control
+            if 'click' in data:
+                self._click = data.get('click', [])
 
-        #     if 'click' in data:
-        #         self.click = data.get('click', [])
+            if 'hover' in data:
+                self._hover = data.get('hover', [])
 
-        #     if 'hover' in data:
-        #         self.hover = data.get('hover', [])
-
-        # else:
-        #     raise ValueError('Wrong popup input')
+        else:
+            raise ValueError('Wrong popup input')
 
     def get_interactivity(self):
-        click_vars = []
-        hover_vars = []
+        click_vars = {}
+        hover_vars = {}
 
-        for value in self._click:
-            click_vars.append(_gen_variable_name(value))
+        self._get_vars(click_vars, self._click)
+        self._get_vars(hover_vars, self._hover)
     
-        for value in self._hover:
-            hover_vars.append(_gen_variable_name(value))
-    
-        interactivity = [{
-            'event': 'click',
-            'values': click_vars
-        }, {
-            'event': 'hover',
-            'values': hover_vars
-        }]
+        interactivity = []
+
+        if len(self._click) > 0:
+            interactivity.append({
+                'event': 'click',
+                'values': click_vars
+            })
+
+        if len(self._hover) > 0:
+            interactivity.append({
+                'event': 'hover',
+                'values': hover_vars
+            })
 
         return interactivity
 
     def get_variables(self):
         variables = {}
+        self._get_vars(variables, self._click)
+        self._get_vars(variables, self._hover)
+        return variables
 
-        for value in self._click:
+    def _get_vars(self, array, output):
+        variables = {}
+        for value in array:
             name = _gen_variable_name(value)
             variables[name] = value
-
-        for value in self._hover:
-            name = _gen_variable_name(value)
-            variables[name] = value
-
         return variables
 
 

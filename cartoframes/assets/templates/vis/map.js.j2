@@ -78,20 +78,15 @@ function onReady() {
     function updatePopup(layer_popup, event, popupHeader, values) {
       if (event.features.length > 0) {
         const feature = event.features[0];
-        const variables = values && values.length
-          ? Object.keys(feature.variables).filter(variable => values.includes(variable))
-          : Object.keys(feature.variables);
 
         let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
         
-        Object.keys(feature.variables).forEach((name) => {
-            if (variables.includes(name)) {
-              const variable = feature.variables[name];
-              popupHTML += `
-                <h3 class="h3">${name}</h3>
-                <p class="description open-sans">${JSON.stringify(variable.value)}</p>
-              `;
-            }
+        Object.keys(values).forEach((name) => {
+          const variable = feature.variables[name];
+          popupHTML += `
+            <h3 class="h3">${values[name]}</h3>
+            <p class="description open-sans">${JSON.stringify(variable.value)}</p>
+          `;
         });
         
         layer_popup
