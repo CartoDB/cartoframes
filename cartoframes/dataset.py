@@ -102,7 +102,7 @@ class Dataset(object):
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
                                               'if_exists="replace" to overwrite it'.format(
-                                                    t=self.table_name, s=self.schema))
+                                                  t=self.table_name, s=self.schema))
 
         # priority order: gdf, df, query
         if self.gdf is not None:
@@ -231,10 +231,10 @@ class Dataset(object):
 
     def _create_table_from_query(self):
         self.cc.batch_sql_client.create_and_wait_for_completion(
-                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                .format(drop=self._drop_table_query(),
-                        create=self._get_query_to_create_table_from_query(),
-                        cartodbfy=self._cartodbfy_query()))
+            '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+            .format(drop=self._drop_table_query(),
+                    create=self._get_query_to_create_table_from_query(),
+                    cartodbfy=self._cartodbfy_query()))
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=self.query)
