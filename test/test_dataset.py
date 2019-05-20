@@ -224,6 +224,13 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
             dataset.upload(table_name=self.test_write_table)
         dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
 
+    def test_dataset_upload_validation_fails_with_query_and_append(self):
+        query = 'SELECT 1'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        err_msg = 'Error using append with a query Dataset. It is not possible to append data to a query'
+        with self.assertRaises(CartoException, msg=err_msg):
+            dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)

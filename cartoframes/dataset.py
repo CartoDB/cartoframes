@@ -116,7 +116,10 @@ class Dataset(object):
             self._copyfrom(with_lonlat)
 
         elif self.query is not None:
-            if if_exists == Dataset.REPLACE or not self.exists():
+            if if_exists == Dataset.APPEND:
+                raise CartoException('Error using append with a query Dataset.'
+                                     'It is not possible to append data to a query')
+            elif if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
