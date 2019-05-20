@@ -87,6 +87,7 @@ class Layer(object):
             self.source.geom_type,
             self.popup.get_variables()
         )
+        self.interactivity = self.popup.get_interactivity()
 
 
 def _set_source(source, context):

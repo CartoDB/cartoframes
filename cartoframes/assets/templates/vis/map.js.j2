@@ -50,28 +50,26 @@ function onReady() {
         closeOnClick: false
       });
 
-      const { event, header, values} = elem.interactivity;
+      interactivity.off('featureHover');
+      interactivity.off('featureClick');
 
-      if (event === 'click') {
-        setPopupsClick(tempPopup, interactivity, header, values);
-      } else if (event === 'hover') {
-        setPopupsHover(tempPopup, interactivity, header, values);
+      for (const { event, values } of elem.interactivity) {
+        if (event === 'click') {
+          setPopupsClick(tempPopup, interactivity, '', values);
+        }
+        if (event === 'hover') {
+          setPopupsHover(tempPopup, interactivity, '', values);
+        }
       }
     }
 
     function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
-      interactivity.off('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
-      });
       interactivity.on('featureClick', (event) => {
           updatePopup(tempPopup, event, popupHeader, values)
       });
     }
     
     function setPopupsHover(tempPopup, interactivity, popupHeader, values) {
-      interactivity.off('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
-      });
       interactivity.on('featureHover', (event) => {
           updatePopup(tempPopup, event, popupHeader, values)
       });
@@ -87,12 +85,13 @@ function onReady() {
         let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
         
         Object.keys(feature.variables).forEach((name) => {
-            const variable = feature.variables[name];
-
-            popupHTML += `
-              <h3 class="h3">${name}</h3>
-              <p class="description open-sans">${JSON.stringify(variable.value)}</p>
-            `;
+            if (variables.includes(name)) {
+              const variable = feature.variables[name];
+              popupHTML += `
+                <h3 class="h3">${name}</h3>
+                <p class="description open-sans">${JSON.stringify(variable.value)}</p>
+              `;
+            }
         });
         
         layer_popup
