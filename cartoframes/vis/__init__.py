@@ -25,6 +25,7 @@ from .map import Map
 from .layer import Layer
 from .source import Source
 from .style import Style
+from .popup import Popup
 
 
 __all__ = [
@@ -33,5 +34,6 @@ __all__ = [
     'Map',
     'Layer',
     'Source',
-    'Style'
+    'Style',
+    'Popup'
 ]
