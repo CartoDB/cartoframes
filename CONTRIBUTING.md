@@ -54,7 +54,7 @@ After the tests pass, merge into master. Next, we publish a release to [PyPi](ht
 
 ### Documentation (readthedocs)
 
-This step needs to be completed before any releases, but is here as a reminder that documentation should not be ignored. Docs are built with [ReadTheDocs](https://cartoframes.readthedocs.io/en/stable/) automatically from any tagged release and a few select branches. ``master`` is the docs build for ``latest``. Once docs are working from master from the previous step, ensure that the version shows up in the default docs page: https://cartoframes.readthedocs.io/en/stable/
+This step needs to be completed before any releases, but it is here as a reminder that documentation should not be ignored. Docs are built with [ReadTheDocs](https://cartoframes.readthedocs.io/en/stable/) automatically from any tagged release and a few select branches. ``master`` is the docs build for ``latest``. Once docs are working from master from the previous step, ensure that the version shows up in the default docs page: https://cartoframes.readthedocs.io/en/stable/
 
 ### PyPi release
 
