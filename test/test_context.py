@@ -287,7 +287,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
         # should error for existing table
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
-            'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
+                   'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
             cc.write(df, self.test_read_table, overwrite=False)
 
