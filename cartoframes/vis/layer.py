@@ -83,7 +83,10 @@ class Layer(object):
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
-        self.viz = self.style.compute_viz(self.source.geom_type)
+        self.viz = self.style.compute_viz(
+            self.source.geom_type,
+            self.popup.get_variables()
+        )
 
 
 def _set_source(source, context):
