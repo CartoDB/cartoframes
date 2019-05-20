@@ -89,6 +89,24 @@ class Map(object):
                 basemap
             )
 
+        Color basemap style.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer, basemaps
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Map(
+                Layer('table in your account'),
+                basemap='yellow'  # None, False, 'white', 'rgb(255, 255, 0)'
+            )
+
         Custom bounds.
 
         .. code::
@@ -373,16 +391,35 @@ class HTMLMap(object):
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
+        basecolor = ''
 
-        if isinstance(basemap, dict):
+        if basemap is None:
+            # No basemap
+            basecolor = 'white'
+            basemap = ''
+        elif isinstance(basemap, bool):
+            if basemap is True:
+                # Default basemap
+                basemap = Basemaps.darkmatter
+            else:
+                # No basemap
+                basecolor = 'white'
+                basemap = ''
+        elif isinstance(basemap, str):
+            if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+                # Basemap is a color
+                basecolor = basemap
+                basemap = ''
+        elif isinstance(basemap, dict):
             token = basemap.get('token', '')
-            if 'style' not in basemap:
+            if 'style' in basemap:
+                basemap = basemap.get('style')
+                if not token and basemap.get('style').startswith('mapbox://'):
+                    warn('A Mapbox style usually needs a token')
+            else:
                 raise ValueError(
                     'If basemap is a dict, it must have a `style` key'
                 )
-            if not token and basemap.get('style').startswith('mapbox://'):
-                warn('A Mapbox style usually needs a token')
-            basemap = basemap.get('style')
 
         if (_airship_path is None):
             airship_components_path = defaults.AIRSHIP_COMPONENTS_PATH
@@ -409,6 +446,7 @@ class HTMLMap(object):
             height=size[1] if size is not None else None,
             sources=sources,
             basemap=basemap,
+            basecolor=basecolor,
             mapboxtoken=token,
             bounds=bounds,
             camera=camera,

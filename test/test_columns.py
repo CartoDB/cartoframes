@@ -3,7 +3,7 @@
 """Unit tests for cartoframes.columns"""
 import unittest
 
-from cartoframes.columns import Column, normalize_names
+from cartoframes.columns import Column, normalize_names, pg2dtypes
 
 
 class TestColumns(unittest.TestCase):
@@ -68,3 +68,16 @@ class TestColumns(unittest.TestCase):
 
     def test_normalize_names_unchanged(self):
         self.assertListEqual(normalize_names(self.cols_ans), self.cols_ans)
+
+    def test_pg2dtypes(self):
+        results = {
+            'date': 'datetime64[D]',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+            'unknown_pgdata': 'object'
+        }
+        for i in results:
+            result = pg2dtypes(i)
+            self.assertEqual(result, results[i])

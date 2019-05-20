@@ -16,7 +16,17 @@ function onReady() {
   // Fetch CARTO basemap if it's there, else try to use other supplied style
   const map = new mapboxgl.Map({
     container: 'map',
-    style: BASEMAPS['{{basemap}}'] || "{{basemap}}",
+    style: BASEMAPS['{{basemap}}'] || '{{basemap}}' || {
+        'version': 8,
+        'sources': {},
+        'layers': [{
+            'id': 'background',
+            'type': 'background',
+            'paint': {
+                'background-color': '{{basecolor}}'
+            }
+        }]
+    },
     zoom: 9,
     dragRotate: false
   });
