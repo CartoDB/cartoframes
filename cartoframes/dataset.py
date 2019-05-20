@@ -84,7 +84,7 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    def upload(self, with_lonlat=None, if_exists='fail', table_name=None, schema=None, context=None):
+    def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self.table_name = normalize_name(table_name)
         if schema:
@@ -93,11 +93,11 @@ class Dataset(object):
             self.cc = context
 
         if self.table_name is None or self.cc is None:
-            raise CartoException('You should provide a table_name and context to upload data.')
+            raise ValueError('You should provide a table_name and context to upload data.')
 
         if self.gdf is None and self.df is None and self.query is None:
-            raise CartoException('Nothing to upload.'
-                                 'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
+            raise ValueError('Nothing to upload.'
+                             'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
@@ -128,9 +128,14 @@ class Dataset(object):
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+        if self.cc is None or (self.table_name is None and self.query is None):
+            raise ValueError('You should provide a context and a table_name or query to download data.')
+
+        # priority order: query, table
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
-        return self.cc.fetch(query, decode_geom=decode_geom)
+        self.df = self.cc.fetch(query, decode_geom=decode_geom)
+        return self.df
 
     def delete(self):
         if self.exists():
@@ -255,10 +260,15 @@ class Dataset(object):
         """Create the read (COPY TO) query"""
         query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
 
-        query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
-            table_name=self.table_name,
-            schema=self.schema,
-            columns=', '.join(query_columns))
+        if self.query is not None:
+            query = 'SELECT {columns} FROM ({query}) _q'.format(
+                query=self.query,
+                columns=', '.join(query_columns))
+        else:
+            query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
+                table_name=self.table_name,
+                schema=self.schema,
+                columns=', '.join(query_columns))
 
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
@@ -269,24 +279,28 @@ class Dataset(object):
         return query
 
     def get_table_columns(self):
-        """Get column names and types from a table"""
-        query = '''
-            SELECT column_name, data_type
-            FROM information_schema.columns
-            WHERE table_name = '{table}' AND table_schema = '{schema}'
-        '''.format(table=self.table_name, schema=self.schema)
+        """Get column names and types from a table or query result"""
+        if self.query is not None:
+            query = 'SELECT * FROM ({}) _q limit 0'.format(self.query)
+            return get_columns(self.cc, query)
+        else:
+            query = '''
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_name = '{table}' AND table_schema = '{schema}'
+            '''.format(table=self.table_name, schema=self.schema)
 
-        try:
-            table_info = self.cc.sql_client.send(query)
-            return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
-        except CartoException as e:
-            # this may happen when using the default_public API key
-            if str(e) == 'Access denied':
-                query = '''
-                    SELECT *
-                    FROM "{schema}"."{table}" LIMIT 0
-                '''.format(table=self.table_name, schema=self.schema)
-                return get_columns(self.cc, query)
+            try:
+                table_info = self.cc.sql_client.send(query)
+                return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+            except CartoException as e:
+                # this may happen when using the default_public API key
+                if str(e) == 'Access denied':
+                    query = '''
+                        SELECT *
+                        FROM "{schema}"."{table}" LIMIT 0
+                    '''.format(table=self.table_name, schema=self.schema)
+                    return get_columns(self.cc, query)
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
