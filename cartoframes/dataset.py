@@ -93,6 +93,8 @@ class Dataset(object):
 
     @table_name.setter
     def table_name(self, value):
+        if hasattr(self, '_table_name') and self._table_name != value:
+            self.is_sync = False
         self._table_name = value
 
     @property
@@ -101,6 +103,8 @@ class Dataset(object):
 
     @schema.setter
     def schema(self, value):
+        if hasattr(self, '_schema') and self._schema != value:
+            self.is_sync = False
         self._schema = value
 
     @property
@@ -109,6 +113,8 @@ class Dataset(object):
 
     @query.setter
     def query(self, value):
+        if hasattr(self, '_query') and self._query != value:
+            self.is_sync = False
         self._query = value
 
     @property
