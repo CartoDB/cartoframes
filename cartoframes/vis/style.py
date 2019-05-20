@@ -47,20 +47,28 @@ class Style(object):
     """
 
     def __init__(self, style=None):
-        self.viz = self._init_style(style)
+        self._data = self._init_style(style)
 
     def _init_style(self, style):
-        """Adds style properties to the viz"""
         if style is None:
-            return ''
-        elif isinstance(style, dict):
-            return self._parse_style_properties_dict(style)
-        elif isinstance(style, str):
+            return defaults.STYLE_DEFAULTS
+        elif isinstance(style, (str, dict)):
             return style
         else:
-            raise ValueError('`style` must be a dictionary or a viz string')
+            raise ValueError('`style` must be a string or a dictionary')
 
-    def _parse_style_properties_dict(self, style):
+    def compute_viz(self, geom_type=None):
+        if isinstance(self._data, dict):
+            if geom_type and geom_type in self._data:
+                return self._parse_style_dict(self._data.get(geom_type))
+            else:
+                return self._parse_style_dict(self._data)
+        elif isinstance(self._data, str):
+            return self._data
+        else:
+            raise ValueError('`style` must be a string or a dictionary')
+
+    def _parse_style_dict(self, style):
         style_variables = []
         style_properties = []
 
@@ -74,7 +82,7 @@ class Style(object):
                             value=_convstr(variables.get(var))
                         )
                     )
-            elif prop in defaults._STYLE_PROPERTIES and style.get(prop) is not None:
+            elif prop in defaults.STYLE_PROPERTIES and style.get(prop) is not None:
                 style_properties.append(
                     '{name}: {value}'.format(
                         name=prop,
@@ -83,7 +91,7 @@ class Style(object):
                 )
             else:
                 raise ValueError('Style property "' + prop + '" is not valid. Valid style properties are: ' +
-                                 ', '.join(defaults._STYLE_PROPERTIES))
+                                 ', '.join(defaults.STYLE_PROPERTIES))
 
         return '\n'.join(style_variables).join(style_properties)
 

@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from tqdm import tqdm
 
-from .columns import normalize_names, normalize_name
+from .columns import Column, normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
 from .geojson import load_geojson
@@ -22,9 +22,6 @@ def set_default_context(context):
 
 
 class Dataset(object):
-    SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
-    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
-
     FAIL = 'fail'
     REPLACE = 'replace'
     APPEND = 'append'
@@ -36,6 +33,10 @@ class Dataset(object):
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
 
+    GEOM_TYPE_POINT = 'point'
+    GEOM_TYPE_LINE = 'line'
+    GEOM_TYPE_POLYGON = 'polygon'
+
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
@@ -46,16 +47,22 @@ class Dataset(object):
         self.gdf = gdf
 
         if not self._validate_init():
-            raise CartoException('Wrong Dataset creation. You should use one of the class methods:'
-                                 'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
         self.cc = context or default_context
 
-        if df is not None:
-            self.normalized_column_names = _normalize_column_names(df)
-        elif gdf is not None:
-            self.normalized_column_names = _normalize_column_names(gdf)
+        self.normalized_column_names = None
+        if self.df is not None:
+            _save_index_as_column(self.df)
+            self.normalized_column_names = _normalize_column_names(self.df)
+        elif self.gdf is not None:
+            _save_index_as_column(self.gdf)
+            self.normalized_column_names = _normalize_column_names(self.gdf)
+
+        if self.table_name != table_name:
+            warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
@@ -89,18 +96,19 @@ class Dataset(object):
             raise CartoException('You should provide a table_name and context to upload data.')
 
         if self.gdf is None and self.df is None and self.query is None:
-            raise CartoException('Nothing to upload.')
+            raise CartoException('Nothing to upload.'
+                                 'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
-        already_exists_error = NameError('Table with name {table_name} already exists in CARTO.'
-                                         ' Please choose a different `table_name` or use'
-                                         ' if_exists="replace" to overwrite it'.format(table_name=self.table_name))
+        already_exists_error = CartoException('Table with name {table_name} already exists in CARTO.'
+                                              'Please choose a different `table_name` or use'
+                                              'if_exists="replace" to overwrite it'.format(table_name=self.table_name))
 
         # priority order: gdf, df, query
         if self.gdf is not None:
             warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
 
         if self.df is not None:
-            if not self.exists() or if_exists == Dataset.REPLACE:
+            if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
@@ -108,7 +116,7 @@ class Dataset(object):
             self._copyfrom(with_lonlat)
 
         elif self.query is not None:
-            if not self.exists() or if_exists == Dataset.REPLACE:
+            if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
@@ -177,15 +185,17 @@ class Dataset(object):
         self.cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, self.df.columns, with_lonlat, geom_col)
+            self._rows(self.df, [c for c in self.df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
+            lng_val = None
+            lat_val = None
             for col in cols:
-                if with_lonlat and col in Dataset.SUPPORTED_GEOM_COL_NAMES:
+                if with_lonlat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
@@ -204,7 +214,7 @@ class Dataset(object):
                 geom = _decode_geom(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lonlat is not None:
+            if with_lonlat is not None and lng_val is not None and lat_val is not None:
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
@@ -244,9 +254,7 @@ class Dataset(object):
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
-        query_columns = list(table_columns.keys())
-        if 'the_geom_webmercator' in query_columns:
-            query_columns.remove('the_geom_webmercator')
+        query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
 
         if self.query is not None:
             query = 'SELECT {columns} FROM ({query}) _q'.format(
@@ -267,31 +275,81 @@ class Dataset(object):
         return query
 
     def get_table_columns(self):
-        """Get column names and types from a table or a query result"""
+        """Get column names and types from a table or query result"""
         if self.query is not None:
             query = 'SELECT * FROM ({}) _q limit 0'.format(self.query)
+            return get_columns(self.cc, query)
         else:
-            query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        return get_columns(self.cc, query)
+            query = '''
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_name = '{table}' AND table_schema = '{schema}'
+            '''.format(table=self.table_name, schema=self.schema)
+
+            try:
+                table_info = self.cc.sql_client.send(query)
+                return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+            except CartoException as e:
+                # this may happen when using the default_public API key
+                if str(e) == 'Access denied':
+                    query = '''
+                        SELECT *
+                        FROM "{schema}"."{table}" LIMIT 0
+                    '''.format(table=self.table_name, schema=self.schema)
+                    return get_columns(self.cc, query)
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
-        query = 'SELECT * FROM "{schema}"."{table}" limit 0'.format(table=self.table_name, schema=self.schema)
-        columns = get_columns(self.cc, query).keys()
+        columns = [c.name for c in self.get_table_columns()]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
 
         return columns
 
+    def compute_geom_type(self):
+        """Compute the geometry type from the data"""
 
-def get_columns(context, query):
-    """Get column names and types from a query"""
-    table_info = context.sql_client.send(query)
-    if 'fields' in table_info:
-        return table_info['fields']
+        if self.state == Dataset.STATE_REMOTE:
+            if self.query:
+                return self._get_remote_geom_type(self.query)
+            elif self.table_name and self.schema:
+                query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
+                return self._get_remote_geom_type(query)
 
-    return None
+        elif self.state == Dataset.STATE_LOCAL:
+            if self.gdf is not None:
+                return self._get_local_geom_type(self.gdf)
+
+    def _get_remote_geom_type(self, query):
+        """Fetch geom type of a remote table"""
+        if self.cc:
+            response = self.cc.sql_client.send('''
+                SELECT distinct ST_GeometryType(the_geom) AS geom_type
+                FROM ({}) q
+                LIMIT 5
+            '''.format(query))
+            if response and response.get('rows') and len(response.get('rows')) > 0:
+                st_geom_type = response.get('rows')[0].get('geom_type')
+                if st_geom_type:
+                    return self._map_geom_type(st_geom_type[3:])
+
+    def _get_local_geom_type(self, gdf):
+        """Compute geom type of the local dataframe"""
+        if len(gdf.geometry) > 0:
+            geom_type = gdf.geometry[0].type
+            if geom_type:
+                return self._map_geom_type(geom_type)
+
+    def _map_geom_type(self, geom_type):
+        return {
+            'Point': Dataset.GEOM_TYPE_POINT,
+            'MultiPoint': Dataset.GEOM_TYPE_POINT,
+            'LineString': Dataset.GEOM_TYPE_LINE,
+            'MultiLineString': Dataset.GEOM_TYPE_LINE,
+            'Polygon': Dataset.GEOM_TYPE_POLYGON,
+            'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
+        }[geom_type]
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
@@ -310,8 +368,22 @@ def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
             raise err
 
 
+def get_columns(context, query):
+    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
+    table_info = context.sql_client.send(col_query)
+    return Column.from_sql_api_fields(table_info['fields'])
+
+
+def _save_index_as_column(df):
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)
+
+
 def _normalize_column_names(df):
-    column_names = [c for c in df.columns if c not in Dataset.RESERVED_COLUMN_NAMES]
+    column_names = [c for c in df.columns if c not in Column.RESERVED_COLUMN_NAMES]
     normalized_columns = normalize_names(column_names)
 
     column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
@@ -333,9 +405,9 @@ def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
         'float64': 'numeric',
-        'int64': 'numeric',
+        'int64': 'integer',
         'float32': 'numeric',
-        'int32': 'numeric',
+        'int32': 'integer',
         'object': 'text',
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
@@ -348,7 +420,7 @@ def _get_geom_col_name(df):
     geom_col = getattr(df, '_geometry_column_name', None)
     if geom_col is None:
         try:
-            geom_col = next(x for x in df.columns if x.lower() in Dataset.SUPPORTED_GEOM_COL_NAMES)
+            geom_col = next(x for x in df.columns if x.lower() in Column.SUPPORTED_GEOM_COL_NAMES)
         except StopIteration:
             pass
 
@@ -418,35 +490,3 @@ def _decode_geom(ewkb):
                         except Exception:
                             pass
     return None
-
-
-def postprocess_dataframe(df, table_columns, decode_geom=False):
-    """Clean a DataFrame with a dataset from CARTO:
-        - use cartodb_id as DataFrame index
-        - process date and bool columns
-        - (optionally) decode geom as a `Shapely <https://github.com/Toblerity/Shapely>`__ object
-
-    Args:
-        df (pandas.DataFrame): DataFrame with a dataset from CARTO.
-        table_columns (dict): column names and types from a table.
-        decode_geom (bool, optional): Decodes CARTO's geometries into a
-            `Shapely <https://github.com/Toblerity/Shapely>`__
-            object that can be used, for example, in `GeoPandas
-            <http://geopandas.org/>`__.
-
-    Returns:
-        pandas.DataFrame
-    """
-    if 'cartodb_id' in df.columns:
-        df.set_index('cartodb_id', inplace=True)
-
-    for column_name in table_columns:
-        if table_columns[column_name]['type'] == 'date':
-            df[column_name] = pd.to_datetime(df[column_name], errors='ignore')
-        elif table_columns[column_name]['type'] == 'boolean':
-            df[column_name] = df[column_name].eq('t')
-
-    if decode_geom and 'the_geom' in df.columns:
-        df['geometry'] = df.the_geom.apply(_decode_geom)
-
-    return df
