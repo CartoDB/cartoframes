@@ -73,7 +73,7 @@ class Dataset(object):
 
     @classmethod
     def from_query(cls, query, context):
-        return cls(query=query, context=context, state=cls.STATE_REMOTE, is_sync=True)
+        return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_dataframe(cls, df):
