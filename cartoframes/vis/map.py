@@ -89,6 +89,24 @@ class Map(object):
                 basemap
             )
 
+        Color basemap style.
+
+        .. code::
+
+            from cartoframes import Context, set_default_context
+            from cartoframes.vis import Map, Layer, basemaps
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Map(
+                Layer('table in your account'),
+                basemap='yellow'  # None, False, 'white', 'rgb(255, 255, 0)'
+            )
+
         Custom bounds.
 
         .. code::
