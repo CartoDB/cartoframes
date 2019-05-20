@@ -7,7 +7,7 @@ class Popup(object):
     """Popup
 
     Args:
-        
+
 
     Example:
 
