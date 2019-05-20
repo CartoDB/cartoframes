@@ -92,10 +92,17 @@ function onReady() {
         let popupHTML = '';
         
         Object.keys(values).forEach((name) => {
-          const variable = feature.variables[name];
+          let value = feature.variables[name].value;
+          if (typeof value === 'number') {
+            if (Math.abs(value) > 1000) {
+              value = value.toExponential(2);
+            } else if (!Number.isInteger(value)) {
+              value = value.toFixed(2);
+            }
+          }
           popupHTML += `
             <p>${values[name]}</p>
-            <h3>${JSON.stringify(variable.value.toFixed(2))}</h3>
+            <h3>${value}</h3>
           `;
         });
         
