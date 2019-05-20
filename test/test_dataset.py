@@ -10,7 +10,7 @@ import warnings
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes import Dataset
+from cartoframes.dataset import Dataset, _decode_geom
 from cartoframes.columns import normalize_name
 
 from utils import _UserUrlLoader
@@ -257,6 +257,13 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
+
+    def test_decode_geom(self):
+        # Point (0, 0) without SRID
+        ewkb = '010100000000000000000000000000000000000000'
+        decoded_geom = _decode_geom(ewkb)
+        self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
+        self.assertIsNone(_decode_geom(None))
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)

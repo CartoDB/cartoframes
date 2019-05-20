@@ -147,6 +147,6 @@ from cartoframes import Layer
 cc.map(layers=Layer('brooklyn_poverty_w_rates', color='poverty_per_pop'))
 ```
 
-![](../img/guides/01-brooklyn_poverty.png)
+![](../../img/guides/01-brooklyn_poverty.png)
 
 Note: Legends are not yet implemented for stable releases of cartoframes. See [this pull request](https://github.com/CartoDB/cartoframes/pull/184) for more information.
