@@ -192,25 +192,25 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         err_msg = 'Nothing to upload. We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.'
-        with self.assertRaises(CartoException, msg=err_msg):
+        with self.assertRaises(ValueError, msg=err_msg):
             dataset.upload()
 
     def test_dataset_upload_validation_query_fails_without_table_name(self):
         query = 'SELECT 1'
         dataset = Dataset.from_query(query=query, context=self.cc)
-        with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
+        with self.assertRaises(ValueError, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
 
     def test_dataset_upload_validation_df_fails_without_table_name_and_context(self):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
-        with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
+        with self.assertRaises(ValueError, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
 
     def test_dataset_upload_validation_df_fails_without_context(self):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
-        with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
+        with self.assertRaises(ValueError, msg='You should provide a table_name and context to upload data.'):
             dataset.upload(table_name=self.test_write_table)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -231,7 +231,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
         error_msg = 'You should provide a context and a table_name or query to download data.'
-        with self.assertRaises(CartoException, msg=error_msg):
+        with self.assertRaises(ValueError, msg=error_msg):
             dataset.download()
 
         query = 'SELECT 1 as fakec'

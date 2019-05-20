@@ -93,11 +93,11 @@ class Dataset(object):
             self.cc = context
 
         if self.table_name is None or self.cc is None:
-            raise CartoException('You should provide a table_name and context to upload data.')
+            raise ValueError('You should provide a table_name and context to upload data.')
 
         if self.gdf is None and self.df is None and self.query is None:
-            raise CartoException('Nothing to upload.'
-                                 'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
+            raise ValueError('Nothing to upload.'
+                             'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
         already_exists_error = CartoException('Table with name {table_name} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
@@ -125,7 +125,7 @@ class Dataset(object):
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
         if self.cc is None or (self.table_name is None and self.query is None):
-            raise CartoException('You should provide a context and a table_name or query to download data.')
+            raise ValueError('You should provide a context and a table_name or query to download data.')
 
         # priority order: query, table
         table_columns = self.get_table_columns()
