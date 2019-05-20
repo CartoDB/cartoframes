@@ -70,7 +70,7 @@ class Style(object):
 
     def _parse_style_dict(self, style, ext_vars):
         style_vars = style.get('vars', {})
-        variables = dict(style_vars.items() + ext_vars.items())
+        variables = _merge_dicts(style_vars, ext_vars)
 
         serialized_variables = self._serialize_variables(variables)
         serialized_properties = self._serialize_properties(style)
@@ -111,3 +111,8 @@ class Style(object):
 def _convstr(obj):
     """Converts all types to strings or None"""
     return str(obj) if obj is not None else None
+
+def _merge_dicts(dict1, dict2):
+    d = dict1.copy()
+    d.update(dict2)
+    return d
