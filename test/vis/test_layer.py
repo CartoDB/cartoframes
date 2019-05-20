@@ -14,7 +14,6 @@ class TestLayer(unittest.TestCase):
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
         self.assertTrue(isinstance(layer.style, vis.Style))
-        self.assertEqual(layer.viz, '')
         self.assertIsNone(layer.interactivity)
         self.assertIsNone(layer.legend)
 
@@ -25,7 +24,6 @@ class TestLayer(unittest.TestCase):
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
         self.assertTrue(isinstance(layer.style, vis.Style))
-        self.assertEqual(layer.viz, '')
         self.assertIsNone(layer.interactivity)
         self.assertIsNone(layer.legend)
 

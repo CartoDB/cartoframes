@@ -157,6 +157,7 @@ class Source(object):
 
         self.context = self.dataset.cc
         self.credentials = _get_credentials(self.context)
+        self.geom_type = _get_geom_type(self.dataset)
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)
@@ -220,4 +221,8 @@ def _get_credentials(context):
             'base_url': context.creds.base_url()
         }
     else:
-        return defaults._CREDENTIALS
+        return defaults.CREDENTIALS
+
+
+def _get_geom_type(dataset):
+    return dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
