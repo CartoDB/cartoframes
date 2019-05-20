@@ -39,7 +39,9 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
+    def __init__(self, table_name=None, schema='public',
+                 query=None, df=None, gdf=None,
+                 state=None, is_sync=False, context=None):
         self.table_name = normalize_name(table_name)
         self.schema = schema
         self.query = query
@@ -50,8 +52,9 @@ class Dataset(object):
             raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self.state = state
         self.cc = context or default_context
+        self.state = state
+        self.is_sync = is_sync
 
         self.normalized_column_names = None
         if self.df is not None:
@@ -66,11 +69,11 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
-        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE, is_sync=True)
 
     @classmethod
     def from_query(cls, query, context):
-        return cls(query=query, context=context, state=cls.STATE_REMOTE)
+        return cls(query=query, context=context, state=cls.STATE_REMOTE, is_sync=True)
 
     @classmethod
     def from_dataframe(cls, df):
@@ -115,6 +118,7 @@ class Dataset(object):
                 raise already_exists_error
 
             self._copyfrom(with_lonlat)
+            self.is_sync = True
 
         elif self.query is not None:
             if if_exists == Dataset.APPEND:
@@ -122,6 +126,7 @@ class Dataset(object):
                                      'It is not possible to append data to a query')
             elif if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
+                self.is_sync = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
