@@ -77,6 +77,10 @@ function onReady() {
       }
     }
 
+    if (elem.legend) {
+      createLegend(layer, elem.legend, idx);
+    }
+
     function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
       interactivity.off('featureHover', (event) => {
           updatePopup(tempPopup, event, popupHeader, values)

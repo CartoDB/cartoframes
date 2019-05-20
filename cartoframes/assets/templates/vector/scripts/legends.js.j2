@@ -10,3 +10,17 @@ function createDefaultLegend(layers) {
     }
   )
 }
+
+function createLegend(layer, legendData, layerIndex) {
+  const element = document.querySelector(`#source${layerIndex}_legend`);
+
+  if (legendData.ramp) {
+    AsBridge.VL.Legends.rampLegend(
+      element,
+      layer,
+      legendData.ramp
+    );
+  } else {
+    // TODO: we don't have a bridge for this case, should this even be a case?
+  }
+}
