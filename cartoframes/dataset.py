@@ -46,8 +46,8 @@ class Dataset(object):
         self.gdf = gdf
 
         if not self._validate_init():
-            raise CartoException('Wrong Dataset creation. You should use one of the class methods:'
-                                 'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
         self.cc = context or default_context
@@ -89,7 +89,8 @@ class Dataset(object):
             raise CartoException('You should provide a table_name and context to upload data.')
 
         if self.gdf is None and self.df is None and self.query is None:
-            raise CartoException('Nothing to upload.')
+            raise CartoException('Nothing to upload.'
+                                 'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
         already_exists_error = NameError('Table with name {table_name} already exists in CARTO.'
                                          ' Please choose a different `table_name` or use'
@@ -108,7 +109,7 @@ class Dataset(object):
             self._copyfrom(with_lonlat)
 
         elif self.query is not None:
-            if not self.exists() or if_exists == Dataset.REPLACE:
+            if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error

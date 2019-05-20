@@ -94,26 +94,37 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
-    def test_dataset_constructor_validation(self):
+    def test_dataset_constructor_validation_fails_with_table_name_and_query(self):
         table_name = 'fake_table'
         schema = 'fake_schema'
         query = 'select * from fake_table'
-        df = {}
-        gdf = {}
-
-        with self.assertRaises(CartoException):
+        with self.assertRaises(ValueError):
             Dataset(table_name=table_name, schema=schema, query=query)
 
-        with self.assertRaises(CartoException):
+    def test_dataset_constructor_validation_fails_with_table_name_and_dataframe(self):
+        table_name = 'fake_table'
+        schema = 'fake_schema'
+        df = {}
+        with self.assertRaises(ValueError):
             Dataset(table_name=table_name, schema=schema, df=df)
 
-        with self.assertRaises(CartoException):
+    def test_dataset_constructor_validation_fails_with_table_name_and_geodataframe(self):
+        table_name = 'fake_table'
+        schema = 'fake_schema'
+        gdf = {}
+        with self.assertRaises(ValueError):
             Dataset(table_name=table_name, schema=schema, gdf=gdf)
 
-        with self.assertRaises(CartoException):
+    def test_dataset_constructor_validation_fails_with_query_and_dataframe(self):
+        query = 'select * from fake_table'
+        df = {}
+        with self.assertRaises(ValueError):
             Dataset(query=query, df=df)
 
-        with self.assertRaises(CartoException):
+    def test_dataset_constructor_validation_fails_with_dataframe_and_geodataframe(self):
+        df = {}
+        gdf = {}
+        with self.assertRaises(ValueError):
             Dataset(df=df, gdf=gdf)
 
     def test_dataset_from_table(self):
@@ -177,33 +188,39 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.cc)
         self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_dataset_upload_validations(self):
-        self.assertNotExistsTable(self.test_write_table)
-
+    def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
-        with self.assertRaises(CartoException, msg='Nothing to upload.'):
+        err_msg = 'Nothing to upload. We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.'
+        with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload()
 
+    def test_dataset_upload_validation_query_fails_without_table_name(self):
         query = 'SELECT 1'
         dataset = Dataset.from_query(query=query, context=self.cc)
         with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
 
-        dataset.upload(table_name=self.test_write_table)
-        with self.assertRaises(NameError):
-            dataset.upload(table_name=self.test_write_table)
-        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
-
+    def test_dataset_upload_validation_df_fails_without_table_name_and_context(self):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
         with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
+
+    def test_dataset_upload_validation_df_fails_without_context(self):
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset.from_dataframe(df=df)
         with self.assertRaises(CartoException, msg='You should provide a table_name and context to upload data.'):
             dataset.upload(table_name=self.test_write_table)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_dataset_upload_into_existing_table_fails_without_replace_property(self):
+        query = 'SELECT 1'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
         with self.assertRaises(NameError):
-            dataset.upload(table_name=self.test_write_table, context=self.cc)
+            dataset.upload(table_name=self.test_write_table)
+        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
