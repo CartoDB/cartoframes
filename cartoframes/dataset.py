@@ -99,9 +99,10 @@ class Dataset(object):
             raise CartoException('Nothing to upload.'
                                  'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
-        already_exists_error = CartoException('Table with name {table_name} already exists in CARTO.'
+        already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
-                                              'if_exists="replace" to overwrite it'.format(table_name=self.table_name))
+                                              'if_exists="replace" to overwrite it'.format(
+                                                    t=self.table_name, s=self.schema))
 
         # priority order: gdf, df, query
         if self.gdf is not None:

@@ -218,8 +218,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         query = 'SELECT 1'
         dataset = Dataset.from_query(query=query, context=self.cc)
         dataset.upload(table_name=self.test_write_table)
-        err_msg = ('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use'
-                   'if_exists="replace" to overwrite it').format(table_name=self.test_write_table)
+        err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
+                   'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table)
         dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
@@ -376,8 +376,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
-        err_msg = ('Table with name {table_name} already exists in CARTO. Please choose a different `table_name` or use'
-                   'if_exists="replace" to overwrite it').format(table_name=self.test_write_table)
+        err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
+                   'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
             dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
 
