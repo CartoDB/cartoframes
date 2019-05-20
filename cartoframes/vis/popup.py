@@ -7,7 +7,7 @@ class Popup(object):
     """Popup
 
     Args:
-        
+
 
     Example:
 
@@ -36,7 +36,7 @@ class Popup(object):
 
         self._get_vars(click_vars, self._click)
         self._get_vars(hover_vars, self._hover)
-    
+
         interactivity = []
 
         if len(self._click) > 0:
