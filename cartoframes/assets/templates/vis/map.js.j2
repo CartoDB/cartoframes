@@ -81,11 +81,11 @@ function onReady() {
 
         let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
         
-        Object.keys(values).reverse().forEach((name) => {
+        Object.keys(values).forEach((name) => {
           const variable = feature.variables[name];
           popupHTML += `
-            <h3 class="h3">${values[name]}</h3>
-            <p class="description open-sans">${JSON.stringify(variable.value)}</p>
+            <p class="description open-sans">${values[name]}</p>
+            <h3 class="h3">${JSON.stringify(variable.value)}</h3>
           `;
         });
         
