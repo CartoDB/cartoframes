@@ -87,6 +87,54 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
+    @property
+    def table_name(self):
+        return self._table_name
+
+    @table_name.setter
+    def table_name(self, value):
+        self._table_name = value
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @schema.setter
+    def schema(self, value):
+        self._schema = value
+
+    @property
+    def query(self):
+        return self._query
+
+    @query.setter
+    def query(self, value):
+        self._query = value
+
+    @property
+    def df(self):
+        return self._df
+
+    @df.setter
+    def df(self, value):
+        self._df = value
+
+    @property
+    def gdf(self):
+        return self._gdf
+
+    @gdf.setter
+    def gdf(self, value):
+        self._gdf = value
+
+    @property
+    def cc(self):
+        return self._cc
+
+    @cc.setter
+    def cc(self, value):
+        self._cc = value
+
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self.table_name = normalize_name(table_name)
