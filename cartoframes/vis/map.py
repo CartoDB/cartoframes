@@ -373,16 +373,23 @@ class HTMLMap(object):
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
+        basecolor = ''
 
-        if isinstance(basemap, dict):
+        if isinstance(basemap, str):
+            if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+                # Basemap is a color
+                basecolor = basemap
+                basemap = ''
+        elif isinstance(basemap, dict):
             token = basemap.get('token', '')
-            if 'style' not in basemap:
+            if 'style' in basemap:
+                basemap = basemap.get('style')
+                if not token and basemap.get('style').startswith('mapbox://'):
+                    warn('A Mapbox style usually needs a token')
+            else:
                 raise ValueError(
                     'If basemap is a dict, it must have a `style` key'
                 )
-            if not token and basemap.get('style').startswith('mapbox://'):
-                warn('A Mapbox style usually needs a token')
-            basemap = basemap.get('style')
 
         if (_airship_path is None):
             airship_components_path = defaults.AIRSHIP_COMPONENTS_PATH
@@ -409,6 +416,7 @@ class HTMLMap(object):
             height=size[1] if size is not None else None,
             sources=sources,
             basemap=basemap,
+            basecolor=basecolor,
             mapboxtoken=token,
             bounds=bounds,
             camera=camera,
