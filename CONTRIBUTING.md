@@ -42,7 +42,7 @@ CARTOframes documentation is located inline in the functions, classes, and metho
 
 ## Releases
 
-To release a new version of cartoframes, create a new branch off of `master` called `vX.Y.Z_release`, where `X.Y.Z` should be replaced with the specific version to be released (e.g., 0.10.1). After this branch is created, update the following files:
+To release a new version of CARTOframes, create a new branch off of `master` called `vX.Y.Z_release`, where `X.Y.Z` should be replaced with the specific version to be released (e.g., 0.10.1). After this branch is created, update the following files:
 
 1. ``cartoframes/__version__.py`` should have the newest version number in the ``__version__`` variable
 2. NEWS.rst should be updated with all of the changes happening in this version. It should include the release number and the date of the release. Looking at merged pull requests sorted by last updated is a good way to ensure features are not missed.
