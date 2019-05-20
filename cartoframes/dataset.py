@@ -40,13 +40,16 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
-        # TODO: error control (https://github.com/CartoDB/cartoframes/issues/669)
-
         self.table_name = normalize_name(table_name)
         self.schema = schema
         self.query = query
         self.df = df
         self.gdf = gdf
+
+        if not self._validate_init():
+            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
         self.state = state
         self.cc = context or default_context
 
@@ -62,70 +65,77 @@ class Dataset(object):
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
-    def from_table(cls, table_name, schema='public', context=None):
-        return cls(
-            table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
+    def from_table(cls, table_name, context, schema='public'):
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
-    def from_query(cls, query, context=None):
-        return cls(
-            query=query, context=context, state=cls.STATE_REMOTE)
+    def from_query(cls, query, context):
+        return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
-    def from_dataframe(cls, df, table_name=None, schema='public', context=None):
-        return cls(
-            df=df, table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_dataframe(cls, df):
+        return cls(df=df, state=cls.STATE_LOCAL)
 
     @classmethod
-    def from_geodataframe(cls, gdf, table_name=None, schema='public', context=None):
-        return cls(
-            gdf=gdf, table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_geodataframe(cls, gdf):
+        return cls(gdf=gdf, state=cls.STATE_LOCAL)
 
     @classmethod
-    def from_geojson(cls, geojson, table_name=None, schema='public', context=None):
-        return cls(
-            gdf=load_geojson(geojson), table_name=table_name, schema=schema, context=context, state=cls.STATE_LOCAL)
+    def from_geojson(cls, geojson):
+        return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    @staticmethod
-    def create_from_query(context, query, table_name):
-        dataset = Dataset.from_table(table_name=table_name, context=context)
-        dataset.cc.batch_sql_client \
-               .create_and_wait_for_completion(
-                   '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                   .format(drop=dataset._drop_table_query(),
-                           create=dataset._create_table_from_query(query),
-                           cartodbfy=dataset._cartodbfy_query()))
+    def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
+        if table_name:
+            self.table_name = normalize_name(table_name)
+        if schema:
+            self.schema = schema
+        if context:
+            self.cc = context
 
-        return dataset
+        if self.table_name is None or self.cc is None:
+            raise ValueError('You should provide a table_name and context to upload data.')
 
-    def upload(self, with_lonlat=None, if_exists='fail'):
-        if self.query and self.table_name is not None and not self.exists():
-            self.cc.batch_sql_client.create_and_wait_for_completion(
-                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                .format(drop=self._drop_table_query(),
-                        create=self._create_table_from_query(self.query),
-                        cartodbfy=self._cartodbfy_query()))
-        else:
-            if self.df is None:
-                raise ValueError('You have to create a `Dataset` with a pandas.DataFrame to upload it to CARTO')
+        if self.gdf is None and self.df is None and self.query is None:
+            raise ValueError('Nothing to upload.'
+                             'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
-            if not self.exists():
+        already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
+                                              'Please choose a different `table_name` or use'
+                                              'if_exists="replace" to overwrite it'.format(
+                                                    t=self.table_name, s=self.schema))
+
+        # priority order: gdf, df, query
+        if self.gdf is not None:
+            warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+
+        if self.df is not None:
+            if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
-            else:
-                if if_exists == Dataset.FAIL:
-                    raise NameError(('Table with name {table_name} already exists in CARTO.'
-                                     ' Please choose a different `table_name` or use'
-                                     ' if_exists="replace" to overwrite it').format(table_name=self.table_name))
-                elif if_exists == Dataset.REPLACE:
-                    self._create_table(with_lonlat)
+            elif if_exists == Dataset.FAIL:
+                raise already_exists_error
+
             self._copyfrom(with_lonlat)
+
+        elif self.query is not None:
+            if if_exists == Dataset.APPEND:
+                raise CartoException('Error using append with a query Dataset.'
+                                     'It is not possible to append data to a query')
+            elif if_exists == Dataset.REPLACE or not self.exists():
+                self._create_table_from_query()
+            elif if_exists == Dataset.FAIL:
+                raise already_exists_error
 
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+        if self.cc is None or (self.table_name is None and self.query is None):
+            raise ValueError('You should provide a context and a table_name or query to download data.')
+
+        # priority order: query, table
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
-        return self.cc.fetch(query, decode_geom=decode_geom)
+        self.df = self.cc.fetch(query, decode_geom=decode_geom)
+        return self.df
 
     def delete(self):
         if self.exists():
@@ -157,6 +167,15 @@ class Dataset(object):
 
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
+
+    def _validate_init(self):
+        inputs = [self.table_name, self.query, self.df, self.gdf]
+        inputs_number = sum(x is not None for x in inputs)
+
+        if inputs_number != 1:
+            return False
+
+        return True
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
@@ -210,9 +229,15 @@ class Dataset(object):
             table_name=self.table_name,
             if_exists='IF EXISTS' if if_exists else '')
 
-    def _create_table_from_query(self, query):
-        create_query = '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=query)
-        return create_query
+    def _create_table_from_query(self):
+        self.cc.batch_sql_client.create_and_wait_for_completion(
+                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                .format(drop=self._drop_table_query(),
+                        create=self._get_query_to_create_table_from_query(),
+                        cartodbfy=self._cartodbfy_query()))
+
+    def _get_query_to_create_table_from_query(self):
+        return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=self.query)
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
@@ -235,10 +260,15 @@ class Dataset(object):
         """Create the read (COPY TO) query"""
         query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
 
-        query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
-            table_name=self.table_name,
-            schema=self.schema,
-            columns=', '.join(query_columns))
+        if self.query is not None:
+            query = 'SELECT {columns} FROM ({query}) _q'.format(
+                query=self.query,
+                columns=', '.join(query_columns))
+        else:
+            query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
+                table_name=self.table_name,
+                schema=self.schema,
+                columns=', '.join(query_columns))
 
         if limit is not None:
             if isinstance(limit, int) and (limit >= 0):
@@ -249,24 +279,28 @@ class Dataset(object):
         return query
 
     def get_table_columns(self):
-        """Get column names and types from a table"""
-        query = '''
-            SELECT column_name, data_type
-            FROM information_schema.columns
-            WHERE table_name = '{table}' AND table_schema = '{schema}'
-        '''.format(table=self.table_name, schema=self.schema)
+        """Get column names and types from a table or query result"""
+        if self.query is not None:
+            query = 'SELECT * FROM ({}) _q limit 0'.format(self.query)
+            return get_columns(self.cc, query)
+        else:
+            query = '''
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_name = '{table}' AND table_schema = '{schema}'
+            '''.format(table=self.table_name, schema=self.schema)
 
-        try:
-            table_info = self.cc.sql_client.send(query)
-            return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
-        except CartoException as e:
-            # this may happen when using the default_public API key
-            if str(e) == 'Access denied':
-                query = '''
-                    SELECT *
-                    FROM "{schema}"."{table}" LIMIT 0
-                '''.format(table=self.table_name, schema=self.schema)
-                return get_columns(self.cc, query)
+            try:
+                table_info = self.cc.sql_client.send(query)
+                return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+            except CartoException as e:
+                # this may happen when using the default_public API key
+                if str(e) == 'Access denied':
+                    query = '''
+                        SELECT *
+                        FROM "{schema}"."{table}" LIMIT 0
+                    '''.format(table=self.table_name, schema=self.schema)
+                    return get_columns(self.cc, query)
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""

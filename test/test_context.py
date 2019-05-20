@@ -286,7 +286,9 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(resp['rows'][0]['count'], len(df))
 
         # should error for existing table
-        with self.assertRaises(NameError):
+        err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
+                   'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
+        with self.assertRaises(CartoException, msg=err_msg):
             cc.write(df, self.test_read_table, overwrite=False)
 
         # overwrite table and create the_geom column
