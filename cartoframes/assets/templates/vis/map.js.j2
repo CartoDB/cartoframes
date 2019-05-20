@@ -65,43 +65,43 @@ function onReady() {
 
       for (const { event, values } of elem.interactivity) {
         if (event === 'click') {
-          setPopupsClick(tempPopup, interactivity, '', values);
+          setPopupsClick(tempPopup, interactivity, values);
         }
         if (event === 'hover') {
-          setPopupsHover(tempPopup, interactivity, '', values);
+          setPopupsHover(tempPopup, interactivity, values);
         }
       }
     }
 
-    function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
+    function setPopupsClick(tempPopup, interactivity, values) {
       interactivity.on('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
+          updatePopup(tempPopup, event, values)
       });
     }
     
-    function setPopupsHover(tempPopup, interactivity, popupHeader, values) {
+    function setPopupsHover(tempPopup, interactivity, values) {
       interactivity.on('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
+          updatePopup(tempPopup, event, values)
       });
     }
 
-    function updatePopup(layer_popup, event, popupHeader, values) {
+    function updatePopup(layer_popup, event, values) {
       if (event.features.length > 0) {
         const feature = event.features[0];
 
-        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
+        let popupHTML = '';
         
         Object.keys(values).forEach((name) => {
           const variable = feature.variables[name];
           popupHTML += `
-            <p class="description open-sans">${values[name]}</p>
-            <h3 class="h3">${JSON.stringify(variable.value)}</h3>
+            <p>${values[name]}</p>
+            <h3>${JSON.stringify(variable.value.toFixed(2))}</h3>
           `;
         });
         
         layer_popup
             .setLngLat([event.coordinates.lng, event.coordinates.lat])
-            .setHTML(`<div>${popupHTML}</div>`);
+            .setHTML(`<div class="popup-content">${popupHTML}</div>`);
         
         if (!layer_popup.isOpen()) {
           layer_popup.addTo(map);

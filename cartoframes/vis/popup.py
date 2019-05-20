@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
-import hashlib
+from ..utils import gen_variable_name
 
 
 class Popup(object):
     """Popup
 
     Args:
-
+        
 
     Example:
 
@@ -61,15 +61,5 @@ class Popup(object):
 
     def _get_vars(self, output, array):
         for value in array:
-            name = _gen_variable_name(value)
+            name = gen_variable_name(value)
             output[name] = value
-
-
-def _gen_variable_name(value):
-    return 'v' + _get_hash(value)[:6]
-
-
-def _get_hash(text):
-    h = hashlib.sha1()
-    h.update(text.encode('utf-8'))
-    return h.hexdigest()
