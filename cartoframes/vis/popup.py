@@ -14,21 +14,21 @@ class Popup(object):
     """
 
     def __init__(self, data=None):
-        if data is None:
-            self._click = []
-            self._hover = []
-    
-        elif isinstance(data, dict):
-            # TODO: error control
+        self._click = []
+        self._hover = []
 
-            if 'click' in data:
-                self._click = data.get('click', [])
+        if data is not None:
+            if isinstance(data, dict):
+                # TODO: error control
 
-            if 'hover' in data:
-                self._hover = data.get('hover', [])
+                if 'click' in data:
+                    self._click = data.get('click', [])
 
-        else:
-            raise ValueError('Wrong popup input')
+                if 'hover' in data:
+                    self._hover = data.get('hover', [])
+
+            else:
+                raise ValueError('Wrong popup input')
 
     def get_interactivity(self):
         click_vars = {}
@@ -59,12 +59,10 @@ class Popup(object):
         self._get_vars(variables, self._hover)
         return variables
 
-    def _get_vars(self, array, output):
-        variables = {}
+    def _get_vars(self, output, array):
         for value in array:
             name = _gen_variable_name(value)
-            variables[name] = value
-        return variables
+            output[name] = value
 
 
 def _gen_variable_name(value):

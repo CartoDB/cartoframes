@@ -81,7 +81,7 @@ function onReady() {
 
         let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
         
-        Object.keys(values).forEach((name) => {
+        Object.keys(values).reverse().forEach((name) => {
           const variable = feature.variables[name];
           popupHTML += `
             <h3 class="h3">${values[name]}</h3>
