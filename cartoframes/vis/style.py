@@ -94,17 +94,18 @@ class Style(object):
     def _serialize_properties(self, properties={}):
         output = ''
         for prop in properties:
+            if prop == 'vars':
+                continue
             if prop not in defaults.STYLE_PROPERTIES:
                 raise ValueError(
                     'Style property "{0}" is not valid. Valid style properties are: {1}'.format(
                         prop,
                         ', '.join(defaults.STYLE_PROPERTIES)
                     ))
-            if prop != 'vars':
-                output += '{name}: {value}\n'.format(
-                    name=prop,
-                    value=_convstr(properties.get(prop))
-                )
+            output += '{name}: {value}\n'.format(
+                name=prop,
+                value=_convstr(properties.get(prop))
+            )
         return output
 
 
