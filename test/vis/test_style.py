@@ -59,7 +59,7 @@ class TestStyle(unittest.TestCase):
         defaults = 'width: ramp(linear(zoom(),0,18),[0.5,4])\n'
         expected = variables + defaults + '@var: 1\ncolor: red'
         self.assertEqual(style.compute_viz('line', {
-            'mimi': '123',
+            'mimi': '$pop',
             'momo': 123
         }), expected)
 
@@ -77,7 +77,7 @@ class TestStyle(unittest.TestCase):
         defaults = 'strokeColor: opacity(#2c2c2c,ramp(linear(zoom(),2,18),[0.2,0.6]))\n'
         expected = '@var: 1\n' + variables + 'color: red\nstrokeWidth: 0\n' + defaults
         self.assertEqual(style.compute_viz('polygon', {
-            'mimi': '123',
+            'mimi': '$pop',
             'momo': 123
         }), expected)
 
