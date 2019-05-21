@@ -6,6 +6,7 @@ from cartoframes.dataobs import get_countrytag
 
 class TestUtils(unittest.TestCase):
     """Tests for functions in utils module"""
+
     def setUp(self):
         pass
 
