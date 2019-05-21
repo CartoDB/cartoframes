@@ -60,7 +60,7 @@ class TestMapLayer(unittest.TestCase):
         layer = vis.Layer(
             source_1,
             popup={
-                'click': ['$pop'],
+                'click': ['$pop', '$name'],
                 'hover': [{
                     'label': 'Pop',
                     'value': '$pop'
@@ -74,6 +74,9 @@ class TestMapLayer(unittest.TestCase):
             'attrs': [{
                 'name': 'v559339',
                 'label': '$pop'
+            }, {
+                'name': 'v8e0f74',
+                'label': '$name'
             }]
         }, {
             'event': 'hover',
