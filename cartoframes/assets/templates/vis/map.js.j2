@@ -60,54 +60,55 @@ function onReady() {
         closeOnClick: false
       });
 
-      const { event, header, values} = elem.interactivity;
+      interactivity.off('featureHover');
+      interactivity.off('featureClick');
 
-      if (event === 'click') {
-        setPopupsClick(tempPopup, interactivity, header, values);
-      } else if (event === 'hover') {
-        setPopupsHover(tempPopup, interactivity, header, values);
+      for (const { event, attrs } of elem.interactivity) {
+        if (event === 'click') {
+          setPopupsClick(tempPopup, interactivity, attrs);
+        }
+        if (event === 'hover') {
+          setPopupsHover(tempPopup, interactivity, attrs);
+        }
       }
     }
 
-    function setPopupsClick(tempPopup, interactivity, popupHeader, values) {
-      interactivity.off('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
-      });
+    function setPopupsClick(tempPopup, interactivity, attrs) {
       interactivity.on('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
+          updatePopup(tempPopup, event, attrs)
       });
     }
     
-    function setPopupsHover(tempPopup, interactivity, popupHeader, values) {
-      interactivity.off('featureClick', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
-      });
+    function setPopupsHover(tempPopup, interactivity, attrs) {
       interactivity.on('featureHover', (event) => {
-          updatePopup(tempPopup, event, popupHeader, values)
+          updatePopup(tempPopup, event, attrs)
       });
     }
 
-    function updatePopup(layer_popup, event, popupHeader, values) {
+    function updatePopup(layer_popup, event, attrs) {
       if (event.features.length > 0) {
         const feature = event.features[0];
-        const variables = values && values.length
-          ? Object.keys(feature.variables).filter(variable => values.includes(variable))
-          : Object.keys(feature.variables);
 
-        let popupHTML = popupHeader ? `<h1>${popupHeader}</h1>` : ``;
+        let popupHTML = '';
         
-        Object.keys(feature.variables).forEach((name) => {
-            const variable = feature.variables[name];
-
-            popupHTML += `
-              <h3 class="h3">${name}</h3>
-              <p class="description open-sans">${JSON.stringify(variable.value)}</p>
-            `;
+        attrs.forEach((item) => {
+          let value = feature.variables[item.name].value;
+          if (typeof value === 'number') {
+            if (Math.abs(value) > 1000) {
+              value = value.toExponential(2);
+            } else if (!Number.isInteger(value)) {
+              value = value.toFixed(2);
+            }
+          }
+          popupHTML += `
+            <span class="popup-name">${item.label}</span>
+            <span class="popup-value">${value}</span>
+          `;
         });
         
         layer_popup
             .setLngLat([event.coordinates.lng, event.coordinates.lat])
-            .setHTML(`<div>${popupHTML}</div>`);
+            .setHTML(`<div class="popup-content">${popupHTML}</div>`);
         
         if (!layer_popup.isOpen()) {
           layer_popup.addTo(map);
