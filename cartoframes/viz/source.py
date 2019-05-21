@@ -39,7 +39,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Source
 
             context = Context(
@@ -54,7 +54,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Source
 
             context = Context(
@@ -69,7 +69,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Source
 
             context = Context(
@@ -84,7 +84,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Source
             from cartoframes import Dataset
 
@@ -102,7 +102,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context
+            from cartoframes.auth import Context
             from cartoframes.viz import Source
 
             context = Context(
@@ -116,7 +116,7 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Source
 
             context = Context(

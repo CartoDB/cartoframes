@@ -30,7 +30,7 @@ class Layer(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Layer
 
             context = Context(
@@ -52,7 +52,7 @@ class Layer(object):
 
         .. code::
 
-            from cartoframes import Context
+            from cartoframes.auth import Context
             from cartoframes.viz import Layer
 
             context = Context(

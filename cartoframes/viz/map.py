@@ -36,7 +36,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Map, Layer
 
             context = Context(
@@ -51,7 +51,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
@@ -70,7 +70,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
@@ -93,7 +93,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
@@ -111,7 +111,7 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
+            from cartoframes.auth import Context, set_default_context
             from cartoframes.viz import Map, Layer
 
             context = Context(
