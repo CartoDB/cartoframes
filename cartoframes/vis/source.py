@@ -180,7 +180,7 @@ class Source(object):
             if self.dataset._query:
                 self.query = self.dataset._query
             else:
-                self.query = _format_query(self.dataset._table_name, self.dataset._schema)
+                self.query = _format_query(self.dataset.get_table_name(), self.dataset._schema)
         elif self.dataset._state == Dataset.STATE_LOCAL:
             if self.dataset.get_geodataframe():
                 self.query = get_encoded_data(self.dataset.get_geodataframe())
