@@ -56,29 +56,46 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
             ]
         }
 
-        self.create_dataset_mock()
+        self.create_dataset_class_mock()
 
-    def create_dataset_mock(self):
+    def tearDown(self):
+        self.restore_dataset_class()
+
+    def create_dataset_class_mock(self):
+        self.previous_dataset = {}
+
         def mock_download(self):
             self.df = pd.DataFrame({'column_name': [1]})
             return self.df
+        self.previous_dataset['download'] = Dataset.download
         Dataset.download = mock_download
 
         def mock_copyfrom(self, _):
             return True
+        self.previous_dataset['_copyfrom'] = Dataset._copyfrom
         Dataset._copyfrom = mock_copyfrom
 
         def mock_create_table(self, _):
             return True
+        self.previous_dataset['_create_table'] = Dataset._create_table
         Dataset._create_table = mock_create_table
 
         def mock_create_table_from_query(self):
             return True
+        self.previous_dataset['_create_table_from_query'] = Dataset._create_table_from_query
         Dataset._create_table_from_query = mock_create_table_from_query
 
         def mock_exists(self):
             return False
+        self.previous_dataset['exists'] = Dataset.exists
         Dataset.exists = mock_exists
+
+    def restore_dataset_class(self):
+        Dataset.download = self.previous_dataset['download']
+        Dataset._copyfrom = self.previous_dataset['_copyfrom']
+        Dataset._create_table = self.previous_dataset['_create_table']
+        Dataset._create_table_from_query = self.previous_dataset['_create_table_from_query']
+        Dataset.exists = self.previous_dataset['exists']
 
     def test_dataset_sync_from_table(self):
         table_name = 'fake_table'
