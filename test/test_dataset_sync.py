@@ -15,6 +15,7 @@ from utils import _UserUrlLoader
 
 warnings.filterwarnings("ignore")
 
+
 class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -78,7 +79,6 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
         def mock_exists(self):
             return False
         Dataset.exists = mock_exists
-
 
     def test_dataset_sync_from_table(self):
         table_name = 'fake_table'
