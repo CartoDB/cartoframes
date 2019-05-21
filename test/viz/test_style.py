@@ -1,5 +1,5 @@
 import unittest
-from cartoframes import vis
+from cartoframes.viz import Style
 
 DEFAULT_STYLE_POINT = '''color: hex("#EE4D5A")
 width: ramp(linear(zoom(),0,18),[2,10])
@@ -9,26 +9,26 @@ strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,1]))
 
 class TestStyle(unittest.TestCase):
     def test_is_style_defined(self):
-        """vis.Style"""
-        self.assertNotEqual(vis.Style, None)
+        """Style"""
+        self.assertNotEqual(Style, None)
 
     def test_style_default(self):
-        """vis.Style.compute_viz should return the default viz without params"""
-        style = vis.Style()
+        """Style.compute_viz should return the default viz without params"""
+        style = Style()
 
         self.assertEqual(style.compute_viz('point'), DEFAULT_STYLE_POINT)
 
     def test_style_string(self):
-        """vis.Style.compute_viz should return the viz from a string with defaults"""
-        style = vis.Style('@var: 1\ncolor: red')
+        """Style.compute_viz should return the viz from a string with defaults"""
+        style = Style('@var: 1\ncolor: red')
 
         defaults = 'width: ramp(linear(zoom(),0,18),[0.5,4])\n'
         expected = defaults + '@var: 1\ncolor: red'
         self.assertEqual(style.compute_viz('line'), expected)
 
     def test_style_dict(self):
-        """vis.Style.compute_viz should return the viz from a dict with defaults"""
-        style = vis.Style({
+        """Style.compute_viz should return the viz from a dict with defaults"""
+        style = Style({
             'vars': {
                 'var': 1
             },
@@ -41,8 +41,8 @@ class TestStyle(unittest.TestCase):
         self.assertEqual(style.compute_viz('polygon'), expected)
 
     def test_style_default_variables(self):
-        """vis.Style.compute_viz should return the default viz with the variables"""
-        style = vis.Style()
+        """Style.compute_viz should return the default viz with the variables"""
+        style = Style()
 
         variables = '@mimi: $pop\n@momo: 123\n'
         expected = variables + DEFAULT_STYLE_POINT
@@ -52,8 +52,8 @@ class TestStyle(unittest.TestCase):
         }), expected)
 
     def test_style_string_variables(self):
-        """vis.Style.compute_viz should return the string viz with the variables"""
-        style = vis.Style('@var: 1\ncolor: red')
+        """Style.compute_viz should return the string viz with the variables"""
+        style = Style('@var: 1\ncolor: red')
 
         variables = '@mimi: $pop\n@momo: 123\n'
         defaults = 'width: ramp(linear(zoom(),0,18),[0.5,4])\n'
@@ -64,8 +64,8 @@ class TestStyle(unittest.TestCase):
         }), expected)
 
     def test_style_dict_variables(self):
-        """vis.Style.compute_viz should return the dict viz with the variables"""
-        style = vis.Style({
+        """Style.compute_viz should return the dict viz with the variables"""
+        style = Style({
             'vars': {
                 'var': 1
             },
@@ -82,6 +82,6 @@ class TestStyle(unittest.TestCase):
         }), expected)
 
     def test_wrong_attribute(self):
-        """vis.Style should raise an error if style property is not valid"""
+        """Style should raise an error if style property is not valid"""
         with self.assertRaises(ValueError):
-            vis.Style({'wrong': 'red'}).compute_viz('point')
+            Style({'wrong': 'red'}).compute_viz('point')

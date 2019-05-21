@@ -11,18 +11,18 @@ class Layer(object):
 
     Args:
         source (str, :py:class:`Dataset <cartoframes.Dataset>`,
-          :py:class:`Source <cartoframes.vis.Source>`): The source data.
-        style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
+          :py:class:`Source <cartoframes.viz.Source>`): The source data.
+        style (str, dict, :py:class:`Style <cartoframes.viz.Style>`,
           optional): The style of the visualization: `CARTO VL styling
           <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
-        popup (dict, :py:class:`Popup <cartoframes.vis.Popup>`, optional):
+        popup (dict, :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           This option adds interactivity (click and hover) to a layer to show popups.
           The columns to be shown must be added in a list format for each event. It
           must be written using `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
         context (:py:class:`Context <cartoframes.Context>`):
           A Context instance. This is only used for the simplified Source API.
-          When a :py:class:`Source <cartoframes.vis.Source>` is pased as source,
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           this context is simply ignored. If not provided the context will be
           automatically obtained from the default context.
 
@@ -31,7 +31,7 @@ class Layer(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Layer
+            from cartoframes.viz import Layer
 
             context = Context(
                 base_url='https://cartovl.carto.com/',
@@ -53,7 +53,7 @@ class Layer(object):
         .. code::
 
             from cartoframes import Context
-            from cartoframes.vis import Layer
+            from cartoframes.viz import Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',

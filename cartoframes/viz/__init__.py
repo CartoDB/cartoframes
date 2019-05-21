@@ -2,7 +2,7 @@
 .. code::
     from cartoframes import set_default_context
     from cartoframes.examples import example_context
-    from cartoframes.vis import Map, Layer
+    from cartoframes.viz import Map, Layer
 
     set_default_context(example_context)
 

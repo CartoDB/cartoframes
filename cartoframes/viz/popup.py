@@ -17,7 +17,7 @@ class Popup(object):
         Show columns.
 
         .. code::
-            from cartoframes.vis import Popup
+            from cartoframes.viz import Popup
 
             Popup({
                 'hover': ['$name'],
@@ -27,7 +27,7 @@ class Popup(object):
         Show expressions.
 
         .. code::
-            from cartoframes.vis import Popup
+            from cartoframes.viz import Popup
 
             Popup({
                 'click': ['$pop_min % 100', 'sqrt($pop_max)']
@@ -36,7 +36,7 @@ class Popup(object):
         Show labels.
 
         .. code::
-            from cartoframes.vis import Popup
+            from cartoframes.viz import Popup
 
             Popup({
                 'hover': [{

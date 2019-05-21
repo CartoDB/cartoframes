@@ -252,7 +252,7 @@ To import an experimental feature, like new vector maps, do the following:
 .. code:: python
 
     from cartoframes import Context
-    from cartoframes.vis import Map, Layer
+    from cartoframes.viz import Map, Layer
 
     context = Context()
     Map(Layer('<table name>', '<carto vl style>', context=context))

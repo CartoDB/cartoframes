@@ -18,7 +18,7 @@ class Map(object):
 
     Args:
         layers (list of Layer-types): List of layers. One or more of
-          :py:class:`Layer <cartoframes.vis.Layer>`.
+          :py:class:`Layer <cartoframes.viz.Layer>`.
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
@@ -37,7 +37,7 @@ class Map(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer
+            from cartoframes.viz import Map, Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -52,7 +52,7 @@ class Map(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -71,7 +71,7 @@ class Map(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -94,7 +94,7 @@ class Map(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -112,7 +112,7 @@ class Map(object):
         .. code::
 
             from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer
+            from cartoframes.viz import Map, Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -376,7 +376,7 @@ class HTMLMap(object):
         self._env.filters['clear_none'] = _clear_none_filter
 
         self.html = None
-        self._template = self._env.get_template('vis/basic.html.j2')
+        self._template = self._env.get_template('viz/basic.html.j2')
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,

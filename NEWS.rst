@@ -19,7 +19,7 @@ Updates
     .from_dataframe(data)
   - Add set_default_context methods
   - Add Context in cartoframes namespace
-  - Add Map, Layer, Source, Style in cartoframes.vis namespace
+  - Add Map, Layer, Source, Style in cartoframes.viz namespace
   - Use sources' context (credentials, bounds)
   - Fix Style class API for variables
   - Remove Dataset, SQL, GeoJSON sources
