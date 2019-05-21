@@ -18,7 +18,7 @@ class Layer(object):
         popup (dict, :py:class:`Popup <cartoframes.vis.Popup>`, optional):
           This option adds interactivity (click and hover) to a layer to show popups.
           The columns to be shown must be added in a list format for each event. It
-          must be written using `CARTL VL expressions syntax
+          must be written using `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
         context (:py:class:`Context <cartoframes.Context>`):
           A Context instance. This is only used for the simplified Source API.

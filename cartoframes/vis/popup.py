@@ -9,7 +9,7 @@ class Popup(object):
     Args:
         data (dict): The popup definition for a layer. It contains the information
           to show a popup on 'click' and 'hover' events with the attributes provided
-          in the definition using the `VL expressions syntax
+          in the definition using the `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
 
     Example:
@@ -103,12 +103,10 @@ class Popup(object):
         return output
 
     def get_variables(self):
-        variables = {}
-        self._get_vars(variables, self._click)
-        self._get_vars(variables, self._hover)
-        return variables
+        return self._get_vars(self._click + self._hover)
 
-    def _get_vars(self, output, array):
+    def _get_vars(self, array):
+        output = {}
         for item in array:
             if item:
                 if isinstance(item, str):
@@ -119,3 +117,4 @@ class Popup(object):
                     output[name] = item.get('value')
                 else:
                     raise ValueError('Wrong popup input')
+        return output
