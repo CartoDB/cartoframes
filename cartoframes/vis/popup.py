@@ -87,18 +87,19 @@ class Popup(object):
     def _get_attrs(self, array):
         output = []
         for item in array:
-            if isinstance(item, str):
-                output.append({
-                    'name': gen_variable_name(item),
-                    'label': item
-                })
-            elif isinstance(item, dict) and 'value' in item:
-                output.append({
-                    'name': gen_variable_name(item.get('value')),
-                    'label': item.get('label')
-                })
-            else:
-                raise ValueError('Wrong popup input')
+            if item:
+                if isinstance(item, str):
+                    output.append({
+                        'name': gen_variable_name(item),
+                        'label': item
+                    })
+                elif isinstance(item, dict) and 'value' in item:
+                    output.append({
+                        'name': gen_variable_name(item.get('value')),
+                        'label': item.get('label')
+                    })
+                else:
+                    raise ValueError('Wrong popup input')
         return output
 
     def get_variables(self):
@@ -109,11 +110,12 @@ class Popup(object):
 
     def _get_vars(self, output, array):
         for item in array:
-            if isinstance(item, str):
-                name = gen_variable_name(item)
-                output[name] = item
-            elif isinstance(item, dict) and 'value' in item:
-                name = gen_variable_name(item.get('value'))
-                output[name] = item.get('value')
-            else:
-                raise ValueError('Wrong popup input')
+            if item:
+                if isinstance(item, str):
+                    name = gen_variable_name(item)
+                    output[name] = item
+                elif isinstance(item, dict) and 'value' in item:
+                    name = gen_variable_name(item.get('value'))
+                    output[name] = item.get('value')
+                else:
+                    raise ValueError('Wrong popup input')

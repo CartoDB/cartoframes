@@ -43,8 +43,8 @@ class Layer(object):
                 'SELECT * FROM populated_places WHERE adm0name = "Spain"',
                 'color: "red"',
                 popup={
-                    'hover': ['name'],
-                    'click': ['name', 'pop_max', 'pop_min']
+                    'hover': ['$name'],
+                    'click': ['$name', '$pop_max', '$pop_min']
                 }
             )
 
