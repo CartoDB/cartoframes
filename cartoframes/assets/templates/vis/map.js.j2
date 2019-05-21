@@ -91,8 +91,8 @@ function onReady() {
 
         let popupHTML = '';
         
-        Object.keys(values).forEach((name) => {
-          let value = feature.variables[name].value;
+        values.forEach((item) => {
+          let value = feature.variables[item.name].value;
           if (typeof value === 'number') {
             if (Math.abs(value) > 1000) {
               value = value.toExponential(2);
@@ -101,7 +101,7 @@ function onReady() {
             }
           }
           popupHTML += `
-            <span class="popup-name">${values[name]}</span>
+            <span class="popup-name">${item.label || item.value}</span>
             <span class="popup-value">${value}</span>
           `;
         });

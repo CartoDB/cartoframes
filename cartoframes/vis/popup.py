@@ -31,27 +31,35 @@ class Popup(object):
                 raise ValueError('Wrong popup input')
 
     def get_interactivity(self):
-        click_vars = {}
-        hover_vars = {}
-
-        self._get_vars(click_vars, self._click)
-        self._get_vars(hover_vars, self._hover)
+        click_values = self._get_values(self._click)
+        hover_values = self._get_values(self._hover)
 
         interactivity = []
 
         if len(self._click) > 0:
             interactivity.append({
                 'event': 'click',
-                'values': click_vars
+                'values': click_values
             })
 
         if len(self._hover) > 0:
             interactivity.append({
                 'event': 'hover',
-                'values': hover_vars
+                'values': hover_values
             })
 
         return interactivity
+
+    def _get_values(self, array):
+        output = []
+        for value in array:
+            name = gen_variable_name(value)
+            output.append({
+                'name': gen_variable_name(value),
+                'label': value,
+                'value': value
+            })
+        return output
 
     def get_variables(self):
         variables = {}
