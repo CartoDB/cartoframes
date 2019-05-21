@@ -35,7 +35,7 @@ class TestStyle(unittest.TestCase):
             'color': 'red',
             'strokeWidth': 0
         })
-    
+
         defaults = 'strokeColor: opacity(#2c2c2c,ramp(linear(zoom(),2,18),[0.2,0.6]))\n'
         expected = '@var: 1\ncolor: red\nstrokeWidth: 0\n' + defaults
         self.assertEqual(style.compute_viz('polygon'), expected)
