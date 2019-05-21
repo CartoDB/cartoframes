@@ -103,7 +103,7 @@ class Style(object):
         for var in variables:
             output += '@{name}: {value}\n'.format(
                 name=var,
-                value=_convstr(variables.get(var))
+                value=self._parse_var(variables.get(var))
             )
         return output
 
@@ -120,11 +120,13 @@ class Style(object):
                     ))
             output += '{name}: {value}\n'.format(
                 name=prop,
-                value=_convstr(properties.get(prop))
+                value=properties.get(prop)
             )
         return output
 
 
-def _convstr(obj):
-    """Converts all types to strings or None"""
-    return str(obj) if obj is not None else None
+    def _parse_var(self, var):
+        if isinstance(var, str):
+            return '"{}"'.format(var)
+        else:
+            return var
