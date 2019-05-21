@@ -182,3 +182,17 @@ class TestCredentials(unittest.TestCase):
                'key=default_key, '
                'base_url=https://default_username.carto.com)')
         self.assertEqual(str(self.default_cred), ans)
+
+    def test_credentials_comparing_equal_objects(self):
+        """credentials.Credentials.__eq__"""
+        creds1 = Credentials(key='abc123', username='jackson-5')
+        creds2 = Credentials(key='abc123', username='jackson-5')
+
+        self.assertTrue(creds1 == creds2)
+
+    def test_credentials_comparing_different_objects(self):
+        """credentials.Credentials.__eq__"""
+        creds1 = Credentials(key='abc123', username='jackson-5')
+        creds2 = Credentials(key='abc', username='jackson-5')
+
+        self.assertFalse(creds1 == creds2)
