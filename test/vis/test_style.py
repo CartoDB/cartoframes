@@ -38,7 +38,7 @@ class TestStyle(unittest.TestCase):
         """vis.Style.compute_viz should return the viz from a string with defaults"""
         style = vis.Style('@var: 1\ncolor: red')
         viz = style.compute_viz('line')
-    
+
         self.assertIn('@var: 1', viz)
         self.assertIn('color: red', viz)
         self.assertIn('width: ramp(linear(zoom(),0,18),[0.5,4])', viz)

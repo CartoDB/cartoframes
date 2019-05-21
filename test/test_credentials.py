@@ -9,6 +9,7 @@ from cartoframes.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
 
 class TestCredentials(unittest.TestCase):
     """Tests for functions in keys module"""
+
     def setUp(self):
         # remove default credential file
         if os.path.exists(_DEFAULT_PATH):
@@ -20,7 +21,7 @@ class TestCredentials(unittest.TestCase):
         self.username = 'loggerhead'
         self.base_url = 'https://loggerhead.carto.com/'
         self.onprem_base_url = 'https://turtleland.com/user/{}'.format(
-                self.username)
+            self.username)
         self.default = {
             'key': 'default_key',
             'username': 'default_username',
@@ -95,7 +96,7 @@ class TestCredentials(unittest.TestCase):
     def test_credentials_cred_file(self):
         """credentials.Credentials cred_file"""
         local_cred_file = './test_cred_file_{}.json'.format(
-                str(time.time())[-4:])
+            str(time.time())[-4:])
 
         # create a credential file with arbitrary name
         with open(local_cred_file, 'w') as f:
@@ -110,9 +111,9 @@ class TestCredentials(unittest.TestCase):
     def test_credentials_set(self):
         """credentials.Credentials.set"""
         new_creds = {
-                'username': 'andy',
-                'key': 'abcdefg'
-                }
+            'username': 'andy',
+            'key': 'abcdefg'
+        }
         self.default_cred.set(**new_creds)
 
     def test_credentials_key(self):
@@ -125,7 +126,7 @@ class TestCredentials(unittest.TestCase):
     def test_credentials_retrieve(self):
         """credentials.Credentials.retrieve"""
         local_cred_file = './test_cred_file_{}.json'.format(
-                str(time.time())[-4:])
+            str(time.time())[-4:])
 
         # create a credential file with arbitrary name
         with open(local_cred_file, 'w') as f:
@@ -141,7 +142,7 @@ class TestCredentials(unittest.TestCase):
         """credentials.Credentials.delete"""
 
         local_cred_file = './test_cred_file_{}.json'.format(
-                str(time.time())[-4:])
+            str(time.time())[-4:])
 
         # create a credentials file
         with open(local_cred_file, 'w') as f:
