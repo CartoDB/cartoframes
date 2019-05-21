@@ -205,6 +205,12 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
         dataset.upload(table_name='another_table', context=self.cc)
         self.assertEqual(dataset.is_sync, True)
 
+    def test_dataset_not_sync_from_dataframe_upload_append(self):
+        df = pd.DataFrame({'column_name': [2]})
+        dataset = Dataset.from_dataframe(df=df)
+        dataset.upload(table_name='another_table', context=self.cc, if_exists=Dataset.APPEND)
+        self.assertEqual(dataset.is_sync, False)
+
     def test_dataset_sync_from_dataframe_still_sync_if_df_is_the_same(self):
         df = pd.DataFrame({'column_name': [2]})
         dataset = Dataset.from_dataframe(df=df)

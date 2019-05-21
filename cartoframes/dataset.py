@@ -174,11 +174,12 @@ class Dataset(object):
         if self.df is not None:
             if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
+                if if_exists != Dataset.APPEND:
+                    self.is_sync = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
             self._copyfrom(with_lonlat)
-            self.is_sync = True
 
         elif self.query is not None:
             if if_exists == Dataset.APPEND:
