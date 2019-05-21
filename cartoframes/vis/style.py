@@ -7,7 +7,7 @@ class Style(object):
     """Style
 
     Args:
-        style (str, dict): The style for the layer. It can be a dictionary or a viz string.
+        data (str, dict): The style for the layer. It can be a dictionary or a viz string.
           More info at
           `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
 
@@ -46,14 +46,14 @@ class Style(object):
             })
     """
 
-    def __init__(self, style=None):
-        self._style = self._init_style(style)
+    def __init__(self, data=None):
+        self._style = self._init_style(data)
 
-    def _init_style(self, style):
-        if style is None:
+    def _init_style(self, data):
+        if data is None:
             return defaults.STYLE_DEFAULTS
-        elif isinstance(style, (str, dict)):
-            return style
+        elif isinstance(data, (str, dict)):
+            return data
         else:
             raise ValueError('`style` must be a string or a dictionary')
 

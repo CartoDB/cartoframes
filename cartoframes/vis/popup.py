@@ -7,26 +7,66 @@ class Popup(object):
     """Popup
 
     Args:
-
+        data (dict): The popup definition for a layer. It contains the information
+          to show a popup on 'click' and 'hover' events with the attributes provided
+          in the definition using the `VL expressions syntax
+          <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
 
     Example:
+
+        Show columns.
+
+        .. code::
+            from cartoframes.vis import Popup
+
+            Popup({
+                'hover': ['$name'],
+                'click': ['$name', '$pop_max']
+            })
+
+        Show expressions.
+
+        .. code::
+            from cartoframes.vis import Popup
+
+            Popup({
+                'click': ['$pop_min % 100', 'sqrt($pop_max)']
+            })
+
+        Show labels.
+
+        .. code::
+            from cartoframes.vis import Popup
+
+            Popup({
+                'hover': [{
+                    'label': 'Name',
+                    'value': '$name'
+                }],
+                'click': [{
+                    'label': 'Name',
+                    'value': '$name'
+                }, {
+                    'label': 'Pop max',
+                    'value': '$pop_max'
+                }]
+            })
 
     """
 
     def __init__(self, data=None):
+        self._init_popup(data)        
+
+    def _init_popup(self, data):
         self._click = []
         self._hover = []
-
         if data is not None:
             if isinstance(data, dict):
                 # TODO: error control
-
                 if 'click' in data:
                     self._click = data.get('click', [])
-
                 if 'hover' in data:
                     self._hover = data.get('hover', [])
-
             else:
                 raise ValueError('Wrong popup input')
 
