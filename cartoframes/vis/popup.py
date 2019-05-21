@@ -55,7 +55,7 @@ class Popup(object):
     """
 
     def __init__(self, data=None):
-        self._init_popup(data)        
+        self._init_popup(data)
 
     def _init_popup(self, data):
         self._click = []
@@ -88,7 +88,6 @@ class Popup(object):
         output = []
         for item in array:
             if isinstance(item, str):
-                name = gen_variable_name(item)
                 output.append({
                     'name': gen_variable_name(item),
                     'label': item
