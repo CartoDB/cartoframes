@@ -71,30 +71,20 @@ class Style(object):
             raise ValueError('`style` must be a string or a dictionary')
 
     def _parse_style_dict(self, style, defaults, ext_vars):
-        style_vars = style.get('vars', {})
-        variables = merge_dicts(style_vars, ext_vars)
+        variables = merge_dicts(style.get('vars', {}), ext_vars)
+        properties = merge_dicts(defaults, style)
 
         serialized_variables = self._serialize_variables(variables)
-        serialized_properties = self._serialize_properties(
-            merge_dicts(defaults, style)
-        )
+        serialized_properties = self._serialize_properties(properties)
 
         return serialized_variables + serialized_properties
 
     def _parse_style_str(self, style, defaults, ext_vars):
-        # Select style defaults
-        defaults = defaults.copy()
-        if 'color:' in style:
-            del defaults['color']
-        if 'width:' in style:
-            del defaults['width']
-        if 'strokeWidth:' in style:
-            del defaults['strokeWidth']
-        if 'strokeColor:' in style:
-            del defaults['strokeColor']
-    
-        serialized_variables = self._serialize_variables(ext_vars)
-        serialized_default_properties = self._serialize_properties(defaults)
+        variables = ext_vars
+        default_properties = self._prune_defaults(defaults, style)
+
+        serialized_variables = self._serialize_variables(variables)
+        serialized_default_properties = self._serialize_properties(default_properties)
 
         return serialized_variables + serialized_default_properties + style
 
@@ -124,9 +114,20 @@ class Style(object):
             )
         return output
 
-
     def _parse_var(self, var):
         if isinstance(var, str):
             return '"{}"'.format(var)
         else:
             return var
+
+    def _prune_defaults(self, defaults, style):
+        output = defaults.copy()
+        if 'color:' in style:
+            del output['color']
+        if 'width:' in style:
+            del output['width']
+        if 'strokeWidth:' in style:
+            del output['strokeWidth']
+        if 'strokeColor:' in style:
+            del output['strokeColor']
+        return output
