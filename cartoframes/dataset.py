@@ -93,7 +93,7 @@ class Dataset(object):
 
     @table_name.setter
     def table_name(self, value):
-        if hasattr(self, '_table_name') and self._table_name != value:
+        if hasattr(self, '_table_name') and self._table_name is not None and self._table_name != value:
             self.is_sync = False
         self._table_name = value
 
@@ -103,7 +103,7 @@ class Dataset(object):
 
     @schema.setter
     def schema(self, value):
-        if hasattr(self, '_schema') and self._schema != value:
+        if hasattr(self, '_schema') and self._schema is not None and self._schema != value:
             self.is_sync = False
         self._schema = value
 
@@ -113,7 +113,7 @@ class Dataset(object):
 
     @query.setter
     def query(self, value):
-        if hasattr(self, '_query') and self._query != value:
+        if hasattr(self, '_query') and self._query is not None and self._query != value:
             self.is_sync = False
         self._query = value
 
@@ -123,6 +123,8 @@ class Dataset(object):
 
     @df.setter
     def df(self, value):
+        if hasattr(self, '_df') and self._df is not None and not self._df.equals(value):
+            self.is_sync = False
         self._df = value
 
     @property
@@ -131,6 +133,8 @@ class Dataset(object):
 
     @gdf.setter
     def gdf(self, value):
+        if hasattr(self, '_gdf') and self._gdf is not None and not self._gdf.equals(value):
+            self.is_sync = False
         self._gdf = value
 
     @property
@@ -139,6 +143,8 @@ class Dataset(object):
 
     @cc.setter
     def cc(self, value):
+        if hasattr(self, '_cc') and self._cc is not None and (value is None or self._cc.creds != value.creds):
+            self.is_sync = False
         self._cc = value
 
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
