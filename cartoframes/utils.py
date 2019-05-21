@@ -105,3 +105,8 @@ def get_hash(text):
     h = hashlib.sha1()
     h.update(text.encode('utf-8'))
     return h.hexdigest()
+
+def merge_dicts(dict1, dict2):
+    d = dict1.copy()
+    d.update(dict2)
+    return d
