@@ -155,36 +155,36 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
-        self.context = self.dataset.cc
+        self.context = self.dataset._cc
         self.credentials = _get_credentials(self.context)
         self.geom_type = _get_geom_type(self.dataset)
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)
         self.type = SourceType.QUERY
-        self.query = self.dataset.query
+        self.query = self.dataset._query
         self.bounds = bounds
 
     def _init_source_geojson(self, data, bounds):
         self.dataset = Dataset.from_geojson(data)
         self.type = SourceType.GEOJSON
-        self.query = get_encoded_data(self.dataset.gdf)
-        self.bounds = bounds or get_bounds(self.dataset.gdf)
+        self.query = get_encoded_data(self.dataset.get_geodataframe())
+        self.bounds = bounds or get_bounds(self.dataset.get_geodataframe())
 
     def _init_source_dataset(self, data, bounds):
         self.dataset = data
-        self.type = _map_dataset_state(self.dataset.state)
+        self.type = _map_dataset_state(self.dataset._state)
 
-        if self.dataset.state == Dataset.STATE_REMOTE:
+        if self.dataset._state == Dataset.STATE_REMOTE:
             self.bounds = bounds
-            if self.dataset.query:
-                self.query = self.dataset.query
+            if self.dataset._query:
+                self.query = self.dataset._query
             else:
-                self.query = _format_query(self.dataset.table_name, self.dataset.schema)
-        elif self.dataset.state == Dataset.STATE_LOCAL:
-            if self.dataset.gdf:
-                self.query = get_encoded_data(self.dataset.gdf)
-                self.bounds = bounds or get_bounds(self.dataset.gdf)
+                self.query = _format_query(self.dataset._table_name, self.dataset._schema)
+        elif self.dataset._state == Dataset.STATE_LOCAL:
+            if self.dataset.get_geodataframe():
+                self.query = get_encoded_data(self.dataset.get_geodataframe())
+                self.bounds = bounds or get_bounds(self.dataset.get_geodataframe())
             else:
                 # TODO: Dataframe
                 pass
