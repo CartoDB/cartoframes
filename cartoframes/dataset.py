@@ -87,65 +87,21 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    @property
-    def table_name(self):
-        return self._table_name
-
-    @table_name.setter
-    def table_name(self, value):
-        if hasattr(self, '_table_name') and self._table_name is not None and self._table_name != value:
-            self._is_sync = False
-        self._table_name = value
-
-    @property
-    def schema(self):
-        return self._schema
-
-    @schema.setter
-    def schema(self, value):
-        if hasattr(self, '_schema') and self._schema is not None and self._schema != value:
-            self._is_sync = False
-        self._schema = value
-
-    @property
-    def query(self):
-        return self._query
-
-    @query.setter
-    def query(self, value):
-        if hasattr(self, '_query') and self._query is not None and self._query != value:
-            self._is_sync = False
-        self._query = value
-
-    @property
-    def df(self):
+    def get_dataframe(self):
         return self._df
 
-    @df.setter
-    def df(self, value):
-        if hasattr(self, '_df') and self._df is not None and not self._df.equals(value):
+    def set_dataframe(self, df):
+        if self._df is None or not self._df.equals(df):
             self._is_sync = False
-        self._df = value
+        self._df = df
 
-    @property
-    def gdf(self):
+    def get_geodataframe(self):
         return self._gdf
 
-    @gdf.setter
-    def gdf(self, value):
-        if hasattr(self, '_gdf') and self._gdf is not None and not self._gdf.equals(value):
+    def set_geodataframe(self, gdf):
+        if self._gdf is None or not self._gdf.equals(gdf):
             self._is_sync = False
-        self._gdf = value
-
-    @property
-    def cc(self):
-        return self._cc
-
-    @cc.setter
-    def cc(self, value):
-        if hasattr(self, '_cc') and self._cc is not None and (value is None or self._cc.creds != value.creds):
-            self._is_sync = False
-        self._cc = value
+        self._gdf = gdf
 
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
