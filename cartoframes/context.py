@@ -349,7 +349,7 @@ class CartoContext(object):
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
                                      'dataset',
-                                     dataset.table_name)))
+                                     dataset.get_table_name())))
 
         return dataset
 
