@@ -93,7 +93,7 @@ class Style(object):
         for var in variables:
             output += '@{name}: {value}\n'.format(
                 name=var,
-                value=self._parse_var(variables.get(var))
+                value=variables.get(var)
             )
         return output
 
@@ -113,12 +113,6 @@ class Style(object):
                 value=properties.get(prop)
             )
         return output
-
-    def _parse_var(self, var):
-        if isinstance(var, str):
-            return '"{}"'.format(var)
-        else:
-            return var
 
     def _prune_defaults(self, defaults, style):
         output = defaults.copy()
