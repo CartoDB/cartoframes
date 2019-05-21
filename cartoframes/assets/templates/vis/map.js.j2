@@ -63,35 +63,35 @@ function onReady() {
       interactivity.off('featureHover');
       interactivity.off('featureClick');
 
-      for (const { event, values } of elem.interactivity) {
+      for (const { event, attrs } of elem.interactivity) {
         if (event === 'click') {
-          setPopupsClick(tempPopup, interactivity, values);
+          setPopupsClick(tempPopup, interactivity, attrs);
         }
         if (event === 'hover') {
-          setPopupsHover(tempPopup, interactivity, values);
+          setPopupsHover(tempPopup, interactivity, attrs);
         }
       }
     }
 
-    function setPopupsClick(tempPopup, interactivity, values) {
+    function setPopupsClick(tempPopup, interactivity, attrs) {
       interactivity.on('featureClick', (event) => {
-          updatePopup(tempPopup, event, values)
+          updatePopup(tempPopup, event, attrs)
       });
     }
     
-    function setPopupsHover(tempPopup, interactivity, values) {
+    function setPopupsHover(tempPopup, interactivity, attrs) {
       interactivity.on('featureHover', (event) => {
-          updatePopup(tempPopup, event, values)
+          updatePopup(tempPopup, event, attrs)
       });
     }
 
-    function updatePopup(layer_popup, event, values) {
+    function updatePopup(layer_popup, event, attrs) {
       if (event.features.length > 0) {
         const feature = event.features[0];
 
         let popupHTML = '';
         
-        values.forEach((item) => {
+        attrs.forEach((item) => {
           let value = feature.variables[item.name].value;
           if (typeof value === 'number') {
             if (Math.abs(value) > 1000) {
@@ -101,7 +101,7 @@ function onReady() {
             }
           }
           popupHTML += `
-            <span class="popup-name">${item.label || item.value}</span>
+            <span class="popup-name">${item.label}</span>
             <span class="popup-value">${value}</span>
           `;
         });

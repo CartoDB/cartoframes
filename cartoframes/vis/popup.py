@@ -31,34 +31,35 @@ class Popup(object):
                 raise ValueError('Wrong popup input')
 
     def get_interactivity(self):
-        click_values = self._get_values(self._click)
-        hover_values = self._get_values(self._hover)
-
         interactivity = []
-
         if len(self._click) > 0:
             interactivity.append({
                 'event': 'click',
-                'values': click_values
+                'attrs': self._get_attrs(self._click)
             })
-
         if len(self._hover) > 0:
             interactivity.append({
                 'event': 'hover',
-                'values': hover_values
+                'attrs': self._get_attrs(self._hover)
             })
-
         return interactivity
 
-    def _get_values(self, array):
+    def _get_attrs(self, array):
         output = []
-        for value in array:
-            name = gen_variable_name(value)
-            output.append({
-                'name': gen_variable_name(value),
-                'label': value,
-                'value': value
-            })
+        for item in array:
+            if isinstance(item, str):
+                name = gen_variable_name(item)
+                output.append({
+                    'name': gen_variable_name(item),
+                    'label': item
+                })
+            elif isinstance(item, dict) and 'value' in item:
+                output.append({
+                    'name': gen_variable_name(item.get('value')),
+                    'label': item.get('label')
+                })
+            else:
+                raise ValueError('Wrong popup input')
         return output
 
     def get_variables(self):
@@ -68,6 +69,12 @@ class Popup(object):
         return variables
 
     def _get_vars(self, output, array):
-        for value in array:
-            name = gen_variable_name(value)
-            output[name] = value
+        for item in array:
+            if isinstance(item, str):
+                name = gen_variable_name(item)
+                output[name] = item
+            elif isinstance(item, dict) and 'value' in item:
+                name = gen_variable_name(item.get('value'))
+                output[name] = item.get('value')
+            else:
+                raise ValueError('Wrong popup input')
