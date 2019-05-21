@@ -80,7 +80,7 @@ class Style(object):
     def _parse_style_str(self, style, ext_vars):
         serialized_variables = self._serialize_variables(ext_vars)
 
-        return '{0}\n{1}'.format(serialized_variables, style)
+        return serialized_variables + style
 
     def _serialize_variables(self, variables={}):
         output = ''
