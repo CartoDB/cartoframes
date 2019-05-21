@@ -206,6 +206,7 @@ class Dataset(object):
     def delete(self):
         if self.exists():
             self.cc.sql_client.send(self._drop_table_query(False))
+            self.is_sync = False
             return True
 
         return False
