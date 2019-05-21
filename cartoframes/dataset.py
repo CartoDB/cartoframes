@@ -41,7 +41,7 @@ class Dataset(object):
 
     def __init__(self, table_name=None, schema='public',
                  query=None, df=None, gdf=None,
-                 state=None, is_sync=False, context=None):
+                 state=None, is_saved_in_carto=False, context=None):
         self._table_name = normalize_name(table_name)
         self._schema = schema
         self._query = query
@@ -54,7 +54,7 @@ class Dataset(object):
 
         self._cc = context or default_context
         self._state = state
-        self._is_sync = is_sync
+        self._is_saved_in_carto = is_saved_in_carto
 
         self._normalized_column_names = None
         if self._df is not None:
@@ -69,7 +69,7 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
-        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE, is_sync=True)
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_query(cls, query, context):
@@ -92,7 +92,7 @@ class Dataset(object):
 
     def set_dataframe(self, df):
         if self._df is None or not self._df.equals(df):
-            self._is_sync = False
+            self._is_saved_in_carto = False
         self._df = df
 
     def get_geodataframe(self):
@@ -100,7 +100,7 @@ class Dataset(object):
 
     def set_geodataframe(self, gdf):
         if self._gdf is None or not self._gdf.equals(gdf):
-            self._is_sync = False
+            self._is_saved_in_carto = False
         self._gdf = gdf
 
     def get_table_name(self):
@@ -134,7 +134,7 @@ class Dataset(object):
             if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
                 if if_exists != Dataset.APPEND:
-                    self._is_sync = True
+                    self._is_saved_in_carto = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
@@ -146,7 +146,7 @@ class Dataset(object):
                                      'It is not possible to append data to a query')
             elif if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
-                self._is_sync = True
+                self._is_saved_in_carto = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
@@ -165,7 +165,7 @@ class Dataset(object):
     def delete(self):
         if self.exists():
             self._cc.sql_client.send(self._drop_table_query(False))
-            self._is_sync = False
+            self._is_saved_in_carto = False
             return True
 
         return False

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.dataset about is_sync prop"""
+"""Unit tests for cartoframes.dataset about _is_saved_in_carto prop"""
 import unittest
 import os
 import json
@@ -100,20 +100,20 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
     def test_dataset_sync_from_table(self):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_table_after_download(self):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         dataset.download()
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_table_after_upload(self):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         dataset.download()
         dataset.upload(table_name='another_table')
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.get_table_name(), 'another_table')
 
     def test_dataset_not_sync_from_table_modify_df(self):
@@ -121,64 +121,64 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         dataset.download()
         dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_sync_from_table_modify_df_and_upload(self):
         table_name = 'fake_table'
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
         dataset.download()
         dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
         dataset.upload(table_name='another_table')
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.get_table_name(), 'another_table')
 
         dataset.set_dataframe(pd.DataFrame({'column_name': [3]}))
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_not_sync_from_query(self):
         query = "SELECT 1"
         dataset = Dataset.from_query(query=query, context=self.cc)
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_sync_from_query_and_upload(self):
         query = "SELECT 1"
         dataset = Dataset.from_query(query=query, context=self.cc)
         dataset.upload(table_name='another_table')
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.get_table_name(), 'another_table')
 
     def test_dataset_sync_from_query_download_modify_upload(self):
         query = "SELECT 1"
         dataset = Dataset.from_query(query=query, context=self.cc)
         dataset.download()
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
         dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
         dataset.upload(table_name='another_table')
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.get_table_name(), 'another_table')
 
     def test_dataset_not_sync_from_dataframe(self):
         df = pd.DataFrame({'column_name': [2]})
         dataset = Dataset.from_dataframe(df=df)
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_sync_from_dataframe_upload(self):
         df = pd.DataFrame({'column_name': [2]})
         dataset = Dataset.from_dataframe(df=df)
         dataset.upload(table_name='another_table', context=self.cc)
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.get_table_name(), 'another_table')
 
     def test_dataset_not_sync_from_dataframe_upload_append(self):
         df = pd.DataFrame({'column_name': [2]})
         dataset = Dataset.from_dataframe(df=df)
         dataset.upload(table_name='another_table', context=self.cc, if_exists=Dataset.APPEND)
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_sync_from_dataframe_still_sync_if_df_is_the_same(self):
         df = pd.DataFrame({'column_name': [2]})
@@ -186,24 +186,24 @@ class TestDatasetSync(unittest.TestCase, _UserUrlLoader):
         dataset.upload(table_name='another_table', context=self.cc)
 
         dataset.set_dataframe(dataset.get_dataframe())
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
         dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
-        self.assertEqual(dataset._is_sync, True)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_not_sync_from_dataframe_overwriting_df(self):
         df = pd.DataFrame({'column_name': [2]})
         dataset = Dataset.from_dataframe(df=df)
         dataset.upload(table_name='another_table', context=self.cc)
         dataset.set_dataframe(pd.DataFrame({'column_name': [3]}))
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_not_sync_from_geodataframe(self):
         gdf = load_geojson(self.test_geojson)
         dataset = Dataset.from_geodataframe(gdf=gdf)
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_not_sync_from_geojson(self):
         geojson = self.test_geojson
         dataset = Dataset.from_geojson(geojson=geojson)
-        self.assertEqual(dataset._is_sync, False)
+        self.assertEqual(dataset._is_saved_in_carto, False)
