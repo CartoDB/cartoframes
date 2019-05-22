@@ -138,7 +138,7 @@ class Source(object):
     def __init__(self, data, context=None, bounds=None, schema='public'):
         self._init_source(data, context, bounds, schema)
 
-        self.context = self.dataset.cc
+        self.context = self.dataset._cc
         self.credentials = _get_credentials(self.context)
         self.geom_type = _get_geom_type(self.dataset)
 
