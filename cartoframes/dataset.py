@@ -57,32 +57,30 @@ class Dataset(object):
         self._is_saved_in_carto = is_saved_in_carto
 
         self._normalized_column_names = None
-        if self._df is not None:
-            _save_index_as_column(self._df)
-            self._normalized_column_names = _normalize_column_names(self._df)
-        elif self._gdf is not None:
-            _save_index_as_column(self._gdf)
-            self._normalized_column_names = _normalize_column_names(self._gdf)
 
         if self._table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
-        return cls(table_name=table_name, schema=schema, context=context,
+        return cls(table_name=table_name, schema=schema, context=context or default_context,
                    state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
-    def from_query(cls, query, context):
-        return cls(query=query, context=context, state=cls.STATE_REMOTE)
+    def from_query(cls, query, context=None):
+        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_dataframe(cls, df):
-        return cls(df=df, state=cls.STATE_LOCAL)
+        dataset = cls(df=df, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._df)
+        return dataset
 
     @classmethod
     def from_geodataframe(cls, gdf):
-        return cls(gdf=gdf, state=cls.STATE_LOCAL)
+        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._gdf)
+        return dataset
 
     @classmethod
     def from_geojson(cls, geojson):
@@ -130,8 +128,12 @@ class Dataset(object):
         # priority order: gdf, df, query
         if self._gdf is not None:
             warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+            # TODO: uncomment when we support GeoDataFrame
+            # self._normalized_column_names = _normalize_column_names(self._gdf)
 
         if self._df is not None:
+            self._normalized_column_names = _normalize_column_names(self._df)
+
             if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
                 if if_exists != Dataset.APPEND:

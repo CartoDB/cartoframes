@@ -17,7 +17,7 @@ class TestStyle(unittest.TestCase):
         """vis.Style should initialize style attributes from a dict"""
         style = vis.Style({'color': 'red'})
 
-        self.assertEqual(style.compute_viz(), 'color: red')
+        self.assertEqual(style.compute_viz(), 'color: red\n')
 
     def test_wrong_attribute(self):
         """vis.Style should raise an error if style property is not valid"""
