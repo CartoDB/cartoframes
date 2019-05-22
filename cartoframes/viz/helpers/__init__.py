@@ -30,7 +30,7 @@ def color_category_layer(source, category, top=11, palette='bold'):
             }]
         },
         legend={
-            'type': 'color_steps',
+            'type': 'basic',
             'ramp': 'color',
             'heading': category,
             'description': ''

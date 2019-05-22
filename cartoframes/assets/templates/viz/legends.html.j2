@@ -1,11 +1,11 @@
 {% macro legend(legend_data, id) -%}
   {% set type = legend_data.type %}
   {% if type == 'basic' %}
-    <as-basic-legend id="{{id}}"></as-basic-legend>
+    <as-basic-legend id="{{id}}" slot="legends"></as-basic-legend>
   {% elif type == 'gradient' %}
-    <as-color-gradient-legend id="{{id}}"></as-color-gradient-legend>
+    <as-color-gradient-legend id="{{id}}" slot="legends"></as-color-gradient-legend>
   {% elif type == 'color_steps' %}
-    <as-color-steps-legend id="{{id}}"></as-color-steps-legend>
+    <as-color-steps-legend id="{{id}}" slot="legends"></as-color-steps-legend>
   {% else %}
     <div>
       <p class="as-body as-color--error">Unknown legend type {{ type }}</p>
