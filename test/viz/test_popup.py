@@ -23,6 +23,20 @@ class TestPopup(unittest.TestCase):
             'value': '$pop'
         }])
 
+        popup = Popup({
+            'click': '$pop',
+            'hover': {
+                'label': 'Pop',
+                'value': '$pop'
+            }
+        })
+
+        self.assertEqual(popup._click, ['$pop'])
+        self.assertEqual(popup._hover, [{
+            'label': 'Pop',
+            'value': '$pop'
+        }])
+
     def test_popup_interactivity(self):
         """Popup should return a proper interactivity object"""
         popup = Popup({
