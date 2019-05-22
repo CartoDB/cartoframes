@@ -56,10 +56,8 @@ class Dataset(object):
         self.normalized_column_names = None
         if self.df is not None:
             _save_index_as_column(self.df)
-            self.normalized_column_names = _normalize_column_names(self.df)
         elif self.gdf is not None:
             _save_index_as_column(self.gdf)
-            self.normalized_column_names = _normalize_column_names(self.gdf)
 
         if self.table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
@@ -107,8 +105,12 @@ class Dataset(object):
         # priority order: gdf, df, query
         if self.gdf is not None:
             warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+            # TODO: uncomment when we support GeoDataFrame
+            # self.normalized_column_names = _normalize_column_names(self.gdf)
 
         if self.df is not None:
+            self.normalized_column_names = _normalize_column_names(self.df)
+
             if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
             elif if_exists == Dataset.FAIL:
