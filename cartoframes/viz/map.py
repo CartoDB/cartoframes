@@ -140,7 +140,7 @@ class Map(object):
                  size=None,
                  viewport=None,
                  template=None,
-                 default_legend=None
+                 default_legend=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)

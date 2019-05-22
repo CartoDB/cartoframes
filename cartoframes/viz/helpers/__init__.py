@@ -24,6 +24,9 @@ def color_category_layer(source, category, top=11, palette='bold'):
             }]
         },
         legend={
-
+            'type': 'color_steps',
+            'ramp': 'color',
+            'heading': category,
+            'description': ''
         }
     )
