@@ -137,7 +137,6 @@ class Dataset(object):
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
         self.df = self.cc.fetch(query, decode_geom=decode_geom)
-        _save_index_as_column(self.df)
         return self.df
 
     def delete(self):
