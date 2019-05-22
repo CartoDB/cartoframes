@@ -36,3 +36,32 @@ def color_category_layer(source, category, top=11, palette='bold'):
             'description': ''
         }
     )
+
+
+def color_bins_layer(source, number, bins=5, palette='reverse(purpor)'):
+    return Layer(
+        source,
+        style={
+            'point': {
+                'color': 'ramp(globalQuantiles(${0},{1}), {2})'.format(number, bins, palette)
+            },
+            'line': {
+                'color': 'ramp(globalQuantiles(${0},{1}), {2})'.format(number, bins, palette)
+            },
+            'polygon': {
+                'color': 'opacity(ramp(globalQuantiles(${0},{1}), {2}),0.9)'.format(number, bins, palette)
+            }
+        },
+        popup={
+            'hover': [{
+                'label': number,
+                'value': '$' + number
+            }]
+        },
+        legend={
+            'type': 'basic',
+            'ramp': 'color',
+            'heading': number,
+            'description': ''
+        }
+    )
