@@ -107,6 +107,14 @@ class Dataset(object):
     def get_table_name(self):
         return self._table_name
 
+    def get_privacy(self):
+        # public method accessing self._metadata.privacy
+        pass
+
+    def set_privacy(self, privacy):
+        # public method setting self._metadata.privacy and calling save method
+        pass
+
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self._table_name = normalize_name(table_name)
