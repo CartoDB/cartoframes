@@ -7,6 +7,7 @@ from tqdm import tqdm
 from .columns import Column, normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
+from carto.datasets import DatasetManager
 from .geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
@@ -55,6 +56,7 @@ class Dataset(object):
         self._cc = context or default_context
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
+        self._metadata = None
 
         self._normalized_column_names = None
 
@@ -384,6 +386,13 @@ class Dataset(object):
             'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
         }[geom_type]
 
+    def _get_metadata(self):
+        if self._is_saved_in_carto:
+            ds_manager = DatasetManager(self._cc.auth_client)
+            self._metadata = ds_manager.get(self._table_name)
+            return True
+        else:
+            return False
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
     try:
