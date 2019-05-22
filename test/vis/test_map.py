@@ -30,8 +30,8 @@ class TestMapLayer(unittest.TestCase):
 
         self.assertEqual(map.layers, [layer])
         self.assertEqual(len(map.sources), 1)
+        self.assertEqual(map.sources[0].get('interactivity'), [])
         self.assertIsNotNone(map.sources[0].get('credentials'))
-        self.assertIsNone(map.sources[0].get('interactivity'))
         self.assertIsNone(map.sources[0].get('legend'))
         self.assertIsNotNone(map.sources[0].get('query'))
         self.assertEqual(map.sources[0].get('type'), 'GeoJSON')
@@ -55,30 +55,47 @@ class TestMapLayer(unittest.TestCase):
         self.assertEqual(len(map.sources), 2)
 
     def test_interactive_layer(self):
-        """vis.Map layer should indicate if the layer has interactivity enabled"""
+        """vis.Map layer should indicate if the layer has interactivity configured"""
         source_1 = vis.Source(build_geojson([-10, 0], [-10, 0]))
-        interactivity = {'event': 'click'}
         layer = vis.Layer(
             source_1,
-            interactivity=interactivity
+            popup={
+                'click': ['$pop', '$name'],
+                'hover': [{
+                    'label': 'Pop',
+                    'value': '$pop'
+                }]
+            }
         )
 
         map = vis.Map(layer)
-        self.assertTrue(map.sources[0].get('interactivity'))
+        self.assertEqual(map.sources[0].get('interactivity'), [{
+            'event': 'click',
+            'attrs': [{
+                'name': 'v559339',
+                'label': '$pop'
+            }, {
+                'name': 'v8e0f74',
+                'label': '$name'
+            }]
+        }, {
+            'event': 'hover',
+            'attrs': [{
+                'name': 'v559339',
+                'label': 'Pop'
+            }]
+        }])
 
     def test_default_interactive_layer(self):
-        """vis.Map layer should get the default event if the interactivity is set to True"""
+        """vis.Map layer should get the default event if the interactivity is set to []"""
         source_1 = vis.Source(build_geojson([-10, 0], [-10, 0]))
-        interactivity = True
         layer = vis.Layer(
             source_1,
-            interactivity=interactivity
+            popup={}
         )
 
         map = vis.Map(layer)
-        layer_interactivity = map.sources[0].get('interactivity')
-        self.assertTrue(layer_interactivity)
-        self.assertEqual(layer_interactivity.get('event'), 'hover')
+        self.assertEqual(map.sources[0].get('interactivity'), [])
 
 
 class TestMapDevelopmentPath(unittest.TestCase):

@@ -13,8 +13,10 @@ class TestLayer(unittest.TestCase):
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
+        self.assertTrue(isinstance(layer.source, vis.Source))
         self.assertTrue(isinstance(layer.style, vis.Style))
-        self.assertIsNone(layer.interactivity)
+        self.assertTrue(isinstance(layer.popup, vis.Popup))
+        self.assertEqual(layer.interactivity, [])
         self.assertIsNone(layer.legend)
 
     def test_initialization_simple(self):
@@ -23,8 +25,10 @@ class TestLayer(unittest.TestCase):
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
+        self.assertTrue(isinstance(layer.source, vis.Source))
         self.assertTrue(isinstance(layer.style, vis.Style))
-        self.assertIsNone(layer.interactivity)
+        self.assertTrue(isinstance(layer.popup, vis.Popup))
+        self.assertEqual(layer.interactivity, [])
         self.assertIsNone(layer.legend)
 
 

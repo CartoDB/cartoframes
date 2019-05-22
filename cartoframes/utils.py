@@ -1,5 +1,7 @@
 """general utility functions"""
 import sys
+import hashlib
+
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
@@ -93,3 +95,13 @@ def dtypes2pg(dtype):
         'datetime64[ns]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
+
+
+def gen_variable_name(value):
+    return 'v' + get_hash(value)[:6]
+
+
+def get_hash(text):
+    h = hashlib.sha1()
+    h.update(text.encode('utf-8'))
+    return h.hexdigest()

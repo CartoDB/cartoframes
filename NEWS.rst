@@ -29,6 +29,9 @@ Updates
   - Update docs in vis classes
   - Add/Update vis tests
   - Pass PEP 8
+- Add default style, based on the geom type (#648)
+- Add basemap None, bool and color interface (#635)
+- Add Popup API (click and hover) (#677)
 
 0.9.2
 -----
