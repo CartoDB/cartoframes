@@ -54,10 +54,6 @@ class Dataset(object):
         self.cc = context or default_context
 
         self.normalized_column_names = None
-        if self.df is not None:
-            _save_index_as_column(self.df)
-        elif self.gdf is not None:
-            _save_index_as_column(self.gdf)
 
         if self.table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
@@ -72,11 +68,15 @@ class Dataset(object):
 
     @classmethod
     def from_dataframe(cls, df):
-        return cls(df=df, state=cls.STATE_LOCAL)
+        dataset = cls(df=df, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset.df)
+        return dataset
 
     @classmethod
     def from_geodataframe(cls, gdf):
-        return cls(gdf=gdf, state=cls.STATE_LOCAL)
+        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset.gdf)
+        return dataset
 
     @classmethod
     def from_geojson(cls, geojson):
