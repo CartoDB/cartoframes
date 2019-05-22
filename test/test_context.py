@@ -269,7 +269,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                   'long': float}
         df = pd.DataFrame(data).astype(schema)
         dataset = cc.write(df, self.test_write_table)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         # check if table exists
         resp = self.sql_client.send('''
@@ -339,7 +339,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
 
     #     df = pd.DataFrame({'ids': list('abcd'), 'vals': range(4)})
     #     dataset = cc.write(df, self.test_write_table)
-    #     self.test_write_table = dataset.table_name
+    #     self.test_write_table = dataset.get_table_name()
     #     dataset = ds_manager.get(self.test_write_table)
     #     self.assertEqual(dataset.privacy.lower(), 'private')
 
@@ -360,7 +360,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
                           index=list('xyz'))
         df.index.name = 'named_index'
         dataset = cc.write(df, self.write_named_index)
-        self.write_named_index = dataset.table_name
+        self.write_named_index = dataset.get_table_name()
 
         df_index = cc.read(self.write_named_index)
         self.assertSetEqual(set(('the_geom', 'vals', 'ids', 'named_index')),
@@ -384,7 +384,7 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame(data)
 
         dataset = cc.write(df, self.test_delete_table, overwrite=True)
-        self.test_delete_table = dataset.table_name
+        self.test_delete_table = dataset.get_table_name()
         cc.delete(self.test_delete_table)
 
         # check that querying recently deleted table raises an exception

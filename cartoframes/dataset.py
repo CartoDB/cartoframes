@@ -39,34 +39,38 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
-        self.table_name = normalize_name(table_name)
-        self.schema = schema
-        self.query = query
-        self.df = df
-        self.gdf = gdf
+    def __init__(self, table_name=None, schema='public',
+                 query=None, df=None, gdf=None,
+                 state=None, is_saved_in_carto=False, context=None):
+        self._table_name = normalize_name(table_name)
+        self._schema = schema
+        self._query = query
+        self._df = df
+        self._gdf = gdf
 
         if not self._validate_init():
             raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self.state = state
-        self.cc = context or default_context
+        self._cc = context or default_context
+        self._state = state
+        self._is_saved_in_carto = is_saved_in_carto
 
-        self.normalized_column_names = None
-        if self.df is not None:
-            _save_index_as_column(self.df)
-            self.normalized_column_names = _normalize_column_names(self.df)
-        elif self.gdf is not None:
-            _save_index_as_column(self.gdf)
-            self.normalized_column_names = _normalize_column_names(self.gdf)
+        self._normalized_column_names = None
+        if self._df is not None:
+            _save_index_as_column(self._df)
+            self._normalized_column_names = _normalize_column_names(self._df)
+        elif self._gdf is not None:
+            _save_index_as_column(self._gdf)
+            self._normalized_column_names = _normalize_column_names(self._gdf)
 
-        if self.table_name != table_name:
+        if self._table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
-        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
+        return cls(table_name=table_name, schema=schema, context=context,
+                   state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_query(cls, query, context):
@@ -84,62 +88,85 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
+    def get_dataframe(self):
+        return self._df
+
+    def set_dataframe(self, df):
+        if self._df is None or not self._df.equals(df):
+            self._is_saved_in_carto = False
+        self._df = df
+
+    def get_geodataframe(self):
+        return self._gdf
+
+    def set_geodataframe(self, gdf):
+        if self._gdf is None or not self._gdf.equals(gdf):
+            self._is_saved_in_carto = False
+        self._gdf = gdf
+
+    def get_table_name(self):
+        return self._table_name
+
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
-            self.table_name = normalize_name(table_name)
+            self._table_name = normalize_name(table_name)
         if schema:
-            self.schema = schema
+            self._schema = schema
         if context:
-            self.cc = context
+            self._cc = context
 
-        if self.table_name is None or self.cc is None:
+        if self._table_name is None or self._cc is None:
             raise ValueError('You should provide a table_name and context to upload data.')
 
-        if self.gdf is None and self.df is None and self.query is None:
+        if self._gdf is None and self._df is None and self._query is None:
             raise ValueError('Nothing to upload.'
                              'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
                                               'if_exists="replace" to overwrite it'.format(
-                                                    t=self.table_name, s=self.schema))
+                                                    t=self._table_name, s=self._schema))
 
         # priority order: gdf, df, query
-        if self.gdf is not None:
+        if self._gdf is not None:
             warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
 
-        if self.df is not None:
+        if self._df is not None:
             if if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table(with_lonlat)
+                if if_exists != Dataset.APPEND:
+                    self._is_saved_in_carto = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
             self._copyfrom(with_lonlat)
 
-        elif self.query is not None:
+        elif self._query is not None:
             if if_exists == Dataset.APPEND:
                 raise CartoException('Error using append with a query Dataset.'
                                      'It is not possible to append data to a query')
             elif if_exists == Dataset.REPLACE or not self.exists():
                 self._create_table_from_query()
+                self._is_saved_in_carto = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
-        if self.cc is None or (self.table_name is None and self.query is None):
+        if self._cc is None or (self._table_name is None and self._query is None):
             raise ValueError('You should provide a context and a table_name or query to download data.')
 
         # priority order: query, table
         table_columns = self.get_table_columns()
         query = self._get_read_query(table_columns, limit)
-        self.df = self.cc.fetch(query, decode_geom=decode_geom)
-        return self.df
+        self._df = self._cc.fetch(query, decode_geom=decode_geom)
+        return self._df
 
     def delete(self):
         if self.exists():
-            self.cc.sql_client.send(self._drop_table_query(False))
+            self._cc.sql_client.send(self._drop_table_query(False))
+            self._is_saved_in_carto = False
             return True
 
         return False
@@ -147,18 +174,18 @@ class Dataset(object):
     def exists(self):
         """Checks to see if table exists"""
         try:
-            self.cc.sql_client.send(
+            self._cc.sql_client.send(
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=self.table_name),
+                    table_name=self._table_name),
                 do_post=False)
             return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
-            self.cc._debug_print(err=err)
+            self._cc._debug_print(err=err)
             return False
 
     def _create_table(self, with_lonlat=None):
-        job = self.cc.batch_sql_client \
+        job = self._cc.batch_sql_client \
                   .create_and_wait_for_completion(
                       '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                       .format(drop=self._drop_table_query(),
@@ -169,7 +196,7 @@ class Dataset(object):
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
     def _validate_init(self):
-        inputs = [self.table_name, self.query, self.df, self.gdf]
+        inputs = [self._table_name, self._query, self._df, self._gdf]
         inputs_number = sum(x is not None for x in inputs)
 
         if inputs_number != 1:
@@ -179,17 +206,17 @@ class Dataset(object):
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
-            .format(org=(self.cc.creds.username() if self.cc.is_org else 'public'),
-                    table_name=self.table_name)
+            .format(org=(self._cc.creds.username() if self._cc.is_org else 'public'),
+                    table_name=self._table_name)
 
     def _copyfrom(self, with_lonlat=None):
-        geom_col = _get_geom_col_name(self.df)
+        geom_col = _get_geom_col_name(self._df)
 
-        columns = ','.join(norm for norm, orig in self.normalized_column_names)
-        self.cc.copy_client.copyfrom(
+        columns = ','.join(norm for norm, orig in self._normalized_column_names)
+        self._cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
-               FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self.table_name, columns=columns),
-            self._rows(self.df, [c for c in self.df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
+               FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
+            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
         )
 
     def _rows(self, df, cols, with_lonlat, geom_col):
@@ -226,48 +253,48 @@ class Dataset(object):
 
     def _drop_table_query(self, if_exists=True):
         return '''DROP TABLE {if_exists} {table_name}'''.format(
-            table_name=self.table_name,
+            table_name=self._table_name,
             if_exists='IF EXISTS' if if_exists else '')
 
     def _create_table_from_query(self):
-        self.cc.batch_sql_client.create_and_wait_for_completion(
+        self._cc.batch_sql_client.create_and_wait_for_completion(
                 '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
                         create=self._get_query_to_create_table_from_query(),
                         cartodbfy=self._cartodbfy_query()))
 
     def _get_query_to_create_table_from_query(self):
-        return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self.table_name, query=self.query)
+        return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
 
     def _create_table_query(self, with_lonlat=None):
         if with_lonlat is None:
-            geom_type = _get_geom_col_type(self.df)
+            geom_type = _get_geom_col_type(self._df)
         else:
             geom_type = 'Point'
 
         col = ('{col} {ctype}')
         cols = ', '.join(col.format(col=norm,
-                                    ctype=_dtypes2pg(self.df.dtypes[orig]))
-                         for norm, orig in self.normalized_column_names)
+                                    ctype=_dtypes2pg(self._df.dtypes[orig]))
+                         for norm, orig in self._normalized_column_names)
 
         if geom_type:
             cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
 
-        create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self.table_name, cols=cols)
+        create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self._table_name, cols=cols)
         return create_query
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""
         query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
 
-        if self.query is not None:
+        if self._query is not None:
             query = 'SELECT {columns} FROM ({query}) _q'.format(
-                query=self.query,
+                query=self._query,
                 columns=', '.join(query_columns))
         else:
             query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
-                table_name=self.table_name,
-                schema=self.schema,
+                table_name=self._table_name,
+                schema=self._schema,
                 columns=', '.join(query_columns))
 
         if limit is not None:
@@ -280,18 +307,18 @@ class Dataset(object):
 
     def get_table_columns(self):
         """Get column names and types from a table or query result"""
-        if self.query is not None:
-            query = 'SELECT * FROM ({}) _q limit 0'.format(self.query)
-            return get_columns(self.cc, query)
+        if self._query is not None:
+            query = 'SELECT * FROM ({}) _q limit 0'.format(self._query)
+            return get_columns(self._cc, query)
         else:
             query = '''
                 SELECT column_name, data_type
                 FROM information_schema.columns
                 WHERE table_name = '{table}' AND table_schema = '{schema}'
-            '''.format(table=self.table_name, schema=self.schema)
+            '''.format(table=self._table_name, schema=self._schema)
 
             try:
-                table_info = self.cc.sql_client.send(query)
+                table_info = self._cc.sql_client.send(query)
                 return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
             except CartoException as e:
                 # this may happen when using the default_public API key
@@ -299,8 +326,8 @@ class Dataset(object):
                     query = '''
                         SELECT *
                         FROM "{schema}"."{table}" LIMIT 0
-                    '''.format(table=self.table_name, schema=self.schema)
-                    return get_columns(self.cc, query)
+                    '''.format(table=self._table_name, schema=self._schema)
+                    return get_columns(self._cc, query)
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
@@ -314,21 +341,21 @@ class Dataset(object):
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
 
-        if self.state == Dataset.STATE_REMOTE:
-            if self.query:
-                return self._get_remote_geom_type(self.query)
-            elif self.table_name and self.schema:
-                query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
+        if self._state == Dataset.STATE_REMOTE:
+            if self._query:
+                return self._get_remote_geom_type(self._query)
+            elif self._table_name and self._schema:
+                query = 'SELECT * FROM "{0}"."{1}"'.format(self._schema, self._table_name)
                 return self._get_remote_geom_type(query)
 
-        elif self.state == Dataset.STATE_LOCAL:
-            if self.gdf is not None:
-                return self._get_local_geom_type(self.gdf)
+        elif self._state == Dataset.STATE_LOCAL:
+            if self._gdf is not None:
+                return self._get_local_geom_type(self._gdf)
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
-        if self.cc:
-            response = self.cc.sql_client.send('''
+        if self._cc:
+            response = self._cc.sql_client.send('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5

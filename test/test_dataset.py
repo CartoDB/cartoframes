@@ -132,61 +132,61 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset.table_name, table_name)
-        self.assertEqual(dataset.schema, 'public')
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.gdf)
-        self.assertEqual(dataset.cc, self.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+        self.assertEqual(dataset.get_table_name(), table_name)
+        self.assertEqual(dataset._schema, 'public')
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._gdf)
+        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_query(self):
         query = 'SELECT * FROM fake_table'
         dataset = Dataset.from_query(query=query, context=self.cc)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset.query, query)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.gdf)
-        self.assertEqual(dataset.cc, self.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+        self.assertEqual(dataset._query, query)
+        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._gdf)
+        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_dataframe(self):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.df)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.gdf)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNotNone(dataset._df)
+        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._gdf)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geodataframe(self):
         gdf = load_geojson(self.test_geojson)
         dataset = Dataset.from_geodataframe(gdf=gdf)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.gdf)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNotNone(dataset._gdf)
+        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geojson(self):
         geojson = self.test_geojson
         dataset = Dataset.from_geojson(geojson=geojson)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.gdf)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNotNone(dataset._gdf)
+        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'
@@ -245,7 +245,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_query(query=query, context=self.cc)
         dataset.upload(table_name=self.test_write_table)
 
-        dataset.table_name = 'non_used_table'
+        dataset._table_name = 'non_used_table'
         df = dataset.download()
         self.assertEqual('fakec' in df.columns, True)
 
@@ -260,7 +260,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_mcdonalds_nyc
         df = read_mcdonalds_nyc(limit=100)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 100)
@@ -272,7 +272,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_ne_50m_graticules_15
         df = read_ne_50m_graticules_15()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 35)
@@ -284,7 +284,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
@@ -298,7 +298,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         lonlat = ('dropoff_longitude', 'dropoff_latitude')
         dataset = Dataset.from_dataframe(df).upload(
             with_lonlat=lonlat, table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -312,7 +312,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -327,7 +327,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
         df.rename(columns={'the_geom': 'geometry'}, inplace=True)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -343,7 +343,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         df.rename(columns={'the_geom': 'geom'}, inplace=True)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -366,7 +366,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         # TODO: use from_geodataframe
         dataset = Dataset.from_dataframe(gdf).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -382,7 +382,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'
                                   .format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
 
@@ -396,7 +396,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
@@ -413,7 +413,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         dataset = Dataset.from_dataframe(df).upload(
             if_exists=Dataset.APPEND, table_name=self.test_write_table, context=self.cc)
@@ -428,7 +428,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.table_name
+        self.test_write_table = dataset.get_table_name()
 
         dataset = Dataset.from_dataframe(df).upload(
             if_exists=Dataset.REPLACE, table_name=self.test_write_table, context=self.cc)
