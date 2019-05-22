@@ -9,7 +9,7 @@ def inspect(helper):
     print(lines)
 
 
-def color_category_layer(source, category, top=11, palette='bold'):
+def color_category_layer(source, category, top=11, palette='bold', label=''):
     return Layer(
         source,
         style={
@@ -25,20 +25,20 @@ def color_category_layer(source, category, top=11, palette='bold'):
         },
         popup={
             'hover': [{
-                'label': category,
+                'label': label or category,
                 'value': '$' + category
             }]
         },
         legend={
             'type': 'basic',
             'ramp': 'color',
-            'heading': category,
+            'heading': label or category,
             'description': ''
         }
     )
 
 
-def color_bins_layer(source, number, bins=5, palette='reverse(purpor)'):
+def color_bins_layer(source, number, bins=5, palette='reverse(purpor)', label=''):
     return Layer(
         source,
         style={
@@ -54,14 +54,14 @@ def color_bins_layer(source, number, bins=5, palette='reverse(purpor)'):
         },
         popup={
             'hover': [{
-                'label': number,
+                'label': label or number,
                 'value': '$' + number
             }]
         },
         legend={
             'type': 'basic',
             'ramp': 'color',
-            'heading': number,
+            'heading': label or number,
             'description': ''
         }
     )
