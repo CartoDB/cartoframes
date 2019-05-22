@@ -3,6 +3,12 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
+def inspect(helper):
+    import inspect
+    lines = inspect.getsource(helper)
+    print(lines)
+
+
 def color_category_layer(source, category, top=11, palette='bold'):
     return Layer(
         source,
