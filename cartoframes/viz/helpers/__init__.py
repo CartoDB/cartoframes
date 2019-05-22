@@ -17,6 +17,13 @@ def color_category_layer(source, category, top=11, palette='bold'):
                 'color': 'opacity(ramp(top(${0}, {1}), {2}),0.9)'.format(category, top, palette)
             }
         },
-        popup={},
-        legend={}
+        popup={
+            'hover': [{
+                'label': category,
+                'value': '$' + category
+            }]
+        },
+        legend={
+            
+        }
     )
