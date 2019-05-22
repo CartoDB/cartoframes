@@ -69,7 +69,8 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context, schema='public'):
-        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
+        return cls(table_name=table_name, schema=schema, context=context,
+                   state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_query(cls, query, context):
