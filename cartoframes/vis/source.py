@@ -136,6 +136,13 @@ class Source(object):
     """
 
     def __init__(self, data, context=None, bounds=None, schema='public'):
+        self._init_source(data, context, bounds, schema)
+
+        self.context = self.dataset.cc
+        self.credentials = _get_credentials(self.context)
+        self.geom_type = _get_geom_type(self.dataset)
+
+    def _init_source(self, data, context, bounds, schema):
         if isinstance(data, str):
             if _check_sql_query(data):
                 self._init_source_query(data, context, bounds)
@@ -154,10 +161,6 @@ class Source(object):
 
         else:
             raise ValueError('Wrong source input')
-
-        self.context = self.dataset.cc
-        self.credentials = _get_credentials(self.context)
-        self.geom_type = _get_geom_type(self.dataset)
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)

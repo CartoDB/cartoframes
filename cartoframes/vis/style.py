@@ -7,7 +7,7 @@ class Style(object):
     """Style
 
     Args:
-        style (str, dict): The style for the layer. It can be a dictionary or a viz string.
+        data (str, dict): The style for the layer. It can be a dictionary or a viz string.
           More info at
           `CARTO VL styling <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`
 
@@ -46,56 +46,75 @@ class Style(object):
             })
     """
 
-    def __init__(self, style=None):
-        self._data = self._init_style(style)
+    def __init__(self, data=None):
+        self._style = self._init_style(data)
 
-    def _init_style(self, style):
-        if style is None:
+    def _init_style(self, data):
+        if data is None:
             return defaults.STYLE_DEFAULTS
-        elif isinstance(style, (str, dict)):
-            return style
+        elif isinstance(data, (str, dict)):
+            return data
         else:
             raise ValueError('`style` must be a string or a dictionary')
 
-    def compute_viz(self, geom_type=None):
-        if isinstance(self._data, dict):
-            if geom_type and geom_type in self._data:
-                return self._parse_style_dict(self._data.get(geom_type))
-            else:
-                return self._parse_style_dict(self._data)
-        elif isinstance(self._data, str):
-            return self._data
+    def compute_viz(self, geom_type=None, variables={}):
+        style = self._style
+        if isinstance(style, dict):
+            if geom_type and geom_type in style:
+                style = style.get(geom_type)
+            return self._parse_style_dict(style, variables)
+        elif isinstance(style, str):
+            return self._parse_style_str(style, variables)
         else:
             raise ValueError('`style` must be a string or a dictionary')
 
-    def _parse_style_dict(self, style):
-        style_variables = []
-        style_properties = []
+    def _parse_style_dict(self, style, ext_vars):
+        style_vars = style.get('vars', {})
+        variables = _merge_dicts(style_vars, ext_vars)
 
-        for prop in style:
+        serialized_variables = self._serialize_variables(variables)
+        serialized_properties = self._serialize_properties(style)
+
+        return serialized_variables + serialized_properties
+
+    def _parse_style_str(self, style, ext_vars):
+        serialized_variables = self._serialize_variables(ext_vars)
+
+        return serialized_variables + style
+
+    def _serialize_variables(self, variables={}):
+        output = ''
+        for var in variables:
+            output += '@{name}: {value}\n'.format(
+                name=var,
+                value=_convstr(variables.get(var))
+            )
+        return output
+
+    def _serialize_properties(self, properties={}):
+        output = ''
+        for prop in properties:
             if prop == 'vars':
-                variables = style.get(prop)
-                for var in variables:
-                    style_variables.append(
-                        '@{name}: {value}'.format(
-                            name=var,
-                            value=_convstr(variables.get(var))
-                        )
-                    )
-            elif prop in defaults.STYLE_PROPERTIES and style.get(prop) is not None:
-                style_properties.append(
-                    '{name}: {value}'.format(
-                        name=prop,
-                        value=_convstr(style.get(prop))
-                    )
-                )
-            else:
-                raise ValueError('Style property "' + prop + '" is not valid. Valid style properties are: ' +
-                                 ', '.join(defaults.STYLE_PROPERTIES))
-
-        return '\n'.join(style_variables).join(style_properties)
+                continue
+            if prop not in defaults.STYLE_PROPERTIES:
+                raise ValueError(
+                    'Style property "{0}" is not valid. Valid style properties are: {1}'.format(
+                        prop,
+                        ', '.join(defaults.STYLE_PROPERTIES)
+                    ))
+            output += '{name}: {value}\n'.format(
+                name=prop,
+                value=_convstr(properties.get(prop))
+            )
+        return output
 
 
 def _convstr(obj):
     """Converts all types to strings or None"""
     return str(obj) if obj is not None else None
+
+
+def _merge_dicts(dict1, dict2):
+    d = dict1.copy()
+    d.update(dict2)
+    return d
