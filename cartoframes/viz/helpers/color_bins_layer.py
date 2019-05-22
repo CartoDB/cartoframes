@@ -3,30 +3,30 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_bins_layer(source, number, bins=5, palette='reverse(purpor)', label=''):
+def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
     return Layer(
         source,
         style={
             'point': {
-                'color': 'ramp(globalQuantiles(${0},{1}), {2})'.format(number, bins, palette)
+                'color': 'ramp(globalQuantiles(${0},{1}),reverse({2}))'.format(value, bins, palette)
             },
             'line': {
-                'color': 'ramp(globalQuantiles(${0},{1}), {2})'.format(number, bins, palette)
+                'color': 'ramp(globalQuantiles(${0},{1}),reverse({2}))'.format(value, bins, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(globalQuantiles(${0},{1}), {2}),0.9)'.format(number, bins, palette)
+                'color': 'opacity(ramp(globalQuantiles(${0},{1}),reverse({2})),0.9)'.format(value, bins, palette)
             }
         },
         popup={
-            'hover': [{
-                'label': label or number,
-                'value': '$' + number
-            }]
+            'hover': {
+                'label': title or value,
+                'value': '$' + value
+            }
         },
         legend={
             'type': 'basic',
             'ramp': 'color',
-            'heading': label or number,
+            'heading': title or value,
             'description': ''
         }
     )
