@@ -1,4 +1,6 @@
 """general utility functions"""
+
+import re
 import sys
 import hashlib
 
@@ -111,3 +113,7 @@ def merge_dicts(dict1, dict2):
     d = dict1.copy()
     d.update(dict2)
     return d
+
+
+def text_match(regex, text):
+    return len(re.findall(regex, text, re.MULTILINE)) > 0
