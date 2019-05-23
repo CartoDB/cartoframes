@@ -32,6 +32,7 @@ Updates
 - Add default style, based on the geom type (#648)
 - Add basemap None, bool and color interface (#635)
 - Add Popup API (click and hover) (#677)
+- Apply default style for not overwritten properties (#684)
 
 0.9.2
 -----

@@ -8,6 +8,7 @@ from cartoframes.columns import Column, normalize_names, pg2dtypes
 
 class TestColumns(unittest.TestCase):
     """Tests for functions in columns module"""
+
     def setUp(self):
         self.cols = ['Unnamed: 0',
                      '201moore',
