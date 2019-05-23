@@ -12,7 +12,8 @@ class Basemaps(object):  # pylint: disable=too-few-public-methods
 
         .. code::
 
-            from cartoframes.vis import basemaps, Map
+            from cartoframes.viz import Map, basemaps
+
             Map(basemap=basemaps.positron)
     """
     positron = 'Positron'

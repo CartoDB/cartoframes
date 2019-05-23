@@ -1,15 +1,15 @@
 import unittest
-from cartoframes import vis
+from cartoframes.viz import Popup
 
 
 class TestPopup(unittest.TestCase):
     def test_is_popup_defined(self):
-        """vis.Popup"""
-        self.assertNotEqual(vis.Popup, None)
+        """Popup"""
+        self.assertNotEqual(Popup, None)
 
     def test_popup_init(self):
-        """vis.Popup should be properly initialized"""
-        popup = vis.Popup({
+        """Popup should be properly initialized"""
+        popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
                 'label': 'Pop',
@@ -24,8 +24,8 @@ class TestPopup(unittest.TestCase):
         }])
 
     def test_popup_interactivity(self):
-        """vis.Popup should return a proper interactivity object"""
-        popup = vis.Popup({
+        """Popup should return a proper interactivity object"""
+        popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
                 'label': 'Pop',
@@ -51,8 +51,8 @@ class TestPopup(unittest.TestCase):
         }])
 
     def test_popup_variables(self):
-        """vis.Style should return a proper variables object"""
-        popup = vis.Popup({
+        """Popup should return a proper variables object"""
+        popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
                 'label': 'Pop',
@@ -66,6 +66,6 @@ class TestPopup(unittest.TestCase):
         })
 
     def test_wrong_attribute(self):
-        """vis.Popup should raise an error if popup property is not valid"""
+        """Popup should raise an error if popup property is not valid"""
         with self.assertRaises(ValueError):
-            vis.Popup(1234)
+            Popup(1234)

@@ -23,7 +23,7 @@ class Source(object):
 
     Args:
         data (str, :py:class:`GeoFrame <geopandas.GeoDataFrame>`,
-          :py:class:`Dataset <cartoframes.vis.Dataset>` ): a table name, SQL query
+          :py:class:`Dataset <cartoframes.viz.Dataset>` ): a table name, SQL query
           ,GeoJSON file, GeoFrame object or Dataset object.
         context (:py:class:`Context <cartoframes.Context>`):
           A Conext instance. If not provided the context will be automatically
@@ -39,8 +39,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Source
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -54,8 +54,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Source
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -69,8 +69,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Source
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -84,8 +84,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Source
             from cartoframes import Dataset
 
             context = Context(
@@ -102,8 +102,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context
+            from cartoframes.viz import Source
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -116,8 +116,8 @@ class Source(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Source
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Source
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
