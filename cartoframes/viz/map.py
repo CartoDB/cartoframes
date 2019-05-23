@@ -405,14 +405,6 @@ class HTMLMap(object):
             # No basemap
             basecolor = 'white'
             basemap = ''
-        elif isinstance(basemap, bool):
-            if basemap is True:
-                # Default basemap
-                basemap = Basemaps.darkmatter
-            else:
-                # No basemap
-                basecolor = 'white'
-                basemap = ''
         elif isinstance(basemap, str):
             if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
                 # Basemap is a color
