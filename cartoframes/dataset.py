@@ -27,9 +27,9 @@ class Dataset(object):
     REPLACE = 'replace'
     APPEND = 'append'
 
-    PRIVATE = 'private'
-    PUBLIC = 'public'
-    LINK = 'link'
+    PRIVATE = 'PRIVATE'
+    PUBLIC = 'PUBLIC'
+    LINK = 'LINK'
 
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
@@ -108,12 +108,31 @@ class Dataset(object):
         return self._table_name
 
     def get_privacy(self):
-        # public method accessing self._metadata.privacy
-        pass
+        if self._is_saved_in_carto:
+            if self._metadata is not None or self._get_metadata():
+                return self._metadata.privacy
+            else:
+                raise CartoException('Something goes wrong accessing the table privacy.')
+        else:
+            raise CartoException('Your data is not synchronized with CARTO.'
+                                 'First of all, you should call upload method to save your data in CARTO.')
+
 
     def set_privacy(self, privacy):
-        # public method setting self._metadata.privacy and calling save method
-        pass
+        if self._is_saved_in_carto:
+            #privacy = privacy.upper()
+            if privacy not in [self.PRIVATE, self.PUBLIC, self.LINK]:
+                raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}').format(
+                    p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK)
+
+            if self._metadata is not None or self._get_metadata():
+                self._metadata.privacy = privacy
+                self._metadata.save()
+            else:
+                raise CartoException('Something goes wrong accessing the table privacy.')
+        else:
+            raise CartoException('Your data is not synchronized with CARTO.'
+                                 'First of all, you should call upload method to save your data in CARTO.')
 
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
@@ -394,10 +413,19 @@ class Dataset(object):
             'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
         }[geom_type]
 
-    def _get_metadata(self):
+    def _get_metadata(self, retries=6, retry_wait_time=1):
         if self._is_saved_in_carto:
             ds_manager = DatasetManager(self._cc.auth_client)
-            self._metadata = ds_manager.get(self._table_name)
+            try:
+                self._metadata = ds_manager.get(self._table_name)
+            except Exception as e:
+                if type(e).__name__ == 'NotFoundException' and retries > 0:
+                    # if retry_wait_time > 7: # it should be after more than 15 seconds
+                        # warn('We are still procesing the CARTO table. Sorry for the delay.')
+                    time.sleep(retry_wait_time)
+                    self._get_metadata(retries=retries-1, retry_wait_time=retry_wait_time*2)
+                else:
+                    raise e
             return True
         else:
             return False
