@@ -13,26 +13,30 @@ Updates
 - Add new visualization API (#662)
   - Add Source class (with param detection)
   - Add Dataset methods
-    .from_table(name, context)
-    .from_query(query, context)
-    .from_geojson(data)
-    .from_dataframe(data)
-  - Add set_default_context methods
-  - Add Context in cartoframes namespace
-  - Add Map, Layer, Source, Style in cartoframes.viz namespace
+    .from_table(...)
+    .from_query(...)
+    .from_geojson(...)
+    .from_dataframe(...)
+  - Add set_default_context method
   - Use sources' context (credentials, bounds)
   - Fix Style class API for variables
   - Remove Dataset, SQL, GeoJSON sources
   - Remove sources namespace
   - Remove context from Map
   - Remove contrib namespace
-  - Update docs in vis classes
-  - Add/Update vis tests
+  - Update docs in viz classes
+  - Add/Update viz tests
   - Pass PEP 8
 - Add default style, based on the geom type (#648)
-- Add basemap None, bool and color interface (#635)
+- Add basemap None and color interface (#635)
 - Add Popup API (click and hover) (#677)
 - Apply default style for not overwritten properties (#684)
+- Add namespaces (#683)
+  - cartoframes.viz: Map, Layer, Source, Style, Popup, basemaps, helpers
+  - cartoframes.auth: Context, set_default_context
+- Add color helpers (#692)
+  - color_category
+  - color_bins
 
 0.9.2
 -----

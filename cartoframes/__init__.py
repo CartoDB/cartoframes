@@ -17,7 +17,7 @@ __all__ = [
     'BinMethod',
 
     # New API
-    'Dataset'
+    'Dataset',
 
     '__version__'
 ]

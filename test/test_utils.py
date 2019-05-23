@@ -4,8 +4,6 @@
 import unittest
 from collections import OrderedDict
 
-import pandas as pd
-
 from cartoframes.utils import (dict_items, cssify, importify_params)
 
 

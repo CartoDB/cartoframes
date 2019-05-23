@@ -64,9 +64,17 @@ class Popup(object):
             if isinstance(data, dict):
                 # TODO: error control
                 if 'click' in data:
-                    self._click = data.get('click', [])
+                    click_data = data.get('click', [])
+                    if isinstance(click_data, list):
+                        self._click = click_data
+                    else:
+                        self._click = [click_data]
                 if 'hover' in data:
-                    self._hover = data.get('hover', [])
+                    hover_data = data.get('hover', [])
+                    if isinstance(hover_data, list):
+                        self._hover = hover_data
+                    else:
+                        self._hover = [hover_data]
             else:
                 raise ValueError('Wrong popup input')
 
