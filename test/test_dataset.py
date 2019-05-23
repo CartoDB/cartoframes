@@ -254,6 +254,17 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = dataset.download()
         self.assertEqual('fakec' in df.columns, True)
 
+    def test_dataset_download_and_upload(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        query = 'SELECT 1 as fakec'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        dataset.download()
+        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
