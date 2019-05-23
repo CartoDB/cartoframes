@@ -466,6 +466,20 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
     #     self.assertExistsTable(self.test_write_table)
 
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_dataset_get_privacy_from_new_table(self):
+        query = 'SELECT 1'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+        self.assertEqual(dataset.get_privacy(), Dataset.PRIVATE)
+
+    def test_dataset_set_privacy_to_new_table(self):
+        query = 'SELECT 1'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+        dataset.set_privacy(Dataset.PUBLIC)
+        self.assertEqual(dataset.get_privacy(), Dataset.PUBLIC)
+
     def assertExistsTable(self, table_name):
         resp = self.cc.sql_client.send('''
             SELECT *
