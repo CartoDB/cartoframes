@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import re
+
 from .defaults import STYLE_DEFAULTS, STYLE_PROPERTIES
 from ..utils import merge_dicts
 
@@ -116,12 +118,12 @@ class Style(object):
 
     def _prune_defaults(self, defaults, style):
         output = defaults.copy()
-        if 'color:' in style:
+        if re.match(r'color\s*:', style):
             del output['color']
-        if 'width:' in style:
+        if re.match(r'width\s*:', style):
             del output['width']
-        if 'strokeWidth:' in style:
+        if re.match(r'strokeWidth\s*:', style):
             del output['strokeWidth']
-        if 'strokeColor:' in style:
+        if re.match(r'strokeColor\s*:', style):
             del output['strokeColor']
         return output
