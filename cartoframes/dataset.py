@@ -303,6 +303,9 @@ class Dataset(object):
                         FROM "{schema}"."{table}" LIMIT 0
                     '''.format(table=self.table_name, schema=self.schema)
                     return get_columns(self.cc, query)
+                else:
+                    raise e
+
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
