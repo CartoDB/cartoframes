@@ -55,13 +55,11 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context=None, schema='public'):
-        from .auth import default_context
-        return cls(table_name=table_name, schema=schema, context=context or default_context, state=cls.STATE_REMOTE)
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_query(cls, query, context=None):
-        from .auth import default_context
-        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE)
+        return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_dataframe(cls, df):
