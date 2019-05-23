@@ -186,7 +186,7 @@ def _get_bounds(bounds, layers):
 
 def _init_layers(layers):
     if layers is None:
-        return None
+        return []
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
