@@ -17,6 +17,7 @@ def walk_subpkg(name):
             data_files.append(os.path.join(sub_dir, f))
     return data_files
 
+
 REQUIRES = [
     'pandas>=0.20.1',
     'webcolors>=1.7.0',
@@ -52,7 +53,7 @@ with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 about = {}
 with open(os.path.join(here, 'cartoframes', '__version__.py'), 'r', 'utf-8') as f:
-        exec(f.read(), about)
+    exec(f.read(), about)
 
 setup(
     name=about['__title__'],

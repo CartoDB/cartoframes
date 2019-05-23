@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import re
-
 from .defaults import STYLE_DEFAULTS, STYLE_PROPERTIES
 from ..utils import merge_dicts, text_match
 
