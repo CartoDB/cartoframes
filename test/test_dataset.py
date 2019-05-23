@@ -306,9 +306,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        lonlat = ('dropoff_longitude', 'dropoff_latitude')
+        lnglat = ('dropoff_longitude', 'dropoff_latitude')
         dataset = Dataset.from_dataframe(df).upload(
-            with_lonlat=lonlat, table_name=self.test_write_table, context=self.cc)
+            with_lnglat=lnglat, table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
