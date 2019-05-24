@@ -460,9 +460,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
     def test_dataset_schema_from_org_context(self):
         username = 'fake_username'
+
         class Fake_creds():
             def username(self):
                 return username
+
         class Fake_context():
             def __init__(self):
                 self.is_org = True
