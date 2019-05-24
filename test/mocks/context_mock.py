@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class CredsMock():
     def __init__(self, key=None, username=None):
         self._key = key
@@ -7,6 +8,7 @@ class CredsMock():
 
     def username(self):
         return self._username
+
 
 class ContextMock():
     def __init__(self, username, api_key):

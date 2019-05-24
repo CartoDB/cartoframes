@@ -486,6 +486,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         except CartoException as e:
             self.assertTrue('relation "{}" does not exist'.format(table_name) in str(e))
 
+
 class TestDatasetMetadata(unittest.TestCase):
     def setUp(self):
         self.username = 'fake_username'
@@ -522,4 +523,3 @@ class TestDatasetMetadata(unittest.TestCase):
                         p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.set_privacy(wrong_privacy)
-

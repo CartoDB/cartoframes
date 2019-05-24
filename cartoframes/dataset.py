@@ -117,7 +117,6 @@ class Dataset(object):
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
 
-
     def set_privacy(self, privacy):
         if self._is_saved_in_carto:
             privacy = privacy.upper()

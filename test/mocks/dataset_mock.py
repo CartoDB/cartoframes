@@ -4,11 +4,14 @@ import pandas as pd
 
 from cartoframes.dataset import Dataset
 
+
 class MetadataMock():
     def __init__(self):
         self.privacy = 'PRIVATE'
+
     def save(self):
         return True
+
 
 class DatasetMock(Dataset):
     def download(self):
