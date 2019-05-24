@@ -7,8 +7,8 @@ from tqdm import tqdm
 from .columns import Column, normalize_names, normalize_name
 
 from carto.exceptions import CartoException, CartoRateLimitException
-from carto.datasets import DatasetManager
 from .geojson import load_geojson
+from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -27,9 +27,9 @@ class Dataset(object):
     REPLACE = 'replace'
     APPEND = 'append'
 
-    PRIVATE = 'PRIVATE'
-    PUBLIC = 'PUBLIC'
-    LINK = 'LINK'
+    PRIVATE = DatasetInfo.PRIVATE
+    PUBLIC = DatasetInfo.PUBLIC
+    LINK = DatasetInfo.LINK
 
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
@@ -56,7 +56,7 @@ class Dataset(object):
         self._cc = context or default_context
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
-        self._metadata = None
+        self._dataset_info = None
 
         self._normalized_column_names = None
 
@@ -107,28 +107,25 @@ class Dataset(object):
     def get_table_name(self):
         return self._table_name
 
-    def get_privacy(self):
+    def get_dataset_info(self):
         if self._is_saved_in_carto:
-            if self._metadata is not None or self._get_metadata():
-                return self._metadata.privacy
-            else:
-                raise CartoException('Something goes wrong accessing the table metadata.')
+            if self._dataset_info is None:
+                self._dataset_info = self._get_dataset_info()
+
+            return self._dataset_info
         else:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
 
-    def set_privacy(self, privacy):
+    def set_dataset_info(self, dataset_info=None, privacy=None, name=None):
         if self._is_saved_in_carto:
-            privacy = privacy.upper()
-            if privacy not in [self.PRIVATE, self.PUBLIC, self.LINK]:
-                raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-                    p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK))
+            if self._dataset_info is None:
+                self._dataset_info = self._get_dataset_info()
 
-            if self._metadata is not None or self._get_metadata():
-                self._metadata.privacy = privacy
-                self._metadata.save()
+            if dataset_info:
+                self._dataset_info.update(privacy=dataset_info.privacy)
             else:
-                raise CartoException('Something goes wrong accessing the table privacy.')
+                self._dataset_info.update(privacy=privacy, name=name)
         else:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
@@ -412,22 +409,8 @@ class Dataset(object):
             'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
         }[geom_type]
 
-    def _get_metadata(self, retries=6, retry_wait_time=1):
-        if self._is_saved_in_carto:
-            ds_manager = DatasetManager(self._cc.auth_client)
-            try:
-                self._metadata = ds_manager.get(self._table_name)
-            except Exception as e:
-                if type(e).__name__ == 'NotFoundException' and retries > 0:
-                    # if retry_wait_time > 7: # it should be after more than 15 seconds
-                        # warn('We are still procesing the CARTO table. Sorry for the delay.')
-                    time.sleep(retry_wait_time)
-                    self._get_metadata(retries=retries-1, retry_wait_time=retry_wait_time*2)
-                else:
-                    return False
-            return True
-        else:
-            return False
+    def _get_dataset_info(self):
+        return DatasetInfo(self._cc, self._table_name)
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
     try:

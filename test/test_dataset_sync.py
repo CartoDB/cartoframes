@@ -8,6 +8,7 @@ from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock
 
+
 class TestDatasetSync(unittest.TestCase):
     def setUp(self):
         self.username = 'fake_username'
