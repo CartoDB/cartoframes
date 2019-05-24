@@ -2,14 +2,20 @@
 
 import pandas as pd
 
-from cartoframes.dataset import Dataset
+from cartoframes.dataset import Dataset, DatasetInfo
 
 
 class MetadataMock():
     def __init__(self):
-        self.privacy = 'PRIVATE'
+        self.privacy = DatasetInfo.PRIVATE
+        self.name = None
 
-    def save(self):
+
+class DatasetInfoMock(DatasetInfo):
+    def _get_metadata(self, _1, _2):
+        self._metadata = MetadataMock()
+
+    def _save_metadata(self):
         return True
 
 
@@ -30,9 +36,5 @@ class DatasetMock(Dataset):
     def exists(self):
         return False
 
-    def _get_metadata(self):
-        if self._is_saved_in_carto:
-            self._metadata = MetadataMock()
-            return True
-        else:
-            return False
+    def _get_dataset_info(self):
+        return DatasetInfoMock(self._cc, self._table_name)
