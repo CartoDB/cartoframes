@@ -39,9 +39,11 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, table_name=None, schema='public', query=None, df=None, gdf=None, state=None, context=None):
+    def __init__(self, table_name=None, schema=None, query=None, df=None, gdf=None, state=None, context=None):
+        self.cc = context or default_context
+
         self.table_name = normalize_name(table_name)
-        self.schema = schema
+        self.schema = schema or self._get_schema()
         self.query = query
         self.df = df
         self.gdf = gdf
@@ -51,15 +53,13 @@ class Dataset(object):
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self.state = state
-        self.cc = context or default_context
-
         self.normalized_column_names = None
 
         if self.table_name != table_name:
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
-    def from_table(cls, table_name, context=None, schema='public'):
+    def from_table(cls, table_name, context=None, schema=None):
         return cls(table_name=table_name, schema=schema, context=context or default_context, state=cls.STATE_REMOTE)
 
     @classmethod
@@ -359,6 +359,12 @@ class Dataset(object):
             'Polygon': Dataset.GEOM_TYPE_POLYGON,
             'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
         }[geom_type]
+
+    def _get_schema(self):
+        if self.cc:
+            return 'public' if not self.cc.is_org else self.cc.creds.username()
+        else:
+            return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):

@@ -449,6 +449,28 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
+    def test_dataset_schema_from_parameter(self):
+        schema = 'fake_schema'
+        dataset = Dataset.from_table(table_name='fake_table', schema=schema, context=self.cc)
+        self.assertEqual(dataset.schema, schema)
+
+    def test_dataset_schema_from_non_org_context(self):
+        dataset = Dataset.from_table(table_name='fake_table', context=self.cc)
+        self.assertEqual(dataset.schema, 'public')
+
+    def test_dataset_schema_from_org_context(self):
+        username = 'fake_username'
+        class Fake_creds():
+            def username(self):
+                return username
+        class Fake_context():
+            def __init__(self):
+                self.is_org = True
+                self.creds = Fake_creds()
+
+        dataset = Dataset.from_table(table_name='fake_table', context=Fake_context())
+        self.assertEqual(dataset.schema, username)
+
     def test_decode_geom(self):
         # Point (0, 0) without SRID
         ewkb = '010100000000000000000000000000000000000000'
