@@ -34,6 +34,22 @@ function onReady() {
     dragRotate: false
   });
 
+  
+  const mapInfo$ = document.getElementById('map-info');
+
+  {% if show_info %}
+    map.on('zoom', updateMapInfo);
+    map.on('move', updateMapInfo);
+
+    function updateMapInfo() {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      mapInfo$.innerText = `Center: [${center.lng.toFixed(6)}, ${center.lat.toFixed(6)}]  Zoom: ${zoom.toFixed(6)}`;
+    }
+  {% endif %}
+
+
   const sources = {{sources|tojson}};
 
   map.fitBounds({{bounds}}, {animate: false, padding: 50, maxZoom: 14});

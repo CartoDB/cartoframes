@@ -141,6 +141,7 @@ class Map(object):
                  viewport=None,
                  template=None,
                  default_legend=None,
+                 show_info=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -153,11 +154,13 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
-
+        
         if default_legend is None and all(layer.legend is None for layer in self.layers):
             self.default_legend = True
         else:
             self.default_legend = default_legend
+
+        self.show_info = show_info
 
         self._htmlMap.set_content(
             size=self.size,
@@ -166,6 +169,7 @@ class Map(object):
             viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
+            show_info=self.show_info,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -387,16 +391,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
-            default_legend=None,
+            default_legend=None, show_info=None,
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, basemap, default_legend,
+            size, sources, bounds, viewport, basemap, default_legend, show_info,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
         self, size, sources, bounds, viewport, basemap=None, default_legend=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            show_info=None, _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
         basecolor = ''
@@ -454,6 +458,7 @@ class HTMLMap(object):
             camera=camera,
             has_legends=has_legends,
             default_legend=default_legend,
+            show_info=show_info,
             carto_vl_path=_carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
