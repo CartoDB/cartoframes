@@ -112,7 +112,7 @@ class Dataset(object):
             if self._metadata is not None or self._get_metadata():
                 return self._metadata.privacy
             else:
-                raise CartoException('Something goes wrong accessing the table privacy.')
+                raise CartoException('Something goes wrong accessing the table metadata.')
         else:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
@@ -120,10 +120,10 @@ class Dataset(object):
 
     def set_privacy(self, privacy):
         if self._is_saved_in_carto:
-            #privacy = privacy.upper()
+            privacy = privacy.upper()
             if privacy not in [self.PRIVATE, self.PUBLIC, self.LINK]:
-                raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}').format(
-                    p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK)
+                raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
+                    p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK))
 
             if self._metadata is not None or self._get_metadata():
                 self._metadata.privacy = privacy
@@ -425,7 +425,7 @@ class Dataset(object):
                     time.sleep(retry_wait_time)
                     self._get_metadata(retries=retries-1, retry_wait_time=retry_wait_time*2)
                 else:
-                    raise e
+                    return False
             return True
         else:
             return False
