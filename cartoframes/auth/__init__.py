@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from ..credentials import Credentials
 from ..context import CartoContext as Context
 
 default_context = None
