@@ -1,3 +1,5 @@
+import time
+
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
@@ -37,7 +39,7 @@ class DatasetInfo():
                 # if retry_wait_time > 7: # it should be after more than 15 seconds
                     # warn('We are still procesing the CARTO table. Sorry for the delay.')
                 time.sleep(retry_wait_time)
-                self._get_metadata(carto_context= carto_context, table_name=table_name,
+                self._get_metadata(carto_context=carto_context, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
                 return None
