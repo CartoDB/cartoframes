@@ -22,6 +22,7 @@ warnings.filterwarnings("ignore")
 
 class TestDataset(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CARTOframes"""
+
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):

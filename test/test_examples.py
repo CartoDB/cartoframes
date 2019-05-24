@@ -9,6 +9,7 @@ from cartoframes.examples import Examples
 
 class TestExamples(unittest.TestCase):
     """Tests examples class"""
+
     def setUp(self):
         self.examples = Examples()
 

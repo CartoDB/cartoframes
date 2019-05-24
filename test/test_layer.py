@@ -7,6 +7,7 @@ from cartoframes import styling, BinMethod
 
 class TestAbstractLayer(unittest.TestCase):
     """Test AbstractLayer class"""
+
     def test_class(self):
         """basic test"""
         self.assertIsNone(AbstractLayer().__init__())
@@ -14,6 +15,7 @@ class TestAbstractLayer(unittest.TestCase):
 
 class TestLayer(unittest.TestCase):
     """Test Layer class"""
+
     def setUp(self):
         self.coffee_temps = pd.DataFrame({
             'a': range(4),
@@ -30,6 +32,7 @@ class TestLayer(unittest.TestCase):
 
 class TestBaseMap(unittest.TestCase):  # pylint: disable=too-many-instance-attributes
     """Tests for functions in keys module"""
+
     def setUp(self):
         # basemaps with baked-in labels
         self.dark_map_all = BaseMap(source='dark')
@@ -116,6 +119,7 @@ class TestBaseMap(unittest.TestCase):  # pylint: disable=too-many-instance-attri
 
 class TestQueryLayer(unittest.TestCase):
     """Tests for functions in QueryLayer module"""
+
     def setUp(self):
         self.query = 'select * from watermelon'
 
@@ -409,7 +413,6 @@ class TestQueryLayer(unittest.TestCase):
             'line-width: 5' in linelayer.cartocss
         )
 
-
         size = 'size_col'
         color = 'mag'
         linelayer = QueryLayer('select * from lines', size=size, color=color)
@@ -427,7 +430,6 @@ class TestQueryLayer(unittest.TestCase):
             'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
         )
 
-
         size = {'column': 'size_col'}
         color = 'mag'
         linelayer = QueryLayer('select * from lines', size=size, color=color)
@@ -444,7 +446,6 @@ class TestQueryLayer(unittest.TestCase):
         self.assertTrue(
             'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
         )
-
 
         size = {
             'column': 'size_col',
@@ -465,7 +466,6 @@ class TestQueryLayer(unittest.TestCase):
             'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
         )
 
-
         size = 1.5
         color = 'mag'
 
@@ -483,7 +483,6 @@ class TestQueryLayer(unittest.TestCase):
         self.assertTrue(
             'line-color: ramp([mag], cartocolor(Mint), quantiles(5), >)' in linelayer.cartocss
         )
-
 
         size = {
             'column': 'size_col',
@@ -509,7 +508,6 @@ class TestQueryLayer(unittest.TestCase):
         self.assertTrue(
             'line-color: ramp([mag], cartocolor(Sunset), quantiles(7), >)' in linelayer.cartocss
         )
-
 
         # size and color
         size = {
