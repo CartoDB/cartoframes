@@ -487,7 +487,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
             self.assertTrue('relation "{}" does not exist'.format(table_name) in str(e))
 
 
-class TestDatasetMetadata(unittest.TestCase):
+class TestDatasetInfo(unittest.TestCase):
     def setUp(self):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
@@ -497,7 +497,7 @@ class TestDatasetMetadata(unittest.TestCase):
         query = 'SELECT 1'
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.upload(table_name='fake_table')
-        self.assertEqual(dataset.get_privacy(), Dataset.PRIVATE)
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
 
     def test_dataset_get_privacy_from_not_sync(self):
         query = 'SELECT 1'
@@ -505,14 +505,14 @@ class TestDatasetMetadata(unittest.TestCase):
         error_msg = ('Your data is not synchronized with CARTO.'
                      'First of all, you should call upload method to save your data in CARTO.')
         with self.assertRaises(CartoException, msg=error_msg):
-            dataset.get_privacy()
+            dataset.get_dataset_info()
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.upload(table_name='fake_table')
-        dataset.set_privacy(Dataset.PUBLIC)
-        self.assertEqual(dataset.get_privacy(), Dataset.PUBLIC)
+        dataset.set_dataset_info(privacy=Dataset.PUBLIC)
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PUBLIC)
 
     def test_dataset_set_privacy_with_wrong_parameter(self):
         query = 'SELECT 1'
@@ -522,4 +522,4 @@ class TestDatasetMetadata(unittest.TestCase):
         error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
                         p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
-            dataset.set_privacy(wrong_privacy)
+            dataset.set_dataset_info(privacy=wrong_privacy)
