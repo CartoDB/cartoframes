@@ -462,16 +462,16 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_schema_from_org_context(self):
         username = 'fake_username'
 
-        class Fake_creds():
+        class FakeCreds():
             def username(self):
                 return username
 
-        class Fake_context():
+        class FakeContext():
             def __init__(self):
                 self.is_org = True
-                self.creds = Fake_creds()
+                self.creds = FakeCreds()
 
-        dataset = Dataset.from_table(table_name='fake_table', context=Fake_context())
+        dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset.schema, username)
 
     def test_decode_geom(self):
