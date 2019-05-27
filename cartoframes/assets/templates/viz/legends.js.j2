@@ -14,13 +14,13 @@ function createDefaultLegend(layers) {
 function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#source${layerIndex}_legend`);
 
-  if (legendData.ramp) {
+  if (legendData.property) {
     const config = { config: { othersLabel: legendData.othersLabel } }
     
     AsBridge.VL.Legends.rampLegend(
       element,
       layer,
-      legendData.ramp,
+      legendData.property,
       config
     );
   } else {

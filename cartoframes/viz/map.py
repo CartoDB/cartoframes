@@ -204,7 +204,7 @@ def _set_map_layer(layer):
     return {
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
-        'legend': layer.legend,
+        'legend': layer.legend_info,
         'query': layer.source.query,
         'type': layer.source.type,
         'viz': layer.viz

@@ -32,7 +32,7 @@ class Legend(object):
         return {
             'type': _type,
             'property': _property,
-            'title': _title,
+            'heading': _title,
             'description': _description,
-            'footer': _footer
+            'source': _footer
         }
