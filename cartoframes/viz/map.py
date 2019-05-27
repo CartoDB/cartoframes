@@ -150,7 +150,7 @@ class Map(object):
         self.template = template
         self.sources = _get_map_layers(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
-        self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
+        self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
 
@@ -388,7 +388,7 @@ class HTMLMap(object):
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
             default_legend=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=None, _airship_path=None):
 
         self.html = self._parse_html_content(
             size, sources, bounds, viewport, basemap, default_legend,
@@ -396,7 +396,7 @@ class HTMLMap(object):
 
     def _parse_html_content(
         self, size, sources, bounds, viewport, basemap=None, default_legend=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=None, _airship_path=None):
 
         token = ''
         basecolor = ''
@@ -421,16 +421,21 @@ class HTMLMap(object):
                     'If basemap is a dict, it must have a `style` key'
                 )
 
-        if (_airship_path is None):
-            airship_components_path = defaults.AIRSHIP_COMPONENTS_PATH
-            airship_bridge_path = defaults.AIRSHIP_BRIDGE_PATH
-            airship_styles_path = defaults.AIRSHIP_STYLES_PATH
-            airship_icons_path = defaults.AIRSHIP_ICONS_PATH
+        if (_carto_vl_path is None):
+            carto_vl_path = defaults.CARTO_VL_URL
         else:
-            airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS
-            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE
-            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE
-            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS
+            carto_vl_path = _carto_vl_path + defaults.CARTO_VL_DEV
+
+        if (_airship_path is None):
+            airship_components_path = defaults.AIRSHIP_COMPONENTS_URL
+            airship_bridge_path = defaults.AIRSHIP_BRIDGE_URL
+            airship_styles_path = defaults.AIRSHIP_STYLES_URL
+            airship_icons_path = defaults.AIRSHIP_ICONS_URL
+        else:
+            airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS_DEV
+            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_DEV
+            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE_DEV
+            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_DEV
 
         camera = None
         if viewport is not None:
@@ -454,7 +459,7 @@ class HTMLMap(object):
             camera=camera,
             has_legends=has_legends,
             default_legend=default_legend,
-            carto_vl_path=_carto_vl_path,
+            carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,

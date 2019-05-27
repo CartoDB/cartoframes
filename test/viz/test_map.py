@@ -103,30 +103,30 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """Map dev path should use default paths if none are given"""
         map = Map()
         template = map._htmlMap.html
-        self.assertTrue(defaults.CARTO_VL_PATH in template)
+        self.assertTrue(defaults.CARTO_VL_URL in template)
 
     def test_custom_carto_vl_path(self):
         """Map dev path should use custom paths"""
         _carto_vl_path = 'custom_carto_vl_path'
         map = Map(_carto_vl_path=_carto_vl_path)
         template = map._htmlMap.html
-        self.assertTrue(_carto_vl_path in template)
+        self.assertTrue(_carto_vl_path + defaults.CARTO_VL_DEV in template)
 
     def test_default_airship_path(self):
         """Map dev path should use default paths if none are given"""
         map = Map()
         template = map._htmlMap.html
-        self.assertTrue(defaults.AIRSHIP_COMPONENTS_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_BRIDGE_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_STYLES_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_ICONS_PATH in template)
+        self.assertTrue(defaults.AIRSHIP_COMPONENTS_URL in template)
+        self.assertTrue(defaults.AIRSHIP_BRIDGE_URL in template)
+        self.assertTrue(defaults.AIRSHIP_STYLES_URL in template)
+        self.assertTrue(defaults.AIRSHIP_ICONS_URL in template)
 
     def test_custom_airship_path(self):
         """Map dev path should use custom paths"""
         _airship_path = 'custom_airship_path'
         map = Map(_airship_path=_airship_path)
         template = map._htmlMap.html
-        self.assertTrue(_airship_path + defaults.AIRSHIP_COMPONENTS in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_STYLE in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_COMPONENTS_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_STYLE_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS_DEV in template)

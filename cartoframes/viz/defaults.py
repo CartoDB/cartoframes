@@ -1,13 +1,14 @@
-CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.min.js'
+CARTO_VL_DEV = '/dist/carto-vl.js'
+CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.js'
 
-AIRSHIP_COMPONENTS = '/packages/components/dist/airship.js'
-AIRSHIP_BRIDGE = '/packages/bridge/dist/asbridge.js'
-AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
-AIRSHIP_ICONS = '/packages/icons/dist/icons.css'
-AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/cartoframes/airship.js'
-AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/cartoframes/asbridge.min.js'
-AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/cartoframes/airship.min.css'
-AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/cartoframes/icons.css'
+AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
+AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
+AIRSHIP_STYLE_DEV = '/packages/styles/dist/airship.css'
+AIRSHIP_ICONS_DEV = '/packages/icons/dist/icons.css'
+AIRSHIP_COMPONENTS_URL = 'https://libs.cartocdn.com/airship-components/cartoframes/airship.js'
+AIRSHIP_BRIDGE_URL = 'https://libs.cartocdn.com/airship-bridge/cartoframes/asbridge.min.js'
+AIRSHIP_STYLES_URL = 'https://libs.cartocdn.com/airship-style/cartoframes/airship.min.css'
+AIRSHIP_ICONS_URL = 'https://libs.cartocdn.com/airship-icons/cartoframes/icons.css'
 
 CREDENTIALS = {
     'username': 'cartoframes',
