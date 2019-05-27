@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, top=11, palette='bold', title='', othersLabel='Others'):
+def color_category_layer(source, value, top=11, palette='bold', title=''):
     return Layer(
         source,
         style={
@@ -14,7 +14,7 @@ def color_category_layer(source, value, top=11, palette='bold', title='', others
                 'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(top(${0}, {1}), {2}), 0.1)'.format(value, top, palette)
+                'color': 'opacity(ramp(top(${0}, {1}), {2}), 0.9)'.format(value, top, palette)
             }
         },
         popup={
@@ -28,6 +28,6 @@ def color_category_layer(source, value, top=11, palette='bold', title='', others
             'ramp': 'color',
             'heading': title or value,
             'description': '',
-            'othersLabel': othersLabel
+            'othersLabel': 'Others'
         }
     )
