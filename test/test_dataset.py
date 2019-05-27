@@ -10,7 +10,7 @@ import warnings
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.dataset import Dataset, _decode_geom
+from cartoframes.datasets import Dataset, _decode_geom
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock

@@ -3,8 +3,7 @@ from .context import CartoContext as Context
 from .credentials import Credentials
 from .layer import BaseMap, QueryLayer, Layer
 from .styling import BinMethod
-from .dataset import Dataset
-from .dataset import set_default_context
+from .datasets import Dataset, set_default_context
 from .__version__ import __version__
 
 __all__ = [

@@ -4,10 +4,10 @@ import pandas as pd
 import time
 from tqdm import tqdm
 
-from .columns import Column, normalize_names, normalize_name
-
 from carto.exceptions import CartoException, CartoRateLimitException
-from .geojson import load_geojson
+
+from ..columns import Column, normalize_names, normalize_name
+from ..geojson import load_geojson
 from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
@@ -117,13 +117,9 @@ class Dataset(object):
 
         return self._dataset_info
 
-    def set_dataset_info(self, dataset_info=None, privacy=None, name=None):
+    def set_dataset_info(self, privacy=None, name=None):
         self._dataset_info = self.get_dataset_info()
-
-        if dataset_info:
-            self._dataset_info.update(privacy=dataset_info.privacy)
-        else:
-            self._dataset_info.update(privacy=privacy, name=name)
+        self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:

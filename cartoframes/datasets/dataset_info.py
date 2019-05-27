@@ -4,7 +4,7 @@ from warnings import warn
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
-from .columns import normalize_name
+from ..columns import normalize_name
 
 class DatasetInfo():
     PRIVATE = 'PRIVATE'

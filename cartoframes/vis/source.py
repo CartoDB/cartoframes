@@ -3,8 +3,8 @@ from __future__ import absolute_import
 import re
 
 from . import defaults
-from ..dataset import Dataset
 from ..geojson import get_encoded_data, get_bounds
+from cartoframes.datasets import Dataset
 
 try:
     import geopandas

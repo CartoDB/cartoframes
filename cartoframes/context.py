@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .dataset import Dataset, recursive_read, _decode_geom, get_columns
+from .datasets import Dataset, recursive_read, _decode_geom, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode

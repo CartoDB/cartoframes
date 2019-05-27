@@ -10,7 +10,7 @@ class Layer(object):
     """Layer
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.Dataset>`,
+        source (str, :py:class:`Dataset <cartoframes.datasets.Dataset>`,
           :py:class:`Source <cartoframes.vis.Source>`): The source data.
         style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
           optional): The style of the visualization: `CARTO VL styling
