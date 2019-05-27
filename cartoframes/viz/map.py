@@ -31,6 +31,8 @@ class Map(object):
           calculated to fit all features.
         size (tuple of int): a (width, height) pair for the size of the map.
           Default is (1024, 632)
+        show_info (bool, optional): Whether to display center and zoom information in the
+          map or not. It is False by default.
 
     Example:
 
@@ -131,6 +133,21 @@ class Map(object):
                 Layer('table in your account'),
                 bounds=bounds
             )
+
+        Show map center and zoom values
+
+        .. code::
+
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Map(Layer('table in your account'), show_info=True)
     """
 
     def __init__(self,
