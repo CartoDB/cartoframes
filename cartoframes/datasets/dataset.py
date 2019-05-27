@@ -93,7 +93,7 @@ class Dataset(object):
 
     def set_dataframe(self, df):
         if self._df is None or not self._df.equals(df):
-            self._is_saved_in_carto = False
+            self._unsync()
         self._df = df
 
     def get_geodataframe(self):
@@ -101,7 +101,7 @@ class Dataset(object):
 
     def set_geodataframe(self, gdf):
         if self._gdf is None or not self._gdf.equals(gdf):
-            self._is_saved_in_carto = False
+            self._unsync()
         self._gdf = gdf
 
     def get_table_name(self):
@@ -184,7 +184,7 @@ class Dataset(object):
     def delete(self):
         if self.exists():
             self._cc.sql_client.send(self._drop_table_query(False))
-            self._is_saved_in_carto = False
+            self._unsync()
             return True
 
         return False
@@ -402,6 +402,11 @@ class Dataset(object):
 
     def _get_dataset_info(self):
         return DatasetInfo(self._cc, self._table_name)
+
+    def _unsync(self):
+        self._is_saved_in_carto = False
+        self._dataset_info = None
+
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
     try:

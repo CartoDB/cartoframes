@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import warnings
+import pandas as pd
 
 from carto.exceptions import CartoException
 
@@ -523,3 +524,29 @@ class TestDatasetInfo(unittest.TestCase):
                         p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.set_dataset_info(privacy=wrong_privacy)
+
+    def test_dataset_info_should_work_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset.download()
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
+
+    def test_dataset_info_should_fail_after_unsync_by_set_dataframe(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset.download()
+        dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_dataset_info()
+
+    def test_dataset_info_should_fail_after_unsync_by_set_geodataframe(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset.download()
+        dataset.set_geodataframe(pd.DataFrame({'column_name': [2]}))
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_dataset_info()
