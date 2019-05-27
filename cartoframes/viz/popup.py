@@ -33,21 +33,21 @@ class Popup(object):
                 'click': ['$pop_min % 100', 'sqrt($pop_max)']
             })
 
-        Show labels.
+        Show titles.
 
         .. code::
             from cartoframes.viz import Popup
 
             Popup({
                 'hover': [{
-                    'label': 'Name',
+                    'title': 'Name',
                     'value': '$name'
                 }],
                 'click': [{
-                    'label': 'Name',
+                    'title': 'Name',
                     'value': '$name'
                 }, {
-                    'label': 'Pop max',
+                    'title': 'Pop max',
                     'value': '$pop_max'
                 }]
             })
@@ -99,12 +99,12 @@ class Popup(object):
                 if isinstance(item, str):
                     output.append({
                         'name': gen_variable_name(item),
-                        'label': item
+                        'title': item
                     })
                 elif isinstance(item, dict) and 'value' in item:
                     output.append({
                         'name': gen_variable_name(item.get('value')),
-                        'label': item.get('label')
+                        'title': item.get('title')
                     })
                 else:
                     raise ValueError('Wrong popup input')

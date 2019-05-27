@@ -155,7 +155,7 @@ class Map(object):
         self._htmlMap = HTMLMap()
 
         if default_legend is None and all(layer.legend is None for layer in self.layers):
-            self.default_legend = True
+            self.default_legend = False
         else:
             self.default_legend = default_legend
 

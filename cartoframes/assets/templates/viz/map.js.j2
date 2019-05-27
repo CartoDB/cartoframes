@@ -105,14 +105,16 @@ function onReady() {
         attrs.forEach((item) => {
           let value = feature.variables[item.name].value;
           if (typeof value === 'number') {
-            if (Math.abs(value) > 1000) {
+            if (Math.abs(value) > 100000) {
               value = value.toExponential(2);
             } else if (!Number.isInteger(value)) {
               value = value.toFixed(2);
+            } else {
+              value = value.toLocaleString();
             }
           }
           popupHTML += `
-            <span class="popup-name">${item.label}</span>
+            <span class="popup-name">${item.title}</span>
             <span class="popup-value">${value}</span>
           `;
         });
