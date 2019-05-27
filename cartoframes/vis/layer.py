@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from .source import Source
 from .style import Style
 from .popup import Popup
-from ..dataset import Dataset
+from cartoframes.datasets import Dataset
 
 
 class Layer(object):
