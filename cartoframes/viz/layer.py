@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from .source import Source
 from .style import Style
 from .popup import Popup
+from .legend import Legend
 from ..dataset import Dataset
 
 
@@ -20,6 +21,8 @@ class Layer(object):
           The columns to be shown must be added in a list format for each event. It
           must be written using `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
+        legend (dict, :py:class:`Legend <cartoframes.viz.Legend>`, optional):
+          ...
         context (:py:class:`Context <cartoframes.Context>`):
           A Context instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
@@ -79,7 +82,7 @@ class Layer(object):
         self.source = _set_source(source, context)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
-        self.legend = legend
+        self.legend = _set_legend(legend)
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
@@ -88,6 +91,9 @@ class Layer(object):
             self.popup.get_variables()
         )
         self.interactivity = self.popup.get_interactivity()
+        self.legend_info = self.legend.get_info(
+            self.source.geom_type
+        )
 
 
 def _set_source(source, context):
@@ -118,3 +124,13 @@ def _set_popup(popup):
         return popup
     else:
         return Popup()
+
+
+def _set_legend(legend):
+    """Set a Legend class from the input"""
+    if isinstance(legend, dict):
+        return Legend(legend)
+    elif isinstance(legend, Legend):
+        return legend
+    else:
+        return Legend()
