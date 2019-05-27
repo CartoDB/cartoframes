@@ -72,4 +72,6 @@ class TestHelpers(unittest.TestCase):
             title='Neighborhoods'
         )
 
-        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(globalQuantiles($name, 3), reverse(prism)), 0.9)')
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            'opacity(ramp(globalQuantiles($name, 3), reverse(prism)), 0.9)')
