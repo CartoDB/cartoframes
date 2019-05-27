@@ -154,7 +154,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
-        
+
         if default_legend is None and all(layer.legend is None for layer in self.layers):
             self.default_legend = True
         else:
