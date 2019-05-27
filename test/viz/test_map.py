@@ -126,7 +126,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
         _airship_path = 'custom_airship_path'
         map = Map(_airship_path=_airship_path)
         template = map._htmlMap.html
-        self.assertTrue(_airship_path + defaults.AIRSHIP_SCRIPT in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE_SCRIPT in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_COMPONENTS in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE in template)
         self.assertTrue(_airship_path + defaults.AIRSHIP_STYLE in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS_STYLE in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS in template)

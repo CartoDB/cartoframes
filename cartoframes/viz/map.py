@@ -427,10 +427,10 @@ class HTMLMap(object):
             airship_styles_path = defaults.AIRSHIP_STYLES_PATH
             airship_icons_path = defaults.AIRSHIP_ICONS_PATH
         else:
-            airship_components_path = _airship_path + defaults.AIRSHIP_SCRIPT
-            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_SCRIPT
+            airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS
+            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE
             airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE
-            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_STYLE
+            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS
 
         camera = None
         if viewport is not None:
