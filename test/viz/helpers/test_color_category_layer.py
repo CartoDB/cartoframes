@@ -26,10 +26,9 @@ class TestHelpers(unittest.TestCase):
 
         self.assertNotEqual(layer.legend, None)
         self.assertEqual(layer.legend['type'], 'basic')
-        self.assertEqual(layer.legend['ramp'], 'color')
-        self.assertEqual(layer.legend['heading'], 'Neighborhoods')
+        self.assertEqual(layer.legend['prop'], 'color')
+        self.assertEqual(layer.legend['title'], 'Neighborhoods')
         self.assertEqual(layer.legend['description'], '')
-        self.assertEqual(layer.legend['othersLabel'], 'Others')
 
     def test_color_category_layer_point(self):
         "should create a point type layer"

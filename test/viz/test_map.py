@@ -32,7 +32,7 @@ class TestMapLayer(unittest.TestCase):
         self.assertEqual(len(map.sources), 1)
         self.assertEqual(map.sources[0].get('interactivity'), [])
         self.assertIsNotNone(map.sources[0].get('credentials'))
-        self.assertIsNone(map.sources[0].get('legend'))
+        self.assertIsNotNone(map.sources[0].get('legend'))
         self.assertIsNotNone(map.sources[0].get('query'))
         self.assertEqual(map.sources[0].get('type'), 'GeoJSON')
         self.assertIsNotNone(map.sources[0].get('viz'))
@@ -62,7 +62,7 @@ class TestMapLayer(unittest.TestCase):
             popup={
                 'click': ['$pop', '$name'],
                 'hover': [{
-                    'label': 'Pop',
+                    'title': 'Pop',
                     'value': '$pop'
                 }]
             }
@@ -73,16 +73,16 @@ class TestMapLayer(unittest.TestCase):
             'event': 'click',
             'attrs': [{
                 'name': 'v559339',
-                'label': '$pop'
+                'title': '$pop'
             }, {
                 'name': 'v8e0f74',
-                'label': '$name'
+                'title': '$name'
             }]
         }, {
             'event': 'hover',
             'attrs': [{
                 'name': 'v559339',
-                'label': 'Pop'
+                'title': 'Pop'
             }]
         }])
 
