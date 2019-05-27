@@ -15,10 +15,15 @@ class Legend(object):
         self._init_legend(data)
 
     def _init_legend(self, data):
+        self._type = 'color-category'
+        self._prop = 'color'
+        self._title = ''
+        self._description = ''
+        self._footer = ''
         if data is not None:
             if isinstance(data, dict):
-                self._type = data.get('type')
-                self._property = data.get('property')
+                self._type = data.get('type', 'color-category')
+                self._prop = data.get('prop', 'color')
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
@@ -31,8 +36,8 @@ class Legend(object):
             _type = _type.get(geom_type)
         return {
             'type': _type,
-            'property': _property,
-            'heading': _title,
-            'description': _description,
-            'source': _footer
+            'property': self._prop,
+            'heading': self._title,
+            'description': self._description,
+            'source': self._footer
         }

@@ -24,10 +24,9 @@ def color_category_layer(source, value, top=11, palette='bold', title=''):
             }
         },
         legend={
-            'type': 'basic',
-            'ramp': 'color',
-            'heading': title or value,
-            'description': '',
-            'othersLabel': 'Others'
+            'type': 'color-category',
+            'prop': 'color',
+            'title': title or value,
+            'description': ''
         }
     )
