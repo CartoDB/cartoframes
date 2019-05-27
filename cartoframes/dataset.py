@@ -108,27 +108,22 @@ class Dataset(object):
         return self._table_name
 
     def get_dataset_info(self):
-        if self._is_saved_in_carto:
-            if self._dataset_info is None:
-                self._dataset_info = self._get_dataset_info()
-
-            return self._dataset_info
-        else:
+        if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
+
+        if self._dataset_info is None:
+            self._dataset_info = self._get_dataset_info()
+
+        return self._dataset_info
 
     def set_dataset_info(self, dataset_info=None, privacy=None, name=None):
-        if self._is_saved_in_carto:
-            if self._dataset_info is None:
-                self._dataset_info = self._get_dataset_info()
+        self._dataset_info = self.get_dataset_info()
 
-            if dataset_info:
-                self._dataset_info.update(privacy=dataset_info.privacy)
-            else:
-                self._dataset_info.update(privacy=privacy, name=name)
+        if dataset_info:
+            self._dataset_info.update(privacy=dataset_info.privacy)
         else:
-            raise CartoException('Your data is not synchronized with CARTO.'
-                                 'First of all, you should call upload method to save your data in CARTO.')
+            self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:

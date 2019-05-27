@@ -13,7 +13,7 @@ class MetadataMock():
 
 class DatasetInfoMock(DatasetInfo):
     def _get_metadata(self, _1, _2):
-        self._metadata = MetadataMock()
+        return MetadataMock()
 
     def _save_metadata(self):
         return True
