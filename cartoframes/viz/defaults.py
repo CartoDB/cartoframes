@@ -1,4 +1,4 @@
-CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/v1.2/carto-vl.min.js'
+CARTO_VL_PATH = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.min.js'
 
 AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
