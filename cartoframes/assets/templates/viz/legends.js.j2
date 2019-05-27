@@ -1,0 +1,29 @@
+function createDefaultLegend(layers) {
+  const defaultLegendContainer = document.querySelector('#basicLegendContainer');
+  defaultLegendContainer.style.display = 'none';
+
+  AsBridge.VL.Legends.layersLegend(
+    '#basicLegend',
+    layers,
+    {
+      onLoad: () => defaultLegendContainer.style.display = 'unset'
+    }
+  )
+}
+
+function createLegend(layer, legendData, layerIndex) {
+  const element = document.querySelector(`#source${layerIndex}_legend`);
+
+  if (legendData.ramp) {
+    const config = { config: { othersLabel: legendData.othersLabel } }
+    
+    AsBridge.VL.Legends.rampLegend(
+      element,
+      layer,
+      legendData.ramp,
+      config
+    );
+  } else {
+    // TODO: we don't have a bridge for this case, should this even be a case?
+  }
+}

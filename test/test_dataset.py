@@ -22,6 +22,7 @@ warnings.filterwarnings("ignore")
 
 class TestDataset(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CARTOframes"""
+
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
@@ -306,9 +307,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        lonlat = ('dropoff_longitude', 'dropoff_latitude')
+        lnglat = ('dropoff_longitude', 'dropoff_latitude')
         dataset = Dataset.from_dataframe(df).upload(
-            with_lonlat=lonlat, table_name=self.test_write_table, context=self.cc)
+            with_lnglat=lnglat, table_name=self.test_write_table, context=self.cc)
         self.test_write_table = dataset.get_table_name()
 
         self.assertExistsTable(self.test_write_table)
@@ -448,6 +449,30 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
+
+    def test_dataset_schema_from_parameter(self):
+        schema = 'fake_schema'
+        dataset = Dataset.from_table(table_name='fake_table', schema=schema, context=self.cc)
+        self.assertEqual(dataset._schema, schema)
+
+    def test_dataset_schema_from_non_org_context(self):
+        dataset = Dataset.from_table(table_name='fake_table', context=self.cc)
+        self.assertEqual(dataset._schema, 'public')
+
+    def test_dataset_schema_from_org_context(self):
+        username = 'fake_username'
+
+        class FakeCreds():
+            def username(self):
+                return username
+
+        class FakeContext():
+            def __init__(self):
+                self.is_org = True
+                self.creds = FakeCreds()
+
+        dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
+        self.assertEqual(dataset._schema, username)
 
     def test_decode_geom(self):
         # Point (0, 0) without SRID

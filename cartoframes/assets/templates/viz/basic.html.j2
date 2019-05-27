@@ -41,7 +41,8 @@
         font-family: "Courier New", Courier, monospace;
         margin: 0 auto;
         font-size: 14px;
-        overflow: scroll;
+        overflow: auto;
+        z-index: 1000;
       }
       
       .error-section {
@@ -103,9 +104,10 @@
         <div class="as-map-area">
           <div id="map"></div>
           <div class="as-map-panels">
-            <div class="as-panel as-panel--right as-panel--top">
-              <div class="as-panel__element" id="legends" style="display: none;">
-              </div>
+            <div class="as-panel as-panel--left as-panel--top">
+              {% if has_legends %}
+                {% include 'viz/legends.html.j2' %}
+              {% endif %}
             </div> <!-- as-panel -->
           </div> <!-- as-map-panels -->
         </div> <!-- as-map-area -->
@@ -115,7 +117,7 @@
     {% include 'error/basic.html.j2' %}
 
     <script>
-      {% include 'vis/map.js.j2' %}
+      {% include 'viz/map.js.j2' %}
     </script>
   </body>
   </html>

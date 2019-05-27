@@ -18,7 +18,7 @@ class Map(object):
 
     Args:
         layers (list of Layer-types): List of layers. One or more of
-          :py:class:`Layer <cartoframes.vis.Layer>`.
+          :py:class:`Layer <cartoframes.viz.Layer>`.
         basemap (str):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
             `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
@@ -36,8 +36,8 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -51,8 +51,8 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -70,8 +70,8 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -93,8 +93,8 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer, basemaps
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer, basemaps
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -111,8 +111,8 @@ class Map(object):
 
         .. code::
 
-            from cartoframes import Context, set_default_context
-            from cartoframes.vis import Map, Layer
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
@@ -140,6 +140,7 @@ class Map(object):
                  size=None,
                  viewport=None,
                  template=None,
+                 default_legend=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -153,12 +154,18 @@ class Map(object):
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
 
+        if default_legend is None and all(layer.legend is None for layer in self.layers):
+            self.default_legend = True
+        else:
+            self.default_legend = default_legend
+
         self._htmlMap.set_content(
             size=self.size,
             sources=self.sources,
             bounds=self.bounds,
             viewport=self.viewport,
             basemap=self.basemap,
+            default_legend=self.default_legend,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -179,7 +186,7 @@ def _get_bounds(bounds, layers):
 
 def _init_layers(layers):
     if layers is None:
-        return None
+        return []
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
@@ -376,18 +383,19 @@ class HTMLMap(object):
         self._env.filters['clear_none'] = _clear_none_filter
 
         self.html = None
-        self._template = self._env.get_template('vis/basic.html.j2')
+        self._template = self._env.get_template('viz/basic.html.j2')
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
+            default_legend=None,
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, basemap,
+            size, sources, bounds, viewport, basemap, default_legend,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
-        self, size, sources, bounds, viewport, basemap=None,
+        self, size, sources, bounds, viewport, basemap=None, default_legend=None,
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
@@ -397,14 +405,6 @@ class HTMLMap(object):
             # No basemap
             basecolor = 'white'
             basemap = ''
-        elif isinstance(basemap, bool):
-            if basemap is True:
-                # Default basemap
-                basemap = Basemaps.darkmatter
-            else:
-                # No basemap
-                basecolor = 'white'
-                basemap = ''
         elif isinstance(basemap, str):
             if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
                 # Basemap is a color
@@ -441,6 +441,8 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
+        has_legends = any(source['legend'] is not None for source in sources) or default_legend
+
         return self._template.render(
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
@@ -450,6 +452,8 @@ class HTMLMap(object):
             mapboxtoken=token,
             bounds=bounds,
             camera=camera,
+            has_legends=has_legends,
+            default_legend=default_legend,
             carto_vl_path=_carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,

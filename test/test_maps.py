@@ -8,6 +8,7 @@ from cartoframes.maps import (non_basemap_layers, has_time_layer, get_map_name,
 
 class TestMaps(unittest.TestCase):
     """Tests for functions in maps module"""
+
     def setUp(self):
         self.layers = [BaseMap('dark'),
                        Layer('cb_2013_puma10_500k',
@@ -122,8 +123,8 @@ class TestMaps(unittest.TestCase):
                 "south": {
                     "default": -45,
                     "type": "number"
-                    }
-                },
+                }
+            },
             "version": "0.0.1",
             "name": ("cartoframes_ver20170406_layers2_time0_baseid1_"
                      "labels0_zoom0"),

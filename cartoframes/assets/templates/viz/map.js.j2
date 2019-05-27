@@ -1,3 +1,6 @@
+{% if has_legends %}
+  {% include 'viz/legends.js.j2' %}
+{% endif %}
 {% include 'error/parser.js.j2' %}
 {% include 'utils/base64.js.j2' %}
 
@@ -39,11 +42,15 @@ function onReady() {
     map.flyTo({{ camera|clear_none|tojson }});
   {% endif %}
 
+  const layers = [];
+
   sources.forEach((elem, idx) => {
     const factory = new SourceFactory();
     const source = factory.createSource(elem);
     const viz = new carto.Viz(elem['viz']);
     const layer = new carto.Layer(`layer${idx}`, source, viz);
+
+    layers.push(layer);
 
     try {
       layer._updateLayer.catch(displayError);
@@ -71,6 +78,10 @@ function onReady() {
           setPopupsHover(tempPopup, interactivity, attrs);
         }
       }
+    }
+
+    if (elem.legend) {
+      createLegend(layer, elem.legend, idx);
     }
 
     function setPopupsClick(tempPopup, interactivity, attrs) {
@@ -139,6 +150,10 @@ function onReady() {
       }
     }
   });
+
+  {% if default_legend %}
+    createDefaultLegend(layers);
+  {% endif %}
 }
 
 function setReady () {
