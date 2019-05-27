@@ -6,6 +6,7 @@ from carto.exceptions import CartoException
 
 from ..columns import normalize_name
 
+
 class DatasetInfo():
     PRIVATE = 'PRIVATE'
     PUBLIC = 'PUBLIC'
@@ -47,8 +48,8 @@ class DatasetInfo():
                 self._get_metadata(carto_context=carto_context, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
-                raise CartoException("We couldn't get the table metadata."
-                                     "Please, try again in a few seconds or contact support for help")
+                raise CartoException('We could not get the table metadata.'
+                                     'Please, try again in a few seconds or contact support for help')
 
     def _save_metadata(self):
         self._metadata.privacy = self.privacy
