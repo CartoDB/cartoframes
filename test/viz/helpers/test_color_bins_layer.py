@@ -22,17 +22,16 @@ class TestHelpers(unittest.TestCase):
             'label': 'name',
             'value': '$name'
         }])
-        
+
         self.assertNotEqual(layer.legend, None)
         self.assertEqual(layer.legend['type'], 'basic')
         self.assertEqual(layer.legend['ramp'], 'color')
         self.assertEqual(layer.legend['heading'], 'name')
         self.assertEqual(layer.legend['description'], '')
 
-    
     def test_color_bins_layer_point(self):
         "should create a point type layer"
-        
+
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -50,7 +49,7 @@ class TestHelpers(unittest.TestCase):
         source = Source('sf_neighborhoods')
 
         layer = helpers.color_bins_layer(
-            'sf_neighborhoods',
+            source,
             'name',
             bins=3,
             palette='prism',
@@ -58,7 +57,7 @@ class TestHelpers(unittest.TestCase):
         )
 
         self.assertEqual(layer.style._style['point']['color'], 'ramp(globalQuantiles($name, 3), reverse(prism))')
-    
+
     def test_color_bins_layer_polygon(self):
         "should create a polygon type layer"
 
@@ -66,10 +65,11 @@ class TestHelpers(unittest.TestCase):
         source = Source('sf_neighborhoods')
 
         layer = helpers.color_bins_layer(
-            'sf_neighborhoods',
+            source,
             'name',
             bins=3,
             palette='prism',
             title='Neighborhoods'
         )
+
         self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(globalQuantiles($name, 3), reverse(prism)), 0.9)')

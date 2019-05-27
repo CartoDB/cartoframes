@@ -23,17 +23,17 @@ class TestHelpers(unittest.TestCase):
             'label': 'Neighborhoods',
             'value': '$name'
         }])
-        
+
         self.assertNotEqual(layer.legend, None)
         self.assertEqual(layer.legend['type'], 'basic')
         self.assertEqual(layer.legend['ramp'], 'color')
         self.assertEqual(layer.legend['heading'], 'Neighborhoods')
         self.assertEqual(layer.legend['description'], '')
         self.assertEqual(layer.legend['othersLabel'], 'Others')
-    
+
     def test_color_category_layer_point(self):
         "should create a point type layer"
-        
+
         layer = helpers.color_category_layer(
             'sf_neighborhoods',
             'name',
@@ -58,7 +58,7 @@ class TestHelpers(unittest.TestCase):
             title='Neighborhoods'
         )
         self.assertEqual(layer.style._style['line']['color'], 'ramp(top($name, 5), prism)')
-    
+
     def test_color_category_layer_polygon(self):
         "should create a polygon type layer"
 
