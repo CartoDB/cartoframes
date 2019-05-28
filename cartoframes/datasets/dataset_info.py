@@ -24,7 +24,6 @@ class DatasetInfo():
     @privacy.setter
     def privacy(self, privacy):
         raise setting_value_exception('privacy', privacy)
-        return False
 
     @property
     def name(self):
@@ -33,7 +32,6 @@ class DatasetInfo():
     @name.setter
     def name(self, name):
         raise setting_value_exception('name', name)
-        return False
 
     def update(self, privacy=None, name=None):
         modified = False
