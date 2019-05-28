@@ -579,8 +579,9 @@ class TestDatasetInfo(unittest.TestCase):
         table_name = 'fake_table'
         dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
         dataset_info = dataset.get_dataset_info()
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
         privacy = Dataset.PUBLIC
         error_msg = str(setting_value_exception('privacy', privacy))
         with self.assertRaises(CartoException, msg=error_msg):
             dataset_info.privacy = privacy
-
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
