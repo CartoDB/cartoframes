@@ -147,16 +147,16 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
 
 .. code:: python
 
-  from cartoframes.auth import Context
+  from cartoframes.auth import set_default_context
   from cartoframes.viz import Map, Layer
 
-  context = Context(
+  set_default_context(
       base_url='https://cartoframes.carto.com/', # or https://cartovl.carto.com/
       api_key='default_public'
   )
 
   Map(
-      Layer('dataset_name', context=context),
+      Layer('dataset_name'),
       _carto_vl_path='http://localhost:8080',
       _airship_path='http://localhost:5000'
   )

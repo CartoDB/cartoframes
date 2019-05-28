@@ -33,14 +33,13 @@ class Layer(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Layer
 
-            context = Context(
+            set_default_context(
                 base_url='https://cartovl.carto.com/',
                 api_key='default_public'
             )
-            set_default_context(context)
 
             Layer(
                 'SELECT * FROM populated_places WHERE adm0name = "Spain"',
