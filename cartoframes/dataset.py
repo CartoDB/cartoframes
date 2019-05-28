@@ -33,8 +33,8 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema=None, query=None, df=None, gdf=None, state=None, context=None):
-        from .auth import default_context
-        self.cc = context or default_context
+        from .auth import _default_context
+        self.cc = context or _default_context
 
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
