@@ -4,10 +4,10 @@ AIRSHIP_SCRIPT = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_SCRIPT = '/packages/bridge/dist/asbridge.js'
 AIRSHIP_STYLE = '/packages/styles/dist/airship.css'
 AIRSHIP_ICONS_STYLE = '/packages/icons/dist/icons.css'
-AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/v2.0/airship.js'
-AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/v2.0/asbridge.js'
-AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/v2.0/airship.css'
-AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/v2.0/icons.css'
+AIRSHIP_COMPONENTS_PATH = 'https://libs.cartocdn.com/airship-components/cartoframes/airship.js'
+AIRSHIP_BRIDGE_PATH = 'https://libs.cartocdn.com/airship-bridge/cartoframes/asbridge.js'
+AIRSHIP_STYLES_PATH = 'https://libs.cartocdn.com/airship-style/cartoframes/airship.css'
+AIRSHIP_ICONS_PATH = 'https://libs.cartocdn.com/airship-icons/cartoframes/icons.css'
 
 CREDENTIALS = {
     'username': 'cartoframes',

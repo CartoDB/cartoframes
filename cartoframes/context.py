@@ -344,7 +344,7 @@ class CartoContext(object):
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset.upload(with_lonlat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
+        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),

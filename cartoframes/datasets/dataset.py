@@ -40,11 +40,13 @@ class Dataset(object):
 
     DEFAULT_RETRY_TIMES = 3
 
-    def __init__(self, table_name=None, schema='public',
+    def __init__(self, table_name=None, schema=None,
                  query=None, df=None, gdf=None,
                  state=None, is_saved_in_carto=False, context=None):
+        self._cc = context or default_context
+
         self._table_name = normalize_name(table_name)
-        self._schema = schema
+        self._schema = schema or self._get_schema()
         self._query = query
         self._df = df
         self._gdf = gdf
@@ -53,7 +55,6 @@ class Dataset(object):
             raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self._cc = context or default_context
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
         self._dataset_info = None
@@ -64,7 +65,7 @@ class Dataset(object):
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
-    def from_table(cls, table_name, context, schema='public'):
+    def from_table(cls, table_name, context, schema=None):
         return cls(table_name=table_name, schema=schema, context=context or default_context,
                    state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
@@ -121,7 +122,7 @@ class Dataset(object):
         self._dataset_info = self.get_dataset_info()
         self._dataset_info.update(privacy=privacy, name=name)
 
-    def upload(self, with_lonlat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
+    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self._table_name = normalize_name(table_name)
         if schema:
@@ -151,13 +152,13 @@ class Dataset(object):
             self._normalized_column_names = _normalize_column_names(self._df)
 
             if if_exists == Dataset.REPLACE or not self.exists():
-                self._create_table(with_lonlat)
+                self._create_table(with_lnglat)
                 if if_exists != Dataset.APPEND:
                     self._is_saved_in_carto = True
             elif if_exists == Dataset.FAIL:
                 raise already_exists_error
 
-            self._copyfrom(with_lonlat)
+            self._copyfrom(with_lnglat)
 
         elif self._query is not None:
             if if_exists == Dataset.APPEND:
@@ -202,12 +203,12 @@ class Dataset(object):
             self._cc._debug_print(err=err)
             return False
 
-    def _create_table(self, with_lonlat=None):
+    def _create_table(self, with_lnglat=None):
         job = self._cc.batch_sql_client \
                   .create_and_wait_for_completion(
                       '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                       .format(drop=self._drop_table_query(),
-                              create=self._create_table_query(with_lonlat),
+                              create=self._create_table_query(with_lnglat),
                               cartodbfy=self._cartodbfy_query()))
 
         if job['status'] != 'done':
@@ -227,32 +228,32 @@ class Dataset(object):
             .format(org=(self._cc.creds.username() if self._cc.is_org else 'public'),
                     table_name=self._table_name)
 
-    def _copyfrom(self, with_lonlat=None):
+    def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
 
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
         self._cc.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
                FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
-            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lonlat, geom_col)
+            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lnglat, geom_col)
         )
 
-    def _rows(self, df, cols, with_lonlat, geom_col):
+    def _rows(self, df, cols, with_lnglat, geom_col):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
             lng_val = None
             lat_val = None
             for col in cols:
-                if with_lonlat and col in Column.SUPPORTED_GEOM_COL_NAMES:
+                if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
                 if pd.isnull(val) or val is None:
                     val = ''
-                if with_lonlat:
-                    if col == with_lonlat[0]:
+                if with_lnglat:
+                    if col == with_lnglat[0]:
                         lng_val = row[col]
-                    if col == with_lonlat[1]:
+                    if col == with_lnglat[1]:
                         lat_val = row[col]
                 if col == geom_col:
                     the_geom_val = row[col]
@@ -263,7 +264,7 @@ class Dataset(object):
                 geom = _decode_geom(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lonlat is not None and lng_val is not None and lat_val is not None:
+            if with_lnglat is not None and lng_val is not None and lat_val is not None:
                 csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
 
             csv_row += '\n'
@@ -284,8 +285,8 @@ class Dataset(object):
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
 
-    def _create_table_query(self, with_lonlat=None):
-        if with_lonlat is None:
+    def _create_table_query(self, with_lnglat=None):
+        if with_lnglat is None:
             geom_type = _get_geom_col_type(self._df)
         else:
             geom_type = 'Point'
@@ -346,6 +347,8 @@ class Dataset(object):
                         FROM "{schema}"."{table}" LIMIT 0
                     '''.format(table=self._table_name, schema=self._schema)
                     return get_columns(self._cc, query)
+                else:
+                    raise e
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
@@ -406,6 +409,12 @@ class Dataset(object):
     def _unsync(self):
         self._is_saved_in_carto = False
         self._dataset_info = None
+
+    def _get_schema(self):
+        if self._cc:
+            return 'public' if not self._cc.is_org else self._cc.creds.username()
+        else:
+            return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):

@@ -6,6 +6,7 @@ from cartoframes import styling
 
 class TestColorScheme(unittest.TestCase):
     """Tests for functions in key modules"""
+
     def setUp(self):
         # color schemes with all different names
         self.burg = styling.burg(bins=4)

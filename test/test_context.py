@@ -36,6 +36,7 @@ warnings.filterwarnings("ignore")
 
 class TestCartoContext(unittest.TestCase, _UserUrlLoader):
     """Tests for cartoframes.CartoContext"""
+
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
