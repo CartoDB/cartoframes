@@ -75,7 +75,7 @@ class TestDatasetSync(unittest.TestCase):
     def test_dataset_not_sync_from_query(self):
         query = "SELECT 1"
         dataset = DatasetMock.from_query(query=query, context=self.context)
-        self.assertEqual(dataset._is_saved_in_carto, False)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_query_and_upload(self):
         query = "SELECT 1"
@@ -88,7 +88,7 @@ class TestDatasetSync(unittest.TestCase):
         query = "SELECT 1"
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.download()
-        self.assertEqual(dataset._is_saved_in_carto, False)
+        self.assertEqual(dataset._is_saved_in_carto, True)
 
         dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
         self.assertEqual(dataset._is_saved_in_carto, False)
