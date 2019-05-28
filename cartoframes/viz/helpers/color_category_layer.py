@@ -14,7 +14,7 @@ def color_category_layer(source, value, top=11, palette='bold', title=''):
                 'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(top(${0}, {1}), {2}),0.9)'.format(value, top, palette)
+                'color': 'opacity(ramp(top(${0}, {1}), {2}), 0.9)'.format(value, top, palette)
             }
         },
         popup={
@@ -27,6 +27,7 @@ def color_category_layer(source, value, top=11, palette='bold', title=''):
             'type': 'basic',
             'ramp': 'color',
             'heading': title or value,
-            'description': ''
+            'description': '',
+            'othersLabel': 'Others'
         }
     )
