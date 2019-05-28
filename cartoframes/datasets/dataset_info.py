@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 from ..columns import normalize_name
 
 
-class DatasetInfo():
+class DatasetInfo(object):
     PRIVATE = 'PRIVATE'
     PUBLIC = 'PUBLIC'
     LINK = 'LINK'
