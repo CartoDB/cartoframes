@@ -16,7 +16,7 @@ __all__ = [
     'BinMethod',
 
     # New API
-    'Context',
+
 
     '__version__'
 ]
