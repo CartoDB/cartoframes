@@ -91,6 +91,7 @@ class DatasetInfo():
 
         return False
 
+
 def setting_value_exception(prop, value):
     return CartoException(("Error setting {prop}. You must use the `update` method: "
-            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
+                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
