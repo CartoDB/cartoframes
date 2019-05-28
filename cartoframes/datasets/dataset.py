@@ -117,7 +117,7 @@ class Dataset(object):
 
         return self._dataset_info
 
-    def set_dataset_info(self, privacy=None, name=None):
+    def update_dataset_info(self, privacy=None, name=None):
         self._dataset_info = self.get_dataset_info()
         self._dataset_info.update(privacy=privacy, name=name)
 

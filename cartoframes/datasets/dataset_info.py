@@ -14,24 +14,42 @@ class DatasetInfo():
 
     def __init__(self, carto_context, table_name):
         self._metadata = self._get_metadata(carto_context, table_name)
-        self.privacy = self._metadata.privacy
-        self.name = self._metadata.name
+        self._privacy = self._metadata.privacy
+        self._name = self._metadata.name
+
+    @property
+    def privacy(self):
+        return self._privacy
+
+    @privacy.setter
+    def privacy(self, privacy):
+        raise setting_value_exception('privacy', privacy)
+        return False
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        raise setting_value_exception('name', name)
+        return False
 
     def update(self, privacy=None, name=None):
         modified = False
 
         if privacy and self._validate_privacy(privacy):
-            self.privacy = privacy.upper()
+            self._privacy = privacy.upper()
             modified = True
 
         if name:
             normalized_name = normalize_name(name)
             if self._validate_name(normalized_name):
-                self.name = normalized_name
+                self._name = normalized_name
                 modified = True
 
-                if normalized_name != name:
-                    warn('Dataset name will be named `{}`'.format(self.name))
+                if self._name != name:
+                    warn('Dataset name will be named `{}`'.format(self._name))
 
         if modified:
             self._save_metadata()
@@ -52,8 +70,8 @@ class DatasetInfo():
                                      'Please, try again in a few seconds or contact support for help')
 
     def _save_metadata(self):
-        self._metadata.privacy = self.privacy
-        self._metadata.name = self.name
+        self._metadata.privacy = self._privacy
+        self._metadata.name = self._name
         self._metadata.save()
 
     def _validate_privacy(self, privacy):
@@ -62,13 +80,17 @@ class DatasetInfo():
             raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
                 p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK))
 
-        if privacy != self.privacy:
+        if privacy != self._privacy:
             return True
 
         return False
 
     def _validate_name(self, name):
-        if name != self.name:
+        if name != self._name:
             return True
 
         return False
+
+def setting_value_exception(prop, value):
+    return CartoException(("Error setting {prop}. You must use the `update` method: "
+            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
