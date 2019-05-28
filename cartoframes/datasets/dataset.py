@@ -4,10 +4,11 @@ import pandas as pd
 import time
 from tqdm import tqdm
 
-from .columns import Column, normalize_names, normalize_name
-
 from carto.exceptions import CartoException, CartoRateLimitException
-from .geojson import load_geojson
+
+from ..columns import Column, normalize_names, normalize_name
+from ..geojson import load_geojson
+from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -26,9 +27,9 @@ class Dataset(object):
     REPLACE = 'replace'
     APPEND = 'append'
 
-    PRIVATE = 'private'
-    PUBLIC = 'public'
-    LINK = 'link'
+    PRIVATE = DatasetInfo.PRIVATE
+    PUBLIC = DatasetInfo.PUBLIC
+    LINK = DatasetInfo.LINK
 
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
@@ -56,6 +57,7 @@ class Dataset(object):
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
+        self._dataset_info = None
 
         self._normalized_column_names = None
 
@@ -92,7 +94,7 @@ class Dataset(object):
 
     def set_dataframe(self, df):
         if self._df is None or not self._df.equals(df):
-            self._is_saved_in_carto = False
+            self._unsync()
         self._df = df
 
     def get_geodataframe(self):
@@ -100,11 +102,25 @@ class Dataset(object):
 
     def set_geodataframe(self, gdf):
         if self._gdf is None or not self._gdf.equals(gdf):
-            self._is_saved_in_carto = False
+            self._unsync()
         self._gdf = gdf
 
     def get_table_name(self):
         return self._table_name
+
+    def get_dataset_info(self):
+        if not self._is_saved_in_carto:
+            raise CartoException('Your data is not synchronized with CARTO.'
+                                 'First of all, you should call upload method to save your data in CARTO.')
+
+        if self._dataset_info is None:
+            self._dataset_info = self._get_dataset_info()
+
+        return self._dataset_info
+
+    def update_dataset_info(self, privacy=None, name=None):
+        self._dataset_info = self.get_dataset_info()
+        self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
@@ -169,7 +185,7 @@ class Dataset(object):
     def delete(self):
         if self.exists():
             self._cc.sql_client.send(self._drop_table_query(False))
-            self._is_saved_in_carto = False
+            self._unsync()
             return True
 
         return False
@@ -386,6 +402,13 @@ class Dataset(object):
             'Polygon': Dataset.GEOM_TYPE_POLYGON,
             'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
         }[geom_type]
+
+    def _get_dataset_info(self):
+        return DatasetInfo(self._cc, self._table_name)
+
+    def _unsync(self):
+        self._is_saved_in_carto = False
+        self._dataset_info = None
 
     def _get_schema(self):
         if self._cc:

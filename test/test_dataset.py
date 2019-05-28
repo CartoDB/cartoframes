@@ -6,13 +6,16 @@ import os
 import sys
 import json
 import warnings
+import pandas as pd
 
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.dataset import Dataset, _decode_geom
+from cartoframes.datasets import Dataset, _decode_geom, setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
+from mocks.dataset_mock import DatasetMock
+from mocks.context_mock import ContextMock
 
 from utils import _UserUrlLoader
 
@@ -508,3 +511,77 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 '''.format(table=table_name))
         except CartoException as e:
             self.assertTrue('relation "{}" does not exist'.format(table_name) in str(e))
+
+
+class TestDatasetInfo(unittest.TestCase):
+    def setUp(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.context = ContextMock(username=self.username, api_key=self.api_key)
+
+    def test_dataset_get_privacy_from_new_table(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
+
+    def test_dataset_get_privacy_from_not_sync(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_dataset_info()
+
+    def test_dataset_set_privacy_to_new_table(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PUBLIC)
+
+    def test_dataset_set_privacy_with_wrong_parameter(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        wrong_privacy = 'wrong_privacy'
+        error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
+                        p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+        with self.assertRaises(ValueError, msg=error_msg):
+            dataset.update_dataset_info(privacy=wrong_privacy)
+
+    def test_dataset_info_should_work_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
+
+    def test_dataset_info_should_fail_after_unsync_by_set_dataframe(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset.download()
+        dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_dataset_info()
+
+    def test_dataset_info_should_fail_after_unsync_by_set_geodataframe(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset.download()
+        dataset.set_geodataframe(pd.DataFrame({'column_name': [2]}))
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_dataset_info()
+
+    def test_dataset_info_props_are_private(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset_info = dataset.get_dataset_info()
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+        privacy = Dataset.PUBLIC
+        error_msg = str(setting_value_exception('privacy', privacy))
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset_info.privacy = privacy
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
