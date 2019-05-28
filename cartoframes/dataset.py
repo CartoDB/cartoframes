@@ -306,7 +306,6 @@ class Dataset(object):
                 else:
                     raise e
 
-
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
         columns = [c.name for c in self.get_table_columns()]
