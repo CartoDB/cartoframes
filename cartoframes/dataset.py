@@ -36,16 +36,15 @@ class Dataset(object):
         from .auth import _default_context
         self.cc = context or _default_context
 
+        if not self._validate_params(table_name, query, df, gdf):
+            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
         self.query = query or self._default_query()
         self.df = df
         self.gdf = gdf
-
-        if not self._validate_init():
-            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
-                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
-
         self.state = state
         self.normalized_column_names = None
 
@@ -164,8 +163,14 @@ class Dataset(object):
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
-    def _validate_init(self):
-        return self.table_name or self.query or self.df or self.gdf
+    def _validate_params(self, table_name, query, df, gdf):
+        inputs = [table_name, query, df, gdf]
+        inputs_number = sum(x is not None for x in inputs)
+
+        if inputs_number != 1:
+            return False
+
+        return True
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -353,7 +358,8 @@ class Dataset(object):
             return 'public'
 
     def _default_query(self):
-        return 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
+        if self.table_name and self.schema:
+            return 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
