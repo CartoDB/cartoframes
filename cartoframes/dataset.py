@@ -38,7 +38,7 @@ class Dataset(object):
 
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
-        self.query = query
+        self.query = query or self._default_query()
         self.df = df
         self.gdf = gdf
 
@@ -355,8 +355,11 @@ class Dataset(object):
     def _get_schema(self):
         if self.cc:
             return self.cc.get_default_schema()
+        else:
+            return 'public'
 
-        return None
+    def _default_query(self):
+        return 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):

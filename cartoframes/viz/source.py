@@ -146,8 +146,7 @@ class Source(object):
                 self._init_source_geojson(data, bounds)
 
             elif _check_table_name(data):
-                schema = schema or _get_schema(context)
-                self._init_source_query(_format_query(data, schema), context, bounds)
+                self._init_source_table(data, context, schema, bounds)
 
         elif HAS_GEOPANDAS and isinstance(data, (list, dict, geopandas.GeoDataFrame)):
             self._init_source_geojson(data, bounds)
@@ -157,6 +156,12 @@ class Source(object):
 
         else:
             raise ValueError('Wrong source input')
+
+    def _init_source_table(self, data, context, schema, bounds):
+        self.dataset = Dataset.from_table(data, context, schema)
+        self.type = SourceType.QUERY
+        self.query = self.dataset.query
+        self.bounds = bounds
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)
@@ -225,13 +230,3 @@ def _get_credentials(context):
 
 def _get_geom_type(dataset):
     return dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
-
-
-def _get_schema(context):
-    from cartoframes.auth import _default_context
-    context = context or _default_context
-
-    if context:
-        return context.get_default_schema()
-    else:
-        return 'public'
