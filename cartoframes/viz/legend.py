@@ -27,6 +27,13 @@ class Legend(object):
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
+
+                if self._type or self._prop:
+                    if not self._type:
+                        raise ValueError('Missing "type"')
+                    if not self._prop:
+                        raise ValueError('Missing "prop"')
+
             else:
                 raise ValueError('Wrong legend input')
 
