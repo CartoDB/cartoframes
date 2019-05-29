@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from .defaults import LEGEND_TYPES, LEGEND_PROPERTIES
+
 
 class Legend(object):
     """Legend
@@ -29,10 +31,18 @@ class Legend(object):
                 self._footer = data.get('footer', '')
 
                 if self._type or self._prop:
-                    if not self._type:
-                        raise ValueError('Missing "type"')
-                    if not self._prop:
-                        raise ValueError('Missing "prop"')
+                    if self._type not in LEGEND_TYPES:
+                        raise ValueError(
+                        'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
+                            self._type,
+                            ', '.join(LEGEND_TYPES)
+                        ))
+                    if self._prop not in LEGEND_PROPERTIES:
+                        raise ValueError(
+                            'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
+                                self._prop,
+                                ', '.join(LEGEND_PROPERTIES)
+                            ))
 
             else:
                 raise ValueError('Wrong legend input')

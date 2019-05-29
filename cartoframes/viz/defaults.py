@@ -16,7 +16,7 @@ CREDENTIALS = {
     'base_url': ''
 }
 
-STYLE_PROPERTIES = (
+STYLE_PROPERTIES = [
     'color',
     'width',
     'filter',
@@ -27,7 +27,17 @@ STYLE_PROPERTIES = (
     'symbol',
     'symbolPlacement',
     'resolution'
-)
+]
+
+LEGEND_PROPERTIES = [
+    'color'
+]
+
+LEGEND_TYPES = [
+    'color-category',
+    'color-bins',
+    'color-continuous'
+]
 
 STYLE_DEFAULTS = {
     'point': {
