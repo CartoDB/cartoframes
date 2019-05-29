@@ -316,7 +316,7 @@ class Dataset(object):
             return self._get_remote_geom_type(self.get_query())
         elif self.state == Dataset.STATE_LOCAL:
             return self._get_local_geom_type(self.gdf)
-    
+
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
         if self.cc and query:
