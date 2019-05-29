@@ -12,7 +12,7 @@ function createDefaultLegend(layers) {
 }
 
 function createLegend(layer, legendData, layerIndex) {
-  const element = document.querySelector(`#source${layerIndex}_legend`);
+  const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.property) {
     const config = { config: { othersLabel: 'Others' } } // TODO: i18n

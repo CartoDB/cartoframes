@@ -134,7 +134,6 @@ class Map(object):
                  bounds=None,
                  size=None,
                  viewport=None,
-                 template=None,
                  default_legend=False,
                  **kwargs):
 
@@ -142,18 +141,15 @@ class Map(object):
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
-        self.template = template
-        self.sources = _get_map_layers(self.layers)
-        self.bounds = _get_bounds(bounds, self.layers)
+        self.default_legend = default_legend
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
-        self._htmlMap = HTMLMap()
-        self.default_legend = default_legend
 
+        self._htmlMap = HTMLMap()
         self._htmlMap.set_content(
+            layers=_get_layer_defs(self.layers),
+            bounds=_get_bounds(bounds, self.layers),
             size=self.size,
-            sources=self.sources,
-            bounds=self.bounds,
             viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
@@ -185,13 +181,13 @@ def _init_layers(layers):
         return layers[::-1]
 
 
-def _get_map_layers(layers):
+def _get_layer_defs(layers):
     if layers is None:
         return None
-    return list(map(_set_map_layer, layers))
+    return list(map(_get_layer_def, layers))
 
 
-def _set_map_layer(layer):
+def _get_layer_def(layer):
     return {
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
@@ -377,16 +373,16 @@ class HTMLMap(object):
         self._template = self._env.get_template('viz/basic.html.j2')
 
     def set_content(
-        self, size, sources, bounds, viewport=None, basemap=None,
+        self, size, layers, bounds, viewport=None, basemap=None,
             default_legend=None,
             _carto_vl_path=None, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, basemap, default_legend,
+            size, layers, bounds, viewport, basemap, default_legend,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
-        self, size, sources, bounds, viewport, basemap=None, default_legend=None,
+        self, size, layers, bounds, viewport, basemap=None, default_legend=None,
             _carto_vl_path=None, _airship_path=None):
 
         token = ''
@@ -437,12 +433,12 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
-        has_legends = any(source['legend'] is not None for source in sources) or default_legend
+        has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
 
         return self._template.render(
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
-            sources=sources,
+            layers=layers,
             basemap=basemap,
             basecolor=basecolor,
             mapboxtoken=token,

@@ -21,14 +21,14 @@
   </as-legends>
   {% endif %}
 
-  {% for source in sources %}
-    {% if source.legend %}
+  {% for layer in layers %}
+    {% if layer.legend %}
       <as-legends
-        heading="{{source.legend.heading}}"
-        description="{{source.legend.description}}"
-        source="{{source.legend.source}}"
+        heading="{{layer.legend.heading}}"
+        description="{{layer.legend.description}}"
+        source="{{layer.legend.source}}"
       >
-        {{ legend(source.legend, 'source%d_legend' % loop.index0) }}
+        {{ legend(layer.legend, 'layer%d_legend' % loop.index0) }}
       </as-legends>
     {% endif %}
   {% endfor %}

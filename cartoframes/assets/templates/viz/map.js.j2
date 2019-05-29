@@ -34,7 +34,7 @@ function onReady() {
     dragRotate: false
   });
 
-  const sources = {{sources|tojson}};
+  const layers = {{layers|tojson}};
 
   map.fitBounds({{bounds}}, {animate: false, padding: 50, maxZoom: 14});
 
@@ -42,26 +42,26 @@ function onReady() {
     map.flyTo({{ camera|clear_none|tojson }});
   {% endif %}
 
-  const layers = [];
+  const mapLayers = [];
 
-  sources.forEach((elem, idx) => {
+  layers.forEach((layer, index) => {
     const factory = new SourceFactory();
-    const source = factory.createSource(elem);
-    const viz = new carto.Viz(elem['viz']);
-    const layer = new carto.Layer(`layer${idx}`, source, viz);
+    const mapSource = factory.createSource(layer);
+    const mapViz = new carto.Viz(layer['viz']);
+    const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
 
-    layers.push(layer);
+    mapLayers.push(mapLayer);
 
     try {
-      layer._updateLayer.catch(displayError);
+      mapLayer._updateLayer.catch(displayError);
     } catch (err) {
       throw err;
     }
 
-    layer.addTo(map);
+    mapLayer.addTo(map);
 
-    if (elem.interactivity) {
-      const interactivity = new carto.Interactivity(layer);
+    if (layer.interactivity) {
+      const interactivity = new carto.Interactivity(mapLayer);
       const tempPopup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false
@@ -70,7 +70,7 @@ function onReady() {
       interactivity.off('featureHover');
       interactivity.off('featureClick');
 
-      for (const { event, attrs } of elem.interactivity) {
+      for (const { event, attrs } of layer.interactivity) {
         if (event === 'click') {
           setPopupsClick(tempPopup, interactivity, attrs);
         }
@@ -80,8 +80,8 @@ function onReady() {
       }
     }
 
-    if (elem.legend) {
-      createLegend(layer, elem.legend, idx);
+    if (layer.legend) {
+      createLegend(mapLayer, layer.legend, index);
     }
 
     function setPopupsClick(tempPopup, interactivity, attrs) {
@@ -96,7 +96,7 @@ function onReady() {
       });
     }
 
-    function updatePopup(layer_popup, event, attrs) {
+    function updatePopup(popup, event, attrs) {
       if (event.features.length > 0) {
         const feature = event.features[0];
 
@@ -119,36 +119,36 @@ function onReady() {
           `;
         });
         
-        layer_popup
+        popup
             .setLngLat([event.coordinates.lng, event.coordinates.lat])
             .setHTML(`<div class="popup-content">${popupHTML}</div>`);
         
-        if (!layer_popup.isOpen()) {
-          layer_popup.addTo(map);
+        if (!popup.isOpen()) {
+          popup.addTo(map);
         }
       } else {
-        layer_popup.remove();
+        popup.remove();
       }
     }
 
     function SourceFactory() {
       const sourceTypes = {
-        GeoJSON: (elem) => new carto.source.GeoJSON(_decodeJSONQuery(elem.query)),
-        Query: (elem) => {
+        GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
+        Query: (layer) => {
           const auth = {
-            username: elem.credentials['username'],
-            apiKey: elem.credentials['api_key'] || 'default_public'
+            username: layer.credentials['username'],
+            apiKey: layer.credentials['api_key'] || 'default_public'
           };
           const config = {
-            serverURL: elem.credentials['base_url'] || `https://${elem.credentials['username']}.carto.com/`
+            serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
           };
-          return new carto.source.SQL(elem.query, auth, config)
+          return new carto.source.SQL(layer.query, auth, config)
         },
-        MVT: (elem) => new carto.source.MVT(elem.query.file, JSON.parse(elem.query.metadata)),
+        MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
       }
 
-      this.createSource = (elem) => {
-        return sourceTypes[elem.type](elem);
+      this.createSource = (layer) => {
+        return sourceTypes[layer.type](layer);
       }
     }
   });
