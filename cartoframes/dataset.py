@@ -153,9 +153,6 @@ class Dataset(object):
             self.cc._debug_print(err=err)
             return False
 
-    def get_query(self):
-        return self.query or self._default_query()
-
     def _create_table(self, with_lnglat=None):
         job = self.cc.batch_sql_client \
                   .create_and_wait_for_completion(
@@ -314,7 +311,7 @@ class Dataset(object):
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         if self.state == Dataset.STATE_REMOTE:
-            return self._get_remote_geom_type(self.get_query())
+            return self._get_remote_geom_type(get_query(self))
         elif self.state == Dataset.STATE_LOCAL:
             return self._get_local_geom_type(self.gdf)
 
@@ -354,10 +351,6 @@ class Dataset(object):
         else:
             return 'public'
 
-    def _default_query(self):
-        if self.table_name and self.schema:
-            return 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
-
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
     try:
@@ -379,6 +372,16 @@ def get_columns(context, query):
     col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
     table_info = context.sql_client.send(col_query)
     return Column.from_sql_api_fields(table_info['fields'])
+
+
+def get_query(dataset):
+    if isinstance(dataset, Dataset):
+        return dataset.query or _default_query(dataset)
+
+
+def _default_query(dataset):
+    if dataset.table_name and dataset.schema:
+        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
 
 
 def _save_index_as_column(df):
