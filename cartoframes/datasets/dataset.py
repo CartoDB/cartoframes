@@ -71,7 +71,7 @@ class Dataset(object):
 
     @classmethod
     def from_query(cls, query, context=None):
-        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE)
+        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_dataframe(cls, df):
