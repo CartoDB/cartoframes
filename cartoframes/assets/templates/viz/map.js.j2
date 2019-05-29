@@ -38,15 +38,17 @@ function onReady() {
   const mapInfo$ = document.getElementById('map-info');
 
   {% if show_info %}
-    map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo);
-
     function updateMapInfo() {
       const center = map.getCenter();
-      const zoom = map.getZoom();
+      const lat = center.lat.toFixed(6);
+      const lng = center.lng.toFixed(6);
+      const zoom = map.getZoom().toFixed(2);
 
-      mapInfo$.innerText = `Center: [${center.lng.toFixed(6)}, ${center.lat.toFixed(6)}]  Zoom: ${zoom.toFixed(6)}`;
+      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
     }
+
+    map.on('zoom', updateMapInfo);
+    map.on('move', updateMapInfo);
   {% endif %}
 
 
