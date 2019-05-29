@@ -174,9 +174,8 @@ class Dataset(object):
         return True
 
     def _cartodbfy_query(self):
-        return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
-            .format(org=(self.cc.creds.username() if self.cc.is_org else 'public'),
-                    table_name=self.table_name)
+        return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
+            .format(schema=self.schema, table_name=self.table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self.df)
@@ -355,9 +354,9 @@ class Dataset(object):
 
     def _get_schema(self):
         if self.cc:
-            return 'public' if not self.cc.is_org else self.cc.creds.username()
-        else:
-            return None
+            return self.cc.get_default_schema()
+
+        return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
