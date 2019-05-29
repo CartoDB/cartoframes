@@ -12,7 +12,7 @@
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js"></script>
     <!-- Include Mapbox GL CSS -->
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css" rel="stylesheet" />
-  
+
     <!-- Include Airship -->
     <script src="{{airship_components_path}}"></script>
     <script src="{{airship_bridge_path}}"></script>
@@ -44,7 +44,7 @@
         overflow: auto;
         z-index: 1000;
       }
-      
+
       .error-section {
         padding: 1em;
         border-radius: 5px;
@@ -62,7 +62,10 @@
 
       #error-container #error-name {
         color: #ba2121;
-        text-decoration: underline;
+      }
+
+      #error-container #error-content {
+        margin-top: 0.4em;
       }
 
       .error-details {
@@ -96,6 +99,19 @@
         margin-bottom: 16px;
       }
 
+      .map-info {
+        position: absolute;
+        bottom: 0;
+        padding: 0 5px;
+        background-color: rgba(255, 255, 255, 0.5);
+        margin: 0;
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 12px;
+        width: auto;
+        height: 18px;
+        font-family: 'Open Sans';
+      }
+
       as-legends {
         --as-legends--padding: 16px;
       }
@@ -119,6 +135,9 @@
       <main class="as-main">
         <div class="as-map-area">
           <div id="map"></div>
+          {% if show_info %}
+            {% include 'viz/info.html.j2' %}
+          {% endif %}
           <div class="as-map-panels">
             <div class="as-panel as-panel--left as-panel--top">
               {% if has_legends %}

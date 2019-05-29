@@ -31,6 +31,8 @@ class Map(object):
           calculated to fit all features.
         size (tuple of int): a (width, height) pair for the size of the map.
           Default is (1024, 632)
+        show_info (bool, optional): Whether to display center and zoom information in the
+          map or not. It is False by default.
 
     Example:
 
@@ -126,6 +128,21 @@ class Map(object):
                 Layer('table in your account'),
                 bounds=bounds
             )
+
+        Show map center and zoom values
+
+        .. code::
+
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Map(Layer('table in your account'), show_info=True)
     """
 
     def __init__(self,
@@ -135,6 +152,7 @@ class Map(object):
                  size=None,
                  viewport=None,
                  default_legend=False,
+                 show_info=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -142,6 +160,7 @@ class Map(object):
         self.size = size
         self.viewport = viewport
         self.default_legend = default_legend
+        self.show_info = show_info
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
 
@@ -153,6 +172,7 @@ class Map(object):
             viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
+            show_info=self.show_info,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -374,16 +394,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
-            default_legend=None,
+            default_legend=None, show_info=None,
             _carto_vl_path=None, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, layers, bounds, viewport, basemap, default_legend,
+            size, layers, bounds, viewport, basemap, default_legend, show_info,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            _carto_vl_path=None, _airship_path=None):
+            show_info=None, _carto_vl_path=None, _airship_path=None):
 
         token = ''
         basecolor = ''
@@ -408,12 +428,12 @@ class HTMLMap(object):
                     'If basemap is a dict, it must have a `style` key'
                 )
 
-        if (_carto_vl_path is None):
+        if _carto_vl_path is None:
             carto_vl_path = defaults.CARTO_VL_URL
         else:
             carto_vl_path = _carto_vl_path + defaults.CARTO_VL_DEV
 
-        if (_airship_path is None):
+        if _airship_path is None:
             airship_components_path = defaults.AIRSHIP_COMPONENTS_URL
             airship_bridge_path = defaults.AIRSHIP_BRIDGE_URL
             airship_styles_path = defaults.AIRSHIP_STYLES_URL
@@ -446,6 +466,7 @@ class HTMLMap(object):
             camera=camera,
             has_legends=has_legends,
             default_legend=default_legend,
+            show_info=show_info,
             carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,

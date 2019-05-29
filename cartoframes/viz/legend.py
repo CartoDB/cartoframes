@@ -15,7 +15,7 @@ class Legend(object):
 
     .. code::
         from cartoframes.viz import Legend
-        
+
         Legend({
             'type': 'color-category',
             'prop': 'color',
@@ -46,10 +46,10 @@ class Legend(object):
                 if self._type or self._prop:
                     if self._type not in LEGEND_TYPES:
                         raise ValueError(
-                        'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
-                            self._type,
-                            ', '.join(LEGEND_TYPES)
-                        ))
+                            'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
+                                self._type,
+                                ', '.join(LEGEND_TYPES)
+                            ))
                     if self._prop not in LEGEND_PROPERTIES:
                         raise ValueError(
                             'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
