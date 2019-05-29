@@ -130,15 +130,18 @@ class Source(object):
             Source('table_name', bounds=bounds)
     """
 
-    def __init__(self, data, context=None, bounds=None, schema='public'):
+    def __init__(self, data, context=None, bounds=None, schema=None):
         self._init_source(data, context, bounds, schema)
 
-        self.context = self.dataset.cc
+        self.context = self.dataset.cc or _default_context
         self.credentials = _get_credentials(self.context)
         self.geom_type = _get_geom_type(self.dataset)
 
     def _init_source(self, data, context, bounds, schema):
         if isinstance(data, str):
+            from cartoframes.auth import _default_context
+            context = context or _default_context
+
             if _check_sql_query(data):
                 self._init_source_query(data, context, bounds)
 
@@ -146,6 +149,7 @@ class Source(object):
                 self._init_source_geojson(data, bounds)
 
             elif _check_table_name(data):
+                schema = schema or context.get_default_schema()
                 self._init_source_query(_format_query(data, schema), context, bounds)
 
         elif HAS_GEOPANDAS and isinstance(data, (list, dict, geopandas.GeoDataFrame)):
