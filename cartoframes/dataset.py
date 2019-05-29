@@ -165,13 +165,7 @@ class Dataset(object):
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
     def _validate_init(self):
-        inputs = [self.table_name, self.query, self.df, self.gdf]
-        inputs_number = sum(x is not None for x in inputs)
-
-        if inputs_number != 1:
-            return False
-
-        return True
+        return self.table_name or self.query or self.df or self.gdf
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
