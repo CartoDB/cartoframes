@@ -226,6 +226,7 @@ def _get_credentials(context):
 def _get_geom_type(dataset):
     return dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
 
+
 def _get_schema(context):
     from cartoframes.auth import _default_context
     context = context or _default_context
