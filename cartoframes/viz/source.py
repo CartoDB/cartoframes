@@ -180,11 +180,8 @@ class Source(object):
         self.type = _map_dataset_state(self.dataset.state)
 
         if self.dataset.state == Dataset.STATE_REMOTE:
+            self.query = self.dataset.query
             self.bounds = bounds
-            if self.dataset.query:
-                self.query = self.dataset.query
-            else:
-                self.query = _format_query(self.dataset.table_name, self.dataset.schema)
         elif self.dataset.state == Dataset.STATE_LOCAL:
             if self.dataset.gdf:
                 self.query = get_encoded_data(self.dataset.gdf)
@@ -204,10 +201,6 @@ def _check_sql_query(data):
 
 def _check_geojson_file(data):
     return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
-
-
-def _format_query(table_name, schema='public'):
-    return 'SELECT * FROM "{0}"."{1}"'.format(schema, table_name)
 
 
 def _map_dataset_state(state):
