@@ -7,9 +7,22 @@ class Legend(object):
     """Legend
 
     Args:
-        data (dict): 
+        data (dict): The legend definition for a layer. It contains the information
+          to show a legend "type" (color-category, color-bins, color-continuous),
+          "prop" (color) and also text information: "title", "description" and "footer".
 
     Example:
+
+    .. code::
+        from cartoframes.viz import Legend
+        
+        Legend({
+            'type': 'color-category',
+            'prop': 'color',
+            'title': '[TITLE]',
+            'description': '[description]',
+            'footer': '[source]'
+        })
 
     """
 
