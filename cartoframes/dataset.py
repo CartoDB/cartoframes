@@ -175,7 +175,7 @@ class Dataset(object):
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
-            .format(schema=self.schema, table_name=self.table_name)
+            .format(schema=self.schema or self.cc.get_default_schema(), table_name=self.table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self.df)
