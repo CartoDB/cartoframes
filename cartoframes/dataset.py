@@ -332,7 +332,7 @@ class Dataset(object):
 
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
-        if gdf and len(gdf.geometry) > 0:
+        if gdf is not None and len(gdf.geometry) > 0:
             geom_type = gdf.geometry[0].type
             if geom_type:
                 return self._map_geom_type(geom_type)
