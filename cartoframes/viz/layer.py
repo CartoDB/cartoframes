@@ -44,7 +44,7 @@ class Layer(object):
             )
 
             Layer(
-                'SELECT * FROM populated_places WHERE adm0name = "Spain"',
+                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
                 'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
                 popup={
                     'hover': '$name',
