@@ -135,7 +135,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.table_name, table_name)
         self.assertEqual(dataset.schema, 'public')
-        self.assertEqual(dataset.query, 'SELECT * FROM "public"."fake_table"')
+        self.assertIsNone(dataset.query)
         self.assertIsNone(dataset.df)
         self.assertIsNone(dataset.gdf)
         self.assertEqual(dataset.cc, self.cc)

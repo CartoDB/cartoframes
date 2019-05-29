@@ -42,7 +42,7 @@ class Dataset(object):
 
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
-        self.query = query or self._default_query()
+        self.query = query
         self.df = df
         self.gdf = gdf
         self.state = state
@@ -151,6 +151,9 @@ class Dataset(object):
             # If table doesn't exist, we get an error from the SQL API
             self.cc._debug_print(err=err)
             return False
+
+    def get_query(self):
+        return self.query or self._default_query()
 
     def _create_table(self, with_lnglat=None):
         job = self.cc.batch_sql_client \
@@ -309,21 +312,14 @@ class Dataset(object):
 
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
-
         if self.state == Dataset.STATE_REMOTE:
-            if self.query:
-                return self._get_remote_geom_type(self.query)
-            elif self.table_name and self.schema:
-                query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
-                return self._get_remote_geom_type(query)
-
+            return self._get_remote_geom_type(self.get_query())
         elif self.state == Dataset.STATE_LOCAL:
-            if self.gdf is not None:
-                return self._get_local_geom_type(self.gdf)
-
+            return self._get_local_geom_type(self.gdf)
+    
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
-        if self.cc:
+        if self.cc and query:
             response = self.cc.sql_client.send('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
@@ -336,7 +332,7 @@ class Dataset(object):
 
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
-        if len(gdf.geometry) > 0:
+        if gdf and len(gdf.geometry) > 0:
             geom_type = gdf.geometry[0].type
             if geom_type:
                 return self._map_geom_type(geom_type)

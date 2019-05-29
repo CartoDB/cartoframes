@@ -160,13 +160,13 @@ class Source(object):
     def _init_source_table(self, data, context, schema, bounds):
         self.dataset = Dataset.from_table(data, context, schema)
         self.type = SourceType.QUERY
-        self.query = self.dataset.query
+        self.query = self.dataset.get_query()
         self.bounds = bounds
 
     def _init_source_query(self, data, context, bounds):
         self.dataset = Dataset.from_query(data, context)
         self.type = SourceType.QUERY
-        self.query = self.dataset.query
+        self.query = self.dataset.get_query()
         self.bounds = bounds
 
     def _init_source_geojson(self, data, bounds):
@@ -180,7 +180,7 @@ class Source(object):
         self.type = _map_dataset_state(self.dataset.state)
 
         if self.dataset.state == Dataset.STATE_REMOTE:
-            self.query = self.dataset.query
+            self.query = self.dataset.get_query()
             self.bounds = bounds
         elif self.dataset.state == Dataset.STATE_LOCAL:
             if self.dataset.gdf:
