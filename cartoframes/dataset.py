@@ -1,24 +1,17 @@
-import binascii as ba
-from warnings import warn
-import pandas as pd
 import time
+import pandas as pd
+import binascii as ba
+
 from tqdm import tqdm
+from warnings import warn
 
 from .columns import Column, normalize_names, normalize_name
+from .geojson import load_geojson
 
 from carto.exceptions import CartoException, CartoRateLimitException
-from .geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
-
-
-default_context = None
-
-
-def set_default_context(context):
-    global default_context
-    default_context = context
 
 
 class Dataset(object):
@@ -40,7 +33,8 @@ class Dataset(object):
     DEFAULT_RETRY_TIMES = 3
 
     def __init__(self, table_name=None, schema=None, query=None, df=None, gdf=None, state=None, context=None):
-        self.cc = context or default_context
+        from .auth import _default_context
+        self.cc = context or _default_context
 
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
@@ -60,11 +54,11 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context=None, schema=None):
-        return cls(table_name=table_name, schema=schema, context=context or default_context, state=cls.STATE_REMOTE)
+        return cls(table_name=table_name, schema=schema, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_query(cls, query, context=None):
-        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE)
+        return cls(query=query, context=context, state=cls.STATE_REMOTE)
 
     @classmethod
     def from_dataframe(cls, df):
@@ -305,7 +299,6 @@ class Dataset(object):
                     return get_columns(self.cc, query)
                 else:
                     raise e
-
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""

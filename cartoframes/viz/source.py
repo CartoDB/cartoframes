@@ -39,14 +39,13 @@ class Source(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Source('table_name')
 
@@ -54,14 +53,13 @@ class Source(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Source('SELECT * FROM table_name')
 
@@ -69,14 +67,13 @@ class Source(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Source('path/to/file.geojson')
 
@@ -84,15 +81,14 @@ class Source(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
             from cartoframes import Dataset
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             ds = Dataset.from_table('table_name')
 
@@ -116,14 +112,13 @@ class Source(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             bounds = {
                 'west': -10,
