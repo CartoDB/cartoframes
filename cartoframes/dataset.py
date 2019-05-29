@@ -36,15 +36,16 @@ class Dataset(object):
         from .auth import _default_context
         self.cc = context or _default_context
 
-        if not self._validate_params(table_name, query, df, gdf):
-            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
-                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
-
         self.table_name = normalize_name(table_name)
         self.schema = schema or self._get_schema()
         self.query = query
         self.df = df
         self.gdf = gdf
+
+        if not self._validate_init():
+            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+                             'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
         self.state = state
         self.normalized_column_names = None
 
@@ -166,8 +167,8 @@ class Dataset(object):
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
-    def _validate_params(self, table_name, query, df, gdf):
-        inputs = [table_name, query, df, gdf]
+    def _validate_init(self):
+        inputs = [self.table_name, self.query, self.df, self.gdf]
         inputs_number = sum(x is not None for x in inputs)
 
         if inputs_number != 1:
@@ -319,7 +320,7 @@ class Dataset(object):
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
-        if self.cc and query:
+        if self.cc:
             response = self.cc.sql_client.send('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
@@ -332,7 +333,7 @@ class Dataset(object):
 
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
-        if gdf is not None and len(gdf.geometry) > 0:
+        if len(gdf.geometry) > 0:
             geom_type = gdf.geometry[0].type
             if geom_type:
                 return self._map_geom_type(geom_type)
