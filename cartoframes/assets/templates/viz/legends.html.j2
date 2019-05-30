@@ -6,10 +6,6 @@
     <as-color-gradient-legend id="{{id}}" slot="legends"></as-color-gradient-legend>
   {% elif type == 'color-bins' %}
     <as-color-steps-legend id="{{id}}" slot="legends"></as-color-steps-legend>
-  {% else %}
-    <div>
-      <p class="as-body as-color--error">Unknown legend type {{ type }}</p>
-    </div>
   {% endif %}
 {%- endmacro %}
 
@@ -26,9 +22,11 @@
       <as-legends
         heading="{{layer.legend.heading}}"
         description="{{layer.legend.description}}"
-        source="{{layer.legend.source}}"
       >
         {{ legend(layer.legend, 'layer%d_legend' % loop.index0) }}
+        {% if layer.legend.source %}
+          <span slot="source">{{layer.legend.source}}</span>
+        {% endif %}
       </as-legends>
     {% endif %}
   {% endfor %}

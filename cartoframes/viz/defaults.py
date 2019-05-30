@@ -30,7 +30,8 @@ STYLE_PROPERTIES = [
 ]
 
 LEGEND_PROPERTIES = [
-    'color'
+    'color',
+    'strokeColor'
 ]
 
 LEGEND_TYPES = [

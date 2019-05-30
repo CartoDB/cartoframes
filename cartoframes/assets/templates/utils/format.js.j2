@@ -1,0 +1,34 @@
+
+function format(value) {
+  if (Array.isArray(value)) {
+    const [first, second] = value;
+    if (first === -Infinity) {
+      return `< ${formatValue(second)}`;
+    }
+    if (second === Infinity) {
+      return `> ${formatValue(first)}`;
+    }
+    return `${formatValue(first)} - ${formatValue(second)}`
+  }
+  return formatValue(value);
+}
+
+function formatValue(value) {
+  if (typeof value === 'number') {
+    return formatNumber(value);
+  }
+  return value;
+}
+
+function formatNumber(value) {
+  if (Math.abs(value) > 100000) {
+    return value.toExponential(2);
+  } else if (!Number.isInteger(value)) {
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  } else {
+    return value.toLocaleString();
+  }
+}

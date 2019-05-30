@@ -15,13 +15,16 @@ function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.property) {
-    const config = { config: { othersLabel: 'Others' } } // TODO: i18n
+    const opts = {
+      format: format,
+      config: { othersLabel: 'Others' } // TODO: i18n
+    };
     
     AsBridge.VL.Legends.rampLegend(
       element,
       layer,
       legendData.property,
-      config
+      opts
     );
   } else {
     // TODO: we don't have a bridge for this case, should this even be a case?
