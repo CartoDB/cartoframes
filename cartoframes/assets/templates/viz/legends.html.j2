@@ -25,7 +25,9 @@
       >
         {{ legend(layer.legend, 'layer%d_legend' % loop.index0) }}
         {% if layer.legend.source %}
-          <span slot="source">{{layer.legend.source}}</span>
+          <div class="as-legends--source" slot="source">
+            <span>{{layer.legend.source}}</span>
+          </div>
         {% endif %}
       </as-legends>
     {% endif %}
