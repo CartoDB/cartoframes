@@ -208,6 +208,9 @@ class CartoContext(object):
         # is an org user if first item is not `public`
         return res['rows'][0]['unnest'] != 'public'
 
+    def get_default_schema(self):
+        return 'public' if not self.is_org else self.creds.username()
+
     def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames. Column types are inferred from database types, to
           avoid problems with integer columns with NA or null values, they are automatically retrieved as float64
