@@ -3,18 +3,18 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
+def color_continuous_layer(source, value, palette='sunset', title=''):
     return Layer(
         source,
         style={
             'point': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), reverse({2}))'.format(value, bins, palette)
+                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
             },
             'line': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), reverse({2}))'.format(value, bins, palette)
+                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(globalQuantiles(${0}, {1}), reverse({2})), 0.9)'.format(value, bins, palette)
+                'color': 'opacity(ramp(linear(${0}), reverse({1})), 0.9)'.format(value, palette)
             }
         },
         popup={
@@ -27,7 +27,7 @@ def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
             'type': {
                 'point': 'color-category',
                 'line': 'color-category',
-                'polygon': 'color-bins'
+                'polygon': 'color-continuous'
             },
             'prop': 'color',
             'title': title or value,

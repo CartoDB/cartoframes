@@ -29,13 +29,13 @@ class TestMapLayer(unittest.TestCase):
         map = Map(layer)
 
         self.assertEqual(map.layers, [layer])
-        self.assertEqual(len(map.sources), 1)
-        self.assertEqual(map.sources[0].get('interactivity'), [])
-        self.assertIsNotNone(map.sources[0].get('credentials'))
-        self.assertIsNotNone(map.sources[0].get('legend'))
-        self.assertIsNotNone(map.sources[0].get('query'))
-        self.assertEqual(map.sources[0].get('type'), 'GeoJSON')
-        self.assertIsNotNone(map.sources[0].get('viz'))
+        self.assertEqual(len(map.layer_defs), 1)
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [])
+        self.assertIsNotNone(map.layer_defs[0].get('credentials'))
+        self.assertIsNotNone(map.layer_defs[0].get('legend'))
+        self.assertIsNotNone(map.layer_defs[0].get('query'))
+        self.assertEqual(map.layer_defs[0].get('type'), 'GeoJSON')
+        self.assertIsNotNone(map.layer_defs[0].get('viz'))
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
@@ -52,7 +52,7 @@ class TestMapLayer(unittest.TestCase):
             layer_2,
             layer_1
         ])
-        self.assertEqual(len(map.sources), 2)
+        self.assertEqual(len(map.layer_defs), 2)
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
@@ -69,7 +69,7 @@ class TestMapLayer(unittest.TestCase):
         )
 
         map = Map(layer)
-        self.assertEqual(map.sources[0].get('interactivity'), [{
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [{
             'event': 'click',
             'attrs': [{
                 'name': 'v559339',
@@ -95,7 +95,7 @@ class TestMapLayer(unittest.TestCase):
         )
 
         map = Map(layer)
-        self.assertEqual(map.sources[0].get('interactivity'), [])
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [])
 
 
 class TestMapDevelopmentPath(unittest.TestCase):

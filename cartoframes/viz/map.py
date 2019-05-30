@@ -161,13 +161,15 @@ class Map(object):
         self.viewport = viewport
         self.default_legend = default_legend
         self.show_info = show_info
+        self.layer_defs = _get_layer_defs(self.layers)
+        self.bounds = _get_bounds(bounds, self.layers)
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
 
         self._htmlMap = HTMLMap()
         self._htmlMap.set_content(
-            layers=_get_layer_defs(self.layers),
-            bounds=_get_bounds(bounds, self.layers),
+            layers=self.layer_defs,
+            bounds=self.bounds,
             size=self.size,
             viewport=self.viewport,
             basemap=self.basemap,
