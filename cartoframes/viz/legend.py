@@ -44,7 +44,7 @@ class Legend(object):
                 self._footer = data.get('footer', '')
 
                 if self._type or self._prop:
-                    if self._type not in LEGEND_TYPES:
+                    if not isinstance(self._type, dict) and self._type not in LEGEND_TYPES:
                         raise ValueError(
                             'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
                                 self._type,
