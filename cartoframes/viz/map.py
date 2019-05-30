@@ -443,7 +443,7 @@ class HTMLMap(object):
         else:
             airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS_DEV
             airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_DEV
-            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE_DEV
+            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLES_DEV
             airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_DEV
 
         camera = None

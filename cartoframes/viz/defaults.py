@@ -3,7 +3,7 @@ CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.js'
 
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
-AIRSHIP_STYLE_DEV = '/packages/styles/dist/airship.css'
+AIRSHIP_STYLES_DEV = '/packages/styles/dist/airship.css'
 AIRSHIP_ICONS_DEV = '/packages/icons/dist/icons.css'
 AIRSHIP_COMPONENTS_URL = 'https://libs.cartocdn.com/airship-components/cartoframes/airship.js'
 AIRSHIP_BRIDGE_URL = 'https://libs.cartocdn.com/airship-bridge/cartoframes/asbridge.min.js'
