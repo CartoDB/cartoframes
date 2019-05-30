@@ -24,7 +24,11 @@ def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
             }
         },
         legend={
-            'type': 'color-category',
+            'type': {
+                'point': 'color-category',
+                'line': 'color-category',
+                'polygon': 'color-bins'
+            },
             'prop': 'color',
             'title': title or value,
             'description': ''
