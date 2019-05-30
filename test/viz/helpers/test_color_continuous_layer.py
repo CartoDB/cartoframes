@@ -19,7 +19,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(layer.style._style['point']['color'], 'ramp(linear($name), reverse(sunset))')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
-            'label': 'name',
+            'title': 'name',
             'value': '$name'
         }])
 

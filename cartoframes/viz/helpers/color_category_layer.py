@@ -19,7 +19,7 @@ def color_category_layer(source, value, top=11, palette='bold', title=''):
         },
         popup={
             'hover': {
-                'label': title or value,
+                'title': title or value,
                 'value': '$' + value
             }
         },

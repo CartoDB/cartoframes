@@ -19,7 +19,7 @@ def color_continuous_layer(source, value, palette='sunset', title=''):
         },
         popup={
             'hover': {
-                'label': title or value,
+                'title': title or value,
                 'value': '$' + value
             }
         },

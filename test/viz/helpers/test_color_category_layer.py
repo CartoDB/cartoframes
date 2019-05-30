@@ -20,7 +20,7 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(layer.style._style['point']['color'], 'ramp(top($name, 11), bold)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
-            'label': 'Neighborhoods',
+            'title': 'Neighborhoods',
             'value': '$name'
         }])
 

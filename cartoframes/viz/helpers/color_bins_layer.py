@@ -19,7 +19,7 @@ def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
         },
         popup={
             'hover': {
-                'label': title or value,
+                'title': title or value,
                 'value': '$' + value
             }
         },
