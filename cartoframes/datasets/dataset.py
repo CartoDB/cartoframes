@@ -107,6 +107,10 @@ class Dataset(object):
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
 
+        if not self._table_name and self._query:
+            raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                                 'to get or modify the info from a CARTO table.')
+
         if self._dataset_info is None:
             self._dataset_info = self._get_dataset_info()
 
