@@ -12,28 +12,28 @@ class TestPopup(unittest.TestCase):
         popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
-                'label': 'Pop',
+                'title': 'Pop',
                 'value': '$pop'
             }]
         })
 
         self.assertEqual(popup._click, ['$pop', '$name'])
         self.assertEqual(popup._hover, [{
-            'label': 'Pop',
+            'title': 'Pop',
             'value': '$pop'
         }])
 
         popup = Popup({
             'click': '$pop',
             'hover': {
-                'label': 'Pop',
+                'title': 'Pop',
                 'value': '$pop'
             }
         })
 
         self.assertEqual(popup._click, ['$pop'])
         self.assertEqual(popup._hover, [{
-            'label': 'Pop',
+            'title': 'Pop',
             'value': '$pop'
         }])
 
@@ -42,7 +42,7 @@ class TestPopup(unittest.TestCase):
         popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
-                'label': 'Pop',
+                'title': 'Pop',
                 'value': '$pop'
             }]
         })
@@ -51,16 +51,16 @@ class TestPopup(unittest.TestCase):
             'event': 'click',
             'attrs': [{
                 'name': 'v559339',
-                'label': '$pop'
+                'title': '$pop'
             }, {
                 'name': 'v8e0f74',
-                'label': '$name'
+                'title': '$name'
             }]
         }, {
             'event': 'hover',
             'attrs': [{
                 'name': 'v559339',
-                'label': 'Pop'
+                'title': 'Pop'
             }]
         }])
 
@@ -69,7 +69,7 @@ class TestPopup(unittest.TestCase):
         popup = Popup({
             'click': ['$pop', '$name'],
             'hover': [{
-                'label': 'Pop',
+                'title': 'Pop',
                 'value': '$pop'
             }]
         })

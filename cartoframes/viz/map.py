@@ -151,8 +151,7 @@ class Map(object):
                  bounds=None,
                  size=None,
                  viewport=None,
-                 template=None,
-                 default_legend=None,
+                 default_legend=False,
                  show_info=None,
                  **kwargs):
 
@@ -160,24 +159,18 @@ class Map(object):
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
-        self.template = template
-        self.sources = _get_map_layers(self.layers)
-        self.bounds = _get_bounds(bounds, self.layers)
-        self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
-        self._airship_path = kwargs.get('_airship_path', None)
-        self._htmlMap = HTMLMap()
-
-        if default_legend is None and all(layer.legend is None for layer in self.layers):
-            self.default_legend = False
-        else:
-            self.default_legend = default_legend
-
+        self.default_legend = default_legend
         self.show_info = show_info
+        self.layer_defs = _get_layer_defs(self.layers)
+        self.bounds = _get_bounds(bounds, self.layers)
+        self._carto_vl_path = kwargs.get('_carto_vl_path', None)
+        self._airship_path = kwargs.get('_airship_path', None)
 
+        self._htmlMap = HTMLMap()
         self._htmlMap.set_content(
-            size=self.size,
-            sources=self.sources,
+            layers=self.layer_defs,
             bounds=self.bounds,
+            size=self.size,
             viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
@@ -210,17 +203,17 @@ def _init_layers(layers):
         return layers[::-1]
 
 
-def _get_map_layers(layers):
+def _get_layer_defs(layers):
     if layers is None:
         return None
-    return list(map(_set_map_layer, layers))
+    return list(map(_get_layer_def, layers))
 
 
-def _set_map_layer(layer):
+def _get_layer_def(layer):
     return {
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
-        'legend': layer.legend,
+        'legend': layer.legend_info,
         'query': layer.source.query,
         'type': layer.source.type,
         'viz': layer.viz
@@ -402,17 +395,17 @@ class HTMLMap(object):
         self._template = self._env.get_template('viz/basic.html.j2')
 
     def set_content(
-        self, size, sources, bounds, viewport=None, basemap=None,
+        self, size, layers, bounds, viewport=None, basemap=None,
             default_legend=None, show_info=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=None, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, basemap, default_legend, show_info,
+            size, layers, bounds, viewport, basemap, default_legend, show_info,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
-        self, size, sources, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+        self, size, layers, bounds, viewport, basemap=None, default_legend=None,
+            show_info=None, _carto_vl_path=None, _airship_path=None):
 
         token = ''
         basecolor = ''
@@ -437,16 +430,21 @@ class HTMLMap(object):
                     'If basemap is a dict, it must have a `style` key'
                 )
 
-        if (_airship_path is None):
-            airship_components_path = defaults.AIRSHIP_COMPONENTS_PATH
-            airship_bridge_path = defaults.AIRSHIP_BRIDGE_PATH
-            airship_styles_path = defaults.AIRSHIP_STYLES_PATH
-            airship_icons_path = defaults.AIRSHIP_ICONS_PATH
+        if _carto_vl_path is None:
+            carto_vl_path = defaults.CARTO_VL_URL
         else:
-            airship_components_path = _airship_path + defaults.AIRSHIP_SCRIPT
-            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_SCRIPT
-            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLE
-            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_STYLE
+            carto_vl_path = _carto_vl_path + defaults.CARTO_VL_DEV
+
+        if _airship_path is None:
+            airship_components_path = defaults.AIRSHIP_COMPONENTS_URL
+            airship_bridge_path = defaults.AIRSHIP_BRIDGE_URL
+            airship_styles_path = defaults.AIRSHIP_STYLES_URL
+            airship_icons_path = defaults.AIRSHIP_ICONS_URL
+        else:
+            airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS_DEV
+            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_DEV
+            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLES_DEV
+            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_DEV
 
         camera = None
         if viewport is not None:
@@ -457,12 +455,12 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
-        has_legends = any(source['legend'] is not None for source in sources) or default_legend
+        has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
 
         return self._template.render(
             width=size[0] if size is not None else None,
             height=size[1] if size is not None else None,
-            sources=sources,
+            layers=layers,
             basemap=basemap,
             basecolor=basecolor,
             mapboxtoken=token,
@@ -471,7 +469,7 @@ class HTMLMap(object):
             has_legends=has_legends,
             default_legend=default_legend,
             show_info=show_info,
-            carto_vl_path=_carto_vl_path,
+            carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,

@@ -3,18 +3,18 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, top=11, palette='bold', title=''):
+def color_continuous_layer(source, value, palette='sunset', title=''):
     return Layer(
         source,
         style={
             'point': {
-                'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
+                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
             },
             'line': {
-                'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
+                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(top(${0}, {1}), {2}), 0.9)'.format(value, top, palette)
+                'color': 'opacity(ramp(linear(${0}), reverse({1})), 0.9)'.format(value, palette)
             }
         },
         popup={
@@ -24,7 +24,11 @@ def color_category_layer(source, value, top=11, palette='bold', title=''):
             }
         },
         legend={
-            'type': 'color-category',
+            'type': {
+                'point': 'color-category',
+                'line': 'color-category',
+                'polygon': 'color-continuous'
+            },
             'prop': 'color',
             'title': title or value,
             'description': ''

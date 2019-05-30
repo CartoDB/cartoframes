@@ -1,34 +1,32 @@
 {% macro legend(legend_data, id) -%}
   {% set type = legend_data.type %}
-  {% if type == 'basic' %}
+  {% if type == 'color-category' %}
     <as-basic-legend id="{{id}}" slot="legends"></as-basic-legend>
-  {% elif type == 'gradient' %}
+  {% elif type == 'color-continuous' %}
     <as-color-gradient-legend id="{{id}}" slot="legends"></as-color-gradient-legend>
-  {% elif type == 'color_steps' %}
+  {% elif type == 'color-bins' %}
     <as-color-steps-legend id="{{id}}" slot="legends"></as-color-steps-legend>
-  {% else %}
-    <div>
-      <p class="as-body as-color--error">Unknown legend type {{ type }}</p>
-    </div>
   {% endif %}
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
-  {% if default_legend != none %}
+  {% if default_legend %}
   <as-legends id="basicLegendContainer" heading="Map Legend">
     <as-basic-legend id="basicLegend" slot="legends">
     </as-basic-legend>
   </as-legends>
   {% endif %}
 
-  {% for source in sources %}
-    {% if source.legend %}
+  {% for layer in layers %}
+    {% if layer.legend %}
       <as-legends
-        heading="{{source.legend.heading}}"
-        description="{{source.legend.description}}"
-        source="{{source.legend.source}}"
+        heading="{{layer.legend.title}}"
+        description="{{layer.legend.description}}"
       >
-        {{ legend(source.legend, 'source%d_legend' % loop.index0) }}
+        {{ legend(layer.legend, 'layer%d_legend' % loop.index0) }}
+        {% if layer.legend.footer %}
+          <span slot="footer">{{layer.legend.footer}}</span>
+        {% endif %}
       </as-legends>
     {% endif %}
   {% endfor %}
