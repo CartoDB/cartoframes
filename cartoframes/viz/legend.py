@@ -72,3 +72,5 @@ class Legend(object):
                 'description': self._description,
                 'source': self._footer
             }
+        else:
+            return {}
