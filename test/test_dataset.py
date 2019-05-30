@@ -474,6 +474,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 self.is_org = True
                 self.creds = FakeCreds()
 
+            def get_default_schema(self):
+                return username
+
         dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset._schema, username)
 
@@ -528,8 +531,8 @@ class TestDatasetInfo(unittest.TestCase):
     def test_dataset_get_privacy_from_not_sync(self):
         query = 'SELECT 1'
         dataset = DatasetMock.from_query(query=query, context=self.context)
-        error_msg = ('Your data is not synchronized with CARTO.'
-                     'First of all, you should call upload method to save your data in CARTO.')
+        error_msg = ('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                     'to get or modify the info from a CARTO table.')
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_dataset_info()
 

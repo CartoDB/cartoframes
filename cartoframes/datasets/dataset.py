@@ -1,8 +1,9 @@
-import binascii as ba
-from warnings import warn
-import pandas as pd
 import time
+import pandas as pd
+import binascii as ba
+
 from tqdm import tqdm
+from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
@@ -12,14 +13,6 @@ from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
-
-
-default_context = None
-
-
-def set_default_context(context):
-    global default_context
-    default_context = context
 
 
 class Dataset(object):
@@ -43,7 +36,8 @@ class Dataset(object):
     def __init__(self, table_name=None, schema=None,
                  query=None, df=None, gdf=None,
                  state=None, is_saved_in_carto=False, context=None):
-        self._cc = context or default_context
+        from cartoframes.auth import _default_context
+        self._cc = context or _default_context
 
         self._table_name = normalize_name(table_name)
         self._schema = schema or self._get_schema()
@@ -65,13 +59,13 @@ class Dataset(object):
             warn('Table will be named `{}`'.format(table_name))
 
     @classmethod
-    def from_table(cls, table_name, context, schema=None):
-        return cls(table_name=table_name, schema=schema, context=context or default_context,
+    def from_table(cls, table_name, context=None, schema=None):
+        return cls(table_name=table_name, schema=schema, context=context,
                    state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_query(cls, query, context=None):
-        return cls(query=query, context=context or default_context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
+        return cls(query=query, context=context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_dataframe(cls, df):
@@ -112,6 +106,10 @@ class Dataset(object):
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
+
+        if not self._table_name and self._query:
+            raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                                 'to get or modify the info from a CARTO table.')
 
         if self._dataset_info is None:
             self._dataset_info = self._get_dataset_info()
@@ -224,9 +222,8 @@ class Dataset(object):
         return True
 
     def _cartodbfy_query(self):
-        return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
-            .format(org=(self._cc.creds.username() if self._cc.is_org else 'public'),
-                    table_name=self._table_name)
+        return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
+            .format(schema=self._schema or self._cc.get_default_schema(), table_name=self._table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
@@ -361,17 +358,10 @@ class Dataset(object):
 
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
-
         if self._state == Dataset.STATE_REMOTE:
-            if self._query:
-                return self._get_remote_geom_type(self._query)
-            elif self._table_name and self._schema:
-                query = 'SELECT * FROM "{0}"."{1}"'.format(self._schema, self._table_name)
-                return self._get_remote_geom_type(query)
-
+            return self._get_remote_geom_type(get_query(self))
         elif self._state == Dataset.STATE_LOCAL:
-            if self._gdf is not None:
-                return self._get_local_geom_type(self._gdf)
+            return self._get_local_geom_type(self._gdf)
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -412,9 +402,9 @@ class Dataset(object):
 
     def _get_schema(self):
         if self._cc:
-            return 'public' if not self._cc.is_org else self._cc.creds.username()
+            return self._cc.get_default_schema()
         else:
-            return None
+            return 'public'
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
@@ -437,6 +427,16 @@ def get_columns(context, query):
     col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
     table_info = context.sql_client.send(col_query)
     return Column.from_sql_api_fields(table_info['fields'])
+
+
+def get_query(dataset):
+    if isinstance(dataset, Dataset):
+        return dataset._query or _default_query(dataset)
+
+
+def _default_query(dataset):
+    if dataset._table_name and dataset._schema:
+        return 'SELECT * FROM "{0}"."{1}"'.format(dataset._schema, dataset._table_name)
 
 
 def _save_index_as_column(df):

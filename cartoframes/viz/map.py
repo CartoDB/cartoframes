@@ -31,19 +31,20 @@ class Map(object):
           calculated to fit all features.
         size (tuple of int): a (width, height) pair for the size of the map.
           Default is (1024, 632)
+        show_info (bool, optional): Whether to display center and zoom information in the
+          map or not. It is False by default.
 
     Example:
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Map, Layer
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Map(Layer('table in your account'))
 
@@ -51,14 +52,13 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Map(
                 Layer('table in your account'),
@@ -70,14 +70,13 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             basemap = {
                 'style': 'mapbox://styles/mapbox/streets-v9',
@@ -93,14 +92,13 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Map, Layer, basemaps
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             Map(
                 Layer('table in your account'),
@@ -111,14 +109,13 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import set_default_context
             from cartoframes.viz import Map, Layer
 
-            context = Context(
+            set_default_context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
 
             bounds = {
                 'west': -10,
@@ -131,6 +128,21 @@ class Map(object):
                 Layer('table in your account'),
                 bounds=bounds
             )
+
+        Show map center and zoom values
+
+        .. code::
+
+            from cartoframes.auth import Context, set_default_context
+            from cartoframes.viz import Map, Layer
+
+            context = Context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+            set_default_context(context)
+
+            Map(Layer('table in your account'), show_info=True)
     """
 
     def __init__(self,
@@ -141,6 +153,7 @@ class Map(object):
                  viewport=None,
                  template=None,
                  default_legend=None,
+                 show_info=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -155,9 +168,11 @@ class Map(object):
         self._htmlMap = HTMLMap()
 
         if default_legend is None and all(layer.legend is None for layer in self.layers):
-            self.default_legend = True
+            self.default_legend = False
         else:
             self.default_legend = default_legend
+
+        self.show_info = show_info
 
         self._htmlMap.set_content(
             size=self.size,
@@ -166,6 +181,7 @@ class Map(object):
             viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
+            show_info=self.show_info,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -387,16 +403,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
-            default_legend=None,
+            default_legend=None, show_info=None,
             _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         self.html = self._parse_html_content(
-            size, sources, bounds, viewport, basemap, default_legend,
+            size, sources, bounds, viewport, basemap, default_legend, show_info,
             _carto_vl_path, _airship_path)
 
     def _parse_html_content(
         self, size, sources, bounds, viewport, basemap=None, default_legend=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            show_info=None, _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
 
         token = ''
         basecolor = ''
@@ -454,6 +470,7 @@ class HTMLMap(object):
             camera=camera,
             has_legends=has_legends,
             default_legend=default_legend,
+            show_info=show_info,
             carto_vl_path=_carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
