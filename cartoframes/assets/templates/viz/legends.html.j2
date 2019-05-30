@@ -20,14 +20,12 @@
   {% for layer in layers %}
     {% if layer.legend %}
       <as-legends
-        heading="{{layer.legend.heading}}"
+        heading="{{layer.legend.title}}"
         description="{{layer.legend.description}}"
       >
         {{ legend(layer.legend, 'layer%d_legend' % loop.index0) }}
-        {% if layer.legend.source %}
-          <div class="as-legends--source" slot="source">
-            <span>{{layer.legend.source}}</span>
-          </div>
+        {% if layer.legend.footer %}
+          <span slot="footer">{{layer.legend.footer}}</span>
         {% endif %}
       </as-legends>
     {% endif %}

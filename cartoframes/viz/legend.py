@@ -21,7 +21,7 @@ class Legend(object):
             'prop': 'color',
             'title': '[TITLE]',
             'description': '[description]',
-            'footer': '[source]'
+            'footer': '[footer]'
         })
 
     """
@@ -67,10 +67,10 @@ class Legend(object):
                 _type = _type.get(geom_type)
             return {
                 'type': _type,
-                'property': self._prop,
-                'heading': self._title,
+                'prop': self._prop,
+                'title': self._title,
                 'description': self._description,
-                'source': self._footer
+                'footer': self._footer
             }
         else:
             return {}

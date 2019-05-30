@@ -14,7 +14,7 @@ function createDefaultLegend(layers) {
 function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
-  if (legendData.property) {
+  if (legendData.prop) {
     const opts = {
       format: format,
       config: { othersLabel: 'Others' } // TODO: i18n
@@ -23,7 +23,7 @@ function createLegend(layer, legendData, layerIndex) {
     AsBridge.VL.Legends.rampLegend(
       element,
       layer,
-      legendData.property,
+      legendData.prop,
       opts
     );
   } else {
