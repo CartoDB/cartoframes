@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-from . import defaults
 from .basemaps import Basemaps as basemaps
 from .map import Map
 from .layer import Layer
@@ -12,7 +11,6 @@ from .legend import Legend
 
 __all__ = [
     'basemaps',
-    'defaults',
     'Map',
     'Layer',
     'Source',
