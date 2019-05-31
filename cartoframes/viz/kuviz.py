@@ -21,8 +21,9 @@ class Kuviz(object):
 
     @classmethod
     def all(cls, context):
-        km = KuvizManager(context.auth_client)
-        return km.all()
+        # km = KuvizManager(context.auth_client)
+        # return km.all()
+        pass
 
     def update(self, html, name, password=None):
         pass
