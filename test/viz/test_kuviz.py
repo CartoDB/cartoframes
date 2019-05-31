@@ -34,7 +34,7 @@ class TestKuviz(unittest.TestCase):
 
     def test_kuviz_create_fails_without_all_fields(self):
         with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
-            kuviz = KuvizMock.create(context=self.context, html=self.html, name=None)
+            KuvizMock.create(context=self.context, html=self.html, name=None)
 
     def test_kuviz_validation(self):
         name = 'test-name'
@@ -54,7 +54,7 @@ class TestKuviz(unittest.TestCase):
         with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
             KuvizMock._validate_carto_kuviz(carto_kuviz)
 
-    def test_kuviz_validation_fails_without_id(self):
+    def test_kuviz_validation_fails_without_url(self):
         name = 'test-name'
         carto_kuviz = CartoKuvizMock(name=name, url=None, password=None)
         with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
