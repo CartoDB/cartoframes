@@ -174,9 +174,8 @@ class Dataset(object):
         return True
 
     def _cartodbfy_query(self):
-        return "SELECT CDB_CartodbfyTable('{org}', '{table_name}')" \
-            .format(org=(self.cc.creds.username() if self.cc.is_org else 'public'),
-                    table_name=self.table_name)
+        return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
+            .format(schema=self.schema or self.cc.get_default_schema(), table_name=self.table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self.df)
@@ -311,17 +310,10 @@ class Dataset(object):
 
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
-
         if self.state == Dataset.STATE_REMOTE:
-            if self.query:
-                return self._get_remote_geom_type(self.query)
-            elif self.table_name and self.schema:
-                query = 'SELECT * FROM "{0}"."{1}"'.format(self.schema, self.table_name)
-                return self._get_remote_geom_type(query)
-
+            return self._get_remote_geom_type(get_query(self))
         elif self.state == Dataset.STATE_LOCAL:
-            if self.gdf is not None:
-                return self._get_local_geom_type(self.gdf)
+            return self._get_local_geom_type(self.gdf)
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -355,9 +347,9 @@ class Dataset(object):
 
     def _get_schema(self):
         if self.cc:
-            return 'public' if not self.cc.is_org else self.cc.creds.username()
+            return self.cc.get_default_schema()
         else:
-            return None
+            return 'public'
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
@@ -380,6 +372,16 @@ def get_columns(context, query):
     col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
     table_info = context.sql_client.send(col_query)
     return Column.from_sql_api_fields(table_info['fields'])
+
+
+def get_query(dataset):
+    if isinstance(dataset, Dataset):
+        return dataset.query or _default_query(dataset)
+
+
+def _default_query(dataset):
+    if dataset.table_name and dataset.schema:
+        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
 
 
 def _save_index_as_column(df):

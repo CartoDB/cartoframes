@@ -471,6 +471,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 self.is_org = True
                 self.creds = FakeCreds()
 
+            def get_default_schema(self):
+                return username
+
         dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset.schema, username)
 

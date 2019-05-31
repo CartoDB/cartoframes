@@ -29,13 +29,13 @@ class TestMapLayer(unittest.TestCase):
         map = Map(layer)
 
         self.assertEqual(map.layers, [layer])
-        self.assertEqual(len(map.sources), 1)
-        self.assertEqual(map.sources[0].get('interactivity'), [])
-        self.assertIsNotNone(map.sources[0].get('credentials'))
-        self.assertIsNone(map.sources[0].get('legend'))
-        self.assertIsNotNone(map.sources[0].get('query'))
-        self.assertEqual(map.sources[0].get('type'), 'GeoJSON')
-        self.assertIsNotNone(map.sources[0].get('viz'))
+        self.assertEqual(len(map.layer_defs), 1)
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [])
+        self.assertIsNotNone(map.layer_defs[0].get('credentials'))
+        self.assertIsNotNone(map.layer_defs[0].get('legend'))
+        self.assertIsNotNone(map.layer_defs[0].get('query'))
+        self.assertEqual(map.layer_defs[0].get('type'), 'GeoJSON')
+        self.assertIsNotNone(map.layer_defs[0].get('viz'))
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
@@ -52,7 +52,7 @@ class TestMapLayer(unittest.TestCase):
             layer_2,
             layer_1
         ])
-        self.assertEqual(len(map.sources), 2)
+        self.assertEqual(len(map.layer_defs), 2)
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
@@ -62,27 +62,27 @@ class TestMapLayer(unittest.TestCase):
             popup={
                 'click': ['$pop', '$name'],
                 'hover': [{
-                    'label': 'Pop',
+                    'title': 'Pop',
                     'value': '$pop'
                 }]
             }
         )
 
         map = Map(layer)
-        self.assertEqual(map.sources[0].get('interactivity'), [{
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [{
             'event': 'click',
             'attrs': [{
                 'name': 'v559339',
-                'label': '$pop'
+                'title': '$pop'
             }, {
                 'name': 'v8e0f74',
-                'label': '$name'
+                'title': '$name'
             }]
         }, {
             'event': 'hover',
             'attrs': [{
                 'name': 'v559339',
-                'label': 'Pop'
+                'title': 'Pop'
             }]
         }])
 
@@ -95,7 +95,7 @@ class TestMapLayer(unittest.TestCase):
         )
 
         map = Map(layer)
-        self.assertEqual(map.sources[0].get('interactivity'), [])
+        self.assertEqual(map.layer_defs[0].get('interactivity'), [])
 
 
 class TestMapDevelopmentPath(unittest.TestCase):
@@ -103,30 +103,30 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """Map dev path should use default paths if none are given"""
         map = Map()
         template = map._htmlMap.html
-        self.assertTrue(defaults.CARTO_VL_PATH in template)
+        self.assertTrue(defaults.CARTO_VL_URL in template)
 
     def test_custom_carto_vl_path(self):
         """Map dev path should use custom paths"""
         _carto_vl_path = 'custom_carto_vl_path'
         map = Map(_carto_vl_path=_carto_vl_path)
         template = map._htmlMap.html
-        self.assertTrue(_carto_vl_path in template)
+        self.assertTrue(_carto_vl_path + defaults.CARTO_VL_DEV in template)
 
     def test_default_airship_path(self):
         """Map dev path should use default paths if none are given"""
         map = Map()
         template = map._htmlMap.html
-        self.assertTrue(defaults.AIRSHIP_COMPONENTS_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_BRIDGE_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_STYLES_PATH in template)
-        self.assertTrue(defaults.AIRSHIP_ICONS_PATH in template)
+        self.assertTrue(defaults.AIRSHIP_COMPONENTS_URL in template)
+        self.assertTrue(defaults.AIRSHIP_BRIDGE_URL in template)
+        self.assertTrue(defaults.AIRSHIP_STYLES_URL in template)
+        self.assertTrue(defaults.AIRSHIP_ICONS_URL in template)
 
     def test_custom_airship_path(self):
         """Map dev path should use custom paths"""
         _airship_path = 'custom_airship_path'
         map = Map(_airship_path=_airship_path)
         template = map._htmlMap.html
-        self.assertTrue(_airship_path + defaults.AIRSHIP_SCRIPT in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE_SCRIPT in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_STYLE in template)
-        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS_STYLE in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_COMPONENTS_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_BRIDGE_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_STYLES_DEV in template)
+        self.assertTrue(_airship_path + defaults.AIRSHIP_ICONS_DEV in template)

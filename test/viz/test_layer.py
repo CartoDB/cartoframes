@@ -1,5 +1,5 @@
 import unittest
-from cartoframes.viz import Layer, Source, Style, Popup
+from cartoframes.viz import Layer, Source, Style, Popup, Legend
 
 
 class TestLayer(unittest.TestCase):
@@ -16,8 +16,8 @@ class TestLayer(unittest.TestCase):
         self.assertTrue(isinstance(layer.source, Source))
         self.assertTrue(isinstance(layer.style, Style))
         self.assertTrue(isinstance(layer.popup, Popup))
+        self.assertTrue(isinstance(layer.legend, Legend))
         self.assertEqual(layer.interactivity, [])
-        self.assertIsNone(layer.legend)
 
     def test_initialization_simple(self):
         """Layer should initialize layer attributes"""
@@ -28,8 +28,8 @@ class TestLayer(unittest.TestCase):
         self.assertTrue(isinstance(layer.source, Source))
         self.assertTrue(isinstance(layer.style, Style))
         self.assertTrue(isinstance(layer.popup, Popup))
+        self.assertTrue(isinstance(layer.legend, Legend))
         self.assertEqual(layer.interactivity, [])
-        self.assertIsNone(layer.legend)
 
 
 class TestLayerStyle(unittest.TestCase):

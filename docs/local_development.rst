@@ -157,8 +157,8 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
 
   Map(
       Layer('dataset_name'),
-      _carto_vl_path='http://localhost:8080/dist/carto-vl.js',
-      _airship_path='http://localhost:5050'
+      _carto_vl_path='http://localhost:8080',
+      _airship_path='http://localhost:5000'
   )
 
 We've a lot of public datasets in both `cartoframes` and `cartovl` accounts that we use for the examples, but I've you've a personal CARTO account you can use your credentials.
