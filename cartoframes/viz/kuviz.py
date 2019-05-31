@@ -14,8 +14,10 @@ class Kuviz(object):
         self.privacy = privacy
 
     @classmethod
-    def create(cls, context, html, name, password=None):
-        carto_kuviz = cls._create_carto_kuviz(cls, context, html, name, password)
+    def create(cls, html, name, context=None, password=None):
+        from cartoframes.auth import _default_context
+        carto_kuviz = cls._create_carto_kuviz(cls, context=context or _default_context,
+                                              html=html, name=name, password=password)
         cls._validate_carto_kuviz(carto_kuviz)
         return cls(context, carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
 
