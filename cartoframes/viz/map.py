@@ -9,6 +9,9 @@ from . import defaults
 from .basemaps import Basemaps
 from .source import SourceType
 from .. import utils
+from ..columns import normalize_name
+from carto.exceptions import CartoException
+from .kuviz import Kuviz
 
 # TODO: refactor
 
@@ -188,8 +191,43 @@ class Map(object):
     def _repr_html_(self):
         return self._htmlMap.html
 
-    def publish(self):
-        pass
+    def publish(self, name, password=None, table_name=None, schema=None, context=None):
+        name = normalize_name(name)
+
+        # sync layers
+        sync_layers = []
+        for idx,layer in enumerate(self.layers):
+            print("\nProcessing layer #{n}".format(n=idx + 1))
+
+            if layer.source.dataset._is_saved_in_carto:
+                print("Already sync")
+            else:
+                print("Synchronizing...")
+                t = "cf_share_{name}_{idx}".format(name=table_name or name, idx=idx + 1)
+                s = schema or layer.source.dataset._schema
+                c = context or layer.source.dataset._cc
+                layer.source.dataset.upload(table_name=t, schema=s, context=c)
+                layer.source = Source(t, context=c, schema=s)
+
+            sync_layers.append(layer)
+
+        if len(sync_layers) != len(self.layers):
+            raise CartoException('Error publishing the map. Something goes wrong processing sources.')
+
+        # get html
+        html_map = HTMLMap()
+        html_map.set_content(
+            size=self.size,
+            sources=_get_map_layers(sync_layers),
+            bounds=self.bounds,
+            viewport=self.viewport,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=self.show_info,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
+
+        return Kuviz.create(context=context, html=html_map.html, name=name, password=password)
 
 
 def _get_bounds(bounds, layers):
