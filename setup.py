@@ -24,6 +24,7 @@ REQUIRES = [
     'carto>=1.4.0',
     'tqdm>=4.14.0',
     'appdirs>=1.4.3',
+    'unidecode>=1.0.0'
 ]
 
 EXTRAS_REQUIRE = {
