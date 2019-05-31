@@ -29,7 +29,20 @@ LEGEND_PROPERTIES = [
 ]
 
 LEGEND_TYPES = [
-    'color-category',
     'color-bins',
-    'color-continuous'
+    'color-bins-line',
+    'color-bins-point',
+    'color-bins-polygon',
+    'color-category',
+    'color-category-line',
+    'color-category-point',
+    'color-category-polygon',
+    'color-continuous',
+    'color-continuous-line',
+    'color-continuous-point',
+    'color-continuous-polygon',
+    'size-bins',
+    'size-bins-point',
+    'size-continuous',
+    'size-continuous-point'
 ]
