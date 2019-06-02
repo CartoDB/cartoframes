@@ -1,25 +1,28 @@
 {% macro legend(legend_data, id) -%}
   {% set type = legend_data.type %}
   {% if type == 'color-category' %}
-    <as-basic-legend id="{{id}}" slot="legends"></as-basic-legend>
+    <as-legend-color-category id="{{id}}" slot="legends"></as-legend-color-category>
   {% elif type == 'color-continuous' %}
-    <as-color-gradient-legend id="{{id}}" slot="legends"></as-color-gradient-legend>
+    <as-legend-color-continuous id="{{id}}" slot="legends"></as-legend-color-continuous>
   {% elif type == 'color-bins' %}
-    <as-color-steps-legend id="{{id}}" slot="legends"></as-color-steps-legend>
+    <as-legend-color-bins id="{{id}}" slot="legends"></as-legend-color-bins>
+  {% elif type == 'size-bins' %}
+    <as-legend-size-bins id="{{id}}" slot="legends"></as-legend-size-bins>
+  {% elif type == 'size-continuous' %}
+    <as-legend-size-continuous id="{{id}}" slot="legends"></as-legend-size-continuous>
   {% endif %}
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
   {% if default_legend %}
-  <as-legends id="basicLegendContainer" heading="Map Legend">
-    <as-basic-legend id="basicLegend" slot="legends">
-    </as-basic-legend>
-  </as-legends>
+  <as-legend id="basicLegendContainer" heading="Map Legend">
+    <as-legend-color-category id="basicLegend" slot="legends"></as-legend-color-category>
+  </as-legend>
   {% endif %}
 
   {% for layer in layers %}
     {% if layer.legend %}
-      <as-legends
+      <as-legend
         heading="{{layer.legend.title}}"
         description="{{layer.legend.description}}"
       >
@@ -27,7 +30,7 @@
         {% if layer.legend.footer %}
           <span slot="footer">{{layer.legend.footer}}</span>
         {% endif %}
-      </as-legends>
+      </as-legend>
     {% endif %}
   {% endfor %}
 </div>

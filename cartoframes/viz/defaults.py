@@ -31,13 +31,16 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'strokeColor'
+    'strokeColor',
+    'width'
 ]
 
 LEGEND_TYPES = [
     'color-category',
     'color-bins',
-    'color-continuous'
+    'color-continuous',
+    'size-bins',
+    'size-continuous'
 ]
 
 STYLE_DEFAULTS = {
