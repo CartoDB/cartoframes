@@ -63,7 +63,7 @@ class Legend(object):
     def get_info(self, geom_type):
         if (self._type and self._prop) or self._title or self._description or self._footer:
             _type = self._type
-            if _type and geom_type in _type:
+            if isinstance(_type, dict) and geom_type in _type:
                 _type = _type.get(geom_type)
             return {
                 'type': _type,

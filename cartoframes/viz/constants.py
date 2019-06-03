@@ -1,5 +1,5 @@
 CARTO_VL_DEV = '/dist/carto-vl.js'
-CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.js'
+CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/v1.3/carto-vl.min.js'
 
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
