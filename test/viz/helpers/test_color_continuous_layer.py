@@ -34,8 +34,8 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(
@@ -50,8 +50,8 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(
@@ -66,8 +66,8 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(

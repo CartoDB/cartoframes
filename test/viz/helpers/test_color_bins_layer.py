@@ -34,9 +34,9 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(
@@ -51,9 +51,9 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(
@@ -68,9 +68,9 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(

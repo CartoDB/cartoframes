@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_bins_layer(source, value, bins=5, palette='purpor', title=''):
+def color_bins_layer(source, value, title='', bins=5, palette='purpor'):
     return Layer(
         source,
         style={
