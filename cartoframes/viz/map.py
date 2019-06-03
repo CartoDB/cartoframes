@@ -7,7 +7,7 @@ from jinja2 import Environment, PackageLoader
 
 from . import defaults
 from .basemaps import Basemaps
-from .source import SourceType
+from .source import Source, SourceType
 from .. import utils
 from ..columns import normalize_name
 from carto.exceptions import CartoException
@@ -196,7 +196,7 @@ class Map(object):
 
         # sync layers
         sync_layers = []
-        for idx,layer in enumerate(self.layers):
+        for idx, layer in enumerate(self.layers):
             print("\nProcessing layer #{n}".format(n=idx + 1))
 
             if layer.source.dataset._is_saved_in_carto:
