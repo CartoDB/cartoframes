@@ -4,7 +4,7 @@ Changelog
 0.10.0
 ------
 
-Release 2019-xx-xx
+Release 2019-06-03
 
 Updates
 
