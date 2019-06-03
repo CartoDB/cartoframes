@@ -16,9 +16,8 @@ class Kuviz(object):
     @classmethod
     def create(cls, html, name, context=None, password=None):
         from cartoframes.auth import _default_context
-        carto_kuviz = cls._create_carto_kuviz(cls, context=context or _default_context,
-                                              html=html, name=name, password=password)
-        cls._validate_carto_kuviz(carto_kuviz)
+        carto_kuviz = _create_carto_kuviz(context=context or _default_context, html=html, name=name, password=password)
+        _validate_carto_kuviz(carto_kuviz)
         return cls(context, carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
 
     @classmethod
@@ -33,16 +32,17 @@ class Kuviz(object):
     def delete(self):
         pass
 
-    @classmethod
-    def _validate_carto_kuviz(cls, carto_kuviz):
-        if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
-            raise CartoException('Error creating Kuviz. Something goes wrong')
 
-        if carto_kuviz.privacy and carto_kuviz.privacy not in [Kuviz.PRIVACY_PUBLIC, Kuviz.PRIVACY_PASSWORD]:
-            raise CartoException('Error creating Kuviz. Invalid privacy')
+def _validate_carto_kuviz(carto_kuviz):
+    if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
+        raise CartoException('Error creating Kuviz. Something goes wrong')
 
-        return True
+    if carto_kuviz.privacy and carto_kuviz.privacy not in [Kuviz.PRIVACY_PUBLIC, Kuviz.PRIVACY_PASSWORD]:
+        raise CartoException('Error creating Kuviz. Invalid privacy')
 
-    def _create_carto_kuviz(self, context, html, name, password=None):
-        km = KuvizManager(context.auth_client)
-        return km.create(html=html, name=name, password=password)
+    return True
+
+
+def _create_carto_kuviz(context, html, name, password=None):
+    km = KuvizManager(context.auth_client)
+    return km.create(html=html, name=name, password=password)

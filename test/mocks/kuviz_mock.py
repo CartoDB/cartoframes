@@ -1,4 +1,4 @@
-from cartoframes.viz.kuviz import Kuviz
+from cartoframes.viz.kuviz import Kuviz, _validate_carto_kuviz
 
 
 class CartoKuvizMock(object):
@@ -13,5 +13,12 @@ class CartoKuvizMock(object):
 
 
 class KuvizMock(Kuviz):
-    def _create_carto_kuviz(self, context, html, name, password=None):
-        return CartoKuvizMock(name=name, password=password)
+    @classmethod
+    def create(cls, context, html, name, password=None):
+        carto_kuviz = _create_carto_kuviz(context, html, name, password)
+        _validate_carto_kuviz(carto_kuviz)
+        return cls(context, carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
+
+
+def _create_carto_kuviz(context, html, name, password=None):
+    return CartoKuvizMock(name=name, password=password)
