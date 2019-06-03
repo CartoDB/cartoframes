@@ -192,42 +192,48 @@ class Map(object):
         return self._htmlMap.html
 
     def publish(self, name, password=None, table_name=None, schema=None, context=None):
-        name = normalize_name(name)
-
         # sync layers
         sync_layers = []
         for idx, layer in enumerate(self.layers):
-            print("\nProcessing layer #{n}".format(n=idx + 1))
+            table_name = normalize_name("cf_share_{name}_{idx}".format(name=table_name or name, idx=idx + 1))
 
-            if layer.source.dataset._is_saved_in_carto:
-                print("Already sync")
-            else:
-                print("Synchronizing...")
-                t = "cf_share_{name}_{idx}".format(name=table_name or name, idx=idx + 1)
-                s = schema or layer.source.dataset._schema
-                c = context or layer.source.dataset._cc
-                layer.source.dataset.upload(table_name=t, schema=s, context=c)
-                layer.source = Source(t, context=c, schema=s)
+            layer = _sync_layer(
+                layer=layer,
+                table_name=table_name,
+                schema=schema or layer.source.dataset._schema,
+                context=context or layer.source.dataset._cc)
 
             sync_layers.append(layer)
 
         if len(sync_layers) != len(self.layers):
             raise CartoException('Error publishing the map. Something goes wrong processing sources.')
 
-        # get html
+        html = self._sharing_HTML(sync_layers)
+
+        return Kuviz.create(context=context, html=html, name=name, password=password)
+
+    def _sharing_HTML(self, sync_layers):
         html_map = HTMLMap()
         html_map.set_content(
-            size=self.size,
+            size=None,
             sources=_get_map_layers(sync_layers),
             bounds=self.bounds,
-            viewport=self.viewport,
+            viewport=None,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-        return Kuviz.create(context=context, html=html_map.html, name=name, password=password)
+        return html_map.html
+
+
+def _sync_layer(layer, table_name, schema, context):
+    if not layer.source.dataset._is_saved_in_carto:
+        layer.source.dataset.upload(table_name=table_name, schema=schema, context=context)
+        layer.source = Source(table_name, context=context, schema=schema)
+
+    return layer
 
 
 def _get_bounds(bounds, layers):
