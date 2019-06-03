@@ -25,7 +25,9 @@ STYLE_PROPERTIES = [
 
 LEGEND_PROPERTIES = [
     'color',
-    'strokeColor'
+    'strokeColor',
+    'width',
+    'strokeWidth'
 ]
 
 LEGEND_TYPES = [

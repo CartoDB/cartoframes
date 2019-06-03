@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from . import constants, defaults
+from . import constants
 
 
 class Legend(object):

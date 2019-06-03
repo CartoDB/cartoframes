@@ -1,6 +1,6 @@
 {% macro createLegend(legend_data, id) -%}
   {% set type = legend_data.type %}
-    {% if type == 'color-bins' %}
+  {% if type == 'color-bins' %}
     <as-legend-color-bins id="{{id}}" slot="legends" />
   {% elif type == 'color-bins-line' %}
     <as-legend-color-bins-line id="{{id}}" slot="legends" />
@@ -24,6 +24,14 @@
     <as-legend-color-continuous-point id="{{id}}" slot="legends" />
   {% elif type == 'color-continuous-polygon' %}
     <as-legend-color-continuous-polygon id="{{id}}" slot="legends" />
+  {% elif type == 'size-bins' %}
+    <as-legend-size-bins id="{{id}}" slot="legends" />
+  {% elif type == 'size-bins-point' %}
+    <as-legend-size-bins-point id="{{id}}" slot="legends" />
+  {% elif type == 'size-continuous' %}
+    <as-legend-size-continuous id="{{id}}" slot="legends" />
+  {% elif type == 'size-continuous-point' %}
+    <as-legend-size-continuous-point id="{{id}}" slot="legends" />
   {% endif %}
 {%- endmacro %}
 
