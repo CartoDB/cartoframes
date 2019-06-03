@@ -1,9 +1,9 @@
 function createDefaultLegend(layers) {
-  const defaultLegendContainer = document.querySelector('#basicLegendContainer');
+  const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
   defaultLegendContainer.style.display = 'none';
 
   AsBridge.VL.Legends.layersLegend(
-    '#basicLegend',
+    '#defaultLegend',
     layers,
     {
       onLoad: () => defaultLegendContainer.style.display = 'unset'

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, top=11, palette='bold', title=''):
+def color_category_layer(source, value, title='', top=11, palette='bold'):
     return Layer(
         source,
         style={

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_continuous_layer(source, value, palette='sunset', title=''):
+def color_continuous_layer(source, value, title='', palette='sunset'):
     return Layer(
         source,
         style={
@@ -24,11 +24,7 @@ def color_continuous_layer(source, value, palette='sunset', title=''):
             }
         },
         legend={
-            'type': {
-                'point': 'color-category',
-                'line': 'color-category',
-                'polygon': 'color-continuous'
-            },
+            'type': 'color-continuous',
             'prop': 'color',
             'title': title or value,
             'description': ''

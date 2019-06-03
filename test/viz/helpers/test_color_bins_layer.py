@@ -24,11 +24,7 @@ class TestHelpers(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, {
-            'point': 'color-category',
-            'line': 'color-category',
-            'polygon': 'color-bins'
-        })
+        self.assertEqual(layer.legend._type, 'color-bins')
         self.assertEqual(layer.legend._prop, 'color')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
@@ -38,16 +34,15 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['point']['color'],
             'ramp(globalQuantiles($name, 3), reverse(prism))'
         )
-        self.assertEqual(layer.legend._type['point'], 'color-category')
 
     def test_color_bins_layer_line(self):
         "should create a line type layer"
@@ -56,16 +51,15 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['line']['color'],
             'ramp(globalQuantiles($name, 3), reverse(prism))'
         )
-        self.assertEqual(layer.legend._type['line'], 'color-category')
 
     def test_color_bins_layer_polygon(self):
         "should create a polygon type layer"
@@ -74,13 +68,12 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
+            'Neighborhoods',
             bins=3,
-            palette='prism',
-            title='Neighborhoods'
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
             'opacity(ramp(globalQuantiles($name, 3), reverse(prism)), 0.9)'
         )
-        self.assertEqual(layer.legend._type['polygon'], 'color-bins')
