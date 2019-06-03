@@ -1,46 +1,10 @@
-CARTO_VL_DEV = '/dist/carto-vl.js'
-CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/branches/develop/carto-vl.js'
-
-AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
-AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
-AIRSHIP_STYLES_DEV = '/packages/styles/dist/airship.css'
-AIRSHIP_ICONS_DEV = '/packages/icons/dist/icons.css'
-AIRSHIP_COMPONENTS_URL = 'https://libs.cartocdn.com/airship-components/cartoframes/airship.js'
-AIRSHIP_BRIDGE_URL = 'https://libs.cartocdn.com/airship-bridge/cartoframes/asbridge.min.js'
-AIRSHIP_STYLES_URL = 'https://libs.cartocdn.com/airship-style/cartoframes/airship.min.css'
-AIRSHIP_ICONS_URL = 'https://libs.cartocdn.com/airship-icons/cartoframes/icons.css'
-
 CREDENTIALS = {
     'username': 'cartoframes',
     'api_key': 'default_public',
     'base_url': ''
 }
 
-STYLE_PROPERTIES = [
-    'color',
-    'width',
-    'filter',
-    'strokeWidth',
-    'strokeColor',
-    'transform',
-    'order',
-    'symbol',
-    'symbolPlacement',
-    'resolution'
-]
-
-LEGEND_PROPERTIES = [
-    'color',
-    'strokeColor'
-]
-
-LEGEND_TYPES = [
-    'color-category',
-    'color-bins',
-    'color-continuous'
-]
-
-STYLE_DEFAULTS = {
+STYLE = {
     'point': {
         'color': 'hex("#EE4D5A")',
         'width': 'ramp(linear(zoom(),0,18),[2,10])',

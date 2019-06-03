@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .defaults import STYLE_DEFAULTS, STYLE_PROPERTIES
+from . import constants, defaults
 from ..utils import merge_dicts, text_match
 
 
@@ -52,7 +52,7 @@ class Style(object):
 
     def _init_style(self, data):
         if data is None:
-            return STYLE_DEFAULTS
+            return defaults.STYLE
         elif isinstance(data, (str, dict)):
             return data
         else:
@@ -60,28 +60,28 @@ class Style(object):
 
     def compute_viz(self, geom_type, variables={}):
         style = self._style
-        defaults = STYLE_DEFAULTS[geom_type]
+        default_style = defaults.STYLE[geom_type]
         if isinstance(style, dict):
             if geom_type in style:
                 style = style.get(geom_type)
-            return self._parse_style_dict(style, defaults, variables)
+            return self._parse_style_dict(style, default_style, variables)
         elif isinstance(style, str):
-            return self._parse_style_str(style, defaults, variables)
+            return self._parse_style_str(style, default_style, variables)
         else:
             raise ValueError('`style` must be a string or a dictionary')
 
-    def _parse_style_dict(self, style, defaults, ext_vars):
+    def _parse_style_dict(self, style, default_style, ext_vars):
         variables = merge_dicts(style.get('vars', {}), ext_vars)
-        properties = merge_dicts(defaults, style)
+        properties = merge_dicts(default_style, style)
 
         serialized_variables = self._serialize_variables(variables)
         serialized_properties = self._serialize_properties(properties)
 
         return serialized_variables + serialized_properties
 
-    def _parse_style_str(self, style, defaults, ext_vars):
+    def _parse_style_str(self, style, default_style, ext_vars):
         variables = ext_vars
-        default_properties = self._prune_defaults(defaults, style)
+        default_properties = self._prune_defaults(default_style, style)
 
         serialized_variables = self._serialize_variables(variables)
         serialized_default_properties = self._serialize_properties(default_properties)
@@ -102,11 +102,11 @@ class Style(object):
         for prop in properties:
             if prop == 'vars':
                 continue
-            if prop not in STYLE_PROPERTIES:
+            if prop not in constants.STYLE_PROPERTIES:
                 raise ValueError(
                     'Style property "{0}" is not valid. Valid style properties are: {1}'.format(
                         prop,
-                        ', '.join(STYLE_PROPERTIES)
+                        ', '.join(constants.STYLE_PROPERTIES)
                     ))
             output += '{name}: {value}\n'.format(
                 name=prop,
@@ -114,8 +114,8 @@ class Style(object):
             )
         return output
 
-    def _prune_defaults(self, defaults, style):
-        output = defaults.copy()
+    def _prune_defaults(self, default_style, style):
+        output = default_style.copy()
         if text_match(r'color\s*:', style):
             del output['color']
         if text_match(r'width\s*:', style):

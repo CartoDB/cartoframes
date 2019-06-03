@@ -5,7 +5,7 @@ import numpy as np
 from warnings import warn
 from jinja2 import Environment, PackageLoader
 
-from . import defaults
+from . import constants
 from .basemaps import Basemaps
 from .source import SourceType
 from .. import utils
@@ -431,20 +431,20 @@ class HTMLMap(object):
                 )
 
         if _carto_vl_path is None:
-            carto_vl_path = defaults.CARTO_VL_URL
+            carto_vl_path = constants.CARTO_VL_URL
         else:
-            carto_vl_path = _carto_vl_path + defaults.CARTO_VL_DEV
+            carto_vl_path = _carto_vl_path + constants.CARTO_VL_DEV
 
         if _airship_path is None:
-            airship_components_path = defaults.AIRSHIP_COMPONENTS_URL
-            airship_bridge_path = defaults.AIRSHIP_BRIDGE_URL
-            airship_styles_path = defaults.AIRSHIP_STYLES_URL
-            airship_icons_path = defaults.AIRSHIP_ICONS_URL
+            airship_components_path = constants.AIRSHIP_COMPONENTS_URL
+            airship_bridge_path = constants.AIRSHIP_BRIDGE_URL
+            airship_styles_path = constants.AIRSHIP_STYLES_URL
+            airship_icons_path = constants.AIRSHIP_ICONS_URL
         else:
-            airship_components_path = _airship_path + defaults.AIRSHIP_COMPONENTS_DEV
-            airship_bridge_path = _airship_path + defaults.AIRSHIP_BRIDGE_DEV
-            airship_styles_path = _airship_path + defaults.AIRSHIP_STYLES_DEV
-            airship_icons_path = _airship_path + defaults.AIRSHIP_ICONS_DEV
+            airship_components_path = _airship_path + constants.AIRSHIP_COMPONENTS_DEV
+            airship_bridge_path = _airship_path + constants.AIRSHIP_BRIDGE_DEV
+            airship_styles_path = _airship_path + constants.AIRSHIP_STYLES_DEV
+            airship_icons_path = _airship_path + constants.AIRSHIP_ICONS_DEV
 
         camera = None
         if viewport is not None:

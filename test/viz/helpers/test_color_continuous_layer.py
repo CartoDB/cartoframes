@@ -24,11 +24,7 @@ class TestHelpers(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, {
-            'point': 'color-category',
-            'line': 'color-category',
-            'polygon': 'color-continuous'
-        })
+        self.assertEqual(layer.legend._type, 'color-continuous')
         self.assertEqual(layer.legend._prop, 'color')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
@@ -38,15 +34,14 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['point']['color'],
             'ramp(linear($name), reverse(prism))'
         )
-        self.assertEqual(layer.legend._type['point'], 'color-category')
 
     def test_color_continuous_layer_line(self):
         "should create a line type layer"
@@ -55,15 +50,14 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['line']['color'],
             'ramp(linear($name), reverse(prism))'
         )
-        self.assertEqual(layer.legend._type['line'], 'color-category')
 
     def test_color_continuous_layer_polygon(self):
         "should create a polygon type layer"
@@ -72,12 +66,11 @@ class TestHelpers(unittest.TestCase):
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
-            palette='prism',
-            title='Neighborhoods'
+            'Neighborhoods',
+            palette='prism'
         )
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
             'opacity(ramp(linear($name), reverse(prism)), 0.9)'
         )
-        self.assertEqual(layer.legend._type['polygon'], 'color-continuous')

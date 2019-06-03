@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .defaults import LEGEND_TYPES, LEGEND_PROPERTIES
+from . import constants
 
 
 class Legend(object):
@@ -44,17 +44,17 @@ class Legend(object):
                 self._footer = data.get('footer', '')
 
                 if self._type or self._prop:
-                    if not isinstance(self._type, dict) and self._type not in LEGEND_TYPES:
+                    if not isinstance(self._type, dict) and self._type not in constants.LEGEND_TYPES:
                         raise ValueError(
                             'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
                                 self._type,
-                                ', '.join(LEGEND_TYPES)
+                                ', '.join(constants.LEGEND_TYPES)
                             ))
-                    if self._prop not in LEGEND_PROPERTIES:
+                    if self._prop not in constants.LEGEND_PROPERTIES:
                         raise ValueError(
                             'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
                                 self._prop,
-                                ', '.join(LEGEND_PROPERTIES)
+                                ', '.join(constants.LEGEND_PROPERTIES)
                             ))
 
             else:
@@ -63,7 +63,7 @@ class Legend(object):
     def get_info(self, geom_type):
         if (self._type and self._prop) or self._title or self._description or self._footer:
             _type = self._type
-            if _type and geom_type in _type:
+            if isinstance(_type, dict) and geom_type in _type:
                 _type = _type.get(geom_type)
             return {
                 'type': _type,
