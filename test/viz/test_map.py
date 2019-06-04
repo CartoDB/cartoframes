@@ -182,4 +182,3 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
-

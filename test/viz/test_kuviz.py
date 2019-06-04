@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import pandas as pd
 
 from carto.exceptions import CartoException
 
