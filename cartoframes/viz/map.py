@@ -9,9 +9,8 @@ from . import defaults
 from .basemaps import Basemaps
 from .source import Source, SourceType
 from .. import utils
-from ..columns import normalize_name
 from carto.exceptions import CartoException
-from .kuviz import Kuviz
+from .kuviz import KuvizPublisher
 
 # TODO: refactor
 
@@ -169,6 +168,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
+        self._publisher = None
 
         if default_legend is None and all(layer.legend is None for layer in self.layers):
             self.default_legend = False
@@ -191,32 +191,20 @@ class Map(object):
     def _repr_html_(self):
         return self._htmlMap.html
 
-    def publish(self, name, password=None, table_name=None, schema=None, context=None):
-        # sync layers
-        sync_layers = []
-        for idx, layer in enumerate(self.layers):
-            table_name = normalize_name("cf_share_{name}_{idx}".format(name=table_name or name, idx=idx + 1))
+    def publish(self, name, maps_api_key='default_public', context=None, password=None):
+        if not self._publisher:
+            self._publisher = KuvizPublisher(self)
 
-            layer = _sync_layer(
-                layer=layer,
-                table_name=table_name,
-                schema=schema or layer.source.dataset._schema,
-                context=context or layer.source.dataset._cc)
+        if not self._publisher.is_sync():
+            raise CartoException('The map layers are not synchronized with CARTO. '
+                                 'Please, use the `sync_data` before publishing the map')
 
-            sync_layers.append(layer)
+        self._publisher.set_context(context)
 
-        if len(sync_layers) != len(self.layers):
-            raise CartoException('Error publishing the map. Something goes wrong processing sources.')
-
-        html = self._sharing_HTML(sync_layers)
-
-        return Kuviz.create(context=context, html=html, name=name, password=password)
-
-    def _sharing_HTML(self, sync_layers):
         html_map = HTMLMap()
         html_map.set_content(
             size=None,
-            sources=_get_map_layers(sync_layers),
+            sources=_get_map_layers(self._publisher.get_layers(maps_api_key)),
             bounds=self.bounds,
             viewport=None,
             basemap=self.basemap,
@@ -225,15 +213,12 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-        return html_map.html
+        return self._publisher.publish(html_map.html, name, password)
 
-
-def _sync_layer(layer, table_name, schema, context):
-    if not layer.source.dataset._is_saved_in_carto:
-        layer.source.dataset.upload(table_name=table_name, schema=schema, context=context)
-        layer.source = Source(table_name, context=context, schema=schema)
-
-    return layer
+    def sync_data(self, table_name, context=None):
+        self._publisher = KuvizPublisher(self)
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, context)
 
 
 def _get_bounds(bounds, layers):
