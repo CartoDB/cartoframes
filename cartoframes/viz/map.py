@@ -193,7 +193,7 @@ class Map(object):
 
     def publish(self, name, maps_api_key='default_public', context=None, password=None):
         if not self._publisher:
-            self._publisher = KuvizPublisher(self)
+            self._publisher = self._get_publisher()
 
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
@@ -216,9 +216,12 @@ class Map(object):
         return self._publisher.publish(html_map.html, name, password)
 
     def sync_data(self, table_name, context=None):
-        self._publisher = KuvizPublisher(self)
+        self._publisher = self._get_publisher()
         if not self._publisher.is_sync():
             self._publisher.sync_layers(table_name, context)
+
+    def _get_publisher(self):
+        return KuvizPublisher(self)
 
 
 def _get_bounds(bounds, layers):

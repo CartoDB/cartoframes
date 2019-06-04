@@ -55,9 +55,9 @@ def _create_carto_kuviz(context, html, name, password=None):
 
 
 class KuvizPublisher(object):
-    def __init__(self, vmap):
+    def __init__(self, vmap, context=None):
         self._layers = deepcopy(vmap.layers)
-        self._context = None
+        self._context = context
 
     def set_context(self, context=None):
         from cartoframes.auth import _default_context
@@ -89,12 +89,12 @@ class KuvizPublisher(object):
             from cartoframes.auth import _default_context
             dataset_context = context or layer.source.dataset._cc or _default_context
 
-            _sync_layer(layer, table_name, dataset_context)
+            self._sync_layer(layer, table_name, dataset_context)
 
 
-def _sync_layer(layer, table_name, context):
-    if not layer.source.dataset._is_saved_in_carto:
-        layer.source.dataset.upload(table_name=table_name, context=context)
-        layer.source = Source(table_name, context=context)
-        warn('Table `{}` created. In order to publish the map, you will need to create a new API '
-             'key with permissions to MAPS API and the new table'.format(table_name))
+    def _sync_layer(self, layer, table_name, context):
+        if not layer.source.dataset._is_saved_in_carto:
+            layer.source.dataset.upload(table_name=table_name, context=context)
+            layer.source = Source(table_name, context=context)
+            warn('Table `{}` created. In order to publish the map, you will need to create a new API '
+                'key with permissions to MAPS API and the new table'.format(table_name))
