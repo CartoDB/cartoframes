@@ -91,7 +91,6 @@ class KuvizPublisher(object):
 
             self._sync_layer(layer, table_name, dataset_context)
 
-
     def _sync_layer(self, layer, table_name, context):
         if not layer.source.dataset._is_saved_in_carto:
             layer.source.dataset.upload(table_name=table_name, context=context)
