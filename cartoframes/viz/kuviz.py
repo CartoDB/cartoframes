@@ -4,7 +4,6 @@ from warnings import warn
 from carto.kuvizs import KuvizManager
 from carto.exceptions import CartoException
 
-from cartoframes import CartoContext
 from .source import Source
 from ..columns import normalize_name
 
@@ -69,7 +68,7 @@ class KuvizPublisher(object):
 
     def is_sync(self):
         syncs = [layer.source.dataset._is_saved_in_carto for layer in self._layers]
-        return not False in syncs
+        return False not in syncs
 
     def get_layers(self, maps_api_key='default_public'):
         for layer in self._layers:

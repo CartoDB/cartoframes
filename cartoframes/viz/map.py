@@ -7,7 +7,7 @@ from jinja2 import Environment, PackageLoader
 
 from . import defaults
 from .basemaps import Basemaps
-from .source import Source, SourceType
+from .source import SourceType
 from .. import utils
 from carto.exceptions import CartoException
 from .kuviz import KuvizPublisher
