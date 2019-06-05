@@ -12,9 +12,9 @@ class Kuviz(object):
     PRIVACY_PUBLIC = 'public'
     PRIVACY_PASSWORD = 'password'
 
-    def __init__(self, context, id, url, name, privacy=PRIVACY_PUBLIC):
-        self.cc = context
-        self.id = id
+    def __init__(self, context, vid, url, name, privacy=PRIVACY_PUBLIC):
+        self.context = context
+        self.vid = vid
         self.url = url
         self.name = name
         self.privacy = privacy
@@ -39,6 +39,8 @@ class Kuviz(object):
         pass
 
 
+# FIXME: https://github.com/CartoDB/carto-python/issues/122
+# Remove the function and usage after the issue will be fixed
 def _validate_carto_kuviz(carto_kuviz):
     if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
         raise CartoException('Error creating Kuviz. Something goes wrong')
