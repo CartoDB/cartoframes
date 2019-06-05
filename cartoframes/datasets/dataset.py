@@ -83,25 +83,32 @@ class Dataset(object):
     def from_geojson(cls, geojson):
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
-    def get_dataframe(self):
+    @property
+    def dataframe(self):
         return self._df
 
-    def get_geodataframe(self):
+    @property
+    def geodataframe(self):
         return self._gdf
 
-    def get_table_name(self):
+    @property
+    def table_name(self):
         return self._table_name
 
-    def get_context(self):
+    @property
+    def context(self):
         return self._cc
 
-    def set_context(self, context):
+    @context.setter
+    def context(self, context):
         self._cc = context
 
-    def get_is_saved_in_carto(self):
+    @property
+    def is_saved_in_carto(self):
         return self._is_saved_in_carto
 
-    def get_dataset_info(self):
+    @property
+    def dataset_info(self):
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
@@ -116,7 +123,7 @@ class Dataset(object):
         return self._dataset_info
 
     def update_dataset_info(self, privacy=None, name=None):
-        self._dataset_info = self.get_dataset_info()
+        self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):

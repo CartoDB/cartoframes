@@ -49,7 +49,7 @@ class TestDatasetSync(unittest.TestCase):
         dataset.download()
         dataset.upload(table_name='another_table')
         self.assertEqual(dataset._is_saved_in_carto, True)
-        self.assertEqual(dataset.get_table_name(), 'another_table')
+        self.assertEqual(dataset.table_name, 'another_table')
 
     def test_dataset_not_sync_from_query(self):
         query = "SELECT 1"
@@ -61,7 +61,7 @@ class TestDatasetSync(unittest.TestCase):
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.upload(table_name='another_table')
         self.assertEqual(dataset._is_saved_in_carto, True)
-        self.assertEqual(dataset.get_table_name(), 'another_table')
+        self.assertEqual(dataset.table_name, 'another_table')
 
     def test_dataset_not_sync_from_dataframe(self):
         df = pd.DataFrame({'column_name': [2]})
@@ -73,7 +73,7 @@ class TestDatasetSync(unittest.TestCase):
         dataset = DatasetMock.from_dataframe(df=df)
         dataset.upload(table_name='another_table', context=self.context)
         self.assertEqual(dataset._is_saved_in_carto, True)
-        self.assertEqual(dataset.get_table_name(), 'another_table')
+        self.assertEqual(dataset.table_name, 'another_table')
 
     def test_dataset_not_sync_from_dataframe_upload_append(self):
         df = pd.DataFrame({'column_name': [2]})

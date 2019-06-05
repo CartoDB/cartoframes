@@ -136,7 +136,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name=table_name, context=self.cc)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset.get_table_name(), table_name)
+        self.assertEqual(dataset.table_name, table_name)
         self.assertEqual(dataset._schema, 'public')
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
@@ -150,7 +150,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset._query, query)
-        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._gdf)
         self.assertEqual(dataset._cc, self.cc)
@@ -162,7 +162,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset._df)
-        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._gdf)
         self.assertIsNone(dataset._cc)
@@ -174,7 +174,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset._gdf)
-        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._cc)
@@ -186,7 +186,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset._gdf)
-        self.assertIsNone(dataset.get_table_name())
+        self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._cc)
@@ -275,7 +275,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_mcdonalds_nyc
         df = read_mcdonalds_nyc(limit=100)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 100)
@@ -287,7 +287,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_ne_50m_graticules_15
         df = read_ne_50m_graticules_15()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 35)
@@ -299,7 +299,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
@@ -313,7 +313,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         lnglat = ('dropoff_longitude', 'dropoff_latitude')
         dataset = Dataset.from_dataframe(df).upload(
             with_lnglat=lnglat, table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -327,7 +327,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -342,7 +342,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
         df.rename(columns={'the_geom': 'geometry'}, inplace=True)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -358,7 +358,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         df.rename(columns={'the_geom': 'geom'}, inplace=True)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -381,7 +381,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         # TODO: use from_geodataframe
         dataset = Dataset.from_dataframe(gdf).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -397,7 +397,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'
                                   .format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
@@ -411,7 +411,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
@@ -428,7 +428,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         dataset = Dataset.from_dataframe(df).upload(
             if_exists=Dataset.APPEND, table_name=self.test_write_table, context=self.cc)
@@ -443,7 +443,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
-        self.test_write_table = dataset.get_table_name()
+        self.test_write_table = dataset.table_name
 
         dataset = Dataset.from_dataframe(df).upload(
             if_exists=Dataset.REPLACE, table_name=self.test_write_table, context=self.cc)
@@ -526,7 +526,7 @@ class TestDatasetInfo(unittest.TestCase):
         query = 'SELECT 1'
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.upload(table_name='fake_table')
-        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
 
     def test_dataset_get_privacy_from_not_sync(self):
         query = 'SELECT 1'
@@ -534,14 +534,14 @@ class TestDatasetInfo(unittest.TestCase):
         error_msg = ('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
                      'to get or modify the info from a CARTO table.')
         with self.assertRaises(CartoException, msg=error_msg):
-            dataset.get_dataset_info()
+            dataset.dataset_info
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
         dataset = DatasetMock.from_query(query=query, context=self.context)
         dataset.upload(table_name='fake_table')
         dataset.update_dataset_info(privacy=Dataset.PUBLIC)
-        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PUBLIC)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
 
     def test_dataset_set_privacy_with_wrong_parameter(self):
         query = 'SELECT 1'
@@ -556,12 +556,12 @@ class TestDatasetInfo(unittest.TestCase):
     def test_dataset_info_should_work_from_table(self):
         table_name = 'fake_table'
         dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
-        self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
 
     def test_dataset_info_props_are_private(self):
         table_name = 'fake_table'
         dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
-        dataset_info = dataset.get_dataset_info()
+        dataset_info = dataset.dataset_info
         self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
         privacy = Dataset.PUBLIC
         error_msg = str(setting_value_exception('privacy', privacy))
