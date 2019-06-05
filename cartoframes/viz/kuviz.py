@@ -96,4 +96,4 @@ class KuvizPublisher(object):
             layer.source.dataset.upload(table_name=table_name, context=context)
             layer.source = Source(table_name, context=context)
             warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
-                 'key with permissions to MAPS API and the new table'.format(table_name))
+                 'key with permissions to Maps API and the table `{}`'.format(table_name, table_name))
