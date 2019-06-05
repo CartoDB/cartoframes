@@ -197,7 +197,7 @@ class Map(object):
 
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
-                                 'Please, use the `sync_data` before publishing the map')
+                                 'Please, use the `sync_data` method before publishing the map')
 
         self._publisher.set_context(context)
 
