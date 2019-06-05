@@ -153,7 +153,7 @@ class TestMapPublication(unittest.TestCase):
 
         name = 'cf_publish'
         kuviz = map.publish(name, context=self.context)
-        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.vid)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
@@ -178,7 +178,7 @@ class TestMapPublication(unittest.TestCase):
 
         name = 'cf_publish'
         kuviz = map.publish(name, context=self.context)
-        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.vid)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
