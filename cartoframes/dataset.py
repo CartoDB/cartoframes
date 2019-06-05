@@ -13,6 +13,12 @@ from carto.exceptions import CartoException, CartoRateLimitException
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
 
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
+
 
 class Dataset(object):
     FAIL = 'fail'
@@ -376,12 +382,26 @@ def get_columns(context, query):
 
 def get_query(dataset):
     if isinstance(dataset, Dataset):
-        return dataset.query or _default_query(dataset)
+        return dataset.query or _compute_query(dataset)
 
 
-def _default_query(dataset):
+def _compute_query(dataset):
     if dataset.table_name and dataset.schema:
         return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
+
+
+def get_geodataframe(dataset):
+    if isinstance(dataset, Dataset):
+        return dataset.gdf or _compute_geodataframe(dataset)
+
+
+def _compute_geodataframe(dataset):
+    if dataset.df:
+        from shapely import wkb
+        df = dataset.df.copy()
+        # TODO: add more geom generation cases
+        df['geometry'] = df['the_geom'].apply(wkb.loads, hex=True)
+        return geopandas.GeoDataFrame(df)
 
 
 def _save_index_as_column(df):

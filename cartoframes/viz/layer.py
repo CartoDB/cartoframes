@@ -1,10 +1,18 @@
 from __future__ import absolute_import
 
+import pandas
+
 from .source import Source
 from .style import Style
 from .popup import Popup
 from .legend import Legend
 from ..dataset import Dataset
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 
 
 class Layer(object):
@@ -104,7 +112,9 @@ class Layer(object):
 
 def _set_source(source, context):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset)):
+    if isinstance(source, (str, list, dict, Dataset)) or \
+       isinstance(source, pandas.DataFrame) or \
+       HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
         return Source(source, context)
     elif isinstance(source, Source):
         return source
