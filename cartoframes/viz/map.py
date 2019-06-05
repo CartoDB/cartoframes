@@ -168,7 +168,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
-        self._publisher = None
+        self._publisher = self._get_publisher()
 
         if default_legend is None and all(layer.legend is None for layer in self.layers):
             self.default_legend = False
@@ -192,9 +192,6 @@ class Map(object):
         return self._htmlMap.html
 
     def publish(self, name, maps_api_key='default_public', context=None, password=None):
-        if not self._publisher:
-            self._publisher = self._get_publisher()
-
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
@@ -216,7 +213,6 @@ class Map(object):
         return self._publisher.publish(html_map.html, name, password)
 
     def sync_data(self, table_name, context=None):
-        self._publisher = self._get_publisher()
         if not self._publisher.is_sync():
             self._publisher.sync_layers(table_name, context)
 

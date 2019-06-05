@@ -102,6 +102,15 @@ class Dataset(object):
     def get_table_name(self):
         return self._table_name
 
+    def get_context(self):
+        return self._cc
+
+    def set_context(self, context):
+        self._cc = context
+
+    def get_is_saved_in_carto(self):
+        return self._is_saved_in_carto
+
     def get_dataset_info(self):
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
