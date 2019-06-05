@@ -12,8 +12,7 @@ class Kuviz(object):
     PRIVACY_PUBLIC = 'public'
     PRIVACY_PASSWORD = 'password'
 
-    def __init__(self, context, vid, url, name, privacy=PRIVACY_PUBLIC):
-        self.context = context
+    def __init__(self, vid, url, name, privacy=PRIVACY_PUBLIC):
         self.vid = vid
         self.url = url
         self.name = name
@@ -24,7 +23,7 @@ class Kuviz(object):
         from cartoframes.auth import _default_context
         carto_kuviz = _create_carto_kuviz(context=context or _default_context, html=html, name=name, password=password)
         _validate_carto_kuviz(carto_kuviz)
-        return cls(context, carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
+        return cls(carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
 
     @classmethod
     def all(cls, context):

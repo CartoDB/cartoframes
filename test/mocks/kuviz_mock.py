@@ -17,7 +17,7 @@ class KuvizMock(Kuviz):
     def create(cls, context, html, name, password=None):
         carto_kuviz = _create_carto_kuviz(context, html, name, password)
         _validate_carto_kuviz(carto_kuviz)
-        return cls(context, carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
+        return cls(carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
 
 
 def _create_carto_kuviz(context, html, name, password=None):
