@@ -95,5 +95,5 @@ class KuvizPublisher(object):
         if not layer.source.dataset._is_saved_in_carto:
             layer.source.dataset.upload(table_name=table_name, context=context)
             layer.source = Source(table_name, context=context)
-            warn('Table `{}` created. In order to publish the map, you will need to create a new API '
+            warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
                  'key with permissions to MAPS API and the new table'.format(table_name))
