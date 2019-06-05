@@ -32,6 +32,8 @@ class Kuviz(object):
         pass
 
 
+# FIXME: https://github.com/CartoDB/carto-python/issues/122
+# Remove the function and usage after the issue will be fixed
 def _validate_carto_kuviz(carto_kuviz):
     if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
         raise CartoException('Error creating Kuviz. Something goes wrong')
