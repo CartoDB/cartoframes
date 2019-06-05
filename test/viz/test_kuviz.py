@@ -20,7 +20,7 @@ class TestKuviz(unittest.TestCase):
     def test_kuviz_create(self):
         name = 'test-name'
         kuviz = KuvizMock.create(context=self.context, html=self.html, name=name)
-        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.vid)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
@@ -28,7 +28,7 @@ class TestKuviz(unittest.TestCase):
     def test_kuviz_create_with_password(self):
         name = 'test-name'
         kuviz = KuvizMock.create(context=self.context, html=self.html, name=name, password="1234")
-        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.vid)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PASSWORD)

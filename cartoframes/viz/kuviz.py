@@ -6,9 +6,9 @@ class Kuviz(object):
     PRIVACY_PUBLIC = 'public'
     PRIVACY_PASSWORD = 'password'
 
-    def __init__(self, context, id, url, name, privacy=PRIVACY_PUBLIC):
-        self.cc = context
-        self.id = id
+    def __init__(self, context, vid, url, name, privacy=PRIVACY_PUBLIC):
+        self.context = context
+        self.vid = vid
         self.url = url
         self.name = name
         self.privacy = privacy
