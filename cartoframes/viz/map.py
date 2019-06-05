@@ -241,12 +241,23 @@ def _list_bounds(bounds):
 
 
 def _dict_bounds(bounds):
-    if 'west' not in bounds or 'east' not in bounds or 'north' not in bounds\
-            or 'south' not in bounds:
+    if 'west' not in bounds or 'east' not in bounds or \
+       'north' not in bounds or 'south' not in bounds:
         raise ValueError('bounds must have east, west, north and '
                          'south properties')
 
-    return '[[{west}, {south}], [{east}, {north}]]'.format(**bounds)
+    clamped_bounds = {
+        'west': _clamp(bounds.get('west'), -180, 180),
+        'east': _clamp(bounds.get('east'), -180, 180),
+        'south': _clamp(bounds.get('south'), -90, 90),
+        'north': _clamp(bounds.get('north'), -90, 90)
+    }
+
+    return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
+
+
+def _clamp(value, minimum, maximum):
+    return max(minimum, min(value, maximum))
 
 
 def _get_super_bounds(layers):

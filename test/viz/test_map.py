@@ -20,6 +20,26 @@ class TestMapInitialization(unittest.TestCase):
         map = Map()
         self.assertIsNotNone(map._htmlMap)
 
+    def test_bounds(self):
+        """Map should set the bounds"""
+        map = Map(bounds={
+            'west': -10,
+            'east': 10,
+            'north': -10,
+            'south': 10
+        })
+        self.assertEqual(map.bounds, '[[-10, 10], [10, -10]]')
+
+    def test_bounds_clamp(self):
+        """Map should set the bounds clamped"""
+        map = Map(bounds={
+            'west': -1000,
+            'east': 1000,
+            'north': -1000,
+            'south': 1000
+        })
+        self.assertEqual(map.bounds, '[[-180, 90], [180, -90]]')
+
 
 class TestMapLayer(unittest.TestCase):
     def test_one_layer(self):

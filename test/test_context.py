@@ -1158,38 +1158,36 @@ class TestCartoContext(unittest.TestCase, _UserUrlLoader):
             msg='Should have same schema/types'
         )
 
-    # FIXME: https://github.com/CartoDB/cartoframes/issues/594
-    # def test_column_name_collision_do_enrichement(self):
-    #     """context.CartoContext.data column collision"""
-    #     import ipdb; ipdb.set_trace(context=30)
-    #     dup_col = 'female_third_level_studies_2011_by_female_pop'
-    #     self.sql_client.send(
-    #         """
-    #         create table {table} as (
-    #             select cdb_latlng(40.4165,-3.70256) the_geom,
-    #                    1 {dup_col})
-    #         """.format(
-    #             dup_col=dup_col,
-    #             table=self.test_write_table
-    #         )
-    #     )
-    #     self.sql_client.send(
-    #         "select cdb_cartodbfytable('public', '{table}')".format(
-    #             table=self.test_write_table
-    #         )
-    #     )
+    def test_column_name_collision_do_enrichement(self):
+        """context.CartoContext.data column collision"""
+        dup_col = 'female_third_level_studies_2011_by_female_pop'
+        self.sql_client.send(
+            """
+            create table {table} as (
+                select cdb_latlng(40.4165,-3.70256) the_geom,
+                       1 {dup_col})
+            """.format(
+                dup_col=dup_col,
+                table=self.test_write_table
+            )
+        )
+        self.sql_client.send(
+            "select cdb_cartodbfytable('public', '{table}')".format(
+                table=self.test_write_table
+            )
+        )
 
-    #     cc = cartoframes.CartoContext(base_url=self.baseurl,
-    #                                   api_key=self.apikey)
-    #     meta = cc.data_discovery(region=self.test_write_table,
-    #                              keywords='female')
-    #     meta = meta[meta.suggested_name == dup_col]
-    #     data = cc.data(
-    #         self.test_write_table,
-    #         meta[meta.suggested_name == dup_col]
-    #     )
+        cc = cartoframes.CartoContext(base_url=self.baseurl,
+                                      api_key=self.apikey)
+        meta = cc.data_discovery(region=self.test_write_table,
+                                 keywords='female')
+        meta = meta[meta.suggested_name == dup_col]
+        data = cc.data(
+            self.test_write_table,
+            meta[meta.suggested_name == dup_col]
+        )
 
-    #     self.assertIn('_' + dup_col, data.keys())
+        self.assertIn('_' + dup_col, data.keys())
 
     def test_tables(self):
         """context.CartoContext.tables normal usage"""
