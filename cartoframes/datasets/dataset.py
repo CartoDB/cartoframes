@@ -86,18 +86,8 @@ class Dataset(object):
     def get_dataframe(self):
         return self._df
 
-    def set_dataframe(self, df):
-        if self._df is None or not self._df.equals(df):
-            self._unsync()
-        self._df = df
-
     def get_geodataframe(self):
         return self._gdf
-
-    def set_geodataframe(self, gdf):
-        if self._gdf is None or not self._gdf.equals(gdf):
-            self._unsync()
-        self._gdf = gdf
 
     def get_table_name(self):
         return self._table_name

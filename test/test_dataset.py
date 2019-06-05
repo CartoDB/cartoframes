@@ -558,26 +558,6 @@ class TestDatasetInfo(unittest.TestCase):
         dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
         self.assertEqual(dataset.get_dataset_info().privacy, Dataset.PRIVATE)
 
-    def test_dataset_info_should_fail_after_unsync_by_set_dataframe(self):
-        table_name = 'fake_table'
-        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
-        dataset.download()
-        dataset.set_dataframe(pd.DataFrame({'column_name': [2]}))
-        error_msg = ('Your data is not synchronized with CARTO.'
-                     'First of all, you should call upload method to save your data in CARTO.')
-        with self.assertRaises(CartoException, msg=error_msg):
-            dataset.get_dataset_info()
-
-    def test_dataset_info_should_fail_after_unsync_by_set_geodataframe(self):
-        table_name = 'fake_table'
-        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
-        dataset.download()
-        dataset.set_geodataframe(pd.DataFrame({'column_name': [2]}))
-        error_msg = ('Your data is not synchronized with CARTO.'
-                     'First of all, you should call upload method to save your data in CARTO.')
-        with self.assertRaises(CartoException, msg=error_msg):
-            dataset.get_dataset_info()
-
     def test_dataset_info_props_are_private(self):
         table_name = 'fake_table'
         dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
