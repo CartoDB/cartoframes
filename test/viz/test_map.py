@@ -3,11 +3,11 @@ import unittest
 from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source, constants
+from cartoframes.viz.kuviz import PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from .utils import build_geojson
 from mocks.map_mock import MapMock
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
-from mocks.kuviz_mock import KuvizMock
 
 
 class TestMap(unittest.TestCase):
@@ -176,7 +176,7 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+        self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
         query = "SELECT 1"
@@ -201,4 +201,4 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+        self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)

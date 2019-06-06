@@ -1,58 +1,14 @@
 from copy import deepcopy
 from warnings import warn
 
-from carto.kuvizs import KuvizManager
+from carto.kuvizs import Kuviz, KuvizManager
 from carto.exceptions import CartoException
 
 from .source import Source
 from ..columns import normalize_name
 
-
-class Kuviz(object):
-    PRIVACY_PUBLIC = 'public'
-    PRIVACY_PASSWORD = 'password'
-
-    def __init__(self, id, url, name, privacy=PRIVACY_PUBLIC):
-        self.id = id
-        self.url = url
-        self.name = name
-        self.privacy = privacy
-
-    @classmethod
-    def create(cls, html, name, context=None, password=None):
-        from cartoframes.auth import _default_context
-        carto_kuviz = _create_carto_kuviz(context=context or _default_context, html=html, name=name, password=password)
-        _validate_carto_kuviz(carto_kuviz)
-        return cls(carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
-
-    @classmethod
-    def all(cls, context):
-        # km = KuvizManager(context.auth_client)
-        # return km.all()
-        pass
-
-    def update(self, html, name, password=None):
-        pass
-
-    def delete(self):
-        pass
-
-
-# FIXME: https://github.com/CartoDB/carto-python/issues/122
-# Remove the function and usage after the issue will be fixed
-def _validate_carto_kuviz(carto_kuviz):
-    if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
-        raise CartoException('Error creating Kuviz. Something goes wrong')
-
-    if carto_kuviz.privacy and carto_kuviz.privacy not in [Kuviz.PRIVACY_PUBLIC, Kuviz.PRIVACY_PASSWORD]:
-        raise CartoException('Error creating Kuviz. Invalid privacy')
-
-    return True
-
-
-def _create_carto_kuviz(context, html, name, password=None):
-    km = KuvizManager(context.auth_client)
-    return km.create(html=html, name=name, password=password)
+PRIVACY_PUBLIC = 'public'
+PRIVACY_PASSWORD = 'password'
 
 
 class KuvizPublisher(object):
@@ -65,7 +21,7 @@ class KuvizPublisher(object):
         self._context = context or _default_context
 
     def publish(self, html, name, password=None):
-        return Kuviz.create(context=self._context, html=html, name=name, password=password)
+        return _create_carto_kuviz(html=html, name=name, context=self._context, password=password)
 
     def is_sync(self):
         return all(layer.source.dataset.is_saved_in_carto for layer in self._layers)
@@ -99,3 +55,27 @@ class KuvizPublisher(object):
                  'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
                  'using the Auth API. You can get more info at '
                  'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
+
+
+def _create_carto_kuviz(html, name, context=None, password=None):
+    from cartoframes.auth import _default_context
+    context = context or _default_context
+
+    km = KuvizManager(context.auth_client)
+    carto_kuviz = km.create(html=html, name=name, password=password)
+
+    _validate_carto_kuviz(carto_kuviz)
+
+    return carto_kuviz
+
+
+# FIXME: https://github.com/CartoDB/carto-python/issues/122
+# Remove the function and usage after the issue will be fixed
+def _validate_carto_kuviz(carto_kuviz):
+    if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
+        raise CartoException('Error creating Kuviz. Something goes wrong')
+
+    if carto_kuviz.privacy and carto_kuviz.privacy not in [PRIVACY_PUBLIC, PRIVACY_PASSWORD]:
+        raise CartoException('Error creating Kuviz. Invalid privacy')
+
+    return True

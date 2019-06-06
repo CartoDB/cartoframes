@@ -1,4 +1,4 @@
-from cartoframes.viz.kuviz import Kuviz, _validate_carto_kuviz, KuvizPublisher
+from cartoframes.viz.kuviz import KuvizPublisher, PRIVACY_PUBLIC, PRIVACY_PASSWORD, _validate_carto_kuviz
 
 
 class CartoKuvizMock(object):
@@ -7,26 +7,20 @@ class CartoKuvizMock(object):
         self.url = url
         self.name = name
         if password:
-            self.privacy = Kuviz.PRIVACY_PASSWORD
+            self.privacy = PRIVACY_PASSWORD
         else:
-            self.privacy = Kuviz.PRIVACY_PUBLIC
+            self.privacy = PRIVACY_PUBLIC
 
 
-class KuvizMock(Kuviz):
-    @classmethod
-    def create(cls, context, html, name, password=None):
-        carto_kuviz = _create_carto_kuviz(context, html, name, password)
-        _validate_carto_kuviz(carto_kuviz)
-        return cls(carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
-
-
-def _create_carto_kuviz(context, html, name, password=None):
-    return CartoKuvizMock(name=name, password=password)
+def _create_carto_kuviz(html, name, context=None, password=None):
+    carto_kuviz = CartoKuvizMock(name=name, password=password)
+    _validate_carto_kuviz(carto_kuviz)
+    return carto_kuviz
 
 
 class KuvizPublisherMock(KuvizPublisher):
     def publish(self, html, name, password=None):
-        return KuvizMock.create(context=self._context, html=html, name=name, password=password)
+        return _create_carto_kuviz(html=html, name=name, context=self._context, password=password)
 
     def _sync_layer(self, layer, table_name, context):
         layer.source.dataset._is_saved_in_carto = True
