@@ -7,6 +7,29 @@ except ImportError:
     HAS_GEOPANDAS = False
 
 
+GEOM_COLUMN_NAMES = [
+    'geometry',
+    'the_geom',
+    'wkt_geometry',
+    'wkb_geometry',
+    'geom',
+    'wkt',
+    'wkb'
+]
+
+LAT_COLUMN_NAMES = [
+    'latitude',
+    'lat'
+]
+
+LNG_COLUMN_NAMES = [
+    'longitude',
+    'lng',
+    'lon',
+    'long'
+]
+
+
 def compute_query(dataset):
     if dataset.table_name and dataset.schema:
         return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
@@ -15,52 +38,29 @@ def compute_query(dataset):
 def compute_geodataframe(dataset):
     if dataset.df is not None:
         df = dataset.df.copy()
-        geom_column = _get_geom_column(df)
+        geom_column = _get_column(df, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             df['geometry'] = _compute_geometry_from_geom(geom_column)
         else:
-            lat_column = _get_lat_column(df)
-            lng_column = _get_lng_column(df)
+            lat_column = _get_column(df, LAT_COLUMN_NAMES)
+            lng_column = _get_column(df, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
                 df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
             else:
-                raise ValueError('DataFrame has no geographic data.')
+                raise ValueError('''No geographic data found. '''
+                                 '''If a geometry exists, change the column name ({0}) or ensure it is a DataFrame with a valid geometry. '''
+                                 '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
+                                     ', '.join(GEOM_COLUMN_NAMES),
+                                     ', '.join(LAT_COLUMN_NAMES),
+                                     ', '.join(LNG_COLUMN_NAMES)
+                                 ))
         return geopandas.GeoDataFrame(df)
 
 
-def _get_geom_column(df):
-    if 'geometry' in df:
-        return df['geometry']
-    if 'the_geom' in df:
-        return df['the_geom']
-    if 'wkt_geometry' in df:
-        return df['wkt_geometry']
-    if 'wkb_geometry' in df:
-        return df['wkb_geometry']
-    if 'geom' in df:
-        return df['geom']
-    if 'wkt' in df:
-        return df['wkt']
-    if 'wkb' in df:
-        return df['wkb']
-
-
-def _get_lat_column(df):
-    if 'latitude' in df:
-        return df['latitude']
-    if 'lat' in df:
-        return df['lat']
-
-
-def _get_lng_column(df):
-    if 'longitude' in df:
-        return df['longitude']
-    if 'lng' in df:
-        return df['lng']
-    if 'lon' in df:
-        return df['lon']
-    if 'long' in df:
-        return df['long']
+def _get_column(df, options):
+    for name in options:
+        if name in df:
+            return df[name]
 
 
 def _compute_geometry_from_geom(geom):
@@ -112,4 +112,3 @@ def decode_geometry(ewkb):
                             return wkt.loads(ewkb)
                         except Exception:
                             pass
-    return None

@@ -112,8 +112,7 @@ class Layer(object):
 
 def _set_source(source, context):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset)) or \
-       isinstance(source, pandas.DataFrame) or \
+    if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or \
        HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
         return Source(source, context)
     elif isinstance(source, Source):
