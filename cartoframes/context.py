@@ -31,7 +31,8 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .dataset import Dataset, recursive_read, _decode_geom, get_columns
+from .dataset import Dataset, recursive_read, get_columns
+from .data.utils import decode_geometry
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -524,7 +525,7 @@ class CartoContext(object):
                          true_values=['t'],
                          false_values=['f'],
                          index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters={'the_geom': lambda x: _decode_geom(x) if decode_geom else x})
+                         converters={'the_geom': lambda x: decode_geometry(x) if decode_geom else x})
 
         if decode_geom:
             df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)

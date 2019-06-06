@@ -1,23 +1,17 @@
 import time
 import pandas as pd
-import binascii as ba
 
 from tqdm import tqdm
 from warnings import warn
 
+from carto.exceptions import CartoException, CartoRateLimitException
+
 from .columns import Column, normalize_names, normalize_name
 from .geojson import load_geojson
-
-from carto.exceptions import CartoException, CartoRateLimitException
+from .data.utils import decode_geometry, compute_query, compute_geodataframe
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
-
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
 
 
 class Dataset(object):
@@ -216,7 +210,7 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                geom = _decode_geom(the_geom_val)
+                geom = decode_geometry(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
             if with_lnglat is not None and lng_val is not None and lat_val is not None:
@@ -383,82 +377,17 @@ def get_columns(context, query):
 def get_query(dataset):
     if isinstance(dataset, Dataset):
         if dataset.query is None:
-            return _compute_query(dataset)
+            return compute_query(dataset)
         else:
             return dataset.query
-
-
-def _compute_query(dataset):
-    if dataset.table_name and dataset.schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
 
 
 def get_geodataframe(dataset):
     if isinstance(dataset, Dataset):
         if dataset.gdf is None:
-            return _compute_geodataframe(dataset)
+            return compute_geodataframe(dataset)
         else:
             return dataset.gdf
-
-
-def _compute_geodataframe(dataset):
-    if dataset.df is not None:
-        df = dataset.df.copy()
-        geom_column = _get_geom_column(df)
-        if geom_column is not None:
-            df['geometry'] = _compute_geometry_from_geom(geom_column)
-        else:
-            lat_column = _get_lat_column(df)
-            lng_column = _get_lng_column(df)
-            if lat_column is not None and lng_column is not None:
-                df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
-            else:
-                raise ValueError('DataFrame has no geographic data.')
-        return geopandas.GeoDataFrame(df)
-
-
-def _get_geom_column(df):
-    if 'geometry' in df:
-        return df['geometry']
-    if 'the_geom' in df:
-        return df['the_geom']
-    if 'wkt_geometry' in df:
-        return df['wkt_geometry']
-    if 'wkb_geometry' in df:
-        return df['wkb_geometry']
-    if 'geom' in df:
-        return df['geom']
-    if 'wkt' in df:
-        return df['wkt']
-    if 'wkb' in df:
-        return df['wkb']
-
-
-def _get_lat_column(df):
-    if 'latitude' in df:
-        return df['latitude']
-    if 'lat' in df:
-        return df['lat']
-
-
-def _get_lng_column(df):
-    if 'longitude' in df:
-        return df['longitude']
-    if 'lng' in df:
-        return df['lng']
-    if 'lon' in df:
-        return df['lon']
-    if 'long' in df:
-        return df['long']
-
-
-def _compute_geometry_from_geom(geom):
-    return geom.apply(_decode_geom)
-
-
-def _compute_geometry_from_latlng(lat, lng):
-    from shapely import geometry
-    return [geometry.Point(xy) for xy in zip(lng, lat)]
 
 
 def _save_index_as_column(df):
@@ -520,7 +449,7 @@ def _get_geom_col_type(df):
         return None
 
     try:
-        geom = _decode_geom(_first_not_null_value(df[geom_col]))
+        geom = decode_geometry(_first_not_null_value(df[geom_col]))
     except IndexError:
         warn('Dataset with null geometries')
         geom = None
@@ -533,47 +462,3 @@ def _get_geom_col_type(df):
 
 def _first_not_null_value(array):
     return array.loc[~array.isnull()].iloc[0]
-
-
-def _encode_decode_decorator(func):
-    """decorator for encoding and decoding geoms"""
-    def wrapper(*args):
-        """error catching"""
-        try:
-            processed_geom = func(*args)
-            return processed_geom
-        except ImportError as err:
-            raise ImportError('The Python package `shapely` needs to be '
-                              'installed to encode or decode geometries. '
-                              '({})'.format(err))
-    return wrapper
-
-
-@_encode_decode_decorator
-def _decode_geom(ewkb):
-    """Decode encoded wkb into a shapely geometry
-    """
-    # it's already a shapely object
-    if hasattr(ewkb, 'geom_type'):
-        return ewkb
-
-    from shapely import wkb
-    from shapely import wkt
-    if ewkb:
-        try:
-            return wkb.loads(ba.unhexlify(ewkb))
-        except Exception:
-            try:
-                return wkb.loads(ba.unhexlify(ewkb), hex=True)
-            except Exception:
-                try:
-                    return wkb.loads(ewkb, hex=True)
-                except Exception:
-                    try:
-                        return wkb.loads(ewkb)
-                    except Exception:
-                        try:
-                            return wkt.loads(ewkb)
-                        except Exception:
-                            pass
-    return None

@@ -10,9 +10,10 @@ import warnings
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.dataset import Dataset, _decode_geom
+from cartoframes.dataset import Dataset
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
+from cartoframes.data.utils import decode_geometry
 
 from utils import _UserUrlLoader
 
@@ -477,12 +478,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset.schema, username)
 
-    def test_decode_geom(self):
+    def test_decode_geometry(self):
         # Point (0, 0) without SRID
         ewkb = '010100000000000000000000000000000000000000'
-        decoded_geom = _decode_geom(ewkb)
+        decoded_geom = decode_geometry(ewkb)
         self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
-        self.assertIsNone(_decode_geom(None))
+        self.assertIsNone(decode_geometry(None))
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)
