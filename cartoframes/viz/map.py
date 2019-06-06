@@ -168,6 +168,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
+        self._kuviz = None
         self._htmlMap = HTMLMap()
 
         self._htmlMap.set_content(
@@ -204,11 +205,22 @@ class Map(object):
             _airship_path=self._airship_path,
             title=name)
 
-        return self._publisher.publish(html_map.html, name, password)
+        self._kuviz = self._publisher.publish(html_map.html, name, password)
+        print("""
+        Map visualization published:
+        id:  {id}
+        url: {url}
+         """.format(id=self._kuviz.id, url=self._kuviz.url))
 
     def sync_data(self, table_name, context=None):
         if not self._publisher.is_sync():
             self._publisher.sync_layers(table_name, context)
+
+    def delete_publication(self):
+        if self._kuviz:
+            self._kuviz.delete()
+            self._kuviz = None
+            print("Publication deleted")
 
     def _get_publisher(self):
         return KuvizPublisher(self)
