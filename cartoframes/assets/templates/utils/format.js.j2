@@ -1,0 +1,35 @@
+
+function format(value) {
+  if (Array.isArray(value)) {
+    const [first, second] = value;
+    if (first === -Infinity) {
+      return `< ${formatValue(second)}`;
+    }
+    if (second === Infinity) {
+      return `> ${formatValue(first)}`;
+    }
+    return `${formatValue(first)} - ${formatValue(second)}`
+  }
+  return formatValue(value);
+}
+
+function formatValue(value) {
+  if (typeof value === 'number') {
+    return formatNumber(value);
+  }
+  return value;
+}
+
+function formatNumber(value) {
+  const digits = 2;
+  if (Math.abs(value) > 10000) {
+    return value.toExponential(digits);
+  } else if (!Number.isInteger(value)) {
+    return value.toLocaleString(undefined, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    });
+  } else {
+    return value.toLocaleString();
+  }
+}

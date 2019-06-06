@@ -51,16 +51,16 @@ Linux:
 4. Create virtualenv
 
 .. code::
-  
+
   python3 -m virtualenv <your env name>
 
-or 
+or
 
 .. code::
 
   pipenv --three
 
-5. Install jupyter 
+5. Install jupyter
 
 .. code::
 
@@ -97,7 +97,7 @@ We're going to clone the repository. We can do it in the jupyter-cartoframes dir
   cd carto-vl
 
 
-The local installation of CARTO VL is explained `in this guide <https://github.com/CartoDB/carto-vl/blob/master/DEVELOPERS.md/>`__ 
+The local installation of CARTO VL is explained `in this guide <https://github.com/CartoDB/carto-vl/blob/master/DEVELOPERS.md/>`__
 
 Airship
 ^^^^^^^^
@@ -111,7 +111,7 @@ Let's clone the Airship repository as well.
   cd airship
 
 
-The local installation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__ 
+The local installation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__
 
 Run all the projects
 ^^^^^^^^^^^^^^^^^^^^
@@ -157,8 +157,8 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
 
   Map(
       Layer('dataset_name'),
-      _carto_vl_path='http://localhost:8080/dist/carto-vl.js',
-      _airship_path='http://localhost:5050'
+      _carto_vl_path='http://localhost:8080',
+      _airship_path='http://localhost:5000'
   )
 
 We've a lot of public datasets in both `cartoframes` and `cartovl` accounts that we use for the examples, but I've you've a personal CARTO account you can use your credentials.

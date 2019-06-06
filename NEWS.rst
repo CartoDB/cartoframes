@@ -4,11 +4,10 @@ Changelog
 0.10.0
 ------
 
-Release 2019-xx-xx
+Release 2019-06-03
 
 Updates
 
-- max line length from 80 to 120
 - Rewrite context.read method using COPY TO (#570)
 - Add new visualization API (#662)
   - Add Source class (with param detection)
@@ -21,9 +20,8 @@ Updates
   - Use sources' context (credentials, bounds)
   - Fix Style class API for variables
   - Remove Dataset, SQL, GeoJSON sources
-  - Remove sources namespace
+  - Remove sources, contrib namespaces
   - Remove context from Map
-  - Remove contrib namespace
   - Update docs in viz classes
   - Add/Update viz tests
   - Pass PEP 8
@@ -34,9 +32,15 @@ Updates
 - Add namespaces (#683)
   - cartoframes.viz: Map, Layer, Source, Style, Popup, basemaps, helpers
   - cartoframes.auth: Context, set_default_context
-- Add color helpers (#692)
+- Add color helpers (#692, #651)
   - color_category
   - color_bins
+  - color_continuous
+- Add center/zoom information (#691)
+- Add Legend API (#693)
+  - type, prop, title, description, footer
+- Update dependencies (#722)
+- Integrate size legends (#721)
 
 0.9.2
 -----

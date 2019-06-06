@@ -4,6 +4,7 @@ from .source import Source
 from .style import Style
 from .popup import Popup
 from cartoframes.datasets import Dataset
+from .legend import Legend
 
 
 class Layer(object):
@@ -20,6 +21,10 @@ class Layer(object):
           The columns to be shown must be added in a list format for each event. It
           must be written using `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
+        legend (dict, :py:class:`Legend <cartoframes.viz.Legend>`, optional):
+          The legend definition for a layer. It contains the information
+          to show a legend "type" (color-category, color-bins, color-continuous),
+          "prop" (color) and also text information: "title", "description" and "footer".
         context (:py:class:`Context <cartoframes.Context>`):
           A Context instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
@@ -39,11 +44,16 @@ class Layer(object):
             )
 
             Layer(
-                'SELECT * FROM populated_places WHERE adm0name = "Spain"',
-                'color: "red"',
+                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
+                'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
                 popup={
-                    'hover': ['$name'],
+                    'hover': '$name',
                     'click': ['$name', '$pop_max', '$pop_min']
+                },
+                legend={
+                    'type': 'color-category',
+                    'prop': 'color',
+                    'title': 'Population'
                 }
             )
 
@@ -60,7 +70,7 @@ class Layer(object):
             )
 
             Layer(
-                'SELECT * FROM populated_places WHERE adm0name = "Spain"',
+                'populated_places',
                 'color: "red"',
                 context=context
             )
@@ -78,7 +88,7 @@ class Layer(object):
         self.source = _set_source(source, context)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
-        self.legend = legend
+        self.legend = _set_legend(legend)
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
@@ -87,6 +97,9 @@ class Layer(object):
             self.popup.get_variables()
         )
         self.interactivity = self.popup.get_interactivity()
+        self.legend_info = self.legend.get_info(
+            self.source.geom_type
+        )
 
 
 def _set_source(source, context):
@@ -117,3 +130,13 @@ def _set_popup(popup):
         return popup
     else:
         return Popup()
+
+
+def _set_legend(legend):
+    """Set a Legend class from the input"""
+    if isinstance(legend, dict):
+        return Legend(legend)
+    elif isinstance(legend, Legend):
+        return legend
+    else:
+        return Legend()
