@@ -48,7 +48,8 @@ def compute_geodataframe(dataset):
                 df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
             else:
                 raise ValueError('''No geographic data found. '''
-                                 '''If a geometry exists, change the column name ({0}) or ensure it is a DataFrame with a valid geometry. '''
+                                 '''If a geometry exists, change the column name ({0}) or '''
+                                 '''ensure it is a DataFrame with a valid geometry. '''
                                  '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
                                      ', '.join(GEOM_COLUMN_NAMES),
                                      ', '.join(LAT_COLUMN_NAMES),
