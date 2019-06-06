@@ -83,7 +83,7 @@ class Source(object):
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
-            from cartoframes import Dataset
+            from cartoframes.datasets import Dataset
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
