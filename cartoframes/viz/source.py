@@ -205,7 +205,7 @@ def _check_geojson_file(data):
 
 
 def _get_context(dataset):
-    return dataset._cc
+    return dataset.context
 
 
 def _get_credentials(dataset):

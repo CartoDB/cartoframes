@@ -9,6 +9,12 @@ class CredsMock():
     def username(self):
         return self._username
 
+    def key(self):
+        return self._key
+
+    def base_url(self):
+        return self._username
+
 
 class ContextMock():
     def __init__(self, username, api_key):
@@ -17,3 +23,6 @@ class ContextMock():
 
     def get_default_schema(self):
         self.creds.username() or 'public'
+
+    def _get_bounds(self, layers):
+        return {'west': None, 'south': None, 'east': None, 'north': None}
