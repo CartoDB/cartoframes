@@ -403,18 +403,58 @@ def get_geodataframe(dataset):
 
 def _compute_geodataframe(dataset):
     if dataset.df is not None:
-        from shapely import wkb, geometry
         df = dataset.df.copy()
-        if 'geometry' not in df:
-            if 'the_geom' in df:
-                df['geometry'] = df['the_geom'].apply(wkb.loads, hex=True)
-            elif 'longitude' in df and 'latitude' in df:
-                df['geometry'] = [geometry.Point(xy) for xy in zip(df.longitude, df.latitude)]
-            elif 'lng' in df and 'lat' in df:
-                df['geometry'] = [geometry.Point(xy) for xy in zip(df.lng, df.lat)]
+        geom_column = _get_geom_column(df)
+        if geom_column is not None:
+            df['geometry'] = _compute_geometry_from_geom(geom_column)
+        else:
+            lat_column = _get_lat_column(df)
+            lng_column = _get_lng_column(df)
+            if lat_column is not None and lng_column is not None:
+                df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
             else:
                 raise ValueError('DataFrame has no geographic data.')
         return geopandas.GeoDataFrame(df)
+
+
+def _get_geom_column(df):
+    if 'geometry' in df:
+        return df['geometry']
+    if 'the_geom' in df:
+        return df['the_geom']
+    if 'wkb_geometry' in df:
+        return df['wkb_geometry']
+    if 'geom' in df:
+        return df['geom']
+    if 'geojson' in df:
+        return df['geojson']
+    if 'wkt' in df:
+        return df['wkt']
+
+
+def _get_lat_column(df):
+    if 'latitude' in df:
+        return df['latitude']
+    if 'lat' in df:
+        return df['lat']
+
+
+def _get_lng_column(df):
+    if 'longitude' in df:
+        return df['longitude']
+    if 'lng' in df:
+        return df['lng']
+    if 'long' in df:
+        return df['long']
+
+
+def _compute_geometry_from_geom(geom):
+    return geom.apply(_decode_geom)
+
+
+def _compute_geometry_from_latlng(lat, lng):
+    from shapely import geometry
+    return [geometry.Point(xy) for xy in zip(lng, lat)]
 
 
 def _save_index_as_column(df):
