@@ -152,11 +152,11 @@ class Source(object):
         elif isinstance(data, (list, dict)):
             self._init_source_geojson(data, bounds)
 
-        elif isinstance(data, pandas.DataFrame):
-            self._init_source_dataframe(data, bounds)
-
         elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
             self._init_source_geodataframe(data, bounds)
+
+        elif isinstance(data, pandas.DataFrame):
+            self._init_source_dataframe(data, bounds)
 
         elif isinstance(data, Dataset):
             self._init_source_dataset(data, bounds)
@@ -176,12 +176,12 @@ class Source(object):
         self.dataset = Dataset.from_geojson(data)
         self._set_source_geojson(self.dataset, bounds)
 
-    def _init_source_dataframe(self, data, bounds):
-        self.dataset = Dataset.from_dataframe(data)
-        self._set_source_geojson(self.dataset, bounds)
-
     def _init_source_geodataframe(self, data, bounds):
         self.dataset = Dataset.from_geodataframe(data)
+        self._set_source_geojson(self.dataset, bounds)
+
+    def _init_source_dataframe(self, data, bounds):
+        self.dataset = Dataset.from_dataframe(data)
         self._set_source_geojson(self.dataset, bounds)
 
     def _init_source_dataset(self, data, bounds):
