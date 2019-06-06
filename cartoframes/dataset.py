@@ -382,7 +382,10 @@ def get_columns(context, query):
 
 def get_query(dataset):
     if isinstance(dataset, Dataset):
-        return dataset.query or _compute_query(dataset)
+        if dataset.query is None:
+            return _compute_query(dataset)
+        else:
+            return dataset.query
 
 
 def _compute_query(dataset):
@@ -392,16 +395,26 @@ def _compute_query(dataset):
 
 def get_geodataframe(dataset):
     if isinstance(dataset, Dataset):
-        return dataset.gdf or _compute_geodataframe(dataset)
+        if dataset.gdf is None:
+            return _compute_geodataframe(dataset)
+        else:
+            return dataset.gdf
 
 
 def _compute_geodataframe(dataset):
     if dataset.df is not None:
-        from shapely import wkb
+        from shapely import wkb, geometry
         df = dataset.df.copy()
-        # TODO: add more geom generation cases
-        geometry = df['the_geom'].apply(wkb.loads, hex=True)
-        return geopandas.GeoDataFrame(df, geometry=geometry)
+        if 'geometry' not in df:
+            if 'the_geom' in df:
+                df['geometry'] = df['the_geom'].apply(wkb.loads, hex=True)
+            elif 'longitude' in df and 'latitude' in df:
+                df['geometry'] = [geometry.Point(xy) for xy in zip(df.longitude, df.latitude)]
+            elif 'lng' in df and 'lat' in df:
+                df['geometry'] = [geometry.Point(xy) for xy in zip(df.lng, df.lat)]
+            else:
+                raise ValueError('DataFrame has no geographic data.')
+        return geopandas.GeoDataFrame(df)
 
 
 def _save_index_as_column(df):
