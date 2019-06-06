@@ -13,7 +13,6 @@ from .legend import Legend
 __all__ = [
     'basemaps',
     'Map',
-    'HTMLMap',
     'Layer',
     'Source',
     'Style',
