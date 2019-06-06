@@ -319,7 +319,7 @@ class Dataset(object):
         if self.state == Dataset.STATE_REMOTE:
             return self._get_remote_geom_type(get_query(self))
         elif self.state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(self.gdf)
+            return self._get_local_geom_type(get_geodataframe(self))
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -337,7 +337,7 @@ class Dataset(object):
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
         if len(gdf.geometry) > 0:
-            geom_type = gdf.geometry[0].type
+            geom_type = gdf.geometry.iloc[0].geom_type
             if geom_type:
                 return self._map_geom_type(geom_type)
 
@@ -396,12 +396,12 @@ def get_geodataframe(dataset):
 
 
 def _compute_geodataframe(dataset):
-    if dataset.df:
+    if dataset.df is not None:
         from shapely import wkb
         df = dataset.df.copy()
         # TODO: add more geom generation cases
-        df['geometry'] = df['the_geom'].apply(wkb.loads, hex=True)
-        return geopandas.GeoDataFrame(df)
+        geometry = df['the_geom'].apply(wkb.loads, hex=True)
+        return geopandas.GeoDataFrame(df, geometry=geometry)
 
 
 def _save_index_as_column(df):
