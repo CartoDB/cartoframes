@@ -9,6 +9,8 @@ from . import defaults
 from .basemaps import Basemaps
 from .source import SourceType
 from .. import utils
+from carto.exceptions import CartoException
+from .kuviz import KuvizPublisher
 
 # TODO: refactor
 
@@ -166,6 +168,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', defaults.CARTO_VL_PATH)
         self._airship_path = kwargs.get('_airship_path', None)
         self._htmlMap = HTMLMap()
+        self._publisher = self._get_publisher()
 
         if default_legend is None and all(layer.legend is None for layer in self.layers):
             self.default_legend = False
@@ -188,8 +191,34 @@ class Map(object):
     def _repr_html_(self):
         return self._htmlMap.html
 
-    def publish(self):
-        pass
+    def publish(self, name, maps_api_key='default_public', context=None, password=None):
+        if not self._publisher.is_sync():
+            raise CartoException('The map layers are not synchronized with CARTO. '
+                                 'Please, use the `sync_data` method before publishing the map')
+
+        self._publisher.set_context(context)
+
+        html_map = HTMLMap('viz/main.html.j2')
+        html_map.set_content(
+            size=None,
+            sources=_get_map_layers(self._publisher.get_layers(maps_api_key)),
+            bounds=self.bounds,
+            viewport=None,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=self.show_info,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path,
+            title=name)
+
+        return self._publisher.publish(html_map.html, name, password)
+
+    def sync_data(self, table_name, context=None):
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, context)
+
+    def _get_publisher(self):
+        return KuvizPublisher(self)
 
 
 def _get_bounds(bounds, layers):
@@ -384,7 +413,7 @@ def _conv2nan(val):
 
 
 class HTMLMap(object):
-    def __init__(self):
+    def __init__(self, template_path='viz/basic.html.j2'):
         self.width = None
         self.height = None
         self.srcdoc = None
@@ -399,21 +428,21 @@ class HTMLMap(object):
         self._env.filters['clear_none'] = _clear_none_filter
 
         self.html = None
-        self._template = self._env.get_template('viz/basic.html.j2')
+        self._template = self._env.get_template(template_path)
 
     def set_content(
         self, size, sources, bounds, viewport=None, basemap=None,
             default_legend=None, show_info=None,
-            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
+            _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None, title=None):
 
         self.html = self._parse_html_content(
             size, sources, bounds, viewport, basemap, default_legend, show_info,
-            _carto_vl_path, _airship_path)
+            _carto_vl_path, _airship_path, title)
 
     def _parse_html_content(
         self, size, sources, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None):
-
+            show_info=None, _carto_vl_path=defaults.CARTO_VL_PATH, _airship_path=None,
+            title='CARTO VL + CARTOframes'):
         token = ''
         basecolor = ''
 
@@ -475,7 +504,8 @@ class HTMLMap(object):
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,
-            airship_icons_path=airship_icons_path
+            airship_icons_path=airship_icons_path,
+            title=title
         )
 
     def _repr_html_(self):
