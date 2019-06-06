@@ -422,14 +422,16 @@ def _get_geom_column(df):
         return df['geometry']
     if 'the_geom' in df:
         return df['the_geom']
+    if 'wkt_geometry' in df:
+        return df['wkt_geometry']
     if 'wkb_geometry' in df:
         return df['wkb_geometry']
     if 'geom' in df:
         return df['geom']
-    if 'geojson' in df:
-        return df['geojson']
     if 'wkt' in df:
         return df['wkt']
+    if 'wkb' in df:
+        return df['wkb']
 
 
 def _get_lat_column(df):
@@ -444,6 +446,8 @@ def _get_lng_column(df):
         return df['longitude']
     if 'lng' in df:
         return df['lng']
+    if 'lon' in df:
+        return df['lon']
     if 'long' in df:
         return df['long']
 
