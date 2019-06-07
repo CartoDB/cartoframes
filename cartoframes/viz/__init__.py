@@ -6,7 +6,7 @@ from .layer import Layer
 from .source import Source
 from .style import Style
 from .popup import Popup
-from .kuviz import Kuviz, KuvizPublisher
+from .kuviz import KuvizPublisher
 from .legend import Legend
 
 
@@ -17,7 +17,6 @@ __all__ = [
     'Source',
     'Style',
     'Popup',
-    'Kuviz',
     'KuvizPublisher',
     'Legend'
 ]
