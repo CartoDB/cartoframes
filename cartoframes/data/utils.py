@@ -45,7 +45,7 @@ def compute_query(dataset):
 
 def compute_geodataframe(dataset):
     if HAS_GEOPANDAS and dataset.dataframe is not None:
-        df = dataset.dataframe.copy()
+        df = dataset.dataframe
         geom_column = _get_column(df, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             df['geometry'] = _compute_geometry_from_geom(geom_column)
