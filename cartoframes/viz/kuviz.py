@@ -1,7 +1,7 @@
 from copy import deepcopy
 from warnings import warn
 
-from carto.kuvizs import Kuviz, KuvizManager
+from carto.kuvizs import KuvizManager
 from carto.exceptions import CartoException
 
 from .source import Source
