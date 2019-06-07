@@ -25,7 +25,6 @@ def color_bins_layer(source, value, title='', bins=5, palette='purpor'):
         },
         legend={
             'type': 'color-bins',
-            'prop': 'color',
             'title': title or value,
             'description': ''
         }

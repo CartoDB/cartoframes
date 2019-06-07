@@ -25,7 +25,6 @@ def color_category_layer(source, value, title='', top=11, palette='bold'):
         },
         legend={
             'type': 'color-category',
-            'prop': 'color',
             'title': title or value,
             'description': ''
         }
