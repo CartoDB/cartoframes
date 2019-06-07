@@ -4,5 +4,8 @@ from .dataset import Dataset, get_query, get_geodataframe
 from .dataset_info import DatasetInfo
 
 __all__ = [
-    'Dataset'
+    'Dataset',
+    'DatasetInfo',
+    'get_query',
+    'get_geodataframe'
 ]
