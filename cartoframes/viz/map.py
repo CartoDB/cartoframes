@@ -191,7 +191,34 @@ class Map(object):
                                  'Please, use the `sync_data` method before publishing the map')
 
         self._publisher.set_context(context)
+        html = self._get_publication_html(name, maps_api_key)
+        self._kuviz = self._publisher.publish(html, name, password)
+        self._show_kuviz_info()
 
+    def sync_data(self, table_name, context=None):
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, context)
+
+    def delete_publication(self):
+        if self._kuviz:
+            self._kuviz.delete()
+            self._kuviz = None
+            print("Publication deleted")
+
+    def update_publication(self, name, maps_api_key='default_public', context=None, password=None):
+        if not self._kuviz:
+            raise CartoException('The map has not been published. Use the `publish` method.')
+
+        if not self._publisher.is_sync():
+            raise CartoException('The map layers are not synchronized with CARTO. '
+                                 'Please, use the `sync_data` method before publishing the map')
+
+        self._publisher.set_context(context)
+        html = self._get_publication_html(name, maps_api_key)
+        self._kuviz.update(html, name, password)
+        self._show_kuviz_info()
+
+    def _get_publication_html(self, name, maps_api_key):
         html_map = HTMLMap('viz/main.html.j2')
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
@@ -205,25 +232,19 @@ class Map(object):
             _airship_path=self._airship_path,
             title=name)
 
-        self._kuviz = self._publisher.publish(html_map.html, name, password)
-        print("""
-        Map visualization published:
-        id:  {id}
-        url: {url}
-         """.format(id=self._kuviz.id, url=self._kuviz.url))
-
-    def sync_data(self, table_name, context=None):
-        if not self._publisher.is_sync():
-            self._publisher.sync_layers(table_name, context)
-
-    def delete_publication(self):
-        if self._kuviz:
-            self._kuviz.delete()
-            self._kuviz = None
-            print("Publication deleted")
+        return html_map.html
 
     def _get_publisher(self):
         return KuvizPublisher(self)
+
+    def _show_kuviz_info(self):
+        print("""
+        Map visualization:
+        id:  {id}
+        url: {url}
+        name:  {name}
+        privacy: {privacy}
+         """.format(id=self._kuviz.id, url=self._kuviz.url, name=self._kuviz.name, privacy=self._kuviz.privacy))
 
 
 def _get_bounds(bounds, layers):
