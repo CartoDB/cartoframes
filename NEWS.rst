@@ -1,14 +1,15 @@
 Changelog
 =========
 
-0.10.1
+0.11.0
 ------
 
 Release 2019-mm-dd
 
 Updates
 - Sharing visualizations: structure and publication
-
+- Add namespaces cartoframes.data for Dataset class
+- Add support for DataFrames visualization (#735)
 
 0.10.0
 ------
