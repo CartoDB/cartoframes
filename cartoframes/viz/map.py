@@ -205,7 +205,7 @@ class Map(object):
             self._kuviz = None
             print("Publication deleted")
 
-    def update_publication(self, name, maps_api_key='default_public', context=None, password=None):
+    def update_publication(self, name, password, maps_api_key='default_public', context=None):
         if not self._kuviz:
             raise CartoException('The map has not been published. Use the `publish` method.')
 

@@ -230,7 +230,7 @@ class TestMapPublication(unittest.TestCase):
         name = 'cf_publish'
         map.publish(name, context=self.context)
         new_name = 'cf_update'
-        kuviz = map.update_publication(new_name)
+        kuviz = map.update_publication(new_name, password=None)
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, new_name)
