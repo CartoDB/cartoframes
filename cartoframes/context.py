@@ -31,7 +31,7 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .dataset import Dataset, recursive_read, get_columns
+from .datasets import Dataset, recursive_read, get_columns
 from .data.utils import decode_geometry
 
 if sys.version_info >= (3, 0):
@@ -348,7 +348,7 @@ class CartoContext(object):
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset = dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
+        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),

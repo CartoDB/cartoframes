@@ -1,6 +1,13 @@
 import unittest
-from .utils import build_geojson
+
+from carto.exceptions import CartoException
+
 from cartoframes.viz import Map, Layer, Source, constants
+from .utils import build_geojson
+from mocks.map_mock import MapMock
+from mocks.context_mock import ContextMock
+from mocks.dataset_mock import DatasetMock
+from mocks.kuviz_mock import KuvizMock
 
 
 class TestMap(unittest.TestCase):
@@ -19,6 +26,26 @@ class TestMapInitialization(unittest.TestCase):
         """Map should return a valid template"""
         map = Map()
         self.assertIsNotNone(map._htmlMap)
+
+    def test_bounds(self):
+        """Map should set the bounds"""
+        map = Map(bounds={
+            'west': -10,
+            'east': 10,
+            'north': -10,
+            'south': 10
+        })
+        self.assertEqual(map.bounds, '[[-10, 10], [10, -10]]')
+
+    def test_bounds_clamp(self):
+        """Map should set the bounds clamped"""
+        map = Map(bounds={
+            'west': -1000,
+            'east': 1000,
+            'north': -1000,
+            'south': 1000
+        })
+        self.assertEqual(map.bounds, '[[-180, 90], [180, -90]]')
 
 
 class TestMapLayer(unittest.TestCase):
@@ -130,3 +157,48 @@ class TestMapDevelopmentPath(unittest.TestCase):
         self.assertTrue(_airship_path + constants.AIRSHIP_BRIDGE_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_STYLES_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_ICONS_DEV in template)
+
+
+class TestMapPublication(unittest.TestCase):
+    def setUp(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.context = ContextMock(username=self.username, api_key=self.api_key)
+
+        self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
+
+    def test_map_publish_remote(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        kuviz = map.publish(name, context=self.context)
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, name)
+        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+
+    def test_map_publish_unsync_fails(self):
+        query = "SELECT 1"
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset._is_saved_in_carto = False
+        map = MapMock(Layer(Source(dataset)))
+
+        msg = 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
+        with self.assertRaises(CartoException, msg=msg):
+            map.publish('test', context=self.context)
+
+    def test_map_publish_unsync_sync_data_and_publish(self):
+        query = "SELECT 1"
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset._is_saved_in_carto = False
+        map = MapMock(Layer(Source(dataset)))
+
+        map.sync_data(table_name='fake_table', context=self.context)
+
+        name = 'cf_publish'
+        kuviz = map.publish(name, context=self.context)
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, name)
+        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)

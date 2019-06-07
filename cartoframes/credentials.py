@@ -87,6 +87,9 @@ class Credentials(object):
                                                key=self._key,
                                                base_url=self._base_url)
 
+    def __eq__(self, obj):
+        return self._key == obj._key and self._username == obj._username and self._base_url == obj._base_url
+
     def _norm_creds(self):
         """Standardize credentials"""
         if self._base_url:

@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.10.1
+------
+
+Release 2019-mm-dd
+
+Updates
+- Sharing visualizations: structure and publication
+
+
 0.10.0
 ------
 

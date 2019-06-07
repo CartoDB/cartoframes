@@ -31,8 +31,8 @@ LNG_COLUMN_NAMES = [
 
 
 def compute_query(dataset):
-    if dataset.table_name and dataset.schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
+    if dataset._table_name and dataset._schema:
+        return 'SELECT * FROM "{0}"."{1}"'.format(dataset._schema, dataset._table_name)
 
 
 def compute_geodataframe(dataset):

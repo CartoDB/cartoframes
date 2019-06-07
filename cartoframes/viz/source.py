@@ -4,8 +4,8 @@ import re
 import pandas
 
 from . import defaults
-from ..dataset import Dataset, get_query, get_geodataframe
 from ..geojson import get_encoded_data, get_bounds
+from cartoframes.datasets import Dataset, get_query, get_geodataframe
 
 try:
     import geopandas
@@ -84,7 +84,7 @@ class Source(object):
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
-            from cartoframes import Dataset
+            from cartoframes.datasets import Dataset
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
@@ -187,9 +187,9 @@ class Source(object):
     def _init_source_dataset(self, data, bounds):
         self.dataset = data
 
-        if self.dataset.state == Dataset.STATE_REMOTE:
+        if self.dataset._state == Dataset.STATE_REMOTE:
             self._set_source_query(self.dataset, bounds)
-        elif self.dataset.state == Dataset.STATE_LOCAL:
+        elif self.dataset._state == Dataset.STATE_LOCAL:
             self._set_source_geojson(self.dataset, bounds)
 
     def _set_source_query(self, dataset, bounds):
@@ -217,7 +217,7 @@ def _check_geojson_file(data):
 
 
 def _get_context(dataset):
-    return dataset.cc
+    return dataset.context
 
 
 def _get_credentials(dataset):
