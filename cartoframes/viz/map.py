@@ -193,7 +193,7 @@ class Map(object):
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz = self._publisher.publish(html, name, password)
-        self._show_kuviz_info()
+        return self._kuviz
 
     def sync_data(self, table_name, context=None):
         if not self._publisher.is_sync():
@@ -216,7 +216,11 @@ class Map(object):
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz.update(html, name, password)
-        self._show_kuviz_info()
+        return self._kuviz
+
+    @staticmethod
+    def all_publications(context=None):
+        return KuvizPublisher.all(context)
 
     def _get_publication_html(self, name, maps_api_key):
         html_map = HTMLMap('viz/main.html.j2')
@@ -236,15 +240,6 @@ class Map(object):
 
     def _get_publisher(self):
         return KuvizPublisher(self)
-
-    def _show_kuviz_info(self):
-        print("""
-        Map visualization:
-        id:  {id}
-        url: {url}
-        name:  {name}
-        privacy: {privacy}
-         """.format(id=self._kuviz.id, url=self._kuviz.url, name=self._kuviz.name, privacy=self._kuviz.privacy))
 
 
 def _get_bounds(bounds, layers):

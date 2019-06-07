@@ -16,6 +16,11 @@ class KuvizPublisher(object):
         self._layers = deepcopy(vmap.layers)
         self._context = context
 
+    @staticmethod
+    def all(context=None):
+        km = _get_kuviz_manager(context)
+        return km.all()
+
     def set_context(self, context=None):
         from cartoframes.auth import _default_context
         self._context = context or _default_context
@@ -58,10 +63,7 @@ class KuvizPublisher(object):
 
 
 def _create_carto_kuviz(html, name, context=None, password=None):
-    from cartoframes.auth import _default_context
-    context = context or _default_context
-
-    km = KuvizManager(context.auth_client)
+    km = _get_kuviz_manager(context)
     carto_kuviz = km.create(html=html, name=name, password=password)
 
     _validate_carto_kuviz(carto_kuviz)
@@ -79,3 +81,10 @@ def _validate_carto_kuviz(carto_kuviz):
         raise CartoException('Error creating Kuviz. Invalid privacy')
 
     return True
+
+
+def _get_kuviz_manager(context=None):
+    from cartoframes.auth import _default_context
+    context = context or _default_context
+
+    return KuvizManager(context.auth_client)
