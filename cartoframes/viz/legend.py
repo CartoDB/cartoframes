@@ -42,35 +42,28 @@ class Legend(object):
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
-
-                if self._type and not self._prop:
-                    self._prop = self._infer_prop()
-
-                if self._type and self._type not in constants.LEGEND_TYPES and not isinstance(self._type, dict):
-                    raise ValueError(
-                        'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
-                            self._type,
-                            ', '.join(constants.LEGEND_TYPES)
-                        ))
-
-                if self._prop and self._prop not in constants.LEGEND_PROPERTIES:
-                    raise ValueError(
-                        'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
-                            self._prop,
-                            ', '.join(constants.LEGEND_PROPERTIES)
-                        ))
-
             else:
-                raise ValueError('Wrong legend input')
+                raise ValueError('Wrong legend input.')
 
-    def get_info(self, geom_type):
-        if (self._type and self._prop) or self._title or self._description or self._footer:
+    def get_info(self, geom_type=None):
+        if self._type or self._title or self._description or self._footer:
             _type = self._type
+            _prop = self._prop
+
             if isinstance(_type, dict) and geom_type in _type:
                 _type = _type.get(geom_type)
+            self._check_type(_type)
+
+            if _type and not _prop:
+                _prop = self._infer_prop(_type)
+
+            self._check_prop(_prop)
+
+            print(_prop)
+
             return {
                 'type': _type,
-                'prop': self._prop,
+                'prop': _prop,
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer
@@ -78,8 +71,23 @@ class Legend(object):
         else:
             return {}
 
-    def _infer_prop(self):
-        if self._type.startswith('color'):
+    def _check_type(self, _type):
+        if _type and _type not in constants.LEGEND_TYPES:
+            raise ValueError(
+                'Legend type is not valid. Valid legend types are: {}.'.format(
+                    ', '.join(constants.LEGEND_TYPES)
+                ))
+
+    def _check_prop(self, _prop):
+        print(_prop)
+        if _prop and _prop not in constants.LEGEND_PROPERTIES:
+            raise ValueError(
+                'Legend property is not valid. Valid legend properties are: {}.'.format(
+                    ', '.join(constants.LEGEND_PROPERTIES)
+                ))
+
+    def _infer_prop(self, _type):
+        if _type.startswith('color'):
             return 'color'
-        elif self._type.startswith('size'):
+        elif _type.startswith('size'):
             return 'width'
