@@ -5,8 +5,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, \
-    DEFAULT_RETRY_TIMES
+from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -92,6 +91,14 @@ class Dataset(object):
     @property
     def table_name(self):
         return self._table_name
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def query(self):
+        return self._query
 
     @property
     def context(self):
@@ -413,18 +420,18 @@ class Dataset(object):
 
 def get_query(dataset):
     if isinstance(dataset, Dataset):
-        if dataset._query is None:
+        if dataset.query is None:
             return compute_query(dataset)
         else:
-            return dataset._query
+            return dataset.query
 
 
 def get_geodataframe(dataset):
     if isinstance(dataset, Dataset):
-        if dataset._gdf is None:
+        if dataset.geodataframe is None:
             return compute_geodataframe(dataset)
         else:
-            return dataset._gdf
+            return dataset.geodataframe
 
 
 def _save_index_as_column(df):

@@ -39,13 +39,13 @@ LNG_COLUMN_NAMES = [
 
 
 def compute_query(dataset):
-    if dataset._table_name and dataset._schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset._schema, dataset._table_name)
+    if dataset.table_name and dataset.schema:
+        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
 
 
 def compute_geodataframe(dataset):
-    if dataset._df is not None:
-        df = dataset._df.copy()
+    if HAS_GEOPANDAS and dataset.dataframe is not None:
+        df = dataset.dataframe.copy()
         geom_column = _get_column(df, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             df['geometry'] = _compute_geometry_from_geom(geom_column)
