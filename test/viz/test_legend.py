@@ -1,4 +1,5 @@
 import unittest
+
 from cartoframes.viz import Legend
 
 
@@ -59,7 +60,7 @@ class TestLegend(unittest.TestCase):
     def test_wrong_input(self):
         """Legend should raise an error if legend input is not valid"""
         msg = 'Wrong legend input.'
-        with self.assertRaisesRegex(ValueError, msg):
+        with self.assertRaisesRegexp(ValueError, msg):
             Legend(1234)
 
     def test_wrong_type(self):
@@ -70,12 +71,12 @@ class TestLegend(unittest.TestCase):
         'color-continuous, color-continuous-line, color-continuous-point, '
         'color-continuous-polygon, size-bins, size-bins-point, size-continuous, '
         'size-continuous-point.'
-        with self.assertRaisesRegex(ValueError, msg):
+        with self.assertRaisesRegexp(ValueError, msg):
             Legend({'type': 'xxx'}).get_info()
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
         msg = 'Legend property is not valid. Valid legend properties are: '
         'color, strokeColor, width, strokeWidth.'
-        with self.assertRaisesRegex(ValueError, msg):
+        with self.assertRaisesRegexp(ValueError, msg):
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
