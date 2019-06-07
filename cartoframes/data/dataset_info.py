@@ -4,6 +4,7 @@ from warnings import warn
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
+from .utils import setting_value_exception
 from ..columns import normalize_name
 
 
@@ -88,8 +89,3 @@ class DatasetInfo(object):
             return True
 
         return False
-
-
-def setting_value_exception(prop, value):
-    return CartoException(("Error setting {prop}. You must use the `update` method: "
-                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))

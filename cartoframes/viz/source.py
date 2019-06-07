@@ -5,7 +5,7 @@ import pandas
 
 from . import defaults
 from ..geojson import get_encoded_data, get_bounds
-from cartoframes.datasets import Dataset, get_query, get_geodataframe
+from ..data import Dataset, get_query, get_geodataframe
 
 try:
     import geopandas
@@ -84,7 +84,7 @@ class Source(object):
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
-            from cartoframes.datasets import Dataset
+            from cartoframes.data import Dataset
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',

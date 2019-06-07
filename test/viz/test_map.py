@@ -3,11 +3,12 @@ import unittest
 from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source, constants
-from .utils import build_geojson
 from mocks.map_mock import MapMock
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
 from mocks.kuviz_mock import KuvizMock
+
+from .utils import build_geojson
 
 
 class TestMap(unittest.TestCase):

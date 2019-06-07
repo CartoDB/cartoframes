@@ -20,7 +20,7 @@ class Kuviz(object):
 
     @classmethod
     def create(cls, html, name, context=None, password=None):
-        from cartoframes.auth import _default_context
+        from ..auth import _default_context
         carto_kuviz = _create_carto_kuviz(context=context or _default_context, html=html, name=name, password=password)
         _validate_carto_kuviz(carto_kuviz)
         return cls(carto_kuviz.id, carto_kuviz.url, carto_kuviz.name, carto_kuviz.privacy)
@@ -61,7 +61,7 @@ class KuvizPublisher(object):
         self._context = context
 
     def set_context(self, context=None):
-        from cartoframes.auth import _default_context
+        from ..auth import _default_context
         self._context = context or _default_context
 
     def publish(self, html, name, password=None):
@@ -86,7 +86,7 @@ class KuvizPublisher(object):
         for idx, layer in enumerate(self._layers):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
-            from cartoframes.auth import _default_context
+            from ..auth import _default_context
             dataset_context = context or layer.source.dataset.context or _default_context
 
             self._sync_layer(layer, table_name, dataset_context)

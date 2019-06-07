@@ -6,13 +6,13 @@ import os
 import sys
 import json
 import warnings
-import pandas as pd
+# import pandas as pd
 
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.datasets import Dataset, setting_value_exception
-from cartoframes.data.utils import decode_geometry
+from cartoframes.data import Dataset
+from cartoframes.data.utils import decode_geometry, setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
@@ -550,7 +550,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
         wrong_privacy = 'wrong_privacy'
         error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-                        p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+            p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info(privacy=wrong_privacy)
 

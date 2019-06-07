@@ -1,15 +1,15 @@
-import time
 import pandas as pd
 
 from tqdm import tqdm
 from warnings import warn
 
-from carto.exceptions import CartoException, CartoRateLimitException
+from carto.exceptions import CartoException
 
+from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, \
+    DEFAULT_RETRY_TIMES
+from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
-from ..data.utils import decode_geometry, compute_query, compute_geodataframe
-from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -31,12 +31,10 @@ class Dataset(object):
     GEOM_TYPE_LINE = 'line'
     GEOM_TYPE_POLYGON = 'polygon'
 
-    DEFAULT_RETRY_TIMES = 3
-
     def __init__(self, table_name=None, schema=None,
                  query=None, df=None, gdf=None,
                  state=None, is_saved_in_carto=False, context=None):
-        from cartoframes.auth import _default_context
+        from ..auth import _default_context
         self._cc = context or _default_context
 
         self._table_name = normalize_name(table_name)
@@ -144,7 +142,7 @@ class Dataset(object):
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
                                               'if_exists="replace" to overwrite it'.format(
-                                                    t=self._table_name, s=self._schema))
+                                                  t=self._table_name, s=self._schema))
 
         # priority order: gdf, df, query
         if self._gdf is not None:
@@ -280,7 +278,7 @@ class Dataset(object):
 
     def _create_table_from_query(self):
         self._cc.batch_sql_client.create_and_wait_for_completion(
-                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+            '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
                         create=self._get_query_to_create_table_from_query(),
                         cartodbfy=self._cartodbfy_query()))
@@ -413,31 +411,9 @@ class Dataset(object):
             return 'public'
 
 
-def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
-    try:
-        return context.copy_client.copyto_stream(query)
-    except CartoRateLimitException as err:
-        if retry_times > 0:
-            retry_times -= 1
-            warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-            time.sleep(err.retry_after)
-            warn('Retrying...')
-            return recursive_read(context, query, retry_times=retry_times)
-        else:
-            warn(('Read call was rate-limited. '
-                  'This usually happens when there are multiple queries being read at the same time.'))
-            raise err
-
-
-def get_columns(context, query):
-    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
-    table_info = context.sql_client.send(col_query)
-    return Column.from_sql_api_fields(table_info['fields'])
-
-
 def get_query(dataset):
     if isinstance(dataset, Dataset):
-        if dataset.query is None:
+        if dataset._query is None:
             return compute_query(dataset)
         else:
             return dataset._query
@@ -445,7 +421,7 @@ def get_query(dataset):
 
 def get_geodataframe(dataset):
     if isinstance(dataset, Dataset):
-        if dataset.gdf is None:
+        if dataset._gdf is None:
             return compute_geodataframe(dataset)
         else:
             return dataset._gdf

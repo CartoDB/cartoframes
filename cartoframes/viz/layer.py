@@ -5,8 +5,8 @@ import pandas
 from .source import Source
 from .style import Style
 from .popup import Popup
-from cartoframes.datasets import Dataset
 from .legend import Legend
+from ..data import Dataset
 
 try:
     import geopandas
@@ -19,7 +19,7 @@ class Layer(object):
     """Layer
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.datasets.Dataset>`,
+        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`,
           :py:class:`Source <cartoframes.vis.Source>`): The source data.
         style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
           optional): The style of the visualization: `CARTO VL styling

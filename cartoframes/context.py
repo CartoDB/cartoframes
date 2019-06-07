@@ -31,8 +31,8 @@ from .maps import (non_basemap_layers, get_map_name,
 from .analysis import Table
 from .__version__ import __version__
 from .columns import dtypes, date_columns_names
-from .datasets import Dataset, recursive_read, get_columns
-from .data.utils import decode_geometry
+from .data import Dataset
+from .data.utils import decode_geometry, recursive_read, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -334,7 +334,7 @@ class CartoContext(object):
                   similar arguments.
 
         Returns:
-            :py:class:`Dataset <cartoframes.datasets.Dataset>`
+            :py:class:`Dataset <cartoframes.data.Dataset>`
 
         .. note::
             DataFrame indexes are changed to ordinary columns. CARTO creates
