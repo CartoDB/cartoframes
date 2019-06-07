@@ -6,13 +6,16 @@ import os
 import sys
 import json
 import warnings
+import pandas as pd
 
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.dataset import Dataset, _decode_geom
+from cartoframes.datasets import Dataset, _decode_geom, setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
+from mocks.dataset_mock import DatasetMock
+from mocks.context_mock import ContextMock
 
 from utils import _UserUrlLoader
 
@@ -134,60 +137,60 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.table_name, table_name)
-        self.assertEqual(dataset.schema, 'public')
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.gdf)
-        self.assertEqual(dataset.cc, self.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+        self.assertEqual(dataset._schema, 'public')
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._gdf)
+        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_query(self):
         query = 'SELECT * FROM fake_table'
         dataset = Dataset.from_query(query=query, context=self.cc)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset.query, query)
+        self.assertEqual(dataset._query, query)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.gdf)
-        self.assertEqual(dataset.cc, self.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_REMOTE)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._gdf)
+        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_dataframe(self):
         df = load_geojson(self.test_geojson)
         dataset = Dataset.from_dataframe(df=df)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.df)
+        self.assertIsNotNone(dataset._df)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.gdf)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._gdf)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geodataframe(self):
         gdf = load_geojson(self.test_geojson)
         dataset = Dataset.from_geodataframe(gdf=gdf)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.gdf)
+        self.assertIsNotNone(dataset._gdf)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geojson(self):
         geojson = self.test_geojson
         dataset = Dataset.from_geojson(geojson=geojson)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset.gdf)
+        self.assertIsNotNone(dataset._gdf)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.df)
-        self.assertIsNone(dataset.cc)
-        self.assertEqual(dataset.state, Dataset.STATE_LOCAL)
+        self.assertIsNone(dataset._query)
+        self.assertIsNone(dataset._df)
+        self.assertIsNone(dataset._cc)
+        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'
@@ -246,7 +249,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_query(query=query, context=self.cc)
         dataset.upload(table_name=self.test_write_table)
 
-        dataset.table_name = 'non_used_table'
+        dataset._table_name = 'non_used_table'
         df = dataset.download()
         self.assertEqual('fakec' in df.columns, True)
 
@@ -453,11 +456,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_schema_from_parameter(self):
         schema = 'fake_schema'
         dataset = Dataset.from_table(table_name='fake_table', schema=schema, context=self.cc)
-        self.assertEqual(dataset.schema, schema)
+        self.assertEqual(dataset._schema, schema)
 
     def test_dataset_schema_from_non_org_context(self):
         dataset = Dataset.from_table(table_name='fake_table', context=self.cc)
-        self.assertEqual(dataset.schema, 'public')
+        self.assertEqual(dataset._schema, 'public')
 
     def test_dataset_schema_from_org_context(self):
         username = 'fake_username'
@@ -475,7 +478,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 return username
 
         dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
-        self.assertEqual(dataset.schema, username)
+        self.assertEqual(dataset._schema, username)
 
     def test_decode_geom(self):
         # Point (0, 0) without SRID
@@ -511,3 +514,57 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 '''.format(table=table_name))
         except CartoException as e:
             self.assertTrue('relation "{}" does not exist'.format(table_name) in str(e))
+
+
+class TestDatasetInfo(unittest.TestCase):
+    def setUp(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.context = ContextMock(username=self.username, api_key=self.api_key)
+
+    def test_dataset_get_privacy_from_new_table(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+
+    def test_dataset_get_privacy_from_not_sync(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        error_msg = ('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                     'to get or modify the info from a CARTO table.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.dataset_info
+
+    def test_dataset_set_privacy_to_new_table(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
+
+    def test_dataset_set_privacy_with_wrong_parameter(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset.upload(table_name='fake_table')
+        wrong_privacy = 'wrong_privacy'
+        error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
+                        p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+        with self.assertRaises(ValueError, msg=error_msg):
+            dataset.update_dataset_info(privacy=wrong_privacy)
+
+    def test_dataset_info_should_work_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+
+    def test_dataset_info_props_are_private(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset_info = dataset.dataset_info
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+        privacy = Dataset.PUBLIC
+        error_msg = str(setting_value_exception('privacy', privacy))
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset_info.privacy = privacy
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)

@@ -106,7 +106,7 @@ function onReady() {
           updatePopup(tempPopup, event, attrs)
       });
     }
-    
+
     function setPopupsHover(tempPopup, interactivity, attrs) {
       interactivity.on('featureHover', (event) => {
           updatePopup(tempPopup, event, attrs)
@@ -118,21 +118,21 @@ function onReady() {
         const feature = event.features[0];
 
         let popupHTML = '';
-        
+
         attrs.forEach((item) => {
           let value = feature.variables[item.name].value;
           value = formatValue(value)
-          
+
           popupHTML += `
             <span class="popup-name">${item.title}</span>
             <span class="popup-value">${value}</span>
           `;
         });
-        
+
         popup
             .setLngLat([event.coordinates.lng, event.coordinates.lat])
             .setHTML(`<div class="popup-content">${popupHTML}</div>`);
-        
+
         if (!popup.isOpen()) {
           popup.addTo(map);
         }
