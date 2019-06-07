@@ -43,19 +43,22 @@ class Legend(object):
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
 
-                if self._type or self._prop:
-                    if not isinstance(self._type, dict) and self._type not in constants.LEGEND_TYPES:
-                        raise ValueError(
-                            'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
-                                self._type,
-                                ', '.join(constants.LEGEND_TYPES)
-                            ))
-                    if self._prop not in constants.LEGEND_PROPERTIES:
-                        raise ValueError(
-                            'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
-                                self._prop,
-                                ', '.join(constants.LEGEND_PROPERTIES)
-                            ))
+                if self._type and not self._prop:
+                    self._prop = self._infer_prop()
+
+                if self._type not in constants.LEGEND_TYPES and not isinstance(self._type, dict):
+                    raise ValueError(
+                        'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
+                            self._type,
+                            ', '.join(constants.LEGEND_TYPES)
+                        ))
+
+                if self._prop not in constants.LEGEND_PROPERTIES:
+                    raise ValueError(
+                        'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
+                            self._prop,
+                            ', '.join(constants.LEGEND_PROPERTIES)
+                        ))
 
             else:
                 raise ValueError('Wrong legend input')
@@ -74,3 +77,9 @@ class Legend(object):
             }
         else:
             return {}
+
+    def _infer_prop(self):
+        if self._type.startswith('color'):
+            return 'color'
+        elif self._type.startswith('size'):
+            return 'width'
