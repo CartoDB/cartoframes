@@ -42,13 +42,13 @@
   </as-legend>
   {% endif %}
 
-  {% for layer in layers %}
+  {% for layer in layers|reverse %}
     {% if layer.legend %}
       <as-legend
         heading="{{layer.legend.title}}"
         description="{{layer.legend.description}}"
       >
-        {{ createLegend(layer.legend, 'layer%d_legend' % loop.index0) }}
+        {{ createLegend(layer.legend, 'layer%d_legend' % loop.revindex0) }}
         {% if layer.legend.footer %}
           <span slot="footer">{{layer.legend.footer}}</span>
         {% endif %}

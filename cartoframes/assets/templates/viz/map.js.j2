@@ -51,9 +51,7 @@ function onReady() {
     map.on('move', updateMapInfo);
   {% endif %}
 
-  let layers = {{layers|tojson}};
-  layers = layers && layers.reverse();
-  const numLayers = layers && layers.length || 0;
+  const layers = {{layers|tojson}};
 
   map.fitBounds({{bounds}}, {animate: false, padding: 50, maxZoom: 14});
 
@@ -64,11 +62,10 @@ function onReady() {
   const mapLayers = [];
 
   layers.forEach((layer, index) => {
-    const layerIndex = numLayers - index - 1;
     const factory = new SourceFactory();
     const mapSource = factory.createSource(layer);
     const mapViz = new carto.Viz(layer['viz']);
-    const mapLayer = new carto.Layer(`layer${layerIndex}`, mapSource, mapViz);
+    const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
 
     mapLayers.push(mapLayer);
 
@@ -101,7 +98,7 @@ function onReady() {
     }
 
     if (layer.legend) {
-      createLegend(mapLayer, layer.legend, layerIndex);
+      createLegend(mapLayer, layer.legend, index);
     }
 
     function setPopupsClick(tempPopup, interactivity, attrs) {

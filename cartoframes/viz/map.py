@@ -228,8 +228,7 @@ def _init_layers(layers):
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
-        # Reverse layers
-        return layers[::-1]
+        return layers
 
 
 def _get_layer_defs(layers):
