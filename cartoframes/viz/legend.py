@@ -7,9 +7,10 @@ class Legend(object):
     """Legend
 
     Args:
-        data (dict): The legend definition for a layer. It contains the information
-          to show a legend "type" (color-category, color-bins, color-continuous),
-          "prop" (color) and also text information: "title", "description" and "footer".
+        data (dict): The legend definition for a layer. It contains the information to render a legend:
+          `type`: color-category, color-bins, color-continuous, size-bins, size-continuous.
+          `prop` (optional): color, width, strokeColor, strokeWidth.
+          The legend also can display text information: `title`, `description` and `footer`.
 
     Example:
 
@@ -18,7 +19,6 @@ class Legend(object):
 
         Legend({
             'type': 'color-category',
-            'prop': 'color',
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]'
@@ -46,14 +46,14 @@ class Legend(object):
                 if self._type and not self._prop:
                     self._prop = self._infer_prop()
 
-                if self._type not in constants.LEGEND_TYPES and not isinstance(self._type, dict):
+                if self._type and self._type not in constants.LEGEND_TYPES and not isinstance(self._type, dict):
                     raise ValueError(
                         'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
                             self._type,
                             ', '.join(constants.LEGEND_TYPES)
                         ))
 
-                if self._prop not in constants.LEGEND_PROPERTIES:
+                if self._prop and self._prop not in constants.LEGEND_PROPERTIES:
                     raise ValueError(
                         'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
                             self._prop,
