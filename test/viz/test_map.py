@@ -202,3 +202,48 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)
+
+    def test_map_publish_with_password(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        kuviz = map.publish(name, context=self.context, password="1234")
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, name)
+        self.assertEqual(kuviz.privacy, PRIVACY_PASSWORD)
+
+    def test_map_publish_deletion(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        map.delete_publication()
+        self.assertIsNone(map._kuviz)
+
+    def test_map_publish_update_name(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        new_name = 'cf_update'
+        kuviz = map.update_publication(new_name)
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, new_name)
+        self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)
+
+    def test_map_publish_update_password(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        kuviz = map.update_publication(name, password="1234")
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, name)
+        self.assertEqual(kuviz.privacy, PRIVACY_PASSWORD)

@@ -1,7 +1,9 @@
+from carto.kuvizs import Kuviz
+
 from cartoframes.viz.kuviz import KuvizPublisher, PRIVACY_PUBLIC, PRIVACY_PASSWORD, _validate_carto_kuviz
 
 
-class CartoKuvizMock(object):
+class CartoKuvizMock(Kuviz):
     def __init__(self, name, id='a12345', url="https://carto.com", password=None):
         self.id = id
         self.url = url
@@ -10,6 +12,12 @@ class CartoKuvizMock(object):
             self.privacy = PRIVACY_PASSWORD
         else:
             self.privacy = PRIVACY_PUBLIC
+
+    def delete(self):
+        return True
+
+    def save(self):
+        return True
 
 
 def _create_carto_kuviz(html, name, context=None, password=None):
