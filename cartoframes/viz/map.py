@@ -437,7 +437,7 @@ class HTMLMap(object):
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
             default_legend=None, show_info=None,
-            _carto_vl_path=None, _airship_path=None, title=None):
+            _carto_vl_path=None, _airship_path=None, title='CARTOframes'):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, basemap, default_legend, show_info,
@@ -445,7 +445,7 @@ class HTMLMap(object):
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=None, _airship_path=None, title='CARTO VL + CARTOframes'):
+            show_info=None, _carto_vl_path=None, _airship_path=None, title=None):
 
         token = ''
         basecolor = ''
