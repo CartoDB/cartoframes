@@ -32,3 +32,6 @@ class KuvizPublisherMock(KuvizPublisher):
 
     def _sync_layer(self, layer, table_name, context):
         layer.source.dataset._is_saved_in_carto = True
+
+    def is_public(self):
+        return True
