@@ -6,7 +6,7 @@ from ..context import CartoContext as Context
 _default_context = None
 
 
-def set_default_context(context=None, base_url=None, api_key=None, creds=None, session=None):
+def set_default_context(context=None, base_url=None, api_key='default_public', creds=None, session=None):
     """set_default_context
 
     From a pair base_url, api_key.
@@ -19,6 +19,14 @@ def set_default_context(context=None, base_url=None, api_key=None, creds=None, s
             base_url='https://your_user_name.carto.com',
             api_key='your api key'
         )
+
+    From a base_url (for public datasets)
+
+    .. code::
+
+        from cartoframes.auth import set_default_context
+
+        set_default_context('https://your_user_name.carto.com')
 
     From context.
 
@@ -47,8 +55,8 @@ def set_default_context(context=None, base_url=None, api_key=None, creds=None, s
     global _default_context
     if isinstance(context, Context):
         _default_context = context
-    elif isinstance(base_url, str) and isinstance(api_key, str):
-        _default_context = Context(base_url=base_url, api_key=api_key, session=session)
+    elif isinstance(base_url or context, str) and isinstance(api_key, str):
+        _default_context = Context(base_url=(base_url or context), api_key=api_key, session=session)
     elif isinstance(creds, Credentials):
         _default_context = Context(creds=creds, session=session)
     else:
