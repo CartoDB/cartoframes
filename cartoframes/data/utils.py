@@ -49,11 +49,13 @@ def compute_geodataframe(dataset):
         geom_column = _get_column(df, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             df['geometry'] = _compute_geometry_from_geom(geom_column)
+            _warn_new_geometry_column(df)
         else:
             lat_column = _get_column(df, LAT_COLUMN_NAMES)
             lng_column = _get_column(df, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
                 df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
+                _warn_new_geometry_column(df)
             else:
                 raise ValueError('''No geographic data found. '''
                                  '''If a geometry exists, change the column name ({0}) or '''
@@ -70,6 +72,11 @@ def _get_column(df, options):
     for name in options:
         if name in df:
             return df[name]
+
+
+def _warn_new_geometry_column(df):
+    if 'geometry' not in df:
+        warn('A new "geometry" column has been added to the original dataframe.')
 
 
 def _compute_geometry_from_geom(geom):
