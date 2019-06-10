@@ -52,7 +52,6 @@ class Layer(object):
                 },
                 legend={
                     'type': 'color-category',
-                    'prop': 'color',
                     'title': 'Population'
                 }
             )

@@ -25,7 +25,6 @@ def color_continuous_layer(source, value, title='', palette='sunset'):
         },
         legend={
             'type': 'color-continuous',
-            'prop': 'color',
             'title': title or value,
             'description': ''
         }
