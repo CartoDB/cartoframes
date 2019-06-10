@@ -6,7 +6,7 @@ from ..context import CartoContext as Context
 _default_context = None
 
 
-def set_default_context(first, context=None, base_url=None, api_key='default_public', creds=None, session=None):
+def set_default_context(first=None, second=None, base_url=None, api_key=None, context=None, creds=None, session=None):
     """set_default_context
 
     Args:
@@ -74,14 +74,15 @@ def set_default_context(first, context=None, base_url=None, api_key='default_pub
     """
     global _default_context
 
-    _context = first if context is None else context
-    _base_url = first if base_url is None else base_url
-    _creds = first if creds is None else creds
+    _context = context if first is None else first
+    _base_url = base_url if first is None else first
+    _api_key = (api_key if second is None else second) or 'default_public'
+    _creds = creds if first is None else first
 
     if isinstance(_context, Context):
         _default_context = _context
-    elif isinstance(_base_url, str) and isinstance(api_key, str):
-        _default_context = Context(base_url=_base_url, api_key=api_key, session=session)
+    elif isinstance(_base_url, str) and isinstance(_api_key, str):
+        _default_context = Context(base_url=_base_url, api_key=_api_key, session=session)
     elif isinstance(_creds, Credentials):
         _default_context = Context(creds=_creds, session=session)
     else:
