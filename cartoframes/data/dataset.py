@@ -390,9 +390,9 @@ class Dataset(object):
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
         if len(gdf.geometry) > 0:
-            geom_type = _first_not_null_value(gdf.geometry).geom_type
-            if geom_type:
-                return self._map_geom_type(geom_type)
+            geometry = _first_value(gdf.geometry)
+            if geometry and geometry.geom_type:
+                return self._map_geom_type(geometry.geom_type)
 
     def _map_geom_type(self, geom_type):
         return {
@@ -493,7 +493,7 @@ def _get_geom_col_type(df):
         return None
 
     try:
-        geom = decode_geometry(_first_not_null_value(df[geom_col]))
+        geom = decode_geometry(_first_value(df[geom_col]))
     except IndexError:
         warn('Dataset with null geometries')
         geom = None
@@ -504,5 +504,7 @@ def _get_geom_col_type(df):
     return geom.geom_type
 
 
-def _first_not_null_value(array):
-    return array.loc[~array.isnull()].iloc[0]
+def _first_value(array):
+    array = array.loc[~array.isnull()]  # Remove null values
+    if len(array) > 0:
+        return array.iloc[0]
