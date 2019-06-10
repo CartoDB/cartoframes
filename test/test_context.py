@@ -24,7 +24,7 @@ import pandas as pd
 import IPython
 
 import cartoframes
-from cartoframes.datasets import Dataset
+from cartoframes.data import Dataset
 from cartoframes.columns import Column, normalize_name
 from cartoframes.utils import dict_items
 

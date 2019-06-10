@@ -1,15 +1,14 @@
-import time
 import pandas as pd
-import binascii as ba
 
 from tqdm import tqdm
 from warnings import warn
 
-from carto.exceptions import CartoException, CartoRateLimitException
+from carto.exceptions import CartoException
 
+from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES
+from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
-from .dataset_info import DatasetInfo
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -31,12 +30,10 @@ class Dataset(object):
     GEOM_TYPE_LINE = 'line'
     GEOM_TYPE_POLYGON = 'polygon'
 
-    DEFAULT_RETRY_TIMES = 3
-
     def __init__(self, table_name=None, schema=None,
                  query=None, df=None, gdf=None,
                  state=None, is_saved_in_carto=False, context=None):
-        from cartoframes.auth import _default_context
+        from ..auth import _default_context
         self._cc = context or _default_context
 
         self._table_name = normalize_name(table_name)
@@ -96,6 +93,14 @@ class Dataset(object):
         return self._table_name
 
     @property
+    def schema(self):
+        return self._schema
+
+    @property
+    def query(self):
+        return self._query
+
+    @property
     def context(self):
         return self._cc
 
@@ -144,7 +149,7 @@ class Dataset(object):
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use'
                                               'if_exists="replace" to overwrite it'.format(
-                                                    t=self._table_name, s=self._schema))
+                                                  t=self._table_name, s=self._schema))
 
         # priority order: gdf, df, query
         if self._gdf is not None:
@@ -264,7 +269,7 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                geom = _decode_geom(the_geom_val)
+                geom = decode_geometry(the_geom_val)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
             if with_lnglat is not None and lng_val is not None and lat_val is not None:
@@ -280,7 +285,7 @@ class Dataset(object):
 
     def _create_table_from_query(self):
         self._cc.batch_sql_client.create_and_wait_for_completion(
-                '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+            '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
                 .format(drop=self._drop_table_query(),
                         create=self._get_query_to_create_table_from_query(),
                         cartodbfy=self._cartodbfy_query()))
@@ -367,7 +372,7 @@ class Dataset(object):
         if self._state == Dataset.STATE_REMOTE:
             return self._get_remote_geom_type(get_query(self))
         elif self._state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(self._gdf)
+            return self._get_local_geom_type(get_geodataframe(self))
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -385,9 +390,9 @@ class Dataset(object):
     def _get_local_geom_type(self, gdf):
         """Compute geom type of the local dataframe"""
         if len(gdf.geometry) > 0:
-            geom_type = gdf.geometry[0].type
-            if geom_type:
-                return self._map_geom_type(geom_type)
+            geometry = _first_value(gdf.geometry)
+            if geometry and geometry.geom_type:
+                return self._map_geom_type(geometry.geom_type)
 
     def _map_geom_type(self, geom_type):
         return {
@@ -413,36 +418,20 @@ class Dataset(object):
             return 'public'
 
 
-def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
-    try:
-        return context.copy_client.copyto_stream(query)
-    except CartoRateLimitException as err:
-        if retry_times > 0:
-            retry_times -= 1
-            warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-            time.sleep(err.retry_after)
-            warn('Retrying...')
-            return recursive_read(context, query, retry_times=retry_times)
-        else:
-            warn(('Read call was rate-limited. '
-                  'This usually happens when there are multiple queries being read at the same time.'))
-            raise err
-
-
-def get_columns(context, query):
-    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
-    table_info = context.sql_client.send(col_query)
-    return Column.from_sql_api_fields(table_info['fields'])
-
-
 def get_query(dataset):
     if isinstance(dataset, Dataset):
-        return dataset._query or _default_query(dataset)
+        if dataset.query is None:
+            return compute_query(dataset)
+        else:
+            return dataset.query
 
 
-def _default_query(dataset):
-    if dataset._table_name and dataset._schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset._schema, dataset._table_name)
+def get_geodataframe(dataset):
+    if isinstance(dataset, Dataset):
+        if dataset.geodataframe is None:
+            return compute_geodataframe(dataset)
+        else:
+            return dataset.geodataframe
 
 
 def _save_index_as_column(df):
@@ -500,64 +489,15 @@ def _get_geom_col_name(df):
 
 def _get_geom_col_type(df):
     geom_col = _get_geom_col_name(df)
-    if geom_col is None:
-        return None
+    if geom_col is not None:
+        geom = decode_geometry(_first_value(df[geom_col]))
+        if geom is not None:
+            return geom.geom_type
 
-    try:
-        geom = _decode_geom(_first_not_null_value(df, geom_col))
-    except IndexError:
+
+def _first_value(array):
+    array = array.loc[~array.isnull()]  # Remove null values
+    if len(array) > 0:
+        return array.iloc[0]
+    else:
         warn('Dataset with null geometries')
-        geom = None
-
-    if geom is None:
-        return None
-
-    return geom.geom_type
-
-
-def _first_not_null_value(df, col):
-    return df[col].loc[~df[col].isnull()].iloc[0]
-
-
-def _encode_decode_decorator(func):
-    """decorator for encoding and decoding geoms"""
-    def wrapper(*args):
-        """error catching"""
-        try:
-            processed_geom = func(*args)
-            return processed_geom
-        except ImportError as err:
-            raise ImportError('The Python package `shapely` needs to be '
-                              'installed to encode or decode geometries. '
-                              '({})'.format(err))
-    return wrapper
-
-
-@_encode_decode_decorator
-def _decode_geom(ewkb):
-    """Decode encoded wkb into a shapely geometry
-    """
-    # it's already a shapely object
-    if hasattr(ewkb, 'geom_type'):
-        return ewkb
-
-    from shapely import wkb
-    from shapely import wkt
-    if ewkb:
-        try:
-            return wkb.loads(ba.unhexlify(ewkb))
-        except Exception:
-            try:
-                return wkb.loads(ba.unhexlify(ewkb), hex=True)
-            except Exception:
-                try:
-                    return wkb.loads(ewkb, hex=True)
-                except Exception:
-                    try:
-                        return wkb.loads(ewkb)
-                    except Exception:
-                        try:
-                            return wkt.loads(ewkb)
-                        except Exception:
-                            pass
-    return None

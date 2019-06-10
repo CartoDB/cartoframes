@@ -42,10 +42,6 @@ def load_geojson(input_data):
                 'geometry': input_data
             }])
 
-    elif isinstance(input_data, geopandas.GeoDataFrame):
-        # GeoDataFrame
-        data = geopandas.GeoDataFrame.from_features(input_data)
-
     else:
         raise ValueError(
             """

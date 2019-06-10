@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from cartoframes.datasets import Dataset, DatasetInfo
+from cartoframes.data import Dataset, DatasetInfo
 
 
 class MetadataMock():
