@@ -191,6 +191,13 @@ class Map(object):
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
 
+        if maps_api_key == 'default_public' and not self._publisher.is_public():
+            raise CartoException('The datasets used in your map are not public. '
+                                 'You need add new Regular API key with permissions to Maps API and the datasets. '
+                                 'You can do it from your CARTO dashboard or using the Auth API. You can get more '
+                                 'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
+
+
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz = self._publisher.publish(html, name, password)

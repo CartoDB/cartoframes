@@ -31,6 +31,9 @@ class KuvizPublisher(object):
     def is_sync(self):
         return all(layer.source.dataset.is_saved_in_carto for layer in self._layers)
 
+    def is_public(self):
+        return all(layer.source.dataset.is_public() for layer in self._layers)
+
     def get_layers(self, maps_api_key='default_public'):
         for layer in self._layers:
             layer.source.dataset.context = self._context
