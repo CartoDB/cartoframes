@@ -193,7 +193,7 @@ class Map(object):
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz = self._publisher.publish(html, name, password)
-        return self._kuviz
+        self._kuviz_message()
 
     def sync_data(self, table_name, context=None):
         if not self._publisher.is_sync():
@@ -217,7 +217,7 @@ class Map(object):
         self._kuviz.name = name
         self._kuviz.password = password
         self._kuviz.save()
-        return self._kuviz
+        self._kuviz_message()
 
     @staticmethod
     def all_publications(context=None):
@@ -241,6 +241,15 @@ class Map(object):
 
     def _get_publisher(self):
         return KuvizPublisher(self)
+
+    def _kuviz_message(self):
+        print(
+        """
+        id:      {id}
+        url:     {url}
+        name:    {name}
+        privacy: {privacy}
+        """.format(id=self._kuviz.id, url=self._kuviz.url, name=self._kuviz.name, privacy=self._kuviz.privacy))
 
 
 def _get_bounds(bounds, layers):
