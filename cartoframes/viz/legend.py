@@ -47,19 +47,8 @@ class Legend(object):
 
     def get_info(self, geom_type=None):
         if self._type or self._title or self._description or self._footer:
-            _type = self._type
-            _prop = self._prop
-
-            if isinstance(_type, dict) and geom_type in _type:
-                _type = _type.get(geom_type)
-            self._check_type(_type)
-
-            if _type and not _prop:
-                _prop = self._infer_prop(_type)
-
-            self._check_prop(_prop)
-
-            print(_prop)
+            _type = self._get_type(geom_type)
+            _prop = self._get_prop(_type)
 
             return {
                 'type': _type,
@@ -71,6 +60,24 @@ class Legend(object):
         else:
             return {}
 
+    def _get_type(self, geom_type):
+        if isinstance(self._type, dict) and geom_type in self._type:
+            _type = self._type.get(geom_type)
+        else:
+            _type = self._type
+
+        self._check_type(_type)
+        return _type
+
+    def _get_prop(self, _type):
+        if _type and not self._prop:
+            _prop = self._infer_prop(_type)
+        else:
+            _prop = self._prop
+
+        self._check_prop(_prop)
+        return _prop
+
     def _check_type(self, _type):
         if _type and _type not in constants.LEGEND_TYPES:
             raise ValueError(
@@ -79,7 +86,6 @@ class Legend(object):
                 ))
 
     def _check_prop(self, _prop):
-        print(_prop)
         if _prop and _prop not in constants.LEGEND_PROPERTIES:
             raise ValueError(
                 'Legend property is not valid. Valid legend properties are: {}.'.format(
