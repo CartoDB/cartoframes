@@ -244,8 +244,10 @@ class TestMapPublication(unittest.TestCase):
 
     def test_map_publish_private_ds_with_public_apikey_fails(self):
         is_public = KuvizPublisherMock.is_public
+
         def is_not_public(self):
             return False
+
         KuvizPublisherMock.is_public = is_not_public
 
         dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
