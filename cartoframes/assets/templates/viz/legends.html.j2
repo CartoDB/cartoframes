@@ -48,7 +48,7 @@
         heading="{{layer.legend.title}}"
         description="{{layer.legend.description}}"
       >
-        {{ createLegend(layer.legend, 'layer%d_legend' % (loop.revindex0 - 1)) }}
+        {{ createLegend(layer.legend, 'layer%d_legend' % loop.revindex0) }}
         {% if layer.legend.footer %}
           <span slot="footer">{{layer.legend.footer}}</span>
         {% endif %}
