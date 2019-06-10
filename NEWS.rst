@@ -10,6 +10,8 @@ Updates
 - Sharing visualizations: structure and publication
 - Add namespaces cartoframes.data for Dataset class
 - Add support for DataFrames visualization (#735)
+- Reverse Map layers order (#742)
+- Infer legend prop from the type (#743)
 
 0.10.0
 ------
