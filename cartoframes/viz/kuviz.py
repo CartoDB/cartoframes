@@ -22,7 +22,7 @@ class KuvizPublisher(object):
         return km.all()
 
     def set_context(self, context=None):
-        from cartoframes.auth import _default_context
+        from ..auth import _default_context
         self._context = context or _default_context
 
     def publish(self, html, name, password=None):
@@ -47,7 +47,7 @@ class KuvizPublisher(object):
         for idx, layer in enumerate(self._layers):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
-            from cartoframes.auth import _default_context
+            from ..auth import _default_context
             dataset_context = context or layer.source.dataset.context or _default_context
 
             self._sync_layer(layer, table_name, dataset_context)

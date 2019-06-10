@@ -9,6 +9,8 @@ from mocks.map_mock import MapMock
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
 
+from .utils import build_geojson
+
 
 class TestMap(unittest.TestCase):
     def test_is_defined(self):
@@ -76,8 +78,8 @@ class TestMapLayer(unittest.TestCase):
         ])
 
         self.assertEqual(map.layers, [
-            layer_2,
-            layer_1
+            layer_1,
+            layer_2
         ])
         self.assertEqual(len(map.layer_defs), 2)
 

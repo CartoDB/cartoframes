@@ -73,7 +73,7 @@ class Credentials(object):
         else:
             try:
                 self._retrieve(_DEFAULT_PATH)
-            except:
+            except Exception:
                 raise RuntimeError(
                     'Could not load CARTO credentials. Try setting them with '
                     'the `key` and `username` arguments.'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.datasets about _is_saved_in_carto prop"""
+"""Unit tests for cartoframes.data about _is_saved_in_carto prop"""
 import unittest
 import pandas as pd
 

@@ -2,15 +2,16 @@ from __future__ import absolute_import
 
 import collections
 import numpy as np
+
 from warnings import warn
 from jinja2 import Environment, PackageLoader
+from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
 from .source import SourceType
-from .. import utils
-from carto.exceptions import CartoException
 from .kuviz import KuvizPublisher
+from .. import utils
 
 # TODO: refactor
 
@@ -266,8 +267,7 @@ def _init_layers(layers):
     if not isinstance(layers, collections.Iterable):
         return [layers]
     else:
-        # Reverse layers
-        return layers[::-1]
+        return layers
 
 
 def _get_layer_defs(layers):

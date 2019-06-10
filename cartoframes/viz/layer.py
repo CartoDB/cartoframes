@@ -1,17 +1,25 @@
 from __future__ import absolute_import
 
+import pandas
+
 from .source import Source
 from .style import Style
 from .popup import Popup
-from cartoframes.datasets import Dataset
 from .legend import Legend
+from ..data import Dataset
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 
 
 class Layer(object):
     """Layer
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.datasets.Dataset>`,
+        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`,
           :py:class:`Source <cartoframes.vis.Source>`): The source data.
         style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
           optional): The style of the visualization: `CARTO VL styling
@@ -52,7 +60,6 @@ class Layer(object):
                 },
                 legend={
                     'type': 'color-category',
-                    'prop': 'color',
                     'title': 'Population'
                 }
             )
@@ -104,7 +111,8 @@ class Layer(object):
 
 def _set_source(source, context):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset)):
+    if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or \
+       HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
         return Source(source, context)
     elif isinstance(source, Source):
         return source

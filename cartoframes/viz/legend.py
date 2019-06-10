@@ -7,9 +7,10 @@ class Legend(object):
     """Legend
 
     Args:
-        data (dict): The legend definition for a layer. It contains the information
-          to show a legend "type" (color-category, color-bins, color-continuous),
-          "prop" (color) and also text information: "title", "description" and "footer".
+        data (dict): The legend definition for a layer. It contains the information to render a legend:
+          `type`: color-category, color-bins, color-continuous, size-bins, size-continuous.
+          `prop` (optional): color, width, strokeColor, strokeWidth.
+          The legend also can display text information: `title`, `description` and `footer`.
 
     Example:
 
@@ -18,7 +19,6 @@ class Legend(object):
 
         Legend({
             'type': 'color-category',
-            'prop': 'color',
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]'
@@ -42,35 +42,58 @@ class Legend(object):
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
-
-                if self._type or self._prop:
-                    if not isinstance(self._type, dict) and self._type not in constants.LEGEND_TYPES:
-                        raise ValueError(
-                            'Legend type "{0}" is not valid. Valid legend types are: {1}'.format(
-                                self._type,
-                                ', '.join(constants.LEGEND_TYPES)
-                            ))
-                    if self._prop not in constants.LEGEND_PROPERTIES:
-                        raise ValueError(
-                            'Legend property "{0}" is not valid. Valid legend property are: {1}'.format(
-                                self._prop,
-                                ', '.join(constants.LEGEND_PROPERTIES)
-                            ))
-
             else:
-                raise ValueError('Wrong legend input')
+                raise ValueError('Wrong legend input.')
 
-    def get_info(self, geom_type):
-        if (self._type and self._prop) or self._title or self._description or self._footer:
-            _type = self._type
-            if isinstance(_type, dict) and geom_type in _type:
-                _type = _type.get(geom_type)
+    def get_info(self, geom_type=None):
+        if self._type or self._title or self._description or self._footer:
+            _type = self._get_type(geom_type)
+            _prop = self._get_prop(_type)
+
             return {
                 'type': _type,
-                'prop': self._prop,
+                'prop': _prop,
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer
             }
         else:
             return {}
+
+    def _get_type(self, geom_type):
+        if isinstance(self._type, dict) and geom_type in self._type:
+            _type = self._type.get(geom_type)
+        else:
+            _type = self._type
+
+        self._check_type(_type)
+        return _type
+
+    def _get_prop(self, _type):
+        if _type and not self._prop:
+            _prop = self._infer_prop(_type)
+        else:
+            _prop = self._prop
+
+        self._check_prop(_prop)
+        return _prop
+
+    def _check_type(self, _type):
+        if _type and _type not in constants.LEGEND_TYPES:
+            raise ValueError(
+                'Legend type is not valid. Valid legend types are: {}.'.format(
+                    ', '.join(constants.LEGEND_TYPES)
+                ))
+
+    def _check_prop(self, _prop):
+        if _prop and _prop not in constants.LEGEND_PROPERTIES:
+            raise ValueError(
+                'Legend property is not valid. Valid legend properties are: {}.'.format(
+                    ', '.join(constants.LEGEND_PROPERTIES)
+                ))
+
+    def _infer_prop(self, _type):
+        if _type.startswith('color'):
+            return 'color'
+        elif _type.startswith('size'):
+            return 'width'
