@@ -489,22 +489,15 @@ def _get_geom_col_name(df):
 
 def _get_geom_col_type(df):
     geom_col = _get_geom_col_name(df)
-    if geom_col is None:
-        return None
-
-    try:
+    if geom_col is not None:
         geom = decode_geometry(_first_value(df[geom_col]))
-    except IndexError:
-        warn('Dataset with null geometries')
-        geom = None
-
-    if geom is None:
-        return None
-
-    return geom.geom_type
+        if geom is not None:
+            return geom.geom_type
 
 
 def _first_value(array):
     array = array.loc[~array.isnull()]  # Remove null values
     if len(array) > 0:
         return array.iloc[0]
+    else:
+        warn('Dataset with null geometries')

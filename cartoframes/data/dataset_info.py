@@ -60,7 +60,7 @@ class DatasetInfo(object):
         except Exception as e:
             if type(e).__name__ == 'NotFoundException' and retries > 0:
                 # if retry_wait_time > 7: # it should be after more than 15 seconds
-                    # warn('We are still procesing the CARTO table. Sorry for the delay.')
+                # warn('We are still procesing the CARTO table. Sorry for the delay.')
                 time.sleep(retry_wait_time)
                 self._get_metadata(carto_context=carto_context, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
