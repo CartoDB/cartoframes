@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
 import re
+import pandas
 
 from . import defaults
 from ..geojson import get_encoded_data, get_bounds
-from cartoframes.datasets import Dataset, get_query
+from ..data import Dataset, get_query, get_geodataframe
 
 try:
     import geopandas
@@ -83,7 +84,7 @@ class Source(object):
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Source
-            from cartoframes.datasets import Dataset
+            from cartoframes.data import Dataset
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
@@ -148,8 +149,14 @@ class Source(object):
             elif _check_table_name(data):
                 self._init_source_table(data, context, schema, bounds)
 
-        elif HAS_GEOPANDAS and isinstance(data, (list, dict, geopandas.GeoDataFrame)):
+        elif isinstance(data, (list, dict)):
             self._init_source_geojson(data, bounds)
+
+        elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
+            self._init_source_geodataframe(data, bounds)
+
+        elif isinstance(data, pandas.DataFrame):
+            self._init_source_dataframe(data, bounds)
 
         elif isinstance(data, Dataset):
             self._init_source_dataset(data, bounds)
@@ -169,17 +176,21 @@ class Source(object):
         self.dataset = Dataset.from_geojson(data)
         self._set_source_geojson(self.dataset, bounds)
 
+    def _init_source_geodataframe(self, data, bounds):
+        self.dataset = Dataset.from_geodataframe(data)
+        self._set_source_geojson(self.dataset, bounds)
+
+    def _init_source_dataframe(self, data, bounds):
+        self.dataset = Dataset.from_dataframe(data)
+        self._set_source_geojson(self.dataset, bounds)
+
     def _init_source_dataset(self, data, bounds):
         self.dataset = data
 
         if self.dataset._state == Dataset.STATE_REMOTE:
             self._set_source_query(self.dataset, bounds)
         elif self.dataset._state == Dataset.STATE_LOCAL:
-            if self.dataset._gdf:
-                self._set_source_geojson(self.dataset, bounds)
-            else:
-                # TODO: Dataframe
-                pass
+            self._set_source_geojson(self.dataset, bounds)
 
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY
@@ -188,8 +199,9 @@ class Source(object):
 
     def _set_source_geojson(self, dataset, bounds):
         self.type = SourceType.GEOJSON
-        self.query = get_encoded_data(dataset._gdf)
-        self.bounds = bounds or get_bounds(dataset._gdf)
+        gdf = get_geodataframe(dataset)
+        self.query = get_encoded_data(gdf)
+        self.bounds = bounds or get_bounds(gdf)
 
 
 def _check_table_name(data):

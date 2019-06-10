@@ -6,12 +6,13 @@ import os
 import sys
 import json
 import warnings
-import pandas as pd
+# import pandas as pd
 
 from carto.exceptions import CartoException
 
 from cartoframes.context import CartoContext
-from cartoframes.datasets import Dataset, _decode_geom, setting_value_exception
+from cartoframes.data import Dataset
+from cartoframes.data.utils import decode_geometry, setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
@@ -480,12 +481,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset._schema, username)
 
-    def test_decode_geom(self):
+    def test_decode_geometry(self):
         # Point (0, 0) without SRID
         ewkb = '010100000000000000000000000000000000000000'
-        decoded_geom = _decode_geom(ewkb)
+        decoded_geom = decode_geometry(ewkb)
         self.assertEqual(decoded_geom.wkt, 'POINT (0 0)')
-        self.assertIsNone(_decode_geom(None))
+        self.assertIsNone(decode_geometry(None))
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)
@@ -549,7 +550,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
         wrong_privacy = 'wrong_privacy'
         error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-                        p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+            p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info(privacy=wrong_privacy)
 

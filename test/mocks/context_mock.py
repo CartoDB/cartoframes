@@ -22,7 +22,7 @@ class ContextMock():
         self.creds = CredsMock(key=api_key, username=username)
 
     def get_default_schema(self):
-        self.creds.username() or 'public'
+        return self.creds.username() or 'public'
 
     def _get_bounds(self, layers):
         return {'west': None, 'south': None, 'east': None, 'north': None}

@@ -6,17 +6,11 @@ from .__version__ import __version__
 
 
 __all__ = [
-
-    # Current API
+    '__version__',
     'CartoContext',
     'Credentials',
     'BaseMap',
     'QueryLayer',
     'Layer',
-    'BinMethod',
-
-    # New API
-
-
-    '__version__'
+    'BinMethod'
 ]
