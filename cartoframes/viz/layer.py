@@ -39,8 +39,8 @@ class Layer(object):
             from cartoframes.viz import Layer
 
             set_default_context(
-                base_url='https://cartovl.carto.com/',
-                api_key='default_public'
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
             )
 
             Layer(
