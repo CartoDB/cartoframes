@@ -213,9 +213,10 @@ class Map(object):
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
 
-        self._publisher.set_context(context)
-        html = self._get_publication_html(name, maps_api_key)
-        self._kuviz.update(html, name, password)
+        self._kuviz.data = self._get_publication_html(name, maps_api_key)
+        self._kuviz.name = name
+        self._kuviz.password = password
+        self._kuviz.save()
         return self._kuviz
 
     @staticmethod
