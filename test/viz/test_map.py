@@ -76,8 +76,8 @@ class TestMapLayer(unittest.TestCase):
         ])
 
         self.assertEqual(map.layers, [
-            layer_2,
-            layer_1
+            layer_1,
+            layer_2
         ])
         self.assertEqual(len(map.layer_defs), 2)
 
