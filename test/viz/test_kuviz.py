@@ -6,7 +6,7 @@ from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source
 
-from mocks.kuviz_mock import CartoKuvizMock, KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
 
