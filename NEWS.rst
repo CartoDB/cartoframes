@@ -12,6 +12,7 @@ Updates
 - Add support for DataFrames visualization (#735)
 - Reverse Map layers order (#742)
 - Infer legend prop from the type (#743)
+- Use `default_public` as default api key (#744)
 
 0.10.0
 ------

@@ -168,7 +168,7 @@ class CartoContext(object):
 
     """
 
-    def __init__(self, base_url=None, api_key=None, creds=None, session=None,
+    def __init__(self, base_url=None, api_key='default_public', creds=None, session=None,
                  verbose=0):
 
         self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
