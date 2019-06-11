@@ -107,6 +107,7 @@ class Dataset(object):
     @context.setter
     def context(self, context):
         self._cc = context
+        self._schema = self._cc.get_default_schema()
 
     @property
     def is_saved_in_carto(self):
@@ -134,10 +135,10 @@ class Dataset(object):
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self._table_name = normalize_name(table_name)
+        if context:
+            self.context = context
         if schema:
             self._schema = schema
-        if context:
-            self._cc = context
 
         if self._table_name is None or self._cc is None:
             raise ValueError('You should provide a table_name and context to upload data.')
