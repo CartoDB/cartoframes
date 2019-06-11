@@ -217,7 +217,7 @@ class Dataset(object):
         try:
             public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
             return True
-        except CartoException as err:
+        except CartoException:
             return False
 
     def _create_table(self, with_lnglat=None):
