@@ -234,7 +234,7 @@ class Dataset(object):
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
-            .format(schema=self._schema or self._cc.get_default_schema(), table_name=self._table_name)
+            .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
@@ -414,8 +414,8 @@ class Dataset(object):
     def _get_schema(self):
         if self._cc:
             return self._cc.get_default_schema()
-        else:
-            return 'public'
+
+        return None
 
 
 def get_query(dataset):
