@@ -167,6 +167,3 @@ Reload changes
 ^^^^^^^^^^^^^^
 
 When making changes in CARTOFrames library, in the notebook, click on kernel > Restart and Run all. When making changes in CARTO VL or Airship, click on run (the page doesn't need to be reloaded)
-
-.. image:: img/local_setup/local_setup.png
-   :alt: jupyter notebook with CARTOFrames, CARTO VL and Airship
