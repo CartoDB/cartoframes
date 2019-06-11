@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 from cartoframes.viz import Map, Layer, Source
 from cartoframes.viz.kuviz import _validate_carto_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
-from mocks.kuviz_mock import CartoKuvizMock, KuvizPublisherMock, _create_carto_kuviz
+from mocks.kuviz_mock import CartoKuvizMock, KuvizPublisherMock, _create_kuviz
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
 
@@ -24,7 +24,7 @@ class TestKuviz(unittest.TestCase):
 
     def test_kuviz_create(self):
         name = 'test-name'
-        kuviz = _create_carto_kuviz(context=self.context, html=self.html, name=name)
+        kuviz = _create_kuviz(context=self.context, html=self.html, name=name)
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
@@ -32,7 +32,7 @@ class TestKuviz(unittest.TestCase):
 
     def test_kuviz_create_with_password(self):
         name = 'test-name'
-        kuviz = _create_carto_kuviz(context=self.context, html=self.html, name=name, password="1234")
+        kuviz = _create_kuviz(context=self.context, html=self.html, name=name, password="1234")
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
@@ -40,7 +40,7 @@ class TestKuviz(unittest.TestCase):
 
     def test_kuviz_create_fails_without_all_fields(self):
         with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
-            _create_carto_kuviz(context=self.context, html=self.html, name=None)
+            _create_kuviz(context=self.context, html=self.html, name=None)
 
     def test_kuviz_validation(self):
         name = 'test-name'

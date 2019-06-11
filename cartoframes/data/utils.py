@@ -158,7 +158,7 @@ def setting_value_exception(prop, value):
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_public_carto_context(context):
+def get_public_context(context):
     api_key = 'default_public'
 
     public_context = deepcopy(context)

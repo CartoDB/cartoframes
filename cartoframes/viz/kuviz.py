@@ -27,7 +27,7 @@ class KuvizPublisher(object):
         self._context = context or _default_context
 
     def publish(self, html, name, password=None):
-        return _create_carto_kuviz(html=html, name=name, context=self._context, password=password)
+        return _create_kuviz(html=html, name=name, context=self._context, password=password)
 
     def is_sync(self):
         return all(layer.source.dataset.is_saved_in_carto for layer in self._layers)
@@ -66,7 +66,7 @@ class KuvizPublisher(object):
                  'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
 
 
-def _create_carto_kuviz(html, name, context=None, password=None):
+def _create_kuviz(html, name, context=None, password=None):
     km = _get_kuviz_manager(context)
     carto_kuviz = km.create(html=html, name=name, password=password)
 

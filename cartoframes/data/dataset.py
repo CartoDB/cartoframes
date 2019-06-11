@@ -5,7 +5,7 @@ from warnings import warn
 from carto.exceptions import CartoException
 
 from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES, \
-    get_public_carto_context
+    get_public_context
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -212,7 +212,7 @@ class Dataset(object):
 
     def is_public(self):
         """Checks to see if table / query has public privacy"""
-        return self.exists(get_public_carto_context(self.context))
+        return self.exists(get_public_context(self.context))
 
     def _create_table(self, with_lnglat=None):
         job = self._cc.batch_sql_client \
