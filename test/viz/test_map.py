@@ -176,12 +176,19 @@ class TestMapPublication(unittest.TestCase):
         self.assertEqual(kuviz.name, name)
         self.assertEqual(kuviz.privacy, privacy)
 
+    def assert_kuviz_dict(self, kuviz_dict, name, privacy):
+        self.assertIsNotNone(kuviz_dict['id'])
+        self.assertIsNotNone(kuviz_dict['url'])
+        self.assertEqual(kuviz_dict['name'], name)
+        self.assertEqual(kuviz_dict['privacy'], privacy)
+
     def test_map_publish_remote(self):
         dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        map.publish(name, context=self.context)
+        kuviz_dict = map.publish(name, context=self.context)
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
@@ -203,7 +210,8 @@ class TestMapPublication(unittest.TestCase):
         map.sync_data(table_name='fake_table', context=self.context)
 
         name = 'cf_publish'
-        map.publish(name, context=self.context)
+        kuviz_dict = map.publish(name, context=self.context)
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_with_password(self):
@@ -211,7 +219,8 @@ class TestMapPublication(unittest.TestCase):
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        map.publish(name, context=self.context, password="1234")
+        kuviz_dict = map.publish(name, context=self.context, password="1234")
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
     def test_map_publish_deletion(self):
@@ -230,7 +239,8 @@ class TestMapPublication(unittest.TestCase):
         name = 'cf_publish'
         map.publish(name, context=self.context)
         new_name = 'cf_update'
-        map.update_publication(new_name, password=None)
+        kuviz_dict = map.update_publication(new_name, password=None)
+        self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
 
     def test_map_publish_update_password(self):
@@ -239,7 +249,8 @@ class TestMapPublication(unittest.TestCase):
 
         name = 'cf_publish'
         map.publish(name, context=self.context)
-        map.update_publication(name, password="1234")
+        kuviz_dict = map.update_publication(name, password="1234")
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
     def test_map_publish_private_ds_with_public_apikey_fails(self):

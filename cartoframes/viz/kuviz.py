@@ -91,3 +91,6 @@ def _get_kuviz_manager(context=None):
     context = context or _default_context
 
     return KuvizManager(context.auth_client)
+
+def kuviz_to_dict(kuviz):
+    return {'id': kuviz.id, 'url': kuviz.url, 'name': kuviz.name, 'privacy': kuviz.privacy}

@@ -10,7 +10,7 @@ from carto.exceptions import CartoException
 from . import constants
 from .basemaps import Basemaps
 from .source import SourceType
-from .kuviz import KuvizPublisher
+from .kuviz import KuvizPublisher, kuviz_to_dict
 from .. import utils
 
 # TODO: refactor
@@ -201,7 +201,7 @@ class Map(object):
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz = self._publisher.publish(html, name, password)
-        self._kuviz_message()
+        return kuviz_to_dict(self._kuviz)
 
     def sync_data(self, table_name, context=None):
         if not self._publisher.is_sync():
@@ -225,7 +225,7 @@ class Map(object):
         self._kuviz.name = name
         self._kuviz.password = password
         self._kuviz.save()
-        self._kuviz_message()
+        return kuviz_to_dict(self._kuviz)
 
     @staticmethod
     def all_publications(context=None):
@@ -249,15 +249,6 @@ class Map(object):
 
     def _get_publisher(self):
         return KuvizPublisher(self)
-
-    def _kuviz_message(self):
-        print(
-        """
-        id:      {id}
-        url:     {url}
-        name:    {name}
-        privacy: {privacy}
-        """.format(id=self._kuviz.id, url=self._kuviz.url, name=self._kuviz.name, privacy=self._kuviz.privacy))
 
 
 def _get_bounds(bounds, layers):
