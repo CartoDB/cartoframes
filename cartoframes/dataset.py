@@ -79,10 +79,11 @@ class Dataset(object):
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self.table_name = normalize_name(table_name)
-        if schema:
-            self.schema = schema
         if context:
             self.cc = context
+            self.schema = context.get_default_schema()
+        if schema:
+            self.schema = schema
 
         if self.table_name is None or self.cc is None:
             raise ValueError('You should provide a table_name and context to upload data.')
