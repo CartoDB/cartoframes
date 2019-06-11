@@ -200,13 +200,10 @@ class Dataset(object):
         return False
 
     def exists(self, context=None):
-        """Checks to see if table exists"""
+        """Checks to see if table exists or query has sense"""
         context = context or self._cc
         try:
-            context.sql_client.send(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=self._table_name),
-                do_post=False)
+            context.sql_client.send('EXPLAIN {query}'.format(query=get_query(self)), do_post=False)
             return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API

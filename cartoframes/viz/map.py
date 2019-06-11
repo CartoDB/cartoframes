@@ -191,12 +191,8 @@ class Map(object):
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
 
-        if maps_api_key == 'default_public' and not self._publisher.is_public():
-            raise CartoException('The datasets used in your map are not public. '
-                                 'You need add new Regular API key with permissions to Maps API and the datasets. '
-                                 'You can do it from your CARTO dashboard or using the Auth API. You can get more '
-                                 'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
-
+        if maps_api_key == 'default_public':
+            self._validate_public_publication()
 
         self._publisher.set_context(context)
         html = self._get_publication_html(name, maps_api_key)
@@ -220,6 +216,9 @@ class Map(object):
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
+
+        if maps_api_key == 'default_public':
+            self._validate_public_publication()
 
         self._kuviz.data = self._get_publication_html(name, maps_api_key)
         self._kuviz.name = name
@@ -249,6 +248,13 @@ class Map(object):
 
     def _get_publisher(self):
         return KuvizPublisher(self)
+
+    def _validate_public_publication(self):
+        if not self._publisher.is_public():
+            raise CartoException('The datasets used in your map are not public. '
+                                 'You need add new Regular API key with permissions to Maps API and the datasets. '
+                                 'You can do it from your CARTO dashboard or using the Auth API. You can get more '
+                                 'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
 
 
 def _get_bounds(bounds, layers):
