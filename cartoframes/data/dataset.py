@@ -199,11 +199,12 @@ class Dataset(object):
 
         return False
 
-    def exists(self, context=None):
-        """Checks to see if table exists or query has sense"""
-        context = context or self._cc
+    def exists(self):
+        """Checks to see if table exists"""
         try:
-            context.sql_client.send('EXPLAIN {query}'.format(query=get_query(self)), do_post=False)
+            self._cc.sql_client.send(
+                'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
+                do_post=False)
             return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
@@ -211,8 +212,13 @@ class Dataset(object):
             return False
 
     def is_public(self):
-        """Checks to see if table / query has public privacy"""
-        return self.exists(get_public_context(self.context))
+        """Checks to see if table or table used by query has public privacy"""
+        public_context = get_public_context(self.context)
+        try:
+            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            return True
+        except CartoException as err:
+            return False
 
     def _create_table(self, with_lnglat=None):
         job = self._cc.batch_sql_client \
