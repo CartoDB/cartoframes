@@ -7,9 +7,6 @@ from carto.exceptions import CartoException
 from .source import Source
 from ..columns import normalize_name
 
-PRIVACY_PUBLIC = 'public'
-PRIVACY_PASSWORD = 'password'
-
 
 class KuvizPublisher(object):
     def __init__(self, vmap, context=None):
@@ -68,23 +65,7 @@ class KuvizPublisher(object):
 
 def _create_kuviz(html, name, context=None, password=None):
     km = _get_kuviz_manager(context)
-    carto_kuviz = km.create(html=html, name=name, password=password)
-
-    _validate_carto_kuviz(carto_kuviz)
-
-    return carto_kuviz
-
-
-# FIXME: https://github.com/CartoDB/carto-python/issues/122
-# Remove the function and usage after the issue will be fixed
-def _validate_carto_kuviz(carto_kuviz):
-    if not carto_kuviz or not carto_kuviz.url or not carto_kuviz.id or not carto_kuviz.name:
-        raise CartoException('Error creating Kuviz. Something goes wrong')
-
-    if carto_kuviz.privacy and carto_kuviz.privacy not in [PRIVACY_PUBLIC, PRIVACY_PASSWORD]:
-        raise CartoException('Error creating Kuviz. Invalid privacy')
-
-    return True
+    return km.create(html=html, name=name, password=password)
 
 
 def _get_kuviz_manager(context=None):

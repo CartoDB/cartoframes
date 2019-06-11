@@ -1,7 +1,9 @@
 from carto.kuvizs import Kuviz
 
-from cartoframes.viz.kuviz import KuvizPublisher, PRIVACY_PUBLIC, PRIVACY_PASSWORD, _validate_carto_kuviz, \
-    kuviz_to_dict
+from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
+
+PRIVACY_PUBLIC = 'public'
+PRIVACY_PASSWORD = 'password'
 
 
 class CartoKuvizMock(Kuviz):
@@ -22,9 +24,7 @@ class CartoKuvizMock(Kuviz):
 
 
 def _create_kuviz(html, name, context=None, password=None):
-    carto_kuviz = CartoKuvizMock(name=name, password=password)
-    _validate_carto_kuviz(carto_kuviz)
-    return carto_kuviz
+    return CartoKuvizMock(name=name, password=password)
 
 
 class KuvizPublisherMock(KuvizPublisher):
