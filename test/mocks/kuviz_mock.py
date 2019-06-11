@@ -1,6 +1,7 @@
 from carto.kuvizs import Kuviz
 
-from cartoframes.viz.kuviz import KuvizPublisher, PRIVACY_PUBLIC, PRIVACY_PASSWORD, _validate_carto_kuviz
+from cartoframes.viz.kuviz import KuvizPublisher, PRIVACY_PUBLIC, PRIVACY_PASSWORD, _validate_carto_kuviz, \
+    kuviz_to_dict
 
 
 class CartoKuvizMock(Kuviz):
@@ -35,3 +36,9 @@ class KuvizPublisherMock(KuvizPublisher):
 
     def is_public(self):
         return True
+
+    @staticmethod
+    def all():
+        kuviz = CartoKuvizMock(name="test")
+        kuvizs = [kuviz, kuviz, kuviz]
+        return [kuviz_to_dict(kuviz) for kuviz in kuvizs]

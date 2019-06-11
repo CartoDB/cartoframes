@@ -73,6 +73,12 @@ class TestKuvizPublisher(unittest.TestCase):
         self.api_key = 'fake_api_key'
         self.context = ContextMock(username=self.username, api_key=self.api_key)
 
+    def assert_kuviz_dict(self, kuviz_dict, name, privacy):
+        self.assertIsNotNone(kuviz_dict['id'])
+        self.assertIsNotNone(kuviz_dict['url'])
+        self.assertEqual(kuviz_dict['name'], name)
+        self.assertEqual(kuviz_dict['privacy'], privacy)
+
     def test_kuviz_publisher_create_local(self):
         source_1 = Source(build_geojson([-10, 0], [-10, 0]))
         source_2 = Source(build_geojson([0, 10], [10, 0]))
@@ -168,3 +174,8 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': maps_api_key, 'base_url': self.username})
+
+    def test_kuviz_publisher_all(self):
+        kuviz_dicts = KuvizPublisherMock.all()
+        for kuviz_dict in kuviz_dicts:
+            self.assert_kuviz_dict(kuviz_dict, name="test", privacy=PRIVACY_PUBLIC)

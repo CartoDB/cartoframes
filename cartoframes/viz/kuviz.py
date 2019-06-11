@@ -19,7 +19,8 @@ class KuvizPublisher(object):
     @staticmethod
     def all(context=None):
         km = _get_kuviz_manager(context)
-        return km.all()
+        kuvizs = km.all()
+        return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
     def set_context(self, context=None):
         from ..auth import _default_context
