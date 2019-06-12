@@ -26,10 +26,20 @@
     <as-legend-color-continuous-polygon id="{{id}}" slot="legends"></as-legend-color-continuous-polygon>
   {% elif type == 'size-bins' %}
     <as-legend-size-bins id="{{id}}" slot="legends"></as-legend-size-bins>
+  {% elif type == 'size-bins-line' %}
+    <as-legend-size-bins-line id="{{id}}" slot="legends"></as-legend-size-bins-line>
   {% elif type == 'size-bins-point' %}
     <as-legend-size-bins-point id="{{id}}" slot="legends"></as-legend-size-bins-point>
+  {% elif type == 'size-category' %}
+    <as-legend-size-category id="{{id}}" slot="legends"></as-legend-size-category>
+  {% elif type == 'size-category-line' %}
+    <as-legend-size-category-line id="{{id}}" slot="legends"></as-legend-size-category-line>
+  {% elif type == 'size-category-point' %}
+    <as-legend-size-category-point id="{{id}}" slot="legends"></as-legend-size-category-point>
   {% elif type == 'size-continuous' %}
     <as-legend-size-continuous id="{{id}}" slot="legends"></as-legend-size-continuous>
+  {% elif type == 'size-continuous-line' %}
+    <as-legend-size-continuous-line id="{{id}}" slot="legends"></as-legend-size-continuous-line>
   {% elif type == 'size-continuous-point' %}
     <as-legend-size-continuous-point id="{{id}}" slot="legends"></as-legend-size-continuous-point>
   {% endif %}

@@ -53,6 +53,6 @@ LEGEND_TYPES = [
     'size-category-line',
     'size-category-point',
     'size-continuous',
-    'size-continuous-line'
+    'size-continuous-line',
     'size-continuous-point'
 ]
