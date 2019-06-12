@@ -150,7 +150,7 @@ class Map(object):
 
     def __init__(self,
                  layers=None,
-                 basemap=Basemaps.darkmatter,
+                 basemap=Basemaps.positron,
                  bounds=None,
                  size=None,
                  viewport=None,

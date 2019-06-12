@@ -8,13 +8,13 @@ def color_bins_layer(source, value, title='', bins=5, palette='purpor'):
         source,
         style={
             'point': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), reverse({2}))'.format(value, bins, palette)
+                'color': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, palette)
             },
             'line': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), reverse({2}))'.format(value, bins, palette)
+                'color': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(globalQuantiles(${0}, {1}), reverse({2})), 0.9)'.format(value, bins, palette)
+                'color': 'opacity(ramp(globalQuantiles(${0}, {1}), {2}), 0.9)'.format(value, bins, palette)
             }
         },
         popup={

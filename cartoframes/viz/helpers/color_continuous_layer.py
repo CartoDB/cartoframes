@@ -8,13 +8,13 @@ def color_continuous_layer(source, value, title='', palette='sunset'):
         source,
         style={
             'point': {
-                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
+                'color': 'ramp(linear(${0}), {1})'.format(value, palette)
             },
             'line': {
-                'color': 'ramp(linear(${0}), reverse({1}))'.format(value, palette)
+                'color': 'ramp(linear(${0}), {1})'.format(value, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(linear(${0}), reverse({1})), 0.9)'.format(value, palette)
+                'color': 'opacity(ramp(linear(${0}), {1}), 0.9)'.format(value, palette)
             }
         },
         popup={
