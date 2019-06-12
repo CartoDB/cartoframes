@@ -6,7 +6,7 @@ import os
 import sys
 import json
 import warnings
-# import pandas as pd
+import pandas as pd
 
 from carto.exceptions import CartoException
 
@@ -268,6 +268,21 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
         dataset.download()
         dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
+
+    def test_dataset_download_bool_null(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        query = 'SELECT * FROM (values (true, true), (false, false), (false, null)) as x(fakec_bool, fakec_bool_null)'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        df = dataset.download()
+
+        self.assertEqual(df['fakec_bool'].dtype, 'bool')
+        self.assertEqual(df['fakec_bool_null'].dtype, 'object')
+        self.assertEqual(list(df['fakec_bool']), [True, False, False])
+        self.assertEqual(list(df['fakec_bool_null']), [True, False, None])
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
@@ -569,3 +584,21 @@ class TestDatasetInfo(unittest.TestCase):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset_info.privacy = privacy
         self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+
+
+class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
+    """Unit tests for cartoframes.Dataset"""
+
+    def test_rows(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        ds = Dataset.from_dataframe(df)
+        rows = ds._rows(ds.dataframe, ['test'], None, '')
+
+        self.assertEqual(list(rows), [b'True|\n', b'[1, 2]|\n'])
+
+    def test_rows_null(self):
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        ds = Dataset.from_dataframe(df)
+        rows = ds._rows(ds.dataframe, ['test'], None, '')
+
+        self.assertEqual(list(rows), [b'|\n', b'|\n'])

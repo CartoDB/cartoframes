@@ -26,7 +26,6 @@ class TestHelpers(unittest.TestCase):
 
         self.assertNotEqual(layer.legend, None)
         self.assertEqual(layer.legend._type, 'color-category')
-        self.assertEqual(layer.legend._prop, 'color')
         self.assertEqual(layer.legend._title, 'Neighborhoods')
         self.assertEqual(layer.legend._description, '')
 

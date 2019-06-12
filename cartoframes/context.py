@@ -30,7 +30,7 @@ from .maps import (non_basemap_layers, get_map_name,
                    get_map_template, top_basemap_layer_url)
 from .analysis import Table
 from .__version__ import __version__
-from .columns import dtypes, date_columns_names
+from .columns import dtypes, date_columns_names, bool_columns_names
 from .data import Dataset
 from .data.utils import decode_geometry, recursive_read, get_columns
 
@@ -517,15 +517,20 @@ class CartoContext(object):
         result = recursive_read(self, copy_query)
 
         query_columns = get_columns(self, query)
-        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True)
+        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
         date_column_names = date_columns_names(query_columns)
+        bool_column_names = bool_columns_names(query_columns)
+
+        converters = {'the_geom': lambda x: decode_geometry(x) if decode_geom else x}
+        for bool_column_name in bool_column_names:
+            converters[bool_column_name] = lambda x: _convert_bool(x)
 
         df = pd.read_csv(result, dtype=df_types,
                          parse_dates=date_column_names,
                          true_values=['t'],
                          false_values=['f'],
                          index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters={'the_geom': lambda x: decode_geometry(x) if decode_geom else x})
+                         converters=converters)
 
         if decode_geom:
             df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
@@ -1760,3 +1765,14 @@ class CartoContext(object):
                                                      str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+
+def _convert_bool(x):
+    if x:
+        if x == 't':
+            return True
+        if x == 'f':
+            return False
+        return bool(x)
+    else:
+        return None
