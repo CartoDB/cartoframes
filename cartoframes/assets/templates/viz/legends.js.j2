@@ -15,10 +15,15 @@ function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.prop) {
+    const config = { othersLabel: 'Others' }  // TODO: i18n
     const opts = {
       format: format,
-      config: { othersLabel: 'Others' } // TODO: i18n
+      config: config
     };
+
+    if (legendData.type.startsWith('size-continuous')) {
+      config.samples = 4;
+    }
     
     AsBridge.VL.Legends.rampLegend(
       element,
