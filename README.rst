@@ -7,7 +7,7 @@ CARTOframes
 .. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
     :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
 .. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.9.2?filepath=examples
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
@@ -86,7 +86,7 @@ Then create a new notebook and try the example code snippets below with tables t
 Using `pipenv`
 ^^^^^^^^^^^^^^
 
-Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an easy way to manage virtual environments. The steps below are: 
+Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an easy way to manage virtual environments. The steps below are:
 
 1. Create a virtual environment with Python 3.4+ (recommended instead of Python 2.7)
 2. Install cartoframes and Jupyter (optional) into the virtual environment

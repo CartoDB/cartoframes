@@ -79,10 +79,11 @@ class Dataset(object):
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self.table_name = normalize_name(table_name)
-        if schema:
-            self.schema = schema
         if context:
             self.cc = context
+            self.schema = context.get_default_schema()
+        if schema:
+            self.schema = schema
 
         if self.table_name is None or self.cc is None:
             raise ValueError('You should provide a table_name and context to upload data.')
@@ -175,7 +176,7 @@ class Dataset(object):
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
-            .format(schema=self.schema or self.cc.get_default_schema(), table_name=self.table_name)
+            .format(schema=self.schema or self._get_schema(), table_name=self.table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self.df)
@@ -197,7 +198,7 @@ class Dataset(object):
                 if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
-                if pd.isnull(val) or val is None:
+                if self._is_null(val):
                     val = ''
                 if with_lnglat:
                     if col == with_lnglat[0]:
@@ -218,6 +219,13 @@ class Dataset(object):
 
             csv_row += '\n'
             yield csv_row.encode()
+
+    def _is_null(self, val):
+        vnull = pd.isnull(val)
+        if isinstance(vnull, bool):
+            return vnull
+        else:
+            return vnull.all()
 
     def _drop_table_query(self, if_exists=True):
         return '''DROP TABLE {if_exists} {table_name}'''.format(
@@ -348,8 +356,8 @@ class Dataset(object):
     def _get_schema(self):
         if self.cc:
             return self.cc.get_default_schema()
-        else:
-            return 'public'
+
+        return None
 
 
 def recursive_read(context, query, retry_times=Dataset.DEFAULT_RETRY_TIMES):
@@ -380,8 +388,10 @@ def get_query(dataset):
 
 
 def _default_query(dataset):
-    if dataset.table_name and dataset.schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
+    if dataset.table_name:
+        return 'SELECT * FROM "{schema}"."{table}"'.format(
+            schema=dataset.schema or dataset._get_schema() or 'public',
+            table=dataset.table_name)
 
 
 def _save_index_as_column(df):
