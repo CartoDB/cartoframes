@@ -3,7 +3,7 @@ CARTO_VL_VERSION = 'v1.3'
 CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
-AIRSHIP_VERSION = 'v2.1.0-rc.0'
+AIRSHIP_VERSION = 'cartoframes'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
 AIRSHIP_STYLES_DEV = '/packages/styles/dist/airship.css'
@@ -47,7 +47,12 @@ LEGEND_TYPES = [
     'color-continuous-point',
     'color-continuous-polygon',
     'size-bins',
+    'size-bins-line',
     'size-bins-point',
+    'size-category',
+    'size-category-line',
+    'size-category-point',
     'size-continuous',
+    'size-continuous-line',
     'size-continuous-point'
 ]

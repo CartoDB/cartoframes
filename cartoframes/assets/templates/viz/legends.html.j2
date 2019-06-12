@@ -1,6 +1,5 @@
 {% macro createLegend(legend_data, id) -%}
-  {% set type = legend_data.type %}
-  <as-legend-{{ type }} id="{{id}}" slot="legends"></as-legend-{{ type }}>
+  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">

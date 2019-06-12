@@ -14,6 +14,11 @@ Updates
 - Reverse Map layers order (#742)
 - Infer legend prop from the type (#743)
 - Use `default_public` as default api key (#744)
+- Integrate size legends (#753)
+- Add size helpers
+  - size_category (#765)
+  - size_bins (#652)
+  - size_continuous (#653)
 
 0.10.1
 ------
