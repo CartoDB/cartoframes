@@ -44,6 +44,19 @@ class TestHelpers(unittest.TestCase):
             'ramp(top($name, 5), prism)'
         )
 
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            "ramp(buckets($name, ['A', 'B']), [red, blue])"
+        )
+
     def test_color_category_layer_line(self):
         "should create a line type layer"
         Source._get_geom_type = Mock(return_value='line')
@@ -61,6 +74,19 @@ class TestHelpers(unittest.TestCase):
             'ramp(top($name, 5), prism)'
         )
 
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            "ramp(buckets($name, ['A', 'B']), [red, blue])"
+        )
+
     def test_color_category_layer_polygon(self):
         "should create a polygon type layer"
         Source._get_geom_type = Mock(return_value='polygon')
@@ -76,4 +102,17 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(
             layer.style._style['polygon']['color'],
             'opacity(ramp(top($name, 5), prism), 0.9)'
+        )
+
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            "opacity(ramp(buckets($name, ['A', 'B']), [red, blue]), 0.9)"
         )
