@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.10.1
+------
+
+Release 2019-06-xx
+
+Updates
+
+- Fix schema not always properly set in write operations (#734)
+- Fix error in Dataset.upload related with array data (#754)
+
+Changelog
+=========
+
 0.10.0
 ------
 

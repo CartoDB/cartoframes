@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import warnings
+import pandas as pd
 
 from carto.exceptions import CartoException
 
@@ -524,3 +525,21 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 '''.format(table=table_name))
         except CartoException as e:
             self.assertTrue('relation "{}" does not exist'.format(table_name) in str(e))
+
+
+class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
+    """Unit tests for cartoframes.Dataset"""
+
+    def test_rows(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        ds = Dataset.from_dataframe(df)
+        rows = ds._rows(ds.df, ['test'], None, '')
+
+        self.assertEqual(list(rows), [b'True|\n', b'[1, 2]|\n'])
+
+    def test_rows_null(self):
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        ds = Dataset.from_dataframe(df)
+        rows = ds._rows(ds.df, ['test'], None, '')
+
+        self.assertEqual(list(rows), [b'|\n', b'|\n'])
