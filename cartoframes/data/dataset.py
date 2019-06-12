@@ -147,7 +147,7 @@ class Dataset(object):
                              'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
 
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
-                                              'Please choose a different `table_name` or use'
+                                              'Please choose a different `table_name` or use '
                                               'if_exists="replace" to overwrite it'.format(
                                                   t=self._table_name, s=self._schema))
 
