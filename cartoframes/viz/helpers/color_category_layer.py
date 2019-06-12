@@ -3,18 +3,19 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, title='', top=11, palette='bold'):
+def color_category_layer(source, value, title='', top=11, cat=None, palette='bold'):
+    func = 'buckets' if cat else 'top'
     return Layer(
         source,
         style={
             'point': {
-                'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, palette)
             },
             'line': {
-                'color': 'ramp(top(${0}, {1}), {2})'.format(value, top, palette)
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp(top(${0}, {1}), {2}), 0.9)'.format(value, top, palette)
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(func, value, cat or top, palette)
             }
         },
         popup={
