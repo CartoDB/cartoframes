@@ -47,7 +47,12 @@ LEGEND_TYPES = [
     'color-continuous-point',
     'color-continuous-polygon',
     'size-bins',
+    'size-bins-line',
     'size-bins-point',
+    'size-category',
+    'size-category-line',
+    'size-category-point',
     'size-continuous',
+    'size-continuous-line'
     'size-continuous-point'
 ]
