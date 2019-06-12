@@ -522,10 +522,12 @@ class CartoContext(object):
 
         converters = {'the_geom': lambda x: _decode_geom(x) if decode_geom else x}
         for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: bool(x) if x else None
+            converters[bool_column_name] = lambda x: _convert_bool(x)
 
         df = pd.read_csv(result, dtype=df_types,
                          parse_dates=date_column_names,
+                         true_values=['t'],
+                         false_values=['f'],
                          index_col='cartodb_id' if 'cartodb_id' in df_types else False,
                          converters=converters)
 
@@ -1762,3 +1764,14 @@ class CartoContext(object):
                                                      str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
+
+
+def _convert_bool(x):
+    if x:
+        if x == 't':
+            return True
+        if x == 'f':
+            return False
+        return bool(x)
+    else:
+        return None
