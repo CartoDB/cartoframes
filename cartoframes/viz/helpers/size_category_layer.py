@@ -24,7 +24,11 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
             }
         },
         legend={
-            'type': 'size-category',
+            'type': {
+                'point': 'size-category-point',
+                'line': 'size-category-line',
+                'polygon': 'size-category-polygon'
+            },
             'title': title or value,
             'description': ''
         }

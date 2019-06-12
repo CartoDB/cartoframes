@@ -25,7 +25,11 @@ def color_category_layer(source, value, title='', top=11, cat=None, palette='bol
             }
         },
         legend={
-            'type': 'color-category',
+            'type': {
+                'point': 'color-category-point',
+                'line': 'color-category-line',
+                'polygon': 'color-category-polygon'
+            },
             'title': title or value,
             'description': ''
         }

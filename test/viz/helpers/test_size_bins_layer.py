@@ -27,7 +27,8 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'size-bins')
+        self.assertEqual(layer.legend._type['point'], 'size-bins-point')
+        self.assertEqual(layer.legend._type['line'], 'size-bins-line')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
 
@@ -50,7 +51,6 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
             layer.style._style['point']['color'],
             'opacity(blue, 0.8)'
         )
-        
 
     def test_size_bins_layer_line(self):
         "should create a line type layer"

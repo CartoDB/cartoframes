@@ -23,7 +23,11 @@ def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
             }
         },
         legend={
-            'type': 'size-bins',
+            'type': {
+                'point': 'size-bins-point',
+                'line': 'size-bins-line',
+                'polygon': 'size-bins-polygon'
+            },
             'title': title or value,
             'description': ''
         }

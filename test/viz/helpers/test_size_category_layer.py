@@ -28,7 +28,8 @@ class TestSizeCategoryLayerHelper(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'size-category')
+        self.assertEqual(layer.legend._type['point'], 'size-category-point')
+        self.assertEqual(layer.legend._type['line'], 'size-category-line')
         self.assertEqual(layer.legend._title, 'Neighborhoods')
         self.assertEqual(layer.legend._description, '')
 

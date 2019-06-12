@@ -16,7 +16,8 @@ class TestSizeContinuousLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['width'], 'ramp(linear(sqrt($name), sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 50])')
+        self.assertEqual(layer.style._style['point']['width'],
+                         'ramp(linear(sqrt($name), sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 50])')
         self.assertEqual(layer.style._style['line']['width'], 'ramp(linear($name), [1, 10])')
         self.assertEqual(layer.style._style['point']['color'], 'opacity(#F46D43, 0.8)')
         self.assertEqual(layer.style._style['line']['color'], 'opacity(#4CC8A3, 0.8)')
@@ -27,7 +28,8 @@ class TestSizeContinuousLayerHelper(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'size-continuous')
+        self.assertEqual(layer.legend._type['point'], 'size-continuous-point')
+        self.assertEqual(layer.legend._type['line'], 'size-continuous-line')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
 

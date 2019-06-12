@@ -17,6 +17,9 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertNotEqual(layer.style, None)
         self.assertEqual(layer.style._style['point']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
+        self.assertEqual(layer.style._style['polygon']['color'],
+                         'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'name',
@@ -24,7 +27,9 @@ class TestColorBinsLayerHelper(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'color-bins')
+        self.assertEqual(layer.legend._type['point'], 'color-bins-point')
+        self.assertEqual(layer.legend._type['line'], 'color-bins-line')
+        self.assertEqual(layer.legend._type['polygon'], 'color-bins-polygon')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
 

@@ -18,6 +18,8 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
         self.assertNotEqual(layer.style, None)
         self.assertEqual(layer.style._style['point']['color'], 'ramp(top($name, 11), bold)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(top($name, 11), bold)')
+        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(top($name, 11), bold), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'Neighborhoods',
@@ -25,7 +27,9 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'color-category')
+        self.assertEqual(layer.legend._type['point'], 'color-category-point')
+        self.assertEqual(layer.legend._type['line'], 'color-category-line')
+        self.assertEqual(layer.legend._type['polygon'], 'color-category-polygon')
         self.assertEqual(layer.legend._title, 'Neighborhoods')
         self.assertEqual(layer.legend._description, '')
 

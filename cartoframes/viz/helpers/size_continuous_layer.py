@@ -23,7 +23,11 @@ def size_continuous_layer(source, value, title='', size=None, color=None):
             }
         },
         legend={
-            'type': 'size-continuous',
+            'type': {
+                'point': 'size-continuous-point',
+                'line': 'size-continuous-line',
+                'polygon': 'size-continuous-polygon'
+            },
             'title': title or value,
             'description': ''
         }
