@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from cartoframes.viz import helpers, Source
 
 
-class TestHelpers(unittest.TestCase):
+class TestColorBinsLayerHelper(unittest.TestCase):
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.color_bins_layer, None)
