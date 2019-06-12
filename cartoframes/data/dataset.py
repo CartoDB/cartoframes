@@ -416,7 +416,7 @@ class Dataset(object):
         if self._cc:
             return self._cc.get_default_schema()
 
-       return None
+        return None
 
 
 def get_query(dataset):
