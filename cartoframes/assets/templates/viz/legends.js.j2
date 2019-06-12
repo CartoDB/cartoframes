@@ -16,10 +16,7 @@ function createLegend(layer, legendData, layerIndex) {
 
   if (legendData.prop) {
     const config = { othersLabel: 'Others' }  // TODO: i18n
-    const opts = {
-      format: format,
-      config: config
-    };
+    const opts = { format, config };
 
     if (legendData.type.startsWith('size-continuous')) {
       config.samples = 4;
