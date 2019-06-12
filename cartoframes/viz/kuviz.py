@@ -7,6 +7,9 @@ from carto.exceptions import CartoException
 from .source import Source
 from ..columns import normalize_name
 
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
+
 
 class KuvizPublisher(object):
     def __init__(self, vmap, context=None):
