@@ -1,48 +1,5 @@
 {% macro createLegend(legend_data, id) -%}
-  {% set type = legend_data.type %}
-  {% if type == 'color-bins' %}
-    <as-legend-color-bins id="{{id}}" slot="legends"></as-legend-color-bins>
-  {% elif type == 'color-bins-line' %}
-    <as-legend-color-bins-line id="{{id}}" slot="legends"></as-legend-color-bins-line>
-  {% elif type == 'color-bins-point' %}
-    <as-legend-color-bins-point id="{{id}}" slot="legends"></as-legend-color-bins-point>
-  {% elif type == 'color-bins-polygon' %}
-    <as-legend-color-bins-polygon id="{{id}}" slot="legends"></as-legend-color-bins-polygon>
-  {% elif type == 'color-category' %}
-    <as-legend-color-category id="{{id}}" slot="legends"></as-legend-color-category>
-  {% elif type == 'color-category-line' %}
-    <as-legend-color-category-line id="{{id}}" slot="legends"></as-legend-color-category-line>
-  {% elif type == 'color-category-point' %}
-    <as-legend-color-category-point id="{{id}}" slot="legends"></as-legend-color-category-point>
-  {% elif type == 'color-category-polygon' %}
-    <as-legend-color-category-polygon id="{{id}}" slot="legends"></as-legend-color-category-polygon>
-  {% elif type == 'color-continuous' %}
-    <as-legend-color-continuous id="{{id}}" slot="legends"></as-legend-color-continuous>
-  {% elif type == 'color-continuous-line' %}
-    <as-legend-color-continuous-line id="{{id}}" slot="legends"></as-legend-color-continuous-line>
-  {% elif type == 'color-continuous-point' %}
-    <as-legend-color-continuous-point id="{{id}}" slot="legends"></as-legend-color-continuous-point>
-  {% elif type == 'color-continuous-polygon' %}
-    <as-legend-color-continuous-polygon id="{{id}}" slot="legends"></as-legend-color-continuous-polygon>
-  {% elif type == 'size-bins' %}
-    <as-legend-size-bins id="{{id}}" slot="legends"></as-legend-size-bins>
-  {% elif type == 'size-bins-line' %}
-    <as-legend-size-bins-line id="{{id}}" slot="legends"></as-legend-size-bins-line>
-  {% elif type == 'size-bins-point' %}
-    <as-legend-size-bins-point id="{{id}}" slot="legends"></as-legend-size-bins-point>
-  {% elif type == 'size-category' %}
-    <as-legend-size-category id="{{id}}" slot="legends"></as-legend-size-category>
-  {% elif type == 'size-category-line' %}
-    <as-legend-size-category-line id="{{id}}" slot="legends"></as-legend-size-category-line>
-  {% elif type == 'size-category-point' %}
-    <as-legend-size-category-point id="{{id}}" slot="legends"></as-legend-size-category-point>
-  {% elif type == 'size-continuous' %}
-    <as-legend-size-continuous id="{{id}}" slot="legends"></as-legend-size-continuous>
-  {% elif type == 'size-continuous-line' %}
-    <as-legend-size-continuous-line id="{{id}}" slot="legends"></as-legend-size-continuous-line>
-  {% elif type == 'size-continuous-point' %}
-    <as-legend-size-continuous-point id="{{id}}" slot="legends"></as-legend-size-continuous-point>
-  {% endif %}
+  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
