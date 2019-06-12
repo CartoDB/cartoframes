@@ -198,7 +198,7 @@ class Dataset(object):
                 if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
-                if pd.isnull(val) or val is None:
+                if self._is_null(val):
                     val = ''
                 if with_lnglat:
                     if col == with_lnglat[0]:
@@ -219,6 +219,13 @@ class Dataset(object):
 
             csv_row += '\n'
             yield csv_row.encode()
+
+    def _is_null(self, val):
+        vnull = pd.isnull(val)
+        if isinstance(vnull, bool):
+            return vnull
+        else:
+            return vnull.all()
 
     def _drop_table_query(self, if_exists=True):
         return '''DROP TABLE {if_exists} {table_name}'''.format(
