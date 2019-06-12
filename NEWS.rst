@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.10.1
+------
+
+Release 2019-06-xx
+
+Updates
+
+- Fix schema not always properly set in write operations (#734)
+
+
+Changelog
+=========
+
 0.10.0
 ------
 
