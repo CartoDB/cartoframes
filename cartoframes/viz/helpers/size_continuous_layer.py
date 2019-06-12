@@ -8,7 +8,8 @@ def size_continuous_layer(source, value, title='', size=None, color=None):
         source,
         style={
             'point': {
-                'width': 'ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})'.format(value, size or [2, 50]),
+                'width': 'ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})'.format(
+                    value, size or [2, 50]),
                 'color': 'opacity({0}, 0.8)'.format(color or '#F46D43')
             },
             'line': {
