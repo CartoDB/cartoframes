@@ -265,6 +265,19 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset.download()
         dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
 
+    def test_dataset_download_bool_null(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        query = 'SELECT * FROM (values (true, true), (false, false), (true, null)) as x(fakec_bool, fakec_bool_null)'
+        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset.upload(table_name=self.test_write_table)
+
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        df = dataset.download()
+
+        self.assertEqual(df['fakec_bool'].dtype, 'bool')
+        self.assertEqual(df['fakec_bool_null'].dtype, 'object')
+
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_points_dataset(self):
         self.assertNotExistsTable(self.test_write_table)
