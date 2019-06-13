@@ -116,12 +116,12 @@ class Style(object):
 
     def _prune_defaults(self, default_style, style):
         output = default_style.copy()
-        if text_match(r'color\s*:', style):
+        if 'color' in output and text_match(r'color\s*:', style):
             del output['color']
-        if text_match(r'width\s*:', style):
+        if 'width' in output and text_match(r'width\s*:', style):
             del output['width']
-        if text_match(r'strokeColor\s*:', style):
+        if 'strokeColor' in output and text_match(r'strokeColor\s*:', style):
             del output['strokeColor']
-        if text_match(r'strokeWidth\s*:', style):
+        if 'strokeWidth' in output and text_match(r'strokeWidth\s*:', style):
             del output['strokeWidth']
         return output

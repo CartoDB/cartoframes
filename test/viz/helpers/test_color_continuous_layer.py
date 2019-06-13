@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from cartoframes.viz import helpers, Source
 
 
-class TestHelpers(unittest.TestCase):
+class TestColorContinuousLayerHelper(unittest.TestCase):
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.color_continuous_layer, None)
@@ -16,7 +16,9 @@ class TestHelpers(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'ramp(linear($name), reverse(sunset))')
+        self.assertEqual(layer.style._style['point']['color'], 'ramp(linear($name), sunset)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(linear($name), sunset)')
+        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(linear($name), sunset), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'name',
@@ -24,8 +26,9 @@ class TestHelpers(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'color-continuous')
-        self.assertEqual(layer.legend._prop, 'color')
+        self.assertEqual(layer.legend._type['point'], 'color-continuous-point')
+        self.assertEqual(layer.legend._type['line'], 'color-continuous-line')
+        self.assertEqual(layer.legend._type['polygon'], 'color-continuous-polygon')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
 
@@ -40,7 +43,7 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(linear($name), reverse(prism))'
+            'ramp(linear($name), prism)'
         )
 
     def test_color_continuous_layer_line(self):
@@ -56,7 +59,7 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(linear($name), reverse(prism))'
+            'ramp(linear($name), prism)'
         )
 
     def test_color_continuous_layer_polygon(self):
@@ -72,5 +75,5 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
-            'opacity(ramp(linear($name), reverse(prism)), 0.9)'
+            'opacity(ramp(linear($name), prism), 0.9)'
         )
