@@ -9,7 +9,7 @@ STYLE = {
         'color': 'hex("#EE4D5A")',
         'width': 'ramp(linear(zoom(),0,18),[2,10])',
         'strokeWidth': 'ramp(linear(zoom(),0,18),[0,1])',
-        'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.4]))'
+        'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
     },
     'line': {
         'color': 'hex("#4CC8A3")',
