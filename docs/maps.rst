@@ -1,6 +1,6 @@
 Interactive Maps
 ================
-.. automodule:: cartoframes.viz.map
+.. autoclass:: cartoframes.viz.Map
     :noindex:
     :members:
     :member-order: bysource

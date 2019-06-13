@@ -5,11 +5,12 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
 
 .. code::
 
-    from cartoframes import CartoContext
+    from cartoframes.auth import Context
+    from cartoframes.data import Dataset
     import pandas as pd
 
     # create cartocontext for your carto account
-    cc = CartoContext(<your credentials>)
+    cc = Context(<your credentials>)
 
     # Extract into a pandas' DataFrame (can be replaced by other operation)
     raw_data = pd.read_csv('https://<remote location>.csv')
@@ -19,6 +20,30 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
 
     # Load into your carto account
     cc.write(processed_data, 'processed_data')
+
+
+Read data from PostgreSQL to CARTO
+----------------------------------
+
+.. code::
+
+    from cartoframes.auth import Context
+    from cartoframes.data import Dataset
+
+    import pandas as pd
+    import sqlalchemy as sqla
+
+    connection_string = 'postgresql://localhost:5432'  # replace with your connection string
+    engine = sql.create_engine(connect_string)
+    raw_data = pd.read_sql_query('arbitrary sql query', con=engine)
+
+    # do something with this data
+    # for example, create a map from the dataframe with lat/lng columns
+    Map(Layer(raw_data))
+
+    # send to carto
+    pg_dataset = Dataset.from_dataframe(df)
+    pg_dataset.upload(table_name='table_from_pg_db')
 
 
 Use cases

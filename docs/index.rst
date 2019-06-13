@@ -9,9 +9,9 @@
    :maxdepth: 2
 
    Overview <overview>
-   Authentication <cartocontext>
    Interactive Maps <maps>
    Data Workflows <data>
+   Authentication <cartocontext>
    Example Functionalty <example_context>
    Credentials <credentials>
    Cookbook <cookbook>
