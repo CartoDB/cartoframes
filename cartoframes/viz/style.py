@@ -17,6 +17,7 @@ class Style(object):
         String API.
 
         .. code::
+
             from cartoframes.viz import Style
 
             Style('color: blue')
@@ -31,6 +32,7 @@ class Style(object):
         Dict API.
 
         .. code::
+
             from cartoframes.viz import Style
 
             Style({

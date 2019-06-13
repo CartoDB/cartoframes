@@ -9,12 +9,11 @@
    :maxdepth: 2
 
    Overview <overview>
-   CartoContext <cartocontext>
-   Map Layers <layers>
-   Layer Styling <styling>
+   Authentication <cartocontext>
+   Interactive Maps <maps>
+   Data Workflows <data>
    Example Functionalty <example_context>
    Credentials <credentials>
-   Batch Jobs <batchjobstatus>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
    Local Development Setup <local_development>

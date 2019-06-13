@@ -17,6 +17,7 @@ class Popup(object):
         Show columns.
 
         .. code::
+
             from cartoframes.viz import Popup
 
             Popup({
@@ -27,6 +28,7 @@ class Popup(object):
         Show expressions.
 
         .. code::
+
             from cartoframes.viz import Popup
 
             Popup({
@@ -36,6 +38,7 @@ class Popup(object):
         Show titles.
 
         .. code::
+
             from cartoframes.viz import Popup
 
             Popup({
