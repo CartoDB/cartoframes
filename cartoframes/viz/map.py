@@ -206,8 +206,8 @@ class Map(object):
     def delete_publication(self):
         if self._kuviz:
             self._kuviz.delete()
+            print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
             self._kuviz = None
-            print("Publication deleted")
 
     def update_publication(self, name, password, maps_api_key='default_public', context=None):
         if not self._kuviz:
