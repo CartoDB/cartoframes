@@ -19,10 +19,10 @@ class Layer(object):
     """Layer
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`,
-          :py:class:`Source <cartoframes.vis.Source>`): The source data.
-        style (str, dict, :py:class:`Style <cartoframes.vis.Style>`,
-          optional): The style of the visualization: `CARTO VL styling
+        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`):
+          The source data.
+        style (str, dict, :py:class:`Style <cartoframes.vis.Style>`, optional):
+          The style of the visualization: `CARTO VL styling
           <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
         popup (dict, :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           This option adds interactivity (click and hover) to a layer to show popups.
@@ -81,6 +81,7 @@ class Layer(object):
                 'color: "red"',
                 context=context
             )
+
     """
 
     def __init__(self,

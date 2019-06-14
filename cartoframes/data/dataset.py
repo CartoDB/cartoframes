@@ -20,7 +20,10 @@ class Dataset(object):
     account, or an arbitrary query against a CARTO account. If hosted, the data
     can be retrieved as a pandas DataFrame.
 
-
+    The recommended way to work with this class is by using the class methods
+    :py:meth:`from_table`, :py:meth:`from_query`, :py:meth:`from_dataframe`,
+    :py:meth:`from_geodataframe`, or :py:meth:`from_geojson`. Direct use of the
+    Dataset constructor should be avoided.
     """
     FAIL = 'fail'
     REPLACE = 'replace'
@@ -64,7 +67,8 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context=None, schema=None):
-        """Create a Dataset from a table hosted on CARTO.
+        """Create a :py:class:`Dataset <cartoframes.data.Dataset>` from a table
+        hosted on CARTO.
 
         Args:
           table_name (str): Name of table on CARTO account associated with
@@ -102,27 +106,30 @@ class Dataset(object):
             `context`.
           context (:py:class:`Context <cartoframes.auth.Context>`, optional):
             Context that `table_name` is associated with. If
-            `set_default_context` is previously used, this value will be
-            implicitly filled in.
+            :py:meth:`set_default_context <cartoframes.auth.set_default_context>`
+            is previously used, this value will be implicitly filled in.
 
         .. code::
 
             from cartoframes.auth import set_default_context
             from cartoframes.data import Dataset
+            from cartoframes.viz import Map
+            from cartoframes.viz.helpers import color_continuous_layer
 
             set_default_context('https://cartoframes.carto.com')
 
-            d = Dataset.from_table('''
+            d = Dataset.from_query('''
                 SELECT
                   CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                  ST_Transform(CDB_LatLng(pickup_latitude, pickup_longitude), 3857) as the_geom_webmercator,
                   cartodb_id,
                   fare_amount
                 FROM
-                  taxi_50
+                  taxi_50k
                 ''')
 
-            # download into a dataframe
-            df = d.download()
+            # show dataset on a map
+            Map(color_continuous_layer(d, 'fare_amount'))
 
         """
         return cls(query=query, context=context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
@@ -134,17 +141,22 @@ class Dataset(object):
         Args:
           df (pandas.DataFrame): pandas DataFrame
 
-        .. code::
+        Example:
 
-            from cartoframes.data import Dataset
-            from cartoframes.viz import Map, Layer
-            import pandas as pd
+            Create a Dataset from a pandas Dataframe and then map the data.
 
-            df = pd.DataFrame({'lat': [0, 10, 20], 'lng': [20, 10, 0]})
+            .. code::
 
-            d = Dataset.from_dataframe(df)
+                from cartoframes.data import Dataset
+                from cartoframes.viz import Map, Layer
+                import pandas as pd
 
-            Map(Layer(d))
+                df = pd.DataFrame({'lat': [0, 10, 20], 'lng': [20, 10, 0]})
+
+                d = Dataset.from_dataframe(df)
+
+                Map(Layer(d))
+
         """
         dataset = cls(df=df, state=cls.STATE_LOCAL)
         _save_index_as_column(dataset._df)
@@ -153,42 +165,6 @@ class Dataset(object):
     @classmethod
     def from_geodataframe(cls, gdf):
         """Create a Dataset from a local GeoPandas GeoDataFrame.
-
-        Args:
-          gdf (geopandas.GeoDataFrame): GeoPandas GeoDataFrame
-
-        Example
-
-          GeoDataFrame example code taken from `GeoPandas documentation
-          <http://geopandas.org/gallery/create_geopandas_from_pandas.html#creating-a-geodataframe-from-a-dataframe-with-coordinates>`__.
-
-        .. code::
-
-            from cartoframes.data import Dataset
-            from cartoframes.viz import Map, Layer
-            import pandas as pd
-            import geopandas as gpd
-
-            df = pd.DataFrame(
-                {'City': ['Buenos Aires', 'Brasilia', 'Santiago', 'Bogota', 'Caracas'],
-                 'Country': ['Argentina', 'Brazil', 'Chile', 'Colombia', 'Venezuela'],
-                 'Latitude': [-34.58, -15.78, -33.45, 4.60, 10.48],
-                 'Longitude': [-58.66, -47.91, -70.66, -74.08, -66.86]})
-            df = pd.DataFrame({'lat': [0, 10, 20], 'lng': [20, 10, 0]})
-            gdf = gpd.GeoDataFrame(
-                df,
-                geometry=gpd.points_from_xy(df.Longitude, df.Latitude)
-            )
-
-            Map(Layer(d))
-        """
-        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
-        _save_index_as_column(dataset._gdf)
-        return dataset
-
-    @classmethod
-    def from_geojson(cls, geojson):
-        """Create a Dataset from a GeoJSON file (hosted or local).
 
         Args:
           gdf (geopandas.GeoDataFrame): GeoPandas GeoDataFrame
@@ -214,7 +190,35 @@ class Dataset(object):
                 df,
                 geometry=gpd.points_from_xy(df.Longitude, df.Latitude)
             )
+
             d = Dataset.from_geodataframe(gdf)
+
+            Map(Layer(d))
+        """
+        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._gdf)
+        return dataset
+
+    @classmethod
+    def from_geojson(cls, geojson):
+        """Create a Dataset from a GeoJSON file (hosted or local).
+
+        Args:
+          gdf (geopandas.GeoDataFrame): GeoPandas GeoDataFrame
+
+        Example:
+
+          GeoDataFrame example code taken from `GeoPandas documentation
+          <http://geopandas.org/gallery/create_geopandas_from_pandas.html#creating-a-geodataframe-from-a-dataframe-with-coordinates>`__.
+
+        .. code::
+
+            from cartoframes.data import Dataset
+            from cartoframes.viz import Map, Layer
+
+            geojson_source = 'https://cartoframes.carto.com/api/v2/sql?q=select+*+from+nyc_census_tracts&format=geojson'
+
+            d = Dataset.from_geojson(geojson_source)
 
             Map(Layer(d))
         """
@@ -222,7 +226,7 @@ class Dataset(object):
 
     @property
     def dataframe(self):
-        """Get the dataset DataFrame, if it exists."""
+        """Get the Dataset DataFrame, if it exists."""
         return self._df
 
     @property
@@ -262,7 +266,7 @@ class Dataset(object):
 
     @property
     def dataset_info(self):
-        """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance"""
+        """Get :py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance"""
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method to save your data in CARTO.')
@@ -305,13 +309,13 @@ class Dataset(object):
               and other special characters.
             context (:py:class:`Context <cartoframes.auth.Context>`, optional):
               Context of user account to send Dataset to. If not provided,
-              a default context (if set with :py:function:`set_default_context
+              a default context (if set with :py:meth:`set_default_context
               <cartoframes.auth.set_default_context>`) will attempted to be
               used.
 
         Example:
 
-            Send a dataframe to CARTO.
+            Send a pandas DataFrame to CARTO.
 
             .. code::
 
@@ -343,17 +347,19 @@ class Dataset(object):
             raise ValueError('You should provide a table_name and context to upload data.')
 
         if self._gdf is None and self._df is None and self._query is None:
-            raise ValueError('Nothing to upload.'
-                             'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
+            raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
+                             'GeoDataFrame, or a query to upload data to CARTO.')
 
-        already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
-                                              'Please choose a different `table_name` or use'
-                                              'if_exists="replace" to overwrite it'.format(
-                                                  t=self._table_name, s=self._schema))
+        already_exists_error = CartoException(
+                'Table with name {t} and schema {s} already exists in CARTO.'
+                'Please choose a different `table_name` or use '
+                'if_exists="replace" to overwrite it'.format(
+                    t=self._table_name, s=self._schema))
 
         # priority order: gdf, df, query
         if self._gdf is not None:
-            warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+            warn('GeoDataFrame option is still under development. Attempting '
+                 'to upload as a DataFrame')
             # TODO: uncomment when we support GeoDataFrame
             # self._normalized_column_names = _normalize_column_names(self._gdf)
 
