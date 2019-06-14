@@ -17,9 +17,10 @@ class TestSizeContinuousLayerHelper(unittest.TestCase):
 
         self.assertNotEqual(layer.style, None)
         self.assertEqual(layer.style._style['point']['width'],
-                         'ramp(linear(sqrt($name), sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 50])')
+                         'ramp(linear(sqrt($name), sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 40])')
         self.assertEqual(layer.style._style['line']['width'], 'ramp(linear($name), [1, 10])')
-        self.assertEqual(layer.style._style['point']['color'], 'opacity(#F46D43, 0.8)')
+        self.assertEqual(layer.style._style['point']['color'], 'opacity(#FFB927, 0.8)')
+        self.assertEqual(layer.style._style['point']['strokeColor'], 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))')
         self.assertEqual(layer.style._style['line']['color'], 'opacity(#4CC8A3, 0.8)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{

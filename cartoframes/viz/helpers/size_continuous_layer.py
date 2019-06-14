@@ -9,8 +9,9 @@ def size_continuous_layer(source, value, title='', size=None, color=None):
         style={
             'point': {
                 'width': 'ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})'.format(
-                    value, size or [2, 50]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#F46D43')
+                    value, size or [2, 40]),
+                'color': 'opacity({0}, 0.8)'.format(color or '#FFB927'),
+                'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
             },
             'line': {
                 'width': 'ramp(linear(${0}), {1})'.format(value, size or [1, 10]),

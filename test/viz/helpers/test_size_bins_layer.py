@@ -16,9 +16,9 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['width'], 'ramp(globalQuantiles($name, 5), [2, 20])')
+        self.assertEqual(layer.style._style['point']['width'], 'ramp(globalQuantiles($name, 5), [2, 14])')
         self.assertEqual(layer.style._style['line']['width'], 'ramp(globalQuantiles($name, 5), [1, 10])')
-        self.assertEqual(layer.style._style['point']['color'], 'opacity(#F46D43, 0.8)')
+        self.assertEqual(layer.style._style['point']['color'], 'opacity(#EE4D5A, 0.8)')
         self.assertEqual(layer.style._style['line']['color'], 'opacity(#4CC8A3, 0.8)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{

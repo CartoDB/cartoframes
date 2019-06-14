@@ -16,9 +16,9 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'ramp(linear($name), sunset)')
-        self.assertEqual(layer.style._style['line']['color'], 'ramp(linear($name), sunset)')
-        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(linear($name), sunset), 0.9)')
+        self.assertEqual(layer.style._style['point']['color'], 'ramp(linear($name), bluyl)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(linear($name), bluyl)')
+        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(linear($name), bluyl), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'name',

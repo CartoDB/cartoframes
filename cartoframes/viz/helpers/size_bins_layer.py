@@ -8,8 +8,8 @@ def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
         source,
         style={
             'point': {
-                'width': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, size or [2, 20]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#F46D43')
+                'width': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, size or [2, 14]),
+                'color': 'opacity({0}, 0.8)'.format(color or '#EE4D5A')
             },
             'line': {
                 'width': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, size or [1, 10]),
