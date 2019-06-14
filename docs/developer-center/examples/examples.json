@@ -2,67 +2,14 @@
   "main": {
     "file": "introduction.md"
   },
-  "categories": [{
-      "title": "Quickstart",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
-    },
+  "categories": [
     {
-      "title": "Sources",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
-    },
-    {
-      "title": "Visualizations",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
-    },
-    {
-      "title": "Helper Methods",
-      "samples": [{
-          "title": "Helper Methods - Part 1",
-          "desc": "",
-          "file": ""
-        },
-        {
-          "title": "Helper Methods - Part 2",
-          "desc": "",
-          "file": ""
-        }
-      ]
-    },
-    {
-      "title": "Spatial Analysis",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
-    },
-    {
-      "title": "Publishing",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
-    },
-    {
-      "title": "Advanced",
-      "samples": [{
-        "title": "",
-        "desc": "",
-        "file": ""
-      }]
+        "title": "Jupyter Notebooks",
+        "samples": [{
+          "title": "Notebooks",
+          "desc": "Notebooks",
+          "file": "notebooks.md"
+        }]
     }
   ]
 }
