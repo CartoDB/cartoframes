@@ -4,6 +4,19 @@
 
 This guide is meant to guide you step by step from the installing and authentication process to generate a simple interactive visualization. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
+At the end, you'll be able to create a simple visualization like the one below and get a link to share it.
+
+<div class="example-map">
+    <iframe
+        id="quickstart-final-map"
+        src="https://cartovl.carto.com/kuviz/6d996e5c-6f83-4408-b11d-3d795f3d2f0d"
+        width="100%"
+        height="500"
+        style="margin: 20px auto !important"
+        frameBorder="0">
+    </iframe>
+</div>
+
 ### Installing CARTOframes
 
 You can install CARTOframes with `pip`. Simply type the following in the command line to do a system install:

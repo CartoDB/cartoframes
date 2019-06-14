@@ -146,3 +146,7 @@ Map(
     size_continuous_layer('table_name', 'numeric_attribute', 'legend/hover title', size='[10, 100]', color='blue')
 )
 ```
+
+### Multilayer Helpers
+
+### Customize visualization parameters

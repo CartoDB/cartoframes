@@ -42,31 +42,191 @@ Map(
 )
 ```
 
+### Add information
+
+```py
+Map(
+    Layer(
+        'populated_places',
+        legend={
+            'title': 'Populated Places',
+            'description': 'This is a common dataset.',
+            'footer': 'Source: CARTO'
+        }
+    )
+)
+```
+
+![Legends Example 1](../../img/guides/legends/legends-1.png)
+
 ### Color Category
-  * color-category-point
-  * color-category-line
-  * color-category-polygon
+
+* color-category-point
+* color-category-line
+* color-category-polygon
+
+Example:
+```py
+Map(
+    Layer(
+        'populated_places',
+        'color: ramp(top($adm0name, 5), bold)',
+        legend=Legend({
+            'type': 'color-category-point'
+        })
+    )
+)
+```
+
+![Legends Example 2](../../img/guides/legends/legends-2.png)
 
 ### Color Bins
-  * color-bins-point
-  * color-bins-line
-  * color-bins-polygon
+
+* color-bins-point
+* color-bins-line
+* color-bins-polygon
+
+Example:
+```py
+Map(
+    Layer(
+        'sfcta_congestion_roads',
+        'color: ramp(globalEqIntervals($auto_speed, 5), purpor)',
+        legend={
+            'type': 'color-bins-line'
+        }
+    )
+)
+```
+
+![Legends Example 3](../../img/guides/legends/legends-3.png)
 
 ### Color Continuous
-  * color-continuous-point
-  * color-continuous-line
-  * color-continuous-polygon
+
+* color-continuous-point
+* color-continuous-line
+* color-continuous-polygon
+
+Example:
+
+```py
+Map(
+    Layer(
+        'sf_neighborhoods',
+        'color: ramp(linear($cartodb_id), sunset)',
+        legend={
+            'type': 'color-continuous-polygon',
+            'prop': 'color'
+        }
+    )
+)
+```
+
+![Legends Example 4](../../img/guides/legends/legends-4.png)
 
 ### Size Category
-  * size-category-point
-  * size-category-line
+
+* size-category-point
+* size-category-line
+
+Example:
+```py
+Map(
+    Layer(
+        'populated_places',
+        '''
+        width: ramp(buckets($adm_0_cap_name, ["Capital", "City"]), [25, 5])
+        strokeWidth: 1
+        strokeColor: white
+        ''',
+        legend={
+            'type': 'size-category-point'
+        }
+    )
+)
+```
+
+![Legends Example 5](../../img/guides/legends/legends-5.png)
 
 ### Size Bins
-  * size-bins-point
-  * size-bins-line
+
+* size-bins-point
+* size-bins-line
+
+Example:
+```py
+Map(
+    Layer(
+        'sfcta_congestion_roads',
+        '''
+        width: ramp(globalEqIntervals($auto_speed, 5), [1, 10])
+        color: opacity(turquoise, 0.8)
+        strokeWidth: 0.5
+        strokeColor: opacity(blue,0.2)
+        ''',
+        legend={
+            'type': 'size-bins-line'
+        }
+    )
+)
+```
+
+![Legends Example 6](../../img/guides/legends/legends-6.png)
 
 ### Size Continuous
-  * size-continuous-point
-  * size-continuous-line
+
+* size-continuous-point
+* size-continuous-line
+
+Example:
+```py
+Map(
+    Layer(
+        'county_points_with_population',
+        '''
+        width: ramp(linear($estimate_total), [1, 80])
+        color: opacity(turquoise, 0.8)
+        strokeWidth: 0.5
+        strokeColor: opacity(blue,0.4)
+        order: asc(width())
+        ''',
+        legend={
+            'type': 'size-continuous-point',
+            'title':'Population by County'
+        }
+    )
+)
+```
+
+![Legends Example 7](../../img/guides/legends/legends-7.png)
 
 ## Multiple Legends
+
+Example:
+```py
+Map([
+    Layer(
+        'maximum_heat_index',
+        'color: ramp(linear($value), purpor)',
+        legend={
+            'type': 'color-continuous-point',
+            'title': 'Heat Index Values'
+        }
+    ),
+    Layer(
+        'county_points_with_population',
+        '''
+        width: ramp(globalEqIntervals($estimate_total,5), [2, 40])
+        color: opacity(turquoise, 0.8)
+        strokeWidth: 0.5
+        strokeColor: opacity(blue,0.2)
+        ''',
+        legend={
+            'type': 'size-continuous-point',
+            'title': 'Population by Counti'
+        }
+    )
+])
+```
+
+![Legends Example 8](../../img/guides/legends/legends-8.png)
