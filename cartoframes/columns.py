@@ -128,14 +128,19 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns, exclude_dates=False, exclude_the_geom=False):
+def dtypes(columns, exclude_dates=False, exclude_the_geom=False, exclude_bools=False):
     return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
             for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
-            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)}
+            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)
+            and not(exclude_bools is True and x.dtype == 'bool')}
 
 
 def date_columns_names(columns):
     return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
+
+
+def bool_columns_names(columns):
+    return [x.name for x in columns if x.dtype == 'bool']
 
 
 def pg2dtypes(pgtype):

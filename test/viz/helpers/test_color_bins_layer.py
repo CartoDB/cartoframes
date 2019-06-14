@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from cartoframes.viz import helpers, Source
 
 
-class TestHelpers(unittest.TestCase):
+class TestColorBinsLayerHelper(unittest.TestCase):
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.color_bins_layer, None)
@@ -16,7 +16,10 @@ class TestHelpers(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'ramp(globalQuantiles($name, 5), reverse(purpor))')
+        self.assertEqual(layer.style._style['point']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
+        self.assertEqual(layer.style._style['polygon']['color'],
+                         'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'name',
@@ -24,8 +27,9 @@ class TestHelpers(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'color-bins')
-        self.assertEqual(layer.legend._prop, 'color')
+        self.assertEqual(layer.legend._type['point'], 'color-bins-point')
+        self.assertEqual(layer.legend._type['line'], 'color-bins-line')
+        self.assertEqual(layer.legend._type['polygon'], 'color-bins-polygon')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
 
@@ -41,7 +45,7 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(globalQuantiles($name, 3), reverse(prism))'
+            'ramp(globalQuantiles($name, 3), prism)'
         )
 
     def test_color_bins_layer_line(self):
@@ -58,7 +62,7 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalQuantiles($name, 3), reverse(prism))'
+            'ramp(globalQuantiles($name, 3), prism)'
         )
 
     def test_color_bins_layer_polygon(self):
@@ -75,5 +79,5 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
-            'opacity(ramp(globalQuantiles($name, 3), reverse(prism)), 0.9)'
+            'opacity(ramp(globalQuantiles($name, 3), prism), 0.9)'
         )

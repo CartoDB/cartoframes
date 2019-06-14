@@ -3,10 +3,11 @@ import unittest
 from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source, constants
+from .utils import build_geojson
 from mocks.map_mock import MapMock
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
-from mocks.kuviz_mock import KuvizMock
+from mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 from .utils import build_geojson
 
@@ -168,16 +169,26 @@ class TestMapPublication(unittest.TestCase):
 
         self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
 
+    def assert_kuviz(self, kuviz, name, privacy):
+        self.assertIsNotNone(kuviz.id)
+        self.assertIsNotNone(kuviz.url)
+        self.assertEqual(kuviz.name, name)
+        self.assertEqual(kuviz.privacy, privacy)
+
+    def assert_kuviz_dict(self, kuviz_dict, name, privacy):
+        self.assertIsNotNone(kuviz_dict['id'])
+        self.assertIsNotNone(kuviz_dict['url'])
+        self.assertEqual(kuviz_dict['name'], name)
+        self.assertEqual(kuviz_dict['privacy'], privacy)
+
     def test_map_publish_remote(self):
         dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        kuviz = map.publish(name, context=self.context)
-        self.assertIsNotNone(kuviz.id)
-        self.assertIsNotNone(kuviz.url)
-        self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+        kuviz_dict = map.publish(name, context=self.context)
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
         query = "SELECT 1"
@@ -198,8 +209,65 @@ class TestMapPublication(unittest.TestCase):
         map.sync_data(table_name='fake_table', context=self.context)
 
         name = 'cf_publish'
-        kuviz = map.publish(name, context=self.context)
-        self.assertIsNotNone(kuviz.id)
-        self.assertIsNotNone(kuviz.url)
-        self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+        kuviz_dict = map.publish(name, context=self.context)
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
+
+    def test_map_publish_with_password(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        kuviz_dict = map.publish(name, context=self.context, password="1234")
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
+        self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
+
+    def test_map_publish_deletion(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        map.delete_publication()
+        self.assertIsNone(map._kuviz)
+
+    def test_map_publish_update_name(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        new_name = 'cf_update'
+        kuviz_dict = map.update_publication(new_name, password=None)
+        self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
+        self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
+
+    def test_map_publish_update_password(self):
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, context=self.context)
+        kuviz_dict = map.update_publication(name, password="1234")
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
+        self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
+
+    def test_map_publish_private_ds_with_public_apikey_fails(self):
+        is_public = KuvizPublisherMock.is_public
+
+        def is_not_public(self):
+            return False
+
+        KuvizPublisherMock.is_public = is_not_public
+
+        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        map = MapMock(Layer(Source(dataset)))
+
+        msg = ('The datasets used in your map are not public. '
+               'You need add new Regular API key with permissions to Maps API and the datasets. '
+               'You can do it from your CARTO dashboard or using the Auth API. You can get more '
+               'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
+        with self.assertRaises(CartoException, msg=msg):
+            map.publish('test', context=self.context)
+
+        KuvizPublisherMock.is_public = is_public

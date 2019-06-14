@@ -1,11 +1,11 @@
 import pandas as pd
-
 from tqdm import tqdm
 from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES
+from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES, \
+    get_public_context
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -107,6 +107,7 @@ class Dataset(object):
     @context.setter
     def context(self, context):
         self._cc = context
+        self._schema = context.get_default_schema()
 
     @property
     def is_saved_in_carto(self):
@@ -134,10 +135,10 @@ class Dataset(object):
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
         if table_name:
             self._table_name = normalize_name(table_name)
+        if context:
+            self.context = context
         if schema:
             self._schema = schema
-        if context:
-            self._cc = context
 
         if self._table_name is None or self._cc is None:
             raise ValueError('You should provide a table_name and context to upload data.')
@@ -203,13 +204,21 @@ class Dataset(object):
         """Checks to see if table exists"""
         try:
             self._cc.sql_client.send(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=self._table_name),
+                'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
             self._cc._debug_print(err=err)
+            return False
+
+    def is_public(self):
+        """Checks to see if table or table used by query has public privacy"""
+        public_context = get_public_context(self.context)
+        try:
+            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            return True
+        except CartoException:
             return False
 
     def _create_table(self, with_lnglat=None):
@@ -234,7 +243,7 @@ class Dataset(object):
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
-            .format(schema=self._schema or self._cc.get_default_schema(), table_name=self._table_name)
+            .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
@@ -256,7 +265,7 @@ class Dataset(object):
                 if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
                     continue
                 val = row[col]
-                if pd.isnull(val) or val is None:
+                if self._is_null(val):
                     val = ''
                 if with_lnglat:
                     if col == with_lnglat[0]:
@@ -277,6 +286,13 @@ class Dataset(object):
 
             csv_row += '\n'
             yield csv_row.encode()
+
+    def _is_null(self, val):
+        vnull = pd.isnull(val)
+        if isinstance(vnull, bool):
+            return vnull
+        else:
+            return vnull.all()
 
     def _drop_table_query(self, if_exists=True):
         return '''DROP TABLE {if_exists} {table_name}'''.format(
@@ -415,7 +431,7 @@ class Dataset(object):
         if self._cc:
             return self._cc.get_default_schema()
         else:
-            return 'public'
+            return None
 
 
 def get_query(dataset):

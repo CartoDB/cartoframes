@@ -15,7 +15,7 @@ class TestStyle(unittest.TestCase):
         self.assertIn('color: hex("#EE4D5A")', viz)
         self.assertIn('width: ramp(linear(zoom(),0,18),[2,10])', viz)
         self.assertIn('strokeWidth: ramp(linear(zoom(),0,18),[0,1])', viz)
-        self.assertIn('strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,1]))', viz)
+        self.assertIn('strokeColor: opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))', viz)
 
     def test_style_default_line(self):
         """Style.compute_viz should return the default viz for line"""

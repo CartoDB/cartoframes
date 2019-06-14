@@ -4,10 +4,9 @@ import unittest
 
 from carto.exceptions import CartoException
 
-from cartoframes.viz.kuviz import _validate_carto_kuviz
 from cartoframes.viz import Map, Layer, Source
 
-from mocks.kuviz_mock import KuvizMock, CartoKuvizMock, KuvizPublisherMock
+from mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
 
@@ -24,47 +23,19 @@ class TestKuviz(unittest.TestCase):
 
     def test_kuviz_create(self):
         name = 'test-name'
-        kuviz = KuvizMock.create(context=self.context, html=self.html, name=name)
+        kuviz = _create_kuviz(context=self.context, html=self.html, name=name)
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PUBLIC)
+        self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)
 
     def test_kuviz_create_with_password(self):
         name = 'test-name'
-        kuviz = KuvizMock.create(context=self.context, html=self.html, name=name, password="1234")
+        kuviz = _create_kuviz(context=self.context, html=self.html, name=name, password="1234")
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
         self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, KuvizMock.PRIVACY_PASSWORD)
-
-    def test_kuviz_create_fails_without_all_fields(self):
-        with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
-            KuvizMock.create(context=self.context, html=self.html, name=None)
-
-    def test_kuviz_validation(self):
-        name = 'test-name'
-        carto_kuviz = CartoKuvizMock(name=name, password=None)
-        result = _validate_carto_kuviz(carto_kuviz)
-        self.assertTrue(result)
-
-    def test_kuviz_validation_with_password(self):
-        name = 'test-name'
-        carto_kuviz = CartoKuvizMock(name=name, password="1234")
-        result = _validate_carto_kuviz(carto_kuviz)
-        self.assertTrue(result)
-
-    def test_kuviz_validation_fails_without_id(self):
-        name = 'test-name'
-        carto_kuviz = CartoKuvizMock(name=name, id=None, password=None)
-        with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
-            _validate_carto_kuviz(carto_kuviz)
-
-    def test_kuviz_validation_fails_without_url(self):
-        name = 'test-name'
-        carto_kuviz = CartoKuvizMock(name=name, url=None, password=None)
-        with self.assertRaises(CartoException, msg='Error creating Kuviz. Something goes wrong'):
-            _validate_carto_kuviz(carto_kuviz)
+        self.assertEqual(kuviz.privacy, PRIVACY_PASSWORD)
 
 
 class TestKuvizPublisher(unittest.TestCase):
@@ -72,6 +43,12 @@ class TestKuvizPublisher(unittest.TestCase):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.context = ContextMock(username=self.username, api_key=self.api_key)
+
+    def assert_kuviz_dict(self, kuviz_dict, name, privacy):
+        self.assertIsNotNone(kuviz_dict['id'])
+        self.assertIsNotNone(kuviz_dict['url'])
+        self.assertEqual(kuviz_dict['name'], name)
+        self.assertEqual(kuviz_dict['privacy'], privacy)
 
     def test_kuviz_publisher_create_local(self):
         source_1 = Source(build_geojson([-10, 0], [-10, 0]))
@@ -168,3 +145,8 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': maps_api_key, 'base_url': self.username})
+
+    def test_kuviz_publisher_all(self):
+        kuviz_dicts = KuvizPublisherMock.all()
+        for kuviz_dict in kuviz_dicts:
+            self.assert_kuviz_dict(kuviz_dict, name="test", privacy=PRIVACY_PUBLIC)

@@ -1,18 +1,35 @@
 Changelog
 =========
 
-0.11.0
+1.0.0b1
 ------
 
 Release 2019-mm-dd
 
 Updates
+
 - Sharing visualizations: structure and publication
 - Add namespaces cartoframes.data for Dataset class
 - Add support for DataFrames visualization (#735)
 - Reverse Map layers order (#742)
 - Infer legend prop from the type (#743)
 - Use `default_public` as default api key (#744)
+- Integrate size legends (#753)
+- Add size helpers
+  - size_category (#765)
+  - size_bins (#652)
+  - size_continuous (#653)
+
+0.10.1
+------
+
+Release 2019-06-12
+
+Updates
+
+- Fix schema not always properly set in write operations (#734)
+- Fix error in Dataset.upload related with array data (#754)
+- Fix Dataset.download error when reading boolean column with nulls (#732)
 
 0.10.0
 ------
