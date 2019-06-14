@@ -1,11 +1,11 @@
 import pandas as pd
-
 from tqdm import tqdm
 from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES
+from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES, \
+    get_public_context
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -204,13 +204,21 @@ class Dataset(object):
         """Checks to see if table exists"""
         try:
             self._cc.sql_client.send(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(
-                    table_name=self._table_name),
+                'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
             self._cc._debug_print(err=err)
+            return False
+
+    def is_public(self):
+        """Checks to see if table or table used by query has public privacy"""
+        public_context = get_public_context(self.context)
+        try:
+            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            return True
+        except CartoException:
             return False
 
     def _create_table(self, with_lnglat=None):
