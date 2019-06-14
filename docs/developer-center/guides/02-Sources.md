@@ -1,3 +1,0 @@
-## Sources
-
-### About this Guide

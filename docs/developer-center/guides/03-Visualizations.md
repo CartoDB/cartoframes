@@ -1,3 +1,0 @@
-## Visualizations
-
-### About this Guide
