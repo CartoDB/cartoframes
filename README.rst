@@ -86,7 +86,7 @@ Then create a new notebook and try the example code snippets below with tables t
 Using `pipenv`
 ^^^^^^^^^^^^^^
 
-Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an easy way to manage virtual environments. The steps below are: 
+Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an easy way to manage virtual environments. The steps below are:
 
 1. Create a virtual environment with Python 3.4+ (recommended instead of Python 2.7)
 2. Install cartoframes and Jupyter (optional) into the virtual environment
