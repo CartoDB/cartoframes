@@ -23,14 +23,14 @@ class Source(object):
     """Source
 
     Args:
-        data (str, :py:class:`GeoFrame <geopandas.GeoDataFrame>`,
-          :py:class:`Dataset <cartoframes.viz.Dataset>` ): a table name, SQL query
-          ,GeoJSON file, GeoFrame object or Dataset object.
-        context (:py:class:`Context <cartoframes.Context>`):
-          A Conext instance. If not provided the context will be automatically
-          obtained from the default context.
-        bounds (dict or list): a dict with `east`,`north`,`west`,`south`
-          properties, or a list of floats in the following order: [west,
+        data (str, geopandas.GeoDataFrame, pandas.DataFrame,
+          :py:class:`Dataset <cartoframes.data.Dataset>` ): a table name,
+          SQL query, GeoJSON file, GeoDataFrame, DataFrame, or Dataset object.
+        context (:py:class:`Context <cartoframes.auth.Context>`):
+          A Context instance. If not provided the context will be automatically
+          obtained from the default context if available.
+        bounds (dict or list): a dict with `east`, `north`, `west`, `south`
+          keys, or a list of floats in the following order: [west,
           south, east, north]. If not provided the bounds will be automatically
           calculated to fit all features.
 
