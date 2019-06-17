@@ -6,16 +6,7 @@ This guide is meant to guide you step by step from the installing and authentica
 
 At the end, you'll be able to create a simple visualization like the one below and get a link to share it.
 
-<div class="example-map">
-    <iframe
-        id="quickstart-final-map"
-        src="https://cartovl.carto.com/kuviz/6d996e5c-6f83-4408-b11d-3d795f3d2f0d"
-        width="100%"
-        height="500"
-        style="margin: 20px auto !important"
-        frameBorder="0">
-    </iframe>
-</div>
+<img src="../../img/guides/quickstart/quickstart-final.gif" alt="Final visualization" />
 
 ### Installing CARTOframes
 
@@ -24,6 +15,7 @@ You can install CARTOframes with `pip`. Simply type the following in the command
 ```bash
 $ pip install cartoframes
 ```
+
 To install through a Jupyter notebook, you can run
 
 ```bash
@@ -72,9 +64,9 @@ Before we can do anything with CARTOframes, we need to authenticate against a CA
 
 If you don't have yet an account at CARTO, and you want to start learning how to use CARTOframes, you only need the cartoframes library. Take a look to the Sources examples to know how to visualize data from a Dataframe or a GeoJSON.
 
-If you already have an account, you can start analyzing and visualizing your data!
+If you already have an account, you can start analyzing and visualizing your data! In this quickstart guide, we'll be using the [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) Dataset, which contains customer activity information in the city of Barcelona.
 
-The elements needed to create contexts are under the `cartoframes.auth` namespace. For this Quickstart guide, let's use one the `cartoframes` account and a public dataset:
+The elements we need to create contexts are under the `cartoframes.auth` namespace. For this Quickstart guide, let's use one the `cartoframes` account and a public dataset.
 
 ```py
 from cartoframes.auth import set_default_context
@@ -85,8 +77,10 @@ set_default_context(
     api_key='default_public'
 )
 
-Map(Layer('populated_places'))
+Map(Layer('spend_data'))
 ```
+
+<img src="../../img/guides/quickstart/quickstart-1.png" alt="Visualize the 'spend_data' dataset" />
 
 ### Change the viewport and basemap
 
@@ -103,15 +97,17 @@ Map(
 
 ### Apply an SQL Query to your visualization
 
-We're filtering by Country using a SQL Query as the first parameter of the Layer we're creating. In this case, we're going to get only the features that belong to Spain.
+In the next step we're filtering the data by taking only the features where the purchase amount is between 150€ and 200€. We're using a simple SQL Query:
 
 ```py
 from cartoframes.viz import Map, Layer, basemaps
 
 Map(
-    Layer('SELECT * from populated_places WHERE adm0name = \'Spain\'')
+    Layer('SELECT * FROM spend_data WHERE amount > 150 AND amount < 200')
 )
 ```
+
+<img src="../../img/guides/quickstart/quickstart-2.png" alt="Apply a simple SQL Query" />
 
 ## Styles, Legends and Popups
 
@@ -122,67 +118,80 @@ We'll se first how to change the default style and how to add legends and popups
 ### 1. Change the Style
 
 ```py
-from cartoframes.viz import Map, Layer, basemaps
+from cartoframes.viz import Map, Layer
 
 Map(
     Layer(
-      'SELECT * from populated_places WHERE adm0name = \'Spain\'',
-      'color: purple width: 15'
-    )
+        'spend_data',
+        'color: ramp($category, bold)'
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )
 ```
+
+<img src="../../img/guides/quickstart/quickstart-3.png" alt="Style by $category" />
 
 ### 2. Add a basic Legend
 
 ```py
-from cartoframes.viz import Legend
+from cartoframes.viz import Map, Layer, Legend
 
 Map(
     Layer(
-        'populated_places',
-        'color: ramp($scalerank, purpor) width: 15',
+        'spend_data',
+        'color: ramp($category, bold)',
         legend=Legend({
             'type': 'color-bins',
-            'title': 'Scale Rank'
+            'title': 'Categories'
         })
-    )
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )
 ```
+
+<img src="../../img/guides/quickstart/quickstart-4.png" alt="Add a legend for the styled category" />
 
 ### 3. Add a basic Popup
 
 ```py
-from cartoframes.viz import Popup
+from cartoframes.viz import Map, Layer, Legend, Popup
 
 Map(
     Layer(
-        'populated_places',
-        'color: ramp($scalerank, purpor) width: 15',
+        'spend_data',
+        'color: ramp($category, bold)',
         legend=Legend({
             'type': 'color-bins',
-            'title': 'Scale Rank'
+            'title': 'Categories'
         }),
         popup=Popup({
             'hover': [{
-                'title': 'Name',
-                'value': '$name'
+                'title': 'Category',
+                'value': '$category'
             }, {
-                'title': 'Province',
-                'value': '$adm1name'
+                'title': 'Hour',
+                'value': '$hour'
             }]
         })
-    )
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )
 ```
+
+<img src="../../img/guides/quickstart/quickstart-5.png" alt="Show popups when interacting with the features" />
 
 ## Use a built-in helper
 
-CARTOframes has a set of built-in [Helper Methods]({{ site.url }}/documentation/cartoframes/guides/helper-methods-part-1/) that can be used to create visualizations with default style, legends and popups, all together!.
+CARTOframes has a set of built-in [Helper Methods]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-1/) that can be used to create visualizations with default style, legends and popups, all together!.
 
 ```py
+from cartoframes.viz import Map
 from cartoframes.viz.helpers import color_bins_layer
 
 Map(
-    color_bins_layer('populated_places','scalerank', 'Scale Rank')
+    color_bins_layer('spend_data','amount', 'Spent Amount €'),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )
 ```
+
+<img src="../../img/guides/quickstart/quickstart-final.gif" alt="Final visualization" />
