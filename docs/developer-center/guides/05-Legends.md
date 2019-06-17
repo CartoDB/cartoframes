@@ -57,7 +57,7 @@ Map(
 )
 ```
 
-![Legends Example 1](../../img/guides/legends/legends-1.png)
+![Add title, description and footer to the Legend](../../img/guides/legends/legends-1.png)
 
 ### Color Category
 
@@ -78,7 +78,7 @@ Map(
 )
 ```
 
-![Legends Example 2](../../img/guides/legends/legends-2.png)
+![color-category legend](../../img/guides/legends/legends-2.png)
 
 ### Color Bins
 
@@ -99,7 +99,7 @@ Map(
 )
 ```
 
-![Legends Example 3](../../img/guides/legends/legends-3.png)
+![color-bins legend](../../img/guides/legends/legends-3.png)
 
 ### Color Continuous
 
@@ -122,7 +122,7 @@ Map(
 )
 ```
 
-![Legends Example 4](../../img/guides/legends/legends-4.png)
+![color-continuous legend](../../img/guides/legends/legends-4.png)
 
 ### Size Category
 
@@ -146,7 +146,7 @@ Map(
 )
 ```
 
-![Legends Example 5](../../img/guides/legends/legends-5.png)
+![size-category legend](../../img/guides/legends/legends-5.png)
 
 ### Size Bins
 
@@ -171,7 +171,7 @@ Map(
 )
 ```
 
-![Legends Example 6](../../img/guides/legends/legends-6.png)
+![size-bins legend](../../img/guides/legends/legends-6.png)
 
 ### Size Continuous
 
@@ -198,7 +198,7 @@ Map(
 )
 ```
 
-![Legends Example 7](../../img/guides/legends/legends-7.png)
+![size-continuous legend](../../img/guides/legends/legends-7.png)
 
 ## Multiple Legends
 
@@ -229,4 +229,4 @@ Map([
 ])
 ```
 
-![Legends Example 8](../../img/guides/legends/legends-8.png)
+![Multiple legends](../../img/guides/legends/legends-8.png)

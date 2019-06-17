@@ -6,7 +6,7 @@ This guide is meant to guide you step by step from the installing and authentica
 
 At the end, you'll be able to create a simple visualization like the one below and get a link to share it.
 
-<img src="../../img/guides/quickstart/quickstart-final.gif" alt="Final visualization" />
+![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
 
 ### Installing CARTOframes
 
@@ -80,7 +80,7 @@ set_default_context(
 Map(Layer('spend_data'))
 ```
 
-<img src="../../img/guides/quickstart/quickstart-1.png" alt="Visualize the 'spend_data' dataset" />
+![Visualize the 'spend_data' dataset](../../img/guides/quickstart/quickstart-1.png)
 
 ### Change the viewport and basemap
 
@@ -107,7 +107,7 @@ Map(
 )
 ```
 
-<img src="../../img/guides/quickstart/quickstart-2.png" alt="Apply a simple SQL Query" />
+![Apply a simple SQL Query](../../img/guides/quickstart/quickstart-2.png)
 
 ## Styles, Legends and Popups
 
@@ -129,7 +129,7 @@ Map(
 )
 ```
 
-<img src="../../img/guides/quickstart/quickstart-3.png" alt="Style by $category" />
+![Style by $category](../../img/guides/quickstart/quickstart-3.png)
 
 ### 2. Add a basic Legend
 
@@ -149,7 +149,7 @@ Map(
 )
 ```
 
-<img src="../../img/guides/quickstart/quickstart-4.png" alt="Add a legend for the styled category" />
+![Add a legend for the styled category](../../img/guides/quickstart/quickstart-4.png)
 
 ### 3. Add a basic Popup
 
@@ -178,7 +178,7 @@ Map(
 )
 ```
 
-<img src="../../img/guides/quickstart/quickstart-5.png" alt="Show popups when interacting with the features" />
+![Show popups when interacting with the features](../../img/guides/quickstart/quickstart-5.png)
 
 ## Use a built-in helper
 
@@ -194,4 +194,4 @@ Map(
 )
 ```
 
-<img src="../../img/guides/quickstart/quickstart-final.gif" alt="Final visualization" />
+![Final visualization](../../img/guides/quickstart/quickstart-final.gif)

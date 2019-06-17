@@ -24,7 +24,7 @@ Map(
 )
 ```
 
-![Popup Example 1](../../img/guides/popups/popups-1.png)
+![Set Popup for 'hover' and 'click' events](../../img/guides/popups/popups-1.png)
 
 ### Using expressions
 
@@ -41,7 +41,7 @@ Map(
 )
 ```
 
-![Popup Example 2](../../img/guides/popups/popups-2.png)
+![Set Popup for 'hover' events using expressions](../../img/guides/popups/popups-2.png)
 
 ### Adding titles
 
@@ -66,4 +66,4 @@ Map(
 )
 ```
 
-![Popup Example 3](../../img/guides/popups/popups-3.png)
+![Set Popup title and value for 'hover' and 'click' events](../../img/guides/popups/popups-3.png)
