@@ -340,8 +340,9 @@ class Dataset(object):
 
         Args:
             with_lnglat (tuple, optional): Two columns that have the longitude
-              and latitude information. E.g., `('long', 'lat')`. Defaults to
-              `None`.
+              and latitude information. If used, a point geometry will be
+              created upon upload to CARTO. Example input: `('long', 'lat')`.
+              Defaults to `None`.
             if_exists (str, optional): Behavior for adding data from Dataset.
               Options are 'fail', 'replace', or 'append'. Defaults to 'fail',
               which means that the Dataset instance will not overwrite a
@@ -395,10 +396,10 @@ class Dataset(object):
                              'GeoDataFrame, or a query to upload data to CARTO.')
 
         already_exists_error = CartoException(
-                'Table with name {t} and schema {s} already exists in CARTO.'
-                'Please choose a different `table_name` or use '
-                'if_exists="replace" to overwrite it'.format(
-                    t=self._table_name, s=self._schema))
+            'Table with name {t} and schema {s} already exists in CARTO.'
+            'Please choose a different `table_name` or use '
+            'if_exists="replace" to overwrite it'.format(
+                t=self._table_name, s=self._schema))
 
         # priority order: gdf, df, query
         if self._gdf is not None:
