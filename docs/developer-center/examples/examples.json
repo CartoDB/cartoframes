@@ -4,10 +4,10 @@
   },
   "categories": [
     {
-        "title": "Jupyter Notebooks",
+        "title": "Examples",
         "samples": [{
-          "title": "Notebooks",
-          "desc": "Notebooks",
+          "title": "Jupyter Notebooks",
+          "desc": "Jupyter Notebooks",
           "file": "notebooks.md"
         }]
     }
