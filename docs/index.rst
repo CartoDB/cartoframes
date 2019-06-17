@@ -16,6 +16,7 @@
    Credentials <credentials>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
+   Publishing and sharing a map <kuviz>
    Local Development Setup <local_development>
 
 ******************
