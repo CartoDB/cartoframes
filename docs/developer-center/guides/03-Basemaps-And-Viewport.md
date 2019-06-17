@@ -25,15 +25,13 @@ Map(
 
 The map below symbolizes county-wide population density in Dallas County, Texas. Instead of using the default extent of the entire county, let's set the focus to the City of Dallas, Texas and surrounding areas.
 
-![Basemap Example 1](../../img/guides/basemap/guide-basemaps-1.png)
-
 The zoom and lat/long coordinate information will be set in the `viewport` parameter. In order to get that information, we first need to add it to the map.
 
 To do this:
 - we'll add the zoom and coordinate information to the map with the option `show_info=True`
-- the information will be added to the bottom-left corner of the map and is updated as the map is zoomed and panned 
+- the information will be added to the bottom-left corner of the map and is updated as the map is zoomed and panned
 
-![Basemap Example 2](../../img/guides/basemap/guide-basemaps-1.png)
+![Show viewport info in the bottom-left corner](../../img/guides/basemap/guide-basemaps-1.png)
 
 Once the area of interest has been located, copy and paste the values provided by `show_info` to the `viewport` parameter to set the opening zoom and center of the map.
 
@@ -52,12 +50,11 @@ Map(
 )
 ```
 
-![Basemap Example 2](../../img/guides/basemap/guide-basemaps-2.png)
+![Set the viewport in the Map](../../img/guides/basemap/guide-basemaps-2.png)
 
 ### Basemap
-The default basemap, Positron comes from CARTO's suite of basemaps. They have been designed to sit in the background so the visual analysis of the most important information (the story!) can more easily come to the foreground. There are other times where you will prefer not to have a basemap, add another layer to provide the right amount of geographic context, or bring in your own!
 
-[Notebook][#TODO]
+The default basemap, Positron comes from CARTO's suite of basemaps. They have been designed to sit in the background so the visual analysis of the most important information (the story!) can more easily come to the foreground. There are other times where you will prefer not to have a basemap, add another layer to provide the right amount of geographic context, or bring in your own!
 
 ```py
 from cartoframes.auth import set_default_context
@@ -77,7 +74,7 @@ Map(
 )
 ```
 
-![Basemap Example 3](../../img/guides/basemap/guide-basemaps-3.png)
+![Default Positron basemap](../../img/guides/basemap/guide-basemaps-3.png)
 
 By default, CARTOframes uses CARTO's Positron basemap with labels under. The basemap can be customized to use another CARTO style (Voyager, Dark Matter), a Mapbox basemap, or a custom background color; all through the `basemap` parameter:
 
@@ -97,16 +94,16 @@ Map(
 )
 ```
 
-![Basemap Example 4](../../img/guides/basemap/guide-basemaps-4.png)
+![Darkmatter basemap](../../img/guides/basemap/guide-basemaps-4.png)
 
 - A string color:
 
 `basemap='lightgray'`
 
-![Basemap Example 5](../../img/guides/basemap/guide-basemaps-5.png)
+!['lightgray' background color as basemap](../../img/guides/basemap/guide-basemaps-5.png)
 
 - An hexadecimal color:
 
 `basemap='#FABADA'`
 
-![Basemap Example 6](../../img/guides/basemap/guide-basemaps-6.png)
+![Hexadecimal color as basemap](../../img/guides/basemap/guide-basemaps-6.png)
