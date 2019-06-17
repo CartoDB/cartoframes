@@ -15,7 +15,7 @@ Or follow the following steps to download them directly from the CARTOframes acc
 
 ### Getting Started
 
-1. Create the contexts:
+#### Create the contexts:
 
 ```py
 from cartoframes.auth import set_default_context, Context
@@ -27,7 +27,7 @@ context = Context(base_url='https://your_user_name.carto.com', api_key='your_api
 cf_context = Context(base_url='https://cartoframes.carto.com', api_key='default_public')
 ```
 
-2. Get the data
+#### Get the data
 
 And upload it to your account:
 
@@ -88,7 +88,7 @@ mcdonalds_per_census_tracts.head()
 
 Build 100 meter buffer area for each McDonald’s by updating the geometry.
 
-1. Create a new table and save it as `nyc_mcdonalds_buffer_100m`.
+#### Create a new table and save it as `nyc_mcdonalds_buffer_100m`.
 
 ```py
 nyc_mcdonalds_buffer_100m = Dataset.from_query(
@@ -104,7 +104,7 @@ nyc_mcdonalds_buffer_100m_df = nyc_mcdonalds_buffer_100m.download()
 nyc_mcdonalds_buffer_100m_df.iloc[0, :]
 ```
 
-2. Visualize the results:
+#### Visualize the results:
 
 ```py
 from cartoframes.viz import Map, Layer
@@ -117,6 +117,7 @@ Map([
 )
 ```
 
+[Live Visualization](https://cartovl.carto.com/kuviz/a6a586c3-682c-4591-a8cd-f4d9d4cc10bd)
 ![NYC McDonald's 100 Metter area](../../img/guides/spatial-analysis/example-2.png)
 
 ### Example 3
@@ -145,9 +146,9 @@ k_means_dataset = Dataset.from_query('''
         context=context)
 
 k_means_dataset.upload(table_name='mcdonalds_clusters', if_exists='replace', context=context)
-````
+```
 
-2. Visualize the results:
+#### Visualize the results:
 
 ```py
 from cartoframes.viz import Map, Layer
@@ -155,4 +156,5 @@ from cartoframes.viz import Map, Layer
 Map(Layer('mcdonalds_clusters', 'color: ramp($cluster_no, Prism)', context=context))
 ```
 
+[Live Visualization](https://cartovl.carto.com/kuviz/8c5b6b66-ab5e-41d3-b3e5-c2d08d6831d4)
 ![NYC McDonald's Cluster](../../img/guides/spatial-analysis/example-3.png)
