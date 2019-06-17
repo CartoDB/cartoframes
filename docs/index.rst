@@ -10,6 +10,7 @@
 
    Overview <overview>
    Data-driven maps <maps>
+   Publishing and sharing a map <kuviz>
    Data workflows <data>
    Authentication <cartocontext>
    Example functionalty <example_context>
