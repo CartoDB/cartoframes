@@ -11,16 +11,16 @@ CARTOframes
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
-Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/data-observatory/>`__ augmentation.
+Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/platform/location-data-streams/>`__ augmentation.
 
 Features
 ========
 
 - Write pandas DataFrames to CARTO tables
 - Read CARTO tables and queries into pandas DataFrames
-- Create customizable, interactive CARTO maps in a Jupyter notebook
-- Interact with CARTO's Data Observatory
-- Use CARTO's spatially-enabled database for analysis
+- Create customizable, interactive CARTO maps in a Jupyter notebook using DataFrames or hosted data
+- Augment your data with CARTO's Data Observatory
+- Use CARTO for cloud-based analysis
 - Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__
 
 Common Uses
@@ -29,14 +29,14 @@ Common Uses
 - Visualize spatial data programmatically as matplotlib images or embedded interactive maps
 - Perform cloud-based spatial data processing using CARTO's analysis tools
 - Extract, transform, and Load (ETL) data using the Python ecosystem for getting data into and out of CARTO
-- Data Services integrations using CARTO's `Data Observatory <https://carto.com/data-observatory/>`__ and other `Data Services APIs <https://carto.com/location-data-services/>`__
+- Data Services integrations using CARTO's `Location Data Streams <https://carto.com/platform/location-data-streams/>`__
 
 Try it out
 ==========
 
-The easiest way to try out cartoframes is to use the cartoframes example notebooks running in binder: https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples If you already have an API key, you can follow along and complete all of the example notebooks.
+The easiest way to try out cartoframes is to use the cartoframes example notebooks running in binder: https://mybinder.org/v2/gh/CartoDB/cartoframes/v0.10.1?filepath=examples If you already have an API key, you can follow along and complete all of the example notebooks.
 
-If you do not have an API key, you can use the `Example Context <https://cartoframes.readthedocs.io/en/latest/#module-cartoframes.examples>`__ to read the example data, make maps, and run arbitrary queries from the datasets there. The best place to get started is in the "Example Datasets" notebook found when running binder or downloading from the `examples <https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__ directory in the cartoframes GitHub repository.
+If you do not have an API key, you can still use cartoframes for creating maps locally.
 
 .. note::
     The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 30 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
@@ -97,9 +97,7 @@ Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an
 
     $ pipenv --three
     $ pipenv install cartoframes jupyter
-    $ pipenv shell
-
-Next, run a Python kernel by typing `$ python`, `$ jupyter notebook`, or however you typically run Python.
+    $ pipenv run jupyter notebook
 
 Native pip
 ----------
@@ -120,22 +118,28 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
 .. code:: python
 
-    import cartoframes
+    from cartoframes.auth import set_default_context
+    from cartoframes.data import Dataset
+
     # `base_url`s are of the form `https://{username}.carto.com/` for most users
-    cc = cartoframes.CartoContext(base_url='https://eschbacher.carto.com/',
-                                  api_key=APIKEY)
+    set_default_context(
+        base_url='https://your_user_name.carto.com/',
+        api_key='your api key'
+    )
+
+    # create a dataset object
+    d = Dataset.from_table('brooklyn_poverty_census_tracts')
 
     # read a table from your CARTO account to a DataFrame
-    df = cc.read('brooklyn_poverty_census_tracts')
+    df = d.download()
 
-    # do fancy pandas operations (add/drop columns, change values, etc.)
+    # perform operations on you dataframe
     df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
 
     # updates CARTO table with all changes from this session
-    cc.write(df, 'brooklyn_poverty_census_tracts', overwrite=True)
+    d.upload(df, if_exists='replace')
 
-
-.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/read_demo.gif
+.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/data-workflow.gif
 
 Write an existing pandas DataFrame to CARTO.
 
@@ -151,6 +155,46 @@ Write an existing pandas DataFrame to CARTO.
 
 Map workflow
 ------------
+
+There are two types of maps in CARTOframes: vector using `CARTO VL <https://carto.com/developers/carto-vl/>`__ and raster using `CARTO.js <https://carto.com/developers/carto-js/>`__. Vector maps are currently available as interactive HTML documents which can be displayed in a notebook, exported to an HTML file, or published to CARTO's platform. The raster-based maps can be displayed interactively in a notebook or as static matplotlib images.
+
+CARTO VL-based Maps
+^^^^^^^^^^^^^^^^^^^
+
+Interactive vector maps can be created programmatically in CARTOframes. In addition to hosted tables and queries, these maps can also display geographic information in pandas DataFrames and geopandas GeoDataFrames. This means that these maps do not need to be tied to a CARTO account (i.e., no need for an API key).
+
+.. code:: python
+
+    from cartoframes.viz import Map
+    from cartoframes.viz.helpers import color_continuous_layer
+    from cartoframes.auth import set_default_context
+
+    set_default_context('https://cartoframes.carto.com')
+
+    # display map in a notebook
+    Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
+
+Publish map to CARTO
+
+.. code:: python
+
+    from cartoframes.viz import Map
+    from cartoframes.viz.helpers import color_continuous_layer
+    from cartoframes.auth import set_default_context
+
+    set_default_context(
+        base_url='https://your_user_name.carto.com'
+        api_key='your api key'
+    )
+
+    # display map in a notebook
+    bk_map = Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
+    bk_map.publish('Brooklyn Poverty')
+
+This will publish a map like `this one <https://cartoframes.carto.com/kuviz/2a7badc3-00b3-49d0-9bc8-3b138542cdcf>`__.
+
+CARTO.js-based Maps
+^^^^^^^^^^^^^^^^^^^
 
 The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `TurboCARTO <https://github.com/CartoDB/turbo-carto>`__ and `CARTOColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CARTOColors wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
 
@@ -170,13 +214,6 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
            interactive=True)
 
 .. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/map_demo.gif
-
-.. note::
-    Legends are under active development. See
-    https://github.com/CartoDB/cartoframes/pull/184 for more information. To
-    try out that code, install `cartoframes` as:
-
-        `pip install git+https://github.com/cartodb/cartoframes.git@add-legends-v1#egg=cartoframes`
 
 Data Observatory
 ----------------
@@ -241,18 +278,3 @@ Once you save your credentials, you can get started in future sessions more quic
 
     from cartoframes import CartoContext
     cc = CartoContext()  # automatically loads credentials if previously saved
-
-Experimental features
----------------------
-
-CARTOframes includes experimental features that we are testing for future releases into cartoframes core. These features exist as separate modules in `vis`. These features are stand-alone other than sometimes relying on some cartoframes utilities, etc. Vis features will also change often and without notice, so they should never be used in a production environment.
-
-To import an experimental feature, like new vector maps, do the following:
-
-.. code:: python
-
-    from cartoframes.auth import Context
-    from cartoframes.viz import Map, Layer
-
-    context = Context()
-    Map(Layer('<table name>', '<carto vl style>', context=context))

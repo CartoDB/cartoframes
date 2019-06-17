@@ -9,15 +9,15 @@
    :maxdepth: 2
 
    Overview <overview>
-   Interactive Maps <maps>
-   Data Workflows <data>
+   Data-driven maps <maps>
+   Publishing and sharing a map <kuviz>
+   Data workflows <data>
    Authentication <cartocontext>
-   Example Functionalty <example_context>
+   Example functionalty <example_context>
    Credentials <credentials>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
-   Publishing and sharing a map <kuviz>
-   Local Development Setup <local_development>
+   Local development setup <local_development>
 
 ******************
 Indices and tables
