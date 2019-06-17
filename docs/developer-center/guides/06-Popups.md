@@ -1,6 +1,6 @@
 ## Popups
 
-It is possible to display the information of a feature showing **popups** when interacting with each feature. The events that allow us to interact with the feature are `hover` and `click`. A feature can listen to both events and the popup can display different information for each event.
+**Popups** are useful for interactively displaying additional information about a feature on a map. The events that allow us to interact with the feature are `hover` and `click`. A feature can listen to both events and display different information for each one.
 
 ```py
 from cartoframes.auth import set_default_context
