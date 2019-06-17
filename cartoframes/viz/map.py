@@ -187,6 +187,20 @@ class Map(object):
         return self._htmlMap.html
 
     def publish(self, name, maps_api_key='default_public', context=None, password=None):
+        """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+            password (str, optional): setting it your Kuviz will be protected by
+                password. When someone will try to show the Kuviz, the password
+                will be requested
+        """
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
@@ -200,16 +214,42 @@ class Map(object):
         return kuviz_to_dict(self._kuviz)
 
     def sync_data(self, table_name, context=None):
+        """Synchronize datasets used by the map with CARTO.
+
+        Args:
+            table_name (str): Desired table name for the dataset on CARTO. If
+                name does not conform to SQL naming conventions, it will be
+                'normalized' (e.g., all lower case, adding `_` in place of spaces
+                and other special characters.
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         if not self._publisher.is_sync():
             self._publisher.sync_layers(table_name, context)
 
     def delete_publication(self):
+        """Delete the published map Kuviz."""
         if self._kuviz:
             self._kuviz.delete()
             print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
             self._kuviz = None
 
     def update_publication(self, name, password, maps_api_key='default_public', context=None):
+        """Update the published map Kuviz.
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            password (str): setting it your Kuviz will be protected by
+                password and using `None` the Kuviz will be public
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         if not self._kuviz:
             raise CartoException('The map has not been published. Use the `publish` method.')
 
@@ -228,6 +268,14 @@ class Map(object):
 
     @staticmethod
     def all_publications(context=None):
+        """Get all map Kuviz published by the current user.
+
+        Args:
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with user account. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         return KuvizPublisher.all(context)
 
     def _get_publication_html(self, name, maps_api_key):
