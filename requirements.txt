@@ -1,3 +1,2 @@
 -e git+https://github.com/CartoDB/carto-python.git#egg=carto
--e git+https://github.com/aayushuppal/jinja@loop_fix#egg=jinja2
 .
