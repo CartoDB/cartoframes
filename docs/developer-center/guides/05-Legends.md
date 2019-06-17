@@ -1,10 +1,12 @@
 ## Legends
 
-There are different types of legends we can use in our visualization. These legends depend on the geometry of the layer and on the type of the data it is being represented.
+In this guide, we explore the different types of legends available for your CARTOframes visualizations.
 
 ### Legend Types
 
-When we set the legend, we have to indicate the type of the legend. Current types are:
+When we set the legend, we have to indicate the type of the legend to use. This will be defined by the type of data (number, category) and visualization method (color,size) you use to represent the information.
+
+Current types are:
 
 * Color
   * `color-category`
@@ -16,22 +18,22 @@ When we set the legend, we have to indicate the type of the legend. Current type
   * `size-bins`
   * `size-continuous`
 
-#### Classified by property
+#### Classified by styling property
 
-As we can see in the previous list of legend types, there're two types of legend regarding style: **color** and **size**. 
+The list of legend types above are broken into two groupls: **color** and **size**. 
 
 * **Color** types represent color style properties: `color` and `strokeColor`.
 * **Size** types represent size style properties: `width` and `strokeWidth`.
 
 #### Classified by data type
 
-Each color and size legend legend types have three options: **category**, **bins**, and **continuous**.
+Each color and size legend types have three options: **category**, **bins**, and **continuous**.
 
 * **Category** legends: for use with **categorical** data.
 * **Bins** legends: for use with **numeric** data.
 * **Continuous** legends: for use with **numeric** data.
 
-By default, each of the previous types detects the geometry of the layer. However, we set explicitely the geometry, which is very useful when having several legens to identify the each one type.
+By default, each legend type detects the geometry of a layer. However, we explicitly set the geometry, which is very useful when using several legend types on one map.
 
 ### Default Legend
 
