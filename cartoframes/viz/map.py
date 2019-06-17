@@ -200,6 +200,18 @@ class Map(object):
             password (str, optional): setting it your Kuviz will be protected by
                 password. When someone will try to show the Kuviz, the password
                 will be requested
+
+        Example:
+
+            Publishing the map visualization
+
+            .. code::
+
+                from cartoframes.viz import Map, Layer, basemaps
+
+                tmap = Map(Layer(PUBLIC_TABLE))
+                tmap.publish('cf_publish_case_1')
+
         """
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
