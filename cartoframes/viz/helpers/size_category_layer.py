@@ -16,9 +16,10 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
         cat (str, optional): Category list. Must be a valid CARTO VL category
           list.
         size (str, optiona): Min/max size array in CARTO VL syntax. Default is
-          '[2, 14]'.
+          '[2, 20]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color.
+          CARTO VL color. Default is '#F46D43' for point geometries and
+          '#4CC8A3' for lines.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and

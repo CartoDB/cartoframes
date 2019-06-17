@@ -15,9 +15,10 @@ def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
         bins (int, optional): Number of size classes (bins) for map. Default is
           5.
         size (str, optiona): Min/max size array in CARTO VL syntax. Default is
-          '[2, 14]'.
+          '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color.
+          CARTO VL color. Default is '#EE5D5A' for point geometries and
+          '#4CC8A3' for lines.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and

@@ -16,11 +16,6 @@ Helper Functions
    :noindex:
    :members:
 
-Viz
----
-
-.. automodule:: cartoframes.viz
-
 Interactive CARTO.js Maps
 =========================
 
