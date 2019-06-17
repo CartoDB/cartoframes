@@ -1,6 +1,8 @@
 ## Context
 
-Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
+Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at **http://your_user_name.carto.com/your_apps.**
+
+<img src="../../img/guides/context/api-keys" alt="API Key - CARTO Dashboard" />
 
 * `base_url`: which is the URL of your CARTO account (`https://your_user_name.carto.com/`)
 * `api_key`: if the dataset is **public**, we can use `default_public`. Otherwise, we need to set the API key.
