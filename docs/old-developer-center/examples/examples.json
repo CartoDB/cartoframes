@@ -1,0 +1,42 @@
+{
+    "main": {
+        "file": "basic-usage.md"
+    },
+    "categories": [
+        {
+            "title": "Basic",
+            "samples": [
+                {
+                    "title": "Basic Usage",
+                    "desc": "Use this notebook to understand CARTOframes basics.",
+                    "file": "BasicUsage.md"
+                },
+                {
+                    "title": "Data Observatory",
+                    "desc": "Introduction to the Data Observatory through CARTOframes.",
+                    "file": "DataObservatory.md"
+                },
+                {
+                    "title": "Geopandas and Shapely",
+                    "desc": "CARTOframes plays nicely with GeoPandas and Shapely.",
+                    "file": "ShapelyGeopandasCartoframes.md"
+                },
+                {
+                    "title": "Example Datasets",
+                    "desc": "Example dataset functionality in CARTOframes.",
+                    "file": "ExampleDatasets.md"
+                }
+            ]
+        },
+        {
+            "title": "Advanced",
+            "samples": [
+                {
+                    "title": "Dask and CARTOframes",
+                    "desc": "Using Dask and CARTOframes together.",
+                    "file": "cartoframes-and-dask.md"
+                }
+            ]
+        }
+    ]
+}
