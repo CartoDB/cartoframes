@@ -139,7 +139,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     # updates CARTO table with all changes from this session
     d.upload(df, if_exists='replace')
 
-.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/read_demo.gif
+.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/data-workflow.gif
 
 Write an existing pandas DataFrame to CARTO.
 
