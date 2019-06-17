@@ -2,13 +2,11 @@
 
 ### About this Guide
 
-This guide is meant to guide you step by step from the installing and authentication process to generate a simple interactive visualization. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
-
-At the end, you'll be able to create a simple visualization like the one below and get a link to share it.
+This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
 ![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
 
-### Installing CARTOframes
+### Install CARTOframes
 
 You can install CARTOframes with `pip`. Simply type the following in the command line to do a system install:
 
@@ -22,7 +20,7 @@ To install through a Jupyter notebook, you can run
 !pip install cartoframes
 ```
 
-It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the the following command line commands to create a virtual env, activate it, and install cartoframes:
+It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the following command to create a virtual env, activate it, and install cartoframes:
 
 ```bash
 $ virtualenv cfenv
@@ -36,7 +34,7 @@ You'll notice the virtual environment name in your command line prompt, like abo
 (cfenv) $ deactivate
 ```
 
-### Installing Jupyter notebook
+### Install Jupyter notebook
 
 To install Jupyter, type:
 
@@ -46,7 +44,7 @@ $ pip install jupyter
 
 If working in a virtual environment, make sure you have activated the environment first.
 
-### Starting Jupyter notebook
+### Start the Jupyter notebook
 
 Start up a Jupyter notebook with the following command:
 
@@ -60,13 +58,11 @@ Next, create a new notebook. See Jupyter's [running a notebook](https://jupyter.
 
 ### Authentication
 
-Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
+Before you can interact with CARTOframes, you need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps. 
 
-If you don't have yet an account at CARTO, and you want to start learning how to use CARTOframes, you only need the cartoframes library. Take a look to the Sources examples to know how to visualize data from a Dataframe or a GeoJSON.
+If you don't have a CARTO account but want to try out CARTOframes, you only need the cartoframes library. To learn more, take a look at the Sources examples to visualize data from either a Dataframe or a GeoJSON.
 
-If you already have an account, you can start analyzing and visualizing your data! In this quickstart guide, we'll be using the [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) Dataset, which contains customer activity information in the city of Barcelona.
-
-The elements we need to create contexts are under the `cartoframes.auth` namespace. For this Quickstart guide, let's use one the `cartoframes` account and a public dataset.
+The elements we need to create contexts are under the `cartoframes.auth` namespace. For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
 
 ```py
 from cartoframes.auth import set_default_context
@@ -84,20 +80,22 @@ Map(Layer('spend_data'))
 
 ### Change the viewport and basemap
 
+By default, the map's center and zoom is set to encompass the entire dataset. For this map, let's modify these settings to better suite our area of interest:
+
 ```py
 from cartoframes.viz import Map, Layer, basemaps
 
 Map(
-    Layer('populated_places'),
+    Layer('spend_data'),
     viewport={'zoom': 2.51, 'lat': 42.99, 'lng': 24.73},
     basemap=basemaps.darkmatter,
     show_info=True
 )
 ```
 
-### Apply an SQL Query to your visualization
+### Apply a SQL Query to your visualization
 
-In the next step we're filtering the data by taking only the features where the purchase amount is between 150€ and 200€. We're using a simple SQL Query:
+Next, let's filter the data by taking only the features where the purchase amount is between 150€ and 200€ using a simple SQL Query:
 
 ```py
 from cartoframes.viz import Map, Layer, basemaps
@@ -111,9 +109,11 @@ Map(
 
 ## Styles, Legends and Popups
 
-In order to change the color and make them a bit bigger, we can change the style of the layer. The second parameter is the `Style` of the layer, and uses [CARTO VL String API](https://carto.com/developers/carto-vl/guides/style-with-expressions/). This API is very powerful because it allows you to style your visualizations with a few lines of code. However, from a data scientist perspective, sometimes we need to focus on the data and not in the visualization style itself. CARTOframes takes this responsibility by providing Helper Methods.
+To overwrite the default color and size of the points, we can modify the second parameter `Style` of the layer using the [CARTO VL String API](https://carto.com/developers/carto-vl/guides/style-with-expressions/). This API is very powerful because it allows you to style your visualizations with a few lines of code. 
 
-We'll se first how to change the default style and how to add legends and popups manually, which gives us more control, and then we'll use Helper Methods to get the final result.
+But, as a data scientist, your primary focus is likely on the data vs. the visualization style, for this purpose,CARTOframes also provides you with a series of Helper Methods to create default visualization types.
+
+First, let's take a look at how to change the default style and how to add legends and popups manually, which gives us more control, and then we'll use Helper Methods to get the final result.
 
 ### 1. Change the Style
 
