@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from cartoframes.viz import helpers, Source
 
 
-class TestHelpers(unittest.TestCase):
+class TestColorCategoryLayerHelper(unittest.TestCase):
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.color_category_layer, None)
@@ -18,6 +18,8 @@ class TestHelpers(unittest.TestCase):
 
         self.assertNotEqual(layer.style, None)
         self.assertEqual(layer.style._style['point']['color'], 'ramp(top($name, 11), bold)')
+        self.assertEqual(layer.style._style['line']['color'], 'ramp(top($name, 11), bold)')
+        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(top($name, 11), bold), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
             'title': 'Neighborhoods',
@@ -25,8 +27,9 @@ class TestHelpers(unittest.TestCase):
         }])
 
         self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type, 'color-category')
-        self.assertEqual(layer.legend._prop, 'color')
+        self.assertEqual(layer.legend._type['point'], 'color-category-point')
+        self.assertEqual(layer.legend._type['line'], 'color-category-line')
+        self.assertEqual(layer.legend._type['polygon'], 'color-category-polygon')
         self.assertEqual(layer.legend._title, 'Neighborhoods')
         self.assertEqual(layer.legend._description, '')
 
@@ -43,6 +46,19 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(
             layer.style._style['point']['color'],
             'ramp(top($name, 5), prism)'
+        )
+
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            "ramp(buckets($name, ['A', 'B']), [red, blue])"
         )
 
     def test_color_category_layer_line(self):
@@ -62,6 +78,19 @@ class TestHelpers(unittest.TestCase):
             'ramp(top($name, 5), prism)'
         )
 
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            "ramp(buckets($name, ['A', 'B']), [red, blue])"
+        )
+
     def test_color_category_layer_polygon(self):
         "should create a polygon type layer"
         Source._get_geom_type = Mock(return_value='polygon')
@@ -77,4 +106,17 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(
             layer.style._style['polygon']['color'],
             'opacity(ramp(top($name, 5), prism), 0.9)'
+        )
+
+        layer = helpers.color_category_layer(
+            'sf_neighborhoods',
+            'name',
+            'Neighborhoods',
+            cat=['A', 'B'],
+            palette='[red, blue]'
+        )
+
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            "opacity(ramp(buckets($name, ['A', 'B']), [red, blue]), 0.9)"
         )

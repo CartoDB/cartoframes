@@ -10,7 +10,7 @@ from carto.exceptions import CartoException
 from . import constants
 from .basemaps import Basemaps
 from .source import SourceType
-from .kuviz import KuvizPublisher
+from .kuviz import KuvizPublisher, kuviz_to_dict
 from .. import utils
 
 # TODO: refactor
@@ -150,7 +150,7 @@ class Map(object):
 
     def __init__(self,
                  layers=None,
-                 basemap=Basemaps.darkmatter,
+                 basemap=Basemaps.positron,
                  bounds=None,
                  size=None,
                  viewport=None,
@@ -169,6 +169,7 @@ class Map(object):
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
+        self._kuviz = None
         self._htmlMap = HTMLMap()
 
         self._htmlMap.set_content(
@@ -190,8 +191,46 @@ class Map(object):
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
 
-        self._publisher.set_context(context)
+        if maps_api_key == 'default_public':
+            self._validate_public_publication()
 
+        self._publisher.set_context(context)
+        html = self._get_publication_html(name, maps_api_key)
+        self._kuviz = self._publisher.publish(html, name, password)
+        return kuviz_to_dict(self._kuviz)
+
+    def sync_data(self, table_name, context=None):
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, context)
+
+    def delete_publication(self):
+        if self._kuviz:
+            self._kuviz.delete()
+            print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
+            self._kuviz = None
+
+    def update_publication(self, name, password, maps_api_key='default_public', context=None):
+        if not self._kuviz:
+            raise CartoException('The map has not been published. Use the `publish` method.')
+
+        if not self._publisher.is_sync():
+            raise CartoException('The map layers are not synchronized with CARTO. '
+                                 'Please, use the `sync_data` method before publishing the map')
+
+        if maps_api_key == 'default_public':
+            self._validate_public_publication()
+
+        self._kuviz.data = self._get_publication_html(name, maps_api_key)
+        self._kuviz.name = name
+        self._kuviz.password = password
+        self._kuviz.save()
+        return kuviz_to_dict(self._kuviz)
+
+    @staticmethod
+    def all_publications(context=None):
+        return KuvizPublisher.all(context)
+
+    def _get_publication_html(self, name, maps_api_key):
         html_map = HTMLMap('viz/main.html.j2')
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
@@ -205,14 +244,17 @@ class Map(object):
             _airship_path=self._airship_path,
             title=name)
 
-        return self._publisher.publish(html_map.html, name, password)
-
-    def sync_data(self, table_name, context=None):
-        if not self._publisher.is_sync():
-            self._publisher.sync_layers(table_name, context)
+        return html_map.html
 
     def _get_publisher(self):
         return KuvizPublisher(self)
+
+    def _validate_public_publication(self):
+        if not self._publisher.is_public():
+            raise CartoException('The datasets used in your map are not public. '
+                                 'You need add new Regular API key with permissions to Maps API and the datasets. '
+                                 'You can do it from your CARTO dashboard or using the Auth API. You can get more '
+                                 'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
 
 
 def _get_bounds(bounds, layers):

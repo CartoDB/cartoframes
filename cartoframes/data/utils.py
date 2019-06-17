@@ -1,7 +1,8 @@
 import time
 import binascii as ba
-
 from warnings import warn
+from copy import deepcopy
+
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..columns import Column
@@ -39,8 +40,11 @@ LNG_COLUMN_NAMES = [
 
 
 def compute_query(dataset):
-    if dataset.table_name and dataset.schema:
-        return 'SELECT * FROM "{0}"."{1}"'.format(dataset.schema, dataset.table_name)
+    if dataset.table_name:
+        return 'SELECT * FROM "{schema}"."{table}"'.format(
+            schema=dataset.schema or dataset._get_schema() or 'public',
+            table=dataset.table_name
+        )
 
 
 def compute_geodataframe(dataset):
@@ -155,3 +159,13 @@ def get_columns(context, query):
 def setting_value_exception(prop, value):
     return CartoException(("Error setting {prop}. You must use the `update` method: "
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
+
+
+def get_public_context(context):
+    api_key = 'default_public'
+
+    public_context = deepcopy(context)
+    public_context.auth_client.api_key = api_key
+    public_context.auth_api_client.api_key = api_key
+
+    return public_context
