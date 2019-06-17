@@ -1,6 +1,6 @@
 ## Publishing and Sharing Visualizations
 
-We're going to get through how to publish a visualization by getting the final URL to share it. For that purpose, we'll need to use the "CARTO custom visualizations", as known as **Kuviz**.
+This guide walks through the steps to publish a visualization and get a URL to share it. To do this, we'll need to use "CARTO custom visualizations", also known as **Kuviz**.
 
 Let's start by creating a default context.
 
@@ -41,7 +41,7 @@ If you try to publish a non synchronized dataset, you will get an **error**:
 
 > 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
 
-As the error message says, we'll need to make a previous step sychronizing the data. Once it's been syncrhonized, as your new table will be private, you will need to create a Maps API key **with permissions** for your new private table from your CARTO dashboard or Auth API. 
+As the error message says, we'll need to make a previous step synchronizing the data. Once it's been synchronized, as your new table will be private, you will need to create a Maps API key **with permissions** for your new private table from your CARTO dashboard or Auth API. 
 
 Finally, we will be ready to publish the visualization!
 
