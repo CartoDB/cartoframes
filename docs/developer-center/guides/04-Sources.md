@@ -1,8 +1,8 @@
 ## Sources
 
-In CARTOframes, the `Sources` are the origin of the data. Let's understand the different types of sources. You can also check the [Context Setup](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/02_context_setup.ipynb) Notebook.
+In CARTOframes, the `Sources` are the origin of the data. In this guide, we cover the different types of sources that can be used with CARTOframes. You can also check the [Context Setup](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/02_context_setup.ipynb) Notebook.
 
-The basic syntax set the `Source` of a visualization is:
+The basic syntax to set the `Source` of a visualization is:
 
 ```py
 from cartoframes.viz import Map, Layer, Source
@@ -10,7 +10,7 @@ from cartoframes.viz import Map, Layer, Source
 Map(Layer(Source('your_source_goes_here')))
 ```
 
-It's not needed to use the `Source` class to create the source for the layer, it's automatically casted when sent as the first parameter:
+You don't need to use the `Source` class to create the source for the layer, as it is automatically casted when sent as the first parameter:
 
 ```py
 from cartoframes.viz import Map, Layer
