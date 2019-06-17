@@ -98,7 +98,7 @@ function onReady() {
     }
 
     if (layer.legend) {
-      createLegend(mapLayer, layer.legend, index);
+      createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
 
     function setPopupsClick(tempPopup, interactivity, attrs) {
