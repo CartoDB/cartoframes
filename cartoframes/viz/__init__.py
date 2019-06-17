@@ -1,3 +1,4 @@
+"""cartoframes map helper functions"""
 from __future__ import absolute_import
 
 from .basemaps import Basemaps as basemaps

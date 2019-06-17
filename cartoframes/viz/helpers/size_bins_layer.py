@@ -4,6 +4,25 @@ from ..layer import Layer
 
 
 def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
+    """Helper function for quickly creating a size symbol map with
+    classification method/buckets.
+
+    Args:
+        source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by
+        title (str, optional): Title of legend
+        bins (int, optional): Number of size classes (bins) for map. Default is
+          5.
+        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+          '[2, 14]'.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
+        popup on `value`.
+    """
     return Layer(
         source,
         style={
