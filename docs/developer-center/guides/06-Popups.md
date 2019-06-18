@@ -4,7 +4,7 @@
 
 ```py
 from cartoframes.auth import set_default_context
-from cartoframes.viz import Map, Layer, Source, Style, Popup
+from cartoframes.viz import Map, Layer
 
 set_default_context('https://cartovl.carto.com/')
 ```
@@ -46,6 +46,8 @@ Map(
 ### Adding titles
 
 ```py
+from cartoframes.viz import Popup
+
 Map(
     Layer(
         'sf_neighborhoods',

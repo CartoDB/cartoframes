@@ -170,7 +170,7 @@ Map(
 Now, let's add the Popup settings in the **fourth** parameter.
 
 ```py
-from cartoframes.viz import Map, Layer, Legend, Popup
+from cartoframes.viz import Map, Layer
 
 Map(
     Layer(
