@@ -16,8 +16,9 @@ Python data analysis workflows often rely on the de facto standards `pandas <htt
 Features
 ========
 
-- Write pandas DataFrames to CARTO tables
-- Read CARTO tables and queries into pandas DataFrames
+- Create interactive maps from pandas DataFrames (CARTO account not required)
+- Publish interactive maps to CARTO's platform
+- Write and read pandas DataFrames to/from CARTO tables and queries
 - Create customizable, interactive CARTO maps in a Jupyter notebook using DataFrames or hosted data
 - Augment your data with CARTO's Data Observatory
 - Use CARTO for cloud-based analysis
@@ -26,7 +27,7 @@ Features
 Common Uses
 ===========
 
-- Visualize spatial data programmatically as matplotlib images or embedded interactive maps
+- Visualize spatial data programmatically as matplotlib images, as notebook-embedded interactive maps, or published map visualizations
 - Perform cloud-based spatial data processing using CARTO's analysis tools
 - Extract, transform, and Load (ETL) data using the Python ecosystem for getting data into and out of CARTO
 - Data Services integrations using CARTO's `Location Data Streams <https://carto.com/platform/location-data-streams/>`__
@@ -121,10 +122,10 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     from cartoframes.auth import set_default_context
     from cartoframes.data import Dataset
 
-    # `base_url`s are of the form `https://{username}.carto.com/` for most users
+    # `base_url`s are of the form `https://username.carto.com/` for most users
     set_default_context(
         base_url='https://your_user_name.carto.com/',
-        api_key='your api key'
+        api_key='your API key'
     )
 
     # create a dataset object
@@ -136,21 +137,14 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     # perform operations on you dataframe
     df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
 
-    # updates CARTO table with all changes from this session
-    d.upload(df, if_exists='replace')
+    # update CARTO table with all changes from this session
+    d_updated = Dataset.from_dataframe(df)
+    d_updated.upload(
+        table_name='brooklyn_poverty_census_tracts',
+        if_exists='replace'
+    )
 
 .. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/data-workflow.gif
-
-Write an existing pandas DataFrame to CARTO.
-
-.. code:: python
-
-    import pandas as pd
-    import cartoframes
-    df = pd.read_csv('acadia_biodiversity.csv')
-    cc = cartoframes.CartoContext(base_url=BASEURL,
-                                  api_key=APIKEY)
-    cc.write(df, 'acadia_biodiversity')
 
 
 Map workflow
@@ -183,7 +177,7 @@ Publish map to CARTO
     from cartoframes.auth import set_default_context
 
     set_default_context(
-        base_url='https://your_user_name.carto.com'
+        base_url='https://your_user_name.carto.com',
         api_key='your api key'
     )
 
