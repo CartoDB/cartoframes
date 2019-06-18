@@ -4,11 +4,11 @@ Changelog
 1.0b1
 ------
 
-Release 2019-mm-dd
+Release 2019-06-18
 
 Updates
 
-- Sharing visualizations: structure and publication
+- Sharing visualizations: structure and publication (#745, #740)
 - Add namespaces cartoframes.data for Dataset class
 - Add support for DataFrames visualization (#735)
 - Reverse Map layers order (#742)
