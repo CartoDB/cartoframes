@@ -61,6 +61,9 @@ function onReady() {
 
   const mapLayers = [];
 
+  const interactiveLayers = [];
+  const interactiveMapLayers = [];
+
   layers.forEach((layer, index) => {
     const factory = new SourceFactory();
     const mapSource = factory.createSource(layer);
@@ -78,94 +81,126 @@ function onReady() {
     mapLayer.addTo(map);
 
     if (layer.interactivity) {
-      const interactivity = new carto.Interactivity(mapLayer);
-      const tempPopup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-      });
-
-      interactivity.off('featureHover');
-      interactivity.off('featureClick');
-
-      for (const { event, attrs } of layer.interactivity) {
-        if (event === 'click') {
-          setPopupsClick(tempPopup, interactivity, attrs);
-        }
-        if (event === 'hover') {
-          setPopupsHover(tempPopup, interactivity, attrs);
-        }
-      }
+      interactiveLayers.push(layer);
+      interactiveMapLayers.push(mapLayer);
     }
 
     if (layer.legend) {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
-
-    function setPopupsClick(tempPopup, interactivity, attrs) {
-      interactivity.on('featureClick', (event) => {
-          updatePopup(tempPopup, event, attrs)
-      });
-    }
-
-    function setPopupsHover(tempPopup, interactivity, attrs) {
-      interactivity.on('featureHover', (event) => {
-          updatePopup(tempPopup, event, attrs)
-      });
-    }
-
-    function updatePopup(popup, event, attrs) {
-      if (event.features.length > 0) {
-        const feature = event.features[0];
-
-        let popupHTML = '';
-
-        attrs.forEach((item) => {
-          let value = feature.variables[item.name].value;
-          value = formatValue(value)
-
-          popupHTML += `
-            <span class="popup-name">${item.title}</span>
-            <span class="popup-value">${value}</span>
-          `;
-        });
-
-        popup
-            .setLngLat([event.coordinates.lng, event.coordinates.lat])
-            .setHTML(`<div class="popup-content">${popupHTML}</div>`);
-
-        if (!popup.isOpen()) {
-          popup.addTo(map);
-        }
-      } else {
-        popup.remove();
-      }
-    }
-
-    function SourceFactory() {
-      const sourceTypes = {
-        GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
-        Query: (layer) => {
-          const auth = {
-            username: layer.credentials['username'],
-            apiKey: layer.credentials['api_key'] || 'default_public'
-          };
-          const config = {
-            serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
-          };
-          return new carto.source.SQL(layer.query, auth, config)
-        },
-        MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
-      }
-
-      this.createSource = (layer) => {
-        return sourceTypes[layer.type](layer);
-      }
-    }
   });
+
+  if (interactiveLayers.length > 0) {
+    const interactivity = new carto.Interactivity(interactiveMapLayers);
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    let clickAttrs = [];
+    let hoverAttrs = [];
+    interactiveLayers.forEach((interactiveLayer) => {
+      interactiveLayer.interactivity.forEach((interactivityDef) => {
+        if (interactivityDef.event === 'click') {
+          clickAttrs = clickAttrs.concat(interactivityDef.attrs);
+        } else if (interactivityDef.event === 'hover') {
+          hoverAttrs = hoverAttrs.concat(interactivityDef.attrs);
+        }
+      });
+    });
+
+    resetPopupClick(interactivity);
+    if (clickAttrs.length > 0) {
+      setPopupsClick(popup, interactivity, clickAttrs);
+    }
+
+    resetPopupHover(interactivity);
+    if (hoverAttrs.length > 0) {
+      setPopupsHover(popup, interactivity, hoverAttrs);
+    }
+  }
 
   {% if default_legend %}
     createDefaultLegend(mapLayers);
   {% endif %}
+
+  function updatePopup(popup, event, attrs) {
+    if (event.features.length > 0) {
+      let popupHTML = '';
+      const layerIDs = [];
+
+      for (const feature of event.features) {
+        if (!layerIDs.includes(feature.layerId)) {
+          // Track layers to add only one feature per layer
+          layerIDs.push(feature.layerId);
+      
+          for (const item of attrs) {
+            const variable = feature.variables[item.name];
+            if (variable) {
+              let value = variable.value;
+              value = formatValue(value)
+
+              popupHTML = `
+                <span class="popup-name">${item.title}</span>
+                <span class="popup-value">${value}</span>
+              ` + popupHTML;
+            }
+          }
+        }
+      }
+
+      popup
+          .setLngLat([event.coordinates.lng, event.coordinates.lat])
+          .setHTML(`<div class="popup-content">${popupHTML}</div>`);
+
+      if (!popup.isOpen()) {
+        popup.addTo(map);
+      }
+    } else {
+      popup.remove();
+    }
+  }
+
+  function resetPopupClick(interactivity) {
+    interactivity.off('featureClick');
+  }
+
+  function resetPopupHover(interactivity) {
+    interactivity.off('featureHover');
+  }
+
+  function setPopupsClick(popup, interactivity, attrs) {
+    interactivity.on('featureClick', (event) => {
+      updatePopup(popup, event, attrs)
+    });
+  }
+
+  function setPopupsHover(popup, interactivity, attrs) {
+    interactivity.on('featureHover', (event) => {
+      updatePopup(popup, event, attrs)
+    });
+  }
+
+  function SourceFactory() {
+    const sourceTypes = {
+      GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
+      Query: (layer) => {
+        const auth = {
+          username: layer.credentials['username'],
+          apiKey: layer.credentials['api_key'] || 'default_public'
+        };
+        const config = {
+          serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
+        };
+        return new carto.source.SQL(layer.query, auth, config)
+      },
+      MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
+    }
+
+    this.createSource = (layer) => {
+      return sourceTypes[layer.type](layer);
+    }
+  }
 }
 
 function setReady () {
