@@ -1,23 +1,26 @@
-## Quickstart Guide
+## Quickstart
 
-### About this guide
+### About this Guide
 
-This guide gets you set up with cartoframes by installing cartoframes, working in a Jupyter notebook, reading data from CARTO into your Python session, writing data to your CARTO account, and visualizing the data.
+This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
-### Installing CARTOframes
+![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
+
+### Install CARTOframes
 
 You can install CARTOframes with `pip`. Simply type the following in the command line to do a system install:
 
 ```bash
 $ pip install cartoframes
 ```
+
 To install through a Jupyter notebook, you can run
 
 ```bash
 !pip install cartoframes
 ```
 
-It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the the following command line commands to create a virtual env, activate it, and install cartoframes:
+It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the following command to create a virtual env, activate it, and install cartoframes:
 
 ```bash
 $ virtualenv cfenv
@@ -31,7 +34,7 @@ You'll notice the virtual environment name in your command line prompt, like abo
 (cfenv) $ deactivate
 ```
 
-### Installing Jupyter notebook
+### Install Jupyter notebook
 
 To install Jupyter, type:
 
@@ -41,7 +44,7 @@ $ pip install jupyter
 
 If working in a virtual environment, make sure you have activated the environment first.
 
-### Starting Jupyter notebook
+### Start the Jupyter notebook
 
 Start up a Jupyter notebook with the following command:
 
@@ -55,98 +58,153 @@ Next, create a new notebook. See Jupyter's [running a notebook](https://jupyter.
 
 ### Authentication
 
-Before we can do anything with CARTOframes, we need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username and API keys, which can be found at `http://your_user_name.carto.com/your_apps`.
+Before you can interact with CARTOframes, you need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps. 
 
-There are two methods of authentication:
+If you don't have a CARTO account but want to try out CARTOframes, you only need the cartoframes library. To learn more, take a look at the Sources examples to visualize data from either a Dataframe or a GeoJSON.
 
-1. Setting the `base_url` and `api_key` directly in CartoContext
+The elements we need to create contexts are under the `cartoframes.auth` namespace. For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
 
-```python
-cc = CartoContext(
-    base_url='https://<your_user_name>.carto.com',
-    api_key='<your_api_key>')
+```py
+from cartoframes.auth import set_default_context
+from cartoframes.viz import Map, Layer
+
+set_default_context(
+    base_url='https://cartoframes.carto.com/',
+    api_key='default_public'
+)
+
+Map(Layer('spend_data'))
 ```
 
-2. By passing a Credentials instance in CartoContext’s creds keyword argument.
+![Visualize the 'spend_data' dataset](../../img/guides/quickstart/quickstart-1.png)
 
-```python
-from cartoframes import Credentials, CartoContext
-creds = Credentials(username='<your_user_name>', key='<your_api_key>')
-cc = CartoContext(creds=creds)
+### Change the viewport and basemap
+
+By default, the map's center and zoom is set to encompass the entire dataset. For this map, let's modify these settings to better suite our area of interest:
+
+```py
+from cartoframes.viz import Map, Layer, basemaps
+
+Map(
+    Layer('spend_data'),
+    viewport={'zoom': 2.51, 'lat': 42.99, 'lng': 24.73},
+    basemap=basemaps.darkmatter,
+    show_info=True
+)
 ```
 
-You can also save your credentials to use later, independent of the Python session. Your credentials will be saved locally on your machine for future sessions.
+### Apply a SQL Query to your visualization
 
-```python
-from cartoframes import Credentials, CartoContext
-creds = Credentials(username='<your_user_name>', key='<your_api_key>')
-creds.save()  # save credentials for later use (not dependent on Python session)
+Next, let's filter the data by taking only the features where the purchase amount is between 150€ and 200€ using a simple SQL Query:
+
+```py
+from cartoframes.viz import Map, Layer, basemaps
+
+Map(
+    Layer('SELECT * FROM spend_data WHERE amount > 150 AND amount < 200')
+)
 ```
 
-Once your credientials are saved, you can start using CARTOframes more quickly:
+![Apply a simple SQL Query](../../img/guides/quickstart/quickstart-2.png)
 
-```python
-from cartoframes import CartoContext
-cc = CartoContext()  # automatically loads credentials if previously saved
+## Styles, Legends and Popups
+
+To overwrite the default color and size of the points, we can modify the second parameter `Style` of the layer using the [CARTO VL String API](https://carto.com/developers/carto-vl/guides/style-with-expressions/). This API is very powerful because it allows you to style your visualizations with a few lines of code. 
+
+But, as a data scientist, your primary focus is likely on the data vs. the visualization style, for this purpose,CARTOframes also provides you with a series of Helper Methods to create default visualization types.
+
+First, let's take a look at how to change the default style and how to add legends and popups manually, which gives us more control, and then we'll use Helper Methods to get the final result.
+
+### 1. Set the viewport
+
+We're going to set the default viewport `zoom`, `lat` and `lng` for the visualization.
+
+```py
+from cartoframes.viz import Map, Layer
+
+Map(
+    Layer('spend_data'),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
 ```
 
-### Reading a table from CARTO
+### 2. Change the Style
 
-In this section, you will read a table from your CARTO account into your Python environment as a pandas DataFrame. If you don't already have a table in your account that you want to use, you can send a dataset on poverty rates in Brooklyn, New York to your account with the following code:
+The style can be set directly as the **second** parameter of a Layer.
 
-```python
-from cartoframes.examples import read_brooklyn_poverty
-cc.write(read_brooklyn_poverty(), 'brooklyn_poverty')
+```py
+from cartoframes.viz import Map, Layer
+
+Map(
+    Layer(
+        'spend_data',
+        'color: ramp($category, bold)'
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
 ```
 
-To get your table from CARTO, use the `CartoContext.read` method:
+![Style by $category](../../img/guides/quickstart/quickstart-3.png)
 
-```python
-# read a table from your CARTO account to a DataFrame
-df = cc.read('brooklyn_poverty')
+### 3. Add a basic Legend
+
+In this case, the **third** parameter of a Layer is the Legend:
+
+```py
+from cartoframes.viz import Map, Layer
+
+Map(
+    Layer(
+        'spend_data',
+        'color: ramp($category, bold)',
+        {'type': 'color-bins', 'title': 'Categories'}
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
 ```
 
-This pulls down the table `brooklyn_poverty` from your CARTO account into a pandas DataFrame. The data types of the SQL table are copied over to the DataFrame and the index is `cartodb_id`. To decode the geometries into [Shapely geometries](https://toblerity.org/shapely/project.html), use the `decode_geom=True` flag.
+![Add a legend for the styled category](../../img/guides/quickstart/quickstart-4.png)
 
-Now that the data is in a DataFrame, you can use it just as a normal pandas DataFrame.
+### 4. Add a basic Popup
 
-```python
-# do fancy pandas operations (add/drop columns, change values, etc.)
-df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
+Now, let's add the Popup settings in the **fourth** parameter.
+
+```py
+from cartoframes.viz import Map, Layer
+
+Map(
+    Layer(
+        'spend_data',
+        'color: ramp($category, bold)',
+        {'type': 'color-bins', 'title': 'Categories'}
+        {
+          'hover': [{
+              'title': 'Category',
+              'value': '$category'
+          }, {
+              'title': 'Hour',
+              'value': '$hour'
+          }]
+        }
+    ),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
 ```
 
+![Show popups when interacting with the features](../../img/guides/quickstart/quickstart-5.png)
 
-### Writing a table to CARTO
+## Use a built-in helper
 
-To write a table to CARTO, use the `CartoContext.write` method as below:
+CARTOframes has a set of built-in [Helper Methods]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-1/) that can be used to create visualizations with default style, legends and popups, all together!.
 
-```python
-cc.write(df, 'brooklyn_poverty_w_rates')
+```py
+from cartoframes.viz import Map
+from cartoframes.viz.helpers import color_bins_layer
+
+Map(
+    color_bins_layer('spend_data','amount', 'Spent Amount €'),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
 ```
 
-If the table already exists and you'd like to overwrite it, use the `overwrite=True` flag like so:
-
-```python
-cc.write(df, 'brooklyn_poverty', overwrite=True)
-```
-
-### Visualizing your table
-
-Now that you have a table in your account, you can visualize it using the `CartoContext.map` method.
-
-This creates an interactive map with only a basemap:
-
-```python
-cc.map()
-```
-
-To add a data layer, import the `Layer` class and pass it as an argument. We can go further and style by the `poverty_per_pop` column to visualize based on a numeric value.
-
-```python
-from cartoframes import Layer
-cc.map(layers=Layer('brooklyn_poverty_w_rates', color='poverty_per_pop'))
-```
-
-![](../../img/guides/01-brooklyn_poverty.png)
-
-Note: Legends are not yet implemented for stable releases of cartoframes. See [this pull request](https://github.com/CartoDB/cartoframes/pull/184) for more information.
+![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
