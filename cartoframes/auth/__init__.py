@@ -1,3 +1,5 @@
+"""Auth namespace contains the class to manage authentication: Context.
+It also includes the utility method set_default_context."""
 from __future__ import absolute_import
 
 from ..credentials import Credentials

@@ -20,24 +20,31 @@ class Map(object):
     """Map
 
     Args:
-        layers (list of Layer-types): List of layers. One or more of
-          :py:class:`Layer <cartoframes.viz.Layer>`.
-        basemap (str):
+        layers (list of :py:class:`Layer <cartoframes.viz.Layer>`): List of
+          layers. Zero or more of :py:class:`Layer <cartoframes.viz.Layer>`.
+        basemap (str, optional):
           - if a `str`, name of a CARTO vector basemap. One of `positron`,
-            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class
+            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
+            hex value, rgb string, or other color expression from CARTO VL.
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
-        bounds (dict or list): a dict with `east`,`north`,`west`,`south`
-          properties, or a list of floats in the following order: [west,
-          south, east, north]. If not provided the bounds will be automatically
-          calculated to fit all features.
-        size (tuple of int): a (width, height) pair for the size of the map.
-          Default is (1024, 632)
+        bounds (dict or list, optional): a dict with `east`, `north`, `west`,
+          `south` properties, or a list of floats in the following order:
+          [west, south, east, north]. If not provided the bounds will be
+          automatically calculated to fit all features.
+        size (tuple, optional): a (width, height) pair for the size of the map.
+          Default is (1024, 632).
+        viewport (dict, optional): Properties for display of the map viewport.
+          Keys can be `bearing` or `pitch`.
+        default_legend (bool, optional): Default False. If True, a legend will
+          display for each layer.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
 
-    Example:
+    Examples:
+
+        Basic usage.
 
         .. code::
 
@@ -51,7 +58,24 @@ class Map(object):
 
             Map(Layer('table in your account'))
 
-        CARTO basemap style.
+        Display more than one layer on a map.
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.viz import Map, Layer
+
+            set_default_context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            Map(layers=[
+                Layer('table1'),
+                Layer('table2')
+            ])
+
+        Change the CARTO basemap style.
 
         .. code::
 
@@ -68,22 +92,22 @@ class Map(object):
                 basemaps.darkmatter
             )
 
-        Custom basemap style. Here we use the Mapbox streets style, which
-        requires an access token.
+        Choose a custom basemap style. Here we use the Mapbox streets style,
+        which requires an access token.
 
         .. code::
 
             from cartoframes.auth import set_default_context
-            from cartoframes.viz import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
-                api_key='your api key'
+                api_key='your CARTO API key'
             )
 
             basemap = {
                 'style': 'mapbox://styles/mapbox/streets-v9',
-                'token: '<your mapbox token>'
+                'token': 'your Mapbox token'
             }
 
             Map(
@@ -91,12 +115,12 @@ class Map(object):
                 basemap
             )
 
-        Color basemap style.
+        Remove basemap and show a custom color.
 
         .. code::
 
             from cartoframes.auth import set_default_context
-            from cartoframes.viz import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
@@ -108,7 +132,7 @@ class Map(object):
                 basemap='yellow'  # None, False, 'white', 'rgb(255, 255, 0)'
             )
 
-        Custom bounds.
+        Set custom bounds.
 
         .. code::
 
@@ -132,7 +156,7 @@ class Map(object):
                 bounds=bounds
             )
 
-        Show map center and zoom values
+        Show the map center and zoom value on the map (lower left-hand corner).
 
         .. code::
 
@@ -187,6 +211,32 @@ class Map(object):
         return self._htmlMap.html
 
     def publish(self, name, maps_api_key='default_public', context=None, password=None):
+        """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+            password (str, optional): setting it your Kuviz will be protected by
+                password. When someone will try to show the Kuviz, the password
+                will be requested
+
+        Example:
+
+            Publishing the map visualization
+
+            .. code::
+
+                from cartoframes.viz import Map, Layer
+
+                tmap = Map(Layer('tablename'))
+                tmap.publish('Custom Map Title')
+
+        """
         if not self._publisher.is_sync():
             raise CartoException('The map layers are not synchronized with CARTO. '
                                  'Please, use the `sync_data` method before publishing the map')
@@ -200,16 +250,42 @@ class Map(object):
         return kuviz_to_dict(self._kuviz)
 
     def sync_data(self, table_name, context=None):
+        """Synchronize datasets used by the map with CARTO.
+
+        Args:
+            table_name (str): Desired table name for the dataset on CARTO. If
+                name does not conform to SQL naming conventions, it will be
+                'normalized' (e.g., all lower case, adding `_` in place of spaces
+                and other special characters.
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         if not self._publisher.is_sync():
             self._publisher.sync_layers(table_name, context)
 
     def delete_publication(self):
+        """Delete the published map Kuviz."""
         if self._kuviz:
             self._kuviz.delete()
             print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
             self._kuviz = None
 
     def update_publication(self, name, password, maps_api_key='default_public', context=None):
+        """Update the published map Kuviz.
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            password (str): setting it your Kuviz will be protected by
+                password and using `None` the Kuviz will be public
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with datasets used by the map. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         if not self._kuviz:
             raise CartoException('The map has not been published. Use the `publish` method.')
 
@@ -228,6 +304,14 @@ class Map(object):
 
     @staticmethod
     def all_publications(context=None):
+        """Get all map Kuviz published by the current user.
+
+        Args:
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+                Context that is associated with user account. If
+                `set_default_context` is previously used, this value will be
+                implicitly filled in.
+        """
         return KuvizPublisher.all(context)
 
     def _get_publication_html(self, name, maps_api_key):

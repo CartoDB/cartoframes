@@ -9,15 +9,15 @@
    :maxdepth: 2
 
    Overview <overview>
-   CartoContext <cartocontext>
-   Map Layers <layers>
-   Layer Styling <styling>
-   Example Functionalty <example_context>
+   Data-driven maps <maps>
+   Publishing and sharing a map <kuviz>
+   Data workflows <data>
+   Authentication <cartocontext>
+   Example functionalty <example_context>
    Credentials <credentials>
-   Batch Jobs <batchjobstatus>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
-   Local Development Setup <local_development>
+   Local development setup <local_development>
 
 ******************
 Indices and tables

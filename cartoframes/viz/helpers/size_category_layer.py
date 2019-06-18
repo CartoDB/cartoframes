@@ -4,6 +4,27 @@ from ..layer import Layer
 
 
 def size_category_layer(source, value, title='', top=5, cat=None, size=None, color=None):
+    """Helper function for quickly creating a size category layer.
+
+    Args:
+        source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by
+        title (str, optional): Title of legend
+        top (int, optional): Number of size categories for layer. Default is
+          5. Valid values range from 1 to 16.
+        cat (str, optional): Category list. Must be a valid CARTO VL category
+          list.
+        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+          '[2, 20]' for point geometries and '[1, 10]' for lines.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Default is '#F46D43' for point geometries and
+          '#4CC8A3' for lines.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
+        popup on `value`.
+    """
     func = 'buckets' if cat else 'top'
     return Layer(
         source,

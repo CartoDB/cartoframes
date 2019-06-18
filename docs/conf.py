@@ -51,8 +51,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cartoframes'
-copyright = '2017, Andy Eschbacher, Stuart Lynn'
-author = 'Andy Eschbacher, Stuart Lynn'
+copyright = '2019, CARTO'
+author = 'CARTO'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

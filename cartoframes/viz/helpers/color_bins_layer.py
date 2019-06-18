@@ -4,6 +4,21 @@ from ..layer import Layer
 
 
 def color_bins_layer(source, value, title='', bins=5, palette=None):
+    """Helper function for quickly creating a classed color map
+
+    Args:
+        source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by
+        title (str, optional): Title of legend
+        bins (int, optional): Number of classes (bins) for map. Default is 5.
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid CARTO VL palette expression. Default is `purpor`.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
+        popup on `value`.
+    """
     return Layer(
         source,
         style={

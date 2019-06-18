@@ -1,3 +1,5 @@
+"""Dataset
+======="""
 import pandas as pd
 from tqdm import tqdm
 from warnings import warn
@@ -15,6 +17,18 @@ tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class Dataset(object):
+    """Generic data class for cartoframes data operations. A `Dataset` instance
+    can be created from a dataframe, geodataframe, a table hosted on a CARTO
+    account, an arbitrary query against a CARTO account, or a local or hosted
+    GeoJSON source. If hosted, the data can be retrieved as a pandas DataFrame.
+    If local or as a query, a new table can be created in a CARTO account off
+    of the Dataset instance.
+
+    The recommended way to work with this class is by using the class methods
+    :py:meth:`from_table`, :py:meth:`from_query`, :py:meth:`from_dataframe`,
+    :py:meth:`from_geodataframe`, or :py:meth:`from_geojson`. Direct use of the
+    Dataset constructor should be avoided.
+    """
     FAIL = 'fail'
     REPLACE = 'replace'
     APPEND = 'append'
@@ -43,7 +57,7 @@ class Dataset(object):
         self._gdf = gdf
 
         if not self._validate_init():
-            raise ValueError('Wrong Dataset creation. You should use one of the class methods: '
+            raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
         self._state = state
@@ -57,70 +71,237 @@ class Dataset(object):
 
     @classmethod
     def from_table(cls, table_name, context=None, schema=None):
+        """Create a :py:class:`Dataset <cartoframes.data.Dataset>` from a table
+        hosted on CARTO.
+
+        Args:
+          table_name (str): Name of table on CARTO account associated with
+            `context`.
+          context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+            Context that `table_name` is associated with. If
+            `set_default_context` is previously used, this value will be
+            implicitly filled in.
+          schema (str, optional): Name of user in organization (multi-user
+            account) who shared `table_name`. This option only works with
+            multi-user accounts.
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.data import Dataset
+
+            set_default_context('https://cartoframes.carto.com')
+
+            d = Dataset.from_table('us_counties_population')
+
+            # download into a dataframe
+            df = d.download()
+
+        """
         return cls(table_name=table_name, schema=schema, context=context,
                    state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_query(cls, query, context=None):
+        """Create a Dataset from an arbitrary query of data hosted on CARTO.
+
+        Args:
+          query (str): Name of table on CARTO account associated with
+            `context`.
+          context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+            Context that `query` is associated with. If
+            :py:meth:`set_default_context <cartoframes.auth.set_default_context>`
+            is previously used, this value will be implicitly filled in.
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.data import Dataset
+            from cartoframes.viz import Map
+            from cartoframes.viz.helpers import color_continuous_layer
+
+            set_default_context('https://cartoframes.carto.com')
+
+            d = Dataset.from_query('''
+                SELECT
+                  CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                  ST_Transform(CDB_LatLng(pickup_latitude, pickup_longitude), 3857) as the_geom_webmercator,
+                  cartodb_id,
+                  fare_amount
+                FROM
+                  taxi_50k
+                ''')
+
+            # show dataset on a map
+            Map(color_continuous_layer(d, 'fare_amount'))
+
+        """
         return cls(query=query, context=context, state=cls.STATE_REMOTE, is_saved_in_carto=True)
 
     @classmethod
     def from_dataframe(cls, df):
+        """Create a Dataset from a local pandas DataFrame.
+
+        Args:
+          df (pandas.DataFrame): pandas DataFrame
+
+        Example:
+
+            Create a Dataset from a pandas Dataframe and then map the data.
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.viz import Map, Layer
+                import pandas as pd
+
+                df = pd.DataFrame({'lat': [0, 10, 20], 'lng': [20, 10, 0]})
+
+                d = Dataset.from_dataframe(df)
+
+                Map(Layer(d))
+
+        """
         dataset = cls(df=df, state=cls.STATE_LOCAL)
         _save_index_as_column(dataset._df)
         return dataset
 
     @classmethod
     def from_geodataframe(cls, gdf):
+        """Create a Dataset from a local GeoPandas GeoDataFrame.
+
+        Args:
+          gdf (geopandas.GeoDataFrame): GeoPandas GeoDataFrame
+
+        Example:
+
+          GeoDataFrame example code taken from `GeoPandas documentation
+          <http://geopandas.org/gallery/create_geopandas_from_pandas.html#creating-a-geodataframe-from-a-dataframe-with-coordinates>`__.
+
+        .. code::
+
+            from cartoframes.data import Dataset
+            from cartoframes.viz import Map, Layer
+            import pandas as pd
+            import geopandas as gpd
+
+            df = pd.DataFrame(
+                {'City': ['Buenos Aires', 'Brasilia', 'Santiago', 'Bogota', 'Caracas'],
+                 'Country': ['Argentina', 'Brazil', 'Chile', 'Colombia', 'Venezuela'],
+                 'Latitude': [-34.58, -15.78, -33.45, 4.60, 10.48],
+                 'Longitude': [-58.66, -47.91, -70.66, -74.08, -66.86]})
+            gdf = gpd.GeoDataFrame(
+                df,
+                geometry=gpd.points_from_xy(df.Longitude, df.Latitude)
+            )
+
+            d = Dataset.from_geodataframe(gdf)
+
+            Map(Layer(d))
+
+        """
         dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
         _save_index_as_column(dataset._gdf)
         return dataset
 
     @classmethod
     def from_geojson(cls, geojson):
+        """Create a Dataset from a GeoJSON file (hosted or local).
+
+        Args:
+          gdf (geopandas.GeoDataFrame): GeoPandas GeoDataFrame
+
+        Example:
+
+          GeoDataFrame example code taken from `GeoPandas documentation
+          <http://geopandas.org/gallery/create_geopandas_from_pandas.html#creating-a-geodataframe-from-a-dataframe-with-coordinates>`__.
+
+        .. code::
+
+            from cartoframes.data import Dataset
+            from cartoframes.viz import Map, Layer
+
+            geojson_source = 'https://cartoframes.carto.com/api/v2/sql?q=select+*+from+nyc_census_tracts&format=geojson'
+
+            d = Dataset.from_geojson(geojson_source)
+
+            Map(Layer(d))
+        """
         return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
 
     @property
     def dataframe(self):
+        """Dataset DataFrame"""
         return self._df
 
     @property
     def geodataframe(self):
+        """Dataset GeoDataFrame"""
         return self._gdf
 
     @property
     def table_name(self):
+        """Dataset table name"""
         return self._table_name
 
     @property
     def schema(self):
+        """Dataset schema"""
         return self._schema
 
     @property
     def query(self):
+        """Dataset query"""
         return self._query
 
     @property
     def context(self):
+        """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
         return self._cc
 
     @context.setter
     def context(self, context):
+        """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._cc = context
         self._schema = context.get_default_schema()
 
     @property
     def is_saved_in_carto(self):
+        """Property on whether Dataset is saved in CARTO account"""
         return self._is_saved_in_carto
 
     @property
     def dataset_info(self):
+        """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance
+
+
+        .. note::
+            This method only works for Datasets created from tables.
+
+        Example:
+
+            .. code::
+
+               from cartoframes.auth import set_default_context
+               from cartoframes.data import Dataset
+
+               set_default_context(
+                   base_url='https://your_user_name.carto.com/',
+                   api_key='your api key'
+               )
+
+               d = Dataset.from_table('tablename')
+               d.dataset_info
+
+        """
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
-                                 'First of all, you should call upload method to save your data in CARTO.')
+                                 'First of all, you should call upload method '
+                                 'to save your data in CARTO.')
 
         if not self._table_name and self._query:
-            raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+            raise CartoException('We can not extract Dataset info from a '
+                                 'query. Use `Dataset.from_table()` method '
                                  'to get or modify the info from a CARTO table.')
 
         if self._dataset_info is None:
@@ -129,10 +310,78 @@ class Dataset(object):
         return self._dataset_info
 
     def update_dataset_info(self, privacy=None, name=None):
+        """Update/change Dataset privacy and name
+
+        Args:
+          privacy (str, optional): One of DatasetInfo.PRIVATE,
+            DatasetInfo.PUBLIC, or DatasetInfo.LINK
+          name (str, optional): Name of the dataset on CARTO.
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_context
+
+                set_default_context(
+                    base_url='https://your_user_name.carto.com/',
+                    api_key='your api key'
+                )
+
+                d = Dataset.from_table('tablename')
+                d.update_dataset_info(privacy='link')
+
+        """
         self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
+        """Upload Dataset to CARTO account associated with `context`.
+
+        Args:
+            with_lnglat (tuple, optional): Two columns that have the longitude
+              and latitude information. If used, a point geometry will be
+              created upon upload to CARTO. Example input: `('long', 'lat')`.
+              Defaults to `None`.
+            if_exists (str, optional): Behavior for adding data from Dataset.
+              Options are 'fail', 'replace', or 'append'. Defaults to 'fail',
+              which means that the Dataset instance will not overwrite a
+              table of the same name if it exists. If the table does not exist,
+              it will be created.
+            table_name (str): Desired table name for the dataset on CARTO. If
+              name does not conform to SQL naming conventions, it will be
+              'normalized' (e.g., all lower case, adding `_` in place of spaces
+              and other special characters.
+            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
+              Context of user account to send Dataset to. If not provided,
+              a default context (if set with :py:meth:`set_default_context
+              <cartoframes.auth.set_default_context>`) will attempted to be
+              used.
+
+        Example:
+
+            Send a pandas DataFrame to CARTO.
+
+            .. code::
+
+                from cartoframes.auth import set_default_context
+                from cartoframes.data import Dataset
+                import pandas as pd
+
+                set_default_context(
+                    base_url='https://your_user_name.carto.com',
+                    api_key='your api key'
+                )
+
+                df = pd.DataFrame({
+                    'lat': [40, 45, 50],
+                    'lng': [-80, -85, -90]
+                })
+                d = Dataset.from_dataframe(df)
+                d.upload(with_lnglat=('lng', 'lat'), table_name='sample_table')
+
+        """
         if table_name:
             self._table_name = normalize_name(table_name)
         if context:
@@ -144,8 +393,8 @@ class Dataset(object):
             raise ValueError('You should provide a table_name and context to upload data.')
 
         if self._gdf is None and self._df is None and self._query is None:
-            raise ValueError('Nothing to upload.'
-                             'We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.')
+            raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
+                             'GeoDataFrame, or a query to upload data to CARTO.')
 
         already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
                                               'Please choose a different `table_name` or use '
@@ -154,7 +403,8 @@ class Dataset(object):
 
         # priority order: gdf, df, query
         if self._gdf is not None:
-            warn('GeoDataFrame option is still under development. We will try the upload with DataFrame')
+            warn('GeoDataFrame option is still under development. Attempting '
+                 'to upload as a DataFrame')
             # TODO: uncomment when we support GeoDataFrame
             # self._normalized_column_names = _normalize_column_names(self._gdf)
 
@@ -183,6 +433,35 @@ class Dataset(object):
         return self
 
     def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+        """Download / read a Dataset (table or query) from CARTO account
+        associated with the Dataset's instance of :py:class:`Context
+        <cartoframes.auth.Context>`.
+
+        Args:
+            limit (int, optional): The number of rows of the Dataset to
+              download. Default is to download all rows. This value must be
+              >= 0.
+            decode_geom (bool, optional): Decode Dataset geometries into
+              Shapely geometries from EWKB encoding.
+            retry_times (int, optional): Number of time to retry the download
+              in case it fails. Default is Dataset.DEFAULT_RETRY_TIMES.
+
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_context
+
+                # use cartoframes example account
+                set_default_context('https://cartoframes.carto.com')
+
+                d = Dataset('brooklyn_poverty')
+
+                df = d.download(decode_geom=True)
+
+        """
         if self._cc is None or (self._table_name is None and self._query is None):
             raise ValueError('You should provide a context and a table_name or query to download data.')
 
@@ -193,6 +472,27 @@ class Dataset(object):
         return self._df
 
     def delete(self):
+        """Delete table on CARTO account associated with a Dataset instance
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_context
+
+                set_default_context(
+                    base_url='https://your_user_name.carto.com',
+                    api_key='your api key'
+                )
+
+                d = Dataset.from_table('table_name')
+                d.delete()
+
+        Returns:
+            bool: True if deletion is successful, False otherwise.
+
+        """
         if self.exists():
             self._cc.sql_client.send(self._drop_table_query(False))
             self._unsync()

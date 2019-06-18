@@ -15,6 +15,7 @@ class Legend(object):
     Example:
 
     .. code::
+
         from cartoframes.viz import Legend
 
         Legend({
