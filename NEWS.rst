@@ -19,6 +19,7 @@ Updates
   - size_category (#765)
   - size_bins (#652)
   - size_continuous (#653)
+- Add multi-layer popups (#793)
 
 0.10.1
 ------
