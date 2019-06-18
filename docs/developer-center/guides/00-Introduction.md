@@ -6,13 +6,13 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 
 ### Content
 
-* [Quickstart]({{ site.url }}/documentation/cartoframes/guides/quickstart/)
-* [Context]({{ site.url }}/documentation/cartoframes/guides/context/)
-* [Basemaps And Viewport]({{ site.url }}/documentation/cartoframes/guides/basemaps-and-viewport/)
-* [Sources]({{ site.url }}/documentation/cartoframes/guides/sources/)
-* [Legends]({{ site.url }}/documentation/cartoframes/guides/legends/)
-* [Popups]({{ site.url }}/documentation/cartoframes/guides/popups/)
-* [Helper Methods Part 1]({{ site.url }}/documentation/cartoframes/guides/helper-methods-part-1/)
-* [Helper Methods Part 2]({{ site.url }}/documentation/cartoframes/guides/helper-methods-part-2/)
-* [Publishing]({{ site.url }}/documentation/cartoframes/guides/publishing/)
-* [Spatial Analysis]({{ site.url }}/documentation/cartoframes/guides/spatial-analysis/)
+* [Quickstart]({{ site.url }}/developers/cartoframes/guides/quickstart/)
+* [Context]({{ site.url }}/developers/cartoframes/guides/context/)
+* [Basemaps And Viewport]({{ site.url }}/developers/cartoframes/guides/basemaps-and-viewport/)
+* [Sources]({{ site.url }}/developers/cartoframes/guides/sources/)
+* [Legends]({{ site.url }}/developers/cartoframes/guides/legends/)
+* [Popups]({{ site.url }}/developers/cartoframes/guides/popups/)
+* [Helper Methods Part 1]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-1/)
+* [Helper Methods Part 2]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-2/)
+* [Publishing]({{ site.url }}/developers/cartoframes/guides/publishing/)
+* [Spatial Analysis]({{ site.url }}/developers/cartoframes/guides/Spatial-Analysis/)
