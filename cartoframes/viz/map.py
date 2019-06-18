@@ -98,7 +98,7 @@ class Map(object):
         .. code::
 
             from cartoframes.auth import set_default_context
-            from cartoframes.viz import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
@@ -107,7 +107,7 @@ class Map(object):
 
             basemap = {
                 'style': 'mapbox://styles/mapbox/streets-v9',
-                'token: 'your Mapbox token'
+                'token': 'your Mapbox token'
             }
 
             Map(
@@ -120,7 +120,7 @@ class Map(object):
         .. code::
 
             from cartoframes.auth import set_default_context
-            from cartoframes.viz import Map, Layer, basemaps
+            from cartoframes.viz import Map, Layer
 
             set_default_context(
                 base_url='https://your_user_name.carto.com',
@@ -231,10 +231,10 @@ class Map(object):
 
             .. code::
 
-                from cartoframes.viz import Map, Layer, basemaps
+                from cartoframes.viz import Map, Layer
 
-                tmap = Map(Layer(PUBLIC_TABLE))
-                tmap.publish('cf_publish_case_1')
+                tmap = Map(Layer('tablename'))
+                tmap.publish('Custom Map Title')
 
         """
         if not self._publisher.is_sync():
