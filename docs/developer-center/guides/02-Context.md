@@ -27,6 +27,14 @@ set_default_context(
 )
 ```
 
+When the data we're going to use is public, we don't need the `api_key` parameter, it's automatically set to `default_public`:
+
+```py
+from cartoframes.auth import set_default_context
+
+set_default_context('https://your_user_name.carto.com/')
+```
+
 ### Layer Context
 
 You can set a `Context` for a `Layer`, and different contexts for different leyers:
@@ -38,17 +46,33 @@ from cartoframes.viz import Map, Layer
 visualization = Map(
     Layer(
         'dataset',
-        context=Context('https://your_user_name.carto.com/', 'default_public')
+        context=Context('https://your_user_name.carto.com/', 'your_api_key')
     )
 )
 ```
+
+Or, if it's public:
 
 ```py
 from cartoframes.auth import Context
 from cartoframes.viz import Map, Layer
 
-context_a=Context('https://your_user_name_a.carto.com/', 'default_public')
-context_b=Context('https://your_user_name_b.carto.com/', 'default_public')
+visualization = Map(
+    Layer(
+        'dataset',
+        context=Context('https://your_user_name.carto.com/')
+    )
+)
+```
+
+Using a different context for each layer:
+
+```py
+from cartoframes.auth import Context
+from cartoframes.viz import Map, Layer
+
+context_a=Context('https://your_user_name_a.carto.com/')
+context_b=Context('https://your_user_name_b.carto.com/')
 
 visualization = Map([
     Layer('dataset_a', context=context_a),
@@ -68,7 +92,7 @@ visualization = Map(
     Layer(
         Source(
             'dataset',
-            Context('https://your_user_name_a.carto.com/', 'default_public')
+            Context('https://your_user_name_a.carto.com/')
         )
     )
 )

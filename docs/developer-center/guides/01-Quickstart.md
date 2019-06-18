@@ -115,7 +115,22 @@ But, as a data scientist, your primary focus is likely on the data vs. the visua
 
 First, let's take a look at how to change the default style and how to add legends and popups manually, which gives us more control, and then we'll use Helper Methods to get the final result.
 
-### 1. Change the Style
+### 1. Set the viewport
+
+We're going to set the default viewport `zoom`, `lat` and `lng` for the visualization.
+
+```py
+from cartoframes.viz import Map, Layer
+
+Map(
+    Layer('spend_data'),
+    viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
+)
+```
+
+### 2. Change the Style
+
+The style can be set directly as the **second** parameter of a Layer.
 
 ```py
 from cartoframes.viz import Map, Layer
@@ -131,19 +146,18 @@ Map(
 
 ![Style by $category](../../img/guides/quickstart/quickstart-3.png)
 
-### 2. Add a basic Legend
+### 3. Add a basic Legend
+
+In this case, the **third** parameter of a Layer is the Legend:
 
 ```py
-from cartoframes.viz import Map, Layer, Legend
+from cartoframes.viz import Map, Layer
 
 Map(
     Layer(
         'spend_data',
         'color: ramp($category, bold)',
-        legend=Legend({
-            'type': 'color-bins',
-            'title': 'Categories'
-        })
+        {'type': 'color-bins', 'title': 'Categories'}
     ),
     viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )
@@ -151,7 +165,9 @@ Map(
 
 ![Add a legend for the styled category](../../img/guides/quickstart/quickstart-4.png)
 
-### 3. Add a basic Popup
+### 4. Add a basic Popup
+
+Now, let's add the Popup settings in the **fourth** parameter.
 
 ```py
 from cartoframes.viz import Map, Layer, Legend, Popup
@@ -160,19 +176,16 @@ Map(
     Layer(
         'spend_data',
         'color: ramp($category, bold)',
-        legend=Legend({
-            'type': 'color-bins',
-            'title': 'Categories'
-        }),
-        popup=Popup({
-            'hover': [{
-                'title': 'Category',
-                'value': '$category'
-            }, {
-                'title': 'Hour',
-                'value': '$hour'
-            }]
-        })
+        {'type': 'color-bins', 'title': 'Categories'}
+        {
+          'hover': [{
+              'title': 'Category',
+              'value': '$category'
+          }, {
+              'title': 'Hour',
+              'value': '$hour'
+          }]
+        }
     ),
     viewport={'zoom': 12.03, 'lat': 41.4, 'lng': 2.19}
 )

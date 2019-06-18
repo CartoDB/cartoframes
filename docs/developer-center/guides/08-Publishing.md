@@ -26,7 +26,16 @@ tmap.publish('cf_publish_case_1_password', password="1234")
 
 #### Case 2: using a synchronized and private table
 
-In this case it's mandatory to add the `maps_api_key` parameter in the publish method. You can get more info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/. This is due to the `publish` method uses `default_public` by default, and the dataset is private.
+In this case it's mandatory to add the `maps_api_key` parameter in the publish method. You can get more info at [https://carto.com/developers/auth-api/guides/types-of-API-Keys/](https://carto.com/developers/auth-api/guides/types-of-API-Keys/). This is due to the `publish` method uses `default_public` by default, and the dataset is private.
+
+1. Go to https://your_carto_user.carto.com/your_apps URL
+2. Click on "New API Key"
+3. Give the API key a name
+4. Select the related dataset
+5. Save changes
+6. Use your new Maps API Key!
+
+![API Keys dashboard page](../../img/guides/publishing/publishing-1.png)
 
 ```py
 from cartoframes.viz import Map, Layer
@@ -41,7 +50,7 @@ If you try to publish a non synchronized dataset, you will get an **error**:
 
 > 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
 
-As the error message says, we'll need to make a previous step synchronizing the data. Once it's been synchronized, as your new table will be private, you will need to create a Maps API key **with permissions** for your new private table from your CARTO dashboard or Auth API. 
+As the error message says, we'll need to make a previous step synchronizing the data. Once it's been synchronized, as your new table will be private, you will need to create a Maps API key **with permissions** for your new private table from your CARTO dashboard or Auth API.
 
 Finally, we will be ready to publish the visualization!
 
@@ -51,7 +60,6 @@ from cartoframes.data import Dataset
 
 ds = Dataset.from_table('private_table_name')
 ds.download()
-ds._is_saved_in_carto = False
 
 tmap = Map(Layer(ds))
 
