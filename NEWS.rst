@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.0b1
+1.0b1
 ------
 
 Release 2019-mm-dd
