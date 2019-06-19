@@ -11,13 +11,13 @@ This guide walks you through the process of installing and authenticating CARTOf
 You can install CARTOframes with `pip`. Simply type the following in the command line to do a system install:
 
 ```bash
-$ pip install cartoframes
+$ pip install --pre cartoframes
 ```
 
 To install through a Jupyter notebook, you can run
 
 ```bash
-!pip install cartoframes
+! pip install --pre cartoframes
 ```
 
 It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the following command to create a virtual env, activate it, and install cartoframes:
@@ -25,7 +25,7 @@ It is recommended to install cartoframes in a [virtual environment](http://docs.
 ```bash
 $ virtualenv cfenv
 $ source cfenv/bin/activate
-(cfenv) $ pip install cartoframes
+(cfenv) $ pip install --pre cartoframes
 ```
 
 You'll notice the virtual environment name in your command line prompt, like above. Type `deactivate` to exit the virtualenv:

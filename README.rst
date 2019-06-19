@@ -60,7 +60,7 @@ latest version:
 
 .. code:: bash
 
-    $ pip install cartoframes
+    $ pip install (--pre) cartoframes
 
 `cartoframes` is continuously tested on Python versions 2.7, 3.5, and 3.6. It is recommended to use `cartoframes` in Jupyter Notebooks (`pip install jupyter`). See the example usage section below or notebooks in the `examples directory <https://github.com/CartoDB/cartoframes/tree/master/examples>`__ for using `cartoframes` in that environment.
 
