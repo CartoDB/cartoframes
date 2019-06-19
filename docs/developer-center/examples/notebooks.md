@@ -5,6 +5,7 @@ All the CARTOframes practical examples and use cases are placed in our [GitHub r
 <div class="example-notebook">
     <iframe
         id="example-notebook-embeded"
+        class="example-notebook-embeded"
         src="/developers/cartoframes/examples/html/index.html"
         width="100%"
         height="100%"
