@@ -7,7 +7,7 @@ These predefined layer-level style helpers provide the following defaults:
 - an appropriate legend
 - hover interactivity on the mapped attribute
 
-[Helper Methods - Part 1](https://github.com/CartoDB/cartoframes/blob/master/examples/04_helper_methods/01_helper_methods_part_1.ipynb) Notebook.
+[Helper Methods - Part 1](https://github.com/CartoDB/cartoframes/blob/develop/examples/04_helper_methods/01_helper_methods_part_1.ipynb) Notebook.
 
 Each component of these helpers (Map, Style, Legend, Popup) have parameters that you can be accessed to customize your visualization which will be covered in [Helper Methods - Part 2]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-2/)
 

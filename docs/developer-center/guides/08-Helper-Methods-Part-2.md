@@ -9,7 +9,7 @@ These predefined layer-level style helpers provide the following defaults:
 
 Each component of these helpers have parameters that you can accesse to customize pieces of your visualization.
 
-[Helper Methods - Part 1](https://github.com/CartoDB/cartoframes/blob/master/examples/04_helper_methods/01_helper_methods_part_1.ipynb) Notebook.
+[Helper Methods - Part 1](https://github.com/CartoDB/cartoframes/blob/develop/examples/04_helper_methods/01_helper_methods_part_1.ipynb) Notebook.
 
 In this guide, you will see how to modify the default visualization parameters of helper methods. For a more in-depth look at each helper method, visit [Helper Methods - Part 1]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-1/)
 

@@ -2,7 +2,7 @@
 
 ### About this Guide
 
-This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
+This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/develop/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
 ![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
 
