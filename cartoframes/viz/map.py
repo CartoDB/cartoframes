@@ -315,7 +315,7 @@ class Map(object):
         return KuvizPublisher.all(context)
 
     def _get_publication_html(self, name, maps_api_key):
-        html_map = HTMLMap('viz/main.html.j2')
+        html_map = HTMLMap('viz/{}/main.html.j2'.format(mode))
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
             bounds=self.bounds,
@@ -542,8 +542,11 @@ def _conv2nan(val):
     return np.nan if val is None else val
 
 
+mode = 'vector'
+
+
 class HTMLMap(object):
-    def __init__(self, template_path='viz/basic.html.j2'):
+    def __init__(self, template_path='viz/{}/embed.html.j2'.format(mode)):
         self.width = None
         self.height = None
         self.srcdoc = None

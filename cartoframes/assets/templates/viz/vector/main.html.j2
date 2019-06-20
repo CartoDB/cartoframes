@@ -126,12 +126,12 @@
       <div class="as-map-area">
         <div id="map"></div>
         {% if show_info %}
-          {% include 'viz/info.html.j2' %}
+          {% include 'viz/vector/info.html.j2' %}
         {% endif %}
         <div class="as-map-panels">
           <div class="as-panel as-panel--left as-panel--top">
             {% if has_legends %}
-              {% include 'viz/legends.html.j2' %}
+              {% include 'viz/vector/legends.html.j2' %}
             {% endif %}
           </div> <!-- as-panel -->
         </div> <!-- as-map-panels -->
@@ -139,10 +139,10 @@
     </main> <!-- as-main -->
   </as-responsive-content>
 
-  {% include 'error/basic.html.j2' %}
+  {% include 'error/main.html.j2' %}
 
   <script>
-    {% include 'viz/map.js.j2' %}
+    {% include 'viz/vector/map.js.j2' %}
   </script>
 </body>
 </html>
