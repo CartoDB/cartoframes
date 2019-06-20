@@ -57,9 +57,12 @@ function onReady() {
       const style = new carto.style.CartoCSS(`
         #layer {
           marker-width: 3;
+          [zoom > 2] {
+            marker-width: 5;
+          }
           marker-fill: #EE4D5A;
           marker-line-width: 0;
-          marker-line-color: #FFF;
+          marker-line-color: #222;
           marker-allow-overlap: true;
         }
       `);
@@ -73,10 +76,11 @@ function onReady() {
 
     if (layer.type === 'GeoJSON') {
       const geojsonMarkerOptions = {
-        radius: 4,
-        color: '#FFF',
+        radius: 3,
+        weight: 1,
+        color: '#222',
         fillColor: '#EE4D5A',
-        opacity: 1,
+        opacity: 0.3,
         fillOpacity: 1
       };
 
