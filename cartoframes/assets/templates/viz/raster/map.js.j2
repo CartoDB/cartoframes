@@ -40,7 +40,41 @@ function onReady() {
     map.on('move', updateMapInfo);
   {% endif %}
 
-  map.fitBounds({{bounds}}, { animate: false })
+  map.fitBounds({{bounds}}, { animate: false });
+
+
+  const layers = {{layers|tojson}};
+  const mapLayers = [];
+
+  layers.forEach((layer, index) => {
+    const client = new carto.Client({
+      apiKey: layer.credentials['api_key'] || 'default_public',
+      username: layer.credentials['username']
+    });
+
+    if (layer.type === 'Query') {
+      const source = new carto.source.SQL(layer.query);
+      const style = new carto.style.CartoCSS(`
+        #layer {
+          marker-width: 3;
+          marker-fill: #EE4D5A;
+          marker-line-width: 0;
+          marker-allow-overlap: true;
+        }
+      `);
+      const mapLayer = new carto.layer.Layer(source, style);
+
+      mapLayers.push(mapLayer);
+
+      client.addLayer(mapLayer);
+      client.getLeafletLayer().addTo(map);
+    }
+
+    if (layer.type === 'GeoJSON') {
+      
+    }
+
+  });
 
 
   {#
