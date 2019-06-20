@@ -423,7 +423,7 @@ def _dict_bounds(bounds, mode):
     if mode == 'raster':
         return '[[{north}, {west}], [{south}, {east}]]'.format(**clamped_bounds)
     else:
-       return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
+        return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
 
 
 def _clamp(value, minimum, maximum):
