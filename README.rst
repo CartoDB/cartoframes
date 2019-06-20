@@ -91,6 +91,7 @@ To setup `cartoframes` and `Jupyter` in a `virtual environment <http://python-gu
 To install the 1.0b1 version, run instead:
 
 .. code:: bash
+
     (venv) $ pip install cartoframes==1.0b1 jupyter
 
 Then create a new notebook and try the example code snippets below with tables that are in your CARTO account.
@@ -114,6 +115,7 @@ Alternatively, `pipenv <https://pipenv.readthedocs.io/en/latest/>`__ provides an
 To install the 1.0b1 version, run instead:
 
 .. code:: bash
+
     $ pipenv --three
     $ pipenv install cartoframes==1.0b1 jupyter
     $ pipenv run jupyter notebook
