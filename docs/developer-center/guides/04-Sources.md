@@ -1,6 +1,6 @@
 ## Sources
 
-In CARTOframes, the `Sources` are the origin of the data. In this guide, we cover the different types of sources that can be used with CARTOframes. You can also check the [Context Setup](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/02_context_setup.ipynb) Notebook.
+In CARTOframes, the `Sources` are the origin of the data. In this guide, we cover the different types of sources that can be used with CARTOframes. You can also check the [Context Setup](https://github.com/CartoDB/cartoframes/blob/develop/examples/01_quickstart/02_context_setup.ipynb) Notebook.
 
 The basic syntax to set the `Source` of a visualization is:
 

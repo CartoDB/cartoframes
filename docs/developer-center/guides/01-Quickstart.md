@@ -2,7 +2,7 @@
 
 ### About this Guide
 
-This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/master/examples/01_quickstart/01_basic_usage.ipynb) notebook.
+This guide walks you through the process of installing and authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/develop/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
 ![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
 
@@ -14,10 +14,22 @@ You can install CARTOframes with `pip`. Simply type the following in the command
 $ pip install cartoframes
 ```
 
+To install the 1.0b1 beta version:
+
+```bash
+$ pip install cartoframes==1.0b1
+```
+
 To install through a Jupyter notebook, you can run
 
 ```bash
-!pip install cartoframes
+! pip install cartoframes
+```
+
+To install the 1.0b1 beta version:
+
+```bash
+!pip install cartoframes==1.0b1
 ```
 
 It is recommended to install cartoframes in a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). For example, you can run the following command to create a virtual env, activate it, and install cartoframes:
@@ -26,6 +38,14 @@ It is recommended to install cartoframes in a [virtual environment](http://docs.
 $ virtualenv cfenv
 $ source cfenv/bin/activate
 (cfenv) $ pip install cartoframes
+```
+
+To install the 1.0b1 beta version:
+
+```bash
+$ virtualenv cfenv
+$ source cfenv/bin/activate
+(cfenv) $ pip install cartoframes==1.0b1
 ```
 
 You'll notice the virtual environment name in your command line prompt, like above. Type `deactivate` to exit the virtualenv:
