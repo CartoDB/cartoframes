@@ -51,6 +51,8 @@ function onReady() {
   const layers = {{layers|tojson}};
   const mapLayers = [];
 
+  const popup = L.popup({ closeButton: false });
+
   layers.forEach((layer, index) => {
     const client = new carto.Client({
       apiKey: layer.credentials['api_key'] || 'default_public',
@@ -77,6 +79,24 @@ function onReady() {
 
       client.addLayer(mapLayer);
       client.getLeafletLayer().addTo(map);
+
+      if (layer.interactivity) {
+        layer.interactivity.forEach((interactivityDef) => {
+          const columns = interactivityDef.attrs.map((item) => item.title);
+          if (interactivityDef.event == 'click') {
+            mapLayer.setFeatureClickColumns(columns);
+            mapLayer.on('featureClicked', (featureEvent) => {
+              openPopup(featureEvent, columns);
+            });
+          } else if (interactivityDef.event == 'hover') {
+            mapLayer.setFeatureOverColumns(columns);
+            mapLayer.on('featureOver', (featureEvent) => {
+              openPopup(featureEvent, columns);
+            });
+            mapLayer.on('featureOut', closePopup);
+          }
+        });
+      }
     }
 
     if (layer.type === 'GeoJSON') {
@@ -96,6 +116,30 @@ function onReady() {
       }).addTo(map);
     }
   });
+
+  function openPopup(featureEvent, columns) {
+    let content = '<div class="popup-content">';
+
+    columns.forEach((column) => {
+      const value = featureEvent.data[column];
+      if (value) {
+        content += `<span class="popup-name">${column}</span>`;
+        content += `<span class="popup-value">${formatValue(value)}</span>`;
+      }
+    });
+
+    content += `</div>`;
+
+    popup.setContent(content);
+    popup.setLatLng(featureEvent.latLng);
+    if (!popup.isOpen()) {
+      popup.openOn(map);
+    }
+  }
+
+  function closePopup(featureEvent) {
+    popup.removeFrom(map);
+  }
 
 
   {#
