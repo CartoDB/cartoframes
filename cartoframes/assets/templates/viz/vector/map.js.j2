@@ -102,9 +102,9 @@ function onReady() {
     interactiveLayers.forEach((interactiveLayer) => {
       interactiveLayer.interactivity.forEach((interactivityDef) => {
         if (interactivityDef.event === 'click') {
-          clickAttrs = clickAttrs.concat(interactivityDef.attrs);
+          clickAttrs = clickAttrs.concat(interactivityDef.attrs.reverse());
         } else if (interactivityDef.event === 'hover') {
-          hoverAttrs = hoverAttrs.concat(interactivityDef.attrs);
+          hoverAttrs = hoverAttrs.concat(interactivityDef.attrs.reverse());
         }
       });
     });
