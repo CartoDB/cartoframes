@@ -25,9 +25,7 @@ function onReady() {
     basemap = basemap.replace('.png', '@2x.png');
   }
 
-  L.tileLayer(basemap, {
-    attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
-  }).addTo(map);
+  L.tileLayer(basemap).addTo(map);
 
   const mapInfo$ = document.getElementById('map-info');
 
@@ -118,7 +116,11 @@ function onReady() {
       L.geoJSON(_decodeJSONQuery(layer.query), {
         pointToLayer: function (feature, latlng) {
           return L.circleMarker(latlng, geojsonMarkerOptions);
-        }
+        },
+        attribution: [
+          '&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors',
+          ' &copy; <a href=\"https://carto.com\">CARTO</a>'
+        ]
       }).addTo(map);
     }
   });
