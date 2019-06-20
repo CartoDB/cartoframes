@@ -41,6 +41,7 @@ class Map(object):
           display for each layer.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
+        mode (str, optional): `raster` or `vector`. Default `vector`.
 
     Examples:
 
@@ -180,6 +181,7 @@ class Map(object):
                  viewport=None,
                  default_legend=False,
                  show_info=None,
+                 mode='vector',
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -188,6 +190,7 @@ class Map(object):
         self.viewport = viewport
         self.default_legend = default_legend
         self.show_info = show_info
+        self.mode = _init_mode(mode)
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self._carto_js_path = kwargs.get('_carto_js_path', None)
@@ -195,7 +198,7 @@ class Map(object):
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
         self._kuviz = None
-        self._htmlMap = HTMLMap()
+        self._htmlMap = HTMLMap('viz/{}/embed.html.j2'.format(self.mode))
 
         self._htmlMap.set_content(
             layers=self.layer_defs,
@@ -317,7 +320,7 @@ class Map(object):
         return KuvizPublisher.all(context)
 
     def _get_publication_html(self, name, maps_api_key):
-        html_map = HTMLMap('viz/{}/main.html.j2'.format(mode))
+        html_map = HTMLMap('viz/{}/main.html.j2'.format(self.mode))
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
             bounds=self.bounds,
@@ -359,6 +362,12 @@ def _init_layers(layers):
         return [layers]
     else:
         return layers
+
+
+def _init_mode(mode):
+    if mode not in ['raster', 'vector']:
+        raise ValueError('Mode not supported. Supported modes are: raster, vector.')
+    return mode
 
 
 def _get_layer_defs(layers):
@@ -545,11 +554,8 @@ def _conv2nan(val):
     return np.nan if val is None else val
 
 
-mode = 'raster'
-
-
 class HTMLMap(object):
-    def __init__(self, template_path='viz/{}/embed.html.j2'.format(mode)):
+    def __init__(self, template_path='viz/vector/embed.html.j2'):
         self.width = None
         self.height = None
         self.srcdoc = None
