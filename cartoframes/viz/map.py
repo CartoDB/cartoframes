@@ -192,7 +192,7 @@ class Map(object):
         self.show_info = show_info
         self.mode = _init_mode(mode)
         self.layer_defs = _get_layer_defs(self.layers)
-        self.bounds = _get_bounds(bounds, self.layers)
+        self.bounds = _get_bounds(bounds, self.layers, self.mode)
         self._carto_js_path = kwargs.get('_carto_js_path', None)
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
@@ -347,11 +347,11 @@ class Map(object):
                                  'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
 
 
-def _get_bounds(bounds, layers):
+def _get_bounds(bounds, layers, mode):
     return (
-        _format_bounds(bounds)
+        _format_bounds(bounds, mode)
         if bounds
-        else _get_super_bounds(layers)
+        else _get_super_bounds(layers, mode)
     )
 
 
@@ -387,14 +387,14 @@ def _get_layer_def(layer):
     }
 
 
-def _format_bounds(bounds):
+def _format_bounds(bounds, mode):
     if isinstance(bounds, dict):
-        return _dict_bounds(bounds)
+        return _dict_bounds(bounds, mode)
 
-    return _list_bounds(bounds)
+    return _list_bounds(bounds, mode)
 
 
-def _list_bounds(bounds):
+def _list_bounds(bounds, mode):
     if len(bounds) != 4:
         raise ValueError('bounds list must have exactly four values in the '
                          'order: [west, south, east, north]')
@@ -407,7 +407,7 @@ def _list_bounds(bounds):
     })
 
 
-def _dict_bounds(bounds):
+def _dict_bounds(bounds, mode):
     if 'west' not in bounds or 'east' not in bounds or \
        'north' not in bounds or 'south' not in bounds:
         raise ValueError('bounds must have east, west, north and '
@@ -420,14 +420,17 @@ def _dict_bounds(bounds):
         'north': _clamp(bounds.get('north'), -90, 90)
     }
 
-    return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
+    if mode == 'raster':
+        return '[[{north}, {west}], [{south}, {east}]]'.format(**clamped_bounds)
+    else:
+       return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
 
 
 def _clamp(value, minimum, maximum):
     return max(minimum, min(value, maximum))
 
 
-def _get_super_bounds(layers):
+def _get_super_bounds(layers, mode):
     """"""
     # TODO: refactor this method:
     # Compute the bounds in the source class
@@ -455,7 +458,7 @@ def _get_super_bounds(layers):
 
     bounds = _combine_bounds(hosted_bounds, local_bounds)
 
-    return _format_bounds(bounds)
+    return _format_bounds(bounds, mode)
 
 
 def _get_bounds_local(layers):
