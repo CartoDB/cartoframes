@@ -100,6 +100,7 @@ class Popup(object):
         for item in array:
             if item:
                 if isinstance(item, str):
+                    item = _complete_value(item)
                     output.append({
                         'name': gen_variable_name(item),
                         'title': item
@@ -121,6 +122,7 @@ class Popup(object):
         for item in array:
             if item:
                 if isinstance(item, str):
+                    item = _complete_value(item)
                     name = gen_variable_name(item)
                     output[name] = item
                 elif isinstance(item, dict) and 'value' in item:
@@ -129,3 +131,17 @@ class Popup(object):
                 else:
                     raise ValueError('Wrong popup input')
         return output
+
+
+def _complete_value(value):
+    if '+' not in value and \
+       '-' not in value and \
+       '*' not in value and \
+       '/' not in value and \
+       '%' not in value and \
+       '(' not in value and \
+       ')' not in value and \
+       '"' not in value:
+        return '$' + value
+    else:
+        return value

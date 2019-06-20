@@ -82,7 +82,13 @@ function onReady() {
 
       if (layer.interactivity) {
         layer.interactivity.forEach((interactivityDef) => {
-          const columns = interactivityDef.attrs.map((item) => item.title);
+          const columns = interactivityDef.attrs.map((item) => {
+            if (item.title.startsWith('$')) {
+              return item.title.substring(1);
+            } else {
+              return item.title;
+            }
+          });
           if (interactivityDef.event == 'click') {
             mapLayer.setFeatureClickColumns(columns);
             mapLayer.on('featureClicked', (featureEvent) => {
