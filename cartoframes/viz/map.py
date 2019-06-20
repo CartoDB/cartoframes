@@ -190,6 +190,7 @@ class Map(object):
         self.show_info = show_info
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
+        self._carto_js_path = kwargs.get('_carto_js_path', None)
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
@@ -204,6 +205,7 @@ class Map(object):
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
+            _carto_js_path=self._carto_js_path,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -324,6 +326,7 @@ class Map(object):
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
+            _carto_js_path=self._carto_js_path,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path,
             title=name)
@@ -542,7 +545,7 @@ def _conv2nan(val):
     return np.nan if val is None else val
 
 
-mode = 'vector'
+mode = 'raster'
 
 
 class HTMLMap(object):
@@ -565,16 +568,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
-            default_legend=None, show_info=None,
+            default_legend=None, show_info=None, _carto_js_path=None,
             _carto_vl_path=None, _airship_path=None, title='CARTOframes'):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, basemap, default_legend, show_info,
-            _carto_vl_path, _airship_path, title)
+            _carto_js_path, _carto_vl_path, _airship_path, title)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=None, _airship_path=None, title=None):
+            show_info=None, _carto_js_path=None, _carto_vl_path=None, _airship_path=None, title=None):
 
         token = ''
         basecolor = ''
@@ -598,6 +601,11 @@ class HTMLMap(object):
                 raise ValueError(
                     'If basemap is a dict, it must have a `style` key'
                 )
+
+        if _carto_js_path is None:
+            carto_js_path = constants.CARTO_JS_URL
+        else:
+            carto_js_path = _carto_js_path + constants.CARTO_JS_DEV
 
         if _carto_vl_path is None:
             carto_vl_path = constants.CARTO_VL_URL
@@ -638,6 +646,7 @@ class HTMLMap(object):
             has_legends=has_legends,
             default_legend=default_legend,
             show_info=show_info,
+            carto_js_path=carto_js_path,
             carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
             airship_bridge_path=airship_bridge_path,

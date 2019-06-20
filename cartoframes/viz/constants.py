@@ -1,3 +1,6 @@
+CARTO_JS_VERSION = 'v4.1'
+CARTO_JS_DEV = '/dist/carto.js'
+CARTO_JS_URL = 'https://libs.cartocdn.com/carto.js/{}/carto.min.js'.format(CARTO_JS_VERSION)
 
 CARTO_VL_VERSION = 'v1.3'
 CARTO_VL_DEV = '/dist/carto-vl.js'
