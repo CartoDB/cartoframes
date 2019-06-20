@@ -59,6 +59,7 @@ function onReady() {
           marker-width: 3;
           marker-fill: #EE4D5A;
           marker-line-width: 0;
+          marker-line-color: #FFF;
           marker-allow-overlap: true;
         }
       `);
@@ -71,9 +72,20 @@ function onReady() {
     }
 
     if (layer.type === 'GeoJSON') {
-      
-    }
+      const geojsonMarkerOptions = {
+        radius: 2,
+        color: '#FFF',
+        fillColor: '#EE4D5A',
+        opacity: 1,
+        fillOpacity: 1
+      };
 
+      L.geoJSON(_decodeJSONQuery(layer.query), {
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+      }).addTo(map);
+    }
   });
 
 
