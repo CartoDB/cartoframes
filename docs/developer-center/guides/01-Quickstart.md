@@ -11,10 +11,10 @@ This guide walks you through the process of installing and authenticating CARTOf
 You can install CARTOframes with `pip`. Simply type the following in the command line to do a system install:
 
 ```bash
-$ pip install --pre cartoframes
+$ pip install cartoframes
 ```
 
-or 
+To install the 1.0b1 beta version:
 
 ```bash
 $ pip install cartoframes==1.0b1
@@ -23,8 +23,10 @@ $ pip install cartoframes==1.0b1
 To install through a Jupyter notebook, you can run
 
 ```bash
-! pip install --pre cartoframes
+! pip install cartoframes
 ```
+
+To install the 1.0b1 beta version:
 
 ```bash
 !pip install cartoframes==1.0b1
@@ -35,10 +37,10 @@ It is recommended to install cartoframes in a [virtual environment](http://docs.
 ```bash
 $ virtualenv cfenv
 $ source cfenv/bin/activate
-(cfenv) $ pip install --pre cartoframes
+(cfenv) $ pip install cartoframes
 ```
 
-or
+To install the 1.0b1 beta version:
 
 ```bash
 $ virtualenv cfenv

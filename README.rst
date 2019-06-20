@@ -60,9 +60,10 @@ latest version:
 
 .. code:: bash
 
-    $ pip install (--pre) cartoframes
+    $ pip install cartoframes
 
-or 
+To install the 1.0b1 beta version:
+
 .. code:: bash
 
     $ pip install cartoframes==1.0b1
