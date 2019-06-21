@@ -106,6 +106,15 @@ function onReady() {
           }
         });
       }
+
+      if (layer.legend) {
+        mapLayer.on('metadataChanged', (metadataEvent) => {
+          if (metadataEvent && metadataEvent.styles && metadataEvent.styles.length > 0) {
+            const style = metadataEvent.styles[0];
+            createLegend(mapLayer, layer.legend, layers.length - index - 1, style);
+          }
+        });
+      }
     }
 
     if (layer.type === 'GeoJSON') {
