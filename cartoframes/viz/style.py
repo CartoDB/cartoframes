@@ -51,6 +51,7 @@ class Style(object):
 
     def __init__(self, data=None):
         self._style = self._init_style(data)
+        self._raw_data = data
 
     def _init_style(self, data):
         if data is None:

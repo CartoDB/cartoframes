@@ -142,8 +142,13 @@ function onReady() {
             let value = variable.value;
             value = formatValue(value)
 
+            let title = item.title;
+            if (title.startsWith('$')) {
+              title = title.substring(1);
+            }
+
             popupHTML = `
-              <span class="popup-name">${item.title}</span>
+              <span class="popup-name">${title}</span>
               <span class="popup-value">${value}</span>
             ` + popupHTML;
           }

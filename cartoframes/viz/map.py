@@ -383,7 +383,8 @@ def _get_layer_def(layer):
         'legend': layer.legend_info,
         'query': layer.source.query,
         'type': layer.source.type,
-        'viz': layer.viz
+        'viz': layer.viz,
+        'style': layer.style._raw_data
     }
 
 
