@@ -1,0 +1,25 @@
+{% macro createLegend(legend_data, id) -%}
+  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
+{%- endmacro %}
+
+<div class="as-panel__element" id="legends">
+  {% if default_legend %}
+  <as-legend id="defaultLegendContainer" heading="Map Legend">
+    <as-legend-color-category id="defaultLegend" slot="legends"></as-legend-color-category>
+  </as-legend>
+  {% endif %}
+
+  {% for layer in layers|reverse %}
+    {% if layer.legend %}
+      <as-legend
+        heading="{{layer.legend.title}}"
+        description="{{layer.legend.description}}"
+      >
+        {{ createLegend(layer.legend, 'layer%d_legend' % loop.index0) }}
+        {% if layer.legend.footer %}
+          <span slot="footer">{{layer.legend.footer}}</span>
+        {% endif %}
+      </as-legend>
+    {% endif %}
+  {% endfor %}
+</div>

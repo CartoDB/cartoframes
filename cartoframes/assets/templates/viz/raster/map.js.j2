@@ -1,6 +1,6 @@
-{# {% if has_legends %}
+{% if has_legends %}
   {% include 'viz/raster/legends.js.j2' %}
-{% endif %} #}
+{% endif %}
 {% include 'error/parser.js.j2' %}
 {% include 'utils/base64.js.j2' %}
 {% include 'utils/format.js.j2' %}
@@ -11,7 +11,8 @@ function onReady() {
 
   const map = L.map('map', {
     zoom: 1,
-    center: [0, 0]
+    center: [0, 0],
+    zoomControl: false
   });
 
   const BASEMAPS = {
