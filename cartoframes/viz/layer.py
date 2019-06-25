@@ -6,6 +6,7 @@ from .source import Source
 from .style import Style
 from .popup import Popup
 from .legend import Legend
+from .widget import Widget
 from ..data import Dataset
 
 try:
@@ -89,6 +90,7 @@ class Layer(object):
                  style=None,
                  popup=None,
                  legend=None,
+                 widget=None,
                  context=None):
 
         self.is_basemap = False
@@ -97,6 +99,7 @@ class Layer(object):
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
+        self.widget = _set_widget(widget)
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
@@ -108,6 +111,7 @@ class Layer(object):
         self.legend_info = self.legend.get_info(
             self.source.geom_type
         )
+        self.widget_info = self.widget.get_info()
 
 
 def _set_source(source, context):
@@ -149,3 +153,13 @@ def _set_legend(legend):
         return legend
     else:
         return Legend()
+
+def _set_widget(widget):
+    """Set a Widget class from the input"""
+
+    if isinstance(widget, dict):
+        return Widget(widget)
+    elif isinstance(widget, Widget):
+        return widget
+    else:
+        return Widget()

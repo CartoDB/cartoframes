@@ -134,6 +134,11 @@
               {% include 'viz/legends.html.j2' %}
             {% endif %}
           </div> <!-- as-panel -->
+          <div class="as-panel as-panel--right as-panel--top">
+            {% if has_widgets %}
+              {% include 'viz/widgets.html.j2' %}
+            {% endif %}
+          </div> <!-- as-panel -->
         </div> <!-- as-map-panels -->
       </div> <!-- as-map-area -->
     </main> <!-- as-main -->
