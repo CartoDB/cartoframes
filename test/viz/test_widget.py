@@ -46,12 +46,12 @@ class TestWidget(unittest.TestCase):
     def test_wrong_input(self):
         """Widget should raise an error if the input is not valid"""
         msg = 'Wrong widget input.'
-        with self.assertRaisesRegex(ValueError, msg):
+        with self.assertRaisesRegexp(ValueError, msg):
             Widget(1234)
 
     def test_wrong_type(self):
         """Widget should raise an error if widget type is not valid"""
         msg = 'Widget type is not valid. Valid widget types are: default, formula.'
 
-        with self.assertRaisesRegex(ValueError, msg):
+        with self.assertRaisesRegexp(ValueError, msg):
             Widget({'type': 'xxx'}).get_info()
