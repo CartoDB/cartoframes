@@ -92,11 +92,13 @@ function onReady() {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
 
-    mapLayer.on('updated', () => {
-      layer.widgets.forEach((widget, widgetIndex) => {
-        renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
-      })
-    });
+    if (layer.widgets.length) {
+      mapLayer.on('updated', () => {
+        layer.widgets.forEach((widget, widgetIndex) => {
+          renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+        })
+      });
+    }
   });
 
   if (interactiveLayers.length > 0) {
