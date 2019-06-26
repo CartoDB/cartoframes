@@ -3,6 +3,8 @@ function renderWidget(layer, widget, variable, layerIndex) {
 
   if (widget.type === 'formula') {
     element.innerText = formatToUnits(variable.value);
+  } else {
+    element.innerText = variable ? variable.value : widget.value;
   }
 }
 
