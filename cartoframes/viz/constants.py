@@ -59,5 +59,6 @@ LEGEND_TYPES = [
 
 WIDGET_TYPES = [
     'default',
-    'formula'
+    'formula',
+    'animation'
 ]

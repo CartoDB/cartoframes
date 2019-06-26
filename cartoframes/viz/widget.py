@@ -35,6 +35,7 @@ class Widget(object):
         self._type = ''
         self._value = ''
         self._name = ''
+        self._prop = ''
         self._title = ''
         self._description = ''
         self._footer = ''
@@ -43,6 +44,7 @@ class Widget(object):
                 self._type = data.get('type', '')
                 self._value = data.get('value', '')
                 self._name = gen_variable_name(self._value)
+                self._prop = data.get('prop', '')
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
