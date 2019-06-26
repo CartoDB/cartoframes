@@ -91,7 +91,7 @@ class Layer(object):
                  style=None,
                  popup=None,
                  legend=None,
-                 widget=None,
+                 widgets=None,
                  context=None):
 
         self.is_basemap = False
@@ -100,12 +100,15 @@ class Layer(object):
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
-        self.widget = _set_widget(widget)
+        self.widgets = _set_widgets(widgets)
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
 
-        variables = merge_dicts(self.popup.get_variables(), self.widget.get_variables())
+        popup_variables = self.popup.get_variables()
+        widgets_variables = _get_widgets_variables(self.widgets)
+
+        variables = merge_dicts(popup_variables, widgets_variables)
 
         self.viz = self.style.compute_viz(
             self.source.geom_type,
@@ -115,7 +118,7 @@ class Layer(object):
         self.legend_info = self.legend.get_info(
             self.source.geom_type
         )
-        self.widget_info = self.widget.get_info()
+        self.widgets_info = _get_widget_info(self.widgets)
 
 
 def _set_source(source, context):
@@ -159,12 +162,32 @@ def _set_legend(legend):
         return Legend()
 
 
-def _set_widget(widget):
+def _set_widgets(widgets):
     """Set a Widget class from the input"""
-
-    if isinstance(widget, dict):
-        return Widget(widget)
-    elif isinstance(widget, Widget):
-        return widget
+    if isinstance(widgets, list):
+        return list(map(_set_widgets, widgets))
+    if isinstance(widgets, dict):
+        return Widget(widgets)
+    elif isinstance(widgets, Widget):
+        return widgets
     else:
         return Widget()
+
+
+def _get_widgets_variables(widgets):
+    variables = {}
+    if isinstance(widgets, list):
+        for widget in widgets:
+            if (widget._type != 'default'):
+                variables[widget._name] = widget._value
+        return variables
+    else:
+        variables[widgets._name] = widgets._value
+        return variables
+
+
+def _get_widget_info(widgets):
+    if isinstance(widgets, list):
+        return list(map(_get_widget_info, widgets))
+
+    return widgets.get_info()

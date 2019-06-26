@@ -369,7 +369,7 @@ def _get_layer_def(layer):
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
         'legend': layer.legend_info,
-        'widget': layer.widget_info,
+        'widgets': layer.widgets_info,
         'query': layer.source.query,
         'type': layer.source.type,
         'viz': layer.viz
@@ -623,7 +623,7 @@ class HTMLMap(object):
             }
 
         has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
-        has_widgets = any(layer['widget'] is not None for layer in layers)
+        has_widgets = any(layer['widgets'] is not None for layer in layers)
 
         return self._template.render(
             width=size[0] if size is not None else None,

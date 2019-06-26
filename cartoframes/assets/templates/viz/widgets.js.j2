@@ -1,5 +1,5 @@
-function renderWidget(layer, widget, variable, layerIndex) {
-  const element = document.querySelector(`#layer${layerIndex}_widget-${widget.name}`);
+function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
+  const element = document.querySelector(`#layer${layerIndex}_widget${widgetIndex}-${widget.name}`);
 
   if (widget.type === 'formula') {
     element.innerText = formatToUnits(variable.value);
@@ -16,5 +16,5 @@ function formatToUnits(number, precision=1) {
 
   return suffix
     ? `${(number / Math.pow(10, order * 3)).toFixed(precision) + suffix}`
-    : `${number}`;
+    : `${number.toFixed(2)}`;
 }

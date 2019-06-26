@@ -34,6 +34,7 @@ class Widget(object):
     def _init_widget(self, data):
         self._type = ''
         self._value = ''
+        self._name = ''
         self._title = ''
         self._description = ''
         self._footer = ''
