@@ -1,11 +1,22 @@
 {% macro createWidget(widget, id) -%}
   <section id="{{id}}" class="as-body">
       {% if widget.title %}
-        <h1 class="as-title">{{widget.title}}</h1>
+        <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
       {% endif %}
       {% if widget.description %}
-        <p>{{widget.description}}</h1>
+        <p class="as-m--0">{{widget.description}}</p>
       {% endif %}
+
+      {% if widget.name %}
+        <p class="as-title as-m--0 as-p--0 as-font--medium" id="{{id}}-{{widget.name}}">
+          <span class="as-loading as-loading--s">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" />
+            </svg>
+          </span>
+        </p>
+      {% endif %}
+
       {% if widget.footer %}
         <footer>{{widget.footer}}</footer>
       {% endif %}

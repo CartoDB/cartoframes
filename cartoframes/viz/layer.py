@@ -8,6 +8,7 @@ from .popup import Popup
 from .legend import Legend
 from .widget import Widget
 from ..data import Dataset
+from ..utils import merge_dicts
 
 try:
     import geopandas
@@ -103,9 +104,12 @@ class Layer(object):
 
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
+
+        variables = merge_dicts(self.popup.get_variables(), self.widget.get_variables())
+
         self.viz = self.style.compute_viz(
             self.source.geom_type,
-            self.popup.get_variables()
+            variables
         )
         self.interactivity = self.popup.get_interactivity()
         self.legend_info = self.legend.get_info(
@@ -153,6 +157,7 @@ def _set_legend(legend):
         return legend
     else:
         return Legend()
+
 
 def _set_widget(widget):
     """Set a Widget class from the input"""

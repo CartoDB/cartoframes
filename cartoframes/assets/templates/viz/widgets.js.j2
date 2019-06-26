@@ -1,5 +1,18 @@
-function createWidget(layer, widgetData, layerIndex) {
-  const element = document.querySelector(`#layer${layerIndex}_widget`);
+function renderWidget(layer, widget, variable, layerIndex) {
+  const element = document.querySelector(`#layer${layerIndex}_widget-${widget.name}`);
 
-  // TBD
+  if (widget.type === 'formula') {
+    element.innerText = formatToUnits(variable.value);
+  }
+}
+
+function formatToUnits(number, precision=1) {
+  const abbrev = ['', 'k', 'm', 'b', 't'];
+  const unrangifiedOrder = Math.floor(Math.log10(Math.abs(number)) / 3)
+  const order = Math.max(0, Math.min(unrangifiedOrder, abbrev.length -1 ))
+  const suffix = abbrev[order];
+
+  return suffix
+    ? `${(number / Math.pow(10, order * 3)).toFixed(precision) + suffix}`
+    : `${number}`;
 }

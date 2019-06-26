@@ -92,9 +92,9 @@ function onReady() {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
 
-    if (layer.widget) {
-      createWidget(mapLayer, layer.widget, layers.length - index - 1);
-    }
+    mapLayer.on('updated', () => {
+      renderWidget(mapLayer, layer.widget, mapViz.variables[layer.widget.name], layers.length - index - 1);
+    });
   });
 
   if (interactiveLayers.length > 0) {

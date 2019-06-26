@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from . import constants
+# from ..utils import gen_variable_name
 
 
 class Widget(object):
@@ -8,7 +9,11 @@ class Widget(object):
 
     Args:
         data (dict): The widget definition for a layer. It contains the information to render a widget:
+            `type`: 'default', 'formula', time-series', 'animation', 'category', 'histogram'
+            `name`: The name given to the widget
+            `value`: A constant value or a CARTO VL expression
 
+            The widget also can display text information: `title`, `description` and `footer`.
     Example:
 
     .. code::
@@ -17,7 +22,8 @@ class Widget(object):
 
         Widget({
             type: 'formula',
-            value: 'viewportSum($amount)',
+            name: 'mySum',
+            value: 'viewportSum($amount)'
             title: '...',
             description: '...',
             footer: '...'
@@ -29,6 +35,7 @@ class Widget(object):
 
     def _init_widget(self, data):
         self._type = ''
+        self._name = ''
         self._value = ''
         self._title = ''
         self._description = ''
@@ -36,6 +43,7 @@ class Widget(object):
         if data is not None:
             if isinstance(data, dict):
                 self._type = data.get('type', '')
+                self._name = data.get('name', '')
                 self._value = data.get('value', '')
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
@@ -49,6 +57,7 @@ class Widget(object):
 
             return {
                 'type': self._type,
+                'name': self._name,
                 'value': self._value,
                 'title': self._title,
                 'description': self._description,
@@ -57,9 +66,18 @@ class Widget(object):
         else:
             return {}
 
+    def get_variables(self):
+        return self._get_vars()
+
     def _check_type(self):
         if self._type and self._type not in constants.WIDGET_TYPES:
             raise ValueError(
                 'Widget type is not valid. Valid widget types are: {}.'.format(
                     ', '.join(constants.WIDGET_TYPES)
                 ))
+
+    def _get_vars(self):
+        variables = {}
+        if self._type != 'default':
+            variables[self._name] = self._value
+        return variables
