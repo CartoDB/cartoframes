@@ -6,7 +6,7 @@ from .source import Source
 from .style import Style
 from .popup import Popup
 from .legend import Legend
-from .widget import Widget
+from .widget_list import WidgetList
 from ..data import Dataset
 from ..utils import merge_dicts
 
@@ -35,6 +35,9 @@ class Layer(object):
           The legend definition for a layer. It contains the information
           to show a legend "type" (color-category, color-bins, color-continuous),
           "prop" (color) and also text information: "title", "description" and "footer".
+        widgets (dict, :py:class `WidgetList <cartoframes.viz.WidgetList>`, optional):
+           Widget or list of widgets for a layer. It contains the information to display
+           different widget types on the top right of the map.
         context (:py:class:`Context <cartoframes.Context>`):
           A Context instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
@@ -63,7 +66,12 @@ class Layer(object):
                 legend={
                     'type': 'color-category',
                     'title': 'Population'
-                }
+                },
+                widgets=[{
+                    'type': 'formula',
+                    'title': 'Avg $pop_max'
+                    'value': 'viewportAvg($pop_max)'
+                }]
             )
 
         Setting the context.
@@ -106,7 +114,7 @@ class Layer(object):
         self.orig_query = self.source.query
 
         popup_variables = self.popup.get_variables()
-        widgets_variables = _get_widgets_variables(self.widgets)
+        widgets_variables = self.widgets.get_variables()
 
         variables = merge_dicts(popup_variables, widgets_variables)
 
@@ -118,7 +126,7 @@ class Layer(object):
         self.legend_info = self.legend.get_info(
             self.source.geom_type
         )
-        self.widgets_info = _get_widget_info(self.widgets)
+        self.widgets_info = self.widgets.get_widgets_info()
 
 
 def _set_source(source, context):
@@ -163,31 +171,9 @@ def _set_legend(legend):
 
 
 def _set_widgets(widgets):
-    """Set a Widget class from the input"""
-    if isinstance(widgets, list):
-        return list(map(_set_widgets, widgets))
-    if isinstance(widgets, dict):
-        return Widget(widgets)
-    elif isinstance(widgets, Widget):
+    if isinstance(widgets, (dict, list)):
+        return WidgetList(widgets)
+    if isinstance(widgets, WidgetList):
         return widgets
     else:
-        return Widget()
-
-
-def _get_widgets_variables(widgets):
-    variables = {}
-    if isinstance(widgets, list):
-        for widget in widgets:
-            if (widget._type != 'default'):
-                variables[widget._name] = widget._value
-        return variables
-    else:
-        variables[widgets._name] = widgets._value
-        return variables
-
-
-def _get_widget_info(widgets):
-    if isinstance(widgets, list):
-        return list(map(_get_widget_info, widgets))
-
-    return widgets.get_info()
+        return WidgetList()

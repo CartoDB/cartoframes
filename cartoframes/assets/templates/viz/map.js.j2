@@ -93,13 +93,9 @@ function onReady() {
     }
 
     mapLayer.on('updated', () => {
-      if (layer.widgets.length) {
-        layer.widgets.forEach((widget, widgetIndex) => {
-          renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
-        })
-      } else {
-        renderWidget(mapLayer, layer.widgets, mapViz.variables[layer.widgets.name], layers.length - index - 1);
-      }
+      layer.widgets.forEach((widget, widgetIndex) => {
+        renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+      })
     });
   });
 

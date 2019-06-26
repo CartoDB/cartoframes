@@ -26,14 +26,10 @@
 <div class="as-panel__element as-px--16 as-pt--8 as-pb--8" id="widgets">
   {% for layer in layers|reverse %}
     {% if layer.widgets %}
-      {% if layer.widgets is mapping %}
-        {{ createWidget(layer.widgets, 'layer%d_widget0' % loop.index0) }}
-      {% else %}
-        {% set outer_loop = loop %}
-          {% for widget in layer.widgets %}
-            {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
-          {% endfor %}      
-      {% endif %}
+      {% set outer_loop = loop %}
+        {% for widget in layer.widgets %}
+          {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
+        {% endfor %}
     {% endif %}
   {% endfor %}
 </div>

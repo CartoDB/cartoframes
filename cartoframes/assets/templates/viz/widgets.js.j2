@@ -1,20 +1,11 @@
+{% include 'utils/format.js.j2' %}
+
 function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
   const element = document.querySelector(`#layer${layerIndex}_widget${widgetIndex}-${widget.name}`);
 
   if (widget.type === 'formula') {
-    element.innerText = formatToUnits(variable.value);
+    element.innerText = format(variable.value);
   } else {
     element.innerText = variable ? variable.value : widget.value;
   }
-}
-
-function formatToUnits(number, precision=1) {
-  const abbrev = ['', 'k', 'm', 'b', 't'];
-  const unrangifiedOrder = Math.floor(Math.log10(Math.abs(number)) / 3)
-  const order = Math.max(0, Math.min(unrangifiedOrder, abbrev.length -1 ))
-  const suffix = abbrev[order];
-
-  return suffix
-    ? `${(number / Math.pow(10, order * 3)).toFixed(precision) + suffix}`
-    : `${number.toFixed(2)}`;
 }

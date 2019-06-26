@@ -623,7 +623,7 @@ class HTMLMap(object):
             }
 
         has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
-        has_widgets = any(layer['widgets'] is not None for layer in layers)
+        has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(
             width=size[0] if size is not None else None,
