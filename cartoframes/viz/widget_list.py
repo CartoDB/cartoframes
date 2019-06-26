@@ -3,11 +3,11 @@ from __future__ import absolute_import
 from .widget import Widget
 
 
-class WidgetList:
+class WidgetList(object):
     def __init__(self, widgets=None):
-        self._widgets = self._init_widgets(widgets)
+        self.widgets = self._initwidgets(widgets)
 
-    def _init_widgets(self, widgets):
+    def _initwidgets(self, widgets):
         if isinstance(widgets, list):
             widget_list = []
             for widget in widgets:
@@ -25,14 +25,14 @@ class WidgetList:
 
     def get_variables(self):
         variables = {}
-        for widget in self._widgets:
+        for widget in self.widgets:
             if widget and widget._type != 'default':
                 variables[widget._name] = widget._value
         return variables
 
-    def get_widgets_info(self):
+    def getwidgets_info(self):
         widgets_info = []
-        for widget in self._widgets:
+        for widget in self.widgets:
             if widget:
                 widgets_info.append(widget.get_info())
 

@@ -10,6 +10,7 @@ from .style import Style
 from .popup import Popup
 from .legend import Legend
 from .widget import Widget
+from .widget_list import WidgetList
 
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     'Style',
     'Popup',
     'Legend',
-    'Widget'
+    'Widget',
+    'WidgetList'
 ]
