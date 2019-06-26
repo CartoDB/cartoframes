@@ -89,3 +89,29 @@ class TestWidgetList(unittest.TestCase):
         widget_list = WidgetList()
         variables = widget_list.get_variables()
         self.assertEqual(variables, {})
+
+    def test_widget_list_get_widgets_info(self):
+        """Widget List should return a proper widgets info object"""
+
+        widget_list = WidgetList([
+          Widget(widget_a),
+          Widget(widget_b)
+        ])
+
+        widgets_info = widget_list.get_widgets_info()
+        self.assertEqual(widgets_info, [
+          {
+            'type': 'formula',
+            'name': 'vb6dbcf',
+            'value': 'viewportSum($amount)',
+            'title': '[TITLE]',
+            'description': '[description]',
+            'footer': '[footer]'
+          }, {
+            'type': 'default',
+            'name': 'v76441e',
+            'value': '"Custom Info"',
+            'title': '',
+            'description': '',
+            'footer': ''
+          }])
