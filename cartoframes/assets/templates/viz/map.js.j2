@@ -1,6 +1,9 @@
 {% if has_legends %}
   {% include 'viz/legends.js.j2' %}
 {% endif %}
+{% if has_widgets %}
+  {% include 'viz/widgets.js.j2' %}
+{% endif %}
 {% include 'error/parser.js.j2' %}
 {% include 'utils/base64.js.j2' %}
 {% include 'utils/format.js.j2' %}
@@ -87,6 +90,14 @@ function onReady() {
 
     if (layer.legend) {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
+    }
+
+    if (layer.widgets.length) {
+      mapLayer.on('updated', () => {
+        layer.widgets.forEach((widget, widgetIndex) => {
+          renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+        })
+      });
     }
   });
 

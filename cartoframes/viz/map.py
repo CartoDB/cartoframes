@@ -369,6 +369,7 @@ def _get_layer_def(layer):
         'credentials': layer.source.credentials,
         'interactivity': layer.interactivity,
         'legend': layer.legend_info,
+        'widgets': layer.widgets_info,
         'query': layer.source.query,
         'type': layer.source.type,
         'viz': layer.viz
@@ -566,8 +567,8 @@ class HTMLMap(object):
             _carto_vl_path=None, _airship_path=None, title='CARTOframes'):
 
         self.html = self._parse_html_content(
-            size, layers, bounds, viewport, basemap, default_legend, show_info,
-            _carto_vl_path, _airship_path, title)
+            size, layers, bounds, viewport, basemap, default_legend,
+            show_info, _carto_vl_path, _airship_path, title)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
@@ -622,6 +623,7 @@ class HTMLMap(object):
             }
 
         has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
+        has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(
             width=size[0] if size is not None else None,
@@ -633,6 +635,7 @@ class HTMLMap(object):
             bounds=bounds,
             camera=camera,
             has_legends=has_legends,
+            has_widgets=has_widgets,
             default_legend=default_legend,
             show_info=show_info,
             carto_vl_path=carto_vl_path,

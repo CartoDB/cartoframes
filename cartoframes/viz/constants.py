@@ -56,3 +56,8 @@ LEGEND_TYPES = [
     'size-continuous-line',
     'size-continuous-point'
 ]
+
+WIDGET_TYPES = [
+    'default',
+    'formula'
+]

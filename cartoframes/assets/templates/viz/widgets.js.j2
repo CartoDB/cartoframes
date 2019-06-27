@@ -1,0 +1,11 @@
+{% include 'utils/format.js.j2' %}
+
+function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
+  const element = document.querySelector(`#layer${layerIndex}_widget${widgetIndex}-${widget.name}`);
+
+  if (widget.type === 'formula') {
+    element.innerText = format(variable.value);
+  } else {
+    element.innerText = variable ? variable.value : widget.value;
+  }
+}
