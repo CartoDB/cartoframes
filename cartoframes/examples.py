@@ -32,9 +32,9 @@ the poverty rate in the census tract a McDonald's fast food joint is located
 
         # query to get poverty rates where mcdonald's are located in brooklyn
         q = '''
-            SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
+            SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, con.poverty_per_pop
             FROM mcdonalds_nyc as m, brooklyn_poverty as c
-            WHERE ST_Intersects(m.the_geom, c.the_geom)
+            WHERE ST_Intersects(m.the_geom, con.the_geom)
         '''
         # get data
         df = example_context.query(q)
@@ -55,11 +55,11 @@ good method:
         from cartoframes.examples import read_taxi
         USERNAME = 'your user name'
         APIKEY = 'your API key'
-        c = Context(
+        con =  Context(
             base_url='https://{}.carto.com'.format(USERNAME),
             api_key=APIKEY
         )
-        c.write(
+        con.write(
             read_taxi(),
             'taxi_data_examples_acct',
             lnglat=('pickup_latitude', 'pickup_longitude')

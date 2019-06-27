@@ -37,8 +37,8 @@ class BaseMap(AbstractLayer):
 
         import cartoframes
         from cartoframes import BaseMap, Layer
-        c = cartoframes.auth.Context(BASEURL, APIKEY)
-        c.map(layers=[BaseMap(source='light', labels='front'),
+        con =  cartoframes.auth.Context(BASEURL, APIKEY)
+        con.map(layers=[BaseMap(source='light', labels='front'),
                        Layer('acadia_biodiversity')])
 
     Args:
@@ -124,8 +124,8 @@ class QueryLayer(AbstractLayer):
 
         import cartoframes
         from cartoframes import QueryLayer, styling
-        c = cartoframes.auth.Context(BASEURL, APIKEY)
-        c.map(layers=[QueryLayer('''
+        con =  cartoframes.auth.Context(BASEURL, APIKEY)
+        con.map(layers=[QueryLayer('''
                                   WITH i_cte As (
                                     SELECT
                                         ST_Buffer(the_geom::geography, 500)::geometry As the_geom,
@@ -674,8 +674,8 @@ class Layer(QueryLayer):
 
             import cartoframes
             from cartoframes import QueryLayer, styling
-            c = cartoframes.auth.Context(BASEURL, APIKEY)
-            c.map(layers=[Layer('fantastic_sql_table',
+            con =  cartoframes.auth.Context(BASEURL, APIKEY)
+            con.map(layers=[Layer('fantastic_sql_table',
                                  size=7,
                                  color={'column': 'mr_fox_sightings',
                                         'scheme': styling.prism(10)})])

@@ -85,7 +85,7 @@ class Context(object):
       1. Setting the `base_url` and `api_key` directly in
          :py:class:`Context <cartoframes.auth.Context>`. This method is easier.::
 
-            c = Context(
+            con =  Context(
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
@@ -97,7 +97,7 @@ class Context(object):
 
             from cartoframes.auth import Credentials
             creds = Credentials(username='eschbacher', key='abcdefg')
-            c = Context(creds=creds)
+            con =  Context(creds=creds)
 
     Attributes:
         creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -137,7 +137,7 @@ class Context(object):
             # if on prem, format is '{host}/user/{username}'
             BASEURL = 'https://{}.carto.com/'.format('your carto username')
             APIKEY = 'your carto api key'
-            c = Context(BASEURL, APIKEY)
+            con =  Context(BASEURL, APIKEY)
 
     Tip:
 
@@ -158,7 +158,7 @@ class Context(object):
             # on prem host (e.g., an IP address)
             onprem_host = 'your on prem carto host'
 
-            c = cartoframes.auth.Context(
+            con =  cartoframes.auth.Context(
                 base_url='{host}/user/{user}'.format(
                     host=onprem_host,
                     user='your carto username'),
@@ -237,8 +237,8 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                c = cartoframes.auth.Context(BASEURL, APIKEY)
-                df = c.read('acadia_biodiversity')
+                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                df = con.read('acadia_biodiversity')
         """
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
@@ -276,7 +276,7 @@ class Context(object):
 
             .. code:: python
 
-                c.write(df, 'brooklyn_poverty', overwrite=True)
+                con.write(df, 'brooklyn_poverty', overwrite=True)
 
             Scrape an HTML table from Wikipedia and send to CARTO with content
             guessing to create a geometry from the country column. This uses
@@ -289,10 +289,10 @@ class Context(object):
                 df = pd.read_html(url, header=0)[0]
                 # send to carto, let it guess polygons based on the 'country'
                 #   column. Also set privacy to 'public'
-                c.write(df, 'life_expectancy',
+                con.write(df, 'life_expectancy',
                          content_guessing=True,
                          privacy='public')
-                c.map(layers=Layer('life_expectancy',
+                con.map(layers=Layer('life_expectancy',
                                     color='both_sexes_life_expectancy'))
 
         .. warning:: datetime64[ns] column will lose precision sending a dataframe to CARTO
@@ -486,7 +486,7 @@ class Context(object):
 
             .. code:: python
 
-                topten_df = c.query(
+                topten_df = con.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -502,7 +502,7 @@ class Context(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = c.query(
+                points_aggregated_to_polygons = con.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -569,7 +569,7 @@ class Context(object):
 
             .. code:: python
 
-                c.execute(
+                con.execute(
                     '''
                       DROP TABLE my_table
                     '''
@@ -579,7 +579,7 @@ class Context(object):
 
             .. code:: python
 
-                c.query(
+                con.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -641,7 +641,7 @@ class Context(object):
 
             .. code:: python
 
-                topten_df = c.query(
+                topten_df = con.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -659,7 +659,7 @@ class Context(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = c.query(
+                points_aggregated_to_polygons = con.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -674,7 +674,7 @@ class Context(object):
 
             .. code:: python
 
-                c.query(
+                con.query(
                     '''
                       DROP TABLE my_table
                     '''
@@ -684,7 +684,7 @@ class Context(object):
 
             .. code:: python
 
-                c.query(
+                con.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -719,8 +719,8 @@ class Context(object):
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
-                c = cartoframes.auth.Context(BASEURL, APIKEY)
-                c.map(layers=[BaseMap(),
+                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                con.map(layers=[BaseMap(),
                                Layer('acadia_biodiversity',
                                      color={'column': 'simpson_index',
                                             'scheme': styling.tealRose(7)}),
@@ -732,7 +732,7 @@ class Context(object):
 
             Create a snapshot of a map at a specific zoom and center::
 
-                c.map(layers=Layer('acadia_biodiversity',
+                con.map(layers=Layer('acadia_biodiversity',
                                     color='simpson_index'),
                        interactive=False,
                        zoom=14,
@@ -1067,8 +1067,8 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                c = cartoframes.auth.Context('base url', 'api key')
-                au_boundaries = c.data_boundaries(region='Australia')
+                con =  cartoframes.auth.Context('base url', 'api key')
+                au_boundaries = con.data_boundaries(region='Australia')
                 au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
@@ -1076,9 +1076,9 @@ class Context(object):
             .. code:: python
 
                 from cartoframes import Layer
-                au_postal_areas = c.data_boundaries(boundary='au.geo.POA')
-                c.write(au_postal_areas, 'au_postal_areas')
-                c.map(Layer('au_postal_areas'))
+                au_postal_areas = con.data_boundaries(boundary='au.geo.POA')
+                con.write(au_postal_areas, 'au_postal_areas')
+                con.map(Layer('au_postal_areas'))
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
@@ -1086,25 +1086,25 @@ class Context(object):
 
             .. code:: python
 
-                c = cartoframes.auth.Context('base url', 'api key')
+                con =  cartoframes.auth.Context('base url', 'api key')
                 # will return DataFrame with columns `the_geom` and `geom_ref`
-                tracts = c.data_boundaries(
+                tracts = con.data_boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
                 # write geometries to a CARTO table
-                c.write(tracts, 'idaho_falls_tracts')
+                con.write(tracts, 'idaho_falls_tracts')
                 # gather metadata needed to look up median income
-                median_income_meta = c.data_discovery(
+                median_income_meta = con.data_discovery(
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
                 # get median income data and original table as new dataframe
-                idaho_falls_income = c.data(
+                idaho_falls_income = con.data(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
-                c.write(idaho_falls_income,
+                con.write(idaho_falls_income,
                          'idaho_falls_tracts',
                          overwrite=True)
 
@@ -1266,7 +1266,7 @@ class Context(object):
 
             .. code::
 
-                meta = c.data_discovery('European Union',
+                meta = con.data_discovery('European Union',
                                          keywords='freight',
                                          time='2010')
                 print(meta['numer_name'].values)
@@ -1485,11 +1485,11 @@ class Context(object):
 
             .. code::
 
-                c = cartoframes.auth.Context(BASEURL, APIKEY)
-                median_income = c.data_discovery('transaction_events',
+                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                median_income = con.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')
-                df = c.data('transaction_events',
+                df = con.data('transaction_events',
                              median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
@@ -1502,7 +1502,7 @@ class Context(object):
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = c.data('transaction_events', median_income)
+                df = con.data('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data

@@ -125,7 +125,7 @@ class TestKuvizPublisher(unittest.TestCase):
         kp.set_context(self.context)
         layers = kp.get_layers()
 
-        self.assertEqual(layers[0].source.dataset._c, self.context)
+        self.assertEqual(layers[0].source.dataset._con, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': 'default_public', 'base_url': self.username})
@@ -139,7 +139,7 @@ class TestKuvizPublisher(unittest.TestCase):
         maps_api_key = '1234'
         layers = kp.get_layers(maps_api_key=maps_api_key)
 
-        self.assertEqual(layers[0].source.dataset._c, self.context)
+        self.assertEqual(layers[0].source.dataset._con, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': maps_api_key, 'base_url': self.username})

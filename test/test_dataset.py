@@ -142,7 +142,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._gdf)
-        self.assertEqual(dataset._c, self.c)
+        self.assertEqual(dataset._con, self.c)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_query(self):
@@ -154,7 +154,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._gdf)
-        self.assertEqual(dataset._c, self.c)
+        self.assertEqual(dataset._con, self.c)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_dataframe(self):
@@ -166,7 +166,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._gdf)
-        self.assertIsNone(dataset._c)
+        self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geodataframe(self):
@@ -178,7 +178,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._c)
+        self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geojson(self):
@@ -190,7 +190,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._c)
+        self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_upload_validation_fails_only_with_table_name(self):

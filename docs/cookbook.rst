@@ -6,7 +6,7 @@ For most operations below, you need to create a :py:class:`Context <cartoframes.
 .. code::
 
     from cartoframes.auth import Context
-    c = Context(
+    con =  Context(
         base_url='https://cyclingfan.carto.com',
         api_key='abc123'
     )
@@ -23,7 +23,7 @@ It's a fairly common use case that someone needs the Census tracts for a region.
 .. code::
 
    # get all census tracts (clipped by water boundaries) in specific bounding box
-   missouri_ct = c.data_boundaries(
+   missouri_ct = con.data_boundaries(
        region=[-95.774147,35.995682,-89.098846,40.613636],
        boundary='us.census.tiger.census_tract_clipped'
    )
@@ -33,10 +33,10 @@ It's a fairly common use case that someone needs the Census tracts for a region.
    missouri_ct = missouri_ct[missouri_ct.geom_refs.str.startswith('29')]
 
    # write to carto
-   c.data_boundaries(missouri_ct, 'missouri_census_tracts')
+   con.data_boundaries(missouri_ct, 'missouri_census_tracts')
 
    # visualize to make sure it makes sense
-   c.map(Layer('missouri_census_tracts'))
+   con.map(Layer('missouri_census_tracts'))
 
 
 .. image:: img/cheatsheet_do_census_tracts.png
@@ -48,7 +48,7 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
 
 
    # get all counties in bounding box around Kansas and Missouri
-   ks_mo_counties = c.data_boundaries(
+   ks_mo_counties = con.data_boundaries(
        region=[-102.1777729674,35.995682,-89.098846,40.613636],
        boundary='us.census.tiger.county'
    )
@@ -57,10 +57,10 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
    ks_mo_counties = ks_mo_counties[ks_mo_counties.geom_refs.str.startswith(('29', '20'))]
 
    # write to carto
-   c.data_boundaries(ks_mo_counties, 'ks_mo_counties')
+   con.data_boundaries(ks_mo_counties, 'ks_mo_counties')
 
    # visualize to make sure it makes sense
-   c.map(Layer('ks_mo_counties'))
+   con.map(Layer('ks_mo_counties'))
 
 
 .. image:: img/cheatsheet_do_counties.png
@@ -92,7 +92,7 @@ Here we're using a dataset with a column called `geoid` which has the GEOID of c
        'numer_timespan': '2011 - 2015'
    }]
 
-   boston_data = c.data('boston_census_tracts', meta, how='geoid')
+   boston_data = con.data('boston_census_tracts', meta, how='geoid')
 
 
 .. tip:: It's best practice to keep your geometry identifiers as strings because leading zeros are removed when strings are converted to numeric types. This usually affects states with FIPS that begin with a zero, or Zip Codes in New England with leading zeros.
@@ -159,7 +159,7 @@ Your new GeoDataFrame will now have geometries decoded into Shapely objects that
 
    from cartoframes.auth import Context
    import geopandas as gpd
-   c = Context()
+   con =  Context()
 
    gdf = gpd.GeoDataFrame(c.read('tablename', decode_geom=True))
 
@@ -177,7 +177,7 @@ Some `on premises installations of CARTO <https://carto.com/developers/on-premis
    session = Session()
    session.verify = False
 
-   c = Context(
+   con =  Context(
        base_url='https://cyclingfan.carto.com/',
        api_key='abc123',
        session=session
@@ -201,7 +201,7 @@ Sometimes tables are too large to read them out in a single `Context.read` or `C
    WHERE cartodb_id >= {lower} and cartodb_id < {upper}
    '''
 
-   num_rows = c.sql_client.send('select count(*) from my_big_table')['rows'][0]['count']
+   num_rows = con.sql_client.send('select count(*) from my_big_table')['rows'][0]['count']
 
    # read in 100,000 chunks
    for r in range(0, num_rows, 100000):
@@ -225,7 +225,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
    from carto.sql import BatchSQLClient
    from time import sleep
 
-   c = Context(
+   con =  Context(
        base_url='https://your-username.carto.com',
        api_key='your-api-key'
    )
@@ -250,7 +250,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
 
    # if curr_status is 'done' the operation was successful
    # and we can read the table into a dataframe
-   geocoded_table = c.read('really_big_table')
+   geocoded_table = con.read('really_big_table')
 
 
 Subdivide Data Observatory search region into sub-regions
@@ -286,7 +286,7 @@ Some geometries in the Data Observatory are too large, numerous, and/or complex 
            bbox[0] + (p[0] + 1) * delta_lng_divs,
            bbox[1] + (p[1] + 1) * delta_lat_divs
        )
-       _df = c.data_boundaries(
+       _df = con.data_boundaries(
            region=sub_bbox,
            boundary='us.census.tiger.census_tract_clipped'
        )
