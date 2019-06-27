@@ -5,7 +5,7 @@ or trying the `Example Datasets notebook
 <https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__.
 
 In addition to the functions listed below, this examples module provides a
-:py:class:`CartoContext <cartoframes.context.CartoContext>` that is
+:py:class:`Context <cartoframes.auth.Context>` that is
 authenticated against all public datasets in the https://cartoframes.carto.com
 account. This means that besides reading the datasets from CARTO, users can
 also create maps from these datasets.
@@ -21,8 +21,8 @@ census tracts in Brooklyn, New York (preview of static version below code).
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&anti_cache=0.2903456538919632&bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
 
-To query datasets, use the :py:meth:`CartoContext.query
-<cartoframes.context.CartoContext.query>` method. The following example finds
+To query datasets, use the :py:meth:`Context.query
+<cartoframes.auth.Context.query>` method. The following example finds
 the poverty rate in the census tract a McDonald's fast food joint is located
 (preview of static map below code).
 
@@ -51,29 +51,29 @@ good method:
 
     .. code::
 
-        from cartoframes import CartoContext
+        from cartoframes.auth import Context
         from cartoframes.examples import read_taxi
         USERNAME = 'your user name'
         APIKEY = 'your API key'
-        cc = CartoContext(
+        c = Context(
             base_url='https://{}.carto.com'.format(USERNAME),
             api_key=APIKEY
         )
-        cc.write(
+        c.write(
             read_taxi(),
             'taxi_data_examples_acct',
             lnglat=('pickup_latitude', 'pickup_longitude')
         )
 """  # noqa
-from cartoframes import CartoContext
+from cartoframes.auth import Context
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
 
 
-class Examples(CartoContext):
-    """A CartoContext with a CARTO account containing example data. This
-    special :py:class:`CartoContext <cartoframes.context.CartoContext>`
+class Examples(Context):
+    """A Context with a CARTO account containing example data. This
+    special :py:class:`Context <cartoframes.auth.Context>`
     provides read access to all the datasets in the cartoframes CARTO account.
 
     The recommended way to use this class is to import the `example_context`
@@ -85,9 +85,9 @@ class Examples(CartoContext):
         df = example_context.read_taxi()
 
     The following tables are available for use with the
-    :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`,
-    :py:meth:`CartoContext.map <cartoframes.context.CartoContext.map>`, and
-    :py:meth:`CartoContext.query <cartoframes.context.CartoContext.query>`
+    :py:meth:`Context.read <cartoframes.auth.Context.read>`,
+    :py:meth:`Context.map <cartoframes.auth.Context.map>`, and
+    :py:meth:`Context.query <cartoframes.auth.Context.query>`
     methods.
 
     - ``brooklyn_poverty`` - basic poverty information for Brooklyn, New York
@@ -99,11 +99,11 @@ class Examples(CartoContext):
       `pickup_latitude`/`pickup_longitude` columns, the
       `dropoff_latitude`/`dropoff_longitude` columns, or through some other
       process. When writing this table to your account, make sure to specify
-      the `lnglat` flag in :py:meth:`CartoContext.write
-      <cartoframes.context.CartoContext.write>`
+      the `lnglat` flag in :py:meth:`Context.write
+      <cartoframes.auth.Context.write>`
 
-    Besides the standard :py:class:`CartoContext
-    <cartoframes.context.CartoContext>` methods, this class includes a
+    Besides the standard :py:class:`Context
+    <cartoframes.auth.Context>` methods, this class includes a
     convenience method for each of the tables listed above. See the full list
     below.
 
@@ -205,28 +205,28 @@ class Examples(CartoContext):
         """
         return self.read('nat', limit, **kwargs)
 
-    # override behavior of CartoContext methods
+    # override behavior of Context methods
     def data(self, table_name, metadata, persist_as=None, how='the_geom'):
-        raise RuntimeError('CartoContext.data method disabled for Examples')
+        raise RuntimeError('Context.data method disabled for Examples')
 
     def write(self, df, table_name, temp_dir=None, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None,
               **kwargs):
-        raise RuntimeError('CartoContext.write method disabled for Examples')
+        raise RuntimeError('Context.write method disabled for Examples')
 
     def data_boundaries(self, boundary=None, region=None, decode_geom=False,
                         timespan=None, include_nonclipped=False):
         raise RuntimeError(
-            'CartoContext.data_boundaries method disabled for Examples')
+            'Context.data_boundaries method disabled for Examples')
 
     def data_discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None, include_quantiles=False):
         raise RuntimeError(
-            'CartoContext.data_discovery method disabled for Examples')
+            'Context.data_discovery method disabled for Examples')
 
     def data_augment(self, table_name, metadata):
         raise RuntimeError(
-            'CartoContext.data_augment method disabled for Examples')
+            'Context.data_augment method disabled for Examples')
 
 
 example_context = Examples()
@@ -242,7 +242,7 @@ def read_ne_50m_graticules_15(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
 
     Returns:
 
@@ -274,7 +274,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
 
     Returns:
 
@@ -307,7 +307,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
 
     Returns:
 
@@ -340,7 +340,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
 
     Returns:
 
@@ -368,7 +368,7 @@ def read_taxi(limit=None, **kwargs):
 
     .. note:: This dataset does not have geometries. The geometries have to be
         created by using the pickup or drop-off lng/lat pairs. These can be
-        specified in `CartoContext.write`.
+        specified in `Context.write`.
 
         To create geometries with `example_context.query`, write a query such
         as this::
@@ -391,8 +391,8 @@ def read_taxi(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read
-        <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read
+        <cartoframes.auth.Context.read>`
 
     Returns:
 
@@ -424,8 +424,8 @@ def read_nat(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`CartoContext.read
-        <cartoframes.context.CartoContext.read>`
+      **kwargs: Arguments accepted in :py:meth:`Context.read
+        <cartoframes.auth.Context.read>`
 
     Returns:
 

@@ -10,7 +10,7 @@ import pandas as pd
 
 from carto.exceptions import CartoException
 
-from cartoframes.context import CartoContext
+from cartoframes.auth import Context
 from cartoframes.data import Dataset
 from cartoframes.data.utils import decode_geometry, setting_value_exception
 from cartoframes.columns import normalize_name
@@ -35,7 +35,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except:  # noqa: E722
-                warnings.warn("Skipping CartoContext tests. To test it, "
+                warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
                               "and updating the credentials to match your "
@@ -65,7 +65,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         )
 
         self.baseurl = self.user_url().format(username=self.username)
-        self.cc = CartoContext(base_url=self.baseurl, api_key=self.apikey)
+        self.c = Context(base_url=self.baseurl, api_key=self.apikey)
 
         self.test_geojson = {
             "type": "FeatureCollection",
@@ -94,8 +94,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         if self.apikey and self.baseurl:
             for table in tables:
                 try:
-                    self.cc.delete(table)
-                    self.cc.sql_client.send(sql_drop.format(table))
+                    self.c.delete(table)
+                    self.c.sql_client.send(sql_drop.format(table))
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
@@ -134,7 +134,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'
-        dataset = Dataset.from_table(table_name=table_name, context=self.cc)
+        dataset = Dataset.from_table(table_name=table_name, context=self.c)
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.table_name, table_name)
@@ -142,19 +142,19 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._gdf)
-        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._c, self.c)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_query(self):
         query = 'SELECT * FROM fake_table'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset._query, query)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._gdf)
-        self.assertEqual(dataset._cc, self.cc)
+        self.assertEqual(dataset._c, self.c)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
     def test_dataset_from_dataframe(self):
@@ -166,7 +166,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._gdf)
-        self.assertIsNone(dataset._cc)
+        self.assertIsNone(dataset._c)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geodataframe(self):
@@ -178,7 +178,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._cc)
+        self.assertIsNone(dataset._c)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geojson(self):
@@ -190,19 +190,19 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._cc)
+        self.assertIsNone(dataset._c)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'
-        dataset = Dataset.from_table(table_name=table_name, context=self.cc)
+        dataset = Dataset.from_table(table_name=table_name, context=self.c)
         err_msg = 'Nothing to upload. We need data in a DataFrame or GeoDataFrame or a query to upload data to CARTO.'
         with self.assertRaises(ValueError, msg=err_msg):
             dataset.upload()
 
     def test_dataset_upload_validation_query_fails_without_table_name(self):
         query = 'SELECT 1'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         with self.assertRaises(ValueError, msg='You should provide a table_name and context to upload data.'):
             dataset.upload()
 
@@ -221,7 +221,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_upload_into_existing_table_fails_without_replace_property(self):
         query = 'SELECT 1'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         dataset.upload(table_name=self.test_write_table)
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
@@ -231,7 +231,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
     def test_dataset_upload_validation_fails_with_query_and_append(self):
         query = 'SELECT 1'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         err_msg = 'Error using append with a query Dataset. It is not possible to append data to a query'
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
@@ -247,14 +247,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
             dataset.download()
 
         query = 'SELECT 1 as fakec'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         dataset.upload(table_name=self.test_write_table)
 
         dataset._table_name = 'non_used_table'
         df = dataset.download()
         self.assertEqual('fakec' in df.columns, True)
 
-        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.c)
         df = dataset.download()
         self.assertEqual('fakec' in df.columns, True)
 
@@ -262,10 +262,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertNotExistsTable(self.test_write_table)
 
         query = 'SELECT 1 as fakec'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         dataset.upload(table_name=self.test_write_table)
 
-        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.c)
         dataset.download()
         dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
 
@@ -273,10 +273,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertNotExistsTable(self.test_write_table)
 
         query = 'SELECT * FROM (values (true, true), (false, false), (false, null)) as x(fakec_bool, fakec_bool_null)'
-        dataset = Dataset.from_query(query=query, context=self.cc)
+        dataset = Dataset.from_query(query=query, context=self.c)
         dataset.upload(table_name=self.test_write_table)
 
-        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_table(table_name=self.test_write_table, context=self.c)
         df = dataset.download()
 
         self.assertEqual(df['fakec_bool'].dtype, 'bool')
@@ -290,10 +290,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_mcdonalds_nyc
         df = read_mcdonalds_nyc(limit=100)
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -302,10 +302,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_ne_50m_graticules_15
         df = read_ne_50m_graticules_15()
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 35)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -314,10 +314,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -328,12 +328,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_taxi(limit=100)
         lnglat = ('dropoff_longitude', 'dropoff_latitude')
         dataset = Dataset.from_dataframe(df).upload(
-            with_lnglat=lnglat, table_name=self.test_write_table, context=self.cc)
+            with_lnglat=lnglat, table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -342,12 +342,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -357,12 +357,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
         df.rename(columns={'the_geom': 'geometry'}, inplace=True)
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -373,12 +373,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
 
         df.rename(columns={'the_geom': 'geom'}, inplace=True)
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -396,12 +396,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                                          zip(df.dropoff_longitude, df.dropoff_latitude)])
 
         # TODO: use from_geodataframe
-        dataset = Dataset.from_dataframe(gdf).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(gdf).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -412,12 +412,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_taxi(limit=50)
         df['the_geom'] = df.apply(lambda x: 'POINT ({x} {y})'
                                   .format(x=x['dropoff_longitude'], y=x['dropoff_latitude']), axis=1)
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -426,56 +426,56 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
-            dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+            dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         dataset = Dataset.from_dataframe(df).upload(
-            if_exists=Dataset.APPEND, table_name=self.test_write_table, context=self.cc)
+            if_exists=Dataset.APPEND, table_name=self.test_write_table, context=self.c)
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_replace(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.cc)
+        dataset = Dataset.from_dataframe(df).upload(table_name=self.test_write_table, context=self.c)
         self.test_write_table = dataset.table_name
 
         dataset = Dataset.from_dataframe(df).upload(
-            if_exists=Dataset.REPLACE, table_name=self.test_write_table, context=self.cc)
+            if_exists=Dataset.REPLACE, table_name=self.test_write_table, context=self.c)
 
         self.assertExistsTable(self.test_write_table)
 
-        result = self.cc.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
+        result = self.c.sql_client.send('SELECT * FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table))
         self.assertEqual(result['total_rows'], 2049)
 
     def test_dataset_schema_from_parameter(self):
         schema = 'fake_schema'
-        dataset = Dataset.from_table(table_name='fake_table', schema=schema, context=self.cc)
+        dataset = Dataset.from_table(table_name='fake_table', schema=schema, context=self.c)
         self.assertEqual(dataset._schema, schema)
 
     def test_dataset_schema_from_non_org_context(self):
-        dataset = Dataset.from_table(table_name='fake_table', context=self.cc)
+        dataset = Dataset.from_table(table_name='fake_table', context=self.c)
         self.assertEqual(dataset._schema, 'public')
 
     def test_dataset_schema_from_org_context(self):
@@ -508,13 +508,13 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     # @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     # def test_dataset_write_with_encoding(self):
     #     df = pd.DataFrame({'vals': [1, 2], 'strings': ['a', 'ô']})
-    #     dataset = self.cc.write(df, self.test_write_table)
+    #     dataset = self.c.write(df, self.test_write_table)
     #     self.test_write_table = dataset.table_name
 
     #     self.assertExistsTable(self.test_write_table)
 
     def assertExistsTable(self, table_name):
-        resp = self.cc.sql_client.send('''
+        resp = self.c.sql_client.send('''
             SELECT *
             FROM {table}
             LIMIT 0
@@ -523,7 +523,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
     def assertNotExistsTable(self, table_name):
         try:
-            self.cc.sql_client.send('''
+            self.c.sql_client.send('''
                 SELECT *
                 FROM {table}
                 LIMIT 0

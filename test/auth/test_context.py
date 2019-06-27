@@ -23,6 +23,7 @@ from carto.sql import SQLClient
 import pandas as pd
 import IPython
 
+import cartoframes
 from cartoframes.data import Dataset
 from cartoframes.utils import dict_items
 from cartoframes.columns import Column, normalize_name
@@ -663,13 +664,13 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         df = df.astype({'vals': str, 'ids': str})
         c.write(df, self.test_write_table, overwrite=True)
 
-        self.assertEquals(Dataset.from_table(context=cc, table_name=self.test_write_table).exists(), True)
+        self.assertEquals(Dataset.from_table(context=c, table_name=self.test_write_table).exists(), True)
 
         c.execute('''
             DROP TABLE {table_name}
             '''.format(table_name=self.test_write_table))
 
-        self.assertEquals(Dataset.from_table(context=cc, table_name=self.test_write_table).exists(), False)
+        self.assertEquals(Dataset.from_table(context=c, table_name=self.test_write_table).exists(), False)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_execute_wrong_query(self):
@@ -686,13 +687,12 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_map(self):
         """Context.map normal usage"""
         from cartoframes import Layer, QueryLayer, BaseMap
-        c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+        c = Context(base_url=self.baseurl, api_key=self.apikey)
 
         # test with no layers - should produce basemap
         if plt:
             basemap_only_static_mpl = c.map(interactive=False)
-            Context.HAS_MATPLOTLIB = False
+            cartoframes.auth.context.HAS_MATPLOTLIB = False
         basemap_only_static = c.map(interactive=False)
         basemap_only_interactive = c.map(interactive=True)
 
@@ -1191,12 +1191,13 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
     def test_tables(self):
         """Context.tables normal usage"""
+        from cartoframes.analysis import Table
         c = Context(
             base_url=self.baseurl,
             api_key=self.apikey
         )
         tables = c.tables()
         self.assertIsInstance(tables, list)
-        self.assertIsInstance(tables[0], cartoframes.analysis.Table)
+        self.assertIsInstance(tables[0], Table)
         self.assertIsNotNone(tables[0].name)
         self.assertIsInstance(tables[0].name, str)

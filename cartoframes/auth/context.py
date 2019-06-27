@@ -158,7 +158,7 @@ class Context(object):
             # on prem host (e.g., an IP address)
             onprem_host = 'your on prem carto host'
 
-            cc = cartoframes.Context(
+            c = cartoframes.auth.Context(
                 base_url='{host}/user/{user}'.format(
                     host=onprem_host,
                     user='your carto username'),
@@ -237,8 +237,8 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                cc = cartoframes.Context(BASEURL, APIKEY)
-                df = cc.read('acadia_biodiversity')
+                c = cartoframes.auth.Context(BASEURL, APIKEY)
+                df = c.read('acadia_biodiversity')
         """
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
@@ -276,7 +276,7 @@ class Context(object):
 
             .. code:: python
 
-                cc.write(df, 'brooklyn_poverty', overwrite=True)
+                c.write(df, 'brooklyn_poverty', overwrite=True)
 
             Scrape an HTML table from Wikipedia and send to CARTO with content
             guessing to create a geometry from the country column. This uses
@@ -289,10 +289,10 @@ class Context(object):
                 df = pd.read_html(url, header=0)[0]
                 # send to carto, let it guess polygons based on the 'country'
                 #   column. Also set privacy to 'public'
-                cc.write(df, 'life_expectancy',
+                c.write(df, 'life_expectancy',
                          content_guessing=True,
                          privacy='public')
-                cc.map(layers=Layer('life_expectancy',
+                c.map(layers=Layer('life_expectancy',
                                     color='both_sexes_life_expectancy'))
 
         .. warning:: datetime64[ns] column will lose precision sending a dataframe to CARTO
@@ -486,7 +486,7 @@ class Context(object):
 
             .. code:: python
 
-                topten_df = cc.query(
+                topten_df = c.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -502,7 +502,7 @@ class Context(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = cc.query(
+                points_aggregated_to_polygons = c.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -569,7 +569,7 @@ class Context(object):
 
             .. code:: python
 
-                cc.execute(
+                c.execute(
                     '''
                       DROP TABLE my_table
                     '''
@@ -579,7 +579,7 @@ class Context(object):
 
             .. code:: python
 
-                cc.query(
+                c.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -641,7 +641,7 @@ class Context(object):
 
             .. code:: python
 
-                topten_df = cc.query(
+                topten_df = c.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -659,7 +659,7 @@ class Context(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = cc.query(
+                points_aggregated_to_polygons = c.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -674,7 +674,7 @@ class Context(object):
 
             .. code:: python
 
-                cc.query(
+                c.query(
                     '''
                       DROP TABLE my_table
                     '''
@@ -684,7 +684,7 @@ class Context(object):
 
             .. code:: python
 
-                cc.query(
+                c.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -719,8 +719,8 @@ class Context(object):
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
-                cc = cartoframes.Context(BASEURL, APIKEY)
-                cc.map(layers=[BaseMap(),
+                c = cartoframes.auth.Context(BASEURL, APIKEY)
+                c.map(layers=[BaseMap(),
                                Layer('acadia_biodiversity',
                                      color={'column': 'simpson_index',
                                             'scheme': styling.tealRose(7)}),
@@ -732,7 +732,7 @@ class Context(object):
 
             Create a snapshot of a map at a specific zoom and center::
 
-                cc.map(layers=Layer('acadia_biodiversity',
+                c.map(layers=Layer('acadia_biodiversity',
                                     color='simpson_index'),
                        interactive=False,
                        zoom=14,
@@ -1051,9 +1051,9 @@ class Context(object):
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
         boundaries for a region and, with :py:meth:`Context.data
-        <cartoframes.context.Context.data>` and
+        <cartoframes.auth.Context.data>` and
         :py:meth:`Context.data_discovery
-        <cartoframes.context.Context.data_discovery>`, getting tables of
+        <cartoframes.auth.Context.data_discovery>`, getting tables of
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
@@ -1067,8 +1067,8 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                cc = cartoframes.Context('base url', 'api key')
-                au_boundaries = cc.data_boundaries(region='Australia')
+                c = cartoframes.auth.Context('base url', 'api key')
+                au_boundaries = c.data_boundaries(region='Australia')
                 au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
@@ -1076,9 +1076,9 @@ class Context(object):
             .. code:: python
 
                 from cartoframes import Layer
-                au_postal_areas = cc.data_boundaries(boundary='au.geo.POA')
-                cc.write(au_postal_areas, 'au_postal_areas')
-                cc.map(Layer('au_postal_areas'))
+                au_postal_areas = c.data_boundaries(boundary='au.geo.POA')
+                c.write(au_postal_areas, 'au_postal_areas')
+                c.map(Layer('au_postal_areas'))
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
@@ -1086,25 +1086,25 @@ class Context(object):
 
             .. code:: python
 
-                cc = cartoframes.Context('base url', 'api key')
+                c = cartoframes.auth.Context('base url', 'api key')
                 # will return DataFrame with columns `the_geom` and `geom_ref`
-                tracts = cc.data_boundaries(
+                tracts = c.data_boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
                 # write geometries to a CARTO table
-                cc.write(tracts, 'idaho_falls_tracts')
+                c.write(tracts, 'idaho_falls_tracts')
                 # gather metadata needed to look up median income
-                median_income_meta = cc.data_discovery(
+                median_income_meta = c.data_discovery(
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
                 # get median income data and original table as new dataframe
-                idaho_falls_income = cc.data(
+                idaho_falls_income = c.data(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
-                cc.write(idaho_falls_income,
+                c.write(idaho_falls_income,
                          'idaho_falls_tracts',
                          overwrite=True)
 
@@ -1114,7 +1114,7 @@ class Context(object):
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
               running :py:meth:`Context.data_boundaries
-              <cartoframes.context.Context.data_boundaries>`
+              <cartoframes.auth.Context.data_boundaries>`
               without any arguments, or by looking in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
@@ -1242,11 +1242,11 @@ class Context(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        :py:meth:`Context.data <cartoframes.context.Context.data>`.
+        :py:meth:`Context.data <cartoframes.auth.Context.data>`.
         For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `Context.data <cartoframes.context.Context.data>`
+        columns as `Context.data <cartoframes.auth.Context.data>`
         generally needs the full metadata.
 
         .. note::
@@ -1266,7 +1266,7 @@ class Context(object):
 
             .. code::
 
-                meta = cc.data_discovery('European Union',
+                meta = c.data_discovery('European Union',
                                          keywords='freight',
                                          time='2010')
                 print(meta['numer_name'].values)
@@ -1474,7 +1474,7 @@ class Context(object):
         """Get an augmented CARTO dataset with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. Use
         `Context.data_discovery
-        <#context.Context.data_discovery>`__ to search for available
+        <#Context.data_discovery>`__ to search for available
         measures, or see the full `Data Observatory catalog
         <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
         persist the data as a new table.
@@ -1485,11 +1485,11 @@ class Context(object):
 
             .. code::
 
-                cc = cartoframes.Context(BASEURL, APIKEY)
-                median_income = cc.data_discovery('transaction_events',
+                c = cartoframes.auth.Context(BASEURL, APIKEY)
+                median_income = c.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')
-                df = cc.data('transaction_events',
+                df = c.data('transaction_events',
                              median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
@@ -1502,14 +1502,14 @@ class Context(object):
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = cc.data('transaction_events', median_income)
+                df = c.data('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
             metadata (pandas.DataFrame): List of all measures to add to
                 `table_name`. See :py:meth:`Context.data_discovery
-                <cartoframes.context.Context.data_discovery>` outputs
+                <cartoframes.auth.Context.data_discovery>` outputs
                 for a full list of metadata columns.
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
@@ -1699,6 +1699,7 @@ class Context(object):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
             html_template = os.path.join(
                 os.path.dirname(__file__),
+                '..',
                 'assets',
                 'cartoframes.html')
             with open(html_template, 'r') as html_file:
