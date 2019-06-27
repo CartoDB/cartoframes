@@ -221,7 +221,7 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 .. code:: python
 
     from cartoframes import Layer, BaseMap, styling
-    con =  cartoframes.auth.Context(base_url=BASEURL,
+    con = cartoframes.auth.Context(base_url=BASEURL,
                                   api_key=APIKEY)
     con.map(layers=[BaseMap('light'),
                    Layer('acadia_biodiversity',
@@ -243,7 +243,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
 .. code:: python
 
     import cartoframes
-    con =  cartoframes.auth.Context(BASEURL, APIKEY)
+    con = cartoframes.auth.Context(BASEURL, APIKEY)
 
     # total pop, high school diploma (normalized), median income, poverty status (normalized)
     # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html
@@ -267,7 +267,7 @@ The most common way to input credentials into cartoframes is through the `Contex
 .. code:: python
 
     from cartoframes.auth import Context
-    con =  Context(
+    con = Context(
         base_url='https://{your_user_name}.carto.com',
         api_key='{your_api_key}'
     )
@@ -278,7 +278,7 @@ You can also set your credentials using the `Credentials` class:
 .. code:: python
 
     from cartoframes.auth import Credentials, Context
-    con =  Context(
+    con = Context(
         creds=Credentials(key='{your_api_key}', username='{your_user_name}')
     )
 
@@ -297,4 +297,4 @@ Once you save your credentials, you can get started in future sessions more quic
 .. code:: python
 
     from cartoframes.auth import Context
-    con =  Context()  # automatically loads credentials if previously saved
+    con = Context()  # automatically loads credentials if previously saved

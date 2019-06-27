@@ -335,7 +335,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     # def test_write_privacy(self):
     #     """Context.write Updates the privacy of a dataset"""
     #     from carto.datasets import DatasetManager
-    #     con =  Context(base_url=self.baseurl,
+    #     con = Context(base_url=self.baseurl,
     #                                   api_key=self.apikey)
     #     ds_manager = DatasetManager(self.auth_client)
 

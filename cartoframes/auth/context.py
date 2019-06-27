@@ -85,7 +85,7 @@ class Context(object):
       1. Setting the `base_url` and `api_key` directly in
          :py:class:`Context <cartoframes.auth.Context>`. This method is easier.::
 
-            con =  Context(
+            con = Context(
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
@@ -97,7 +97,7 @@ class Context(object):
 
             from cartoframes.auth import Credentials
             creds = Credentials(username='eschbacher', key='abcdefg')
-            con =  Context(creds=creds)
+            con = Context(creds=creds)
 
     Attributes:
         creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -137,7 +137,7 @@ class Context(object):
             # if on prem, format is '{host}/user/{username}'
             BASEURL = 'https://{}.carto.com/'.format('your carto username')
             APIKEY = 'your carto api key'
-            con =  Context(BASEURL, APIKEY)
+            con = Context(BASEURL, APIKEY)
 
     Tip:
 
@@ -158,7 +158,7 @@ class Context(object):
             # on prem host (e.g., an IP address)
             onprem_host = 'your on prem carto host'
 
-            con =  cartoframes.auth.Context(
+            con = cartoframes.auth.Context(
                 base_url='{host}/user/{user}'.format(
                     host=onprem_host,
                     user='your carto username'),
@@ -237,7 +237,7 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
                 df = con.read('acadia_biodiversity')
         """
         # choose schema (default user - org or standalone - or shared)
@@ -719,7 +719,7 @@ class Context(object):
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
-                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
                 con.map(layers=[BaseMap(),
                                Layer('acadia_biodiversity',
                                      color={'column': 'simpson_index',
@@ -1067,7 +1067,7 @@ class Context(object):
             .. code:: python
 
                 import cartoframes
-                con =  cartoframes.auth.Context('base url', 'api key')
+                con = cartoframes.auth.Context('base url', 'api key')
                 au_boundaries = con.data_boundaries(region='Australia')
                 au_boundaries[['geom_name', 'geom_id']]
 
@@ -1086,7 +1086,7 @@ class Context(object):
 
             .. code:: python
 
-                con =  cartoframes.auth.Context('base url', 'api key')
+                con = cartoframes.auth.Context('base url', 'api key')
                 # will return DataFrame with columns `the_geom` and `geom_ref`
                 tracts = con.data_boundaries(
                     boundary='us.census.tiger.census_tract',
@@ -1485,7 +1485,7 @@ class Context(object):
 
             .. code::
 
-                con =  cartoframes.auth.Context(BASEURL, APIKEY)
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
                 median_income = con.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')

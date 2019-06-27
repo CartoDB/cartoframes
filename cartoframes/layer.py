@@ -37,7 +37,7 @@ class BaseMap(AbstractLayer):
 
         import cartoframes
         from cartoframes import BaseMap, Layer
-        con =  cartoframes.auth.Context(BASEURL, APIKEY)
+        con = cartoframes.auth.Context(BASEURL, APIKEY)
         con.map(layers=[BaseMap(source='light', labels='front'),
                        Layer('acadia_biodiversity')])
 
@@ -124,7 +124,7 @@ class QueryLayer(AbstractLayer):
 
         import cartoframes
         from cartoframes import QueryLayer, styling
-        con =  cartoframes.auth.Context(BASEURL, APIKEY)
+        con = cartoframes.auth.Context(BASEURL, APIKEY)
         con.map(layers=[QueryLayer('''
                                   WITH i_cte As (
                                     SELECT
@@ -674,7 +674,7 @@ class Layer(QueryLayer):
 
             import cartoframes
             from cartoframes import QueryLayer, styling
-            con =  cartoframes.auth.Context(BASEURL, APIKEY)
+            con = cartoframes.auth.Context(BASEURL, APIKEY)
             con.map(layers=[Layer('fantastic_sql_table',
                                  size=7,
                                  color={'column': 'mr_fox_sightings',

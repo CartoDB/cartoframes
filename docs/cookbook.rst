@@ -6,7 +6,7 @@ For most operations below, you need to create a :py:class:`Context <cartoframes.
 .. code::
 
     from cartoframes.auth import Context
-    con =  Context(
+    con = Context(
         base_url='https://cyclingfan.carto.com',
         api_key='abc123'
     )
@@ -159,7 +159,7 @@ Your new GeoDataFrame will now have geometries decoded into Shapely objects that
 
    from cartoframes.auth import Context
    import geopandas as gpd
-   con =  Context()
+   con = Context()
 
    gdf = gpd.GeoDataFrame(c.read('tablename', decode_geom=True))
 
@@ -177,7 +177,7 @@ Some `on premises installations of CARTO <https://carto.com/developers/on-premis
    session = Session()
    session.verify = False
 
-   con =  Context(
+   con = Context(
        base_url='https://cyclingfan.carto.com/',
        api_key='abc123',
        session=session
@@ -225,7 +225,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
    from carto.sql import BatchSQLClient
    from time import sleep
 
-   con =  Context(
+   con = Context(
        base_url='https://your-username.carto.com',
        api_key='your-api-key'
    )

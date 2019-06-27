@@ -45,7 +45,7 @@ class Credentials(object):
 
             from cartoframes.auth import Credentials, Context
             creds = Credentials(key='abcdefg', username='eschbacher')
-            con =  Context(creds=creds)
+            con = Context(creds=creds)
 
     """
 

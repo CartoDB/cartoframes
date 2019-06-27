@@ -55,7 +55,7 @@ good method:
         from cartoframes.examples import read_taxi
         USERNAME = 'your user name'
         APIKEY = 'your API key'
-        con =  Context(
+        con = Context(
             base_url='https://{}.carto.com'.format(USERNAME),
             api_key=APIKEY
         )
