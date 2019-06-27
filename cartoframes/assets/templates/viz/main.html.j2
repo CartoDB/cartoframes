@@ -17,6 +17,8 @@
   <link href="{{airship_styles_path}}" rel="stylesheet">
   <link href="{{airship_icons_path}}" rel="stylesheet">
 
+  <link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+
   <style>
     body {
       margin: 0;
@@ -110,6 +112,19 @@
       font-family: 'Open Sans';
     }
 
+    .map-footer {
+      background: #F2F6F9;
+      font-family: Roboto;
+      font-size: 12px;
+      line-height: 24px;
+      color: #162945;
+      text-align: center;
+    }
+
+    .map-footer a {
+      text-decoration: none;
+    }
+
     as-widget-header .as-widget-header__header {
       margin-bottom: 8px;
     }
@@ -143,6 +158,8 @@
       </div> <!-- as-map-area -->
     </main> <!-- as-main -->
   </as-responsive-content>
+
+  {% include 'viz/footer.html.j2' %}
 
   {% include 'error/basic.html.j2' %}
 
