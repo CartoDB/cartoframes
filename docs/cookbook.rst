@@ -1,12 +1,12 @@
 Cheat Sheet
 ===========
 
-For most operations below, you need to create a :py:class:`CartoContext <cartoframes.context.CartoContext>` object. For example, here's how user `cyclingfan` with API key `abc123` creates one:
+For most operations below, you need to create a :py:class:`Context <cartoframes.auth.Context>` object. For example, here's how user `cyclingfan` with API key `abc123` creates one:
 
 .. code::
 
-    from cartoframes import CartoContext
-    cc = CartoContext(
+    from cartoframes.auth import Context
+    con = Context(
         base_url='https://cyclingfan.carto.com',
         api_key='abc123'
     )
@@ -23,7 +23,7 @@ It's a fairly common use case that someone needs the Census tracts for a region.
 .. code::
 
    # get all census tracts (clipped by water boundaries) in specific bounding box
-   missouri_ct = cc.data_boundaries(
+   missouri_ct = con.data_boundaries(
        region=[-95.774147,35.995682,-89.098846,40.613636],
        boundary='us.census.tiger.census_tract_clipped'
    )
@@ -33,10 +33,10 @@ It's a fairly common use case that someone needs the Census tracts for a region.
    missouri_ct = missouri_ct[missouri_ct.geom_refs.str.startswith('29')]
 
    # write to carto
-   cc.write(missouri_ct, 'missouri_census_tracts')
+   con.write(missouri_ct, 'missouri_census_tracts')
 
    # visualize to make sure it makes sense
-   cc.map(Layer('missouri_census_tracts'))
+   con.map(Layer('missouri_census_tracts'))
 
 
 .. image:: img/cheatsheet_do_census_tracts.png
@@ -48,7 +48,7 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
 
 
    # get all counties in bounding box around Kansas and Missouri
-   ks_mo_counties = cc.data_boundaries(
+   ks_mo_counties = con.data_boundaries(
        region=[-102.1777729674,35.995682,-89.098846,40.613636],
        boundary='us.census.tiger.county'
    )
@@ -57,10 +57,10 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
    ks_mo_counties = ks_mo_counties[ks_mo_counties.geom_refs.str.startswith(('29', '20'))]
 
    # write to carto
-   cc.write(ks_mo_counties, 'ks_mo_counties')
+   con.write(ks_mo_counties, 'ks_mo_counties')
 
    # visualize to make sure it makes sense
-   cc.map(Layer('ks_mo_counties'))
+   con.map(Layer('ks_mo_counties'))
 
 
 .. image:: img/cheatsheet_do_counties.png
@@ -69,11 +69,11 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
 Get raw measures from the DO
 ----------------------------
 
-To get raw census measures from the Data Observatory, the key part is the use of `predenominated` in the metadata and `how='geoid'` (or some other geom_ref) when using `CartoContext.data`. If you don't use the `how=` flag, the Data Observatory will perform some calculations with the geometries in the table you are trying to augment.
+To get raw census measures from the Data Observatory, the key part is the use of `predenominated` in the metadata and `how='geoid'` (or some other geom_ref) when using `Context.data`. If you don't use the `how=` flag, the Data Observatory will perform some calculations with the geometries in the table you are trying to augment.
 
 Here we're using a dataset with a column called `geoid` which has the GEOID of census tracts. Note that it's important to specify the same geometry ID in the measure metadata as the geometries you are wishing to enrich.
 
-1. Find the measures you want, either through `CartoContext.data_discovery` or using the `Data Observatory catalog <https://cartodb.github.io/bigmetadata/>`__.
+1. Find the measures you want, either through `Context.data_discovery` or using the `Data Observatory catalog <https://cartodb.github.io/bigmetadata/>`__.
 2. Create a dataframe with columns for each measure metadata object, or a list of dictionaries (like below) for your curated measures. Be careful to specify the specific geometry level you want the measures for and make sure the geometry reference (e.g., GEOID) you have for your geometries matches this geometry level.
 
 
@@ -92,7 +92,7 @@ Here we're using a dataset with a column called `geoid` which has the GEOID of c
        'numer_timespan': '2011 - 2015'
    }]
 
-   boston_data = cc.data('boston_census_tracts', meta, how='geoid')
+   boston_data = con.data('boston_census_tracts', meta, how='geoid')
 
 
 .. tip:: It's best practice to keep your geometry identifiers as strings because leading zeros are removed when strings are converted to numeric types. This usually affects states with FIPS that begin with a zero, or Zip Codes in New England with leading zeros.
@@ -143,33 +143,33 @@ In this example, we use the :py:class:`example_context <cartoframes.examples.Exa
    plt.show()
 
 .. image:: img/small_multiple.png
-   :alt: Small multiple example with matplotlib and CartoContext.map
+   :alt: Small multiple example with matplotlib and Context.map
 
 Get a table as a GeoDataFrame
 -----------------------------
 
 CARTOframes works with GeoPandas.
 
-1. For any `CartoContext.read` or `CartoContext.query` operation, use the `decode_geom` flag set to ``True``, like below.
+1. For any `Context.read` or `Context.query` operation, use the `decode_geom` flag set to ``True``, like below.
 2. Wrap the result of step 1 in the GeoPandas GeoDataFrame constructor
 
 Your new GeoDataFrame will now have geometries decoded into Shapely objects that can then be used for spatial operations in your Python environment.
 
 .. code::
 
-   from cartoframes import CartoContext
+   from cartoframes.auth import Context
    import geopandas as gpd
-   cc = CartoContext()
+   con = Context()
 
-   gdf = gpd.GeoDataFrame(cc.read('tablename', decode_geom=True))
+   gdf = gpd.GeoDataFrame(con.read('tablename', decode_geom=True))
 
 
-You can reverse this process and have geometries encoded for storage in CARTO by specifying `encode_geom=True` in the `CartoContext.write` operation.
+You can reverse this process and have geometries encoded for storage in CARTO by specifying `encode_geom=True` in the `Context.write` operation.
 
 Skip SSL verification
 ---------------------
 
-Some `on premises installations of CARTO <https://carto.com/developers/on-premises/>`__ don't need SSL verification. You can disable this using the requests library's `Session class <http://docs.python-requests.org/en/master/user/advanced/#session-objects>`__ and passing that into your :py:class:`CartoContext <cartoframes.context.CartoConext>`.
+Some `on premises installations of CARTO <https://carto.com/developers/on-premises/>`__ don't need SSL verification. You can disable this using the requests library's `Session class <http://docs.python-requests.org/en/master/user/advanced/#session-objects>`__ and passing that into your :py:class:`Context <cartoframes.context.CartoConext>`.
 
 .. code::
 
@@ -177,7 +177,7 @@ Some `on premises installations of CARTO <https://carto.com/developers/on-premis
    session = Session()
    session.verify = False
 
-   cc = CartoContext(
+   con = Context(
        base_url='https://cyclingfan.carto.com/',
        api_key='abc123',
        session=session
@@ -186,7 +186,7 @@ Some `on premises installations of CARTO <https://carto.com/developers/on-premis
 Reading large tables or queries
 -------------------------------
 
-Sometimes tables are too large to read them out in a single `CartoContext.read` or `CartoContext.query` operation. In this case, you can read chunks and recombine, like below:
+Sometimes tables are too large to read them out in a single `Context.read` or `Context.query` operation. In this case, you can read chunks and recombine, like below:
 
 .. code::
 
@@ -201,11 +201,11 @@ Sometimes tables are too large to read them out in a single `CartoContext.read` 
    WHERE cartodb_id >= {lower} and cartodb_id < {upper}
    '''
 
-   num_rows = cc.sql_client.send('select count(*) from my_big_table')['rows'][0]['count']
+   num_rows = con.sql_client.send('select count(*) from my_big_table')['rows'][0]['count']
 
    # read in 100,000 chunks
    for r in range(0, num_rows, 100000):
-       dfs.append(cc.query(q.format(lower=r, upper=r+100000)))
+       dfs.append(con.query(q.format(lower=r, upper=r+100000)))
 
    # combine 'em all
    all_together = pd.concat(dfs)
@@ -217,20 +217,20 @@ When writing large DataFrames to CARTO, cartoframes takes care of the batching. 
 Perform long running query if a time out occurs
 -----------------------------------------------
 
-While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`__ jobs can be created through the `CARTO Python SDK <https://carto.com/developers/python-sdk/>`__ -- the CARTO Python package for developers. Below is a sample workflow for how to perform a long running query that would otherwise produce timeout errors with :py:meth:`CartoContext.query <cartoframes.context.CartoContext.query>`.
+While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`__ jobs can be created through the `CARTO Python SDK <https://carto.com/developers/python-sdk/>`__ -- the CARTO Python package for developers. Below is a sample workflow for how to perform a long running query that would otherwise produce timeout errors with :py:meth:`Context.query <cartoframes.auth.Context.query>`.
 
 .. code::
 
-   from cartoframes import CartoContext, BatchJobStatus
+   from cartoframes.auth import Context, BatchJobStatus
    from carto.sql import BatchSQLClient
    from time import sleep
 
-   cc = CartoContext(
+   con = Context(
        base_url='https://your-username.carto.com',
        api_key='your-api-key'
    )
 
-   bsc = BatchSQLClient(cc.auth_client)
+   bsc = BatchSQLClient(con.auth_client)
 
    job = bsc.create(['''
        UPDATE really_big_table
@@ -238,7 +238,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
        ''', 
    ])
 
-   bjs = BatchJobStatus(cc, job)
+   bjs = BatchJobStatus(con, job)
    last_status = bjs.status()['status']
 
    while curr_status not in ('failed', 'done', 'canceled', 'unknown'):
@@ -250,7 +250,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
 
    # if curr_status is 'done' the operation was successful
    # and we can read the table into a dataframe
-   geocoded_table = cc.read('really_big_table')
+   geocoded_table = con.read('really_big_table')
 
 
 Subdivide Data Observatory search region into sub-regions
@@ -286,7 +286,7 @@ Some geometries in the Data Observatory are too large, numerous, and/or complex 
            bbox[0] + (p[0] + 1) * delta_lng_divs,
            bbox[1] + (p[1] + 1) * delta_lat_divs
        )
-       _df = cc.data_boundaries(
+       _df = con.data_boundaries(
            region=sub_bbox,
            boundary='us.census.tiger.census_tract_clipped'
        )

@@ -1,9 +1,9 @@
-.. automodule:: cartoframes.context
+.. automodule:: cartoframes.auth
 
 
-CartoContext
+Context
 ============
-.. autoclass:: cartoframes.context.CartoContext
+.. autoclass:: cartoframes.auth.Context
     :noindex:
     :member-order: bysource
     :members: read, query, delete, map, data_discovery, data, data_boundaries

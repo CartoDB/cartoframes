@@ -9,8 +9,8 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
     from cartoframes.data import Dataset
     import pandas as pd
 
-    # create cartocontext for your carto account
-    cc = Context(<your credentials>)
+    # create context for your carto account
+    con = Context(<your credentials>)
 
     # Extract into a pandas' DataFrame (can be replaced by other operation)
     raw_data = pd.read_csv('https://<remote location>.csv')
@@ -19,7 +19,7 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
     processed_data = <some processing pipeline>
 
     # Load into your carto account
-    cc.write(processed_data, 'processed_data')
+    con.write(processed_data, 'processed_data')
 
 
 Read data from PostgreSQL to CARTO

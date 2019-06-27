@@ -1,6 +1,6 @@
 from cartoframes.viz import Map
 
-from mocks.kuviz_mock import KuvizPublisherMock, CartoKuvizMock
+from mocks.kuviz_mock import KuvizPublisherMock
 
 
 class MapMock(Map):

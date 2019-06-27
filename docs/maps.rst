@@ -48,7 +48,7 @@ The static outputs are matplotlib axes, so they can be added to subplots to
 accompany charts and other maps. The interactive maps are HTML documents that
 display in a notebook or can be exported.
 
-.. automethod:: cartoframes.CartoContext.map
+.. automethod:: cartoframes.auth.Context.map
     :noindex:
 
 Raster Layers

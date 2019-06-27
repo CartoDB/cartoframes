@@ -37,8 +37,8 @@ class BaseMap(AbstractLayer):
 
         import cartoframes
         from cartoframes import BaseMap, Layer
-        cc = cartoframes.CartoContext(BASEURL, APIKEY)
-        cc.map(layers=[BaseMap(source='light', labels='front'),
+        con = cartoframes.auth.Context(BASEURL, APIKEY)
+        con.map(layers=[BaseMap(source='light', labels='front'),
                        Layer('acadia_biodiversity')])
 
     Args:
@@ -112,8 +112,8 @@ class QueryLayer(AbstractLayer):
     * Visualizing a subset of the data (e.g., ``SELECT * FROM table LIMIT
       1000``)
 
-    Used in the `layers` keyword in :py:meth:`CartoContext.map
-    <cartoframes.context.CartoContext.map>`.
+    Used in the `layers` keyword in :py:meth:`Context.map
+    <cartoframes.auth.Context.map>`.
 
     Example:
         Underlay a QueryLayer with a complex query below a layer from a table.
@@ -124,8 +124,8 @@ class QueryLayer(AbstractLayer):
 
         import cartoframes
         from cartoframes import QueryLayer, styling
-        cc = cartoframes.CartoContext(BASEURL, APIKEY)
-        cc.map(layers=[QueryLayer('''
+        con = cartoframes.auth.Context(BASEURL, APIKEY)
+        con.map(layers=[QueryLayer('''
                                   WITH i_cte As (
                                     SELECT
                                         ST_Buffer(the_geom::geography, 500)::geometry As the_geom,
@@ -664,8 +664,8 @@ class QueryLayer(AbstractLayer):
 class Layer(QueryLayer):
     """A cartoframes Data Layer based on a specific table in user's CARTO
     database. This layer class is used for visualizing individual datasets
-    with :py:meth:`CartoContext.map
-    <cartoframes.context.CartoContext.map>`\'s `layers`
+    with :py:meth:`Context.map
+    <cartoframes.auth.Context.map>`\'s `layers`
     keyword argument.
 
     Example:
@@ -674,8 +674,8 @@ class Layer(QueryLayer):
 
             import cartoframes
             from cartoframes import QueryLayer, styling
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
-            cc.map(layers=[Layer('fantastic_sql_table',
+            con = cartoframes.auth.Context(BASEURL, APIKEY)
+            con.map(layers=[Layer('fantastic_sql_table',
                                  size=7,
                                  color={'column': 'mr_fox_sightings',
                                         'scheme': styling.prism(10)})])

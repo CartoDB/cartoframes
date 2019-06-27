@@ -23,16 +23,16 @@ from carto.datasets import DatasetManager
 from pyrestcli.exceptions import NotFoundException
 
 from .credentials import Credentials
-from .dataobs import get_countrytag
-from . import utils
-from .layer import BaseMap, AbstractLayer
-from .maps import (non_basemap_layers, get_map_name,
-                   get_map_template, top_basemap_layer_url)
-from .analysis import Table
-from .__version__ import __version__
-from .columns import dtypes, date_columns_names, bool_columns_names
-from .data import Dataset
-from .data.utils import decode_geometry, recursive_read, get_columns
+from ..dataobs import get_countrytag
+from .. import utils
+from ..layer import BaseMap, AbstractLayer
+from ..maps import (non_basemap_layers, get_map_name,
+                    get_map_template, top_basemap_layer_url)
+from ..analysis import Table
+from ..__version__ import __version__
+from ..columns import dtypes, date_columns_names, bool_columns_names
+from ..data import Dataset
+from ..data.utils import decode_geometry, recursive_read, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -66,8 +66,8 @@ DEFAULT_SQL_ARGS = dict(do_post=False)
 tqdm(disable=True, total=0)  # initialise internal lock
 
 
-class CartoContext(object):
-    """CartoContext class for authentication with CARTO and high-level
+class Context(object):
+    """Context class for authentication with CARTO and high-level
     operations such as reading tables from CARTO into dataframes, writing
     dataframes to CARTO tables, creating custom maps from dataframes and CARTO
     tables, and augmenting data using CARTO's `Data Observatory
@@ -83,25 +83,25 @@ class CartoContext(object):
     There are two ways of authenticating against a CARTO account:
 
       1. Setting the `base_url` and `api_key` directly in
-         :py:class:`CartoContext`. This method is easier.::
+         :py:class:`Context <cartoframes.auth.Context>`. This method is easier.::
 
-            cc = CartoContext(
+            con = Context(
                 base_url='https://eschbacher.carto.com',
                 api_key='abcdefg')
 
       2. By passing a :py:class:`Credentials
-         <cartoframes.credentials.Credentials>` instance in
-         :py:class:`CartoContext <cartoframes.context.CartoContext>`'s
-         :py:attr:`creds <cartoframes.credentials.Credentials.creds>`
+         <cartoframes.auth.Credentials>` instance in
+         :py:class:`Context <cartoframes.auth.Context>`'s
+         :py:attr:`creds <cartoframes.auth.Credentials.creds>`
          keyword argument. This method is more flexible.::
 
-            from cartoframes import Credentials
+            from cartoframes.auth import Credentials
             creds = Credentials(username='eschbacher', key='abcdefg')
-            cc = CartoContext(creds=creds)
+            con = Context(creds=creds)
 
     Attributes:
-        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
-          :py:class:`Credentials <cartoframes.credentials.Credentials>`
+        creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          :py:class:`Credentials <cartoframes.auth.Credentials>`
           instance
 
     Args:
@@ -111,8 +111,8 @@ class CartoContext(object):
             a personal or multi-user account. On-premises installation users
             should ask their admin.
         api_key (str): CARTO API key.
-        creds (:py:class:`Credentials <cartoframes.credentials.Credentials>`):
-          A :py:class:`Credentials <cartoframes.credentials.Credentials>`
+        creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          A :py:class:`Credentials <cartoframes.auth.Credentials>`
           instance can be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
             documentation
@@ -122,22 +122,22 @@ class CartoContext(object):
             suppress (False, default)
 
     Returns:
-        :py:class:`CartoContext <cartoframes.context.CartoContext>`: A
-        CartoContext object that is authenticated against the user's CARTO
+        :py:class:`Context <cartoframes.auth.Context>`: A
+        Context object that is authenticated against the user's CARTO
         account.
 
     Example:
 
-        Create a :py:class:`CartoContext` object for a cloud-based CARTO
+        Create a :py:class:`Context <cartoframes.auth.Context>` object for a cloud-based CARTO
         account.
 
         .. code::
 
-            import cartoframes
+            from cartoframes.auth import Context
             # if on prem, format is '{host}/user/{username}'
             BASEURL = 'https://{}.carto.com/'.format('your carto username')
             APIKEY = 'your carto api key'
-            cc = cartoframes.CartoContext(BASEURL, APIKEY)
+            con = Context(BASEURL, APIKEY)
 
     Tip:
 
@@ -158,7 +158,7 @@ class CartoContext(object):
             # on prem host (e.g., an IP address)
             onprem_host = 'your on prem carto host'
 
-            cc = cartoframes.CartoContext(
+            con = cartoframes.auth.Context(
                 base_url='{host}/user/{user}'.format(
                     host=onprem_host,
                     user='your carto username'),
@@ -237,8 +237,8 @@ class CartoContext(object):
             .. code:: python
 
                 import cartoframes
-                cc = cartoframes.CartoContext(BASEURL, APIKEY)
-                df = cc.read('acadia_biodiversity')
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
+                df = con.read('acadia_biodiversity')
         """
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (
@@ -276,7 +276,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.write(df, 'brooklyn_poverty', overwrite=True)
+                con.write(df, 'brooklyn_poverty', overwrite=True)
 
             Scrape an HTML table from Wikipedia and send to CARTO with content
             guessing to create a geometry from the country column. This uses
@@ -289,10 +289,10 @@ class CartoContext(object):
                 df = pd.read_html(url, header=0)[0]
                 # send to carto, let it guess polygons based on the 'country'
                 #   column. Also set privacy to 'public'
-                cc.write(df, 'life_expectancy',
+                con.write(df, 'life_expectancy',
                          content_guessing=True,
                          privacy='public')
-                cc.map(layers=Layer('life_expectancy',
+                con.map(layers=Layer('life_expectancy',
                                     color='both_sexes_life_expectancy'))
 
         .. warning:: datetime64[ns] column will lose precision sending a dataframe to CARTO
@@ -486,7 +486,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                topten_df = cc.query(
+                topten_df = con.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -502,7 +502,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = cc.query(
+                points_aggregated_to_polygons = con.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -569,7 +569,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.execute(
+                con.execute(
                     '''
                       DROP TABLE my_table
                     '''
@@ -579,7 +579,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.query(
+                con.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -596,11 +596,11 @@ class CartoContext(object):
         adding columns, updates, etc.). In this case, you have to explicitly
         specify `is_select=False`
 
-        This method is a helper for the `CartoContext.fetch` and `CartoContext.execute`
+        This method is a helper for the `Context.fetch` and `Context.execute`
         methods. We strongly encourage you to use any of those methods depending on the
         type of query you want to run. If you want to get the results of a `SELECT` query
-        into a pandas DataFrame, then use `CartoContext.fetch`. For any other query that
-        performs an operation into the CARTO database, use `CartoContext.execute`
+        into a pandas DataFrame, then use `Context.fetch`. For any other query that
+        performs an operation into the CARTO database, use `Context.execute`
 
         Args:
             query (str): Query to run against CARTO user database. This data
@@ -641,7 +641,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                topten_df = cc.query(
+                topten_df = con.query(
                     '''
                       SELECT * FROM
                       my_table
@@ -659,7 +659,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                points_aggregated_to_polygons = cc.query(
+                points_aggregated_to_polygons = con.query(
                     '''
                       SELECT polygons.*, sum(points.values)
                       FROM polygons JOIN points
@@ -674,7 +674,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.query(
+                con.query(
                     '''
                       DROP TABLE my_table
                     '''
@@ -684,7 +684,7 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc.query(
+                con.query(
                     '''
                       UPDATE my_table SET my_column = 1
                     '''
@@ -719,8 +719,8 @@ class CartoContext(object):
 
                 import cartoframes
                 from cartoframes import Layer, BaseMap, styling
-                cc = cartoframes.CartoContext(BASEURL, APIKEY)
-                cc.map(layers=[BaseMap(),
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
+                con.map(layers=[BaseMap(),
                                Layer('acadia_biodiversity',
                                      color={'column': 'simpson_index',
                                             'scheme': styling.tealRose(7)}),
@@ -732,7 +732,7 @@ class CartoContext(object):
 
             Create a snapshot of a map at a specific zoom and center::
 
-                cc.map(layers=Layer('acadia_biodiversity',
+                con.map(layers=Layer('acadia_biodiversity',
                                     color='simpson_index'),
                        interactive=False,
                        zoom=14,
@@ -1050,10 +1050,10 @@ class CartoContext(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is espeically useful for getting
-        boundaries for a region and, with :py:meth:`CartoContext.data
-        <cartoframes.context.CartoContext.data>` and
-        :py:meth:`CartoContext.data_discovery
-        <cartoframes.context.CartoContext.data_discovery>`, getting tables of
+        boundaries for a region and, with :py:meth:`Context.data
+        <cartoframes.auth.Context.data>` and
+        :py:meth:`Context.data_discovery
+        <cartoframes.auth.Context.data_discovery>`, getting tables of
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
@@ -1067,8 +1067,8 @@ class CartoContext(object):
             .. code:: python
 
                 import cartoframes
-                cc = cartoframes.CartoContext('base url', 'api key')
-                au_boundaries = cc.data_boundaries(region='Australia')
+                con = cartoframes.auth.Context('base url', 'api key')
+                au_boundaries = con.data_boundaries(region='Australia')
                 au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
@@ -1076,9 +1076,9 @@ class CartoContext(object):
             .. code:: python
 
                 from cartoframes import Layer
-                au_postal_areas = cc.data_boundaries(boundary='au.geo.POA')
-                cc.write(au_postal_areas, 'au_postal_areas')
-                cc.map(Layer('au_postal_areas'))
+                au_postal_areas = con.data_boundaries(boundary='au.geo.POA')
+                con.write(au_postal_areas, 'au_postal_areas')
+                con.map(Layer('au_postal_areas'))
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
@@ -1086,25 +1086,25 @@ class CartoContext(object):
 
             .. code:: python
 
-                cc = cartoframes.CartoContext('base url', 'api key')
+                con = cartoframes.auth.Context('base url', 'api key')
                 # will return DataFrame with columns `the_geom` and `geom_ref`
-                tracts = cc.data_boundaries(
+                tracts = con.data_boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
                 # write geometries to a CARTO table
-                cc.write(tracts, 'idaho_falls_tracts')
+                con.write(tracts, 'idaho_falls_tracts')
                 # gather metadata needed to look up median income
-                median_income_meta = cc.data_discovery(
+                median_income_meta = con.data_discovery(
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
                 # get median income data and original table as new dataframe
-                idaho_falls_income = cc.data(
+                idaho_falls_income = con.data(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
                 # overwrite existing table with newly-enriched dataframe
-                cc.write(idaho_falls_income,
+                con.write(idaho_falls_income,
                          'idaho_falls_tracts',
                          overwrite=True)
 
@@ -1113,8 +1113,8 @@ class CartoContext(object):
               that are of interest. For example, US census tracts have a
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running :py:meth:`CartoContext.data_boundaries
-              <cartoframes.context.CartoContext.data_boundaries>`
+              running :py:meth:`Context.data_boundaries
+              <cartoframes.auth.Context.data_boundaries>`
               without any arguments, or by looking in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
@@ -1242,11 +1242,11 @@ class CartoContext(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        :py:meth:`CartoContext.data <cartoframes.context.CartoContext.data>`.
+        :py:meth:`Context.data <cartoframes.auth.Context.data>`.
         For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `CartoContext.data <cartoframes.context.CartoContext.data>`
+        columns as `Context.data <cartoframes.auth.Context.data>`
         generally needs the full metadata.
 
         .. note::
@@ -1266,7 +1266,7 @@ class CartoContext(object):
 
             .. code::
 
-                meta = cc.data_discovery('European Union',
+                meta = con.data_discovery('European Union',
                                          keywords='freight',
                                          time='2010')
                 print(meta['numer_name'].values)
@@ -1473,8 +1473,8 @@ class CartoContext(object):
     def data(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. Use
-        `CartoContext.data_discovery
-        <#context.CartoContext.data_discovery>`__ to search for available
+        `Context.data_discovery
+        <#Context.data_discovery>`__ to search for available
         measures, or see the full `Data Observatory catalog
         <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
         persist the data as a new table.
@@ -1485,11 +1485,11 @@ class CartoContext(object):
 
             .. code::
 
-                cc = cartoframes.CartoContext(BASEURL, APIKEY)
-                median_income = cc.data_discovery('transaction_events',
+                con = cartoframes.auth.Context(BASEURL, APIKEY)
+                median_income = con.data_discovery('transaction_events',
                                                   regex='.*median income.*',
                                                   time='2011 - 2015')
-                df = cc.data('transaction_events',
+                df = con.data('transaction_events',
                              median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
@@ -1502,14 +1502,14 @@ class CartoContext(object):
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = cc.data('transaction_events', median_income)
+                df = con.data('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
             metadata (pandas.DataFrame): List of all measures to add to
-                `table_name`. See :py:meth:`CartoContext.data_discovery
-                <cartoframes.context.CartoContext.data_discovery>` outputs
+                `table_name`. See :py:meth:`Context.data_discovery
+                <cartoframes.auth.Context.data_discovery>` outputs
                 for a full list of metadata columns.
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
@@ -1699,6 +1699,7 @@ class CartoContext(object):
         if not hasattr(self, '_srcdoc') or self._srcdoc is None:
             html_template = os.path.join(
                 os.path.dirname(__file__),
+                '..',
                 'assets',
                 'cartoframes.html')
             with open(html_template, 'r') as html_file:
