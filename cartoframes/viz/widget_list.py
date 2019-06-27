@@ -12,7 +12,7 @@ class WidgetList(object):
      .. code::
          from cartoframes.viz import Widget
 
-         WidgetList({
+         WidgetList([{
             type: 'formula',
             value: 'viewportSum($amount)'
             title: '...',
@@ -21,13 +21,13 @@ class WidgetList(object):
         }, {
             'type': 'default',
             'value': '"Custom Info"',
-        })
+        }])
     """
 
     def __init__(self, widgets=None):
-        self.widgets = self._initwidgets(widgets)
+        self.widgets = self._init_widgets(widgets)
 
-    def _initwidgets(self, widgets):
+    def _init_widgets(self, widgets):
         if isinstance(widgets, list):
             widget_list = []
             for widget in widgets:
