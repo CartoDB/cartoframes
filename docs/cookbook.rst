@@ -33,7 +33,7 @@ It's a fairly common use case that someone needs the Census tracts for a region.
    missouri_ct = missouri_ct[missouri_ct.geom_refs.str.startswith('29')]
 
    # write to carto
-   con.data_boundaries(missouri_ct, 'missouri_census_tracts')
+   con.write(missouri_ct, 'missouri_census_tracts')
 
    # visualize to make sure it makes sense
    con.map(Layer('missouri_census_tracts'))
@@ -57,7 +57,7 @@ Since `pandas.Series.str.startswith` can take multiple string prefixes, we can f
    ks_mo_counties = ks_mo_counties[ks_mo_counties.geom_refs.str.startswith(('29', '20'))]
 
    # write to carto
-   con.data_boundaries(ks_mo_counties, 'ks_mo_counties')
+   con.write(ks_mo_counties, 'ks_mo_counties')
 
    # visualize to make sure it makes sense
    con.map(Layer('ks_mo_counties'))
@@ -161,7 +161,7 @@ Your new GeoDataFrame will now have geometries decoded into Shapely objects that
    import geopandas as gpd
    con = Context()
 
-   gdf = gpd.GeoDataFrame(c.read('tablename', decode_geom=True))
+   gdf = gpd.GeoDataFrame(con.read('tablename', decode_geom=True))
 
 
 You can reverse this process and have geometries encoded for storage in CARTO by specifying `encode_geom=True` in the `Context.write` operation.
@@ -205,7 +205,7 @@ Sometimes tables are too large to read them out in a single `Context.read` or `C
 
    # read in 100,000 chunks
    for r in range(0, num_rows, 100000):
-       dfs.append(c.query(q.format(lower=r, upper=r+100000)))
+       dfs.append(con.query(q.format(lower=r, upper=r+100000)))
 
    # combine 'em all
    all_together = pd.concat(dfs)
@@ -230,7 +230,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
        api_key='your-api-key'
    )
 
-   bsc = BatchSQLClient(c.auth_client)
+   bsc = BatchSQLClient(con.auth_client)
 
    job = bsc.create(['''
        UPDATE really_big_table
@@ -238,7 +238,7 @@ While not a part of cartoframes yet, `Batch SQL API <https://carto.com/developer
        ''', 
    ])
 
-   bjs = BatchJobStatus(cc, job)
+   bjs = BatchJobStatus(con, job)
    last_status = bjs.status()['status']
 
    while curr_status not in ('failed', 'done', 'canceled', 'unknown'):
