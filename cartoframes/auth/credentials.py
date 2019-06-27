@@ -10,8 +10,7 @@ else:
     from urlparse import urlparse
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
-_DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR,
-                             'cartocreds.json')
+_DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
 
 
 class Credentials(object):
@@ -44,9 +43,9 @@ class Credentials(object):
 
         .. code::
 
-            from cartoframes import Credentials, CartoContext
+            from cartoframes.auth import Credentials, Context
             creds = Credentials(key='abcdefg', username='eschbacher')
-            cc = CartoContext(creds=creds)
+            cc = Context(creds=creds)
 
     """
 

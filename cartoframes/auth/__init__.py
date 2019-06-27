@@ -2,8 +2,8 @@
 It also includes the utility method set_default_context."""
 from __future__ import absolute_import
 
-from ..credentials import Credentials
-from ..context import CartoContext as Context
+from .context import Context
+from .credentials import Credentials
 
 _default_context = None
 
@@ -93,5 +93,6 @@ def set_default_context(first=None, second=None, base_url=None, api_key=None, co
 
 __all__ = [
     'Context',
+    'Credentials',
     'set_default_context'
 ]
