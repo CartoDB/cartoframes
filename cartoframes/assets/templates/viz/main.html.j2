@@ -125,6 +125,10 @@
       text-decoration: none;
     }
 
+    .map-footer a:hover {
+      text-decoration: underline;
+    }
+
     as-widget-header .as-widget-header__header {
       margin-bottom: 8px;
     }
@@ -159,7 +163,9 @@
     </main> <!-- as-main -->
   </as-responsive-content>
 
-  {% include 'viz/footer.html.j2' %}
+  {% if is_embed %}
+    {% include 'viz/footer.html.j2' %}
+  {% endif %}
 
   {% include 'error/basic.html.j2' %}
 
