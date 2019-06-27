@@ -2,8 +2,6 @@
 
 import unittest
 
-from carto.exceptions import CartoException
-
 from cartoframes.viz import Map, Layer, Source
 
 from mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD

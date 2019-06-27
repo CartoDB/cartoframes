@@ -602,9 +602,9 @@ class Dataset(object):
     def _create_table_from_query(self):
         self._c.batch_sql_client.create_and_wait_for_completion(
             '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                .format(drop=self._drop_table_query(),
-                        create=self._get_query_to_create_table_from_query(),
-                        cartodbfy=self._cartodbfy_query()))
+            .format(drop=self._drop_table_query(),
+                    create=self._get_query_to_create_table_from_query(),
+                    cartodbfy=self._cartodbfy_query()))
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)

@@ -132,7 +132,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
         if self.apikey and self.baseurl:
             c = Context(base_url=self.baseurl,
-                                          api_key=self.apikey)
+                        api_key=self.apikey)
             for table in tables:
                 try:
                     c.delete(table)
@@ -150,21 +150,21 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context(self):
         """Context.__init__ normal usage"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         self.assertEqual(c.creds.key(), self.apikey)
         self.assertEqual(c.creds.base_url(), self.baseurl.strip('/'))
         self.assertEqual(c.creds.username(), self.username)
         self.assertTrue(not c.is_org)
         with self.assertRaises(CartoException):
             Context(base_url=self.baseurl,
-                                     api_key='notavalidkey')
+                    api_key='notavalidkey')
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_Context_credentials(self):
         """Context.__init__ Credentials argument"""
         creds = Credentials(base_url=self.baseurl,
-                                        username=self.username,
-                                        key=self.apikey)
+                            username=self.username,
+                            key=self.apikey)
         c = Context(creds=creds)
         self.assertIsInstance(c, Context)
         self.assertEqual(c.creds.username(), self.username)
@@ -172,8 +172,8 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
         # Context pulls from saved credentials
         saved_creds = Credentials(base_url=self.baseurl,
-                                              username=self.username,
-                                              key=self.apikey)
+                                  username=self.username,
+                                  key=self.apikey)
         saved_creds.save()
         c_saved = Context()
         self.assertEqual(c_saved.creds.key(), self.apikey)
@@ -200,7 +200,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_read(self):
         """Context.read"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         # fails if limit is smaller than zero
         with self.assertRaises(ValueError):
             df = c.read(self.test_read_table, limit=-10)
@@ -232,7 +232,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
     def test_Context_read_with_same_schema(self):
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         df = pd.DataFrame({'fips': ['01'],
                            'cfips': ['0001'],
                            'intval': [1],
@@ -258,8 +258,8 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_Context_write(self):
         """Context.write normal usage"""
-        c= Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+        c = Context(base_url=self.baseurl,
+                    api_key=self.apikey)
         data = {'nums': list(range(100, 0, -1)),
                 'category': [random.choice('abcdefghijklmnop')
                              for _ in range(100)],
@@ -295,8 +295,8 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
         # overwrite table and create the_geom column
         c.write(df, self.test_write_table,
-                 overwrite=True,
-                 lnglat=('long', 'lat'))
+                overwrite=True,
+                lnglat=('long', 'lat'))
 
         resp = self.sql_client.send('''
             SELECT count(*) AS num_rows, count(the_geom) AS num_geoms
@@ -312,7 +312,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         c.write(df, self.test_write_table, overwrite=True)
         schema = c.sql_client.send('select ids, vals from {}'.format(
             self.test_write_table))['fields']
-        self.assertSetEqual(set([schema[c]['type'] for c in schema]),
+        self.assertSetEqual(set([schema[s]['type'] for s in schema]),
                             set(('string', )))
 
         df = pd.DataFrame({'vals': list('abcd'),
@@ -357,7 +357,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_write_index(self):
         """Context.write with non-default index"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         df = pd.DataFrame({'vals': range(3), 'ids': list('abc')},
                           index=list('xyz'))
         df.index.name = 'named_index'
@@ -372,7 +372,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_mixed_case(self):
         """Context.write table name mixed case"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         data = pd.DataFrame({'a': [1, 2, 3],
                              'B': list('abc')})
         c.write(pd.DataFrame(data), self.mixed_case_table, overwrite=True)
@@ -380,7 +380,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_delete(self):
         """Context.delete"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         data = {'col1': [1, 2, 3],
                 'col2': ['a', 'b', 'c']}
         df = pd.DataFrame(data)
@@ -408,14 +408,14 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_cartoframes_sync(self):
         """Context.sync"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         self.assertIsNone(c.sync(pd.DataFrame(), 'acadia'))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_query(self):
         """Context.query"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         columns = (Column('link', pgtype='string'),
                    Column('body', pgtype='string'),
                    Column('displayname', pgtype='string'),
@@ -509,7 +509,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_fetch(self):
         """Context.fetch"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         columns = (Column('link', pgtype='string'),
                    Column('body', pgtype='string'),
@@ -552,7 +552,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_fetch_empty(self):
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         # empty response
         df_empty = c.fetch('''
@@ -569,7 +569,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_fetch_with_cte(self):
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         df = c.fetch('''
             WITH cte AS (
@@ -604,7 +604,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_fetch_with_decode_geom(self):
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         df = c.fetch('''
             SELECT CDB_LatLng(0.1, 0) as the_geom, i
@@ -638,7 +638,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_fetch_with_exception(self):
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         # see what happens if a query fails after 100 successful rows
         with self.assertRaises(CartoException):
@@ -658,7 +658,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_execute(self):
         """Context.execute"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         df = pd.DataFrame({'vals': list('abcd'), 'ids': list('wxyz')})
         df = df.astype({'vals': str, 'ids': str})
@@ -676,7 +676,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_execute_wrong_query(self):
         """Context.execute"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         with self.assertRaises(CartoException):
             c.execute('''
@@ -731,7 +731,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
         # test with two Layers
         two_layers = c.map(layers=[Layer('tweets_obama'),
-                                    Layer(self.test_read_table)])
+                                   Layer(self.test_read_table)])
 
         self.assertIsInstance(two_layers, IPython.core.display.HTML)
 
@@ -740,17 +740,17 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
                                                 SELECT *
                                                 FROM tweets_obama
                                                 LIMIT 100'''),
-                                           Layer(self.test_read_table)])
+                                          Layer(self.test_read_table)])
 
         self.assertIsInstance(onelayer_onequery, IPython.core.display.HTML)
 
         # test with BaseMap, Layer, QueryLayer
         c.map(layers=[BaseMap('light'),
-                       QueryLayer('''
+                      QueryLayer('''
                                SELECT *
                                FROM tweets_obama
                                LIMIT 100''', color='favoritescount'),
-                       Layer(self.test_read_table)])
+                      Layer(self.test_read_table)])
 
         # Errors
         # too many layers
@@ -769,7 +769,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         # only one time layer can be added
         with self.assertRaises(ValueError):
             c.map(layers=[Layer(self.test_read_table, time='cartodb_id'),
-                           Layer(self.test_read_table, time='cartodb_id')])
+                          Layer(self.test_read_table, time='cartodb_id')])
 
         # no geometry
         with self.assertRaises(ValueError):
@@ -786,28 +786,28 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context.map time options"""
         from cartoframes import Layer
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         html_map = c.map(layers=Layer(self.test_point_table,
-                                       time='cartodb_id'))
+                                      time='cartodb_id'))
         self.assertIsInstance(html_map, IPython.core.display.HTML)
 
         # category map
         cat_map = c.map(layers=Layer(self.test_point_table,
-                                      time='actor_postedtime',
-                                      color='twitter_lang'))
+                                     time='actor_postedtime',
+                                     color='twitter_lang'))
         self.assertRegexpMatches(cat_map.__html__(), '.*CDB_Math_Mode\(cf_value_twitter_lang\).*')
 
         with self.assertRaises(
                 ValueError,
                 msg='cannot create static torque maps currently'):
             c.map(layers=Layer(self.test_point_table, time='cartodb_id'),
-                   interactive=False)
+                  interactive=False)
 
         with self.assertRaises(
                 ValueError,
                 msg='cannot have more than one torque layer'):
             c.map(layers=[Layer(self.test_point_table, time='cartodb_id'),
-                           Layer(self.test_point_table, color='cartodb_id')])
+                          Layer(self.test_point_table, color='cartodb_id')])
 
         with self.assertRaises(
                 ValueError,
@@ -819,7 +819,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context.map basemap geometry type defaults"""
         from cartoframes import Layer, QueryLayer
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         # baseid1 = dark, labels1 = labels on top in named map name
         labels_polygon = c.map(layers=Layer(self.test_read_table))
@@ -836,7 +836,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
                                      'point layer is present')
 
         labels_multi = c.map(layers=[Layer(self.test_point_table),
-                                      Layer(self.test_read_table)])
+                                     Layer(self.test_read_table)])
         self.assertRegexpMatches(labels_multi.__html__(),
                                  '.*baseid2_labels0.*',
                                  msg='labels should be on bottom because a '
@@ -866,7 +866,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context._get_bounds"""
         from cartoframes.layer import QueryLayer
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         vals1 = {'minx': 0,
                  'maxx': 1,
                  'miny': 0,
@@ -907,7 +907,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_Context_check_query(self):
         """Context._check_query"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         # this table does not exist in this account
         fail_query = '''
             SELECT *
@@ -931,8 +931,8 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_debug_print(self):
         """_debug_print"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey,
-                                      verbose=True)
+                    api_key=self.apikey,
+                    verbose=True)
         # request-response usage
         resp = requests.get('http://httpbin.org/get')
         c._debug_print(resp=resp)
@@ -946,14 +946,14 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
         # verbose = False test
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey,
-                                      verbose=False)
+                    api_key=self.apikey,
+                    verbose=False)
         self.assertIsNone(c._debug_print(resp=test_str))
 
     def test_data_boundaries(self):
         """Context.data_boundaries"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         # all boundary metadata
         boundary_meta = c.data_boundaries()
@@ -1018,11 +1018,11 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_data_discovery(self):
         """Context.data_discovery"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         meta = c.data_discovery(self.test_read_table,
-                                 keywords=('poverty', ),
-                                 time=('2010 - 2014', ))
+                                keywords=('poverty', ),
+                                time=('2010 - 2014', ))
         meta_columns = set((
             'denom_aggregate', 'denom_colname', 'denom_description',
             'denom_geomref_colname', 'denom_id', 'denom_name',
@@ -1052,7 +1052,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dd['numer_id'][0], 'eu.eurostat.tgs00078')
 
         dd = c.data_discovery('Australia',
-                               regex='.*Torres Strait Islander.*')
+                              regex='.*Torres Strait Islander.*')
         for nid in dd['numer_id'].values:
             self.assertRegexpMatches(nid, '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
 
@@ -1060,8 +1060,8 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
             c.data_discovery('non_existent_table_abcdefg')
 
         dd = c.data_discovery('United States',
-                               boundaries='us.epa.huc.hydro_unit',
-                               time=('2006', '2010', ))
+                              boundaries='us.epa.huc.hydro_unit',
+                              time=('2006', '2010', ))
         self.assertTrue(dd.shape[0] >= 1)
 
         poverty = c.data_discovery(
@@ -1085,11 +1085,11 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
     def test_data(self):
         """Context.data"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         meta = c.data_discovery(self.test_read_table,
-                                 keywords=('poverty', ),
-                                 time=('2010 - 2014', ))
+                                keywords=('poverty', ),
+                                time=('2010 - 2014', ))
         data = c.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(c.read(self.test_data_table, limit=1, decode_geom=True).columns)
@@ -1109,17 +1109,17 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError, msg='too many metadata measures'):
             # returns ~180 measures
             meta = c.data_discovery(region='united states',
-                                     keywords='education')
+                                    keywords='education')
             c.data(self.test_read_table, meta)
 
     def test_data_with_persist_as(self):
         """Context.data"""
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
 
         meta = c.data_discovery(self.test_read_table,
-                                 keywords=('poverty', ),
-                                 time=('2010 - 2014', ))
+                                keywords=('poverty', ),
+                                time=('2010 - 2014', ))
         data = c.data(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(c.read(self.test_data_table, limit=1, decode_geom=True).columns)
@@ -1178,9 +1178,9 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         )
 
         c = Context(base_url=self.baseurl,
-                                      api_key=self.apikey)
+                    api_key=self.apikey)
         meta = c.data_discovery(region=self.test_write_table,
-                                 keywords='female')
+                                keywords='female')
         meta = meta[meta.suggested_name == dup_col]
         data = c.data(
             self.test_write_table,

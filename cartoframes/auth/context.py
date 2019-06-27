@@ -27,7 +27,7 @@ from ..dataobs import get_countrytag
 from .. import utils
 from ..layer import BaseMap, AbstractLayer
 from ..maps import (non_basemap_layers, get_map_name,
-                   get_map_template, top_basemap_layer_url)
+                    get_map_template, top_basemap_layer_url)
 from ..analysis import Table
 from ..__version__ import __version__
 from ..columns import dtypes, date_columns_names, bool_columns_names
