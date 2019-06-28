@@ -98,14 +98,6 @@ def _compute_geometry_from_geom(geom):
     return geom.apply(lambda g: decode_geometry(g, enc_type))
 
 
-def _first_value(array):
-    array = array.loc[~array.isnull()]  # Remove null values
-    if len(array) > 0:
-        return array.iloc[0]
-    else:
-        warn('Dataset with null geometries')
-
-
 def _compute_geometry_from_latlng(lat, lng):
     from shapely import geometry
     return [geometry.Point(xy) for xy in zip(lng, lat)]
