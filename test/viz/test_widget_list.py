@@ -64,8 +64,8 @@ class TestWidgetList(unittest.TestCase):
         """WidgetList should be properly initialized"""
 
         widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
+            Widget(widget_a),
+            Widget(widget_b)
         ])
 
         self.assertTrue(isinstance(widget_list.widgets[0], Widget))
@@ -74,8 +74,8 @@ class TestWidgetList(unittest.TestCase):
     def test_widget_list_variables(self):
         """Widget List should return a proper variables object"""
         widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
+            Widget(widget_a),
+            Widget(widget_b)
         ])
 
         variables = widget_list.get_variables()
@@ -94,24 +94,24 @@ class TestWidgetList(unittest.TestCase):
         """Widget List should return a proper widgets info object"""
 
         widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
+            Widget(widget_a),
+            Widget(widget_b)
         ])
 
         widgets_info = widget_list.get_widgets_info()
         self.assertEqual(widgets_info, [
-          {
-            'type': 'formula',
-            'name': 'vb6dbcf',
-            'value': 'viewportSum($amount)',
-            'title': '[TITLE]',
-            'description': '[description]',
-            'footer': '[footer]'
-          }, {
-            'type': 'default',
-            'name': 'v76441e',
-            'value': '"Custom Info"',
-            'title': '',
-            'description': '',
-            'footer': ''
-          }])
+            {
+                'type': 'formula',
+                'name': 'vb6dbcf',
+                'value': 'viewportSum($amount)',
+                'title': '[TITLE]',
+                'description': '[description]',
+                'footer': '[footer]'
+            }, {
+                'type': 'default',
+                'name': 'v76441e',
+                'value': '"Custom Info"',
+                'title': '',
+                'description': '',
+                'footer': ''
+            }])

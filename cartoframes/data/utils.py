@@ -170,7 +170,7 @@ def detect_encoding_type(input_geom):
         result = re.match(r'^SRID=\d+;(.*)$', input_geom)
         prefix = 'e' if result else ''
         geom = result.group(1) if result else input_geom
-    
+
         if re.match(r'^[0-9a-fA-F]+$', geom):
             return prefix + ENC_WKB_HEX_ASCII
         elif geom != '':
