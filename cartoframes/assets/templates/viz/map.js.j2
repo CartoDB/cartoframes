@@ -97,6 +97,7 @@ function onReady() {
         widget.element = document.querySelector(`#layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`);
       });
 
+      // TODO Move to widgets.js
       const bridge = new AsBridge.VL.Bridge({
         carto: carto,
         layer: mapLayer,
@@ -110,6 +111,9 @@ function onReady() {
           switch (widget.type) {
             case 'histogram':
               bridge.histogram(widget.element, widget.value, widget.options);
+              break;
+            case 'category':
+              bridge.category(widget.element, widget.value, widget.options);
               break;
           }
         });

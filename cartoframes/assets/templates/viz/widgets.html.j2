@@ -28,6 +28,12 @@
       description="{{widget.description}}"
       heading="{{widget.title}}">
     </as-histogram-widget>
+  {% elif widget.type == 'category' %}
+    <as-category-widget
+      id="{{id}}-{{widget.name}}"
+      description="{{widget.description}}"
+      heading="{{widget.title}}">
+    </as-category-widget>
   {% endif %}
 {%- endmacro %}
 
