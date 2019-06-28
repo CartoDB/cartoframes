@@ -4,7 +4,7 @@
 import unittest
 from collections import OrderedDict
 
-from cartoframes.utils import (dict_items, cssify, importify_params)
+from cartoframes.utils import (dict_items, cssify, importify_params, snake_to_camel, camel_dictionary)
 
 
 class TestUtils(unittest.TestCase):
@@ -136,3 +136,19 @@ class TestUtils(unittest.TestCase):
         }
         for i in results:
             self.assertEqual(dtypes2pg(i), results[i])
+
+    def test_snake_to_camel(self):
+        self.assertEqual(snake_to_camel('sneaky_snake'), 'sneakySnake')
+        self.assertEqual(snake_to_camel('coolCamel'), 'coolCamel')
+        self.assertEqual(snake_to_camel('kinky-kebab'), 'kinky-kebab')
+    
+    def test_camel_dictionary(self):
+        test_dictionary = { 'sneaky_snake': 'fang', 'coolCamel': 'hunch', 'kinky-kebab': 'spice' }
+
+        camel_dictionary(test_dictionary)
+
+        self.assertEqual(test_dictionary['sneakySnake'], 'fang')
+        self.assertEqual(test_dictionary['coolCamel'], 'hunch')
+        self.assertEqual(test_dictionary['kinky-kebab'], 'spice')
+        with self.assertRaises(KeyError):
+            self.assertEqual(test_dictionary['sneaky-snake'], None)
