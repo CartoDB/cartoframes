@@ -97,10 +97,31 @@ function onReady() {
         widget.element = document.querySelector(`#layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`);
       });
 
+      const bridge = new AsBridge.VL.Bridge({
+        carto: carto,
+        layer: mapLayer,
+        source: mapSource,
+        map: map
+      });
+
+      layer.widgets
+        .filter((widget) => !widget.has_variable)
+        .forEach((widget) => {
+          switch (widget.type) {
+            case 'histogram':
+              bridge.histogram(widget.element, widget.value, widget.options);
+              break;
+          }
+        });
+
+      bridge.build();
+
       mapLayer.on('updated', () => {
-        layer.widgets.forEach((widget, widgetIndex) => {
-          renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
-        })
+        layer.widgets
+          .filter((widget) => widget.has_variable)
+          .forEach((widget, widgetIndex) => {
+            renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+          })
       });
     }
   });
