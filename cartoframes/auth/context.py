@@ -32,7 +32,7 @@ from ..analysis import Table
 from ..__version__ import __version__
 from ..columns import dtypes, date_columns_names, bool_columns_names
 from ..data import Dataset
-from ..data.utils import decode_geometry, recursive_read, get_columns
+from ..data.utils import decode_geometry, ENC_WKB_HEX, recursive_read, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -521,7 +521,7 @@ class Context(object):
         date_column_names = date_columns_names(query_columns)
         bool_column_names = bool_columns_names(query_columns)
 
-        converters = {'the_geom': lambda x: decode_geometry(x) if decode_geom else x}
+        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_HEX) if decode_geom else x}
         for bool_column_name in bool_column_names:
             converters[bool_column_name] = lambda x: _convert_bool(x)
 

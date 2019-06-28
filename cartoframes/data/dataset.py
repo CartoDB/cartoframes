@@ -6,8 +6,8 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES, \
-    get_public_context
+from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
+    get_columns, get_public_context, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -578,7 +578,8 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                geom = decode_geometry(the_geom_val)
+                enc_type = detect_encoding_type(the_geom_val)
+                geom = decode_geometry(the_geom_val, enc_type)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
             if with_lnglat is not None and lng_val is not None and lat_val is not None:
@@ -806,9 +807,12 @@ def _get_geom_col_name(df):
 def _get_geom_col_type(df):
     geom_col = _get_geom_col_name(df)
     if geom_col is not None:
-        geom = decode_geometry(_first_value(df[geom_col]))
-        if geom is not None:
-            return geom.geom_type
+        first_geom = _first_value(df[geom_col])
+        if first_geom:
+            enc_type = detect_encoding_type(first_geom)
+            geom = decode_geometry(first_geom, enc_type)
+            if geom is not None:
+                return geom.geom_type
 
 
 def _first_value(array):

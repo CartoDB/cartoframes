@@ -39,6 +39,14 @@ LNG_COLUMN_NAMES = [
     'long'
 ]
 
+ENC_SHAPELY = 'shapely'
+ENC_WKB = 'wkb'
+ENC_WKB_HEX = 'wkb-hex'
+ENC_WKB_HEX_ASCII = 'wkb-hex-ascii'
+ENC_EWKB_HEX_ASCII = 'ewkb-hex-ascii'
+ENC_WKT = 'wkt'
+ENC_EWKT = 'ewkt'
+
 
 def compute_query(dataset):
     if dataset.table_name:
@@ -85,9 +93,17 @@ def _warn_new_geometry_column(df):
 
 
 def _compute_geometry_from_geom(geom):
-    first_el = geom[0]
-    enc_type = detect_encoding_type(first_el)
+    first_geom = next(item for item in geom if item is not None)
+    enc_type = detect_encoding_type(first_geom)
     return geom.apply(lambda g: decode_geometry(g, enc_type))
+
+
+def _first_value(array):
+    array = array.loc[~array.isnull()]  # Remove null values
+    if len(array) > 0:
+        return array.iloc[0]
+    else:
+        warn('Dataset with null geometries')
 
 
 def _compute_geometry_from_latlng(lat, lng):
@@ -116,42 +132,39 @@ def decode_geometry(geom, enc_type):
     from shapely import wkt
 
     func = {
-        'shapely': lambda: geom,
-        'wkb': lambda: wkb.loads(geom),
-        'wkb-hex': lambda: wkb.loads(ba.unhexlify(geom)),
-        'wkb-hex-ascii': lambda: wkb.loads(geom, hex=True),
-        'ewkb-hex-ascii': lambda: wkb.loads(_remove_srid(geom), hex=True),
-        'wkt': lambda: wkt.loads(geom),
-        'ewkt': lambda: wkt.loads(_remove_srid(geom))
+        ENC_SHAPELY: lambda: geom,
+        ENC_WKB: lambda: wkb.loads(geom),
+        ENC_WKB_HEX: lambda: wkb.loads(ba.unhexlify(geom)),
+        ENC_WKB_HEX_ASCII: lambda: wkb.loads(geom, hex=True),
+        ENC_EWKB_HEX_ASCII: lambda: wkb.loads(_remove_srid(geom), hex=True),
+        ENC_WKT: lambda: wkt.loads(geom),
+        ENC_EWKT: lambda: wkt.loads(_remove_srid(geom))
     }.get(enc_type)
 
-    if func:
-        return func()
-    else:
-        raise ValueError('Encoding type "{}" not supported'.format(enc_type))
+    return func() if func else geom
 
 
 def detect_encoding_type(input_geom):
     """
     Detect geometry encoding type:
-    - 'wkb': b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
-    - 'wkb-hex': b'0101000000000000000048934000000000009db640'
-    - 'wkb-hex-ascii': '0101000000000000000048934000000000009db640'
-    - 'ewkb-hex-ascii': 'SRID=4326;0101000000000000000048934000000000009db640'
-    - 'wkt': 'POINT (1234 5789)'
-    - 'ewkt': 'SRID=4326;POINT (1234 5789)'
+    - ENC_WKB: b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
+    - ENC_WKB_HEX: b'0101000000000000000048934000000000009db640'
+    - ENC_WKB_HEX_ASCII: '0101000000000000000048934000000000009db640'
+    - ENC_EWKB_HEX_ASCII: 'SRID=4326;0101000000000000000048934000000000009db640'
+    - ENC_WKT: 'POINT (1234 5789)'
+    - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
     from shapely.geometry.base import BaseGeometry
 
     if isinstance(input_geom, BaseGeometry):
-        return 'shapely'
+        return ENC_SHAPELY
 
     if isinstance(input_geom, bytes):
         try:
             ba.unhexlify(input_geom)
-            return 'wkb-hex'
+            return ENC_WKB_HEX
         except Exception:
-            return 'wkb'
+            return ENC_WKB
 
     if isinstance(input_geom, str):
         result = re.match(r'^SRID=\d+;(.*)$', input_geom)
@@ -159,11 +172,9 @@ def detect_encoding_type(input_geom):
         geom = result.group(1) if result else input_geom
     
         if re.match(r'^[0-9a-fA-F]+$', geom):
-            return prefix + 'wkb-hex-ascii'
-        else:
-            return prefix + 'wkt'
-    
-    raise ValueError('Wrong input geometry.')
+            return prefix + ENC_WKB_HEX_ASCII
+        elif geom != '':
+            return prefix + ENC_WKT
 
 
 def _remove_srid(text):
