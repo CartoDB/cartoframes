@@ -122,6 +122,9 @@
 
 <body class="as-app-body as-app">
   <as-responsive-content>
+    {% if has_widgets %}
+      {% include 'viz/widgets.html.j2' %}
+    {% endif %}
     <main class="as-main">
       <div class="as-map-area">
         <div id="map"></div>
@@ -132,11 +135,6 @@
           <div class="as-panel as-panel--left as-panel--top">
             {% if has_legends %}
               {% include 'viz/legends.html.j2' %}
-            {% endif %}
-          </div> <!-- as-panel -->
-          <div class="as-panel as-panel--right as-panel--top">
-            {% if has_widgets %}
-              {% include 'viz/widgets.html.j2' %}
             {% endif %}
           </div> <!-- as-panel -->
         </div> <!-- as-map-panels -->

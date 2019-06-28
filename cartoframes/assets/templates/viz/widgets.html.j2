@@ -23,13 +23,15 @@
   </section>
 {%- endmacro %}
 
-<div class="as-panel__element as-px--16 as-pt--8 as-pb--8" id="widgets">
+<aside class="as-sidebar as-sidebar--right" id="widgets" data-name="Widgets">
   {% for layer in layers|reverse %}
     {% if layer.widgets %}
       {% set outer_loop = loop %}
         {% for widget in layer.widgets %}
+          <div class="as-box">
           {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
+          </div>
         {% endfor %}
     {% endif %}
   {% endfor %}
-</div>
+</aside>
