@@ -145,3 +145,38 @@ class TestDataUtils(unittest.TestCase):
     def test_detect_encoding_type_ewkt(self):
         enc_type = detect_encoding_type('SRID=4326;POINT (1234 5789)')
         self.assertEqual(enc_type, 'ewkt')
+
+    def test_decode_geometry_shapely(self):
+        geom = decode_geometry(Point(1234, 5789), 'shapely')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_wkb(self):
+        geom = decode_geometry(b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', 'wkb')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_wkb_hex(self):
+        geom = decode_geometry(b'0101000000000000000048934000000000009db640', 'wkb-hex')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_wkb_hex_ascii(self):
+        geom = decode_geometry('0101000000000000000048934000000000009db640', 'wkb-hex-ascii')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_ewkb_hex_ascii(self):
+        geom = decode_geometry('SRID=4326;0101000000000000000048934000000000009db640', 'ewkb-hex-ascii')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_wkt(self):
+        geom = decode_geometry('POINT (1234 5789)', 'wkt')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
+
+    def test_decode_geometry_ewkt(self):
+        geom = decode_geometry('SRID=4326;POINT (1234 5789)', 'ewkt')
+        expected_geom = Point(1234, 5789)
+        self.assertEqual(str(geom), str(expected_geom))
