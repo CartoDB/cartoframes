@@ -118,6 +118,7 @@ def merge_dicts(dict1, dict2):
 def text_match(regex, text):
     return len(re.findall(regex, text, re.MULTILINE)) > 0
 
+
 def camel_dictionary(dictionary):
     snake_keys = filter(in_snake_case, dictionary.keys())
 
@@ -126,12 +127,14 @@ def camel_dictionary(dictionary):
 
     return dictionary
 
+
 # https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase
 def snake_to_camel(snake_str):
     components = snake_str.split('_')
     # We capitalize the first letter of each component except the first one
     # with the 'title' method and join them together.
     return components[0] + ''.join(x.title() for x in components[1:])
+
 
 def in_snake_case(str):
     return str.find('_') != -1

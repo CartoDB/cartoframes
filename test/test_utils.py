@@ -141,9 +141,9 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(snake_to_camel('sneaky_snake'), 'sneakySnake')
         self.assertEqual(snake_to_camel('coolCamel'), 'coolCamel')
         self.assertEqual(snake_to_camel('kinky-kebab'), 'kinky-kebab')
-    
+
     def test_camel_dictionary(self):
-        test_dictionary = { 'sneaky_snake': 'fang', 'coolCamel': 'hunch', 'kinky-kebab': 'spice' }
+        test_dictionary = {'sneaky_snake': 'fang', 'coolCamel': 'hunch', 'kinky-kebab': 'spice'}
 
         camel_dictionary(test_dictionary)
 
