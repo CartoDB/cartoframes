@@ -5,6 +5,14 @@ function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
 
   if (widget.type === 'formula') {
     element.innerText = format(variable.value);
+  } else if (widget.type === 'animation') {
+    AsBridge.VL.animationControls(
+      element,
+      layer,
+      {
+        'as-animation-controls-widget', widget.column, { variableName: widget._name }
+      }
+    );
   } else {
     element.innerText = variable ? variable.value : widget.value;
   }
