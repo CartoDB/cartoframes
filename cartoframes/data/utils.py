@@ -1,3 +1,4 @@
+import re
 import time
 import binascii as ba
 from warnings import warn
@@ -107,31 +108,62 @@ def _encode_decode_decorator(func):
 
 
 @_encode_decode_decorator
-def decode_geometry(ewkb):
-    """Decode encoded wkb into a shapely geometry"""
-    # it's already a shapely object
-    if hasattr(ewkb, 'geom_type'):
-        return ewkb
-
+def decode_geometry(geom, enc_type):
+    """Decode any geometry into a shapely geometry"""
     from shapely import wkb
     from shapely import wkt
-    if ewkb:
+
+    func = {
+        'shapely': lambda: geom,
+        'wkb': lambda: wkb.loads(geom),
+        'wkb-hex': lambda: wkb.loads(ba.unhexlify(geom)),
+        'wkb-hex-ascii': lambda: wkb.loads(geom, hex=True),
+        'ewkb-hex-ascii': lambda: wkb.loads(_remove_srid(geom), hex=True),
+        'wkt': lambda: wkt.loads(geom),
+        'ewkt': lambda: wkt.loads(_remove_srid(geom))
+    }.get(enc_type)
+
+    return func() if func else geom
+
+
+def detect_encoding_type(input_geom):
+    """
+    Detect geometry encoding type:
+    - 'wkb': b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
+    - 'wkb-hex': b'0101000000000000000048934000000000009db640'
+    - 'wkb-hex-ascii': '0101000000000000000048934000000000009db640'
+    - 'ewkb-hex-ascii': 'SRID=4326;0101000000000000000048934000000000009db640'
+    - 'wkt': 'POINT (1234 5789)'
+    - 'ewkt': 'SRID=4326;POINT (1234 5789)'
+    """
+    from shapely.geometry.base import BaseGeometry
+
+    if isinstance(input_geom, BaseGeometry):
+        return 'shapely'
+
+    if isinstance(input_geom, bytes):
         try:
-            return wkb.loads(ba.unhexlify(ewkb))
+            ba.unhexlify(input_geom)
+            return 'wkb-hex'
         except Exception:
-            try:
-                return wkb.loads(ba.unhexlify(ewkb), hex=True)
-            except Exception:
-                try:
-                    return wkb.loads(ewkb, hex=True)
-                except Exception:
-                    try:
-                        return wkb.loads(ewkb)
-                    except Exception:
-                        try:
-                            return wkt.loads(ewkb)
-                        except Exception:
-                            pass
+            return 'wkb'
+
+    if isinstance(input_geom, str):
+        result = re.match('^SRID=d+;(.*)$', input_geom)
+        prefix = 'e' if result else ''
+        geom = result.group(1) if result else input_geom
+    
+        if re.match('^[0-9a-fA-F]+$', geom):
+            return prefix + 'wkb-hex-ascii'
+        else:
+            return prefix + 'wkt'
+    
+    raise ValueError('Wrong input geometry.')
+
+
+def _remove_srid(text):
+    result = re.match('^SRID=d+;(.*)$', text)
+    return result.group(1) if result else text
 
 
 def recursive_read(context, query, retry_times=DEFAULT_RETRY_TIMES):
