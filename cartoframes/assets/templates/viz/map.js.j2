@@ -88,9 +88,11 @@ function onReady() {
       interactiveMapLayers.push(mapLayer);
     }
 
+    {% if has_legends %}
     if (layer.legend) {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
+    {% endif %}
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {

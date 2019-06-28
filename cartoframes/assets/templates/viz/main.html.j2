@@ -131,13 +131,13 @@
         {% if show_info %}
           {% include 'viz/info.html.j2' %}
         {% endif %}
-        <div class="as-map-panels">
-          <div class="as-panel as-panel--left as-panel--top">
-            {% if has_legends %}
+        {% if has_legends %}
+          <div class="as-map-panels" data-name="Legends">
+            <div class="as-panel as-panel--left as-panel--top">
               {% include 'viz/legends.html.j2' %}
-            {% endif %}
-          </div> <!-- as-panel -->
-        </div> <!-- as-map-panels -->
+            </div> <!-- as-panel -->
+          </div> <!-- as-map-panels -->
+        {% endif %}
       </div> <!-- as-map-area -->
     </main> <!-- as-main -->
   </as-responsive-content>
