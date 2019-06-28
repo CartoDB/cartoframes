@@ -63,10 +63,14 @@ class Widget(object):
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer,
+                'has_variable': self.has_variable(),
                 'options': self._options
             }
         else:
             return {}
+
+    def has_variable(self):
+        return self._type == 'formula'
 
     def _check_type(self):
         if self._type and self._type not in constants.WIDGET_TYPES:
