@@ -106,12 +106,16 @@ class TestWidgetList(unittest.TestCase):
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
             'description': '[description]',
-            'footer': '[footer]'
+            'footer': '[footer]',
+            'has_variable': True,
+            'options': {}
           }, {
             'type': 'default',
             'name': 'v76441e',
             'value': '"Custom Info"',
             'title': '',
             'description': '',
-            'footer': ''
+            'footer': '',
+            'has_variable': False,
+            'options': {}
           }])
