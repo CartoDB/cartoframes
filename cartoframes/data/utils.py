@@ -85,7 +85,9 @@ def _warn_new_geometry_column(df):
 
 
 def _compute_geometry_from_geom(geom):
-    return geom.apply(decode_geometry)
+    first_el = geom[0]
+    enc_type = detect_encoding_type(first_el)
+    return geom.apply(lambda g: decode_geometry(g, enc_type))
 
 
 def _compute_geometry_from_latlng(lat, lng):
@@ -123,7 +125,10 @@ def decode_geometry(geom, enc_type):
         'ewkt': lambda: wkt.loads(_remove_srid(geom))
     }.get(enc_type)
 
-    return func() if func else geom
+    if func:
+        return func()
+    else:
+        raise ValueError('Encoding type "{}" not supported'.format(enc_type))
 
 
 def detect_encoding_type(input_geom):
@@ -149,11 +154,11 @@ def detect_encoding_type(input_geom):
             return 'wkb'
 
     if isinstance(input_geom, str):
-        result = re.match('^SRID=d+;(.*)$', input_geom)
+        result = re.match(r'^SRID=\d+;(.*)$', input_geom)
         prefix = 'e' if result else ''
         geom = result.group(1) if result else input_geom
     
-        if re.match('^[0-9a-fA-F]+$', geom):
+        if re.match(r'^[0-9a-fA-F]+$', geom):
             return prefix + 'wkb-hex-ascii'
         else:
             return prefix + 'wkt'
@@ -162,7 +167,7 @@ def detect_encoding_type(input_geom):
 
 
 def _remove_srid(text):
-    result = re.match('^SRID=d+;(.*)$', text)
+    result = re.match(r'^SRID=\d+;(.*)$', text)
     return result.group(1) if result else text
 
 

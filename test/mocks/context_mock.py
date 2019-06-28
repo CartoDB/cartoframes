@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 class CredsMock():
     def __init__(self, key=None, username=None):
         self._key = key

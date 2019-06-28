@@ -6,7 +6,8 @@ from shapely.geometry import Point
 from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
-from cartoframes.data.utils import compute_query, compute_geodataframe
+from cartoframes.data.utils import compute_query, compute_geodataframe, \
+    decode_geometry, detect_encoding_type
 
 from mocks.context_mock import ContextMock
 
@@ -116,3 +117,31 @@ class TestDataUtils(unittest.TestCase):
         ds = Dataset.from_dataframe(pd.DataFrame({'longitude': self.lng}))
         with self.assertRaises(ValueError, msg=self.msg):
             compute_geodataframe(ds)
+
+    def test_detect_encoding_type_shapely(self):
+        enc_type = detect_encoding_type(Point(1234, 5789))
+        self.assertEqual(enc_type, 'shapely')
+
+    def test_detect_encoding_type_wkb(self):
+        enc_type = detect_encoding_type(b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
+        self.assertEqual(enc_type, 'wkb')
+
+    def test_detect_encoding_type_wkb_hex(self):
+        enc_type = detect_encoding_type(b'0101000000000000000048934000000000009db640')
+        self.assertEqual(enc_type, 'wkb-hex')
+
+    def test_detect_encoding_type_wkb_hex_ascii(self):
+        enc_type = detect_encoding_type('0101000000000000000048934000000000009db640')
+        self.assertEqual(enc_type, 'wkb-hex-ascii')
+
+    def test_detect_encoding_type_ewkb_hex_ascii(self):
+        enc_type = detect_encoding_type('SRID=4326;0101000000000000000048934000000000009db640')
+        self.assertEqual(enc_type, 'ewkb-hex-ascii')
+
+    def test_detect_encoding_type_wkt(self):
+        enc_type = detect_encoding_type('POINT (1234 5789)')
+        self.assertEqual(enc_type, 'wkt')
+
+    def test_detect_encoding_type_ewkt(self):
+        enc_type = detect_encoding_type('SRID=4326;POINT (1234 5789)')
+        self.assertEqual(enc_type, 'ewkt')
