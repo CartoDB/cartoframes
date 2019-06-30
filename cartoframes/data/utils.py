@@ -143,7 +143,6 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
-    from shapely import wkb, geos
     from shapely.geometry.base import BaseGeometry
 
     if isinstance(input_geom, BaseGeometry):
@@ -204,7 +203,7 @@ def _load_ewkt(egeom):
     ogeom = loads(geom)
     if srid:
         from shapely.geos import lgeos
-        lgeos.GEOSSetSRID(ogeom._geom, srid)
+        lgeos.GEOSSetSRID(ogeom._geom, int(srid))
     return ogeom
 
 
