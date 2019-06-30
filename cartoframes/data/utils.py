@@ -42,7 +42,7 @@ LNG_COLUMN_NAMES = [
 ENC_SHAPELY = 'shapely'
 ENC_WKB = 'wkb'
 ENC_WKB_HEX = 'wkb-hex'
-ENC_WKB_HEX_ASCII = 'wkb-hex-ascii'
+ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 
@@ -123,7 +123,7 @@ def decode_geometry(geom, enc_type):
         ENC_SHAPELY: lambda: geom,
         ENC_WKB: lambda: _load_wkb(geom),
         ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
-        ENC_WKB_HEX_ASCII: lambda: _load_wkb_hex_ascii(geom),
+        ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
         ENC_WKT: lambda: _load_wkt(geom),
         ENC_EWKT: lambda: _load_ewkt(geom)
     }.get(enc_type)
@@ -136,10 +136,10 @@ def detect_encoding_type(input_geom):
     Detect geometry encoding type:
     - ENC_WKB: b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
     - ENC_EWKB: b'\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@'
-    - ENC_WKB_HEX: b'0101000000000000000048934000000000009db640'
-    - ENC_EWKB_HEX: b'0101000020E6100000000000000048934000000000009DB640'
-    - ENC_WKB_HEX_ASCII: '0101000000000000000048934000000000009db640'
-    - ENC_EWKB_HEX_ASCII: '0101000020E6100000000000000048934000000000009DB640'
+    - ENC_WKB_HEX: '0101000000000000000048934000000000009DB640'
+    - ENC_EWKB_HEX: '0101000020E6100000000000000048934000000000009DB640'
+    - ENC_WKB_BHEX: b'0101000000000000000048934000000000009DB640'
+    - ENC_EWKB_BHEX: b'0101000020E6100000000000000048934000000000009DB640'
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
@@ -151,13 +151,13 @@ def detect_encoding_type(input_geom):
     if isinstance(input_geom, bytes):
         try:
             ba.unhexlify(input_geom)
-            return ENC_WKB_HEX
+            return ENC_WKB_BHEX
         except Exception:
             return ENC_WKB
 
     if isinstance(input_geom, str):
         if re.match(r'^[0-9a-fA-F]+$', input_geom):
-            return ENC_WKB_HEX_ASCII
+            return ENC_WKB_HEX
         else:
             result = re.match(r'^SRID=\d+;(.*)$', input_geom)
             if result:
@@ -175,17 +175,17 @@ def _load_wkb(geom):
 
 
 def _load_wkb_hex(geom):
-    """Load WKB_HEX or EWKB_HEX geometry.
+    """Load WKB_HEX or EWKB_HEX geometry."""
+    from shapely.wkb import loads
+    return loads(geom, hex=True)
+
+
+def _load_wkb_bhex(geom):
+    """Load WKB_BHEX or EWKB_BHEX geometry.
     The geom must be converted to WKB/EWKB before loading.
     """
     from shapely.wkb import loads
     return loads(ba.unhexlify(geom))
-
-
-def _load_wkb_hex_ascii(geom):
-    """Load WKB_HEX_ASCII or EWKB_HEX_ASCII geometry."""
-    from shapely.wkb import loads
-    return loads(geom, hex=True)
 
 
 def _load_wkt(geom):
