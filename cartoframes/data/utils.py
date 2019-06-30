@@ -143,17 +143,11 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
+    from shapely import wkb
     from shapely.geometry.base import BaseGeometry
 
     if isinstance(input_geom, BaseGeometry):
         return ENC_SHAPELY
-
-    if isinstance(input_geom, bytes):
-        try:
-            ba.unhexlify(input_geom)
-            return ENC_WKB_BHEX
-        except Exception:
-            return ENC_WKB
 
     if isinstance(input_geom, str):
         if re.match(r'^[0-9a-fA-F]+$', input_geom):
@@ -165,7 +159,18 @@ def detect_encoding_type(input_geom):
                 if geom != '':
                     return ENC_EWKT
             elif input_geom != '':
-                return ENC_WKT
+                try:
+                    wkb.loads(input_geom)
+                    return ENC_WKB
+                except Exception:
+                    return ENC_WKT
+
+    if isinstance(input_geom, bytes):
+        try:
+            ba.unhexlify(input_geom)
+            return ENC_WKB_BHEX
+        except Exception:
+            return ENC_WKB
 
 
 def _load_wkb(geom):
