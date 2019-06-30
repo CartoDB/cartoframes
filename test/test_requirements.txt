@@ -1,5 +1,4 @@
 pytest
 geopandas
 matplotlib
-shapely
 coveralls
