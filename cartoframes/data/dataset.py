@@ -546,12 +546,8 @@ class Dataset(object):
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyfrom(self, with_lnglat=None):
-        enc_type = ''
         geom_col = _get_geom_col_name(self._df)
-        if geom_col is not None:
-            first_geom = _first_value(self._df[geom_col])
-            if first_geom:
-                enc_type = detect_encoding_type(first_geom)
+        enc_type = _detect_encoding_type(self._df, geom_col)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
         self._con.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
@@ -824,3 +820,11 @@ def _first_value(array):
     array = array.loc[~array.isnull()]  # Remove null values
     if len(array) > 0:
         return array.iloc[0]
+
+
+def _detect_encoding_type(df, geom_col):
+    if geom_col is not None:
+        first_geom = _first_value(df[geom_col])
+        if first_geom:
+            return detect_encoding_type(first_geom)
+    return ''
