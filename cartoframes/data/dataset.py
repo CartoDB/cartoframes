@@ -546,16 +546,20 @@ class Dataset(object):
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyfrom(self, with_lnglat=None):
+        enc_type = ''
         geom_col = _get_geom_col_name(self._df)
-
+        if geom_col is not None:
+            first_geom = _first_value(self._df[geom_col])
+            if first_geom:
+                enc_type = detect_encoding_type(first_geom)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
         self._con.copy_client.copyfrom(
             """COPY {table_name}({columns},the_geom)
-               FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
-            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lnglat, geom_col)
+            FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
+            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lnglat, geom_col, enc_type)
         )
 
-    def _rows(self, df, cols, with_lnglat, geom_col):
+    def _rows(self, df, cols, with_lnglat, geom_col, enc_type):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
@@ -578,7 +582,6 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                enc_type = detect_encoding_type(the_geom_val)
                 geom = decode_geometry(the_geom_val, enc_type)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)

@@ -585,13 +585,13 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
         ds = Dataset.from_dataframe(df)
-        rows = ds._rows(ds.dataframe, ['test'], None, '')
+        rows = ds._rows(ds.dataframe, ['test'], None, '', '')
 
         self.assertEqual(list(rows), [b'True|\n', b'[1, 2]|\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
         ds = Dataset.from_dataframe(df)
-        rows = ds._rows(ds.dataframe, ['test'], None, '')
+        rows = ds._rows(ds.dataframe, ['test'], None, '', '')
 
         self.assertEqual(list(rows), [b'|\n', b'|\n'])

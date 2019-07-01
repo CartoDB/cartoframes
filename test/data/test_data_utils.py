@@ -1,5 +1,4 @@
 """Unit tests for cartoframes.data.utils"""
-import sys
 import unittest
 import pandas as pd
 
