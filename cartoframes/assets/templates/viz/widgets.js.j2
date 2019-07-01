@@ -15,8 +15,7 @@ function renderWidget(layer, source, map, widget, variable, layerIndex, widgetIn
       map: map
     });
 
-    //bridge.animationControls(widget.element, widget.value, widget.options);
-    bridge.animationControls(widget.element, widget.value, { variableName: 'animation' });
+    bridge.animationControls(widget.element, widget.column, widget.prop, widget.name);
     bridge.build();
 
   } else {
