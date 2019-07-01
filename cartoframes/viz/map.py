@@ -623,7 +623,7 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
-        has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
+        has_legends = any(layer['legend'] for layer in layers) or default_legend
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(

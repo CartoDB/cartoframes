@@ -136,29 +136,31 @@
     as-widget-header .as-widget-header__subheader {
       margin-bottom: 12px;
     }
+
+    as-category-widget {
+      max-height: 250px;
+    }
   </style>
 </head>
 
 <body class="as-app-body as-app">
   <as-responsive-content>
+    {% if has_widgets %}
+      {% include 'viz/widgets.html.j2' %}
+    {% endif %}
     <main class="as-main">
       <div class="as-map-area">
         <div id="map"></div>
         {% if show_info %}
           {% include 'viz/info.html.j2' %}
         {% endif %}
-        <div class="as-map-panels">
-          <div class="as-panel as-panel--left as-panel--top">
-            {% if has_legends %}
+        {% if has_legends %}
+          <div class="as-map-panels" data-name="Legends">
+            <div class="as-panel as-panel--left as-panel--top">
               {% include 'viz/legends.html.j2' %}
-            {% endif %}
-          </div> <!-- as-panel -->
-          <div class="as-panel as-panel--right as-panel--top">
-            {% if has_widgets %}
-              {% include 'viz/widgets.html.j2' %}
-            {% endif %}
-          </div> <!-- as-panel -->
-        </div> <!-- as-map-panels -->
+            </div> <!-- as-panel -->
+          </div> <!-- as-map-panels -->
+        {% endif %}
       </div> <!-- as-map-area -->
     </main> <!-- as-main -->
   </as-responsive-content>
