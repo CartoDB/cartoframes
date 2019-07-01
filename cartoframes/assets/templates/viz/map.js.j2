@@ -93,9 +93,14 @@ function onReady() {
     }
 
     if (layer.widgets.length) {
-      mapLayer.on('updated', () => {
+      layer.widgets.forEach((widget, widgetIndex) => {
+        const id = `layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`;
+        widget.id = id;
+      });
+
+      mapLayer.on('loaded', () => {
         layer.widgets.forEach((widget, widgetIndex) => {
-          renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+          renderWidget(mapLayer,mapSource, map, widget, mapViz.variables[widget.name]);
         })
       });
     }

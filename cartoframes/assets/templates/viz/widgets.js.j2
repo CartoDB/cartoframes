@@ -1,18 +1,24 @@
 {% include 'utils/format.js.j2' %}
 
-function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
-  const element = document.querySelector(`#layer${layerIndex}_widget${widgetIndex}-${widget.name}`);
+function renderWidget(layer, source, map, widget, variable, layerIndex, widgetIndex=0) {
+  widget.element = document.querySelector(`#${widget.id}`);
 
   if (widget.type === 'formula') {
     element.innerText = format(variable.value);
   } else if (widget.type === 'animation') {
-    AsBridge.VL.animationControls(
-      element,
-      layer,
-      {
-        'as-animation-controls-widget', widget.column, { variableName: widget._name }
-      }
-    );
+    const variableName = widget.name;
+
+    const bridge = new AsBridge.VL.Bridge({
+      carto: carto,
+      layer: layer,
+      source: source,
+      map: map
+    });
+
+    //bridge.animationControls(widget.element, widget.value, widget.options);
+    bridge.animationControls(widget.element, widget.value, { variableName: 'animation' });
+    bridge.build();
+
   } else {
     element.innerText = variable ? variable.value : widget.value;
   }

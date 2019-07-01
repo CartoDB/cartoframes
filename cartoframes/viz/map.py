@@ -605,11 +605,13 @@ class HTMLMap(object):
         if _airship_path is None:
             airship_components_path = constants.AIRSHIP_COMPONENTS_URL
             airship_bridge_path = constants.AIRSHIP_BRIDGE_URL
+            airship_module_path = _airship_path + constants.AIRSHIP_MODULE_URL
             airship_styles_path = constants.AIRSHIP_STYLES_URL
             airship_icons_path = constants.AIRSHIP_ICONS_URL
         else:
             airship_components_path = _airship_path + constants.AIRSHIP_COMPONENTS_DEV
             airship_bridge_path = _airship_path + constants.AIRSHIP_BRIDGE_DEV
+            airship_module_path = _airship_path + constants.AIRSHIP_MODULE_DEV
             airship_styles_path = _airship_path + constants.AIRSHIP_STYLES_DEV
             airship_icons_path = _airship_path + constants.AIRSHIP_ICONS_DEV
 
@@ -640,6 +642,7 @@ class HTMLMap(object):
             show_info=show_info,
             carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
+            airship_module_path=airship_module_path,
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,
             airship_icons_path=airship_icons_path,

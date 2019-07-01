@@ -1,5 +1,5 @@
 {% macro createWidget(widget, id) -%}
-  <section id="{{id}}" class="as-body">
+  <section class="as-body">
       {% if widget.title %}
         <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
       {% endif %}
@@ -7,7 +7,9 @@
         <p class="as-m--0">{{widget.description}}</p>
       {% endif %}
 
-      {% include 'viz/widgets/' + widget.type + '.html.j2' %}
+      {% with id = id %}
+        {% include 'viz/widgets/' + widget.type + '.html.j2' %}
+      {% endwith %}
 
       {% if widget.footer %}
         <footer>{{widget.footer}}</footer>
@@ -20,7 +22,7 @@
     {% if layer.widgets %}
       {% set outer_loop = loop %}
         {% for widget in layer.widgets %}
-          {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
+          {{ createWidget(widget, 'layer%d_widget%d-%s' | format(outer_loop.index0, loop.index0, widget.name )) }}
         {% endfor %}
     {% endif %}
   {% endfor %}
