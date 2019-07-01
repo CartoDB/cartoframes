@@ -9,3 +9,27 @@ function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
     element.innerText = variable ? variable.value : widget.value;
   }
 }
+
+function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
+  const bridge = new AsBridge.VL.Bridge({
+    carto: carto,
+    layer: mapLayer,
+    source: mapSource,
+    map: map
+  });
+
+  widgets
+    .filter((widget) => !widget.has_variable)
+    .forEach((widget) => {
+      switch (widget.type) {
+        case 'histogram':
+          bridge.histogram(widget.element, widget.value, widget.options);
+          break;
+        case 'category':
+          bridge.category(widget.element, widget.value, widget.options);
+          break;
+      }
+    });
+
+  bridge.build();
+}
