@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 import binascii as ba
 from warnings import warn
@@ -46,6 +47,9 @@ ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 
+if (sys.version_info < (3, 0)):
+    ENC_WKB_BHEX = ENC_WKB_HEX
+
 
 def compute_query(dataset):
     if dataset.table_name:
@@ -91,10 +95,10 @@ def _warn_new_geometry_column(df):
         warn('A new "geometry" column has been added to the original dataframe.')
 
 
-def _compute_geometry_from_geom(geom):
-    first_geom = next(item for item in geom if item is not None)
+def _compute_geometry_from_geom(geom_column):
+    first_geom = next(item for item in geom_column if item is not None)
     enc_type = detect_encoding_type(first_geom)
-    return geom.apply(lambda g: decode_geometry(g, enc_type))
+    return geom_column.apply(lambda g: decode_geometry(g, enc_type))
 
 
 def _compute_geometry_from_latlng(lat, lng):
@@ -119,16 +123,17 @@ def _encode_decode_decorator(func):
 @_encode_decode_decorator
 def decode_geometry(geom, enc_type):
     """Decode any geometry into a shapely geometry."""
-    func = {
-        ENC_SHAPELY: lambda: geom,
-        ENC_WKB: lambda: _load_wkb(geom),
-        ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
-        ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
-        ENC_WKT: lambda: _load_wkt(geom),
-        ENC_EWKT: lambda: _load_ewkt(geom)
-    }.get(enc_type)
-
-    return func() if func else geom
+    if geom:
+        func = {
+            ENC_SHAPELY: lambda: geom,
+            ENC_WKB: lambda: _load_wkb(geom),
+            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
+            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
+            ENC_WKT: lambda: _load_wkt(geom),
+            ENC_EWKT: lambda: _load_ewkt(geom)
+        }.get(enc_type)
+        return func() if func else geom
+    return ''
 
 
 def detect_encoding_type(input_geom):

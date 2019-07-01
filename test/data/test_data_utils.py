@@ -9,7 +9,8 @@ from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
 from cartoframes.data.utils import compute_query, compute_geodataframe, \
-    decode_geometry, detect_encoding_type
+    decode_geometry, detect_encoding_type, ENC_SHAPELY, ENC_WKB, ENC_WKB_HEX, \
+    ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
 
 from mocks.context_mock import ContextMock
 
@@ -122,81 +123,79 @@ class TestDataUtils(unittest.TestCase):
 
     def test_detect_encoding_type_shapely(self):
         enc_type = detect_encoding_type(Point(1234, 5789))
-        self.assertEqual(enc_type, 'shapely')
+        self.assertEqual(enc_type, ENC_SHAPELY)
 
     def test_detect_encoding_type_wkb(self):
         enc_type = detect_encoding_type(
             b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
-        self.assertEqual(enc_type, 'wkb')
+        self.assertEqual(enc_type, ENC_WKB)
 
         enc_type = detect_encoding_type(
             b'\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')  # ext
-        self.assertEqual(enc_type, 'wkb')
+        self.assertEqual(enc_type, ENC_WKB)
 
     def test_detect_encoding_type_wkb_hex(self):
         enc_type = detect_encoding_type('0101000000000000000048934000000000009db640')
-        self.assertEqual(enc_type, 'wkb-hex')
+        self.assertEqual(enc_type, ENC_WKB_HEX)
 
         enc_type = detect_encoding_type('0101000020E6100000000000000048934000000000009DB640')  # ext
-        self.assertEqual(enc_type, 'wkb-hex')
+        self.assertEqual(enc_type, ENC_WKB_HEX)
 
-    @unittest.skipIf(sys.version_info < (3, 5), 'requires python3.5 or higher')
     def test_detect_encoding_type_wkb_bhex(self):
         enc_type = detect_encoding_type(b'0101000000000000000048934000000000009db640')
-        self.assertEqual(enc_type, 'wkb-bhex')
+        self.assertEqual(enc_type, ENC_WKB_BHEX)
 
         enc_type = detect_encoding_type(b'0101000020E6100000000000000048934000000000009DB640')  # ext
-        self.assertEqual(enc_type, 'wkb-bhex')
+        self.assertEqual(enc_type, ENC_WKB_BHEX)
 
     def test_detect_encoding_type_wkt(self):
         enc_type = detect_encoding_type('POINT (1234 5789)')
-        self.assertEqual(enc_type, 'wkt')
+        self.assertEqual(enc_type, ENC_WKT)
 
     def test_detect_encoding_type_ewkt(self):
         enc_type = detect_encoding_type('SRID=4326;POINT (1234 5789)')  # ext
-        self.assertEqual(enc_type, 'ewkt')
+        self.assertEqual(enc_type, ENC_EWKT)
 
     def test_decode_geometry_shapely(self):
         expected_geom = Point(1234, 5789)
-        geom = decode_geometry(Point(1234, 5789), 'shapely')
+        geom = decode_geometry(Point(1234, 5789), ENC_SHAPELY)
         self.assertEqual(str(geom), str(expected_geom))
 
     def test_decode_geometry_wkb(self):
         geom = decode_geometry(
-            b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', 'wkb')
+            b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', ENC_WKB)
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 0)
         self.assertEqual(geom.wkb, b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
 
         geom = decode_geometry(
-            b'\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', 'wkb')  # ext
+            b'\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@', ENC_WKB)  # ext
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 4326)
         self.assertEqual(geom.wkb, b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
 
     def test_decode_geometry_wkb_hex(self):
-        geom = decode_geometry('0101000000000000000048934000000000009DB640', 'wkb-hex')
+        geom = decode_geometry('0101000000000000000048934000000000009DB640', ENC_WKB_HEX)
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 0)
         self.assertEqual(geom.wkb_hex, '0101000000000000000048934000000000009DB640')
 
-        geom = decode_geometry('0101000020E6100000000000000048934000000000009DB640', 'wkb-hex')  # ext
+        geom = decode_geometry('0101000020E6100000000000000048934000000000009DB640', ENC_WKB_HEX)  # ext
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 4326)
         self.assertEqual(geom.wkb_hex, '0101000000000000000048934000000000009DB640')
 
-    @unittest.skipIf(sys.version_info < (3, 5), 'requires python3.5 or higher')
     def test_decode_geometry_wkb_bhex(self):
-        geom = decode_geometry(b'0101000000000000000048934000000000009DB640', 'wkb-bhex')
+        geom = decode_geometry(b'0101000000000000000048934000000000009DB640', ENC_WKB_BHEX)
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 0)
         self.assertEqual(geom.wkb, b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
 
-        geom = decode_geometry(b'0101000020E6100000000000000048934000000000009DB640', 'wkb-bhex')  # ext
+        geom = decode_geometry(b'0101000020E6100000000000000048934000000000009DB640', ENC_WKB_BHEX)  # ext
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 4326)
         self.assertEqual(geom.wkb, b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@')
 
     def test_decode_geometry_wkt(self):
-        geom = decode_geometry('POINT (1234 5789)', 'wkt')
+        geom = decode_geometry('POINT (1234 5789)', ENC_WKT)
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 0)
         self.assertEqual(geom.wkt, 'POINT (1234 5789)')
 
     def test_decode_geometry_ewkt(self):
-        geom = decode_geometry('SRID=4326;POINT (1234 5789)', 'ewkt')  # ext
+        geom = decode_geometry('SRID=4326;POINT (1234 5789)', ENC_EWKT)  # ext
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 4326)
         self.assertEqual(geom.wkt, 'POINT (1234 5789)')

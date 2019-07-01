@@ -813,11 +813,11 @@ def _get_geom_col_type(df):
             geom = decode_geometry(first_geom, enc_type)
             if geom is not None:
                 return geom.geom_type
+        else:
+            warn('Dataset with null geometries')
 
 
 def _first_value(array):
     array = array.loc[~array.isnull()]  # Remove null values
     if len(array) > 0:
         return array.iloc[0]
-    else:
-        warn('Dataset with null geometries')
