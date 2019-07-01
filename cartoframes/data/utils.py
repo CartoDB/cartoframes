@@ -164,6 +164,7 @@ def detect_encoding_type(input_geom):
                 if geom != '':
                     return ENC_EWKT
             elif input_geom != '':
+                # This is required because in P27 bytes = str
                 try:
                     wkb.loads(input_geom)
                     return ENC_WKB
