@@ -155,18 +155,18 @@ def detect_encoding_type(input_geom):
         return ENC_SHAPELY
 
     if isinstance(input_geom, str):
-        if re.match(r'^[0-9a-fA-F]+$', input_geom):
+        if _is_hex(input_geom):
             return ENC_WKB_HEX
         else:
-            result = re.match(r'^SRID=\d+;(.*)$', input_geom)
-            if result:
-                geom = result.group(1)
-                if geom != '':
-                    return ENC_EWKT
-            elif input_geom != '':
-                # This is required because in P27 bytes = str
+            srid, geom = _extract_srid(input_geom)
+            if not geom:
+                return
+            if srid:
+                return ENC_EWKT
+            else:
                 try:
-                    wkb.loads(input_geom)
+                    # This is required because in P27 bytes = str
+                    wkb.loads(geom)
                     return ENC_WKB
                 except Exception:
                     return ENC_WKT
@@ -210,12 +210,16 @@ def _load_ewkt(egeom):
     The SRID must be removed before loading and added after loading.
     """
     from shapely.wkt import loads
-    (srid, geom) = _extract_srid(egeom)
+    srid, geom = _extract_srid(egeom)
     ogeom = loads(geom)
     if srid:
         from shapely.geos import lgeos
         lgeos.GEOSSetSRID(ogeom._geom, int(srid))
     return ogeom
+
+
+def _is_hex(input_geom):
+    return re.match(r'^[0-9a-fA-F]+$', input_geom)
 
 
 def _extract_srid(egeom):
