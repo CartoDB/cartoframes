@@ -42,6 +42,7 @@ class TestWidget(unittest.TestCase):
             'description': '[description]',
             'footer': '[footer]',
             'has_variable': True,
+            'prop': '',
             'options': {}
         })
 

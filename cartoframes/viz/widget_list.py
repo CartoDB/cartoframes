@@ -46,7 +46,8 @@ class WidgetList(object):
     def get_variables(self):
         variables = {}
         for widget in self.widgets:
-            variables[widget._name] = widget._value
+            if widget and widget._value:
+                variables[widget._name] = widget._value
         return variables
 
     def get_properties(self):

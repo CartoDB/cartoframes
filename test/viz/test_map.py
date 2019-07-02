@@ -147,6 +147,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
         self.assertTrue(constants.AIRSHIP_COMPONENTS_URL in template)
         self.assertTrue(constants.AIRSHIP_BRIDGE_URL in template)
         self.assertTrue(constants.AIRSHIP_STYLES_URL in template)
+        self.assertTrue(constants.AIRSHIP_MODULE_URL in template)
         self.assertTrue(constants.AIRSHIP_ICONS_URL in template)
 
     def test_custom_airship_path(self):
@@ -157,6 +158,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
         self.assertTrue(_airship_path + constants.AIRSHIP_COMPONENTS_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_BRIDGE_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_STYLES_DEV in template)
+        self.assertTrue(_airship_path + constants.AIRSHIP_MODULE_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_ICONS_DEV in template)
 
 

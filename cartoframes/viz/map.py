@@ -606,7 +606,7 @@ class HTMLMap(object):
         if _airship_path is None:
             airship_components_path = constants.AIRSHIP_COMPONENTS_URL
             airship_bridge_path = constants.AIRSHIP_BRIDGE_URL
-            airship_module_path = _airship_path + constants.AIRSHIP_MODULE_URL
+            airship_module_path = constants.AIRSHIP_MODULE_URL
             airship_styles_path = constants.AIRSHIP_STYLES_URL
             airship_icons_path = constants.AIRSHIP_ICONS_URL
         else:

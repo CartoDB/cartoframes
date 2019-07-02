@@ -13,7 +13,7 @@ widget_a = {
 
 widget_b = {
     'type': 'default',
-    'value': '"Custom Info"',
+    'title': '"Custom Info"',
 }
 
 
@@ -48,8 +48,7 @@ class TestWidgetList(unittest.TestCase):
         self.assertTrue(isinstance(widget_list.widgets[0], Widget))
 
         self.assertEqual(widget_list.widgets[1]._type, 'default')
-        self.assertEqual(widget_list.widgets[1]._value, '"Custom Info"')
-        self.assertEqual(widget_list.widgets[1]._title, '')
+        self.assertEqual(widget_list.widgets[1]._title, '"Custom Info"')
         self.assertEqual(widget_list.widgets[1]._description, '')
         self.assertEqual(widget_list.widgets[1]._footer, '')
         self.assertNotEqual(widget_list.widgets[1]._name, None)
@@ -105,15 +104,17 @@ class TestWidgetList(unittest.TestCase):
             'name': 'vb6dbcf',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
+            'prop': '',
             'description': '[description]',
             'footer': '[footer]',
             'has_variable': True,
             'options': {}
           }, {
             'type': 'default',
-            'name': 'v76441e',
-            'value': '"Custom Info"',
-            'title': '',
+            'name': 'vda39a3',
+            'title': '"Custom Info"',
+            'value': '',
+            'prop': '',
             'description': '',
             'footer': '',
             'has_variable': False,
