@@ -59,5 +59,7 @@ LEGEND_TYPES = [
 
 WIDGET_TYPES = [
     'default',
-    'formula'
+    'formula',
+    'histogram',
+    'category'
 ]

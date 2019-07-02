@@ -1,35 +1,51 @@
 {% macro createWidget(widget, id) -%}
-  <section id="{{id}}" class="as-body">
-      {% if widget.title %}
-        <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
-      {% endif %}
-      {% if widget.description %}
-        <p class="as-m--0">{{widget.description}}</p>
-      {% endif %}
+  {% if widget.type == 'formula' %}
+    <section id="{{id}}" class="as-body">
+        {% if widget.title %}
+          <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
+        {% endif %}
+        {% if widget.description %}
+          <p class="as-m--0">{{widget.description}}</p>
+        {% endif %}
 
-      {% if widget.name %}
-        <p class="as-title as-m--0 as-p--0 as-font--medium" id="{{id}}-{{widget.name}}">
-          <span class="as-loading as-loading--s">
-            <svg viewBox="0 0 50 50">
-              <circle cx="25" cy="25" r="20" fill="none" />
-            </svg>
-          </span>
-        </p>
-      {% endif %}
+        {% if widget.name %}
+          <p class="as-title as-m--0 as-p--0 as-font--medium" id="{{id}}-{{widget.name}}">
+            <span class="as-loading as-loading--s">
+              <svg viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="20" fill="none" />
+              </svg>
+            </span>
+          </p>
+        {% endif %}
 
-      {% if widget.footer %}
-        <footer>{{widget.footer}}</footer>
-      {% endif %}
-  </section>
+        {% if widget.footer %}
+          <footer>{{widget.footer}}</footer>
+        {% endif %}
+    </section>
+  {% elif widget.type == 'histogram' %}
+    <as-histogram-widget
+      id="{{id}}-{{widget.name}}"
+      description="{{widget.description}}"
+      heading="{{widget.title}}">
+    </as-histogram-widget>
+  {% elif widget.type == 'category' %}
+    <as-category-widget
+      id="{{id}}-{{widget.name}}"
+      description="{{widget.description}}"
+      heading="{{widget.title}}">
+    </as-category-widget>
+  {% endif %}
 {%- endmacro %}
 
-<div class="as-panel__element as-px--16 as-pt--8 as-pb--8" id="widgets">
+<aside class="as-sidebar as-sidebar--right" id="widgets" data-name="Widgets">
   {% for layer in layers|reverse %}
     {% if layer.widgets %}
       {% set outer_loop = loop %}
         {% for widget in layer.widgets %}
-          {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
+          <div class="as-box">
+            {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0 )) }}
+          </div>
         {% endfor %}
     {% endif %}
   {% endfor %}
-</div>
+</aside>
