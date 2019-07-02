@@ -1,19 +1,19 @@
 {% macro createWidget(widget, id) -%}
   <section class="as-body">
-      {% if widget.title %}
-        <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
-      {% endif %}
-      {% if widget.description %}
-        <p class="as-m--0">{{widget.description}}</p>
-      {% endif %}
+    {% if widget.title %}
+      <h1 class="as-m--0 as-font--medium">{{widget.title}}</h1>
+    {% endif %}
+    {% if widget.description %}
+      <p class="as-m--0">{{widget.description}}</p>
+    {% endif %}
 
-      {% with id = id %}
-        {% include 'viz/widgets/' + widget.type + '.html.j2' %}
-      {% endwith %}
+    {% with id = id %}
+      {% include 'viz/widgets/' + widget.type + '.html.j2' %}
+    {% endwith %}
 
-      {% if widget.footer %}
-        <footer>{{widget.footer}}</footer>
-      {% endif %}
+    {% if widget.footer %}
+      <footer>{{widget.footer}}</footer>
+    {% endif %}
   </section>
 {%- endmacro %}
 

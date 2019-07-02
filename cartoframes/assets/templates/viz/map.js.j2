@@ -98,18 +98,17 @@ function onReady() {
       layer.widgets.forEach((widget, widgetIndex) => {
         const id = `layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`;
         widget.id = id;
-        widget.element = document.querySelector(`#${id}`);
       });
-
-      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
 
       mapLayer.on('updated', () => {
         layer.widgets
           .filter((widget) => widget.has_variable)
           .forEach((widget, widgetIndex) => {
-            renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1);
+            renderWidget(widget, mapViz.variables[widget.name]);
           })
       });
+
+      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
     }
   });
 

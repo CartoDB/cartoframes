@@ -61,6 +61,7 @@ class Widget(object):
             return {
                 'type': self._type,
                 'name': self._name,
+                'prop': self._prop,
                 'value': self._value,
                 'title': self._title,
                 'description': self._description,
