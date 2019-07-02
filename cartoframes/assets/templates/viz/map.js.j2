@@ -88,20 +88,27 @@ function onReady() {
       interactiveMapLayers.push(mapLayer);
     }
 
+    {% if has_legends %}
     if (layer.legend) {
       createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
+    {% endif %}
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
         const id = `layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`;
         widget.id = id;
+        widget.element = document.querySelector(`#${id}`);
       });
 
-      mapLayer.on('loaded', () => {
-        layer.widgets.forEach((widget, widgetIndex) => {
-          renderWidget(mapLayer,mapSource, map, widget, mapViz.variables[widget.name]);
-        })
+      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
+
+      mapLayer.on('updated', () => {
+        layer.widgets
+          .filter((widget) => widget.has_variable)
+          .forEach((widget, widgetIndex) => {
+            renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1);
+          })
       });
     }
   });

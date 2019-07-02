@@ -21,13 +21,13 @@ function formatValue(value) {
 }
 
 function formatNumber(value) {
-  const digits = 2;
-  if (Math.abs(value) > 10000) {
-    return value.toExponential(digits);
+  const log = Math.log10(Math.abs(value))
+  if (log > 4 || log < -2.00000001) {
+    return value.toExponential(2);
   } else if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 3
     });
   } else {
     return value.toLocaleString();

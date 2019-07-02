@@ -221,9 +221,9 @@ The following will embed a CARTO map in a Jupyter notebook, allowing for custom 
 .. code:: python
 
     from cartoframes import Layer, BaseMap, styling
-    cc = cartoframes.CartoContext(base_url=BASEURL,
+    con = cartoframes.auth.Context(base_url=BASEURL,
                                   api_key=APIKEY)
-    cc.map(layers=[BaseMap('light'),
+    con.map(layers=[BaseMap('light'),
                    Layer('acadia_biodiversity',
                          color={'column': 'simpson_index',
                                 'scheme': styling.tealRose(5)}),
@@ -243,7 +243,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
 .. code:: python
 
     import cartoframes
-    cc = cartoframes.CartoContext(BASEURL, APIKEY)
+    con = cartoframes.auth.Context(BASEURL, APIKEY)
 
     # total pop, high school diploma (normalized), median income, poverty status (normalized)
     # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html
@@ -253,7 +253,7 @@ Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/dat
                          {'numer_id': 'us.census.acs.B19013001'},
                          {'numer_id': 'us.census.acs.B17001002',
                           'normalization': 'predenominated'},]
-    df = cc.data('transactions', data_obs_measures)
+    df = con.data('transactions', data_obs_measures)
 
 
 CARTO Credential Management
@@ -262,12 +262,12 @@ CARTO Credential Management
 Typical usage
 ^^^^^^^^^^^^^
 
-The most common way to input credentials into cartoframes is through the `CartoContext`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
+The most common way to input credentials into cartoframes is through the `Context`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
 
 .. code:: python
 
-    from cartoframes import CartoContext
-    cc = CartoContext(
+    from cartoframes.auth import Context
+    con = Context(
         base_url='https://{your_user_name}.carto.com',
         api_key='{your_api_key}'
     )
@@ -277,8 +277,8 @@ You can also set your credentials using the `Credentials` class:
 
 .. code:: python
 
-    from cartoframes import Credentials, CartoContext
-    cc = CartoContext(
+    from cartoframes.auth import Credentials, Context
+    con = Context(
         creds=Credentials(key='{your_api_key}', username='{your_user_name}')
     )
 
@@ -288,7 +288,7 @@ Save/update credentials for later use
 
 .. code:: python
 
-    from cartoframes import Credentials, CartoContext
+    from cartoframes.auth import Credentials, Context
     creds = Credentials(username='eschbacher', key='abcdefg')
     creds.save()  # save credentials for later use (not dependent on Python session)
 
@@ -296,5 +296,5 @@ Once you save your credentials, you can get started in future sessions more quic
 
 .. code:: python
 
-    from cartoframes import CartoContext
-    cc = CartoContext()  # automatically loads credentials if previously saved
+    from cartoframes.auth import Context
+    con = Context()  # automatically loads credentials if previously saved

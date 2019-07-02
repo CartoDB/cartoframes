@@ -326,7 +326,8 @@ class Map(object):
             show_info=self.show_info,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path,
-            title=name)
+            title=name,
+            is_embed=True)
 
         return html_map.html
 
@@ -563,16 +564,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
-            default_legend=None, show_info=None,
-            _carto_vl_path=None, _airship_path=None, title='CARTOframes'):
+            default_legend=None, show_info=None, _carto_vl_path=None,
+            _airship_path=None, title='CARTOframes', is_embed=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, basemap, default_legend,
-            show_info, _carto_vl_path, _airship_path, title)
+            show_info, _carto_vl_path, _airship_path, title, is_embed)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=None, _airship_path=None, title=None):
+            show_info=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False):
 
         token = ''
         basecolor = ''
@@ -624,7 +625,7 @@ class HTMLMap(object):
                 'pitch': viewport.get('pitch')
             }
 
-        has_legends = any(layer['legend'] is not None for layer in layers) or default_legend
+        has_legends = any(layer['legend'] for layer in layers) or default_legend
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)
 
         return self._template.render(
@@ -646,7 +647,8 @@ class HTMLMap(object):
             airship_bridge_path=airship_bridge_path,
             airship_styles_path=airship_styles_path,
             airship_icons_path=airship_icons_path,
-            title=title
+            title=title,
+            is_embed=is_embed
         )
 
     def _repr_html_(self):

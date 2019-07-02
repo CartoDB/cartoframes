@@ -1,8 +1,6 @@
 {% include 'utils/format.js.j2' %}
 
-function renderWidget(layer, source, map, widget, variable, layerIndex, widgetIndex=0) {
-  widget.element = document.querySelector(`#${widget.id}`);
-
+function renderWidget(layer, source, map, widget, variable) {
   if (widget.type === 'formula') {
     element.innerText = format(variable.value);
   } else if (widget.type === 'animation') {
@@ -21,4 +19,28 @@ function renderWidget(layer, source, map, widget, variable, layerIndex, widgetIn
   } else {
     element.innerText = variable ? variable.value : widget.value;
   }
+}
+
+function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
+  const bridge = new AsBridge.VL.Bridge({
+    carto: carto,
+    layer: mapLayer,
+    source: mapSource,
+    map: map
+  });
+
+  widgets
+    .filter((widget) => !widget.has_variable)
+    .forEach((widget) => {
+      switch (widget.type) {
+        case 'histogram':
+          bridge.histogram(widget.element, widget.value, widget.options);
+          break;
+        case 'category':
+          bridge.category(widget.element, widget.value, widget.options);
+          break;
+      }
+    });
+
+  bridge.build();
 }

@@ -2,7 +2,6 @@ from copy import deepcopy
 from warnings import warn
 
 from carto.kuvizs import KuvizManager
-from carto.exceptions import CartoException
 
 from .source import Source
 from ..columns import normalize_name

@@ -40,7 +40,9 @@ class TestWidget(unittest.TestCase):
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
             'description': '[description]',
-            'footer': '[footer]'
+            'footer': '[footer]',
+            'has_variable': True,
+            'options': {}
         })
 
     def test_wrong_input(self):

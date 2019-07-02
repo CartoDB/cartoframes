@@ -37,7 +37,7 @@ class DatasetMock(Dataset):
         return False
 
     def _get_dataset_info(self):
-        return DatasetInfoMock(self._cc, self._table_name)
+        return DatasetInfoMock(self._con, self._table_name)
 
     def compute_geom_type(self):
         return Dataset.GEOM_TYPE_POINT

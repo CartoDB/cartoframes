@@ -130,8 +130,8 @@ Map([
 k_means_dataset = Dataset.from_query('''
        SELECT
          row_number() OVER () AS cartodb_id,
-         c.cluster_no,
-         c.the_geom,
+         con.cluster_no,
+         con.the_geom,
          ST_Transform(c.the_geom, 3857) AS the_geom_webmercator
        FROM
          ((SELECT *
