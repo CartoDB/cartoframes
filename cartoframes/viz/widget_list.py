@@ -46,14 +46,15 @@ class WidgetList(object):
     def get_variables(self):
         variables = {}
         for widget in self.widgets:
-            if widget and widget._value:
+            if widget and widget._type == 'animation':
                 variables[widget._name] = widget._value
         return variables
 
     def get_properties(self):
         properties = {}
         for widget in self.widgets:
-            properties[widget._prop] = '@' + widget._name
+            if widget and widget._prop:
+                properties[widget._prop] = '@' + widget._name
         return properties
 
     def get_widgets_info(self):
