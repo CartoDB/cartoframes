@@ -102,7 +102,7 @@ function onReady() {
 
       mapLayer.on('updated', () => {
         layer.widgets
-          .filter((widget) => widget.has_variable)
+          .filter((widget) => widget.has_bridge)
           .forEach((widget, widgetIndex) => {
             renderWidget(widget, mapViz.variables[widget.name]);
           })

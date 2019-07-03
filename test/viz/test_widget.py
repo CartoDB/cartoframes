@@ -41,6 +41,7 @@ class TestWidget(unittest.TestCase):
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]',
+            'has_bridge': False,
             'has_variable': True,
             'prop': '',
             'options': {}

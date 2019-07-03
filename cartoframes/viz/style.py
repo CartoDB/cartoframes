@@ -63,33 +63,35 @@ class Style(object):
     def compute_viz(self, geom_type, variables={}, properties={}):
         style = self._style
         default_style = defaults.STYLE[geom_type]
-        ext_props = self._serialize_properties(properties)
+
         if isinstance(style, dict):
             if geom_type in style:
                 style = style.get(geom_type)
-            return self._parse_style_dict(style, default_style, variables, ext_props)
+            return self._parse_style_dict(style, default_style, variables, properties)
         elif isinstance(style, str):
-            return self._parse_style_str(style, default_style, variables, ext_props)
+            return self._parse_style_str(style, default_style, variables, properties)
         else:
             raise ValueError('`style` must be a string or a dictionary')
 
     def _parse_style_dict(self, style, default_style, ext_vars, ext_props):
         variables = merge_dicts(style.get('vars', {}), ext_vars)
         properties = merge_dicts(default_style, style)
+        allproperties = merge_dicts(properties, ext_props)
 
         serialized_variables = self._serialize_variables(variables)
-        serialized_properties = self._serialize_properties(properties)
+        serialized_properties = self._serialize_properties(allproperties)
 
-        return serialized_variables + serialized_properties + ext_props
+        return serialized_variables + serialized_properties
 
     def _parse_style_str(self, style, default_style, ext_vars, ext_props):
         variables = ext_vars
         default_properties = self._prune_defaults(default_style, style)
+        properties = merge_dicts(default_properties, ext_props)
 
         serialized_variables = self._serialize_variables(variables)
-        serialized_default_properties = self._serialize_properties(default_properties)
+        serialized_default_properties = self._serialize_properties(properties)
 
-        return serialized_variables + serialized_default_properties + ext_props + style
+        return serialized_variables + serialized_default_properties + style
 
     def _serialize_variables(self, variables={}):
         output = ''

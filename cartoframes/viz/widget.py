@@ -36,7 +36,6 @@ class Widget(object):
         self._type = ''
         self._value = ''
         self._name = ''
-        self._prop = ''
         self._title = ''
         self._description = ''
         self._footer = ''
@@ -46,11 +45,11 @@ class Widget(object):
                 self._type = data.get('type', '')
                 self._value = data.get('value', '')
                 self._name = gen_variable_name(self._value)
-                self._prop = data.get('prop', '')
                 self._title = data.get('title', '')
                 self._description = data.get('description', '')
                 self._footer = data.get('footer', '')
                 self._options = camel_dictionary(data.get('options', {}))
+                self._prop = self._options.get('propertyName', '')
             else:
                 raise ValueError('Wrong widget input.')
 
@@ -67,13 +66,17 @@ class Widget(object):
                 'description': self._description,
                 'footer': self._footer,
                 'has_variable': self.has_variable(),
+                'has_bridge': self.has_bridge(),
                 'options': self._options
             }
         else:
             return {}
 
     def has_variable(self):
-        return self._type == 'formula'
+        return self._type == 'formula' or self._type == 'animation'
+
+    def has_bridge(self):
+        return self._type != 'formula' and self._type != 'default'
 
     def _check_type(self):
         if self._type and self._type not in constants.WIDGET_TYPES:
