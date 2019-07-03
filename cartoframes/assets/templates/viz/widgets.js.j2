@@ -36,7 +36,7 @@ function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
   });
 
   widgets
-    .filter((widget) => !widget.has_bridge)
+    .filter((widget) => widget.has_bridge)
     .forEach((widget) => renderBridge(bridge, widget));
 
   bridge.build();
