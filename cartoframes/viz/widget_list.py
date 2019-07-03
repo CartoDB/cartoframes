@@ -50,13 +50,6 @@ class WidgetList(object):
                 variables[widget._name] = widget._value
         return variables
 
-    def get_properties(self):
-        properties = {}
-        for widget in self.widgets:
-            if widget and widget._prop:
-                properties[widget._prop] = '@' + widget._name
-        return properties
-
     def get_widgets_info(self):
         widgets_info = []
         for widget in self.widgets:

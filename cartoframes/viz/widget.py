@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 from . import constants
-from ..utils import gen_variable_name, camel_dictionary
+from ..utils import camel_dictionary, gen_variable_name
 
 
-class Widget(object):
+class Widget():
     """Widget
 
     Args:
@@ -20,38 +20,38 @@ class Widget(object):
 
         from cartoframes.viz import Widget
 
-        Widget({
-            type: 'formula',
-            value: 'viewportSum($amount)'
-            title: '...',
-            description: '...',
-            footer: '...'
-        })
+        Widget('formula', value='viewportSum($amount)', title='...')
     """
 
-    def __init__(self, data=None):
-        self._init_widget(data)
+    def __init__(self, f_arg, **kwargs):
+        if isinstance(f_arg, dict):
+            self._init_widget(f_arg)
+        elif isinstance(f_arg, str):
+            self._init_widget(kwargs, f_arg)
+        else:
+            raise ValueError('Wrong widget input.')
 
-    def _init_widget(self, data):
+    def _init_widget(self, data, widget_type=''):
         self._type = ''
         self._value = ''
         self._name = ''
         self._title = ''
+        self._prop = ''
         self._description = ''
         self._footer = ''
         self._options = {}
+
         if data is not None:
-            if isinstance(data, dict):
-                self._type = data.get('type', '')
-                self._value = data.get('value', '')
-                self._name = gen_variable_name(self._value)
-                self._title = data.get('title', '')
-                self._description = data.get('description', '')
-                self._footer = data.get('footer', '')
-                self._options = camel_dictionary(data.get('options', {}))
-                self._prop = self._options.get('propertyName', '')
-            else:
-                raise ValueError('Wrong widget input.')
+            self._type = widget_type if widget_type else data.get('type', '')
+            self._value = data.get('value', '')
+            self._name = data.get('name', gen_variable_name(self._value))
+            self._title = data.get('title', '')
+            self._description = data.get('description', '')
+            self._footer = data.get('footer', '')
+            self._options = camel_dictionary(data.get('options', {}))
+            self._prop = data.get('prop', '')
+        else:
+            raise ValueError('Wrong widget input.')
 
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
@@ -73,7 +73,7 @@ class Widget(object):
             return {}
 
     def has_variable(self):
-        return self._type == 'formula' or self._type == 'animation'
+        return self._type == 'formula'
 
     def has_bridge(self):
         return self._type != 'formula' and self._type != 'default'

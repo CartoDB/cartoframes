@@ -113,16 +113,14 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
 
-        popup_variables = self.popup.get_variables()
-        widgets_variables = self.widgets.get_variables()
+        variables = self.popup.get_variables()
+        # widgets_variables = self.widgets.get_variables()
 
-        variables = merge_dicts(popup_variables, widgets_variables)
-        properties = self.widgets.get_properties()
+        # variables = merge_dicts(popup_variables, widgets_variables)
 
         self.viz = self.style.compute_viz(
             self.source.geom_type,
-            variables,
-            properties
+            variables
         )
 
         self.interactivity = self.popup.get_interactivity()

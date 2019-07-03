@@ -18,7 +18,11 @@ function renderBridge(bridge, widget) {
       bridge.category(widget.element, widget.value, widget.options);
       break;
     case 'animation':
-      const options = { ...widget.options, variableName: widget.name };
+      const options = {
+        variableName: widget.name,
+        propertyName: widget.prop
+      }
+
       bridge.animationControls(widget.element, widget.column, options);
       break;
     default:
