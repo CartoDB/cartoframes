@@ -22,7 +22,6 @@ class TestWidget(unittest.TestCase):
         self.assertEqual(widget._title, '[TITLE]')
         self.assertEqual(widget._description, '[description]')
         self.assertEqual(widget._footer, '[footer]')
-        self.assertNotEqual(widget._name, None)
 
     def test_widget_info(self):
         """Widget should return a proper information object"""
@@ -36,7 +35,6 @@ class TestWidget(unittest.TestCase):
 
         self.assertEqual(widget.get_info(), {
             'type': 'formula',
-            'name': 'vb6dbcf',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
             'description': '[description]',
