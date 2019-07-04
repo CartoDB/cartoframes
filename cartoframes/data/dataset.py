@@ -688,7 +688,7 @@ class Dataset(object):
         if self._state == Dataset.STATE_REMOTE:
             return self._get_remote_geom_type(get_query(self))
         elif self._state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(self.geodataframe)
+            return self._get_local_geom_type()
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -703,10 +703,10 @@ class Dataset(object):
                 if st_geom_type:
                     return self._map_geom_type(st_geom_type[3:])
 
-    def _get_local_geom_type(self, gdf):
+    def _get_local_geom_type(self):
         """Compute geom type of the local dataframe"""
-        if len(gdf.geometry) > 0:
-            geometry = _first_value(gdf.geometry)
+        if len(self.geodataframe.geometry) > 0:
+            geometry = _first_value(self.geodataframe.geometry)
             if geometry and geometry.geom_type:
                 return self._map_geom_type(geometry.geom_type)
 
