@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from . import constants
-from ..utils import camel_dictionary, gen_variable_name
+from ..utils import camel_dictionary
 
 
 class Widget():
