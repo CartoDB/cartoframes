@@ -34,7 +34,6 @@ class Widget():
     def _init_widget(self, data, widget_type=''):
         self._type = ''
         self._value = ''
-        self._name = ''
         self._title = ''
         self._prop = ''
         self._description = ''
@@ -44,7 +43,6 @@ class Widget():
         if data is not None:
             self._type = widget_type if widget_type else data.get('type', '')
             self._value = data.get('value', '')
-            self._name = data.get('name', gen_variable_name(self._value))
             self._title = data.get('title', '')
             self._description = data.get('description', '')
             self._footer = data.get('footer', '')
@@ -59,7 +57,6 @@ class Widget():
 
             return {
                 'type': self._type,
-                'name': self._name,
                 'prop': self._prop,
                 'value': self._value,
                 'title': self._title,

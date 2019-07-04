@@ -3,8 +3,9 @@
 function renderWidget(widget, variable) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
 
-  const value = variable ? variable.value : widget.value;
-  widget.element.innerText = typeof value === 'number' ? format(value) : value;
+  if (widget.value) {
+    widget.element.innerText = typeof value === 'number' ? format(value) : value;
+  }
 }
 
 function renderBridge(bridge, widget) {
@@ -19,7 +20,6 @@ function renderBridge(bridge, widget) {
       break;
     case 'animation':
       const options = {
-        variableName: widget.name,
         propertyName: widget.prop
       }
 

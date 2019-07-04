@@ -12,7 +12,7 @@
       {% set outer_loop = loop %}
         {% for widget in layer.widgets %}
           <div class="as-box">
-            {{ createWidget(widget, 'layer%d_widget%d-%s' | format(outer_loop.index0, loop.index0, widget.name )) }}
+            {{ createWidget(widget, 'layer%d_widget%d' | format(outer_loop.index0, loop.index0)) }}
           </div>
         {% endfor %}
     {% endif %}

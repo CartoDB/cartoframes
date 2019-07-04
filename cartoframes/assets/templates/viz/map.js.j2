@@ -96,15 +96,15 @@ function onReady() {
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
-        const id = `layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`;
+        const id = `layer${layers.length - index - 1}_widget${widgetIndex}`;
         widget.id = id;
       });
 
       mapLayer.on('updated', () => {
         layer.widgets
           .filter((widget) => !widget.has_bridge)
-          .forEach((widget, widgetIndex) => {
-            renderWidget(widget, mapViz.variables[widget.name]);
+          .forEach((widget) => {
+            renderWidget(widget);
           })
       });
 
