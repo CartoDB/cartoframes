@@ -12,6 +12,12 @@ from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
 
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
+
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
 
@@ -44,8 +50,7 @@ class Dataset(object):
     GEOM_TYPE_LINE = 'line'
     GEOM_TYPE_POLYGON = 'polygon'
 
-    def __init__(self, table_name=None, schema=None,
-                 query=None, df=None, gdf=None,
+    def __init__(self, table_name=None, schema=None, query=None, df=None,
                  state=None, is_saved_in_carto=False, context=None):
         from ..auth import _default_context
         self._con = context or _default_context
@@ -54,7 +59,6 @@ class Dataset(object):
         self._schema = schema or self._get_schema()
         self._query = query
         self._df = df
-        self._gdf = gdf
 
         if not self._validate_init():
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
@@ -200,8 +204,8 @@ class Dataset(object):
             Map(Layer(d))
 
         """
-        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
-        _save_index_as_column(dataset._gdf)
+        dataset = cls(df=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._df)
         return dataset
 
     @classmethod
@@ -227,17 +231,19 @@ class Dataset(object):
 
             Map(Layer(d))
         """
-        return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
+        return cls(df=load_geojson(geojson), state=cls.STATE_LOCAL)
 
     @property
     def dataframe(self):
         """Dataset DataFrame"""
         return self._df
 
-    @property
     def geodataframe(self):
-        """Dataset GeoDataFrame"""
-        return self._gdf
+        """Converts DataFrame into GeoDataFrame if possible"""
+        if HAS_GEOPANDAS and not isinstance(self._df, geopandas.GeoDataFrame):
+            self._df = compute_geodataframe(self)
+
+        return self._df
 
     @property
     def table_name(self):
@@ -392,7 +398,7 @@ class Dataset(object):
         if self._table_name is None or self._con is None:
             raise ValueError('You should provide a table_name and context to upload data.')
 
-        if self._gdf is None and self._df is None and self._query is None:
+        if self._df is None and self._query is None:
             raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
                              'GeoDataFrame, or a query to upload data to CARTO.')
 
@@ -401,13 +407,7 @@ class Dataset(object):
                                               'if_exists="replace" to overwrite it'.format(
                                                   t=self._table_name, s=self._schema))
 
-        # priority order: gdf, df, query
-        if self._gdf is not None:
-            warn('GeoDataFrame option is still under development. Attempting '
-                 'to upload as a DataFrame')
-            # TODO: uncomment when we support GeoDataFrame
-            # self._normalized_column_names = _normalize_column_names(self._gdf)
-
+        # priority order: df, query
         if self._df is not None:
             self._normalized_column_names = _normalize_column_names(self._df)
 
@@ -533,7 +533,7 @@ class Dataset(object):
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
     def _validate_init(self):
-        inputs = [self._table_name, self._query, self._df, self._gdf]
+        inputs = [self._table_name, self._query, self._df]
         inputs_number = sum(x is not None for x in inputs)
 
         if inputs_number != 1:
@@ -688,7 +688,7 @@ class Dataset(object):
         if self._state == Dataset.STATE_REMOTE:
             return self._get_remote_geom_type(get_query(self))
         elif self._state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(get_geodataframe(self))
+            return self._get_local_geom_type(self.geodataframe)
 
     def _get_remote_geom_type(self, query):
         """Fetch geom type of a remote table"""
@@ -740,14 +740,6 @@ def get_query(dataset):
             return compute_query(dataset)
         else:
             return dataset.query
-
-
-def get_geodataframe(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.geodataframe is None:
-            return compute_geodataframe(dataset)
-        else:
-            return dataset.geodataframe
 
 
 def _save_index_as_column(df):

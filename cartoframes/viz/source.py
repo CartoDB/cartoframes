@@ -199,9 +199,8 @@ class Source(object):
 
     def _set_source_geojson(self, dataset, bounds):
         self.type = SourceType.GEOJSON
-        gdf = get_geodataframe(dataset)
-        self.query = get_encoded_data(gdf)
-        self.bounds = bounds or get_bounds(gdf)
+        self.query = get_encoded_data(dataset.geodataframe)
+        self.bounds = bounds or get_bounds(dataset.geodataframe)
 
 
 def _check_table_name(data):

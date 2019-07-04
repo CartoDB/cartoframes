@@ -113,24 +113,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError):
             Dataset(table_name=table_name, schema=schema, df=df)
 
-    def test_dataset_constructor_validation_fails_with_table_name_and_geodataframe(self):
-        table_name = 'fake_table'
-        schema = 'fake_schema'
-        gdf = {}
-        with self.assertRaises(ValueError):
-            Dataset(table_name=table_name, schema=schema, gdf=gdf)
-
     def test_dataset_constructor_validation_fails_with_query_and_dataframe(self):
         query = 'select * from fake_table'
         df = {}
         with self.assertRaises(ValueError):
             Dataset(query=query, df=df)
-
-    def test_dataset_constructor_validation_fails_with_dataframe_and_geodataframe(self):
-        df = {}
-        gdf = {}
-        with self.assertRaises(ValueError):
-            Dataset(df=df, gdf=gdf)
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'
@@ -141,7 +128,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dataset._schema, 'public')
         self.assertIsNone(dataset._query)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._gdf)
         self.assertEqual(dataset._con, self.con)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
@@ -153,7 +139,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dataset._query, query)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._df)
-        self.assertIsNone(dataset._gdf)
         self.assertEqual(dataset._con, self.con)
         self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
 
@@ -165,19 +150,17 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dataset._df)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._gdf)
         self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
     def test_dataset_from_geodataframe(self):
         gdf = load_geojson(self.test_geojson)
-        dataset = Dataset.from_geodataframe(gdf=gdf)
+        dataset = Dataset.from_geodataframe(gdf)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset._gdf)
+        self.assertIsNotNone(dataset._df)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
@@ -186,10 +169,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset = Dataset.from_geojson(geojson=geojson)
 
         self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset._gdf)
+        self.assertIsNotNone(dataset._df)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._df)
         self.assertIsNone(dataset._con)
         self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
 
