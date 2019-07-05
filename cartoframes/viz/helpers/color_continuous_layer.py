@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_continuous_layer(source, value, title='', palette=None):
+def color_continuous_layer(source, value, title='', palette=None, description='', footer=''):
     """Helper function for quickly creating a continuous color map
 
     Args:
@@ -44,6 +44,7 @@ def color_continuous_layer(source, value, title='', palette=None):
                 'polygon': 'color-continuous-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': description,
+            'footer': footer
         }
     )
