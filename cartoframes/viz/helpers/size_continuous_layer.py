@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_continuous_layer(source, value, title='', size=None, color=None):
+def size_continuous_layer(source, value, title='', size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by `value`.
 
@@ -49,6 +49,7 @@ def size_continuous_layer(source, value, title='', size=None, color=None):
                 'polygon': 'size-continuous-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': description,
+            'footer': footer
         }
     )
