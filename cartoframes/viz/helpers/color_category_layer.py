@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, title='', top=11, cat=None, palette='bold', description='', footer='' ):
+def color_category_layer(source, value, title='', top=11, cat=None, palette='bold', description='', footer=''):
     """Helper function for quickly creating a category color map.
 
     Args:
