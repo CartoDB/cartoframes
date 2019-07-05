@@ -28,11 +28,11 @@ def size_bins_layer(source, value, title='', method='quantiles', bins=5, size=No
         source,
         style={
             'point': {
-                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(method,value, bins, size or [2, 14]),
+                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(method, value, bins, size or [2, 14]),
                 'color': 'opacity({0}, 0.8)'.format(color or '#EE4D5A')
             },
             'line': {
-                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(value, bins, size or [1, 10]),
+                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(method, value, bins, size or [1, 10]),
                 'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
             }
         },
