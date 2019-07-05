@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_category_layer(source, value, title='', top=5, cat=None, size=None, color=None):
+def size_category_layer(source, value, title='', top=5, cat=None, size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size category layer.
 
     Args:
@@ -51,6 +51,7 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
                 'polygon': 'size-category-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': description,
+            'footer': footer
         }
     )
