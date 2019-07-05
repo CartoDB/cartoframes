@@ -45,7 +45,6 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, palett
                 'polygon': 'color-bins-polygon'
             },
             'title': title or value,
-            'description': '',
             'description': description,
             'footer': footer
         }
