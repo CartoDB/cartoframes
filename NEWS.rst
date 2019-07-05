@@ -1,6 +1,16 @@
 Changelog
 =========
 
+1.0b2
+------
+
+Release 2019-xx-xx
+
+Updates
+
+- Optimize Dataset df/gdf (#704)
+
+
 1.0b1
 ------
 
