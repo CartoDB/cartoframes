@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
+def size_bins_layer(source, value, title='', method='quantiles', bins=5, size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
@@ -28,11 +28,11 @@ def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
         source,
         style={
             'point': {
-                'width': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, size or [2, 14]),
+                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(method,value, bins, size or [2, 14]),
                 'color': 'opacity({0}, 0.8)'.format(color or '#EE4D5A')
             },
             'line': {
-                'width': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, size or [1, 10]),
+                'width': 'ramp(global{0}(${1}, {2}), {3})'.format(value, bins, size or [1, 10]),
                 'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
             }
         },
@@ -49,6 +49,7 @@ def size_bins_layer(source, value, title='', bins=5, size=None, color=None):
                 'polygon': 'size-bins-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': description,
+            'footer': footer
         }
     )
