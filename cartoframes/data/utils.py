@@ -30,13 +30,11 @@ GEOM_COLUMN_NAMES = [
 
 LAT_COLUMN_NAMES = [
     'latitude',
-    'Latitude',
     'lat'
 ]
 
 LNG_COLUMN_NAMES = [
     'longitude',
-    'Longitude',
     'lng',
     'lon',
     'long'

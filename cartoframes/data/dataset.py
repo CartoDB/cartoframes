@@ -706,8 +706,8 @@ class Dataset(object):
 
     def _get_local_geom_type(self):
         """Compute geom type of the local dataframe"""
-        if len(self.geodataframe.geometry) > 0:
-            geometry = _first_value(self.geodataframe.geometry)
+        if len(self.dataframe.geometry) > 0:
+            geometry = _first_value(self.dataframe.geometry)
             if geometry and geometry.geom_type:
                 return self._map_geom_type(geometry.geom_type)
 
