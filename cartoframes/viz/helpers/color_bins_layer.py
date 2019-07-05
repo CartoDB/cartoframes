@@ -29,7 +29,7 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, palett
                 'color': 'ramp(global{0}(${1}, {2}), {3})'.format(method, value, bins, palette or 'purpor')
             },
             'polygon': {
-                'color': 'opacity(global{0}(${1}, {2}), {3}), 0.9)'.format(method, value, bins, palette or 'purpor')
+                'color': 'opacity(ramp(global{0}(${1}, {2}), {3}), 0.9)'.format(method, value, bins, palette or 'purpor')
             }
         },
         popup={
