@@ -47,9 +47,13 @@ class Widget():
             self._description = data.get('description', '')
             self._footer = data.get('footer', '')
             self._options = camel_dictionary(data.get('options', {}))
-            self._prop = data.get('prop', '')
+            self._prop = self.get_default_prop(data)
         else:
             raise ValueError('Wrong widget input.')
+
+    def get_default_prop(self, data):
+        prop = data.get('prop', '')
+        return 'filter' if self._type == 'animation' and not prop else prop
 
     def get_info(self):
         if self._type or self._title or self._description or self._footer:
@@ -62,15 +66,11 @@ class Widget():
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer,
-                'has_variable': self.has_variable(),
                 'has_bridge': self.has_bridge(),
                 'options': self._options
             }
         else:
             return {}
-
-    def has_variable(self):
-        return self._type == 'formula'
 
     def has_bridge(self):
         return self._type != 'formula' and self._type != 'default'

@@ -40,7 +40,6 @@ class TestWidget(unittest.TestCase):
             'description': '[description]',
             'footer': '[footer]',
             'has_bridge': False,
-            'has_variable': True,
             'prop': '',
             'options': {}
         })
@@ -57,3 +56,38 @@ class TestWidget(unittest.TestCase):
 
         with self.assertRaisesRegexp(ValueError, msg):
             Widget({'type': 'xxx'}).get_info()
+
+    def test_animation_widget(self):
+        """An Animation widget should be created successfully with the default property"""
+        widget = Widget({
+            'type': 'animation',
+        })
+
+        self.assertEqual(widget.get_info(), {
+            'type': 'animation',
+            'title': '',
+            'value': '',
+            'description': '',
+            'footer': '',
+            'has_bridge': True,
+            'prop': 'filter',
+            'options': {}
+        })
+
+    def test_animation_widget_prop(self):
+        """An Animation widget should be created successfully with a custom property"""
+        widget = Widget({
+            'type': 'animation',
+            'prop': 'width'
+        })
+
+        self.assertEqual(widget.get_info(), {
+            'type': 'animation',
+            'title': '',
+            'value': '',
+            'description': '',
+            'footer': '',
+            'has_bridge': True,
+            'prop': 'width',
+            'options': {}
+        })

@@ -85,7 +85,6 @@ class TestWidgetList(unittest.TestCase):
             'description': '[description]',
             'footer': '[footer]',
             'has_bridge': False,
-            'has_variable': True,
             'options': {}
           }, {
             'type': 'default',
@@ -95,6 +94,5 @@ class TestWidgetList(unittest.TestCase):
             'description': '',
             'footer': '',
             'has_bridge': False,
-            'has_variable': False,
             'options': {}
           }])
