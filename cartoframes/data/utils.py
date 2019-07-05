@@ -30,11 +30,13 @@ GEOM_COLUMN_NAMES = [
 
 LAT_COLUMN_NAMES = [
     'latitude',
+    'Latitude',
     'lat'
 ]
 
 LNG_COLUMN_NAMES = [
     'longitude',
+    'Longitude',
     'lng',
     'lon',
     'long'
@@ -61,6 +63,9 @@ def compute_query(dataset):
 
 def compute_geodataframe(dataset):
     if HAS_GEOPANDAS and dataset.dataframe is not None:
+        if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
+            return dataset.dataframe
+
         df = dataset.dataframe
         geom_column = _get_column(df, GEOM_COLUMN_NAMES)
         if geom_column is not None:

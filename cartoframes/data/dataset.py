@@ -240,8 +240,9 @@ class Dataset(object):
 
     def geodataframe(self):
         """Converts DataFrame into GeoDataFrame if possible"""
-        if HAS_GEOPANDAS and not isinstance(self._df, geopandas.GeoDataFrame):
-            self._df = compute_geodataframe(self)
+        gdf = compute_geodataframe(self)
+        if not gdf.empty:
+            self._df = gdf
 
         return self._df
 
