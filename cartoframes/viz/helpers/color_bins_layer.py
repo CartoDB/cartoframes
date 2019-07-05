@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_bins_layer(source, value, title='', bins=5, palette=None):
+def color_bins_layer(source, value, title='', method='quantiles', bins=5, palette=None, description='', footer=''):
     """Helper function for quickly creating a classed color map
 
     Args:
@@ -23,13 +23,13 @@ def color_bins_layer(source, value, title='', bins=5, palette=None):
         source,
         style={
             'point': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, palette or 'purpor')
+                'color': 'ramp(global{0}(${1}, {2}), {3})'.format(method, value, bins, palette or 'purpor')
             },
             'line': {
-                'color': 'ramp(globalQuantiles(${0}, {1}), {2})'.format(value, bins, palette or 'purpor')
+                'color': 'ramp(global{0}(${1}, {2}), {3})'.format(method, value, bins, palette or 'purpor')
             },
             'polygon': {
-                'color': 'opacity(ramp(globalQuantiles(${0}, {1}), {2}), 0.9)'.format(value, bins, palette or 'purpor')
+                'color': 'opacity(global{0}(${1}, {2}), {3}), 0.9)'.format(method, value, bins, palette or 'purpor')
             }
         },
         popup={
@@ -45,6 +45,8 @@ def color_bins_layer(source, value, title='', bins=5, palette=None):
                 'polygon': 'color-bins-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': '',
+            'description': description,
+            'footer': footer
         }
     )
