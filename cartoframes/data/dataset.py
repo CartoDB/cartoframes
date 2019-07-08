@@ -6,6 +6,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
+from ..client.client import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
     get_columns, get_public_context, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
@@ -48,6 +49,7 @@ class Dataset(object):
                  state=None, is_saved_in_carto=False, context=None):
         from ..auth import _default_context
         self._con = context or _default_context
+        self.client = get_client(self._con.creds, self._con.session)
 
         self._table_name = normalize_name(table_name)
         self._schema = schema or self._get_schema()
@@ -546,7 +548,7 @@ class Dataset(object):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
-    def _copyfrom(self, with_lnglat=None):
+        def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
