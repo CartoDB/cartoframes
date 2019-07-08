@@ -32,27 +32,27 @@ class Widget():
             raise ValueError('Wrong widget input.')
 
     def _init_widget(self, data, widget_type=''):
-        self._type = None
-        self._value = None
-        self._title = None
-        self._prop = None
-        self._description = None
-        self._footer = None
+        self._type = ''
+        self._value = ''
+        self._title = ''
+        self._prop = ''
+        self._description = ''
+        self._footer = ''
         self._options = {}
 
         if data is not None:
-            self._type = widget_type if widget_type else data.get('type', None)
-            self._value = data.get('value', None)
-            self._title = data.get('title', None)
-            self._description = data.get('description', None)
-            self._footer = data.get('footer', None)
+            self._type = widget_type if widget_type else data.get('type', '')
+            self._value = data.get('value', '')
+            self._title = data.get('title', '')
+            self._description = data.get('description', '')
+            self._footer = data.get('footer', '')
             self._options = camel_dictionary(data.get('options', {}))
             self._prop = self.get_default_prop(data)
         else:
             raise ValueError('Wrong widget input.')
 
     def get_default_prop(self, data):
-        prop = data.get('prop', None)
+        prop = data.get('prop', '')
         return 'filter' if self._type == 'animation' and not prop else prop
 
     def get_info(self):
