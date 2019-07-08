@@ -44,8 +44,7 @@ class Dataset(object):
     GEOM_TYPE_LINE = 'line'
     GEOM_TYPE_POLYGON = 'polygon'
 
-    def __init__(self, table_name=None, schema=None,
-                 query=None, df=None, gdf=None,
+    def __init__(self, table_name=None, schema=None, query=None, df=None,
                  state=None, is_saved_in_carto=False, context=None):
         from ..auth import _default_context
         self._con = context or _default_context
@@ -54,7 +53,6 @@ class Dataset(object):
         self._schema = schema or self._get_schema()
         self._query = query
         self._df = df
-        self._gdf = gdf
 
         if not self._validate_init():
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
@@ -200,8 +198,8 @@ class Dataset(object):
             Map(Layer(d))
 
         """
-        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
-        _save_index_as_column(dataset._gdf)
+        dataset = cls(df=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._df)
         return dataset
 
     @classmethod
@@ -227,17 +225,20 @@ class Dataset(object):
 
             Map(Layer(d))
         """
-        return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
+        return cls(df=load_geojson(geojson), state=cls.STATE_LOCAL)
 
     @property
     def dataframe(self):
         """Dataset DataFrame"""
         return self._df
 
-    @property
-    def geodataframe(self):
-        """Dataset GeoDataFrame"""
-        return self._gdf
+    def get_geodataframe(self):
+        """Converts DataFrame into GeoDataFrame if possible"""
+        gdf = compute_geodataframe(self)
+        if not gdf.empty:
+            self._df = gdf
+
+        return self.dataframe
 
     @property
     def table_name(self):
@@ -253,6 +254,12 @@ class Dataset(object):
     def query(self):
         """Dataset query"""
         return self._query
+
+    def get_query(self):
+        if self.query is None:
+            return compute_query(self)
+        else:
+            return self.query
 
     @property
     def context(self):
@@ -392,7 +399,7 @@ class Dataset(object):
         if self._table_name is None or self._con is None:
             raise ValueError('You should provide a table_name and context to upload data.')
 
-        if self._gdf is None and self._df is None and self._query is None:
+        if self._df is None and self._query is None:
             raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
                              'GeoDataFrame, or a query to upload data to CARTO.')
 
@@ -401,13 +408,7 @@ class Dataset(object):
                                               'if_exists="replace" to overwrite it'.format(
                                                   t=self._table_name, s=self._schema))
 
-        # priority order: gdf, df, query
-        if self._gdf is not None:
-            warn('GeoDataFrame option is still under development. Attempting '
-                 'to upload as a DataFrame')
-            # TODO: uncomment when we support GeoDataFrame
-            # self._normalized_column_names = _normalize_column_names(self._gdf)
-
+        # priority order: df, query
         if self._df is not None:
             self._normalized_column_names = _normalize_column_names(self._df)
 
@@ -516,7 +517,7 @@ class Dataset(object):
         """Checks to see if table or table used by query has public privacy"""
         public_context = get_public_context(self.context)
         try:
-            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            public_context.sql_client.send('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoException:
             return False
@@ -533,7 +534,7 @@ class Dataset(object):
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
     def _validate_init(self):
-        inputs = [self._table_name, self._query, self._df, self._gdf]
+        inputs = [self._table_name, self._query, self._df]
         inputs_number = sum(x is not None for x in inputs)
 
         if inputs_number != 1:
@@ -686,27 +687,27 @@ class Dataset(object):
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         if self._state == Dataset.STATE_REMOTE:
-            return self._get_remote_geom_type(get_query(self))
+            return self._get_remote_geom_type()
         elif self._state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(get_geodataframe(self))
+            return self._get_local_geom_type()
 
-    def _get_remote_geom_type(self, query):
+    def _get_remote_geom_type(self):
         """Fetch geom type of a remote table"""
         if self._con:
             response = self._con.sql_client.send('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5
-            '''.format(query))
+            '''.format(self.get_query()))
             if response and response.get('rows') and len(response.get('rows')) > 0:
                 st_geom_type = response.get('rows')[0].get('geom_type')
                 if st_geom_type:
                     return self._map_geom_type(st_geom_type[3:])
 
-    def _get_local_geom_type(self, gdf):
+    def _get_local_geom_type(self):
         """Compute geom type of the local dataframe"""
-        if len(gdf.geometry) > 0:
-            geometry = _first_value(gdf.geometry)
+        if not self.dataframe.empty and 'geometry' in self.dataframe and len(self.dataframe.geometry) > 0:
+            geometry = _first_value(self.dataframe.geometry)
             if geometry and geometry.geom_type:
                 return self._map_geom_type(geometry.geom_type)
 
@@ -732,22 +733,6 @@ class Dataset(object):
             return self._con.get_default_schema()
         else:
             return None
-
-
-def get_query(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.query is None:
-            return compute_query(dataset)
-        else:
-            return dataset.query
-
-
-def get_geodataframe(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.geodataframe is None:
-            return compute_geodataframe(dataset)
-        else:
-            return dataset.geodataframe
 
 
 def _save_index_as_column(df):
