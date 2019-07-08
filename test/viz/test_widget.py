@@ -40,7 +40,7 @@ class TestWidget(unittest.TestCase):
             'description': '[description]',
             'footer': '[footer]',
             'has_bridge': False,
-            'prop': '',
+            'prop': None,
             'options': {}
         })
 
@@ -65,10 +65,10 @@ class TestWidget(unittest.TestCase):
 
         self.assertEqual(widget.get_info(), {
             'type': 'animation',
-            'title': '',
-            'value': '',
-            'description': '',
-            'footer': '',
+            'title': None,
+            'value': None,
+            'description': None,
+            'footer': None,
             'has_bridge': True,
             'prop': 'filter',
             'options': {}
@@ -83,10 +83,10 @@ class TestWidget(unittest.TestCase):
 
         self.assertEqual(widget.get_info(), {
             'type': 'animation',
-            'title': '',
-            'value': '',
-            'description': '',
-            'footer': '',
+            'title': None,
+            'value': None,
+            'description': None,
+            'footer': None,
             'has_bridge': True,
             'prop': 'width',
             'options': {}
