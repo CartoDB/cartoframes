@@ -47,8 +47,8 @@ class TestWidgetList(unittest.TestCase):
 
         self.assertEqual(widget_list.widgets[1]._type, 'default')
         self.assertEqual(widget_list.widgets[1]._title, '"Custom Info"')
-        self.assertEqual(widget_list.widgets[1]._description, None)
-        self.assertEqual(widget_list.widgets[1]._footer, None)
+        self.assertEqual(widget_list.widgets[1]._description, '')
+        self.assertEqual(widget_list.widgets[1]._footer, '')
         self.assertTrue(isinstance(widget_list.widgets[1], Widget))
 
     def test_widget_list_init_with_a_widget(self):
@@ -81,7 +81,7 @@ class TestWidgetList(unittest.TestCase):
             'type': 'formula',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
-            'prop': None,
+            'prop': '',
             'description': '[description]',
             'footer': '[footer]',
             'has_bridge': False,
@@ -89,10 +89,10 @@ class TestWidgetList(unittest.TestCase):
           }, {
             'type': 'default',
             'title': '"Custom Info"',
-            'value': None,
-            'prop': None,
-            'description': None,
-            'footer': None,
+            'value': '',
+            'prop': '',
+            'description': '',
+            'footer': '',
             'has_bridge': False,
             'options': {}
           }])
