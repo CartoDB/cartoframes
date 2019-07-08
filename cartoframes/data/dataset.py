@@ -232,7 +232,7 @@ class Dataset(object):
         """Dataset DataFrame"""
         return self._df
 
-    def geodataframe(self):
+    def get_geodataframe(self):
         """Converts DataFrame into GeoDataFrame if possible"""
         gdf = compute_geodataframe(self)
         if not gdf.empty:
