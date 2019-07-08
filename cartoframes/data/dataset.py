@@ -257,7 +257,7 @@ class Dataset(object):
 
     def get_query(self):
         if self.query is None:
-            return compute_query(dataset)
+            return compute_query(self)
         else:
             return self.query
 
