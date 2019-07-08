@@ -194,7 +194,7 @@ class Source(object):
 
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY
-        self.query = get_query(dataset)
+        self.query = dataset.get_query()
         self.bounds = bounds
 
     def _set_source_geojson(self, dataset, bounds):

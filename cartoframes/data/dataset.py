@@ -238,7 +238,7 @@ class Dataset(object):
         if not gdf.empty:
             self._df = gdf
 
-        return self._df
+        return self.dataframe
 
     @property
     def table_name(self):
@@ -254,6 +254,12 @@ class Dataset(object):
     def query(self):
         """Dataset query"""
         return self._query
+
+    def get_query(self):
+        if self.query is None:
+            return compute_query(dataset)
+        else:
+            return self.query
 
     @property
     def context(self):
@@ -511,7 +517,7 @@ class Dataset(object):
         """Checks to see if table or table used by query has public privacy"""
         public_context = get_public_context(self.context)
         try:
-            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            public_context.sql_client.send('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoException:
             return False
@@ -681,18 +687,18 @@ class Dataset(object):
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         if self._state == Dataset.STATE_REMOTE:
-            return self._get_remote_geom_type(get_query(self))
+            return self._get_remote_geom_type()
         elif self._state == Dataset.STATE_LOCAL:
             return self._get_local_geom_type()
 
-    def _get_remote_geom_type(self, query):
+    def _get_remote_geom_type(self):
         """Fetch geom type of a remote table"""
         if self._con:
             response = self._con.sql_client.send('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5
-            '''.format(query))
+            '''.format(self.get_query()))
             if response and response.get('rows') and len(response.get('rows')) > 0:
                 st_geom_type = response.get('rows')[0].get('geom_type')
                 if st_geom_type:
@@ -727,14 +733,6 @@ class Dataset(object):
             return self._con.get_default_schema()
         else:
             return None
-
-
-def get_query(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.query is None:
-            return compute_query(dataset)
-        else:
-            return dataset.query
 
 
 def _save_index_as_column(df):
