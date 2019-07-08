@@ -16,7 +16,7 @@ from cartoframes.data.utils import setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
-from mocks.context_mock import ContextMock
+from mocks.context_mock import ContextMock, CredsMock
 
 from utils import _UserUrlLoader
 
@@ -463,19 +463,17 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_schema_from_org_context(self):
         username = 'fake_username'
 
-        class FakeCreds():
-            def username(self):
-                return username
-
         class FakeContext():
             def __init__(self):
                 self.is_org = True
-                self.creds = FakeCreds()
+                self.creds = CredsMock(key='', username=username)
+                self.version = ''
+                self.session = ''
 
             def get_default_schema(self):
                 return username
 
-        dataset = Dataset.from_table(table_name='fake_table', context=FakeContext())
+        dataset = DatasetMock.from_table(table_name='fake_table', context=FakeContext())
         self.assertEqual(dataset._schema, username)
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after

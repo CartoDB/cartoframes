@@ -41,3 +41,6 @@ class DatasetMock(Dataset):
 
     def compute_geom_type(self):
         return Dataset.GEOM_TYPE_POINT
+
+    def get_client(self):
+        return None

@@ -1,16 +1,17 @@
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
-from client import ClientBase
+from .client import ClientBase
+from .copy_client_utils import _rows
 
 class APIClient(ClientBase):
-    def __init__(self, creds, session):
+    def __init__(self, creds, session, version):
         self.auth_client = APIKeyAuthClient(
             base_url=creds.base_url(),
             api_key=creds.key(),
             session=session,
-            client_id='cartoframes_{}'.format(__version__),
-            user_agent='cartoframes_{}'.format(__version__)
+            client_id='cartoframes_{}'.format(version),
+            user_agent='cartoframes_{}'.format(version)
         )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)

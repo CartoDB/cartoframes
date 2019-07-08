@@ -6,7 +6,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from ..client.client import get_client
+from ..client.client_factory import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
     get_columns, get_public_context, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
@@ -49,7 +49,6 @@ class Dataset(object):
                  state=None, is_saved_in_carto=False, context=None):
         from ..auth import _default_context
         self._con = context or _default_context
-        self.client = get_client(self._con.creds, self._con.session)
 
         self._table_name = normalize_name(table_name)
         self._schema = schema or self._get_schema()
@@ -59,6 +58,8 @@ class Dataset(object):
         if not self._validate_init():
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
+        self._client = self.get_client()
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
@@ -273,11 +274,16 @@ class Dataset(object):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._con = context
         self._schema = context.get_default_schema()
+        self._client = self.get_client()
 
     @property
     def is_saved_in_carto(self):
         """Property on whether Dataset is saved in CARTO account"""
         return self._is_saved_in_carto
+
+    def get_client(self):
+        if self._con:
+            return get_client(self._con.creds, self._con.session, self._con.version)
 
     @property
     def dataset_info(self):
@@ -548,7 +554,7 @@ class Dataset(object):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
-        def _copyfrom(self, with_lnglat=None):
+    def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)

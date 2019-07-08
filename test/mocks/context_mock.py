@@ -20,6 +20,8 @@ class ContextMock():
     def __init__(self, username, api_key):
         self.is_org = True
         self.creds = CredsMock(key=api_key, username=username)
+        self.version = ''
+        self.session = ''
 
     def get_default_schema(self):
         return self.creds.username() or 'public'
