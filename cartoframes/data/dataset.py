@@ -61,7 +61,7 @@ class Dataset(object):
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self._client = self.get_client()
+        self._client = self._get_client()
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
@@ -276,16 +276,12 @@ class Dataset(object):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._con = context
         self._schema = context.get_default_schema()
-        self._client = self.get_client()
+        self._client = self._get_client()
 
     @property
     def is_saved_in_carto(self):
         """Property on whether Dataset is saved in CARTO account"""
         return self._is_saved_in_carto
-
-    def get_client(self):
-        if self._con:
-            return get_client(self._con.creds, self._con.session, self._con.version)
 
     @property
     def dataset_info(self):
@@ -527,6 +523,10 @@ class Dataset(object):
             return True
         except CartoException:
             return False
+
+    def _get_client(self):
+        if self._con:
+            return get_client(self._con.creds, self._con.session, self._con.version)
 
     def _create_table(self, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
