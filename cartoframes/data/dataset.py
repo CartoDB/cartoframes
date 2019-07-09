@@ -531,12 +531,12 @@ class Dataset(object):
             return False
 
     def _create_table(self, with_lnglat=None):
-        job = self._con.batch_sql_client \
-                  .create_and_wait_for_completion(
-                      '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                      .format(drop=self._drop_table_query(),
-                              create=self._create_table_query(with_lnglat),
-                              cartodbfy=self._cartodbfy_query()))
+        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                    .format(drop=self._drop_table_query(),
+                            create=self._create_table_query(with_lnglat),
+                            cartodbfy=self._cartodbfy_query())
+
+        job = self._client.execute_long_running_query(query)
 
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
@@ -609,11 +609,15 @@ class Dataset(object):
             if_exists='IF EXISTS' if if_exists else '')
 
     def _create_table_from_query(self):
-        self._con.batch_sql_client.create_and_wait_for_completion(
-            '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-            .format(drop=self._drop_table_query(),
-                    create=self._get_query_to_create_table_from_query(),
-                    cartodbfy=self._cartodbfy_query()))
+        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
+                    .format(drop=self._drop_table_query(),
+                            create=self._get_query_to_create_table_from_query(),
+                            cartodbfy=self._cartodbfy_query()))
+
+        self._client.execute_long_running_query(query)
+
+        if job['status'] != 'done':
+            raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)

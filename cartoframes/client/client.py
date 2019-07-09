@@ -13,3 +13,7 @@ class ClientBase(metaclass=ABCMeta):
     @abstractmethod
     def execute_query(self):
         pass
+
+    @abstractmethod
+    def execute_long_running_query(self):
+        pass
