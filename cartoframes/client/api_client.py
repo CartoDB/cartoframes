@@ -1,7 +1,13 @@
+import time
+from warnings import warn
+
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
+from carto.exceptions import CartoRateLimitException
 
 from .client import ClientBase
+
+DEFAULT_RETRY_TIMES = 3
 
 
 class APIClient(ClientBase):
@@ -17,8 +23,20 @@ class APIClient(ClientBase):
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
 
-    def download(self):
-        pass
+    def download(self, query, retry_times=DEFAULT_RETRY_TIMES):
+        try:
+            return self.copy_client.copyto_stream(query)
+        except CartoRateLimitException as err:
+            if retry_times > 0:
+                retry_times -= 1
+                warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
+                time.sleep(err.retry_after)
+                warn('Retrying...')
+                return self.download(query, retry_times=retry_times)
+            else:
+                warn(('Read call was rate-limited. '
+                    'This usually happens when there are multiple queries being read at the same time.'))
+                raise err
 
     def upload(self, query, data):
         return self.copy_client.copyfrom(query, data)

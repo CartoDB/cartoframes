@@ -8,13 +8,15 @@ from carto.exceptions import CartoException
 
 from ..client.client_factory import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
-    get_client_with_public_creds, DEFAULT_RETRY_TIMES
+    get_client_with_public_creds, _convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo
-from ..columns import Column, normalize_names, normalize_name
+from ..columns import Column, normalize_names, normalize_name, dtypes, date_columns_names, bool_columns_names
 from ..geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
+
+DOWNLOAD_RETRY_TIMES = 3
 
 
 class Dataset(object):
@@ -441,7 +443,7 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+    def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account
         associated with the Dataset's instance of :py:class:`Context
         <cartoframes.auth.Context>`.
@@ -452,10 +454,8 @@ class Dataset(object):
               >= 0.
             decode_geom (bool, optional): Decode Dataset geometries into
               Shapely geometries from EWKB encoding.
-            retry_times (int, optional): Number of time to retry the download
-              in case it fails. Default is Dataset.DEFAULT_RETRY_TIMES.
-
-
+            retry_times (int, optional): If the read call is rate limited,
+              number of retries to be made
         Example:
 
             .. code::
@@ -475,10 +475,8 @@ class Dataset(object):
             raise ValueError('You should provide a context and a table_name or query to download data.')
 
         # priority order: query, table
-        table_columns = self.get_table_columns()
-        query = self._get_read_query(table_columns, limit)
-        self._df = self._con.fetch(query, decode_geom=decode_geom)
-        return self._df
+        self._df = self._copyto(limit, decode_geom, retry_times)
+        return self.dataframe
 
     def delete(self):
         """Delete table on CARTO account associated with a Dataset instance
@@ -553,6 +551,33 @@ class Dataset(object):
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
+
+    def _copyto(self, limit, decode_geom, retry_times):
+        columns = self.get_table_columns()
+        query = self._get_read_query(columns, limit)
+
+        copy_query = """COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query=query)
+        raw_result = self._client.download(copy_query, retry_times)
+
+        df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
+        date_column_names = date_columns_names(columns)
+        bool_column_names = bool_columns_names(columns)
+
+        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
+        for bool_column_name in bool_column_names:
+            converters[bool_column_name] = lambda x: _convert_bool(x)
+
+        df = pd.read_csv(raw_result, dtype=df_types,
+                         parse_dates=date_column_names,
+                         true_values=['t'],
+                         false_values=['f'],
+                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
+                         converters=converters)
+
+        if decode_geom:
+            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+        return df
 
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
