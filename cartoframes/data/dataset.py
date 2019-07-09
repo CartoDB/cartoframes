@@ -8,7 +8,7 @@ from carto.exceptions import CartoException
 
 from ..client.client_factory import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
-    get_public_context, DEFAULT_RETRY_TIMES
+    get_client_with_public_creds, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -737,7 +737,7 @@ class Dataset(object):
         else:
             return None
 
-    def get_columns():
+    def get_columns(self):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
         table_info = self._client.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
