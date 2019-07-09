@@ -553,10 +553,14 @@ class Dataset(object):
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyto(self, limit, decode_geom, retry_times):
-        columns = self.get_table_columns()
-        query = self._get_read_query(columns, limit)
+        if self.query:
+            columns = self.get_columns()
+            query = self.query
+        else:
+            columns = self.get_table_columns()
+            query = self._get_read_query(columns, limit)
 
-        copy_query = """COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query=query)
+        copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
         raw_result = self._client.download(copy_query, retry_times)
 
         df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
