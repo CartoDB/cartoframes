@@ -8,7 +8,7 @@ from carto.exceptions import CartoException
 
 from ..client.client_factory import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
-    get_columns, get_public_context, DEFAULT_RETRY_TIMES
+    get_public_context, DEFAULT_RETRY_TIMES
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name
 from ..geojson import load_geojson
@@ -503,7 +503,7 @@ class Dataset(object):
 
         """
         if self.exists():
-            self._con.sql_client.send(self._drop_table_query(False))
+            self._client.execute_query(self._drop_table_query(False))
             self._unsync()
             return True
 
@@ -512,7 +512,7 @@ class Dataset(object):
     def exists(self):
         """Checks to see if table exists"""
         try:
-            self._con.sql_client.send(
+            self._client.execute_query(
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
@@ -523,9 +523,9 @@ class Dataset(object):
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_context = get_public_context(self.context)
+        public_client = get_client_with_public_creds(self.context)
         try:
-            public_context.sql_client.send('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoException:
             return False
@@ -660,8 +660,7 @@ class Dataset(object):
     def get_table_columns(self):
         """Get column names and types from a table or query result"""
         if self._query is not None:
-            query = 'SELECT * FROM ({}) _q limit 0'.format(self._query)
-            return get_columns(self._con, query)
+            return self.get_columns()
         else:
             query = '''
                 SELECT column_name, data_type
@@ -670,16 +669,12 @@ class Dataset(object):
             '''.format(table=self._table_name, schema=self._schema)
 
             try:
-                table_info = self._con.sql_client.send(query)
+                table_info = self._client.execute_query(query)
                 return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
             except CartoException as e:
                 # this may happen when using the default_public API key
                 if str(e) == 'Access denied':
-                    query = '''
-                        SELECT *
-                        FROM "{schema}"."{table}" LIMIT 0
-                    '''.format(table=self._table_name, schema=self._schema)
-                    return get_columns(self._con, query)
+                    return self.get_columns()
                 else:
                     raise e
 
@@ -702,7 +697,7 @@ class Dataset(object):
     def _get_remote_geom_type(self):
         """Fetch geom type of a remote table"""
         if self._con:
-            response = self._con.sql_client.send('''
+            response = self._client.execute_query('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5
@@ -741,6 +736,11 @@ class Dataset(object):
             return self._con.get_default_schema()
         else:
             return None
+
+    def get_columns():
+        query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
+        table_info = self._client.execute_query(query)
+        return Column.from_sql_api_fields(table_info['fields'])
 
 
 def _save_index_as_column(df):

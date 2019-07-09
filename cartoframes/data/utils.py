@@ -8,6 +8,7 @@ from copy import deepcopy
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..columns import Column
+from ..client.client_factory import get_client
 
 try:
     import geopandas
@@ -249,22 +250,12 @@ def recursive_read(context, query, retry_times=DEFAULT_RETRY_TIMES):
             raise err
 
 
-def get_columns(context, query):
-    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
-    table_info = context.sql_client.send(col_query)
-    return Column.from_sql_api_fields(table_info['fields'])
-
-
 def setting_value_exception(prop, value):
     return CartoException(("Error setting {prop}. You must use the `update` method: "
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_public_context(context):
+def get_client_with_public_creds(context):
     api_key = 'default_public'
-
-    public_context = deepcopy(context)
-    public_context.auth_client.api_key = api_key
-    public_context.auth_api_client.api_key = api_key
-
-    return public_context
+    public_creds = deepcopy(context.creds)
+    return get_client(public_creds, context.session, context.version)

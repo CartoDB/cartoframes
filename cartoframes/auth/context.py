@@ -32,7 +32,7 @@ from ..analysis import Table
 from ..__version__ import __version__
 from ..columns import dtypes, date_columns_names, bool_columns_names
 from ..data import Dataset
-from ..data.utils import decode_geometry, ENC_WKB_BHEX, recursive_read, get_columns
+from ..data.utils import decode_geometry, ENC_WKB_BHEX, recursive_read
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -518,7 +518,8 @@ class Context(object):
         copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
         result = recursive_read(self, copy_query)
 
-        query_columns = get_columns(self, query)
+        dataset = Dataset.from_query(query, context=self)
+        query_columns = dataset.get_columns()
         df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
         date_column_names = date_columns_names(query_columns)
         bool_column_names = bool_columns_names(query_columns)
