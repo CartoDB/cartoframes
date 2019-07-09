@@ -558,11 +558,19 @@ class Dataset(object):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
-        self._con.copy_client.copyfrom(
-            """COPY {table_name}({columns},the_geom)
-            FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
-            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lnglat, geom_col, enc_type)
-        )
+
+        query = """COPY {table_name}({columns},the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
+            table_name=self._table_name,
+            columns=columns)
+
+        data = self._rows(
+            self._df,
+            [c for c in self._df.columns if c != 'cartodb_id'],
+            with_lnglat,
+            geom_col,
+            enc_type)
+
+        self._client.upload(query, data)
 
     def _rows(self, df, cols, with_lnglat, geom_col, enc_type):
         for i, row in df.iterrows():

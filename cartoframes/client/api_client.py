@@ -20,8 +20,8 @@ class APIClient(ClientBase):
     def download(self):
         pass
 
-    def upload(self):
-        pass
+    def upload(self, query, data):
+        return self.copy_client.copyfrom(query, data)
 
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query, parse_json, do_post, format, **request_args)
