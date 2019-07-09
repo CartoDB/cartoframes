@@ -35,7 +35,7 @@ class APIClient(ClientBase):
                 return self.download(query, retry_times=retry_times)
             else:
                 warn(('Read call was rate-limited. '
-                    'This usually happens when there are multiple queries being read at the same time.'))
+                      'This usually happens when there are multiple queries being read at the same time.'))
                 raise err
 
     def upload(self, query, data):
