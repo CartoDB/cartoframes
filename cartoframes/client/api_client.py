@@ -23,4 +23,7 @@ class APIClient(ClientBase):
     def upload(self):
         pass
 
+    def execute_query(self, query):
+        return self.sql_client.send(query)
+
 

@@ -9,3 +9,7 @@ class ClientBase(metaclass=ABCMeta):
     @abstractmethod
     def upload(self):
         pass
+
+    @abstractmethod
+    def execute_query(self):
+        pass
