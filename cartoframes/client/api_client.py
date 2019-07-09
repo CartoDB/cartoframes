@@ -27,6 +27,6 @@ class APIClient(ClientBase):
         return self.sql_client.send(query, parse_json, do_post, format, **request_args)
 
     def execute_long_running_query(self, query):
-        self._con.batch_sql_client.create_and_wait_for_completion(query)
+        return self.batch_sql_client.create_and_wait_for_completion(query)
 
 
