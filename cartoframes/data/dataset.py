@@ -450,8 +450,8 @@ class Dataset(object):
               >= 0.
             decode_geom (bool, optional): Decode Dataset geometries into
               Shapely geometries from EWKB encoding.
-            retry_times (int, optional): If the read call is rate limited,
-              number of retries to be made
+            retry_times (int, optional): Number of time to retry the download
+              in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
         Example:
 
             .. code::
