@@ -2,7 +2,7 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from .client import ClientBase
-from .copy_client_utils import _rows
+
 
 class APIClient(ClientBase):
     def __init__(self, creds, session, version):
