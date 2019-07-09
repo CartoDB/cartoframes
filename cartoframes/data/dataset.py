@@ -532,9 +532,9 @@ class Dataset(object):
 
     def _create_table(self, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                    .format(drop=self._drop_table_query(),
-                            create=self._create_table_query(with_lnglat),
-                            cartodbfy=self._cartodbfy_query())
+                .format(drop=self._drop_table_query(),
+                        create=self._create_table_query(with_lnglat),
+                        cartodbfy=self._cartodbfy_query())
 
         job = self._client.execute_long_running_query(query)
 
@@ -610,11 +610,11 @@ class Dataset(object):
 
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                    .format(drop=self._drop_table_query(),
-                            create=self._get_query_to_create_table_from_query(),
-                            cartodbfy=self._cartodbfy_query()))
+                .format(drop=self._drop_table_query(),
+                        create=self._get_query_to_create_table_from_query(),
+                        cartodbfy=self._cartodbfy_query())
 
-        self._client.execute_long_running_query(query)
+        job = self._client.execute_long_running_query(query)
 
         if job['status'] != 'done':
             raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
