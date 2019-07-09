@@ -53,7 +53,7 @@ class Widget():
 
     def get_default_prop(self, data):
         prop = data.get('prop', '')
-        return 'filter' if self._type == 'animation' and not prop else prop
+        return 'filter' if self._type not in ('animation', 'time-series') and not prop else prop
 
     def get_info(self):
         if self._type or self._title or self._description or self._footer:

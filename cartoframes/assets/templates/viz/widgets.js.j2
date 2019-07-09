@@ -24,10 +24,10 @@ function renderBridge(bridge, widget) {
         ...widget.options
       }
 
-      bridge.animationControls(widget.element, widget.column, options);
+      bridge.animationControls(widget.element, widget.value, options);
       break;
     case 'time-series':
-      bridge.timeSeries(widget.element, widget.column, widget.options);
+      bridge.timeSeries(widget.element, widget.value, widget.options);
       break;
     default:
       widget.element.innerText = typeof widget.value === 'number' ? format(widget.value) : widget.value;
