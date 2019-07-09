@@ -63,5 +63,6 @@ WIDGET_TYPES = [
     'formula',
     'histogram',
     'category',
-    'animation'
+    'animation',
+    'time-series'
 ]

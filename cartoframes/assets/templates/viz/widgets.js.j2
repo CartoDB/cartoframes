@@ -20,10 +20,14 @@ function renderBridge(bridge, widget) {
       break;
     case 'animation':
       const options = {
-        propertyName: widget.prop
+        propertyName: widget.prop,
+        ...widget.options
       }
 
       bridge.animationControls(widget.element, widget.column, options);
+      break;
+    case 'time-series':
+      bridge.timeSeries(widget.element, widget.column, widget.options);
       break;
     default:
       widget.element.innerText = typeof widget.value === 'number' ? format(widget.value) : widget.value;
