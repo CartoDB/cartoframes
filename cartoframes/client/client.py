@@ -1,7 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 
-class ClientBase(ABC):
+class ClientBase():
+    __metaclass__ = ABCMeta
+
     @abstractmethod
     def download(self):
         pass
