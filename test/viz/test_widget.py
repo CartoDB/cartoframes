@@ -22,7 +22,6 @@ class TestWidget(unittest.TestCase):
         self.assertEqual(widget._title, '[TITLE]')
         self.assertEqual(widget._description, '[description]')
         self.assertEqual(widget._footer, '[footer]')
-        self.assertNotEqual(widget._name, None)
 
     def test_widget_info(self):
         """Widget should return a proper information object"""
@@ -36,12 +35,12 @@ class TestWidget(unittest.TestCase):
 
         self.assertEqual(widget.get_info(), {
             'type': 'formula',
-            'name': 'vb6dbcf',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]',
-            'has_variable': True,
+            'has_bridge': False,
+            'prop': '',
             'options': {}
         })
 
@@ -57,3 +56,38 @@ class TestWidget(unittest.TestCase):
 
         with self.assertRaisesRegexp(ValueError, msg):
             Widget({'type': 'xxx'}).get_info()
+
+    def test_animation_widget(self):
+        """An Animation widget should be created successfully with the default property"""
+        widget = Widget({
+            'type': 'animation',
+        })
+
+        self.assertEqual(widget.get_info(), {
+            'type': 'animation',
+            'title': '',
+            'value': '',
+            'description': '',
+            'footer': '',
+            'has_bridge': True,
+            'prop': 'filter',
+            'options': {}
+        })
+
+    def test_animation_widget_prop(self):
+        """An Animation widget should be created successfully with a custom property"""
+        widget = Widget({
+            'type': 'animation',
+            'prop': 'width'
+        })
+
+        self.assertEqual(widget.get_info(), {
+            'type': 'animation',
+            'title': '',
+            'value': '',
+            'description': '',
+            'footer': '',
+            'has_bridge': True,
+            'prop': 'width',
+            'options': {}
+        })

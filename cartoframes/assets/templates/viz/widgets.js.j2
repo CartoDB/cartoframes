@@ -1,12 +1,33 @@
 {% include 'utils/format.js.j2' %}
 
-function renderWidget(layer, widget, variable, layerIndex, widgetIndex=0) {
-  const element = widget.element;
+function renderWidget(widget, variable) {
+  widget.element = widget.element || document.querySelector(`#${widget.id}`);
 
-  if (widget.type === 'formula') {
-    element.innerText = format(variable.value);
-  } else {
-    element.innerText = variable ? variable.value : widget.value;
+  if (widget.value) {
+    widget.element.innerText = typeof value === 'number' ? format(value) : value;
+  }
+}
+
+function renderBridge(bridge, widget) {
+  widget.element = widget.element || document.querySelector(`#${widget.id}`);
+
+  switch (widget.type) {
+    case 'histogram':
+      bridge.histogram(widget.element, widget.value, widget.options);
+      break;
+    case 'category':
+      bridge.category(widget.element, widget.value, widget.options);
+      break;
+    case 'animation':
+      const options = {
+        propertyName: widget.prop
+      }
+
+      bridge.animationControls(widget.element, widget.column, options);
+      break;
+    default:
+      widget.element.innerText = typeof widget.value === 'number' ? format(widget.value) : widget.value;
+      break;
   }
 }
 
@@ -19,17 +40,8 @@ function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
   });
 
   widgets
-    .filter((widget) => !widget.has_variable)
-    .forEach((widget) => {
-      switch (widget.type) {
-        case 'histogram':
-          bridge.histogram(widget.element, widget.value, widget.options);
-          break;
-        case 'category':
-          bridge.category(widget.element, widget.value, widget.options);
-          break;
-      }
-    });
+    .filter((widget) => widget.has_bridge)
+    .forEach((widget) => renderBridge(bridge, widget));
 
   bridge.build();
 }
