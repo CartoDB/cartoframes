@@ -14,23 +14,24 @@ def size_bins_layer(
           or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
         title (str, optional): Title of legend.
-        method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
+        method (str, optional): Classification method of data: "quantiles", "equal", "stdev". 
+          Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
-        breaks (int[], optional): TODO.
+        breaks (int[], optional): Assign manual class break values.
         size (str, optiona): Min/max size array in CARTO VL syntax. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
-        description (str, optional): TODO.
-        footer (str, optional): TODO.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
         popup on `value`.
     """
     if method not in ('quantiles', 'equal', 'stdev'):
-        raise ValueError('Wrong method. Available methods are: "quantiles", "equal", "stdev"')
+        raise ValueError('Available methods are: "quantiles", "equal", "stdev"')
 
     func = 'buckets' if breaks else {
         'quantiles': 'globalQuantiles',
