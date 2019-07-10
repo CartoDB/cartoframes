@@ -6,8 +6,18 @@ CARTOframes
     :target: https://travis-ci.org/CartoDB/cartoframes
 .. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
     :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
-.. image:: https://mybinder.org/badge_logo.svg
+
+Try it Out
+==========
+
+* Stable (v0.10.1): |stable|
+* Latest (develop branch): |develop|
+
+.. |stable| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b1?filepath=examples
+
+.. |develop| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes.git/develop?filepath=examples
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
