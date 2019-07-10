@@ -9,14 +9,16 @@ def color_category_layer(source, value, title='', top=11, cat=None, palette='bol
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
-        value (str): Column to symbolize by
-        title (str, optional): Title of legend
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
         cat (str, optional): Category list. Must be a valid CARTO VL category
           list.
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `bold`.
+        description (str, optional): TODO.
+        footer (str, optional): TODO.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and

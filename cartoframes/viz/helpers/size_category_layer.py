@@ -9,8 +9,8 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
-        value (str): Column to symbolize by
-        title (str, optional): Title of legend
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
         top (int, optional): Number of size categories for layer. Default is
           5. Valid values range from 1 to 16.
         cat (str, optional): Category list. Must be a valid CARTO VL category
@@ -20,6 +20,8 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
+        description (str, optional): TODO.
+        footer (str, optional): TODO.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and

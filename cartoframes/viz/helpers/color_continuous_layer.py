@@ -9,10 +9,12 @@ def color_continuous_layer(source, value, title='', palette=None, description=''
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
-        value (str): Column to symbolize by
+        value (str): Column to symbolize by.
         title (str, optional): Title of legend
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `bluyl`.
+        description (str, optional): TODO.
+        footer (str, optional): TODO.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and

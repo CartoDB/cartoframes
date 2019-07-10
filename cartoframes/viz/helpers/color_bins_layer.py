@@ -9,8 +9,8 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, breaks
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
-        value (str): Column to symbolize by
-        title (str, optional): Title of legend
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
         bins (int, optional): Number of classes (bins) for map. Default is 5.
         breaks (int[], optional): TODO.
