@@ -526,7 +526,7 @@ class Dataset(object):
 
     def _get_client(self):
         if self._con:
-            return get_client(self._con.creds, self._con.session, self._con.version)
+            return get_client(self._con.creds, self._con.session)
 
     def _create_table(self, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(

@@ -239,7 +239,7 @@ def setting_value_exception(prop, value):
 def get_client_with_public_creds(context):
     api_key = 'default_public'
     public_creds = deepcopy(context.creds)
-    return get_client(public_creds, context.session, context.version)
+    return get_client(public_creds, context.session)
 
 
 def _convert_bool(x):

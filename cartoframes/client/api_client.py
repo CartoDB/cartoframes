@@ -6,18 +6,19 @@ from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoRateLimitException
 
 from .client import ClientBase
+from ..__version__ import __version__
 
 DEFAULT_RETRY_TIMES = 3
 
 
 class APIClient(ClientBase):
-    def __init__(self, creds, session, version):
+    def __init__(self, creds, session=None):
         self.auth_client = APIKeyAuthClient(
             base_url=creds.base_url(),
             api_key=creds.key(),
             session=session,
-            client_id='cartoframes_{}'.format(version),
-            user_agent='cartoframes_{}'.format(version)
+            client_id='cartoframes_{}'.format(__version__),
+            user_agent='cartoframes_{}'.format(__version__)
         )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
