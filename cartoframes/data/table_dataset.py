@@ -72,8 +72,11 @@ class TableDataset(DatasetBase):
         self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
-    def download(self):
-        pass
+    def download(self, limit, decode_geom, retry_times):
+        self._is_ready_for_dowload_validation()
+        columns = self._get_table_columns()
+        query = self._get_read_query(columns, limit)
+        return self._copyto(columns, query, limit, decode_geom, retry_times)
 
     def upload(self):
         raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
@@ -111,3 +114,23 @@ class TableDataset(DatasetBase):
     def _unsync(self):
         # self._is_saved_in_carto = False
         self._dataset_info = None
+
+    def _get_table_columns(self):
+        """Get column names and types from a table"""
+        query = '''
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = '{table}' AND table_schema = '{schema}'
+        '''.format(table=self._table_name, schema=self._schema)
+
+        try:
+            table_info = self._client.execute_query(query)
+            return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+        except CartoRateLimitException as err:
+            raise err
+        except CartoException as e:
+            # this may happen when using the default_public API key
+            if str(e) == 'Access denied':
+                return self.get_columns()
+            else:
+                raise e

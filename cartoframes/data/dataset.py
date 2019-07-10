@@ -339,12 +339,7 @@ class Dataset(object):
                 df = d.download(decode_geom=True)
 
         """
-        if self._con is None or (self._table_name is None and self._query is None):
-            raise ValueError('You should provide a context and a table_name or query to download data.')
 
-        # priority order: query, table
-        self._df = self._copyto(limit, decode_geom, retry_times)
-        return self._df
 
 
     def is_public(self):
@@ -385,36 +380,7 @@ class Dataset(object):
         return True
 
 
-    def _copyto(self, limit, decode_geom, retry_times):
-        if self._query:
-            columns = self.get_columns()
-            query = self._query
-        else:
-            columns = self.get_table_columns()
-            query = self._get_read_query(columns, limit)
 
-        copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
-        raw_result = self._client.download(copy_query, retry_times)
-
-        df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
-        date_column_names = date_columns_names(columns)
-        bool_column_names = bool_columns_names(columns)
-
-        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
-        for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: convert_bool(x)
-
-        df = pd.read_csv(raw_result, dtype=df_types,
-                         parse_dates=date_column_names,
-                         true_values=['t'],
-                         false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters=converters)
-
-        if decode_geom:
-            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
-
-        return df
 
 
 
@@ -459,28 +425,7 @@ class Dataset(object):
 
         return query
 
-    def get_table_columns(self):
-        """Get column names and types from a table or query result"""
-        if self._query is not None:
-            return self.get_columns()
-        else:
-            query = '''
-                SELECT column_name, data_type
-                FROM information_schema.columns
-                WHERE table_name = '{table}' AND table_schema = '{schema}'
-            '''.format(table=self._table_name, schema=self._schema)
 
-            try:
-                table_info = self._client.execute_query(query)
-                return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
-            except CartoRateLimitException as err:
-                raise err
-            except CartoException as e:
-                # this may happen when using the default_public API key
-                if str(e) == 'Access denied':
-                    return self.get_columns()
-                else:
-                    raise e
 
     def get_table_column_names(self, exclude=None):
         """Get column names and types from a table"""
@@ -539,10 +484,7 @@ class Dataset(object):
         else:
             return None
 
-    def get_columns(self):
-        query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
-        table_info = self._client.execute_query(query)
-        return Column.from_sql_api_fields(table_info['fields'])
+
 
 
 def _save_index_as_column(df):

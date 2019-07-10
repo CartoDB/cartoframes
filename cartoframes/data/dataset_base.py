@@ -100,3 +100,41 @@ class DatasetBase():
         if self._table_name is None or self._context is None:
             raise ValueError('You should provide a table_name and context to upload data.')
 
+    def _is_ready_for_dowload_validation(self):
+        if self._context is None or (self._table_name is None and self._query is None):
+            raise ValueError('You should provide a context and a table_name or query to download data.')
+
+    def _copyto(self, columns, query, limit, decode_geom, retry_times):
+        copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
+        raw_result = self._client.download(copy_query, retry_times)
+
+        df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
+        date_column_names = date_columns_names(columns)
+        bool_column_names = bool_columns_names(columns)
+
+        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
+        for bool_column_name in bool_column_names:
+            converters[bool_column_name] = lambda x: convert_bool(x)
+
+        df = pd.read_csv(raw_result, dtype=df_types,
+                         parse_dates=date_column_names,
+                         true_values=['t'],
+                         false_values=['f'],
+                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
+                         converters=converters)
+
+        if decode_geom:
+            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+        return df
+
+    def get_query_columns(self):
+        query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
+        table_info = self._client.execute_query(query)
+        return Column.from_sql_api_fields(table_info['fields'])
+
+    def get_query(self):
+        if self.query:
+            return self._query
+        else:
+            return compute_query(self)

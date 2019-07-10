@@ -9,9 +9,9 @@ class DataFrameDataset(DatasetBase):
         self._df = data
 
     def download(self):
-        raise ValueError('It is not possible to download a DataFrameDataset')
+        self._is_ready_for_dowload_validation()
 
-    def upload(self, with_lnglat, if_exists):
+    def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
         if if_exists == DatasetBase.REPLACE or not self.exists():

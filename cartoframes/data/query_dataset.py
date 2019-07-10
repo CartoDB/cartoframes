@@ -8,10 +8,12 @@ class QueryDataset(DatasetBase):
 
         self._query = data
 
-    def download(self):
-        pass
+    def download(self, limit, decode_geom, retry_times):
+        self._is_ready_for_dowload_validation()
+        columns = self.get_query_columns()
+        return self._copyto(columns, self._query, limit, decode_geom, retry_times)
 
-    def upload(self, with_lnglat, if_exists):
+    def upload(self, if_exists):
         self._is_ready_for_upload_validation()
 
         if if_exists == DatasetBase.APPEND:
@@ -38,3 +40,4 @@ class QueryDataset(DatasetBase):
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
+
