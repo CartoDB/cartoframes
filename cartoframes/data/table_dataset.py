@@ -5,7 +5,6 @@ class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
         super(TableDataset, self).__init__(data)
         self._state = DataFrameDataset.STATE_REMOTE
-        self._is_saved_in_carto = True
 
         if context:
             self._context = context
@@ -17,15 +16,10 @@ class TableDataset(DatasetBase):
         pass
 
     def upload(self):
-        pass
+        raise ValueError('It is not possible to upload a TableDataset')
 
     @property
     def dataset_info(self):
-        if not self._is_saved_in_carto:
-            raise CartoException('Your data is not synchronized with CARTO.'
-                                 'First of all, you should call upload method '
-                                 'to save your data in CARTO.')
-
         if self._dataset_info is None:
             self._dataset_info = self._get_dataset_info()
 
