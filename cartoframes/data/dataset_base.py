@@ -33,3 +33,6 @@ class DatasetBase():
     @abstractmethod
     def upload(self):
         pass
+
+    def get_data(self):
+        return self.data
