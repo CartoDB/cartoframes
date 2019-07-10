@@ -242,7 +242,7 @@ def get_client_with_public_creds(context):
     return create_client(public_creds, context.session)
 
 
-def _convert_bool(x):
+def convert_bool(x):
     if x:
         if x == 't':
             return True

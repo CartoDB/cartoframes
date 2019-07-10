@@ -8,7 +8,7 @@ from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..client import create_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
-    get_client_with_public_creds, _convert_bool, ENC_WKB_BHEX
+    get_client_with_public_creds, convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name, dtypes, date_columns_names, bool_columns_names
 from ..geojson import load_geojson
@@ -575,7 +575,7 @@ class Dataset(object):
 
         converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
         for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: _convert_bool(x)
+            converters[bool_column_name] = lambda x: convert_bool(x)
 
         df = pd.read_csv(raw_result, dtype=df_types,
                          parse_dates=date_column_names,
