@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_bins_layer(source, value, title='', method='quantiles', bins=5, breaks=None, size=None, color=None, description='', footer=''):
+def size_bins_layer(
+        source, value, title='', method='quantiles', bins=5,
+        breaks=None, size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
@@ -40,12 +42,16 @@ def size_bins_layer(source, value, title='', method='quantiles', bins=5, breaks=
         source,
         style={
             'point': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, breaks or bins, size or [2, 14]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#EE4D5A')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, breaks or bins, size or [2, 14]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#EE4D5A')
             },
             'line': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, breaks or bins, size or [1, 10]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, breaks or bins, size or [1, 10]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#4CC8A3')
             }
         },
         popup={

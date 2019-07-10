@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_bins_layer(source, value, title='', method='quantiles', bins=5, breaks=None, palette=None, description='', footer=''):
+def color_bins_layer(
+        source, value, title='', method='quantiles', bins=5,
+        breaks=None, palette=None, description='', footer=''):
     """Helper function for quickly creating a classed color map
 
     Args:
@@ -25,7 +27,7 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, breaks
     """
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Wrong method. Available methods are: "quantiles", "equal", "stdev"')
-    
+
     func = 'buckets' if breaks else {
         'quantiles': 'globalQuantiles',
         'equal': 'globalEqIntervals',
@@ -36,13 +38,16 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, breaks
         source,
         style={
             'point': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, breaks or bins, palette or 'purpor')
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, breaks or bins, palette or 'purpor')
             },
             'line': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, breaks or bins, palette or 'purpor')
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, breaks or bins, palette or 'purpor')
             },
             'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(method, value, breaks or bins, palette or 'purpor')
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
+                    method, value, breaks or bins, palette or 'purpor')
             }
         },
         popup={

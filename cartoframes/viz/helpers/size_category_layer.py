@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_category_layer(source, value, title='', top=5, cat=None, size=None, color=None, description='', footer=''):
+def size_category_layer(
+        source, value, title='', top=5, cat=None,
+        size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size category layer.
 
     Args:
@@ -32,12 +34,16 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
         source,
         style={
             'point': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, size or [2, 20]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#F46D43')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, size or [2, 20]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#F46D43')
             },
             'line': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, size or [1, 10]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, size or [1, 10]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#4CC8A3')
             }
         },
         popup={

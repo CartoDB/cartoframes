@@ -3,7 +3,8 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_continuous_layer(source, value, title='', palette=None, description='', footer=''):
+def color_continuous_layer(
+        source, value, title='', palette=None, description='', footer=''):
     """Helper function for quickly creating a continuous color map
 
     Args:
@@ -24,13 +25,16 @@ def color_continuous_layer(source, value, title='', palette=None, description=''
         source,
         style={
             'point': {
-                'color': 'ramp(linear(${0}), {1})'.format(value, palette or 'bluyl')
+                'color': 'ramp(linear(${0}), {1})'.format(
+                    value, palette or 'bluyl')
             },
             'line': {
-                'color': 'ramp(linear(${0}), {1})'.format(value, palette or 'bluyl')
+                'color': 'ramp(linear(${0}), {1})'.format(
+                    value, palette or 'bluyl')
             },
             'polygon': {
-                'color': 'opacity(ramp(linear(${0}), {1}), 0.9)'.format(value, palette or 'bluyl')
+                'color': 'opacity(ramp(linear(${0}), {1}), 0.9)'.format(
+                    value, palette or 'bluyl')
             }
         },
         popup={

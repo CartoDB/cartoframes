@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_continuous_layer(source, value, title='', size=None, color=None, description='', footer=''):
+def size_continuous_layer(
+        source, value, title='', size=None,
+        color=None, description='', footer=''):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by `value`.
 
@@ -30,12 +32,15 @@ def size_continuous_layer(source, value, title='', size=None, color=None, descri
             'point': {
                 'width': 'ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})'.format(
                     value, size or [2, 40]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#FFB927'),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#FFB927'),
                 'strokeColor': 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
             },
             'line': {
-                'width': 'ramp(linear(${0}), {1})'.format(value, size or [1, 10]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
+                'width': 'ramp(linear(${0}), {1})'.format(
+                    value, size or [1, 10]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#4CC8A3')
             }
         },
         popup={

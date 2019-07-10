@@ -3,7 +3,9 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def color_category_layer(source, value, title='', top=11, cat=None, palette='bold', description='', footer=''):
+def color_category_layer(
+        source, value, title='', top=11, cat=None,
+        palette='bold', description='', footer=''):
     """Helper function for quickly creating a category color map.
 
     Args:
@@ -29,13 +31,16 @@ def color_category_layer(source, value, title='', top=11, cat=None, palette='bol
         source,
         style={
             'point': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, palette)
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, palette)
             },
             'line': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, palette)
+                'color': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, palette)
             },
             'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(func, value, cat or top, palette)
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
+                    func, value, cat or top, palette)
             }
         },
         popup={
