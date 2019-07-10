@@ -1,4 +1,4 @@
-cartoframes
+-e git+https://github.com/cartodb/cartoframes.git@develop#egg=cartoframes
 # Additional dependencies from examples
 matplotlib
 pandas
