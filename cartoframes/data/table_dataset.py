@@ -1,16 +1,21 @@
 from .dataset_base import DatasetBase
+from ..columns import normalize_name
 
 
 class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
-        super(TableDataset, self).__init__(data)
-        self._state = DataFrameDataset.STATE_REMOTE
+        super(TableDataset, self).__init__(normalize_name(data))
+        self._state = DatasetBase.STATE_REMOTE
 
         if context:
             self._context = context
 
         self.schema = schema or self._get_schema()
         self._dataset_info = None
+        self._normalized_column_names = None
+
+        if self.data != data:
+            warn('Table will be named `{}`'.format(table_name))
 
     def download(self):
         pass
