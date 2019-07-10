@@ -1,6 +1,19 @@
 Changelog
 =========
 
+1.0b2
+------
+
+Release 2019-xx-xx
+
+Updates
+
+- Optimize Dataset df/gdf (#704)
+- Decoupling clients from Dataset (#831)
+- Client Architecture (#833)
+- Fix retry_times usage in Dataset.download (#783)
+
+
 1.0b1
 ------
 

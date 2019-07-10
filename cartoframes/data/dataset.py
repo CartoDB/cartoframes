@@ -4,16 +4,19 @@ import pandas as pd
 from tqdm import tqdm
 from warnings import warn
 
-from carto.exceptions import CartoException
+from carto.exceptions import CartoException, CartoRateLimitException
 
-from .utils import decode_geometry, compute_query, compute_geodataframe, get_columns, DEFAULT_RETRY_TIMES, \
-    get_public_context
+from ..client import create_client
+from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
+    get_client_with_public_creds, convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo
-from ..columns import Column, normalize_names, normalize_name
+from ..columns import Column, normalize_names, normalize_name, dtypes, date_columns_names, bool_columns_names
 from ..geojson import load_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
+
+DOWNLOAD_RETRY_TIMES = 3
 
 
 class Dataset(object):
@@ -44,8 +47,7 @@ class Dataset(object):
     GEOM_TYPE_LINE = 'line'
     GEOM_TYPE_POLYGON = 'polygon'
 
-    def __init__(self, table_name=None, schema=None,
-                 query=None, df=None, gdf=None,
+    def __init__(self, table_name=None, schema=None, query=None, df=None,
                  state=None, is_saved_in_carto=False, context=None):
         from ..auth import _default_context
         self._con = context or _default_context
@@ -54,11 +56,12 @@ class Dataset(object):
         self._schema = schema or self._get_schema()
         self._query = query
         self._df = df
-        self._gdf = gdf
 
         if not self._validate_init():
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
+
+        self._client = self._create_client()
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
@@ -200,8 +203,8 @@ class Dataset(object):
             Map(Layer(d))
 
         """
-        dataset = cls(gdf=gdf, state=cls.STATE_LOCAL)
-        _save_index_as_column(dataset._gdf)
+        dataset = cls(df=gdf, state=cls.STATE_LOCAL)
+        _save_index_as_column(dataset._df)
         return dataset
 
     @classmethod
@@ -227,17 +230,20 @@ class Dataset(object):
 
             Map(Layer(d))
         """
-        return cls(gdf=load_geojson(geojson), state=cls.STATE_LOCAL)
+        return cls(df=load_geojson(geojson), state=cls.STATE_LOCAL)
 
     @property
     def dataframe(self):
         """Dataset DataFrame"""
         return self._df
 
-    @property
-    def geodataframe(self):
-        """Dataset GeoDataFrame"""
-        return self._gdf
+    def get_geodataframe(self):
+        """Converts DataFrame into GeoDataFrame if possible"""
+        gdf = compute_geodataframe(self)
+        if not gdf.empty:
+            self._df = gdf
+
+        return self._df
 
     @property
     def table_name(self):
@@ -254,6 +260,12 @@ class Dataset(object):
         """Dataset query"""
         return self._query
 
+    def get_query(self):
+        if self.query is None:
+            return compute_query(self)
+        else:
+            return self._query
+
     @property
     def context(self):
         """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
@@ -264,6 +276,7 @@ class Dataset(object):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._con = context
         self._schema = context.get_default_schema()
+        self._client = self._create_client()
 
     @property
     def is_saved_in_carto(self):
@@ -392,7 +405,7 @@ class Dataset(object):
         if self._table_name is None or self._con is None:
             raise ValueError('You should provide a table_name and context to upload data.')
 
-        if self._gdf is None and self._df is None and self._query is None:
+        if self._df is None and self._query is None:
             raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
                              'GeoDataFrame, or a query to upload data to CARTO.')
 
@@ -401,13 +414,7 @@ class Dataset(object):
                                               'if_exists="replace" to overwrite it'.format(
                                                   t=self._table_name, s=self._schema))
 
-        # priority order: gdf, df, query
-        if self._gdf is not None:
-            warn('GeoDataFrame option is still under development. Attempting '
-                 'to upload as a DataFrame')
-            # TODO: uncomment when we support GeoDataFrame
-            # self._normalized_column_names = _normalize_column_names(self._gdf)
-
+        # priority order: df, query
         if self._df is not None:
             self._normalized_column_names = _normalize_column_names(self._df)
 
@@ -432,7 +439,7 @@ class Dataset(object):
 
         return self
 
-    def download(self, limit=None, decode_geom=False, retry_times=DEFAULT_RETRY_TIMES):
+    def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account
         associated with the Dataset's instance of :py:class:`Context
         <cartoframes.auth.Context>`.
@@ -444,9 +451,7 @@ class Dataset(object):
             decode_geom (bool, optional): Decode Dataset geometries into
               Shapely geometries from EWKB encoding.
             retry_times (int, optional): Number of time to retry the download
-              in case it fails. Default is Dataset.DEFAULT_RETRY_TIMES.
-
-
+              in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
         Example:
 
             .. code::
@@ -466,9 +471,7 @@ class Dataset(object):
             raise ValueError('You should provide a context and a table_name or query to download data.')
 
         # priority order: query, table
-        table_columns = self.get_table_columns()
-        query = self._get_read_query(table_columns, limit)
-        self._df = self._con.fetch(query, decode_geom=decode_geom)
+        self._df = self._copyto(limit, decode_geom, retry_times)
         return self._df
 
     def delete(self):
@@ -494,7 +497,7 @@ class Dataset(object):
 
         """
         if self.exists():
-            self._con.sql_client.send(self._drop_table_query(False))
+            self._client.execute_query(self._drop_table_query(False))
             self._unsync()
             return True
 
@@ -503,10 +506,12 @@ class Dataset(object):
     def exists(self):
         """Checks to see if table exists"""
         try:
-            self._con.sql_client.send(
+            self._client.execute_query(
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
+        except CartoRateLimitException as err:
+            raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
             self._con._debug_print(err=err)
@@ -514,26 +519,34 @@ class Dataset(object):
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_context = get_public_context(self.context)
+        public_client = get_client_with_public_creds(self.context)
         try:
-            public_context.sql_client.send('EXPLAIN {}'.format(get_query(self)), do_post=False)
+            public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
+        except CartoRateLimitException as err:
+            raise err
         except CartoException:
             return False
 
-    def _create_table(self, with_lnglat=None):
-        job = self._con.batch_sql_client \
-                  .create_and_wait_for_completion(
-                      '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-                      .format(drop=self._drop_table_query(),
-                              create=self._create_table_query(with_lnglat),
-                              cartodbfy=self._cartodbfy_query()))
+    def _create_client(self):
+        if self._con:
+            return create_client(self._con.creds, self._con.session)
 
-        if job['status'] != 'done':
-            raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
+    def _create_table(self, with_lnglat=None):
+        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
+            drop=self._drop_table_query(),
+            create=self._create_table_query(with_lnglat),
+            cartodbfy=self._cartodbfy_query())
+
+        try:
+            self._client.execute_long_running_query(query)
+        except CartoRateLimitException as err:
+            raise err
+        except CartoException as err:
+            raise CartoException('Cannot create table: {}.'.format(err))
 
     def _validate_init(self):
-        inputs = [self._table_name, self._query, self._df, self._gdf]
+        inputs = [self._table_name, self._query, self._df]
         inputs_number = sum(x is not None for x in inputs)
 
         if inputs_number != 1:
@@ -545,17 +558,56 @@ class Dataset(object):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
+    def _copyto(self, limit, decode_geom, retry_times):
+        if self._query:
+            columns = self.get_columns()
+            query = self._query
+        else:
+            columns = self.get_table_columns()
+            query = self._get_read_query(columns, limit)
+
+        copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
+        raw_result = self._client.download(copy_query, retry_times)
+
+        df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
+        date_column_names = date_columns_names(columns)
+        bool_column_names = bool_columns_names(columns)
+
+        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
+        for bool_column_name in bool_column_names:
+            converters[bool_column_name] = lambda x: convert_bool(x)
+
+        df = pd.read_csv(raw_result, dtype=df_types,
+                         parse_dates=date_column_names,
+                         true_values=['t'],
+                         false_values=['f'],
+                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
+                         converters=converters)
+
+        if decode_geom:
+            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
+
+        return df
+
     def _copyfrom(self, with_lnglat=None):
         geom_col = _get_geom_col_name(self._df)
-
+        enc_type = _detect_encoding_type(self._df, geom_col)
         columns = ','.join(norm for norm, orig in self._normalized_column_names)
-        self._con.copy_client.copyfrom(
-            """COPY {table_name}({columns},the_geom)
-               FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(table_name=self._table_name, columns=columns),
-            self._rows(self._df, [c for c in self._df.columns if c != 'cartodb_id'], with_lnglat, geom_col)
-        )
 
-    def _rows(self, df, cols, with_lnglat, geom_col):
+        query = """COPY {table_name}({columns},the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
+            table_name=self._table_name,
+            columns=columns)
+
+        data = self._rows(
+            self._df,
+            [c for c in self._df.columns if c != 'cartodb_id'],
+            with_lnglat,
+            geom_col,
+            enc_type)
+
+        self._client.upload(query, data)
+
+    def _rows(self, df, cols, with_lnglat, geom_col, enc_type):
         for i, row in df.iterrows():
             csv_row = ''
             the_geom_val = None
@@ -578,7 +630,7 @@ class Dataset(object):
                     csv_row += '{val}|'.format(val=val)
 
             if the_geom_val is not None:
-                geom = decode_geometry(the_geom_val)
+                geom = decode_geometry(the_geom_val, enc_type)
                 if geom:
                     csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
             if with_lnglat is not None and lng_val is not None and lat_val is not None:
@@ -600,11 +652,17 @@ class Dataset(object):
             if_exists='IF EXISTS' if if_exists else '')
 
     def _create_table_from_query(self):
-        self._con.batch_sql_client.create_and_wait_for_completion(
-            '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''
-            .format(drop=self._drop_table_query(),
-                    create=self._get_query_to_create_table_from_query(),
-                    cartodbfy=self._cartodbfy_query()))
+        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
+            drop=self._drop_table_query(),
+            create=self._get_query_to_create_table_from_query(),
+            cartodbfy=self._cartodbfy_query())
+
+        try:
+            self._client.execute_long_running_query(query)
+        except CartoRateLimitException as err:
+            raise err
+        except CartoException as err:
+            raise CartoException('Cannot create table: {}.'.format(err))
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
@@ -651,8 +709,7 @@ class Dataset(object):
     def get_table_columns(self):
         """Get column names and types from a table or query result"""
         if self._query is not None:
-            query = 'SELECT * FROM ({}) _q limit 0'.format(self._query)
-            return get_columns(self._con, query)
+            return self.get_columns()
         else:
             query = '''
                 SELECT column_name, data_type
@@ -661,16 +718,14 @@ class Dataset(object):
             '''.format(table=self._table_name, schema=self._schema)
 
             try:
-                table_info = self._con.sql_client.send(query)
+                table_info = self._client.execute_query(query)
                 return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+            except CartoRateLimitException as err:
+                raise err
             except CartoException as e:
                 # this may happen when using the default_public API key
                 if str(e) == 'Access denied':
-                    query = '''
-                        SELECT *
-                        FROM "{schema}"."{table}" LIMIT 0
-                    '''.format(table=self._table_name, schema=self._schema)
-                    return get_columns(self._con, query)
+                    return self.get_columns()
                 else:
                     raise e
 
@@ -686,27 +741,27 @@ class Dataset(object):
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         if self._state == Dataset.STATE_REMOTE:
-            return self._get_remote_geom_type(get_query(self))
+            return self._get_remote_geom_type()
         elif self._state == Dataset.STATE_LOCAL:
-            return self._get_local_geom_type(get_geodataframe(self))
+            return self._get_local_geom_type()
 
-    def _get_remote_geom_type(self, query):
+    def _get_remote_geom_type(self):
         """Fetch geom type of a remote table"""
         if self._con:
-            response = self._con.sql_client.send('''
+            response = self._client.execute_query('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5
-            '''.format(query))
+            '''.format(self.get_query()))
             if response and response.get('rows') and len(response.get('rows')) > 0:
                 st_geom_type = response.get('rows')[0].get('geom_type')
                 if st_geom_type:
                     return self._map_geom_type(st_geom_type[3:])
 
-    def _get_local_geom_type(self, gdf):
+    def _get_local_geom_type(self):
         """Compute geom type of the local dataframe"""
-        if len(gdf.geometry) > 0:
-            geometry = _first_value(gdf.geometry)
+        if not self._df.empty and 'geometry' in self._df and len(self._df.geometry) > 0:
+            geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
                 return self._map_geom_type(geometry.geom_type)
 
@@ -733,21 +788,10 @@ class Dataset(object):
         else:
             return None
 
-
-def get_query(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.query is None:
-            return compute_query(dataset)
-        else:
-            return dataset.query
-
-
-def get_geodataframe(dataset):
-    if isinstance(dataset, Dataset):
-        if dataset.geodataframe is None:
-            return compute_geodataframe(dataset)
-        else:
-            return dataset.geodataframe
+    def get_columns(self):
+        query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
+        table_info = self._client.execute_query(query)
+        return Column.from_sql_api_fields(table_info['fields'])
 
 
 def _save_index_as_column(df):
@@ -806,14 +850,25 @@ def _get_geom_col_name(df):
 def _get_geom_col_type(df):
     geom_col = _get_geom_col_name(df)
     if geom_col is not None:
-        geom = decode_geometry(_first_value(df[geom_col]))
-        if geom is not None:
-            return geom.geom_type
+        first_geom = _first_value(df[geom_col])
+        if first_geom:
+            enc_type = detect_encoding_type(first_geom)
+            geom = decode_geometry(first_geom, enc_type)
+            if geom is not None:
+                return geom.geom_type
+        else:
+            warn('Dataset with null geometries')
 
 
 def _first_value(array):
     array = array.loc[~array.isnull()]  # Remove null values
     if len(array) > 0:
         return array.iloc[0]
-    else:
-        warn('Dataset with null geometries')
+
+
+def _detect_encoding_type(df, geom_col):
+    if geom_col is not None:
+        first_geom = _first_value(df[geom_col])
+        if first_geom:
+            return detect_encoding_type(first_geom)
+    return ''

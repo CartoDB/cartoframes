@@ -13,7 +13,7 @@ widget_a = {
 
 widget_b = {
     'type': 'default',
-    'value': '"Custom Info"',
+    'title': '"Custom Info"',
 }
 
 
@@ -31,7 +31,6 @@ class TestWidgetList(unittest.TestCase):
         self.assertEqual(widget_list.widgets[0]._title, '[TITLE]')
         self.assertEqual(widget_list.widgets[0]._description, '[description]')
         self.assertEqual(widget_list.widgets[0]._footer, '[footer]')
-        self.assertNotEqual(widget_list.widgets[0]._name, None)
         self.assertTrue(isinstance(widget_list.widgets[0], Widget))
 
     def test_widget_list_init_with_a_list_of_dict(self):
@@ -44,15 +43,12 @@ class TestWidgetList(unittest.TestCase):
         self.assertEqual(widget_list.widgets[0]._title, '[TITLE]')
         self.assertEqual(widget_list.widgets[0]._description, '[description]')
         self.assertEqual(widget_list.widgets[0]._footer, '[footer]')
-        self.assertNotEqual(widget_list.widgets[0]._name, None)
         self.assertTrue(isinstance(widget_list.widgets[0], Widget))
 
         self.assertEqual(widget_list.widgets[1]._type, 'default')
-        self.assertEqual(widget_list.widgets[1]._value, '"Custom Info"')
-        self.assertEqual(widget_list.widgets[1]._title, '')
+        self.assertEqual(widget_list.widgets[1]._title, '"Custom Info"')
         self.assertEqual(widget_list.widgets[1]._description, '')
         self.assertEqual(widget_list.widgets[1]._footer, '')
-        self.assertNotEqual(widget_list.widgets[1]._name, None)
         self.assertTrue(isinstance(widget_list.widgets[1], Widget))
 
     def test_widget_list_init_with_a_widget(self):
@@ -64,58 +60,39 @@ class TestWidgetList(unittest.TestCase):
         """WidgetList should be properly initialized"""
 
         widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
+            Widget(widget_a),
+            Widget(widget_b)
         ])
 
         self.assertTrue(isinstance(widget_list.widgets[0], Widget))
         self.assertTrue(isinstance(widget_list.widgets[1], Widget))
 
-    def test_widget_list_variables(self):
-        """Widget List should return a proper variables object"""
-        widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
-        ])
-
-        variables = widget_list.get_variables()
-        self.assertEqual(variables, {
-            'vb6dbcf': 'viewportSum($amount)'
-        })
-
-    def test_widget_list_variables_when_is_empty(self):
-        """Widget List should return an empty dict"""
-
-        widget_list = WidgetList()
-        variables = widget_list.get_variables()
-        self.assertEqual(variables, {})
-
     def test_widget_list_get_widgets_info(self):
         """Widget List should return a proper widgets info object"""
 
         widget_list = WidgetList([
-          Widget(widget_a),
-          Widget(widget_b)
+            Widget(widget_a),
+            Widget(widget_b)
         ])
 
         widgets_info = widget_list.get_widgets_info()
         self.assertEqual(widgets_info, [
           {
             'type': 'formula',
-            'name': 'vb6dbcf',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
+            'prop': '',
             'description': '[description]',
             'footer': '[footer]',
-            'has_variable': True,
+            'has_bridge': False,
             'options': {}
           }, {
             'type': 'default',
-            'name': 'v76441e',
-            'value': '"Custom Info"',
-            'title': '',
+            'title': '"Custom Info"',
+            'value': '',
+            'prop': '',
             'description': '',
             'footer': '',
-            'has_variable': False,
+            'has_bridge': False,
             'options': {}
           }])
