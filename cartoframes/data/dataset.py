@@ -6,7 +6,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..client.client_factory import get_client
+from ..client import create_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
     get_client_with_public_creds, _convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo
@@ -61,7 +61,7 @@ class Dataset(object):
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self._client = self._get_client()
+        self._client = self._create_client()
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
@@ -276,7 +276,7 @@ class Dataset(object):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._con = context
         self._schema = context.get_default_schema()
-        self._client = self._get_client()
+        self._client = self._create_client()
 
     @property
     def is_saved_in_carto(self):
@@ -528,9 +528,9 @@ class Dataset(object):
         except CartoException:
             return False
 
-    def _get_client(self):
+    def _create_client(self):
         if self._con:
-            return get_client(self._con.creds, self._con.session)
+            return create_client(self._con.creds, self._con.session)
 
     def _create_table(self, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
