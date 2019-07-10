@@ -534,10 +534,10 @@ class Dataset(object):
             create=self._create_table_query(with_lnglat),
             cartodbfy=self._cartodbfy_query())
 
-        job = self._client.execute_long_running_query(query)
-
-        if job['status'] != 'done':
-            raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
+        try:
+            self._client.execute_long_running_query(query)
+        except CartoException as err:
+            raise CartoException('Cannot create table: {}.'.format(err))
 
     def _validate_init(self):
         inputs = [self._table_name, self._query, self._df]
@@ -651,10 +651,10 @@ class Dataset(object):
             create=self._get_query_to_create_table_from_query(),
             cartodbfy=self._cartodbfy_query())
 
-        job = self._client.execute_long_running_query(query)
-
-        if job['status'] != 'done':
-            raise CartoException('Cannot create table: {}.'.format(job['failed_reason']))
+        try:
+            self._client.execute_long_running_query(query)
+        except CartoException as err:
+            raise CartoException('Cannot create table: {}.'.format(err))
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
