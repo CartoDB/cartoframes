@@ -1,6 +1,5 @@
 import re
 import sys
-import time
 import binascii as ba
 from warnings import warn
 from copy import deepcopy
@@ -8,6 +7,7 @@ from copy import deepcopy
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..columns import Column
+from ..client import create_client
 
 try:
     import geopandas
@@ -15,8 +15,6 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-
-DEFAULT_RETRY_TIMES = 3
 
 GEOM_COLUMN_NAMES = [
     'geometry',
@@ -233,38 +231,23 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-def recursive_read(context, query, retry_times=DEFAULT_RETRY_TIMES):
-    try:
-        return context.copy_client.copyto_stream(query)
-    except CartoRateLimitException as err:
-        if retry_times > 0:
-            retry_times -= 1
-            warn('Read call rate limited. Waiting {s} seconds'.format(s=err.retry_after))
-            time.sleep(err.retry_after)
-            warn('Retrying...')
-            return recursive_read(context, query, retry_times=retry_times)
-        else:
-            warn(('Read call was rate-limited. '
-                  'This usually happens when there are multiple queries being read at the same time.'))
-            raise err
-
-
-def get_columns(context, query):
-    col_query = '''SELECT * FROM ({query}) _q LIMIT 0'''.format(query=query)
-    table_info = context.sql_client.send(col_query)
-    return Column.from_sql_api_fields(table_info['fields'])
-
-
 def setting_value_exception(prop, value):
     return CartoException(("Error setting {prop}. You must use the `update` method: "
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_public_context(context):
+def get_client_with_public_creds(context):
     api_key = 'default_public'
+    public_creds = deepcopy(context.creds)
+    return create_client(public_creds, context.session)
 
-    public_context = deepcopy(context)
-    public_context.auth_client.api_key = api_key
-    public_context.auth_api_client.api_key = api_key
 
-    return public_context
+def convert_bool(x):
+    if x:
+        if x == 't':
+            return True
+        if x == 'f':
+            return False
+        return bool(x)
+    else:
+        return None

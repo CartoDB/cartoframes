@@ -30,9 +30,7 @@ from ..maps import (non_basemap_layers, get_map_name,
                     get_map_template, top_basemap_layer_url)
 from ..analysis import Table
 from ..__version__ import __version__
-from ..columns import dtypes, date_columns_names, bool_columns_names
 from ..data import Dataset
-from ..data.utils import decode_geometry, ENC_WKB_BHEX, recursive_read, get_columns
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse, urlencode
@@ -172,6 +170,7 @@ class Context(object):
                  verbose=0):
 
         self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
+        self.session = session
         self.auth_client = APIKeyAuthClient(
             base_url=self.creds.base_url(),
             api_key=self.creds.key(),
@@ -513,29 +512,8 @@ class Context(object):
                 )
 
         """
-        copy_query = 'COPY ({query}) TO stdout WITH (FORMAT csv, HEADER true)'.format(query=query)
-        result = recursive_read(self, copy_query)
-
-        query_columns = get_columns(self, query)
-        df_types = dtypes(query_columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
-        date_column_names = date_columns_names(query_columns)
-        bool_column_names = bool_columns_names(query_columns)
-
-        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
-        for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: _convert_bool(x)
-
-        df = pd.read_csv(result, dtype=df_types,
-                         parse_dates=date_column_names,
-                         true_values=['t'],
-                         false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters=converters)
-
-        if decode_geom:
-            df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
-
-        return df
+        dataset = Dataset.from_query(query, context=self)
+        return dataset.download(decode_geom=decode_geom)
 
     def execute(self, query):
         """Runs an arbitrary query to a CARTO account.
@@ -1766,14 +1744,3 @@ class Context(object):
                                                      str_value[-50:])
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
-
-
-def _convert_bool(x):
-    if x:
-        if x == 't':
-            return True
-        if x == 'f':
-            return False
-        return bool(x)
-    else:
-        return None
