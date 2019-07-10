@@ -1,7 +1,7 @@
 <as-time-series-widget
   animated
   id="{{id}}"
-  time-format='%Q'
+  time-format="{% if widget.options.timeFormat %}{{widget.options.timeFormat}}{% endif %}"
   description="{{widget.description}}"
   heading="{{widget.title}}">
 </as-time-series-widget>
