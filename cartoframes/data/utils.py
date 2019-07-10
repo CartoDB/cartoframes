@@ -7,7 +7,7 @@ from copy import deepcopy
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..columns import Column
-from ..client.client_factory import get_client
+from ..client import create_client
 
 try:
     import geopandas
@@ -239,10 +239,10 @@ def setting_value_exception(prop, value):
 def get_client_with_public_creds(context):
     api_key = 'default_public'
     public_creds = deepcopy(context.creds)
-    return get_client(public_creds, context.session, context.version)
+    return create_client(public_creds, context.session)
 
 
-def _convert_bool(x):
+def convert_bool(x):
     if x:
         if x == 't':
             return True

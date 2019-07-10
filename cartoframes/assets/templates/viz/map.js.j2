@@ -96,18 +96,19 @@ function onReady() {
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
-        widget.element = document.querySelector(`#layer${layers.length - index - 1}_widget${widgetIndex}-${widget.name}`);
+        const id = `layer${layers.length - index - 1}_widget${widgetIndex}`;
+        widget.id = id;
       });
-
-      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
 
       mapLayer.on('updated', () => {
         layer.widgets
-          .filter((widget) => widget.has_variable)
-          .forEach((widget, widgetIndex) => {
-            renderWidget(mapLayer, widget, mapViz.variables[widget.name], layers.length - index - 1, widgetIndex);
+          .filter((widget) => !widget.has_bridge)
+          .forEach((widget) => {
+            renderWidget(widget);
           })
       });
+
+      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
     }
   });
 

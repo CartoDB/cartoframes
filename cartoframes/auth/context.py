@@ -171,7 +171,6 @@ class Context(object):
 
         self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
         self.session = session
-        self.version = __version__
         self.auth_client = APIKeyAuthClient(
             base_url=self.creds.base_url(),
             api_key=self.creds.key(),

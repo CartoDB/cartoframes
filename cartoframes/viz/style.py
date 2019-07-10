@@ -63,6 +63,7 @@ class Style(object):
     def compute_viz(self, geom_type, variables={}):
         style = self._style
         default_style = defaults.STYLE[geom_type]
+
         if isinstance(style, dict):
             if geom_type in style:
                 style = style.get(geom_type)

@@ -43,13 +43,6 @@ class WidgetList(object):
         else:
             return []
 
-    def get_variables(self):
-        variables = {}
-        for widget in self.widgets:
-            if widget and widget.has_variable():
-                variables[widget._name] = widget._value
-        return variables
-
     def get_widgets_info(self):
         widgets_info = []
         for widget in self.widgets:
