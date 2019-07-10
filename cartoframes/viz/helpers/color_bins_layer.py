@@ -14,6 +14,7 @@ def color_bins_layer(source, value, title='', method='quantiles', bins=5, palett
         bins (int, optional): Number of classes (bins) for map. Default is 5.
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `purpor`.
+        method (str, optional): Classification method of data
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
