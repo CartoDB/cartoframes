@@ -26,7 +26,7 @@ def color_bins_layer(
         popup on `value`.
     """
     if method not in ('quantiles', 'equal', 'stdev'):
-        raise ValueError('Wrong method. Available methods are: "quantiles", "equal", "stdev"')
+        raise ValueError('Wrong method. Available methods are: "quantiles", "equal", "stdev".')
 
     func = 'buckets' if breaks else {
         'quantiles': 'globalQuantiles',
@@ -34,20 +34,26 @@ def color_bins_layer(
         'stdev': 'globalStandardDev'
     }.get(method)
 
+    default_palette = 'purpor' if breaks else {
+        'quantiles': 'purpor',
+        'equal': 'purpor',
+        'stdev': 'temps'
+    }.get(method)
+
     return Layer(
         source,
         style={
             'point': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or 'purpor')
+                    func, value, breaks or bins, palette or default_palette)
             },
             'line': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or 'purpor')
+                    func, value, breaks or bins, palette or default_palette)
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    method, value, breaks or bins, palette or 'purpor')
+                    func, value, breaks or bins, palette or default_palette)
             }
         },
         popup={

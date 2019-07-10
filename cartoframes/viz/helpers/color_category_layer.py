@@ -5,7 +5,7 @@ from ..layer import Layer
 
 def color_category_layer(
         source, value, title='', top=11, cat=None,
-        palette='bold', description='', footer=''):
+        palette=None, description='', footer=''):
     """Helper function for quickly creating a category color map.
 
     Args:
@@ -32,15 +32,15 @@ def color_category_layer(
         style={
             'point': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, palette)
+                    func, value, cat or top, palette or 'bold')
             },
             'line': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, palette)
+                    func, value, cat or top, palette or 'bold')
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    func, value, cat or top, palette)
+                    func, value, cat or top, palette or 'bold')
             }
         },
         popup={
