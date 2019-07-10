@@ -4,7 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 from warnings import warn
 
-from carto.exceptions import CartoException
+from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..client.client_factory import get_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
@@ -510,6 +510,8 @@ class Dataset(object):
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
+        except CartoRateLimitException as err:
+            raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
             self._con._debug_print(err=err)
@@ -521,6 +523,8 @@ class Dataset(object):
         try:
             public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
+        except CartoRateLimitException as err:
+            raise err
         except CartoException:
             return False
 
@@ -536,6 +540,8 @@ class Dataset(object):
 
         try:
             self._client.execute_long_running_query(query)
+        except CartoRateLimitException as err:
+            raise err
         except CartoException as err:
             raise CartoException('Cannot create table: {}.'.format(err))
 
@@ -653,6 +659,8 @@ class Dataset(object):
 
         try:
             self._client.execute_long_running_query(query)
+        except CartoRateLimitException as err:
+            raise err
         except CartoException as err:
             raise CartoException('Cannot create table: {}.'.format(err))
 
@@ -712,6 +720,8 @@ class Dataset(object):
             try:
                 table_info = self._client.execute_query(query)
                 return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
+            except CartoRateLimitException as err:
+                raise err
             except CartoException as e:
                 # this may happen when using the default_public API key
                 if str(e) == 'Access denied':
