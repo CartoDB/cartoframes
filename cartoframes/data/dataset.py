@@ -243,7 +243,7 @@ class Dataset(object):
         if not gdf.empty:
             self._df = gdf
 
-        return self.dataframe
+        return self._df
 
     @property
     def table_name(self):
@@ -264,7 +264,7 @@ class Dataset(object):
         if self.query is None:
             return compute_query(self)
         else:
-            return self.query
+            return self._query
 
     @property
     def context(self):
@@ -472,7 +472,7 @@ class Dataset(object):
 
         # priority order: query, table
         self._df = self._copyto(limit, decode_geom, retry_times)
-        return self.dataframe
+        return self._df
 
     def delete(self):
         """Delete table on CARTO account associated with a Dataset instance
@@ -559,9 +559,9 @@ class Dataset(object):
             .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyto(self, limit, decode_geom, retry_times):
-        if self.query:
+        if self._query:
             columns = self.get_columns()
-            query = self.query
+            query = self._query
         else:
             columns = self.get_table_columns()
             query = self._get_read_query(columns, limit)
@@ -760,8 +760,8 @@ class Dataset(object):
 
     def _get_local_geom_type(self):
         """Compute geom type of the local dataframe"""
-        if not self.dataframe.empty and 'geometry' in self.dataframe and len(self.dataframe.geometry) > 0:
-            geometry = _first_value(self.dataframe.geometry)
+        if not self._df.empty and 'geometry' in self._df and len(self._df.geometry) > 0:
+            geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
                 return self._map_geom_type(geometry.geom_type)
 
