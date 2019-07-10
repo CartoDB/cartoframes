@@ -7,7 +7,7 @@ from ..geojson import load_geojson
 
 
 class Dataset(object):
-    def __init__(self, data):
+    def __init__(self, data, context=None, schema=None):
         self._strategy = self._get_strategy(data)
 
     def _get_strategy(self, data):
@@ -15,11 +15,15 @@ class Dataset(object):
             return DataFrameDataset(data)
         elif isinstance(data, str):
             if _is_sql_query(data):
-                return QueryDataset(data)
+                if not context:
+                    raise ValueError('QueryDataset needs a Context object')
+                return QueryDataset(data, context)
             elif _is_geojson_file_path(data) or isinstance(data, (list, dict)):
                 return DataFrameDataset(load_geojson(data))
             else:
-                return TableDataset(data)
+                if not context:
+                    raise ValueError('TableDataset needs a Context object')
+                return TableDataset(data, context, schema)
         else:
             raise ValueError('We can not detect the Dataset type')
 
@@ -27,31 +31,17 @@ class Dataset(object):
         self._strategy = strategy(data)
 
     def download(self):
-        data = self._strategy.download()
+        self._strategy.download()
         self._set_strategy(DataFrameDataset, data)
+        return self._strategy.dataframe
 
-    def upload(self):
-        self._strategy.upload()
+    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
+        if table_name:
+            self._strategy.table_name = table_name
+        if context:
+            self._strategy.context = context
+        if schema:
+            self._strategy.schema = schema
 
+        self._strategy.upload(with_lnglat, if_exists)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _is_sql_query(data):
-    return re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
-
-
-def _is_geojson_file_path(data):
-    return isinstance(data, str) and re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)

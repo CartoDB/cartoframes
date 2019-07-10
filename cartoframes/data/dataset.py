@@ -285,28 +285,7 @@ class Dataset(object):
 
     @property
     def dataset_info(self):
-        """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance
 
-
-        .. note::
-            This method only works for Datasets created from tables.
-
-        Example:
-
-            .. code::
-
-               from cartoframes.auth import set_default_context
-               from cartoframes.data import Dataset
-
-               set_default_context(
-                   base_url='https://your_user_name.carto.com/',
-                   api_key='your api key'
-               )
-
-               d = Dataset.from_table('tablename')
-               d.dataset_info
-
-        """
         if not self._is_saved_in_carto:
             raise CartoException('Your data is not synchronized with CARTO.'
                                  'First of all, you should call upload method '
@@ -323,119 +302,12 @@ class Dataset(object):
         return self._dataset_info
 
     def update_dataset_info(self, privacy=None, name=None):
-        """Update/change Dataset privacy and name
 
-        Args:
-          privacy (str, optional): One of DatasetInfo.PRIVATE,
-            DatasetInfo.PUBLIC, or DatasetInfo.LINK
-          name (str, optional): Name of the dataset on CARTO.
-
-        Example:
-
-            .. code::
-
-                from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
-
-                set_default_context(
-                    base_url='https://your_user_name.carto.com/',
-                    api_key='your api key'
-                )
-
-                d = Dataset.from_table('tablename')
-                d.update_dataset_info(privacy='link')
-
-        """
         self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
-        """Upload Dataset to CARTO account associated with `context`.
 
-        Args:
-            with_lnglat (tuple, optional): Two columns that have the longitude
-              and latitude information. If used, a point geometry will be
-              created upon upload to CARTO. Example input: `('long', 'lat')`.
-              Defaults to `None`.
-            if_exists (str, optional): Behavior for adding data from Dataset.
-              Options are 'fail', 'replace', or 'append'. Defaults to 'fail',
-              which means that the Dataset instance will not overwrite a
-              table of the same name if it exists. If the table does not exist,
-              it will be created.
-            table_name (str): Desired table name for the dataset on CARTO. If
-              name does not conform to SQL naming conventions, it will be
-              'normalized' (e.g., all lower case, adding `_` in place of spaces
-              and other special characters.
-            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
-              Context of user account to send Dataset to. If not provided,
-              a default context (if set with :py:meth:`set_default_context
-              <cartoframes.auth.set_default_context>`) will attempted to be
-              used.
-
-        Example:
-
-            Send a pandas DataFrame to CARTO.
-
-            .. code::
-
-                from cartoframes.auth import set_default_context
-                from cartoframes.data import Dataset
-                import pandas as pd
-
-                set_default_context(
-                    base_url='https://your_user_name.carto.com',
-                    api_key='your api key'
-                )
-
-                df = pd.DataFrame({
-                    'lat': [40, 45, 50],
-                    'lng': [-80, -85, -90]
-                })
-                d = Dataset.from_dataframe(df)
-                d.upload(with_lnglat=('lng', 'lat'), table_name='sample_table')
-
-        """
-        if table_name:
-            self._table_name = normalize_name(table_name)
-        if context:
-            self.context = context
-        if schema:
-            self._schema = schema
-
-        if self._table_name is None or self._con is None:
-            raise ValueError('You should provide a table_name and context to upload data.')
-
-        if self._df is None and self._query is None:
-            raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
-                             'GeoDataFrame, or a query to upload data to CARTO.')
-
-        already_exists_error = CartoException('Table with name {t} and schema {s} already exists in CARTO.'
-                                              'Please choose a different `table_name` or use '
-                                              'if_exists="replace" to overwrite it'.format(
-                                                  t=self._table_name, s=self._schema))
-
-        # priority order: df, query
-        if self._df is not None:
-            self._normalized_column_names = _normalize_column_names(self._df)
-
-            if if_exists == Dataset.REPLACE or not self.exists():
-                self._create_table(with_lnglat)
-                if if_exists != Dataset.APPEND:
-                    self._is_saved_in_carto = True
-            elif if_exists == Dataset.FAIL:
-                raise already_exists_error
-
-            self._copyfrom(with_lnglat)
-
-        elif self._query is not None:
-            if if_exists == Dataset.APPEND:
-                raise CartoException('Error using append with a query Dataset.'
-                                     'It is not possible to append data to a query')
-            elif if_exists == Dataset.REPLACE or not self.exists():
-                self._create_table_from_query()
-                self._is_saved_in_carto = True
-            elif if_exists == Dataset.FAIL:
-                raise already_exists_error
 
         return self
 
@@ -474,48 +346,6 @@ class Dataset(object):
         self._df = self._copyto(limit, decode_geom, retry_times)
         return self._df
 
-    def delete(self):
-        """Delete table on CARTO account associated with a Dataset instance
-
-        Example:
-
-            .. code::
-
-                from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
-
-                set_default_context(
-                    base_url='https://your_user_name.carto.com',
-                    api_key='your api key'
-                )
-
-                d = Dataset.from_table('table_name')
-                d.delete()
-
-        Returns:
-            bool: True if deletion is successful, False otherwise.
-
-        """
-        if self.exists():
-            self._client.execute_query(self._drop_table_query(False))
-            self._unsync()
-            return True
-
-        return False
-
-    def exists(self):
-        """Checks to see if table exists"""
-        try:
-            self._client.execute_query(
-                'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
-                do_post=False)
-            return True
-        except CartoRateLimitException as err:
-            raise err
-        except CartoException as err:
-            # If table doesn't exist, we get an error from the SQL API
-            self._con._debug_print(err=err)
-            return False
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
@@ -554,9 +384,6 @@ class Dataset(object):
 
         return True
 
-    def _cartodbfy_query(self):
-        return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
-            .format(schema=self._schema or self._get_schema(), table_name=self._table_name)
 
     def _copyto(self, limit, decode_geom, retry_times):
         if self._query:
@@ -589,83 +416,9 @@ class Dataset(object):
 
         return df
 
-    def _copyfrom(self, with_lnglat=None):
-        geom_col = _get_geom_col_name(self._df)
-        enc_type = _detect_encoding_type(self._df, geom_col)
-        columns = ','.join(norm for norm, orig in self._normalized_column_names)
 
-        query = """COPY {table_name}({columns},the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
-            table_name=self._table_name,
-            columns=columns)
 
-        data = self._rows(
-            self._df,
-            [c for c in self._df.columns if c != 'cartodb_id'],
-            with_lnglat,
-            geom_col,
-            enc_type)
 
-        self._client.upload(query, data)
-
-    def _rows(self, df, cols, with_lnglat, geom_col, enc_type):
-        for i, row in df.iterrows():
-            csv_row = ''
-            the_geom_val = None
-            lng_val = None
-            lat_val = None
-            for col in cols:
-                if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
-                    continue
-                val = row[col]
-                if self._is_null(val):
-                    val = ''
-                if with_lnglat:
-                    if col == with_lnglat[0]:
-                        lng_val = row[col]
-                    if col == with_lnglat[1]:
-                        lat_val = row[col]
-                if col == geom_col:
-                    the_geom_val = row[col]
-                else:
-                    csv_row += '{val}|'.format(val=val)
-
-            if the_geom_val is not None:
-                geom = decode_geometry(the_geom_val, enc_type)
-                if geom:
-                    csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-            if with_lnglat is not None and lng_val is not None and lat_val is not None:
-                csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
-
-            csv_row += '\n'
-            yield csv_row.encode()
-
-    def _is_null(self, val):
-        vnull = pd.isnull(val)
-        if isinstance(vnull, bool):
-            return vnull
-        else:
-            return vnull.all()
-
-    def _drop_table_query(self, if_exists=True):
-        return '''DROP TABLE {if_exists} {table_name}'''.format(
-            table_name=self._table_name,
-            if_exists='IF EXISTS' if if_exists else '')
-
-    def _create_table_from_query(self):
-        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
-            drop=self._drop_table_query(),
-            create=self._get_query_to_create_table_from_query(),
-            cartodbfy=self._cartodbfy_query())
-
-        try:
-            self._client.execute_long_running_query(query)
-        except CartoRateLimitException as err:
-            raise err
-        except CartoException as err:
-            raise CartoException('Cannot create table: {}.'.format(err))
-
-    def _get_query_to_create_table_from_query(self):
-        return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
 
     def _create_table_query(self, with_lnglat=None):
         if with_lnglat is None:
@@ -778,9 +531,7 @@ class Dataset(object):
     def _get_dataset_info(self):
         return DatasetInfo(self._con, self._table_name)
 
-    def _unsync(self):
-        self._is_saved_in_carto = False
-        self._dataset_info = None
+
 
     def _get_schema(self):
         if self._con:
@@ -802,23 +553,7 @@ def _save_index_as_column(df):
             df.set_index(index_name, drop=False, inplace=True)
 
 
-def _normalize_column_names(df):
-    column_names = [c for c in df.columns if c not in Column.RESERVED_COLUMN_NAMES]
-    normalized_columns = normalize_names(column_names)
 
-    column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
-
-    changed_cols = '\n'.join([
-        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
-            orig=orig,
-            new=norm)
-        for norm, orig in column_tuples if norm != orig])
-
-    if changed_cols != '':
-        tqdm.write('The following columns were changed in the CARTO '
-                   'copy of this dataframe:\n{0}'.format(changed_cols))
-
-    return column_tuples
 
 
 def _dtypes2pg(dtype):
@@ -836,15 +571,7 @@ def _dtypes2pg(dtype):
     return mapping.get(str(dtype), 'text')
 
 
-def _get_geom_col_name(df):
-    geom_col = getattr(df, '_geometry_column_name', None)
-    if geom_col is None:
-        try:
-            geom_col = next(x for x in df.columns if x.lower() in Column.SUPPORTED_GEOM_COL_NAMES)
-        except StopIteration:
-            pass
 
-    return geom_col
 
 
 def _get_geom_col_type(df):
@@ -866,9 +593,4 @@ def _first_value(array):
         return array.iloc[0]
 
 
-def _detect_encoding_type(df, geom_col):
-    if geom_col is not None:
-        first_geom = _first_value(df[geom_col])
-        if first_geom:
-            return detect_encoding_type(first_geom)
-    return ''
+
