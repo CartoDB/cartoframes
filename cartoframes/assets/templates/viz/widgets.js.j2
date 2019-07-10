@@ -10,16 +10,17 @@ function renderWidget(widget, variable) {
 
 function renderBridge(bridge, widget) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
+  let options = {...widget.options};
 
   switch (widget.type) {
     case 'histogram':
-      bridge.histogram(widget.element, widget.value, widget.options);
+      bridge.histogram(widget.element, widget.value, options);
       break;
     case 'category':
-      bridge.category(widget.element, widget.value, widget.options);
+      bridge.category(widget.element, widget.value, options);
       break;
     case 'animation':
-      const options = {
+      options = {
         propertyName: widget.prop,
         ...widget.options
       }
@@ -27,7 +28,12 @@ function renderBridge(bridge, widget) {
       bridge.animationControls(widget.element, widget.value, options);
       break;
     case 'time-series':
-      bridge.timeSeries(widget.element, widget.value, widget.options);
+      options = {
+        propertyName: widget.prop,
+        ...widget.options
+      }
+
+      bridge.timeSeries(widget.element, widget.value, options);
       break;
     default:
       widget.element.innerText = typeof widget.value === 'number' ? format(widget.value) : widget.value;
