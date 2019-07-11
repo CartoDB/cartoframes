@@ -47,5 +47,3 @@ class APIClient(BaseClient):
 
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query)
-
-

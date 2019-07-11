@@ -34,6 +34,7 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
         self.assertEqual(layer.legend._type['polygon'], 'color-continuous-polygon')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
+        self.assertEqual(layer.legend._footer, '')
 
     def test_color_continuous_layer_point(self):
         "should create a point type layer"

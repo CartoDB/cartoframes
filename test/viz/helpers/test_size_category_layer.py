@@ -35,6 +35,7 @@ class TestSizeCategoryLayerHelper(unittest.TestCase):
         self.assertEqual(layer.legend._type['line'], 'size-category-line')
         self.assertEqual(layer.legend._title, 'Neighborhoods')
         self.assertEqual(layer.legend._description, '')
+        self.assertEqual(layer.legend._footer, '')
 
     def test_size_category_layer_point(self):
         "should create a point type layer"

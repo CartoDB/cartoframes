@@ -4,9 +4,8 @@ import binascii as ba
 from warnings import warn
 from copy import deepcopy
 
-from carto.exceptions import CartoException, CartoRateLimitException
+from carto.exceptions import CartoException
 
-from ..columns import Column
 from ..client import create_client
 
 try:
@@ -237,6 +236,7 @@ def setting_value_exception(prop, value):
 
 
 def get_client_with_public_creds(context):
+    # FIXME: api_key not used
     api_key = 'default_public'
     public_creds = deepcopy(context.creds)
     return create_client(public_creds, context.session)
