@@ -141,15 +141,20 @@ class SQLClient(object):
         query += 'COMMIT;'
         return self.execute(query)
 
+    def insert_table(self, table_name, columns, values):
+        sql_values = list(map(lambda x: self._sql_format(x), values))
+        query = '''
+            INSERT INTO {0} ({1}) VALUES({2})
+        '''.format(table_name, ','.join(columns), ','.join(sql_values))
+        return self.execute(query)
+
     def update_table(self, table_name, column_name, value, condition):
         """Update the column's value for the rows that match the condition."""
-        if isinstance(value, str):
-            value = '\'{}\''.format(value)
-        if isinstance(value, bool):
-            value = 'TRUE' if value else 'FALSE'
+        value = self._sql_format(value)
         query = '''
             UPDATE {0} SET {1}={2} WHERE {3};
         '''.format(table_name, column_name, value, condition)
+        return self.execute(query)
 
     def rename_table(self, table_name, new_table_name):
         """Rename a table from its table name."""
@@ -168,11 +173,18 @@ class SQLClient(object):
         return self._is_org_user
 
     def _get_column_type(self, table_name, column_name):
-        query = 'SELECT {0} FROM {1} LIMIT 0'.format(column_name, table_name)
+        query = 'SELECT {0} FROM {1} LIMIT 0;'.format(column_name, table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
         field = fields.get(column_name)
         return field.get('type')
+
+    def _sql_format(self, value):
+        if isinstance(value, str):
+            return '\'{}\''.format(value)
+        if isinstance(value, bool):
+            return 'TRUE' if value else 'FALSE'
+        return str(value)
 
     def _print_table(self, rows, columns=None, padding=None):
         row_format = ''
