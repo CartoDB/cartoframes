@@ -14,7 +14,7 @@ def size_bins_layer(
           or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
         title (str, optional): Title of legend.
-        method (str, optional): Classification method of data: "quantiles", "equal", "stdev". 
+        method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
         breaks (int[], optional): Assign manual class break values.
