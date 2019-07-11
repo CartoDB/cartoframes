@@ -108,26 +108,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
-    def test_dataset_constructor_validation_fails_with_table_name_and_query(self):
-        table_name = 'fake_table'
-        schema = 'fake_schema'
-        query = 'select * from fake_table'
-        with self.assertRaises(ValueError):
-            Dataset(table_name=table_name, schema=schema, query=query)
-
-    def test_dataset_constructor_validation_fails_with_table_name_and_dataframe(self):
-        table_name = 'fake_table'
-        schema = 'fake_schema'
-        df = {}
-        with self.assertRaises(ValueError):
-            Dataset(table_name=table_name, schema=schema, df=df)
-
-    def test_dataset_constructor_validation_fails_with_query_and_dataframe(self):
-        query = 'select * from fake_table'
-        df = {}
-        with self.assertRaises(ValueError):
-            Dataset(query=query, df=df)
-
     def test_dataset_from_table(self):
         table_name = 'fake_table'
         dataset = Dataset(table_name, context=self.con)
