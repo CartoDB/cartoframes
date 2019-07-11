@@ -65,8 +65,8 @@ class SQLClient(object):
         """Get the distict values and their count in a table
         for a specific column."""
         query = '''
-        SELECT {0}, COUNT(*) FROM {1}
-        GROUP BY {0} ORDER BY 2 DESC
+            SELECT {0}, COUNT(*) FROM {1}
+            GROUP BY {0} ORDER BY 2 DESC
         '''.format(column_name, table_name)
         output = self.query(query)
         return list(map(lambda x: (x.get(column_name), x.get('count')), output))
@@ -105,8 +105,17 @@ class SQLClient(object):
                 self._creds.username() if is_org_user else 'public',
                 table_name)
         query += 'COMMIT;'
-        print(query)
         return self.execute(query)
+
+    def update_table(self, table_name, column_name, value, condition):
+        """Update the column's value for the rows that match the condition."""
+        if isinstance(value, str):
+            value = '\'{}\''.format(value)
+        if isinstance(value, bool):
+            value = 'TRUE' if value else 'FALSE'
+        query = '''
+            UPDATE {0} SET {1}={2} WHERE {3};
+        '''.format(table_name, column_name, value, condition)
 
     def rename_table(self, table_name, new_table_name):
         """Rename a table from its table name."""
