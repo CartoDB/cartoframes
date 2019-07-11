@@ -34,7 +34,7 @@ class TableDataset(DatasetBase):
                    api_key='your api key'
                )
 
-               d = Dataset.from_table('tablename')
+               d = Dataset('tablename')
                d.dataset_info
 
         """
@@ -63,7 +63,7 @@ class TableDataset(DatasetBase):
                     api_key='your api key'
                 )
 
-                d = Dataset.from_table('tablename')
+                d = Dataset('tablename')
                 d.update_dataset_info(privacy='link')
 
         """
@@ -95,7 +95,7 @@ class TableDataset(DatasetBase):
                     api_key='your api key'
                 )
 
-                d = Dataset.from_table('table_name')
+                d = Dataset('table_name')
                 d.delete()
 
         Returns:

@@ -83,7 +83,7 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(kp.is_sync(), False)
 
     def test_kuviz_publisher_create_remote(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', context=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
@@ -92,14 +92,14 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(len(kp._layers), len(vmap.layers))
 
     def test_kuviz_publisher_create_remote_sync(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', context=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
         self.assertEqual(kp.is_sync(), True)
 
     def test_kuviz_publisher_unsync(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', context=self.context)
         dataset._is_saved_in_carto = False
         vmap = Map(Layer(Source(dataset)))
 
@@ -108,7 +108,7 @@ class TestKuvizPublisher(unittest.TestCase):
 
     def test_kuviz_publisher_sync_layers(self):
         query = "SELECT 1"
-        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset = DatasetMock(query, context=self.context)
         dataset._is_saved_in_carto = False
         vmap = Map(Layer(Source(dataset)))
 
@@ -118,7 +118,7 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(kp.is_sync(), True)
 
     def test_kuviz_publisher_get_layers_defaul_apikey(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', context=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
@@ -131,7 +131,7 @@ class TestKuvizPublisher(unittest.TestCase):
             {'username': self.username, 'api_key': 'default_public', 'base_url': self.username})
 
     def test_kuviz_publisher_get_layers_with_api_key(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', context=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)

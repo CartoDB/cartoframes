@@ -3,10 +3,6 @@ from abc import ABCMeta, abstractmethod
 class DatasetBase():
     __metaclass__ = ABCMeta
 
-    FAIL = 'fail'
-    REPLACE = 'replace'
-    APPEND = 'append'
-
     def __init__(self, context=None):
         from ..auth import _default_context
         self._context = context or _default_context

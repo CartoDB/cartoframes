@@ -34,18 +34,18 @@ class TestDatasetSync(unittest.TestCase):
 
     def test_dataset_sync_from_table(self):
         table_name = 'fake_table'
-        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset = DatasetMock(table_name, context=self.context)
         self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_table_after_download(self):
         table_name = 'fake_table'
-        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset = DatasetMock(table_name, context=self.context)
         dataset.download()
         self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_table_after_upload(self):
         table_name = 'fake_table'
-        dataset = DatasetMock.from_table(table_name=table_name, context=self.context)
+        dataset = DatasetMock(table_name, context=self.context)
         dataset.download()
         dataset.upload(table_name='another_table')
         self.assertEqual(dataset._is_saved_in_carto, True)
@@ -53,40 +53,40 @@ class TestDatasetSync(unittest.TestCase):
 
     def test_dataset_not_sync_from_query(self):
         query = "SELECT 1"
-        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset = DatasetMock(query, context=self.context)
         self.assertEqual(dataset._is_saved_in_carto, True)
 
     def test_dataset_sync_from_query_and_upload(self):
         query = "SELECT 1"
-        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset = DatasetMock(query, context=self.context)
         dataset.upload(table_name='another_table')
         self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.table_name, 'another_table')
 
     def test_dataset_not_sync_from_dataframe(self):
         df = pd.DataFrame({'column_name': [2]})
-        dataset = DatasetMock.from_dataframe(df=df)
+        dataset = DatasetMock(df)
         self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_sync_from_dataframe_upload(self):
         df = pd.DataFrame({'column_name': [2]})
-        dataset = DatasetMock.from_dataframe(df=df)
+        dataset = DatasetMock(df)
         dataset.upload(table_name='another_table', context=self.context)
         self.assertEqual(dataset._is_saved_in_carto, True)
         self.assertEqual(dataset.table_name, 'another_table')
 
     def test_dataset_not_sync_from_dataframe_upload_append(self):
         df = pd.DataFrame({'column_name': [2]})
-        dataset = DatasetMock.from_dataframe(df=df)
+        dataset = DatasetMock(df)
         dataset.upload(table_name='another_table', context=self.context, if_exists=DatasetMock.APPEND)
         self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_not_sync_from_geodataframe(self):
         gdf = load_geojson(self.test_geojson)
-        dataset = DatasetMock.from_geodataframe(gdf=gdf)
+        dataset = DatasetMock(gdf)
         self.assertEqual(dataset._is_saved_in_carto, False)
 
     def test_dataset_not_sync_from_geojson(self):
         geojson = self.test_geojson
-        dataset = DatasetMock.from_geojson(geojson=geojson)
+        dataset = DatasetMock(geojson)
         self.assertEqual(dataset._is_saved_in_carto, False)

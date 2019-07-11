@@ -91,7 +91,7 @@ class Source(object):
                 api_key='your api key'
             )
 
-            ds = Dataset.from_table('table_name')
+            ds = Dataset('table_name')
 
             Source(ds)
 
@@ -165,23 +165,23 @@ class Source(object):
             raise ValueError('Wrong source input')
 
     def _init_source_table(self, data, context, schema, bounds):
-        self.dataset = Dataset.from_table(data, context, schema)
+        self.dataset = Dataset(data, context, schema)
         self._set_source_query(self.dataset, bounds)
 
     def _init_source_query(self, data, context, bounds):
-        self.dataset = Dataset.from_query(data, context)
+        self.dataset = Dataset(data, context)
         self._set_source_query(self.dataset, bounds)
 
     def _init_source_geojson(self, data, bounds):
-        self.dataset = Dataset.from_geojson(data)
+        self.dataset = Dataset(data)
         self._set_source_geojson(self.dataset, bounds)
 
     def _init_source_geodataframe(self, data, bounds):
-        self.dataset = Dataset.from_geodataframe(data)
+        self.dataset = Dataset(data)
         self._set_source_geojson(self.dataset, bounds)
 
     def _init_source_dataframe(self, data, bounds):
-        self.dataset = Dataset.from_dataframe(data)
+        self.dataset = Dataset(data)
         self._set_source_geojson(self.dataset, bounds)
 
     def _init_source_dataset(self, data, bounds):
