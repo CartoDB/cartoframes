@@ -22,7 +22,7 @@ function formatValue(value) {
 
 function formatNumber(value) {
   const log = Math.log10(Math.abs(value))
-  if (log > 4 || log < -2.00000001) {
+  if ((log > 4 || log < -2.00000001) && value) {
     return value.toExponential(2);
   } else if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
