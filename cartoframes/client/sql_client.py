@@ -24,7 +24,6 @@ class SQLClient(object):
             else:
                 return response
         except CartoException as e:
-            raise ValueError(e)
             print('Error: {}'.format(e))
 
     def execute(self, query):
@@ -36,5 +35,30 @@ class SQLClient(object):
         except CartoException as e:
             print('Error: {}'.format(e))
 
+    def distinct(self, table_name, column_name):
+        query = 'SELECT DISTINCT {0} FROM {1};'.format(column_name, table_name)
+        output = self.query(query)
+        return list(map(lambda x: x.get(column_name), output))
 
+    def count(self, table_name):
+        query = 'SELECT COUNT(*) FROM {};'.format(table_name)
+        output = self.query(query)
+        return output[0].get('count')
 
+    def bounds(self, query):
+        output = self.query('''
+            SELECT ARRAY[
+                ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+                ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+            ] bounds FROM (
+                SELECT ST_Extent(the_geom) geom_env
+                FROM ({}) q
+            ) q;
+        '''.format(query))
+        return output[0].get('bounds')
+
+    def create_table(self, table_name, columns):
+        return self.execute('CREATE TABLE {0} ({1});'.format(table_name, ','.join(columns)))
+
+    def drop_table(self, table_name):
+        return self.execute('DROP TABLE {0};'.format(table_name))
