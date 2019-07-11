@@ -90,18 +90,25 @@ class SQLClient(object):
         '''.format(query))
         return output[0].get('bounds')
 
-    def schema(self, table_name):
-        """Show information about the schema of a table."""
+    def schema(self, table_name, raw=False):
+        """Show information about the schema of a table.
+        Setting raw=True is returns a JSON with the data."""
         query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
         rows = []
+        output = {}
         for key in fields:
             field = fields.get(key)
-            row = [key, field.get('type')]
+            value = field.get('type')
+            output[key] = value
+            row = [key, value]
             rows.append(row)
-        self._print_table(rows, columns=['Column name', 'Column type'], padding=[10, 5])
-
+        if raw:
+            return output
+        else:
+            self._print_table(rows, columns=['Column name', 'Column type'], padding=[10, 5])
+        
     def describe(self, table_name, column_name):
         """Show information about a column in a specific table."""
         column_type = self._get_column_type(table_name, column_name)
