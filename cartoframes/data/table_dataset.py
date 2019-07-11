@@ -11,7 +11,7 @@ class TableDataset(DatasetBase):
         self._dataset_info = None
         self._normalized_column_names = None
 
-        if self.data != data:
+        if self._table_name != data:
             warn('Table will be named `{}`'.format(table_name))
 
     @property

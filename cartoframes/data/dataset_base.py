@@ -1,5 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
+from ..client import create_client
+
+
 class DatasetBase():
     __metaclass__ = ABCMeta
 
@@ -146,7 +149,7 @@ class DatasetBase():
                 return map_geom_type(st_geom_type[3:])
 
     def _get_schema(self):
-        if self._con:
+        if self._context:
             return self._context.get_default_schema()
         else:
             return None

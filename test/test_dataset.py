@@ -17,8 +17,17 @@ from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock, CredsMock
+from cartoframes.data.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.table_dataset import TableDataset
+from cartoframes.data.query_dataset import QueryDataset
 
 from utils import _UserUrlLoader
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 
 WILL_SKIP = False
 warnings.filterwarnings("ignore")
@@ -561,17 +570,94 @@ class TestDatasetInfo(unittest.TestCase):
 
 class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     """Unit tests for cartoframes.Dataset"""
+    def setUp(self):
+        self.username = 'fake_username'
+        self.api_key = 'fake_api_key'
+        self.context = ContextMock(username=self.username, api_key=self.api_key)
 
+    def assertIsTableDatasetInstance(self, table_name):
+        ds = DatasetMock(table_name, context=self.context)
+        error = "Dataset('{}')._strategy is not an instance of TableDataset".format(table_name)
+        self.assertTrue(isinstance(ds._strategy, TableDataset), msg=error)
+
+    def assertIsQueryDatasetInstance(self, query):
+        ds = DatasetMock(query, context=self.context)
+        error = "Dataset('{}')._strategy is not an instance of QueryDataset".format(query)
+        self.assertTrue(isinstance(ds._strategy, QueryDataset), msg=error)
+
+    def assertIsDataFrameDatasetInstance(self, data):
+        ds = DatasetMock(data)
+        error = "Dataset('{}')._strategy is not an instance of DataFrameDataset".format(data)
+        self.assertTrue(isinstance(ds._strategy, DataFrameDataset), msg=error)
+
+    def test_creation_from_valid_table_names(self):
+        table_names = ['myt', 'my_t', 'tgeojson', 't_geojson', 'select_t',]
+        for table_name in table_names:
+            self.assertIsTableDatasetInstance(table_name)
+
+    def test_creation_from_valid_queries(self):
+        queries = ['SELECT * FROM', 'select * from', 'select c', 'with n as', 'WITH n AS']
+        for query in queries:
+            self.assertIsQueryDatasetInstance(query)
+
+    def test_creation_from_valid_dataframe(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        self.assertIsDataFrameDatasetInstance(df)
+
+    @unittest.skipIf(not HAS_GEOPANDAS, 'no geopandas imported, skipping this test')
+    def test_creation_from_valid_geodataframe(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        gdf = geopandas.GeoDataFrame(df)
+        self.assertIsDataFrameDatasetInstance(gdf)
+
+    def test_creation_from_valid_localgeojson(self):
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -3.1640625,
+                            42.032974332441405
+                        ]
+                    }
+                }
+            ]
+        }
+        self.assertIsDataFrameDatasetInstance(geojson)
+
+    def test_creation_from_valid_localgeojson(self):
+        geojson = object
+        with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
+            self.assertIsDataFrameDatasetInstance(geojson)
+
+    def test_creation_from_valid_geojson_file_path(self):
+        geojson_file_path = os.path.abspath('test/fixtures/valid.geojson')
+        self.assertIsDataFrameDatasetInstance(geojson_file_path)
+
+    def test_creation_from_wrong_geojson_file_path(self):
+        geojson_file_path = os.path.abspath('test/fixtures/wrong.geojson')
+        with self.assertRaises(Exception):
+            self.assertIsDataFrameDatasetInstance(geojson_file_path)
+
+    def test_creation_from_unexisting_geojson_file_path(self):
+        geojson_file_path = os.path.abspath('unexisting.geojson')
+        with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
+            self.assertIsDataFrameDatasetInstance(geojson_file_path)
+
+
+class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        ds = Dataset(df)
-        rows = ds._rows(ds.dataframe, ['test'], None, '', '')
+        rows = _rows(df, ['test'], None, '', '')
 
         self.assertEqual(list(rows), [b'True|\n', b'[1, 2]|\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
-        ds = Dataset(df)
-        rows = ds._rows(ds.dataframe, ['test'], None, '', '')
+        rows = _rows(df, ['test'], None, '', '')
 
         self.assertEqual(list(rows), [b'|\n', b'|\n'])

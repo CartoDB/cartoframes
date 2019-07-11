@@ -1,4 +1,5 @@
 import re
+import os
 import sys
 import binascii as ba
 from warnings import warn
@@ -265,3 +266,15 @@ def map_geom_type(geom_type):
         'Polygon': Dataset.GEOM_TYPE_POLYGON,
         'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
     }[geom_type]
+
+
+def is_sql_query(data):
+    return re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
+
+
+def is_geojson_file(data):
+    return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
+
+
+def is_geojson_file_path(data):
+    return is_geojson_file(data) and os.path.exists(data)

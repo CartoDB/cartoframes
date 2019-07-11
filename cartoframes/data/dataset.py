@@ -1,11 +1,12 @@
 from abc import ABCMeta
+import pandas as pd
 
 from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
 from .dataset_info import DatasetInfo
 from ..geojson import load_geojson
-from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
+from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson_file_path
 
 DOWNLOAD_RETRY_TIMES = 3
 
@@ -20,27 +21,38 @@ class Dataset(object):
     LINK = DatasetInfo.LINK
 
     def __init__(self, data, context=None, schema=None):
-        self._strategy = self._get_strategy(data)
+        self._strategy = self._get_strategy(data, context, schema)
 
     def _get_strategy(self, data, context=None, schema=None):
         if isinstance(data, pd.DataFrame):
-            return DataFrameDataset(data)
+            return self._getDataFrameDataset(data)
+        elif isinstance(data, (list, dict)):
+            return self._getDataFrameDataset(load_geojson(data))
         elif isinstance(data, str):
-            if _is_sql_query(data):
+            if is_sql_query(data):
                 if not context:
                     raise ValueError('QueryDataset needs a Context object')
-                return QueryDataset(data, context)
-            elif _is_geojson_file_path(data) or isinstance(data, (list, dict)):
-                return DataFrameDataset(load_geojson(data))
+                return self._getQueryDataset(data, context)
+            elif is_geojson_file_path(data):
+                return self._getDataFrameDataset(load_geojson(data))
             else:
                 if not context:
                     raise ValueError('TableDataset needs a Context object')
-                return TableDataset(data, context, schema)
+                return self._getTableDataset(data, context, schema)
         else:
             raise ValueError('We can not detect the Dataset type')
 
     def _set_strategy(self, strategy, data, context=None, schema=None):
         self._strategy = strategy(data, context, schema)
+
+    def _getDataFrameDataset(self, data):
+        return DataFrameDataset(data)
+
+    def _getQueryDataset(self, data, context):
+        return QueryDataset(data, context)
+
+    def _getTableDataset(self, data, context, schema):
+        return TableDataset(data, context, schema)
 
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         data = self._strategy.download(limit, decode_geom, retry_times)

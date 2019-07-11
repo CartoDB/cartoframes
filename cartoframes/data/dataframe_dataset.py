@@ -1,3 +1,5 @@
+import pandas as pd
+
 from .dataset_base import DatasetBase
 
 
@@ -9,7 +11,7 @@ class DataFrameDataset(DatasetBase):
         _save_index_as_column(self._df)
 
     @property
-    def df(self):
+    def dataframe(self):
         """Dataset DataFrame"""
         return self._df
 
