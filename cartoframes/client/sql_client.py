@@ -90,20 +90,39 @@ class SQLClient(object):
         '''.format(query))
         return output[0].get('bounds')
 
-    def describe(self, table_name, column_name=None):
-        """"""
-        if column_name is None:
-            query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
-            output = self.query(query, verbose=True)
-            fields = output.get('fields')
-            rows = []
-            for name in fields:
-                field = fields.get(name)
-                row = [name, field.get('type')]
-                rows.append(row)
-            self._print_table(['Column name', 'Column type'], rows, [10, 5])
-        else:
-            pass
+    def schema(self, table_name):
+        """Show information about the schema of a table."""
+        query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get('fields')
+        rows = []
+        for key in fields:
+            field = fields.get(key)
+            row = [key, field.get('type')]
+            rows.append(row)
+        self._print_table(rows, columns=['Column name', 'Column type'], padding=[10, 5])
+
+    def describe(self, table_name, column_name):
+        """Show information about a column in a specific table."""
+        column_type = self._get_column_type(table_name, column_name)
+        stats = ['COUNT(*)']
+        if column_type == 'number':
+            stats.append('AVG({})'.format(column_name))
+            stats.append('MIN({})'.format(column_name))
+            stats.append('MAX({})'.format(column_name))
+        query = '''
+            SELECT {0}
+            FROM {1}
+        '''.format(','.join(stats), table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get('rows')[0]
+        rows = []
+        for key in fields:
+            value = fields.get(key)
+            row = [key, round(value, 2)]
+            rows.append(row)
+        self._print_table(rows, padding=[5, 10])
+        print('type: {}'.format(column_type))
 
     def create_table(self, table_name, columns, cartodbfy=True):
         """Create a table with a specific table name and columns.
@@ -148,15 +167,23 @@ class SQLClient(object):
             self._is_org_user = res['rows'][0]['unnest'] != 'public'
         return self._is_org_user
 
-    def _print_table(self, columns, rows, padding=None):
+    def _get_column_type(self, table_name, column_name):
+        query = 'SELECT {0} FROM {1} LIMIT 0'.format(column_name, table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get('fields')
+        field = fields.get(column_name)
+        return field.get('type')
+
+    def _print_table(self, rows, columns=None, padding=None):
         row_format = ''
         index = 0
-        for column in columns:
-            length = str(len(column) + padding[index] if padding else 5)
-            row_format += '{:>' + length + '}'
+        for column in columns or rows[0]:
+            length = str(len(str(column)) + (padding[index] if padding else 5))
+            row_format += '{:' + length + '}'
             index += 1
-        header = row_format.format(*columns)
-        print(header)
-        print('-' * len(header))
+        if columns:
+            header = row_format.format(*columns)
+            print(header)
+            print('-' * len(header))
         for row in rows:
             print(row_format.format(*row))
