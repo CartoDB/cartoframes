@@ -50,10 +50,11 @@ class Credentials(object):
     """
 
     def __init__(self, creds=None, key=None, username=None, base_url=None,
-                 cred_file=None):
+                 cred_file=None, api_key=None):
         self._key = None
         self._username = None
         self._base_url = None
+        key = key or api_key
         if creds and isinstance(creds, Credentials):
             self.key(key=creds.key())
             self.username(username=creds.username())
