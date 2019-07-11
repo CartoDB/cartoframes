@@ -6,8 +6,33 @@ from .internal import create_client
 
 
 class SQLClient(object):
-    """
-    TODO
+    """SQLClient class is a client to run SQL queries in a CARTO account.
+
+    Args:
+        creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          A :py:class:`Credentials <cartoframes.auth.Credentials>`
+          instance can be used in place of a `base_url`/`api_key` combination.
+        session (requests.Session, optional): requests session. See `requests
+          documentation
+          <http://docs.python-requests.org/en/master/user/advanced/>`__
+          for more information.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import SQLClient
+
+            creds = Credentials(username='<YOUR USER NAME>', api_key='<YOUR API KEY>')
+            sql_client = SQLClient(creds)
+
+            sql_client.query('SELECT * FROM table_name')
+            sql_client.execute('DROP TABLE table_name')
+
+            sql_client.distinct('table_name', 'column_name')
+            sql_client.count('table_name')
+            ...
     """
 
     def __init__(self, credentials, session=None):
@@ -16,8 +41,8 @@ class SQLClient(object):
         self._client = create_client(credentials, session)
 
     def query(self, query, verbose=False):
-        """
-        TODO
+        """Run a SQL query. It returns a JSON object with the response.
+        If the `verbose` params is True it returns the full SQL response.
         """
         try:
             response = self._client.execute_query(query)
@@ -29,25 +54,27 @@ class SQLClient(object):
             print('Error: {}'.format(e))
 
     def execute(self, query):
-        """
-        TODO
-        """
+        """Run a long running query. It returns an object with the
+        status and information of the job."""
         try:
             return self._client.execute_long_running_query(query)
         except CartoException as e:
             print('Error: {}'.format(e))
 
     def distinct(self, table_name, column_name):
+        """Get the distict values in a table for a specific column."""
         query = 'SELECT DISTINCT {0} FROM {1};'.format(column_name, table_name)
         output = self.query(query)
         return list(map(lambda x: x.get(column_name), output))
 
     def count(self, table_name):
+        """Get the number of elements of a table."""
         query = 'SELECT COUNT(*) FROM {};'.format(table_name)
         output = self.query(query)
         return output[0].get('count')
 
     def bounds(self, query):
+        """Get the bounds of the geometries in a table."""
         output = self.query('''
             SELECT ARRAY[
                 ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
@@ -60,6 +87,10 @@ class SQLClient(object):
         return output[0].get('bounds')
 
     def create_table(self, table_name, columns, cartodbfy=True):
+        """Create a table with a specific table name and columns.
+        By default, geometry columns are added to the table.
+        To disable this pass `cartodbfy=False`.
+        """
         is_org_user = self._check_org_user()
         query = 'BEGIN;'
         query += 'CREATE TABLE {0} ({1});'.format(
@@ -74,6 +105,7 @@ class SQLClient(object):
         return self.execute(query)
 
     def drop_table(self, table_name):
+        """Remove a table from its table name."""
         return self.execute('DROP TABLE {0};'.format(table_name))
 
     def _check_org_user(self):
