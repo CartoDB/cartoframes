@@ -62,10 +62,14 @@ class SQLClient(object):
             print('Error: {}'.format(e))
 
     def distinct(self, table_name, column_name):
-        """Get the distict values in a table for a specific column."""
-        query = 'SELECT DISTINCT {0} FROM {1};'.format(column_name, table_name)
+        """Get the distict values and their count in a table
+        for a specific column."""
+        query = '''
+        SELECT {0}, COUNT(*) FROM {1}
+        GROUP BY {0} ORDER BY 2 DESC
+        '''.format(column_name, table_name)
         output = self.query(query)
-        return list(map(lambda x: x.get(column_name), output))
+        return list(map(lambda x: (x.get(column_name), x.get('count')), output))
 
     def count(self, table_name):
         """Get the number of elements of a table."""
