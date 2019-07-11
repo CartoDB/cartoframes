@@ -1,10 +1,15 @@
 import pandas as pd
+from warnings import warn
+
+from carto.exceptions import CartoException, CartoRateLimitException
 
 from .dataset_base import DatasetBase
+from ..columns import Column, normalize_names
+from .utils import decode_geometry
 
 
 class DataFrameDataset(DatasetBase):
-    def __init__(self, data):
+    def __init__(self, data, context=None, schema=None):
         super(DataFrameDataset, self).__init__()
 
         self._df = data
@@ -23,7 +28,16 @@ class DataFrameDataset(DatasetBase):
 
         return self._df
 
-    def download(self):
+    @property
+    def dataset_info(self):
+        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                             'to get or modify the info from a CARTO table.')
+
+    def update_dataset_info(self, privacy=None, name=None):
+        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                             'to get or modify the info from a CARTO table.')
+
+    def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
 
     def upload(self, if_exists, with_lnglat):

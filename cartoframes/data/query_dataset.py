@@ -1,24 +1,34 @@
+from carto.exceptions import CartoException, CartoRateLimitException
+
 from .dataset_base import DatasetBase
 from .utils import map_geom_type
 
 
 class QueryDataset(DatasetBase):
-    def __init__(self, data, context):
+    def __init__(self, data, context=None, schema=None):
         super(QueryDataset, self).__init__(context)
 
         self._query = data
 
     @property
     def query(self):
-        """Dataset query"""
         return self._query
+
+    @property
+    def dataset_info(self):
+        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                             'to get or modify the info from a CARTO table.')
+
+    def update_dataset_info(self, privacy=None, name=None):
+        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
+                             'to get or modify the info from a CARTO table.')
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
         columns = self.get_query_columns()
         return self._copyto(columns, self._query, limit, decode_geom, retry_times)
 
-    def upload(self, if_exists):
+    def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
         if if_exists == DatasetBase.APPEND:

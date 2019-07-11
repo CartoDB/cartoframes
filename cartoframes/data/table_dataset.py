@@ -1,6 +1,12 @@
+from warnings import warn
+
+from carto.exceptions import CartoException, CartoRateLimitException
+
 from .dataset_base import DatasetBase
-from ..columns import normalize_name
+from .dataset_info import DatasetInfo
+from ..columns import Column, normalize_name
 from .utils import map_geom_type
+
 
 class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
@@ -16,57 +22,12 @@ class TableDataset(DatasetBase):
 
     @property
     def dataset_info(self):
-        """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance
-
-
-        .. note::
-            This method only works for Datasets created from tables.
-
-        Example:
-
-            .. code::
-
-               from cartoframes.auth import set_default_context
-               from cartoframes.data import Dataset
-
-               set_default_context(
-                   base_url='https://your_user_name.carto.com/',
-                   api_key='your api key'
-               )
-
-               d = Dataset('tablename')
-               d.dataset_info
-
-        """
         if self._dataset_info is None:
             self._dataset_info = self._get_dataset_info()
 
         return self._dataset_info
 
     def update_dataset_info(self, privacy=None, name=None):
-        """Update/change Dataset privacy and name
-
-        Args:
-          privacy (str, optional): One of DatasetInfo.PRIVATE,
-            DatasetInfo.PUBLIC, or DatasetInfo.LINK
-          name (str, optional): Name of the dataset on CARTO.
-
-        Example:
-
-            .. code::
-
-                from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
-
-                set_default_context(
-                    base_url='https://your_user_name.carto.com/',
-                    api_key='your api key'
-                )
-
-                d = Dataset('tablename')
-                d.update_dataset_info(privacy='link')
-
-        """
         self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
@@ -76,7 +37,7 @@ class TableDataset(DatasetBase):
         query = self._get_read_query(columns, limit)
         return self._copyto(columns, query, limit, decode_geom, retry_times)
 
-    def upload(self):
+    def upload(self, if_exists, with_lnglat):
         raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
                          'GeoDataFrame, or a query to upload data to CARTO.')
 
@@ -125,7 +86,7 @@ class TableDataset(DatasetBase):
                 raise e
 
     def _get_dataset_info(self):
-        return DatasetInfo(self._con, self._table_name)
+        return DatasetInfo(self._context, self._table_name)
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""

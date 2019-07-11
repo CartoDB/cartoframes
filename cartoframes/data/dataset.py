@@ -12,9 +12,9 @@ DOWNLOAD_RETRY_TIMES = 3
 
 
 class Dataset(object):
-    FAIL = 'fail'
-    REPLACE = 'replace'
-    APPEND = 'append'
+    FAIL = TableDataset.FAIL
+    REPLACE = TableDataset.REPLACE
+    APPEND = TableDataset.APPEND
 
     PRIVATE = DatasetInfo.PRIVATE
     PUBLIC = DatasetInfo.PUBLIC
@@ -54,6 +54,75 @@ class Dataset(object):
     def _getTableDataset(self, data, context, schema):
         return TableDataset(data, context, schema)
 
+    @property
+    def query(self):
+        """Dataset query"""
+        return self._strategy.query
+
+    def get_query(self):
+        return self._strategy.get_query()
+
+    @property
+    def dataframe(self):
+        """Dataset DataFrame"""
+        return self._strategy.dataframe
+
+    def get_geodataframe(self):
+        """Converts DataFrame into GeoDataFrame if possible"""
+        return self._strategy.get_geodataframe()
+
+    @property
+    def dataset_info(self):
+        """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance
+
+
+        .. note::
+            This method only works for Datasets created from tables.
+
+        Example:
+
+            .. code::
+
+               from cartoframes.auth import set_default_context
+               from cartoframes.data import Dataset
+
+               set_default_context(
+                   base_url='https://your_user_name.carto.com/',
+                   api_key='your api key'
+               )
+
+               d = Dataset('tablename')
+               d.dataset_info
+
+        """
+        return self._strategy.dataset_info
+
+    def update_dataset_info(self, privacy=None, name=None):
+        """Update/change Dataset privacy and name
+
+        Args:
+          privacy (str, optional): One of DatasetInfo.PRIVATE,
+            DatasetInfo.PUBLIC, or DatasetInfo.LINK
+          name (str, optional): Name of the dataset on CARTO.
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_context
+
+                set_default_context(
+                    base_url='https://your_user_name.carto.com/',
+                    api_key='your api key'
+                )
+
+                d = Dataset('tablename')
+                d.update_dataset_info(privacy='link')
+
+        """
+        return self._strategy.update_dataset_info(privacy, name)
+
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account
         associated with the Dataset's instance of :py:class:`Context
@@ -76,7 +145,17 @@ class Dataset(object):
                 df = d.download(decode_geom=True)
         """
         data = self._strategy.download(limit, decode_geom, retry_times)
+
+        table_name = self._strategy.table_name
+        context = self._strategy.context
+        schema = self._strategy.schema
+
         self._set_strategy(DataFrameDataset, data)
+
+        self._strategy.table_name = table_name
+        self._strategy.context = context
+        self._strategy.schema = schema
+
         return data
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
@@ -156,3 +235,4 @@ class Dataset(object):
 
         """
         return self._strategy.delete()
+

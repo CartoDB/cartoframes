@@ -1,10 +1,19 @@
 from abc import ABCMeta, abstractmethod
+import pandas as pd
 
+from carto.exceptions import CartoException, CartoRateLimitException
+
+from .utils import decode_geometry, convert_bool
 from ..client import create_client
+from ..columns import normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
 class DatasetBase():
     __metaclass__ = ABCMeta
+
+    FAIL = 'fail'
+    REPLACE = 'replace'
+    APPEND = 'append'
 
     def __init__(self, context=None):
         from ..auth import _default_context
