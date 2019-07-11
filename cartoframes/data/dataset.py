@@ -6,7 +6,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..client import create_client
+from ..client.internal import create_client
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
     get_client_with_public_creds, convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo

@@ -1,10 +1,6 @@
-from .api_client import APIClient
+from __future__ import absolute_import
+
 from .sql_client import SQLClient
-
-
-def create_client(creds, session=None):
-    return APIClient(creds, session)
-
 
 __all__ = [
     'SQLClient'

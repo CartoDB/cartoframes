@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from carto.exceptions import CartoException
 
-from ..client import create_client
+from ..client.internal import create_client
 
 try:
     import geopandas
