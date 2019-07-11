@@ -104,6 +104,10 @@ class SQLClient(object):
         print(query)
         return self.execute(query)
 
+    def rename_table(self, table_name, new_table_name):
+        """Rename a table from its table name."""
+        return self.execute('ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name))
+
     def drop_table(self, table_name):
         """Remove a table from its table name."""
         return self.execute('DROP TABLE {0};'.format(table_name))
