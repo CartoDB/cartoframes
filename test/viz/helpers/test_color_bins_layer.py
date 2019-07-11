@@ -35,6 +35,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
         self.assertEqual(layer.legend._type['polygon'], 'color-bins-polygon')
         self.assertEqual(layer.legend._title, 'name')
         self.assertEqual(layer.legend._description, '')
+        self.assertEqual(layer.legend._footer, '')
 
     def test_color_bins_layer_point(self):
         "should create a point type layer"
@@ -45,7 +46,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             bins=3,
             palette='prism'
         )
-
+    
         self.assertEqual(
             layer.style._style['point']['color'],
             'ramp(globalQuantiles($name, 3), prism)'
@@ -84,3 +85,82 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             layer.style._style['polygon']['color'],
             'opacity(ramp(globalQuantiles($name, 3), prism), 0.9)'
         )
+
+    def test_color_bins_layer_method(self):
+        layer = helpers.color_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='quantiles'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            'ramp(globalQuantiles($name, 5), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            'ramp(globalQuantiles($name, 5), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
+        )
+
+        layer = helpers.color_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='equal'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            'ramp(globalEqIntervals($name, 5), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            'ramp(globalEqIntervals($name, 5), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            'opacity(ramp(globalEqIntervals($name, 5), purpor), 0.9)'
+        )
+
+        layer = helpers.color_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='stdev'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            'ramp(globalStandardDev($name, 5), temps)'
+        )
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            'ramp(globalStandardDev($name, 5), temps)'
+        )
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            'opacity(ramp(globalStandardDev($name, 5), temps), 0.9)'
+        )
+
+    def test_color_bins_layer_breaks(self):
+        layer = helpers.color_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            breaks=[0, 1, 2]
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['color'],
+            'ramp(buckets($name, [0, 1, 2]), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['line']['color'],
+            'ramp(buckets($name, [0, 1, 2]), purpor)'
+        )
+        self.assertEqual(
+            layer.style._style['polygon']['color'],
+            'opacity(ramp(buckets($name, [0, 1, 2]), purpor), 0.9)'
+        )
+        
