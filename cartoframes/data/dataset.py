@@ -3,6 +3,7 @@ from abc import ABCMeta
 from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
+from .dataset_info import PRIVATE, PUBLIC, LINK
 from ..geojson import load_geojson
 from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
 
@@ -10,6 +11,10 @@ DOWNLOAD_RETRY_TIMES = 3
 
 
 class Dataset(object):
+    PRIVATE = PRIVATE
+    PUBLIC = PUBLIC
+    LINK = LINK
+
     def __init__(self, data, context=None, schema=None):
         self._strategy = self._get_strategy(data)
 
