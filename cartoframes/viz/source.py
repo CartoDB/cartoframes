@@ -5,7 +5,8 @@ import pandas
 
 from . import defaults
 from ..geojson import get_encoded_data, get_bounds
-from ..data import Dataset, DataFrameDataset
+from ..data import Dataset, is_sql_query, is_geojson_file
+from ..data.dataframe_dataset import DataFrameDataset
 
 try:
     import geopandas
@@ -140,10 +141,10 @@ class Source(object):
 
     def _init_source(self, data, context, bounds, schema):
         if isinstance(data, str):
-            if _check_sql_query(data):
+            if is_sql_query(data):
                 self._init_source_query(data, context, bounds)
 
-            elif _check_geojson_file(data):
+            elif is_geojson_file(data):
                 self._init_source_geojson(data, bounds)
 
             elif _check_table_name(data):
@@ -198,14 +199,6 @@ class Source(object):
 
 def _check_table_name(data):
     return True
-
-
-def _check_sql_query(data):
-    return re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
-
-
-def _check_geojson_file(data):
-    return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
 
 
 def _get_context(dataset):
