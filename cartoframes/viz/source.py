@@ -5,7 +5,7 @@ import pandas
 
 from . import defaults
 from ..geojson import get_encoded_data, get_bounds
-from ..data import Dataset
+from ..data import Dataset, DataFrameDataset
 
 try:
     import geopandas
@@ -187,10 +187,10 @@ class Source(object):
     def _init_source_dataset(self, data, bounds):
         self.dataset = data
 
-        if self.dataset._state == Dataset.STATE_REMOTE:
-            self._set_source_query(self.dataset, bounds)
-        elif self.dataset._state == Dataset.STATE_LOCAL:
+        if isinstance(self.dataset, DataFrameDataset):
             self._set_source_geojson(self.dataset, bounds)
+        else:
+            self._set_source_query(self.dataset, bounds)
 
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY

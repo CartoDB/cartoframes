@@ -5,7 +5,6 @@ from .utils import map_geom_type
 class QueryDataset(DatasetBase):
     def __init__(self, data, context):
         super(QueryDataset, self).__init__(context)
-        self._state = DatasetBase.STATE_REMOTE
 
         self._query = data
 

@@ -4,7 +4,6 @@ from .dataset_base import DatasetBase
 class DataFrameDataset(DatasetBase):
     def __init__(self, data):
         super(DataFrameDataset, self).__init__()
-        self._state = DatasetBase.STATE_LOCAL
 
         self._df = data
         _save_index_as_column(self._df)

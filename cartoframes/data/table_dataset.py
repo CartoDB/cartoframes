@@ -5,7 +5,6 @@ from .utils import map_geom_type
 class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
         super(TableDataset, self).__init__(context,)
-        self._state = DatasetBase.STATE_REMOTE
 
         self._table_name = normalize_name(data)
         self._schema = schema or self._get_schema()

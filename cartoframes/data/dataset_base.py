@@ -7,13 +7,6 @@ class DatasetBase():
     REPLACE = 'replace'
     APPEND = 'append'
 
-    PRIVATE = DatasetInfo.PRIVATE
-    PUBLIC = DatasetInfo.PUBLIC
-    LINK = DatasetInfo.LINK
-
-    STATE_LOCAL = 'local'
-    STATE_REMOTE = 'remote'
-
     def __init__(self, context=None):
         from ..auth import _default_context
         self._context = context or _default_context
