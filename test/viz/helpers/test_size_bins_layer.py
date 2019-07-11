@@ -77,3 +77,75 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
             layer.style._style['line']['color'],
             'opacity(blue, 0.8)'
         )
+
+    def test_size_bins_layer_method(self):
+        "should apply the classification method"
+        layer = helpers.size_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='quantiles'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['width'],
+            'ramp(globalQuantiles($name, 5), [2, 14])'
+        )
+        self.assertEqual(
+            layer.style._style['line']['width'],
+            'ramp(globalQuantiles($name, 5), [1, 10])'
+        )
+
+        layer = helpers.size_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='equal'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['width'],
+            'ramp(globalEqIntervals($name, 5), [2, 14])'
+        )
+        self.assertEqual(
+            layer.style._style['line']['width'],
+            'ramp(globalEqIntervals($name, 5), [1, 10])'
+        )
+
+        layer = helpers.size_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            method='stdev'
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['width'],
+            'ramp(globalStandardDev($name, 5), [2, 14])'
+        )
+        self.assertEqual(
+            layer.style._style['line']['width'],
+            'ramp(globalStandardDev($name, 5), [1, 10])'
+        )
+
+        msg = 'Available methods are: "quantiles", "equal", "stdev".'
+        with self.assertRaisesRegexp(ValueError, msg):
+            helpers.size_bins_layer(
+                'sf_neighborhoods',
+                'name',
+                method='wrong'
+            )
+
+    def test_size_bins_layer_breaks(self):
+        "should apply buckets if breaks are passed"
+        layer = helpers.size_bins_layer(
+            'sf_neighborhoods',
+            'name',
+            breaks=[0, 1, 2]
+        )
+
+        self.assertEqual(
+            layer.style._style['point']['width'],
+            'ramp(buckets($name, [0, 1, 2]), [2, 14])'
+        )
+        self.assertEqual(
+            layer.style._style['line']['width'],
+            'ramp(buckets($name, [0, 1, 2]), [1, 10])'
+        )

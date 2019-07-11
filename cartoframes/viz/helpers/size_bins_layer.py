@@ -31,7 +31,7 @@ def size_bins_layer(
         popup on `value`.
     """
     if method not in ('quantiles', 'equal', 'stdev'):
-        raise ValueError('Available methods are: "quantiles", "equal", "stdev"')
+        raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
     func = 'buckets' if breaks else {
         'quantiles': 'globalQuantiles',

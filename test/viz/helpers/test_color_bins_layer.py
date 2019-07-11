@@ -46,7 +46,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             bins=3,
             palette='prism'
         )
-    
+
         self.assertEqual(
             layer.style._style['point']['color'],
             'ramp(globalQuantiles($name, 3), prism)'
@@ -87,6 +87,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
         )
 
     def test_color_bins_layer_method(self):
+        "should apply the classification method"
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -144,7 +145,16 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             'opacity(ramp(globalStandardDev($name, 5), temps), 0.9)'
         )
 
+        msg = 'Available methods are: "quantiles", "equal", "stdev".'
+        with self.assertRaisesRegexp(ValueError, msg):
+            helpers.color_bins_layer(
+                'sf_neighborhoods',
+                'name',
+                method='wrong'
+            )
+
     def test_color_bins_layer_breaks(self):
+        "should apply buckets if breaks are passed"
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -163,4 +173,3 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             layer.style._style['polygon']['color'],
             'opacity(ramp(buckets($name, [0, 1, 2]), purpor), 0.9)'
         )
-        
