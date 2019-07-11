@@ -14,10 +14,6 @@ class DatasetBase():
     STATE_LOCAL = 'local'
     STATE_REMOTE = 'remote'
 
-    GEOM_TYPE_POINT = 'point'
-    GEOM_TYPE_LINE = 'line'
-    GEOM_TYPE_POLYGON = 'polygon'
-
     def __init__(self, context=None):
         from ..auth import _default_context
         self._context = context or _default_context
@@ -63,9 +59,8 @@ class DatasetBase():
     def schema(self, schema):
         self._schema = schema
 
-    def _create_client(self):
-        if self._context:
-            return create_client(self._context.creds, self._context.session)
+    def get_query(self):
+        return compute_query(self)
 
     def exists(self):
         """Checks to see if table exists"""
@@ -80,6 +75,22 @@ class DatasetBase():
             # If table doesn't exist, we get an error from the SQL API
             self._context._debug_print(err=err)
             return False
+
+    def is_public(self):
+        """Checks to see if table or table used by query has public privacy"""
+        public_client = get_client_with_public_creds(self.context)
+        try:
+            public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            return True
+        except CartoRateLimitException as err:
+            raise err
+        except CartoException:
+            return False
+
+
+    def _create_client(self):
+        if self._context:
+            return create_client(self._context.creds, self._context.session)
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -133,8 +144,20 @@ class DatasetBase():
         table_info = self._client.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
 
-    def get_query(self):
-        if self.query:
-            return self._query
+    def _get_geom_type(self, query=None):
+        """Fetch geom type of a remote table"""
+        response = self._client.execute_query('''
+            SELECT distinct ST_GeometryType(the_geom) AS geom_type
+            FROM ({}) q
+            LIMIT 5
+        '''.format(query or self.get_query()))
+        if response and response.get('rows') and len(response.get('rows')) > 0:
+            st_geom_type = response.get('rows')[0].get('geom_type')
+            if st_geom_type:
+                return map_geom_type(st_geom_type[3:])
+
+    def _get_schema(self):
+        if self._con:
+            return self._context.get_default_schema()
         else:
-            return compute_query(self)
+            return None

@@ -1,6 +1,6 @@
 from .dataset_base import DatasetBase
 from ..columns import normalize_name
-
+from .utils import map_geom_type
 
 class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
@@ -11,7 +11,6 @@ class TableDataset(DatasetBase):
         self._schema = schema or self._get_schema()
         self._dataset_info = None
         self._normalized_column_names = None
-        self._client = self._get_client()
 
         if self.data != data:
             warn('Table will be named `{}`'.format(table_name))
@@ -111,12 +110,24 @@ class TableDataset(DatasetBase):
 
         return False
 
+    def compute_geom_type(self):
+        """Compute the geometry type from the data"""
+        return self._get_geom_type()
+
+    def get_table_column_names(self, exclude=None):
+        """Get column names and types from a table"""
+        columns = [c.name for c in self._get_table_columns()]
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
     def _unsync(self):
         # self._is_saved_in_carto = False
         self._dataset_info = None
 
     def _get_table_columns(self):
-        """Get column names and types from a table"""
         query = '''
             SELECT column_name, data_type
             FROM information_schema.columns
@@ -134,3 +145,23 @@ class TableDataset(DatasetBase):
                 return self.get_columns()
             else:
                 raise e
+
+    def _get_dataset_info(self):
+        return DatasetInfo(self._con, self._table_name)
+
+    def _get_read_query(self, table_columns, limit=None):
+        """Create the read (COPY TO) query"""
+        query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
+
+        query = 'SELECT {columns} FROM "{schema}"."{table_name}"'.format(
+            table_name=self._table_name,
+            schema=self._schema,
+            columns=', '.join(query_columns))
+
+        if limit is not None:
+            if isinstance(limit, int) and (limit >= 0):
+                query += ' LIMIT {limit}'.format(limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
+
+        return query

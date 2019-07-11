@@ -1,4 +1,5 @@
 from .dataset_base import DatasetBase
+from .utils import map_geom_type
 
 
 class QueryDataset(DatasetBase):
@@ -7,6 +8,11 @@ class QueryDataset(DatasetBase):
         self._state = DatasetBase.STATE_REMOTE
 
         self._query = data
+
+    @property
+    def query(self):
+        """Dataset query"""
+        return self._query
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
@@ -21,9 +27,15 @@ class QueryDataset(DatasetBase):
                                  'It is not possible to append data to a query')
         elif if_exists == DatasetBase.REPLACE or not self.exists():
             self._create_table_from_query()
-            # self._is_saved_in_carto = True
         elif if_exists == DatasetBase.FAIL:
             raise self._already_exists_error()
+
+    def get_query(self):
+        return self._query
+
+    def compute_geom_type(self):
+        """Compute the geometry type from the data"""
+        return self._get_geom_type(self._query)
 
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(

@@ -48,6 +48,10 @@ ENC_EWKT = 'ewkt'
 if (sys.version_info < (3, 0)):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
+GEOM_TYPE_POINT = 'point'
+GEOM_TYPE_LINE = 'line'
+GEOM_TYPE_POLYGON = 'polygon'
+
 
 def compute_query(dataset):
     if dataset.table_name:
@@ -251,3 +255,13 @@ def convert_bool(x):
         return bool(x)
     else:
         return None
+
+def map_geom_type(geom_type):
+    return {
+        'Point': Dataset.GEOM_TYPE_POINT,
+        'MultiPoint': Dataset.GEOM_TYPE_POINT,
+        'LineString': Dataset.GEOM_TYPE_LINE,
+        'MultiLineString': Dataset.GEOM_TYPE_LINE,
+        'Polygon': Dataset.GEOM_TYPE_POLYGON,
+        'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
+    }[geom_type]
