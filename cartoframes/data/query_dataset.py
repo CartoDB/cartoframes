@@ -29,6 +29,9 @@ class QueryDataset(DatasetBase):
         elif if_exists == DatasetBase.FAIL:
             raise self._already_exists_error()
 
+    def delete(self):
+        raise ValueError('Method not allowed in QueryDataset. You should use a TableDataset: `Dataset(my_table)`')
+
     def get_query(self):
         return self._query
 

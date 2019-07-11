@@ -81,27 +81,6 @@ class TableDataset(DatasetBase):
                          'GeoDataFrame, or a query to upload data to CARTO.')
 
     def delete(self):
-        """Delete table on CARTO account associated with a Dataset instance
-
-        Example:
-
-            .. code::
-
-                from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
-
-                set_default_context(
-                    base_url='https://your_user_name.carto.com',
-                    api_key='your api key'
-                )
-
-                d = Dataset('table_name')
-                d.delete()
-
-        Returns:
-            bool: True if deletion is successful, False otherwise.
-
-        """
         if self.exists():
             self._client.execute_query(self._drop_table_query(False))
             self._unsync()

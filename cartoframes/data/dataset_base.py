@@ -21,6 +21,10 @@ class DatasetBase():
     def upload(self):
         pass
 
+    @abstractmethod
+    def delete(self):
+        pass
+
     @property
     def context(self):
         """Dataset :py:class:`Context <cartoframes.auth.Context>`"""

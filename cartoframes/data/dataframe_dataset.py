@@ -38,6 +38,9 @@ class DataFrameDataset(DatasetBase):
 
         self._copyfrom(normalized_column_names, with_lnglat)
 
+    def delete(self):
+        raise ValueError('Method not allowed in DataFrameDataset. You should use a TableDataset: `Dataset(my_table)`')
+
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
