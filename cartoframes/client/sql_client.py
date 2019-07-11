@@ -66,7 +66,7 @@ class SQLClient(object):
         for a specific column."""
         query = '''
             SELECT {0}, COUNT(*) FROM {1}
-            GROUP BY {0} ORDER BY 2 DESC
+            GROUP BY 1 ORDER BY 2 DESC
         '''.format(column_name, table_name)
         output = self.query(query)
         return list(map(lambda x: (x.get(column_name), x.get('count')), output))
@@ -89,6 +89,21 @@ class SQLClient(object):
             ) q;
         '''.format(query))
         return output[0].get('bounds')
+
+    def describe(self, table_name, column_name=None):
+        """"""
+        if column_name is None:
+            query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
+            output = self.query(query, verbose=True)
+            fields = output.get('fields')
+            rows = []
+            for name in fields:
+                field = fields.get(name)
+                row = [name, field.get('type')]
+                rows.append(row)
+            self._print_table(['Column name', 'Column type'], rows, [10, 5])
+        else:
+            pass
 
     def create_table(self, table_name, columns, cartodbfy=True):
         """Create a table with a specific table name and columns.
@@ -132,3 +147,16 @@ class SQLClient(object):
             res = self._client.execute_query(query, do_post=False)
             self._is_org_user = res['rows'][0]['unnest'] != 'public'
         return self._is_org_user
+
+    def _print_table(self, columns, rows, padding=None):
+        row_format = ''
+        index = 0
+        for column in columns:
+            length = str(len(column) + padding[index] if padding else 5)
+            row_format += '{:>' + length + '}'
+            index += 1
+        header = row_format.format(*columns)
+        print(header)
+        print('-' * len(header))
+        for row in rows:
+            print(row_format.format(*row))
