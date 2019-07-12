@@ -500,6 +500,22 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.context = ContextMock(username=self.username, api_key=self.api_key)
+        self.test_geojson = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -3.1640625,
+                            42.032974332441405
+                        ]
+                    }
+                }
+            ]
+        }
 
     def assertIsTableDatasetInstance(self, table_name):
         ds = DatasetMock(table_name, context=self.context)
@@ -537,23 +553,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsDataFrameDatasetInstance(gdf)
 
     def test_creation_from_valid_localgeojson(self):
-        geojson = {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": {},
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [
-                            -3.1640625,
-                            42.032974332441405
-                        ]
-                    }
-                }
-            ]
-        }
-        self.assertIsDataFrameDatasetInstance(geojson)
+        self.assertIsDataFrameDatasetInstance(self.test_geojson)
 
     def test_creation_from_valid_localgeojson(self):
         geojson = object
@@ -576,24 +576,21 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'
-        dataset = Dataset(table_name, context=self.con)
+        dataset = DatasetMock(table_name, context=self.context)
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.table_name, table_name)
         self.assertEqual(dataset.schema, 'public')
-        self.assertIsNone(dataset.query)
-        self.assertIsNone(dataset.dataframe)
-        self.assertEqual(dataset.context, self.con)
+        self.assertEqual(dataset.context, self.context)
 
     def test_dataset_from_query(self):
         query = 'SELECT * FROM fake_table'
-        dataset = Dataset(query, context=self.con)
+        dataset = DatasetMock(query, context=self.context)
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.query, query)
+        self.assertEqual(dataset.context, self.context)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.dataframe)
-        self.assertEqual(dataset.context, self.con)
 
     def test_dataset_from_dataframe(self):
         df = load_geojson(self.test_geojson)
@@ -602,7 +599,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
         self.assertIsNone(dataset.context)
 
     def test_dataset_from_geodataframe(self):
@@ -612,7 +608,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
         self.assertIsNone(dataset.context)
 
     def test_dataset_from_geojson(self):
@@ -622,7 +617,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsInstance(dataset, Dataset)
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset.query)
         self.assertIsNone(dataset.context)
 
 

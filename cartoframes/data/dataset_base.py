@@ -3,9 +3,9 @@ import pandas as pd
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .utils import decode_geometry, convert_bool
+from .utils import decode_geometry, convert_bool, compute_query
 from ..client import create_client
-from ..columns import normalize_name, dtypes, date_columns_names, bool_columns_names
+from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
 class DatasetBase():
@@ -144,7 +144,7 @@ class DatasetBase():
 
         return df
 
-    def get_query_columns(self):
+    def _get_query_columns(self):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
         table_info = self._client.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])

@@ -10,12 +10,11 @@ from .utils import map_geom_type
 
 class TableDataset(DatasetBase):
     def __init__(self, data, context=None, schema=None):
-        super(TableDataset, self).__init__(context,)
+        super(TableDataset, self).__init__(context)
 
         self._table_name = normalize_name(data)
         self._schema = schema or self._get_schema()
         self._dataset_info = None
-        self._normalized_column_names = None
 
         if self._table_name != data:
             warn('Table will be named `{}`'.format(table_name))
@@ -81,7 +80,7 @@ class TableDataset(DatasetBase):
         except CartoException as e:
             # this may happen when using the default_public API key
             if str(e) == 'Access denied':
-                return self.get_columns()
+                return self._get_query_columns()
             else:
                 raise e
 

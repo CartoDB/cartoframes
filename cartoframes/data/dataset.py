@@ -227,6 +227,8 @@ class Dataset(object):
                 self._strategy.context,
                 self._strategy.schema)
 
+        return self
+
     def delete(self):
         """Delete table on CARTO account associated with a Dataset instance
 
@@ -251,3 +253,10 @@ class Dataset(object):
         """
         return self._strategy.delete()
 
+    def exists(self):
+        """Checks to see if table exists"""
+        return self._strategy.exists()
+
+    def is_public(self):
+        """Checks to see if table or table used by query has public privacy"""
+        return self._strategy.is_public()

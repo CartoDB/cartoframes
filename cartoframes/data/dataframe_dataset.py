@@ -5,7 +5,7 @@ from carto.exceptions import CartoException, CartoRateLimitException
 
 from .dataset_base import DatasetBase
 from ..columns import Column, normalize_names
-from .utils import decode_geometry
+from .utils import decode_geometry, compute_geodataframe, detect_encoding_type
 
 
 class DataFrameDataset(DatasetBase):

@@ -25,7 +25,7 @@ class QueryDataset(DatasetBase):
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
-        columns = self.get_query_columns()
+        columns = self._get_query_columns()
         return self._copyto(columns, self._query, limit, decode_geom, retry_times)
 
     def upload(self, if_exists, with_lnglat):
