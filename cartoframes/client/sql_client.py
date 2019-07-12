@@ -24,7 +24,7 @@ class SQLClient(object):
             from cartoframes.auth import Credentials
             from cartoframes.client import SQLClient
 
-            creds = Credentials(username='<YOUR USER NAME>', api_key='<YOUR API KEY>')
+            creds = Credentials(username='<USER NAME>', api_key='<API KEY>')
             sql_client = SQLClient(creds)
 
             sql_client.query('SELECT * FROM table_name')
@@ -69,7 +69,7 @@ class SQLClient(object):
             GROUP BY 1 ORDER BY 2 DESC
         '''.format(column_name, table_name)
         output = self.query(query)
-        return list(map(lambda x: (x.get(column_name), x.get('count')), output))
+        return [(x.get(column_name), x.get('count')) for x in output]
 
     def count(self, table_name):
         """Get the number of elements of a table."""
@@ -92,23 +92,17 @@ class SQLClient(object):
 
     def schema(self, table_name, raw=False):
         """Show information about the schema of a table.
-        Setting raw=True is returns a JSON with the data."""
+        Setting raw=True is returns a Python dict with the data."""
         query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
-        rows = []
-        output = {}
-        for key in fields:
-            field = fields.get(key)
-            value = field.get('type')
-            output[key] = value
-            row = [key, value]
-            rows.append(row)
         if raw:
-            return output
+            return {key: fields[key]['type'] for key in fields}
         else:
-            self._print_table(rows, columns=['Column name', 'Column type'], padding=[10, 5])
-        
+            columns = ['Column name', 'Column type']
+            rows = [(key, fields[key]['type']) for key in fields]
+            self._print_table(rows, columns=columns, padding=[10, 5])
+
     def describe(self, table_name, column_name):
         """Show information about a column in a specific table."""
         column_type = self._get_column_type(table_name, column_name)
@@ -123,11 +117,7 @@ class SQLClient(object):
         '''.format(','.join(stats), table_name)
         output = self.query(query, verbose=True)
         fields = output.get('rows')[0]
-        rows = []
-        for key in fields:
-            value = fields.get(key)
-            row = [key, round(value, 2)]
-            rows.append(row)
+        rows = [(key, '{:0.2e}'.format(fields[key])) for key in fields]
         self._print_table(rows, padding=[5, 10])
         print('type: {}'.format(column_type))
 
@@ -137,19 +127,18 @@ class SQLClient(object):
         To disable this pass `cartodbfy=False`.
         """
         is_org_user = self._check_org_user()
-        query = 'BEGIN;'
-        query += 'CREATE TABLE {0} ({1});'.format(
-            table_name,
-            ','.join(map(lambda x: ' '.join(x), columns)))
-        if cartodbfy:
-            query += 'SELECT CDB_CartoDBFyTable(\'{0}\', \'{1}\');'.format(
-                self._creds.username() if is_org_user else 'public',
-                table_name)
-        query += 'COMMIT;'
+        columns = ','.join(' '.join(x) for x in columns)
+        username = self._creds.username() if is_org_user else 'public'
+        query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
+            drop='DROP TABLE IF EXISTS {}'.format(table_name),
+            create='CREATE TABLE {0} ({1})'.format(table_name, columns),
+            cartodbfy='SELECT CDB_CartoDBFyTable(\'{0}\', \'{1}\')'.format(
+                username, table_name) if cartodbfy else ''
+        )
         return self.execute(query)
 
     def insert_table(self, table_name, columns, values):
-        sql_values = list(map(lambda x: self._sql_format(x), values))
+        sql_values = [self._sql_format(x) for x in values]
         query = '''
             INSERT INTO {0} ({1}) VALUES({2})
         '''.format(table_name, ','.join(columns), ','.join(sql_values))
@@ -165,7 +154,8 @@ class SQLClient(object):
 
     def rename_table(self, table_name, new_table_name):
         """Rename a table from its table name."""
-        return self.execute('ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name))
+        query = 'ALTER TABLE {0} RENAME TO {1};'.format(table_name, new_table_name)
+        return self.execute(query)
 
     def drop_table(self, table_name):
         """Remove a table from its table name."""
