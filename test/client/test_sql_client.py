@@ -253,3 +253,19 @@ class TestSQLClient(unittest.TestCase):
         self.assertEqual(self._mock_client.query, '''
             UPDATE table_name SET name='b' WHERE id = 0;
         '''.strip())
+
+    def test_rename_table(self):
+        """client.SQLClient.rename_table"""
+        output = self._sql_client.rename_table('table_name', 'new_table_name')
+
+        self.assertEqual(self._mock_client.query, '''
+            ALTER TABLE table_name RENAME TO new_table_name;
+        '''.strip())
+
+    def test_drop_table(self):
+        """client.SQLClient.drop_table"""
+        output = self._sql_client.drop_table('table_name')
+
+        self.assertEqual(self._mock_client.query, '''
+            DROP TABLE IF EXISTS table_name;
+        '''.strip())
