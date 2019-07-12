@@ -48,6 +48,18 @@ SQL_SCHEMA_RESPONSE = {
     'total_rows': 0
 }
 
+SQL_DESCRIBE_STRING = {
+    'rows': [
+        {'count': 12345}
+    ]
+}
+
+SQL_DESCRIBE_NUMBER = {
+    'rows': [
+        {'count': 12345, 'avg': 123.45, 'min': 0, 'max': 1000}
+    ]
+}
+
 SQL_BATCH_RESPONSE = {
     'user': 'username',
     'status': 'done',
@@ -154,3 +166,25 @@ class TestSQLClient(unittest.TestCase):
             'column_b': 'number',
             'column_c': 'geometry'
         })
+
+    def test_describe_type_string(self):
+        """client.SQLClient.describe string"""
+        self._sql_client._get_column_type = lambda t, c: 'string'
+        self._mock_client.response = SQL_DESCRIBE_NUMBER
+        output = self._sql_client.describe('table_name', 'column_name')
+
+        self.assertEqual(self._mock_client.query, '''
+            SELECT COUNT(*)
+            FROM table_name;
+        '''.strip())
+
+    def test_describe_type_number(self):
+        """client.SQLClient.describe number"""
+        self._sql_client._get_column_type = lambda t, c: 'number'
+        self._mock_client.response = SQL_DESCRIBE_NUMBER
+        output = self._sql_client.describe('table_name', 'column_name')
+
+        self.assertEqual(self._mock_client.query, '''
+            SELECT COUNT(*),AVG(column_name),MIN(column_name),MAX(column_name)
+            FROM table_name;
+        '''.strip())
