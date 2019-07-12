@@ -37,6 +37,17 @@ SQL_BOUNDS_RESPONSE = {
     ]
 }
 
+SQL_SCHEMA_RESPONSE = {
+    'rows': [],
+    'time': 0.003,
+    'fields': {
+        'column_a': {'type': 'string', 'pgtype': 'text'},
+        'column_b': {'type': 'number', 'pgtype': 'int4'},
+        'column_c': {'type': 'geometry', 'wkbtype': 'Unknown', 'dims': 2, 'srid': 4326}
+    },
+    'total_rows': 0
+}
+
 SQL_BATCH_RESPONSE = {
     'user': 'username',
     'status': 'done',
@@ -129,3 +140,17 @@ class TestSQLClient(unittest.TestCase):
             ) q;
         '''.strip())
         self.assertEqual(output, [[-16.2500006525, 28.0999760122], [2.65424597028, 43.530016092]])
+        
+    def test_schema(self):
+        """client.SQLClient.schema"""
+        self._mock_client.response = SQL_SCHEMA_RESPONSE
+        output = self._sql_client.schema('table_name', raw=True)
+
+        self.assertEqual(self._mock_client.query, '''
+            SELECT * FROM table_name LIMIT 0;
+        '''.strip())
+        self.assertEqual(output, {
+            'column_a': 'string',
+            'column_b': 'number',
+            'column_c': 'geometry'
+        })
