@@ -63,29 +63,33 @@ class TestSQLClient(unittest.TestCase):
     def test_query(self):
         """client.SQLClient.query"""
         self._mock_client.response = SQL_SELECT_RESPONSE
-
         output = self._sql_client.query('')
+
         self.assertEqual(output, [{
             'column_a': 'A',
             'column_b': 123,
             'column_c': '0123456789ABCDEF'
         }])
 
+    def test_query_verbose(self):
+        """client.SQLClient.query verbose"""
+        self._mock_client.response = SQL_SELECT_RESPONSE
         output = self._sql_client.query('', verbose=True)
+
         self.assertEqual(output, SQL_SELECT_RESPONSE)
 
     def test_execute(self):
         """client.SQLClient.execute"""
         self._mock_client.response = SQL_BATCH_RESPONSE
-
         output = self._sql_client.execute('')
+
         self.assertEqual(output, SQL_BATCH_RESPONSE)
 
     def test_distinct(self):
         """client.SQLClient.distinct"""
         self._mock_client.response = SQL_DISTINCT_RESPONSE
-
         output = self._sql_client.distinct('table_name', 'column_name')
+
         self.assertEqual(self._mock_client.query, '''
             SELECT column_name, COUNT(*) FROM table_name
             GROUP BY 1 ORDER BY 2 DESC
