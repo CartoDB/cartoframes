@@ -1,10 +1,5 @@
 """Unit tests for cartoframes.client.SQLClient"""
 import unittest
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
     
 from cartoframes.client import SQLClient, internal
 
@@ -30,6 +25,10 @@ SQL_DISTINCT_RESPONSE = {
     ]
 }
 
+SQL_COUNT_RESPONSE = {
+    'rows': [{'count': 12345}]
+}
+
 SQL_BATCH_RESPONSE = {
     'user': 'username',
     'status': 'done',
@@ -41,9 +40,9 @@ SQL_BATCH_RESPONSE = {
 
 
 class MockClient():
-    def __init__(self, response):
+    def __init__(self):
         self.query = ''
-        self.response = response
+        self.response = ''
 
     def execute_query(self, q):
         self.query = q
@@ -56,7 +55,8 @@ class MockClient():
 
 class TestSQLClient(unittest.TestCase):
     def setUp(self):
-        self._mock_client = MockClient('')
+        self._mock_client = MockClient()
+        # Mock create_client method
         internal.create_client = lambda c, s: self._mock_client
         self._sql_client = SQLClient(None)
 
@@ -95,3 +95,13 @@ class TestSQLClient(unittest.TestCase):
             GROUP BY 1 ORDER BY 2 DESC
         '''.strip())
         self.assertEqual(output, [('A', 1234), ('B', 5678)])
+
+    def test_count(self):
+        """client.SQLClient.count"""
+        self._mock_client.response = SQL_COUNT_RESPONSE
+        output = self._sql_client.count('table_name')
+
+        self.assertEqual(self._mock_client.query, '''
+            SELECT COUNT(*) FROM table_name;
+        '''.strip())
+        self.assertEqual(output, 12345)
