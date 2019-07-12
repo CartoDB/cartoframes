@@ -62,7 +62,6 @@ class TableDataset(DatasetBase):
         return columns
 
     def _unsync(self):
-        # self._is_saved_in_carto = False
         self._dataset_info = None
 
     def _get_table_columns(self):
