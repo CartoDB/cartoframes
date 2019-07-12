@@ -5,7 +5,8 @@ from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
 from .dataset_info import DatasetInfo
 from ..geojson import load_geojson
-from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson_file_path
+from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson_file_path, \
+    _save_index_as_column
 
 DOWNLOAD_RETRY_TIMES = 3
 

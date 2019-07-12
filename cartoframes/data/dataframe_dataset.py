@@ -197,14 +197,6 @@ def _detect_encoding_type(df, geom_col):
     return ''
 
 
-def _save_index_as_column(df):
-    index_name = df.index.name
-    if index_name is not None:
-        if index_name not in df.columns:
-            df.reset_index(inplace=True)
-            df.set_index(index_name, drop=False, inplace=True)
-
-
 def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {

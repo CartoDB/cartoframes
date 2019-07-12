@@ -278,3 +278,11 @@ def is_geojson_file(data):
 
 def is_geojson_file_path(data):
     return is_geojson_file(data) and os.path.exists(data)
+
+
+def _save_index_as_column(df):
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)
