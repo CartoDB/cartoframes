@@ -26,7 +26,15 @@ SQL_DISTINCT_RESPONSE = {
 }
 
 SQL_COUNT_RESPONSE = {
-    'rows': [{'count': 12345}]
+    'rows': [
+        {'count': 12345}
+    ]
+}
+
+SQL_BOUNDS_RESPONSE = {
+    'rows': [
+        {'bounds': [[-16.2500006525, 28.0999760122], [2.65424597028, 43.530016092]]}
+    ]
 }
 
 SQL_BATCH_RESPONSE = {
@@ -105,3 +113,19 @@ class TestSQLClient(unittest.TestCase):
             SELECT COUNT(*) FROM table_name;
         '''.strip())
         self.assertEqual(output, 12345)
+
+    def test_bounds(self):
+        """client.SQLClient.bounds"""
+        self._mock_client.response = SQL_BOUNDS_RESPONSE
+        output = self._sql_client.bounds('query')
+
+        self.assertEqual(self._mock_client.query, '''
+            SELECT ARRAY[
+                ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+                ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+            ] bounds FROM (
+                SELECT ST_Extent(the_geom) geom_env
+                FROM (query) q
+            ) q;
+        '''.strip())
+        self.assertEqual(output, [[-16.2500006525, 28.0999760122], [2.65424597028, 43.530016092]])
