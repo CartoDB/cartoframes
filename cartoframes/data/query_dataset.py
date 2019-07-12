@@ -1,7 +1,6 @@
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .dataset_base import DatasetBase
-from .utils import map_geom_type
 
 
 class QueryDataset(DatasetBase):

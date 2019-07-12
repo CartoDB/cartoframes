@@ -6,7 +6,6 @@ import pandas
 from . import defaults
 from ..geojson import get_encoded_data, get_bounds
 from ..data import Dataset, is_sql_query, is_geojson_file
-from ..data.dataframe_dataset import DataFrameDataset
 
 try:
     import geopandas

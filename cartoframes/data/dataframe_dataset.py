@@ -1,14 +1,15 @@
 import pandas as pd
 from warnings import warn
 from tqdm import tqdm
-# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
-tqdm(disable=True, total=0) # initialise internal lock
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .dataset_base import DatasetBase
 from ..columns import Column, normalize_names
-from .utils import decode_geometry, compute_geodataframe, detect_encoding_type
+from .utils import decode_geometry, compute_geodataframe, detect_encoding_type, map_geom_type
+
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class DataFrameDataset(DatasetBase):
@@ -115,7 +116,7 @@ class DataFrameDataset(DatasetBase):
         if not self._df.empty and 'geometry' in self._df and len(self._df.geometry) > 0:
             geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
-                return self._map_geom_type(geometry.geom_type)
+                return map_geom_type(geometry.geom_type)
 
 
 def _rows(df, cols, with_lnglat, geom_col, enc_type):

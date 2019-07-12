@@ -2,7 +2,6 @@
 
 import pandas as pd
 
-from cartoframes.data.dataset_base import DatasetBase
 from cartoframes.data.dataframe_dataset import DataFrameDataset
 from cartoframes.data.query_dataset import QueryDataset
 from cartoframes.data.table_dataset import TableDataset

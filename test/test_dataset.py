@@ -533,7 +533,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertTrue(isinstance(ds._strategy, DataFrameDataset), msg=error)
 
     def test_creation_from_valid_table_names(self):
-        table_names = ['myt', 'my_t', 'tgeojson', 't_geojson', 'select_t',]
+        table_names = ['myt', 'my_t', 'tgeojson', 't_geojson', 'select_t']
         for table_name in table_names:
             self.assertIsTableDatasetInstance(table_name)
 
@@ -555,7 +555,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_creation_from_valid_localgeojson(self):
         self.assertIsDataFrameDatasetInstance(self.test_geojson)
 
-    def test_creation_from_valid_localgeojson(self):
+    def test_creation_from_invalid_localgeojson(self):
         geojson = object
         with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
             self.assertIsDataFrameDatasetInstance(geojson)

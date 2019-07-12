@@ -5,7 +5,6 @@ from carto.exceptions import CartoException, CartoRateLimitException
 from .dataset_base import DatasetBase
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_name
-from .utils import map_geom_type
 
 
 class TableDataset(DatasetBase):
@@ -17,7 +16,7 @@ class TableDataset(DatasetBase):
         self._dataset_info = None
 
         if self._table_name != data:
-            warn('Table will be named `{}`'.format(table_name))
+            warn('Table will be named `{}`'.format(self._table_name))
 
     @property
     def dataset_info(self):

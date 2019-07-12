@@ -11,6 +11,7 @@ from cartoframes.data.dataframe_dataset import DataFrameDataset
 from cartoframes.data.table_dataset import TableDataset
 from cartoframes.data.query_dataset import QueryDataset
 
+
 class TestDatasetStrategyChanges(unittest.TestCase):
     def setUp(self):
         self.username = 'fake_username'

@@ -259,12 +259,12 @@ def convert_bool(x):
 
 def map_geom_type(geom_type):
     return {
-        'Point': Dataset.GEOM_TYPE_POINT,
-        'MultiPoint': Dataset.GEOM_TYPE_POINT,
-        'LineString': Dataset.GEOM_TYPE_LINE,
-        'MultiLineString': Dataset.GEOM_TYPE_LINE,
-        'Polygon': Dataset.GEOM_TYPE_POLYGON,
-        'MultiPolygon': Dataset.GEOM_TYPE_POLYGON
+        'Point': GEOM_TYPE_POINT,
+        'MultiPoint': GEOM_TYPE_POINT,
+        'LineString': GEOM_TYPE_LINE,
+        'MultiLineString': GEOM_TYPE_LINE,
+        'Polygon': GEOM_TYPE_POLYGON,
+        'MultiPolygon': GEOM_TYPE_POLYGON
     }[geom_type]
 
 
