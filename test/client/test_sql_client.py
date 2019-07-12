@@ -69,6 +69,14 @@ SQL_BATCH_RESPONSE = {
     'job_id': 'bd07b045-262f-432e-a7a1-82dba2cbbbb4'
 }
 
+class MockCredentials():
+    def __init__(self, username, api_key):
+        self._username = username
+        self._api_key = api_key
+
+    def username(self):
+        return self._username
+
 
 class MockClient():
     def __init__(self):
@@ -89,7 +97,8 @@ class TestSQLClient(unittest.TestCase):
         self._mock_client = MockClient()
         # Mock create_client method
         internal.create_client = lambda c, s: self._mock_client
-        self._sql_client = SQLClient(None)
+        creds = MockCredentials('user_name', '1234567890')
+        self._sql_client = SQLClient(creds)
 
     def test_query(self):
         """client.SQLClient.query"""
@@ -168,7 +177,7 @@ class TestSQLClient(unittest.TestCase):
         })
 
     def test_describe_type_string(self):
-        """client.SQLClient.describe string"""
+        """client.SQLClient.describe type: string"""
         self._sql_client._get_column_type = lambda t, c: 'string'
         self._mock_client.response = SQL_DESCRIBE_NUMBER
         output = self._sql_client.describe('table_name', 'column_name')
@@ -179,7 +188,7 @@ class TestSQLClient(unittest.TestCase):
         '''.strip())
 
     def test_describe_type_number(self):
-        """client.SQLClient.describe number"""
+        """client.SQLClient.describe type: number"""
         self._sql_client._get_column_type = lambda t, c: 'number'
         self._mock_client.response = SQL_DESCRIBE_NUMBER
         output = self._sql_client.describe('table_name', 'column_name')
@@ -187,4 +196,44 @@ class TestSQLClient(unittest.TestCase):
         self.assertEqual(self._mock_client.query, '''
             SELECT COUNT(*),AVG(column_name),MIN(column_name),MAX(column_name)
             FROM table_name;
+        '''.strip())
+
+    def test_create_table_no_cartodbfy(self):
+        """client.SQLClient.create_table"""
+        self._sql_client._check_org_user = lambda: False
+        output = self._sql_client.create_table(
+            'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
+
+        self.assertEqual(self._mock_client.query, '''
+            BEGIN;
+            DROP TABLE IF EXISTS table_name;
+            CREATE TABLE table_name (id INT,name TEXT);
+            ;
+            COMMIT;
+        '''.strip())
+
+    def test_create_table_cartodbfy_public_user(self):
+        """client.SQLClient.create_table cartodbfy: public user"""
+        self._sql_client._check_org_user = lambda: False
+        output = self._sql_client.create_table('table_name', [('id', 'INT'), ('name', 'TEXT')])
+
+        self.assertEqual(self._mock_client.query, '''
+            BEGIN;
+            DROP TABLE IF EXISTS table_name;
+            CREATE TABLE table_name (id INT,name TEXT);
+            SELECT CDB_CartoDBFyTable('public', 'table_name');
+            COMMIT;
+        '''.strip())
+
+    def test_create_table_cartodbfy_org_user(self):
+        """client.SQLClient.create_table cartodbfy: organization user"""
+        self._sql_client._check_org_user = lambda: True
+        output = self._sql_client.create_table('table_name', [('id', 'INT'), ('name', 'TEXT')])
+
+        self.assertEqual(self._mock_client.query, '''
+            BEGIN;
+            DROP TABLE IF EXISTS table_name;
+            CREATE TABLE table_name (id INT,name TEXT);
+            SELECT CDB_CartoDBFyTable('user_name', 'table_name');
+            COMMIT;
         '''.strip())
