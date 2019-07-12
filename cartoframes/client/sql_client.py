@@ -79,7 +79,7 @@ class SQLClient(object):
 
     def bounds(self, query):
         """Get the bounds of the geometries in a table."""
-        output = self.query('''
+        query = '''
             SELECT ARRAY[
                 ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
                 ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
@@ -87,13 +87,14 @@ class SQLClient(object):
                 SELECT ST_Extent(the_geom) geom_env
                 FROM ({}) q
             ) q;
-        '''.format(query))
+        '''.format(query)
+        output = self.query(query)
         return output[0].get('bounds')
 
     def schema(self, table_name, raw=False):
         """Show information about the schema of a table.
         Setting raw=True is returns a Python dict with the data."""
-        query = 'SELECT * FROM {0} LIMIT 0'.format(table_name)
+        query = 'SELECT * FROM {0} LIMIT 0;'.format(table_name)
         output = self.query(query, verbose=True)
         fields = output.get('fields')
         if raw:
@@ -113,7 +114,7 @@ class SQLClient(object):
             stats.append('MAX({})'.format(column_name))
         query = '''
             SELECT {0}
-            FROM {1}
+            FROM {1};
         '''.format(','.join(stats), table_name)
         output = self.query(query, verbose=True)
         fields = output.get('rows')[0]
@@ -129,7 +130,13 @@ class SQLClient(object):
         is_org_user = self._check_org_user()
         columns = ','.join(' '.join(x) for x in columns)
         username = self._creds.username() if is_org_user else 'public'
-        query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
+        query = '''
+            BEGIN;
+            {drop};
+            {create};
+            {cartodbfy};
+            COMMIT;
+        '''.format(
             drop='DROP TABLE IF EXISTS {}'.format(table_name),
             create='CREATE TABLE {0} ({1})'.format(table_name, columns),
             cartodbfy='SELECT CDB_CartoDBFyTable(\'{0}\', \'{1}\')'.format(
@@ -140,7 +147,7 @@ class SQLClient(object):
     def insert_table(self, table_name, columns, values):
         sql_values = [self._sql_format(x) for x in values]
         query = '''
-            INSERT INTO {0} ({1}) VALUES({2})
+            INSERT INTO {0} ({1}) VALUES({2});
         '''.format(table_name, ','.join(columns), ','.join(sql_values))
         return self.execute(query)
 
@@ -159,7 +166,8 @@ class SQLClient(object):
 
     def drop_table(self, table_name):
         """Remove a table from its table name."""
-        return self.execute('DROP TABLE {0};'.format(table_name))
+        query = 'DROP TABLE IF EXISTS {0};'.format(table_name)
+        return self.execute(query)
 
     def _check_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""

@@ -1,6 +1,6 @@
 """Unit tests for cartoframes.client.SQLClient"""
 import unittest
-    
+
 from cartoframes.client import SQLClient, internal
 
 SQL_SELECT_RESPONSE = {
@@ -68,6 +68,7 @@ SQL_BATCH_RESPONSE = {
     'updated_at': '2019-07-12T09:07:16.786Z',
     'job_id': 'bd07b045-262f-432e-a7a1-82dba2cbbbb4'
 }
+
 
 class MockCredentials():
     def __init__(self, username, api_key):
@@ -160,8 +161,11 @@ class TestSQLClient(unittest.TestCase):
                 FROM (query) q
             ) q;
         '''.strip())
-        self.assertEqual(output, [[-16.2500006525, 28.0999760122], [2.65424597028, 43.530016092]])
-        
+        self.assertEqual(output, [
+            [-16.2500006525, 28.0999760122],
+            [2.65424597028, 43.530016092]
+        ])
+
     def test_schema(self):
         """client.SQLClient.schema"""
         self._mock_client.response = SQL_SCHEMA_RESPONSE
@@ -180,7 +184,7 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.describe type: string"""
         self._sql_client._get_column_type = lambda t, c: 'string'
         self._mock_client.response = SQL_DESCRIBE_NUMBER
-        output = self._sql_client.describe('table_name', 'column_name')
+        self._sql_client.describe('table_name', 'column_name')
 
         self.assertEqual(self._mock_client.query, '''
             SELECT COUNT(*)
@@ -191,7 +195,7 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.describe type: number"""
         self._sql_client._get_column_type = lambda t, c: 'number'
         self._mock_client.response = SQL_DESCRIBE_NUMBER
-        output = self._sql_client.describe('table_name', 'column_name')
+        self._sql_client.describe('table_name', 'column_name')
 
         self.assertEqual(self._mock_client.query, '''
             SELECT COUNT(*),AVG(column_name),MIN(column_name),MAX(column_name)
@@ -201,7 +205,7 @@ class TestSQLClient(unittest.TestCase):
     def test_create_table_no_cartodbfy(self):
         """client.SQLClient.create_table"""
         self._sql_client._check_org_user = lambda: False
-        output = self._sql_client.create_table(
+        self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
 
         self.assertEqual(self._mock_client.query, '''
@@ -215,7 +219,8 @@ class TestSQLClient(unittest.TestCase):
     def test_create_table_cartodbfy_public_user(self):
         """client.SQLClient.create_table cartodbfy: public user"""
         self._sql_client._check_org_user = lambda: False
-        output = self._sql_client.create_table('table_name', [('id', 'INT'), ('name', 'TEXT')])
+        self._sql_client.create_table(
+            'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
         self.assertEqual(self._mock_client.query, '''
             BEGIN;
@@ -228,7 +233,8 @@ class TestSQLClient(unittest.TestCase):
     def test_create_table_cartodbfy_org_user(self):
         """client.SQLClient.create_table cartodbfy: organization user"""
         self._sql_client._check_org_user = lambda: True
-        output = self._sql_client.create_table('table_name', [('id', 'INT'), ('name', 'TEXT')])
+        self._sql_client.create_table(
+            'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
         self.assertEqual(self._mock_client.query, '''
             BEGIN;
@@ -240,7 +246,7 @@ class TestSQLClient(unittest.TestCase):
 
     def test_insert_table(self):
         """client.SQLClient.insert_table"""
-        output = self._sql_client.insert_table('table_name', ['id', 'name'], [0, 'a'])
+        self._sql_client.insert_table('table_name', ['id', 'name'], [0, 'a'])
 
         self.assertEqual(self._mock_client.query, '''
             INSERT INTO table_name (id,name) VALUES(0,'a');
@@ -248,7 +254,7 @@ class TestSQLClient(unittest.TestCase):
 
     def test_update_table(self):
         """client.SQLClient.update_table"""
-        output = self._sql_client.update_table('table_name', 'name', 'b', 'id = 0')
+        self._sql_client.update_table('table_name', 'name', 'b', 'id = 0')
 
         self.assertEqual(self._mock_client.query, '''
             UPDATE table_name SET name='b' WHERE id = 0;
@@ -256,7 +262,7 @@ class TestSQLClient(unittest.TestCase):
 
     def test_rename_table(self):
         """client.SQLClient.rename_table"""
-        output = self._sql_client.rename_table('table_name', 'new_table_name')
+        self._sql_client.rename_table('table_name', 'new_table_name')
 
         self.assertEqual(self._mock_client.query, '''
             ALTER TABLE table_name RENAME TO new_table_name;
@@ -264,7 +270,7 @@ class TestSQLClient(unittest.TestCase):
 
     def test_drop_table(self):
         """client.SQLClient.drop_table"""
-        output = self._sql_client.drop_table('table_name')
+        self._sql_client.drop_table('table_name')
 
         self.assertEqual(self._mock_client.query, '''
             DROP TABLE IF EXISTS table_name;
