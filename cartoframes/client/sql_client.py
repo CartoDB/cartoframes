@@ -41,9 +41,11 @@ class SQLClient(object):
         self._client = internal.create_client(credentials, session)
 
     def query(self, query, verbose=False):
-        """Run a SQL query. It returns a JSON object with the response.
-        If the `verbose` params is True it returns the full SQL response.
-        """
+        """Run a SQL query. It returns a `list` with content of the response.
+        If the `verbose` param is True it returns the full SQL response in a `dict`.
+        For more information check the `SQL API
+        documentation
+        <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
         try:
             response = self._client.execute_query(query.strip())
             if not verbose:
@@ -55,7 +57,9 @@ class SQLClient(object):
 
     def execute(self, query):
         """Run a long running query. It returns an object with the
-        status and information of the job."""
+        status and information of the job. For more information check the `Batch API
+        documentation
+        <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
         try:
             return self._client.execute_long_running_query(query.strip())
         except CartoException as e:
