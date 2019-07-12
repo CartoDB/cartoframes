@@ -20,10 +20,15 @@ class Dataset(object):
     PUBLIC = DatasetInfo.PUBLIC
     LINK = DatasetInfo.LINK
 
-    def __init__(self, data, context=None, schema=None):
-        self._strategy = self._get_strategy(data, context, schema)
+    GEOM_TYPE_POINT = GEOM_TYPE_POINT
+    GEOM_TYPE_LINE = GEOM_TYPE_LINE
+    GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
 
-    def _get_strategy(self, data, context=None, schema=None):
+    def __init__(self, data, context=None, schema=None):
+        self._strategy = self._init_strategy(data, context, schema)
+        self._is_saved_in_carto = self._init_saved_in_carto()
+
+    def _init_strategy(self, data, context=None, schema=None):
         if isinstance(data, pd.DataFrame):
             return self._getDataFrameDataset(data)
         elif isinstance(data, (list, dict)):
@@ -42,6 +47,9 @@ class Dataset(object):
         else:
             raise ValueError('We can not detect the Dataset type')
 
+    def _init_saved_in_carto(self):
+        return self.is_remote()
+
     def _set_strategy(self, strategy, data, context=None, schema=None):
         self._strategy = strategy(data, context, schema)
 
@@ -58,6 +66,11 @@ class Dataset(object):
     def context(self):
         """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
         return self._strategy.context
+
+    @context.setter
+    def context(self, context):
+        """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
+        self._strategy.context = context
 
     @property
     def table_name(self):
@@ -85,6 +98,11 @@ class Dataset(object):
     def get_geodataframe(self):
         """Converts DataFrame into GeoDataFrame if possible"""
         return self._strategy.get_geodataframe()
+
+    @property
+    def is_saved_in_carto(self):
+        """Property on whether Dataset is saved in CARTO account"""
+        return self._is_saved_in_carto
 
     @property
     def dataset_info(self):
@@ -219,6 +237,7 @@ class Dataset(object):
             self._strategy.schema = schema
 
         self._strategy.upload(if_exists, with_lnglat)
+        self._is_saved_in_carto = True
 
         if isinstance(self._strategy, QueryDataset):
             self._set_strategy(
@@ -260,3 +279,12 @@ class Dataset(object):
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
         return self._strategy.is_public()
+
+    def is_local(self):
+        return isinstance(self._strategy, DataFrameDataset)
+
+    def is_remote(self):
+        return not self.is_local()
+
+    def compute_geom_type(self):
+        return self._strategy.compute_geom_type()

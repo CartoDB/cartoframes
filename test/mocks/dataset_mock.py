@@ -77,6 +77,9 @@ class TableDatasetMock(TableDataset):
     def _get_read_query(self, _, _2):
         return True
 
+    def compute_geom_type(self):
+        return Dataset.GEOM_TYPE_POINT
+
 
 class DatasetMock(Dataset):
     def _getDataFrameDataset(self, data):

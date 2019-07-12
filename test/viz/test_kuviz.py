@@ -99,21 +99,17 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(kp.is_sync(), True)
 
     def test_kuviz_publisher_unsync(self):
-        dataset = DatasetMock('fake_table', context=self.context)
-        dataset._is_saved_in_carto = False
+        dataset = DatasetMock(build_geojson([-10, 0], [-10, 0]))
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
         self.assertEqual(kp.is_sync(), False)
 
     def test_kuviz_publisher_sync_layers(self):
-        query = "SELECT 1"
-        dataset = DatasetMock(query, context=self.context)
-        dataset._is_saved_in_carto = False
+        dataset = DatasetMock(build_geojson([-10, 0], [-10, 0]))
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
-        kp._layers[0].source.dataset = dataset
         kp.sync_layers(table_name='fake_table', context=self.context)
         self.assertEqual(kp.is_sync(), True)
 
@@ -125,7 +121,7 @@ class TestKuvizPublisher(unittest.TestCase):
         kp.set_context(self.context)
         layers = kp.get_layers()
 
-        self.assertEqual(layers[0].source.dataset._con, self.context)
+        self.assertEqual(layers[0].source.dataset.context, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': 'default_public', 'base_url': self.username})
@@ -139,7 +135,7 @@ class TestKuvizPublisher(unittest.TestCase):
         maps_api_key = '1234'
         layers = kp.get_layers(maps_api_key=maps_api_key)
 
-        self.assertEqual(layers[0].source.dataset._con, self.context)
+        self.assertEqual(layers[0].source.dataset.context, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username, 'api_key': maps_api_key, 'base_url': self.username})

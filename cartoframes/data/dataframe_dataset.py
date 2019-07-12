@@ -1,5 +1,8 @@
 import pandas as pd
 from warnings import warn
+from tqdm import tqdm
+# avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
+tqdm(disable=True, total=0) # initialise internal lock
 
 from carto.exceptions import CartoException, CartoRateLimitException
 

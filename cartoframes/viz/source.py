@@ -180,7 +180,7 @@ class Source(object):
     def _init_source_dataset(self, data, bounds):
         self.dataset = data
 
-        if isinstance(self.dataset, DataFrameDataset):
+        if self.dataset.is_local():
             self._set_source_geojson(self.dataset, bounds)
         else:
             self._set_source_query(self.dataset, bounds)
