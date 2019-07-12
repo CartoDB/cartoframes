@@ -53,6 +53,7 @@ class Dataset(object):
         self._strategy = strategy(data, context, schema)
 
     def _getDataFrameDataset(self, data):
+        _save_index_as_column(data)
         return DataFrameDataset(data)
 
     def _getQueryDataset(self, data, context):

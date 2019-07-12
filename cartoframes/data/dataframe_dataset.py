@@ -17,7 +17,6 @@ class DataFrameDataset(DatasetBase):
         super(DataFrameDataset, self).__init__()
 
         self._df = data
-        _save_index_as_column(self._df)
 
     @property
     def dataframe(self):
