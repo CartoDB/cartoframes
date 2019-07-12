@@ -1,8 +1,8 @@
 from .api_context import APIContext
 
 
-def create_context(creds, session=None):
-    return APIContext(creds, session)
+def create_context(credentials, session=None):
+    return APIContext(credentials, session)
 
 
 __all__ = [

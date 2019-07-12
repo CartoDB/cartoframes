@@ -6,9 +6,9 @@ from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..client.internal import create_client
+from .. import context
 from .utils import decode_geometry, detect_encoding_type, compute_query, compute_geodataframe, \
-    get_client_with_public_creds, convert_bool, ENC_WKB_BHEX
+    get_context_with_public_creds, convert_bool, ENC_WKB_BHEX
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_names, normalize_name, dtypes, date_columns_names, bool_columns_names
 from ..geojson import load_geojson
@@ -61,7 +61,7 @@ class Dataset(object):
             raise ValueError('Improper dataset creation. You should use one of the class methods: '
                              'from_table, from_query, from_dataframe, from_geodataframe, from_geojson')
 
-        self._client = self._create_client()
+        self._context = self._create_context()
 
         self._state = state
         self._is_saved_in_carto = is_saved_in_carto
@@ -276,7 +276,7 @@ class Dataset(object):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._con = context
         self._schema = context.get_default_schema()
-        self._client = self._create_client()
+        self._context = self._create_context()
 
     @property
     def is_saved_in_carto(self):
@@ -497,7 +497,7 @@ class Dataset(object):
 
         """
         if self.exists():
-            self._client.execute_query(self._drop_table_query(False))
+            self._context.execute_query(self._drop_table_query(False))
             self._unsync()
             return True
 
@@ -506,7 +506,7 @@ class Dataset(object):
     def exists(self):
         """Checks to see if table exists"""
         try:
-            self._client.execute_query(
+            self._context.execute_query(
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
@@ -519,18 +519,18 @@ class Dataset(object):
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_client = get_client_with_public_creds(self.context)
+        public_context = get_context_with_public_creds(self.context)
         try:
-            public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            public_context.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoRateLimitException as err:
             raise err
         except CartoException:
             return False
 
-    def _create_client(self):
+    def _create_context(self):
         if self._con:
-            return create_client(self._con.creds, self._con.session)
+            return context.create_context(self._con.creds, self._con.session)
 
     def _create_table(self, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
@@ -539,7 +539,7 @@ class Dataset(object):
             cartodbfy=self._cartodbfy_query())
 
         try:
-            self._client.execute_long_running_query(query)
+            self._context.execute_long_running_query(query)
         except CartoRateLimitException as err:
             raise err
         except CartoException as err:
@@ -567,7 +567,7 @@ class Dataset(object):
             query = self._get_read_query(columns, limit)
 
         copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
-        raw_result = self._client.download(copy_query, retry_times)
+        raw_result = self._context.download(copy_query, retry_times)
 
         df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
         date_column_names = date_columns_names(columns)
@@ -605,7 +605,7 @@ class Dataset(object):
             geom_col,
             enc_type)
 
-        self._client.upload(query, data)
+        self._context.upload(query, data)
 
     def _rows(self, df, cols, with_lnglat, geom_col, enc_type):
         for i, row in df.iterrows():
@@ -658,7 +658,7 @@ class Dataset(object):
             cartodbfy=self._cartodbfy_query())
 
         try:
-            self._client.execute_long_running_query(query)
+            self._context.execute_long_running_query(query)
         except CartoRateLimitException as err:
             raise err
         except CartoException as err:
@@ -718,7 +718,7 @@ class Dataset(object):
             '''.format(table=self._table_name, schema=self._schema)
 
             try:
-                table_info = self._client.execute_query(query)
+                table_info = self._context.execute_query(query)
                 return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
             except CartoRateLimitException as err:
                 raise err
@@ -748,7 +748,7 @@ class Dataset(object):
     def _get_remote_geom_type(self):
         """Fetch geom type of a remote table"""
         if self._con:
-            response = self._client.execute_query('''
+            response = self._context.execute_query('''
                 SELECT distinct ST_GeometryType(the_geom) AS geom_type
                 FROM ({}) q
                 LIMIT 5
@@ -790,7 +790,7 @@ class Dataset(object):
 
     def get_columns(self):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
-        table_info = self._client.execute_query(query)
+        table_info = self._context.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
 
 

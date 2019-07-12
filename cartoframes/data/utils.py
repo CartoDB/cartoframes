@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from carto.exceptions import CartoException
 
-from ..client.internal import create_client
+from ..context import create_context
 
 try:
     import geopandas
@@ -235,11 +235,11 @@ def setting_value_exception(prop, value):
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_client_with_public_creds(context):
+def get_context_with_public_creds(context):
     # FIXME: api_key not used
     api_key = 'default_public'
     public_creds = deepcopy(context.creds)
-    return create_client(public_creds, context.session)
+    return create_context(public_creds, context.session)
 
 
 def convert_bool(x):
