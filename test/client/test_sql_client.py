@@ -237,3 +237,11 @@ class TestSQLClient(unittest.TestCase):
             SELECT CDB_CartoDBFyTable('user_name', 'table_name');
             COMMIT;
         '''.strip())
+
+    def test_insert_table(self):
+        """client.SQLClient.insert_table"""
+        output = self._sql_client.insert_table('table_name', ['id', 'name'], [0, 'a'])
+
+        self.assertEqual(self._mock_client.query, '''
+            INSERT INTO table_name (id,name) VALUES(0,'a')
+        '''.strip())
