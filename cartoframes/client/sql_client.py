@@ -45,7 +45,7 @@ class SQLClient(object):
         If the `verbose` params is True it returns the full SQL response.
         """
         try:
-            response = self._client.execute_query(query)
+            response = self._client.execute_query(query.strip())
             if not verbose:
                 return response.get('rows')
             else:
@@ -57,7 +57,7 @@ class SQLClient(object):
         """Run a long running query. It returns an object with the
         status and information of the job."""
         try:
-            return self._client.execute_long_running_query(query)
+            return self._client.execute_long_running_query(query.strip())
         except CartoException as e:
             print('Error: {}'.format(e))
 
