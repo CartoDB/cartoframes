@@ -2,14 +2,14 @@ from __future__ import absolute_import
 
 from carto.exceptions import CartoException
 
-from . import internal
+from .. import context
 
 
 class SQLClient(object):
     """SQLClient class is a client to run SQL queries in a CARTO account.
 
     Args:
-        creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
           A :py:class:`Credentials <cartoframes.auth.Credentials>`
           instance can be used in place of a `username`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
@@ -25,20 +25,20 @@ class SQLClient(object):
             from cartoframes.client import SQLClient
 
             creds = Credentials(username='<USER NAME>', api_key='<API KEY>')
-            sql_client = SQLClient(creds)
+            sql = SQLClient(creds)
 
-            sql_client.query('SELECT * FROM table_name')
-            sql_client.execute('DROP TABLE table_name')
+            sql.query('SELECT * FROM table_name')
+            sql.execute('DROP TABLE table_name')
 
-            sql_client.distinct('table_name', 'column_name')
-            sql_client.count('table_name')
+            sql.distinct('table_name', 'column_name')
+            sql.count('table_name')
             ...
     """
 
     def __init__(self, credentials, session=None):
         self._is_org_user = None
         self._creds = credentials
-        self._client = internal.create_client(credentials, session)
+        self._context = context.create_context(credentials, session)
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a `list` with content of the response.
@@ -46,24 +46,18 @@ class SQLClient(object):
         For more information check the `SQL API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
-        try:
-            response = self._client.execute_query(query.strip())
-            if not verbose:
-                return response.get('rows')
-            else:
-                return response
-        except CartoException as e:
-            print('Error: {}'.format(e))
+        response = self._context.execute_query(query.strip())
+        if not verbose:
+            return response.get('rows')
+        else:
+            return response
 
     def execute(self, query):
         """Run a long running query. It returns an object with the
         status and information of the job. For more information check the `Batch API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
-        try:
-            return self._client.execute_long_running_query(query.strip())
-        except CartoException as e:
-            print('Error: {}'.format(e))
+        return self._context.execute_long_running_query(query.strip())
 
     def distinct(self, table_name, column_name):
         """Get the distict values and their count in a table
@@ -177,7 +171,7 @@ class SQLClient(object):
         """Report whether user is in a multiuser CARTO organization or not"""
         if self._is_org_user is None:
             query = 'SELECT unnest(current_schemas(\'f\'))'
-            res = self._client.execute_query(query, do_post=False)
+            res = self._context.execute_query(query, do_post=False)
             self._is_org_user = res['rows'][0]['unnest'] != 'public'
         return self._is_org_user
 

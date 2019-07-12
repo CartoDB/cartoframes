@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class BaseClient():
+class BaseContext():
     __metaclass__ = ABCMeta
 
     @abstractmethod
