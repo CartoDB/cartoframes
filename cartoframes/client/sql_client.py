@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from carto.exceptions import CartoException
 
-from .internal import create_client
+from . import internal
 
 
 class SQLClient(object):
@@ -11,7 +11,7 @@ class SQLClient(object):
     Args:
         creds (:py:class:`Credentials <cartoframes.auth.Credentials>`):
           A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `base_url`/`api_key` combination.
+          instance can be used in place of a `username`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
           documentation
           <http://docs.python-requests.org/en/master/user/advanced/>`__
@@ -38,7 +38,7 @@ class SQLClient(object):
     def __init__(self, credentials, session=None):
         self._is_org_user = None
         self._creds = credentials
-        self._client = create_client(credentials, session)
+        self._client = internal.create_client(credentials, session)
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a JSON object with the response.
