@@ -108,62 +108,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 except CartoException:
                     warnings.warn('Error deleting tables')
 
-    def test_dataset_from_table(self):
-        table_name = 'fake_table'
-        dataset = Dataset(table_name, context=self.con)
-
-        self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset.table_name, table_name)
-        self.assertEqual(dataset._schema, 'public')
-        self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._df)
-        self.assertEqual(dataset._con, self.con)
-        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
-
-    def test_dataset_from_query(self):
-        query = 'SELECT * FROM fake_table'
-        dataset = Dataset(query, context=self.con)
-
-        self.assertIsInstance(dataset, Dataset)
-        self.assertEqual(dataset._query, query)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset._df)
-        self.assertEqual(dataset._con, self.con)
-        self.assertEqual(dataset._state, Dataset.STATE_REMOTE)
-
-    def test_dataset_from_dataframe(self):
-        df = load_geojson(self.test_geojson)
-        dataset = Dataset(df)
-
-        self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset._df)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._con)
-        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
-
-    def test_dataset_from_geodataframe(self):
-        gdf = load_geojson(self.test_geojson)
-        dataset = Dataset(gdf)
-
-        self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset._df)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._con)
-        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
-
-    def test_dataset_from_geojson(self):
-        geojson = self.test_geojson
-        dataset = Dataset(geojson)
-
-        self.assertIsInstance(dataset, Dataset)
-        self.assertIsNotNone(dataset._df)
-        self.assertIsNone(dataset.table_name)
-        self.assertIsNone(dataset._query)
-        self.assertIsNone(dataset._con)
-        self.assertEqual(dataset._state, Dataset.STATE_LOCAL)
-
     def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'
         dataset = Dataset(table_name, context=self.con)
@@ -194,6 +138,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         query = 'SELECT 1'
         dataset = Dataset(query, context=self.con)
         dataset.upload(table_name=self.test_write_table)
+
+        dataset = Dataset(query, context=self.con)
         err_msg = ('Table with name {t} and schema {s} already exists in CARTO. Please choose a different `table_name`'
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
@@ -443,11 +389,11 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_schema_from_parameter(self):
         schema = 'fake_schema'
         dataset = Dataset('fake_table', schema=schema, context=self.con)
-        self.assertEqual(dataset._schema, schema)
+        self.assertEqual(dataset.schema, schema)
 
     def test_dataset_schema_from_non_org_context(self):
         dataset = Dataset('fake_table', context=self.con)
-        self.assertEqual(dataset._schema, 'public')
+        self.assertEqual(dataset.schema, 'public')
 
     def test_dataset_schema_from_org_context(self):
         username = 'fake_username'
@@ -463,7 +409,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 return username
 
         dataset = DatasetMock('fake_table', context=FakeContext())
-        self.assertEqual(dataset._schema, username)
+        self.assertEqual(dataset.schema, username)
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)
@@ -627,6 +573,57 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         geojson_file_path = os.path.abspath('unexisting.geojson')
         with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
             self.assertIsDataFrameDatasetInstance(geojson_file_path)
+
+    def test_dataset_from_table(self):
+        table_name = 'fake_table'
+        dataset = Dataset(table_name, context=self.con)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(dataset.table_name, table_name)
+        self.assertEqual(dataset.schema, 'public')
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.dataframe)
+        self.assertEqual(dataset.context, self.con)
+
+    def test_dataset_from_query(self):
+        query = 'SELECT * FROM fake_table'
+        dataset = Dataset(query, context=self.con)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(dataset.query, query)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.dataframe)
+        self.assertEqual(dataset.context, self.con)
+
+    def test_dataset_from_dataframe(self):
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset(df)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.dataframe)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.context)
+
+    def test_dataset_from_geodataframe(self):
+        gdf = load_geojson(self.test_geojson)
+        dataset = Dataset(gdf)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.dataframe)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.context)
+
+    def test_dataset_from_geojson(self):
+        geojson = self.test_geojson
+        dataset = Dataset(geojson)
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertIsNotNone(dataset.dataframe)
+        self.assertIsNone(dataset.table_name)
+        self.assertIsNone(dataset.query)
+        self.assertIsNone(dataset.context)
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):

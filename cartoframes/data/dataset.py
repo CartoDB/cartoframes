@@ -55,6 +55,21 @@ class Dataset(object):
         return TableDataset(data, context, schema)
 
     @property
+    def context(self):
+        """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
+        return self._strategy.context
+
+    @property
+    def table_name(self):
+        """Dataset table name"""
+        return self._strategy.table_name
+
+    @property
+    def schema(self):
+        """Dataset schema"""
+        return self._strategy.schema
+
+    @property
     def query(self):
         """Dataset query"""
         return self._strategy.query
