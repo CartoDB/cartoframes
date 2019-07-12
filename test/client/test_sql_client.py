@@ -243,5 +243,13 @@ class TestSQLClient(unittest.TestCase):
         output = self._sql_client.insert_table('table_name', ['id', 'name'], [0, 'a'])
 
         self.assertEqual(self._mock_client.query, '''
-            INSERT INTO table_name (id,name) VALUES(0,'a')
+            INSERT INTO table_name (id,name) VALUES(0,'a');
+        '''.strip())
+
+    def test_update_table(self):
+        """client.SQLClient.update_table"""
+        output = self._sql_client.update_table('table_name', 'name', 'b', 'id = 0')
+
+        self.assertEqual(self._mock_client.query, '''
+            UPDATE table_name SET name='b' WHERE id = 0;
         '''.strip())
