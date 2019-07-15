@@ -2,12 +2,12 @@ from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .dataset_base import DatasetBase
+from .base_dataset import BaseDataset
 from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_name
 
 
-class TableDataset(DatasetBase):
+class TableDataset(BaseDataset):
     def __init__(self, data, context=None, schema=None):
         super(TableDataset, self).__init__(context)
 

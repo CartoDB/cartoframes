@@ -9,7 +9,7 @@ from ..client import create_client
 from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
-class DatasetBase():
+class BaseDataset():
     __metaclass__ = ABCMeta
 
     FAIL = 'fail'

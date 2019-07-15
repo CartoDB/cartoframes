@@ -1,9 +1,9 @@
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .dataset_base import DatasetBase
+from .base_dataset import BaseDataset
 
 
-class QueryDataset(DatasetBase):
+class QueryDataset(BaseDataset):
     def __init__(self, data, context=None, schema=None):
         super(QueryDataset, self).__init__(context)
 
@@ -30,12 +30,12 @@ class QueryDataset(DatasetBase):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
-        if if_exists == DatasetBase.APPEND:
+        if if_exists == BaseDataset.APPEND:
             raise CartoException('Error using append with a QueryDataset.'
                                  'It is not possible to append data to a query')
-        elif if_exists == DatasetBase.REPLACE or not self.exists():
+        elif if_exists == BaseDataset.REPLACE or not self.exists():
             self._create_table_from_query()
-        elif if_exists == DatasetBase.FAIL:
+        elif if_exists == BaseDataset.FAIL:
             raise self._already_exists_error()
 
     def delete(self):

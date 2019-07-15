@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .dataset_base import DatasetBase
+from .base_dataset import BaseDataset
 from ..columns import Column, normalize_names
 from .utils import decode_geometry, compute_geodataframe, detect_encoding_type, map_geom_type
 
@@ -12,7 +12,7 @@ from .utils import decode_geometry, compute_geodataframe, detect_encoding_type, 
 tqdm(disable=True, total=0)  # initialise internal lock
 
 
-class DataFrameDataset(DatasetBase):
+class DataFrameDataset(BaseDataset):
     def __init__(self, data, context=None, schema=None):
         super(DataFrameDataset, self).__init__()
 
@@ -39,9 +39,9 @@ class DataFrameDataset(DatasetBase):
 
         normalized_column_names = _normalize_column_names(self._df)
 
-        if if_exists == DatasetBase.REPLACE or not self.exists():
+        if if_exists == BaseDataset.REPLACE or not self.exists():
             self._create_table(normalized_column_names, with_lnglat)
-        elif if_exists == DatasetBase.FAIL:
+        elif if_exists == BaseDataset.FAIL:
             raise self._already_exists_error()
 
         self._copyfrom(normalized_column_names, with_lnglat)
