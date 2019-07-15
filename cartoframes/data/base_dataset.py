@@ -104,7 +104,6 @@ class BaseDataset():
         except CartoException:
             return False
 
-
     def _create_client(self):
         if self._context:
             return create_client(self._context.creds, self._context.session)
