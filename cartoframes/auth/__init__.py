@@ -25,7 +25,7 @@ def set_default_context(first=None, second=None, base_url=None, api_key=None, co
           instance can be used in place of a `base_url`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
           documentation
-          <http://docs.python-requests.org/en/master/user/advanced/>`__
+          <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
           for more information.
 
     Example:

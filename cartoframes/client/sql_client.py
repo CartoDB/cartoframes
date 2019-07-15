@@ -5,6 +5,8 @@ from .. import context
 
 class SQLClient(object):
     """SQLClient class is a client to run SQL queries in a CARTO account.
+    Note: for long running SELECT queries affected by database timeouts it's
+    recommended to use the :py:class:`Dataset <cartoframes.data.Dataset>` class.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -12,7 +14,7 @@ class SQLClient(object):
           instance can be used in place of a `username`/`api_key` combination.
         session (requests.Session, optional): requests session. See `requests
           documentation
-          <http://docs.python-requests.org/en/master/user/advanced/>`__
+          <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
           for more information.
 
     Example:
