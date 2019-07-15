@@ -6,12 +6,22 @@ CARTOframes
     :target: https://travis-ci.org/CartoDB/cartoframes
 .. image:: https://coveralls.io/repos/github/CartoDB/cartoframes/badge.svg?branch=master
     :target: https://coveralls.io/github/CartoDB/cartoframes?branch=master
-.. image:: https://mybinder.org/badge_logo.svg
-    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b1?filepath=examples
 
 A Python package for integrating `CARTO <https://carto.com/>`__ maps, analysis, and data services into data science workflows.
 
 Python data analysis workflows often rely on the de facto standards `pandas <http://pandas.pydata.org/>`__ and `Jupyter notebooks <http://jupyter.org/>`__. Integrating CARTO into this workflow saves data scientists time and energy by not having to export datasets as files or retain multiple copies of the data. Instead, CARTOframes give the ability to communicate reproducible analysis while providing the ability to gain from CARTO's services like hosted, dynamic or static maps and `Data Observatory <https://carto.com/platform/location-data-streams/>`__ augmentation.
+
+Try it Out
+==========
+
+* Stable (v0.10.1): |stable|
+* Latest (develop branch): |develop|
+
+.. |stable| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
+
+.. |develop| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
 
 Features
 ========

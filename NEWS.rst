@@ -12,6 +12,8 @@ Updates
 - Decoupling clients from Dataset (#831)
 - Client Architecture (#833)
 - Fix retry_times usage in Dataset.download (#783)
+- New SQLClient API (#808)
+- Deprecate cartoframes.analysis.Table in favor of Dataset (#587)
 
 
 1.0b1

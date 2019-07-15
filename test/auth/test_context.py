@@ -1191,13 +1191,12 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
     def test_tables(self):
         """Context.tables normal usage"""
-        from cartoframes.analysis import Table
         con = Context(
             base_url=self.baseurl,
             api_key=self.apikey
         )
-        tables = con.tables()
-        self.assertIsInstance(tables, list)
-        self.assertIsInstance(tables[0], Table)
-        self.assertIsNotNone(tables[0].name)
-        self.assertIsInstance(tables[0].name, str)
+        datasets = con.tables()
+        self.assertIsInstance(datasets, list)
+        self.assertIsInstance(datasets[0], Dataset)
+        self.assertIsNotNone(datasets[0].table_name)
+        self.assertIsInstance(datasets[0].table_name, str)

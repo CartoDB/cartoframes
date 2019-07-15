@@ -3,14 +3,16 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def size_category_layer(source, value, title='', top=5, cat=None, size=None, color=None):
+def size_category_layer(
+        source, value, title='', top=5, cat=None,
+        size=None, color=None, description='', footer=''):
     """Helper function for quickly creating a size category layer.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
-        value (str): Column to symbolize by
-        title (str, optional): Title of legend
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
         top (int, optional): Number of size categories for layer. Default is
           5. Valid values range from 1 to 16.
         cat (str, optional): Category list. Must be a valid CARTO VL category
@@ -20,6 +22,8 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
@@ -30,12 +34,16 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
         source,
         style={
             'point': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, size or [2, 20]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#F46D43')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, size or [2, 20]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#F46D43')
             },
             'line': {
-                'width': 'ramp({0}(${1}, {2}), {3})'.format(func, value, cat or top, size or [1, 10]),
-                'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3')
+                'width': 'ramp({0}(${1}, {2}), {3})'.format(
+                    func, value, cat or top, size or [1, 10]),
+                'color': 'opacity({0}, 0.8)'.format(
+                    color or '#4CC8A3')
             }
         },
         popup={
@@ -51,6 +59,7 @@ def size_category_layer(source, value, title='', top=5, cat=None, size=None, col
                 'polygon': 'size-category-polygon'
             },
             'title': title or value,
-            'description': ''
+            'description': description,
+            'footer': footer
         }
     )

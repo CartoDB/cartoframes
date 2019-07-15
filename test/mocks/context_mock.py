@@ -13,7 +13,7 @@ class CredsMock():
         return self._key
 
     def base_url(self):
-        return self._username
+        return 'https://{}.carto.com/'.format(self._username)
 
 
 class ContextMock():

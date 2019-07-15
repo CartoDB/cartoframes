@@ -124,7 +124,9 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(layers[0].source.dataset.context, self.context)
         self.assertEqual(
             layers[0].source.credentials,
-            {'username': self.username, 'api_key': 'default_public', 'base_url': self.username})
+            {'username': self.username,
+             'api_key': 'default_public',
+             'base_url': 'https://{}.carto.com/'.format(self.username)})
 
     def test_kuviz_publisher_get_layers_with_api_key(self):
         dataset = DatasetMock('fake_table', context=self.context)
@@ -138,7 +140,9 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(layers[0].source.dataset.context, self.context)
         self.assertEqual(
             layers[0].source.credentials,
-            {'username': self.username, 'api_key': maps_api_key, 'base_url': self.username})
+            {'username': self.username,
+             'api_key': maps_api_key,
+             'base_url': 'https://{}.carto.com/'.format(self.username)})
 
     def test_kuviz_publisher_all(self):
         kuviz_dicts = KuvizPublisherMock.all()

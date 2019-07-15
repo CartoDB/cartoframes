@@ -28,7 +28,6 @@ from .. import utils
 from ..layer import BaseMap, AbstractLayer
 from ..maps import (non_basemap_layers, get_map_name,
                     get_map_template, top_basemap_layer_url)
-from ..analysis import Table
 from ..__version__ import __version__
 from ..data import Dataset
 
@@ -251,7 +250,7 @@ class Context(object):
         """List all tables in user's CARTO account
 
         Returns:
-            :obj:`list` of :py:class:`Table <cartoframes.analysis.Table>`
+            :obj:`list` of :py:class:`Dataset <cartoframes.data.Dataset>`
 
         """
         datasets = DatasetManager(self.auth_client).filter(
@@ -264,7 +263,7 @@ class Context(object):
             show_uses_builder_features='false',
             show_synchronization='false',
             load_totals='false')
-        return [Table.from_dataset(d) for d in datasets]
+        return [Dataset(d) for d in datasets]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):

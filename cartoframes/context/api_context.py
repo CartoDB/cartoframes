@@ -5,13 +5,13 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoRateLimitException
 
-from .base_client import BaseClient
+from .base_context import BaseContext
 from ..__version__ import __version__
 
 DEFAULT_RETRY_TIMES = 3
 
 
-class APIClient(BaseClient):
+class APIContext(BaseContext):
     def __init__(self, creds, session=None):
         self.auth_client = APIKeyAuthClient(
             base_url=creds.base_url(),
@@ -47,5 +47,3 @@ class APIClient(BaseClient):
 
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query)
-
-
