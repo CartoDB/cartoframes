@@ -13,21 +13,9 @@ class TableDataset(DatasetBase):
 
         self._table_name = normalize_name(data)
         self._schema = schema or self._get_schema()
-        self._dataset_info = None
 
         if self._table_name != data:
             warn('Table will be named `{}`'.format(self._table_name))
-
-    @property
-    def dataset_info(self):
-        if self._dataset_info is None:
-            self._dataset_info = self._get_dataset_info()
-
-        return self._dataset_info
-
-    def update_dataset_info(self, privacy=None, name=None):
-        self._dataset_info = self.dataset_info
-        self._dataset_info.update(privacy=privacy, name=name)
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()

@@ -21,6 +21,7 @@ class DatasetBase():
         self._client = self._create_client()
         self._table_name = None
         self._schema = None
+        self._dataset_info = None
 
     @abstractmethod
     def download(self):
@@ -66,6 +67,17 @@ class DatasetBase():
 
     def get_query(self):
         return compute_query(self)
+
+    @property
+    def dataset_info(self):
+        if self._dataset_info is None:
+            self._dataset_info = self._get_dataset_info()
+
+        return self._dataset_info
+
+    def update_dataset_info(self, privacy=None, name=None):
+        self._dataset_info = self.dataset_info
+        self._dataset_info.update(privacy=privacy, name=name)
 
     def exists(self):
         """Checks to see if table exists"""

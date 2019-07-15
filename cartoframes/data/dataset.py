@@ -131,6 +131,11 @@ class Dataset(object):
                d.dataset_info
 
         """
+        if not self._is_saved_in_carto:
+            raise CartoException('Your data is not synchronized with CARTO.'
+                                 'First of all, you should call upload method '
+                                 'to save your data in CARTO.')
+
         return self._strategy.dataset_info
 
     def update_dataset_info(self, privacy=None, name=None):
