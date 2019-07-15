@@ -1191,7 +1191,6 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
 
     def test_tables(self):
         """Context.tables normal usage"""
-        from cartoframes.analysis import Table
         con = Context(
             base_url=self.baseurl,
             api_key=self.apikey
