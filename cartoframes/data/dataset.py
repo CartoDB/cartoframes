@@ -284,15 +284,19 @@ class Dataset(object):
         return self._strategy.is_public()
 
     def is_local(self):
+        """Checks if the Dataset is local (DataFrameDataset)"""
         return isinstance(self._strategy, DataFrameDataset)
 
     def is_remote(self):
+        """Checks if the Dataset is local (TableDataset or QueryDataset)"""
         return not self.is_local()
 
     def compute_geom_type(self):
+        """Compute the geometry type from the data"""
         return self._strategy.compute_geom_type()
 
     def get_table_column_names(self, exclude=None):
+        """Get column names and types from a table"""
         return self._strategy.get_table_column_names(exclude)
 
 
