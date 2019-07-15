@@ -1,5 +1,6 @@
 import unittest
 from cartoframes.viz import Layer, Source, Style, Popup, Legend
+from mocks.source_mock import SourceMock
 
 
 class TestLayer(unittest.TestCase):
@@ -9,7 +10,7 @@ class TestLayer(unittest.TestCase):
 
     def test_initialization_objects(self):
         """Layer should initialize layer attributes"""
-        layer = Layer(Source('layer_source'))
+        layer = Layer(SourceMock('layer_source'))
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
@@ -21,7 +22,7 @@ class TestLayer(unittest.TestCase):
 
     def test_initialization_simple(self):
         """Layer should initialize layer attributes"""
-        layer = Layer('layer_source', '')
+        layer = Layer(SourceMock('layer_source'), '')
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
@@ -36,7 +37,7 @@ class TestLayerStyle(unittest.TestCase):
     def test_style_dict(self):
         """Layer style should set the style when it is a dict"""
         layer = Layer(
-            'layer_source',
+            SourceMock('layer_source'),
             {
                 'vars': {
                     'grad': '[red, green, blue]'
@@ -58,7 +59,7 @@ class TestLayerStyle(unittest.TestCase):
     def test_style_str(self):
         """Layer style should set the style when it is a dict"""
         layer = Layer(
-            'layer_source',
+            SourceMock('layer_source'),
             """
                 @grad: [red, green, blue]
                 color: blue
