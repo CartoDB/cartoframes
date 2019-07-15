@@ -29,6 +29,8 @@ class Dataset(object):
         self._is_saved_in_carto = self._init_saved_in_carto()
 
     def _init_strategy(self, data, context=None, schema=None):
+        context = context or _get_default_context()
+
         if isinstance(data, pd.DataFrame):
             return self._getDataFrameDataset(data)
         elif isinstance(data, (list, dict)):
@@ -289,3 +291,8 @@ class Dataset(object):
 
     def compute_geom_type(self):
         return self._strategy.compute_geom_type()
+
+
+def _get_default_context():
+    from ..auth import _default_context
+    return _default_context

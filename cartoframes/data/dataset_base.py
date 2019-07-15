@@ -17,8 +17,7 @@ class DatasetBase():
     APPEND = 'append'
 
     def __init__(self, context=None):
-        from ..auth import _default_context
-        self._context = context or _default_context
+        self._context = context
         self._client = self._create_client()
         self._table_name = None
         self._schema = None
