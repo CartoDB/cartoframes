@@ -141,13 +141,13 @@ class Source(object):
     def _init_source(self, data, context, bounds, schema):
         if isinstance(data, str):
             if is_sql_query(data):
-                self._init_source_query(data, context, bounds)
+                self._init_source_query(data, context, schema, bounds)
 
             elif is_geojson_file(data):
                 self._init_source_geojson(data, bounds)
 
             elif _check_table_name(data):
-                self._init_source_table(data, context, schema, bounds)
+                self._init_source_query(data, context, schema, bounds)
 
         elif isinstance(data, (list, dict)):
             self._init_source_geojson(data, bounds)
@@ -164,12 +164,8 @@ class Source(object):
         else:
             raise ValueError('Wrong source input')
 
-    def _init_source_table(self, data, context, schema, bounds):
+    def _init_source_query(self, data, context, schema, bounds):
         self.dataset = Dataset(data, context, schema)
-        self._set_source_query(self.dataset, bounds)
-
-    def _init_source_query(self, data, context, bounds):
-        self.dataset = Dataset(data, context)
         self._set_source_query(self.dataset, bounds)
 
     def _init_source_geojson(self, data, bounds):
