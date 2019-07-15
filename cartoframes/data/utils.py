@@ -273,7 +273,7 @@ def is_sql_query(data):
 
 
 def is_geojson_file(data):
-    return re.match(r'^.*\.geojson\s*$', data, re.IGNORECASE)
+    return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
 
 
 def is_geojson_file_path(data):

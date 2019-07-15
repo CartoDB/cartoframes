@@ -533,12 +533,13 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertTrue(isinstance(ds._strategy, DataFrameDataset), msg=error)
 
     def test_creation_from_valid_table_names(self):
-        table_names = ['myt', 'my_t', 'tgeojson', 't_geojson', 'select_t']
+        table_names = ['myt', 'my_t', 'tgeojson', 't_geojson', 'geojson', 'json', 'select_t']
         for table_name in table_names:
             self.assertIsTableDatasetInstance(table_name)
 
     def test_creation_from_valid_queries(self):
-        queries = ['SELECT * FROM', 'select * from', 'select c', 'with n as', 'WITH n AS']
+        queries = ['SELECT * FROM', 'select * from', 'select c', 'with n as', 'WITH n AS', 'select * from json',
+                   'select * from geojson']
         for query in queries:
             self.assertIsQueryDatasetInstance(query)
 
@@ -561,8 +562,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
             self.assertIsDataFrameDatasetInstance(geojson)
 
     def test_creation_from_valid_geojson_file_path(self):
-        geojson_file_path = os.path.abspath('test/fixtures/valid.geojson')
-        self.assertIsDataFrameDatasetInstance(geojson_file_path)
+        paths = [os.path.abspath('test/fixtures/valid.geojson'), os.path.abspath('test/fixtures/validgeo.json')]
+        for path in paths:
+            self.assertIsDataFrameDatasetInstance(path)
 
     def test_creation_from_wrong_geojson_file_path(self):
         geojson_file_path = os.path.abspath('test/fixtures/wrong.geojson')
