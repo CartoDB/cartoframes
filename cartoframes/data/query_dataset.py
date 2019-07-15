@@ -4,8 +4,8 @@ from .base_dataset import BaseDataset
 
 
 class QueryDataset(BaseDataset):
-    def __init__(self, data, context=None, schema=None):
-        super(QueryDataset, self).__init__(context)
+    def __init__(self, data, credentials=None, schema=None):
+        super(QueryDataset, self).__init__(credentials)
 
         self._query = data
 
@@ -55,7 +55,7 @@ class QueryDataset(BaseDataset):
             cartodbfy=self._cartodbfy_query())
 
         try:
-            self._client.execute_long_running_query(query)
+            self._context.execute_long_running_query(query)
         except CartoRateLimitException as err:
             raise err
         except CartoException as err:

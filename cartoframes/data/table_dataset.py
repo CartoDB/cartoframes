@@ -3,13 +3,12 @@ from warnings import warn
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from .dataset_info import DatasetInfo
 from ..columns import Column, normalize_name
 
 
 class TableDataset(BaseDataset):
-    def __init__(self, data, context=None, schema=None):
-        super(TableDataset, self).__init__(context)
+    def __init__(self, data, credentials=None, schema=None):
+        super(TableDataset, self).__init__(credentials)
 
         self._table_name = normalize_name(data)
         self._schema = schema or self._get_schema()
@@ -29,7 +28,7 @@ class TableDataset(BaseDataset):
 
     def delete(self):
         if self.exists():
-            self._client.execute_query(self._drop_table_query(False))
+            self._context.execute_query(self._drop_table_query(False))
             self._unsync()
             return True
 
@@ -59,7 +58,7 @@ class TableDataset(BaseDataset):
         '''.format(table=self._table_name, schema=self._schema)
 
         try:
-            table_info = self._client.execute_query(query)
+            table_info = self._context.execute_query(query)
             return [Column(c['column_name'], pgtype=c['data_type']) for c in table_info['rows']]
         except CartoRateLimitException as err:
             raise err
@@ -69,9 +68,6 @@ class TableDataset(BaseDataset):
                 return self._get_query_columns()
             else:
                 raise e
-
-    def _get_dataset_info(self):
-        return DatasetInfo(self._context, self._table_name)
 
     def _get_read_query(self, table_columns, limit=None):
         """Create the read (COPY TO) query"""

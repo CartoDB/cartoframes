@@ -183,7 +183,7 @@ class TestMapPublication(unittest.TestCase):
         self.assertEqual(kuviz_dict['privacy'], privacy)
 
     def test_map_publish_remote(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -193,7 +193,7 @@ class TestMapPublication(unittest.TestCase):
 
     def test_map_publish_unsync_fails(self):
         query = "SELECT 1"
-        dataset = DatasetMock(query, context=self.context)
+        dataset = DatasetMock(query, credentials=self.context)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
@@ -203,7 +203,7 @@ class TestMapPublication(unittest.TestCase):
 
     def test_map_publish_unsync_sync_data_and_publish(self):
         query = "SELECT 1"
-        dataset = DatasetMock(query, context=self.context)
+        dataset = DatasetMock(query, credentials=self.context)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
@@ -215,7 +215,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_with_password(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -224,7 +224,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
     def test_map_publish_deletion(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -233,7 +233,7 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNone(map._kuviz)
 
     def test_map_publish_update_name(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -244,7 +244,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
 
     def test_map_publish_update_password(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -261,7 +261,7 @@ class TestMapPublication(unittest.TestCase):
 
         KuvizPublisherMock.is_public = is_not_public
 
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         msg = ('The datasets used in your map are not public. '

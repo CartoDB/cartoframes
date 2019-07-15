@@ -242,7 +242,7 @@ class Context(object):
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
 
-        dataset = Dataset(table_name, schema=schema, context=self)
+        dataset = Dataset(table_name, schema=schema, credentials=self)
         return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
@@ -346,7 +346,7 @@ class Context(object):
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
+        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, credentials=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
@@ -383,7 +383,7 @@ class Context(object):
             bool: `True` if table is removed
 
         """
-        dataset = Dataset(table_name, context=self)
+        dataset = Dataset(table_name, credentials=self)
         deleted = dataset.delete()
         if deleted:
             return deleted
@@ -511,7 +511,7 @@ class Context(object):
                 )
 
         """
-        dataset = Dataset(query, context=self)
+        dataset = Dataset(query, credentials=self)
         return dataset.download(decode_geom=decode_geom)
 
     def execute(self, query):
@@ -673,7 +673,7 @@ class Context(object):
         is_select_query = is_select or (is_select is None and query.strip().lower().startswith('select'))
         if is_select_query:
             if table_name:
-                dataset = Dataset(query, context=self)
+                dataset = Dataset(query, credentials=self)
                 dataset.upload(table_name=table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
             else:
@@ -1569,7 +1569,7 @@ class Context(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(table_name, context=self)
+        dataset = Dataset(table_name, credentials=self)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}

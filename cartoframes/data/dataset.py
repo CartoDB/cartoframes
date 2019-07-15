@@ -24,12 +24,12 @@ class Dataset(object):
     GEOM_TYPE_LINE = GEOM_TYPE_LINE
     GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
 
-    def __init__(self, data, context=None, schema=None):
-        self._strategy = self._init_strategy(data, context, schema)
+    def __init__(self, data, credentials=None, schema=None):
+        self._strategy = self._init_strategy(data, credentials, schema)
         self._is_saved_in_carto = self._init_saved_in_carto()
 
-    def _init_strategy(self, data, context=None, schema=None):
-        context = context or _get_default_context()
+    def _init_strategy(self, data, credentials=None, schema=None):
+        credentials = credentials or _get_default_credentials()
 
         if isinstance(data, pd.DataFrame):
             return self._getDataFrameDataset(data)
@@ -37,43 +37,43 @@ class Dataset(object):
             return self._getDataFrameDataset(load_geojson(data))
         elif isinstance(data, str):
             if is_sql_query(data):
-                if not context:
-                    raise ValueError('QueryDataset needs a Context object')
-                return self._getQueryDataset(data, context)
+                if not credentials:
+                    raise ValueError('QueryDataset needs a Credentials object')
+                return self._getQueryDataset(data, credentials)
             elif is_geojson_file_path(data):
                 return self._getDataFrameDataset(load_geojson(data))
             else:
-                if not context:
-                    raise ValueError('TableDataset needs a Context object')
-                return self._getTableDataset(data, context, schema)
+                if not credentials:
+                    raise ValueError('TableDataset needs a Credentials object')
+                return self._getTableDataset(data, credentials, schema)
         else:
             raise ValueError('We can not detect the Dataset type')
 
     def _init_saved_in_carto(self):
         return self.is_remote()
 
-    def _set_strategy(self, strategy, data, context=None, schema=None):
-        self._strategy = strategy(data, context, schema)
+    def _set_strategy(self, strategy, data, credentials=None, schema=None):
+        self._strategy = strategy(data, credentials, schema)
 
     def _getDataFrameDataset(self, data):
         _save_index_as_column(data)
         return DataFrameDataset(data)
 
-    def _getQueryDataset(self, data, context):
-        return QueryDataset(data, context)
+    def _getQueryDataset(self, data, credentials):
+        return QueryDataset(data, credentials)
 
-    def _getTableDataset(self, data, context, schema):
-        return TableDataset(data, context, schema)
+    def _getTableDataset(self, data, credentials, schema):
+        return TableDataset(data, credentials, schema)
 
     @property
-    def context(self):
+    def credentials(self):
         """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
-        return self._strategy.context
+        return self._strategy.credentials
 
-    @context.setter
-    def context(self, context):
+    @credentials.setter
+    def credentials(self, credentials):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
-        self._strategy.context = context
+        self._strategy.credentials = credentials
 
     @property
     def table_name(self):
@@ -188,19 +188,19 @@ class Dataset(object):
         data = self._strategy.download(limit, decode_geom, retry_times)
 
         table_name = self._strategy.table_name
-        context = self._strategy.context
+        credentials = self._strategy.credentials
         schema = self._strategy.schema
 
         self._set_strategy(DataFrameDataset, data)
 
         self._strategy.table_name = table_name
-        self._strategy.context = context
+        self._strategy.credentials = credentials
         self._strategy.schema = schema
 
         return data
 
-    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, context=None):
-        """Upload Dataset to CARTO account associated with `context`.
+    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
+        """Upload Dataset to CARTO account associated with `credentials`.
         Args:
             with_lnglat (tuple, optional): Two columns that have the longitude
               and latitude information. If used, a point geometry will be
@@ -215,9 +215,9 @@ class Dataset(object):
               name does not conform to SQL naming conventions, it will be
               'normalized' (e.g., all lower case, adding `_` in place of spaces
               and other special characters.
-            context (:py:class:`Context <cartoframes.auth.Context>`, optional):
-              Context of user account to send Dataset to. If not provided,
-              a default context (if set with :py:meth:`set_default_context
+            credentials (:py:class:`Context <cartoframes.auth.Context>`, optional):
+              credentials of user account to send Dataset to. If not provided,
+              a default credentials (if set with :py:meth:`set_default_context
               <cartoframes.auth.set_default_context>`) will attempted to be
               used.
         Example:
@@ -239,8 +239,8 @@ class Dataset(object):
         """
         if table_name:
             self._strategy.table_name = table_name
-        if context:
-            self._strategy.context = context
+        if credentials:
+            self._strategy.credentials = credentials
         if schema:
             self._strategy.schema = schema
 
@@ -251,7 +251,7 @@ class Dataset(object):
             self._set_strategy(
                 TableDataset,
                 self._strategy.table_name,
-                self._strategy.context,
+                self._strategy.credentials,
                 self._strategy.schema)
 
         return self
@@ -305,6 +305,6 @@ class Dataset(object):
         return self._strategy.get_table_column_names(exclude)
 
 
-def _get_default_context():
+def _get_default_credentials():
     from ..auth import _default_context
     return _default_context

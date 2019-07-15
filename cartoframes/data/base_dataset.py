@@ -3,9 +3,10 @@ import pandas as pd
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .utils import decode_geometry, convert_bool, compute_query, get_client_with_public_creds, ENC_WKB_BHEX, \
+from .dataset_info import DatasetInfo
+from .utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, ENC_WKB_BHEX, \
     map_geom_type
-from ..client import create_client
+from .. import context
 from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
@@ -16,9 +17,9 @@ class BaseDataset():
     REPLACE = 'replace'
     APPEND = 'append'
 
-    def __init__(self, context=None):
-        self._context = context
-        self._client = self._create_client()
+    def __init__(self, credentials=None):
+        self._credentials = credentials
+        self._context = self._create_context()
         self._table_name = None
         self._schema = None
         self._dataset_info = None
@@ -36,16 +37,16 @@ class BaseDataset():
         pass
 
     @property
-    def context(self):
+    def credentials(self):
         """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
-        return self._context
+        return self._credentials
 
-    @context.setter
-    def context(self, context):
+    @credentials.setter
+    def credentials(self, credentials):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
-        self._context = context
-        self._schema = context.get_default_schema()
-        self._client = self._create_client()
+        self._credentials = credentials
+        self._schema = credentials.get_default_schema()
+        self._context = self._create_context()
 
     @property
     def table_name(self):
@@ -82,7 +83,7 @@ class BaseDataset():
     def exists(self):
         """Checks to see if table exists"""
         try:
-            self._client.execute_query(
+            self._context.execute_query(
                 'EXPLAIN SELECT * FROM "{table_name}"'.format(table_name=self._table_name),
                 do_post=False)
             return True
@@ -90,23 +91,23 @@ class BaseDataset():
             raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
-            self._context._debug_print(err=err)
+            self._credentials._debug_print(err=err)
             return False
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_client = get_client_with_public_creds(self.context)
+        public_credentials = get_context_with_public_creds(self.credentials)
         try:
-            public_client.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            public_credentials.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoRateLimitException as err:
             raise err
         except CartoException:
             return False
 
-    def _create_client(self):
-        if self._context:
-            return create_client(self._context.creds, self._context.session)
+    def _create_context(self):
+        if self._credentials:
+            return context.create_context(self._credentials.creds, self._credentials.session)
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -124,16 +125,16 @@ class BaseDataset():
                                   t=self._table_name, s=self._schema))
 
     def _is_ready_for_upload_validation(self):
-        if self._table_name is None or self._context is None:
-            raise ValueError('You should provide a table_name and context to upload data.')
+        if self._table_name is None or self._credentials is None:
+            raise ValueError('You should provide a table_name and credentials to upload data.')
 
     def _is_ready_for_dowload_validation(self):
-        if self._context is None or (self._table_name is None and self._query is None):
-            raise ValueError('You should provide a context and a table_name or query to download data.')
+        if self._credentials is None or (self._table_name is None and self._query is None):
+            raise ValueError('You should provide a credentials and a table_name or query to download data.')
 
     def _copyto(self, columns, query, limit, decode_geom, retry_times):
         copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
-        raw_result = self._client.download(copy_query, retry_times)
+        raw_result = self._context.download(copy_query, retry_times)
 
         df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
         date_column_names = date_columns_names(columns)
@@ -157,12 +158,12 @@ class BaseDataset():
 
     def _get_query_columns(self):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(self.get_query())
-        table_info = self._client.execute_query(query)
+        table_info = self._context.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
 
     def _get_geom_type(self, query=None):
         """Fetch geom type of a remote table"""
-        response = self._client.execute_query('''
+        response = self._context.execute_query('''
             SELECT distinct ST_GeometryType(the_geom) AS geom_type
             FROM ({}) q
             LIMIT 5
@@ -173,7 +174,10 @@ class BaseDataset():
                 return map_geom_type(st_geom_type[3:])
 
     def _get_schema(self):
-        if self._context:
-            return self._context.get_default_schema()
+        if self._credentials:
+            return self._credentials.get_default_schema()
         else:
             return None
+
+    def _get_dataset_info(self):
+        return DatasetInfo(self._credentials, self._table_name)

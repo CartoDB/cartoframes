@@ -13,7 +13,7 @@ tqdm(disable=True, total=0)  # initialise internal lock
 
 
 class DataFrameDataset(BaseDataset):
-    def __init__(self, data, context=None, schema=None):
+    def __init__(self, data, credentials=None, schema=None):
         super(DataFrameDataset, self).__init__()
 
         self._df = data
@@ -69,7 +69,7 @@ class DataFrameDataset(BaseDataset):
             geom_col,
             enc_type)
 
-        self._client.upload(query, data)
+        self._context.upload(query, data)
 
     def _create_table(self, normalized_column_names, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
@@ -78,7 +78,7 @@ class DataFrameDataset(BaseDataset):
             cartodbfy=self._cartodbfy_query())
 
         try:
-            self._client.execute_long_running_query(query)
+            self._context.execute_long_running_query(query)
         except CartoRateLimitException as err:
             raise err
         except CartoException as err:

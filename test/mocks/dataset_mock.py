@@ -88,13 +88,13 @@ class DatasetMock(Dataset):
     def _getDataFrameDataset(self, data):
         return DataFrameDatasetMock(data)
 
-    def _getQueryDataset(self, data, context):
-        return QueryDatasetMock(data, context)
+    def _getQueryDataset(self, data, credentials):
+        return QueryDatasetMock(data, credentials)
 
-    def _getTableDataset(self, data, context, schema):
-        return TableDatasetMock(data, context, schema)
+    def _getTableDataset(self, data, credentials, schema):
+        return TableDatasetMock(data, credentials, schema)
 
-    def _set_strategy(self, strategy, data, context=None, schema=None):
+    def _set_strategy(self, strategy, data, credentials=None, schema=None):
         if strategy == DataFrameDataset:
             strategy = DataFrameDatasetMock
         elif strategy == TableDataset:
@@ -102,4 +102,4 @@ class DatasetMock(Dataset):
         elif strategy == QueryDataset:
             strategy = QueryDatasetMock
 
-        super(DatasetMock, self)._set_strategy(strategy, data, context, schema)
+        super(DatasetMock, self)._set_strategy(strategy, data, credentials, schema)

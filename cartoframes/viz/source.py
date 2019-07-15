@@ -197,7 +197,7 @@ def _check_table_name(data):
 
 
 def _get_context(dataset):
-    return dataset.context
+    return dataset.credentials
 
 
 def _get_credentials(dataset):

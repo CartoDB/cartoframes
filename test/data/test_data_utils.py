@@ -40,13 +40,13 @@ class TestDataUtils(unittest.TestCase):
 
     def test_compute_query(self):
         """data.utils.compute_query"""
-        ds = Dataset('table_name', schema='schema', context=self.context)
+        ds = Dataset('table_name', schema='schema', credentials=self.context)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "schema"."table_name"')
 
     def test_compute_query_default_schema(self):
         """data.utils.compute_query"""
-        ds = Dataset('table_name', context=self.context)
+        ds = Dataset('table_name', credentials=self.context)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "public"."table_name"')
 

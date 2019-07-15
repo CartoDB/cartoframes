@@ -83,7 +83,7 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(kp.is_sync(), False)
 
     def test_kuviz_publisher_create_remote(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
@@ -92,7 +92,7 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(len(kp._layers), len(vmap.layers))
 
     def test_kuviz_publisher_create_remote_sync(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
@@ -114,14 +114,14 @@ class TestKuvizPublisher(unittest.TestCase):
         self.assertEqual(kp.is_sync(), True)
 
     def test_kuviz_publisher_get_layers_defaul_apikey(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
         kp.set_context(self.context)
         layers = kp.get_layers()
 
-        self.assertEqual(layers[0].source.dataset.context, self.context)
+        self.assertEqual(layers[0].source.dataset.credentials, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username,
@@ -129,7 +129,7 @@ class TestKuvizPublisher(unittest.TestCase):
              'base_url': 'https://{}.carto.com/'.format(self.username)})
 
     def test_kuviz_publisher_get_layers_with_api_key(self):
-        dataset = DatasetMock('fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         vmap = Map(Layer(Source(dataset)))
 
         kp = KuvizPublisherMock(vmap)
@@ -137,7 +137,7 @@ class TestKuvizPublisher(unittest.TestCase):
         maps_api_key = '1234'
         layers = kp.get_layers(maps_api_key=maps_api_key)
 
-        self.assertEqual(layers[0].source.dataset.context, self.context)
+        self.assertEqual(layers[0].source.dataset.credentials, self.context)
         self.assertEqual(
             layers[0].source.credentials,
             {'username': self.username,

@@ -36,7 +36,7 @@ class KuvizPublisher(object):
 
     def get_layers(self, maps_api_key='default_public'):
         for layer in self._layers:
-            layer.source.dataset.context = self._context
+            layer.source.dataset.credentials = self._context
 
             layer.source.credentials = {
                 'username': self._context.creds.username(),
@@ -51,7 +51,7 @@ class KuvizPublisher(object):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
             from ..auth import _default_context
-            dataset_context = context or layer.source.dataset.context or _default_context
+            dataset_context = context or layer.source.dataset.credentials or _default_context
 
             self._sync_layer(layer, table_name, dataset_context)
 
