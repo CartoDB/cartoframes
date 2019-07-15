@@ -6,6 +6,8 @@ from cartoframes.data.dataframe_dataset import DataFrameDataset
 from cartoframes.data.query_dataset import QueryDataset
 from cartoframes.data.table_dataset import TableDataset
 from cartoframes.data import Dataset, DatasetInfo
+from mocks.context_mock import ContextMock
+
 
 class MetadataMock():
     def __init__(self):
@@ -54,6 +56,9 @@ class QueryDatasetMock(QueryDataset):
 
     def _get_query_columns(self):
         return True
+
+    def compute_geom_type(self):
+        return Dataset.GEOM_TYPE_POINT
 
 
 class TableDatasetMock(TableDataset):

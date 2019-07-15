@@ -292,6 +292,9 @@ class Dataset(object):
     def compute_geom_type(self):
         return self._strategy.compute_geom_type()
 
+    def get_table_column_names(self, exclude=None):
+        return self._strategy.get_table_column_names(exclude)
+
 
 def _get_default_context():
     from ..auth import _default_context
