@@ -22,13 +22,12 @@ class Dataset(object):
     GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
 
     def __init__(self, data, credentials=None, schema=None):
-        self._registry = StrategiesRegistry()
+        self._registry = self._get_strategies_registry()
         self._strategy = self._init_strategy(data, credentials, schema)
         self._is_saved_in_carto = self._init_saved_in_carto()
 
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or _get_default_credentials()
-
         for strategy in self._registry.get_strategies():
             if strategy.can_work_with(data):
                 return strategy.create(data, credentials, schema)
@@ -40,6 +39,9 @@ class Dataset(object):
 
     def _set_strategy(self, strategy, data, credentials=None, schema=None):
         self._strategy = strategy(data, credentials, schema)
+
+    def _get_strategies_registry(self):
+        return StrategiesRegistry()
 
     @property
     def credentials(self):

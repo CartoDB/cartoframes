@@ -17,14 +17,17 @@ class StrategiesRegistry(object):
         strategyRegistry.add(CSVDataset)
     """
     class __StrategiesRegistry:
-        def __init__(self):
-            self.registry = [DataFrameDataset, QueryDataset, TableDataset]
+        def __init__(self, strategies):
+            self.registry = strategies
 
     instance = None
 
     def __init__(self):
         if not StrategiesRegistry.instance:
-            StrategiesRegistry.instance = StrategiesRegistry.__StrategiesRegistry()
+            StrategiesRegistry.instance = StrategiesRegistry.__StrategiesRegistry(self._get_initial_strategies())
+
+    def _get_initial_strategies(self):
+        return [DataFrameDataset, QueryDataset, TableDataset]
 
     def get_strategies(self):
         return StrategiesRegistry.instance.registry
