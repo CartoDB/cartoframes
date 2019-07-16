@@ -4,7 +4,7 @@ from .base_dataset import BaseDataset
 
 
 class QueryDataset(BaseDataset):
-    def __init__(self, data, credentials=None, schema=None):
+    def __init__(self, data, credentials, schema=None):
         super(QueryDataset, self).__init__(credentials)
 
         self._query = data

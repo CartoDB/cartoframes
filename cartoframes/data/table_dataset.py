@@ -7,7 +7,7 @@ from ..columns import Column, normalize_name
 
 
 class TableDataset(BaseDataset):
-    def __init__(self, data, credentials=None, schema=None):
+    def __init__(self, data, credentials, schema=None):
         super(TableDataset, self).__init__(credentials)
 
         self._table_name = normalize_name(data)
