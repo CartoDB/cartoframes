@@ -48,8 +48,13 @@ class Widget():
             self._title = data.get('title', '')
             self._description = data.get('description', '')
             self._footer = data.get('footer', '')
-            self._options = camel_dictionary(data.get('options', {}))
             self._prop = self.get_default_prop(data)
+
+            options = {}
+            for key, value in data.items():
+                options[key] = value
+
+            self._options = camel_dictionary(options)
         else:
             raise ValueError('Wrong widget input.')
 
