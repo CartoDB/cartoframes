@@ -13,6 +13,8 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
 
     def test_size_bins_layer(self):
         "should create a layer with the proper attributes"
+        Source._get_geom_type = Mock(return_value='point')
+
         layer = helpers.size_bins_layer(
             source='sf_neighborhoods',
             value='name'
@@ -135,6 +137,8 @@ class TestSizeBinsLayerHelper(unittest.TestCase):
 
     def test_size_bins_layer_breaks(self):
         "should apply buckets if breaks are passed"
+        Source._get_geom_type = Mock(return_value='point')
+
         layer = helpers.size_bins_layer(
             'sf_neighborhoods',
             'name',

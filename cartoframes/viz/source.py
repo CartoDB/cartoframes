@@ -134,9 +134,9 @@ class Source(object):
     def __init__(self, data, context=None, bounds=None, schema=None):
         self._init_source(data, context, bounds, schema)
 
-        self.context = _get_context(self.dataset)
-        self.geom_type = _get_geom_type(self.dataset)
-        self.credentials = _get_credentials(self.dataset)
+        self.context = self._get_context()
+        self.geom_type = self._get_geom_type()
+        self.credentials = self._get_credentials()
 
     def _init_source(self, data, context, bounds, schema):
         if isinstance(data, str):
@@ -195,26 +195,23 @@ class Source(object):
         self.query = get_encoded_data(gdf)
         self.bounds = bounds or get_bounds(gdf)
 
+    def _get_context(self):
+        return self.dataset.credentials
+
+    def _get_geom_type(self):
+        return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
+
+    def _get_credentials(self):
+        context = self._get_context()
+        if context and context.creds:
+            return {
+                'username': context.creds.username(),
+                'api_key': context.creds.key(),
+                'base_url': context.creds.base_url()
+            }
+        else:
+            return defaults.CREDENTIALS
+
 
 def _check_table_name(data):
     return True
-
-
-def _get_context(dataset):
-    return dataset.credentials
-
-
-def _get_credentials(dataset):
-    context = _get_context(dataset)
-    if context and context.creds:
-        return {
-            'username': context.creds.username(),
-            'api_key': context.creds.key(),
-            'base_url': context.creds.base_url()
-        }
-    else:
-        return defaults.CREDENTIALS
-
-
-def _get_geom_type(dataset):
-    return dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
