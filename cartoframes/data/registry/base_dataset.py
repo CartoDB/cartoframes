@@ -24,6 +24,14 @@ class BaseDataset():
         self._schema = None
         self._dataset_info = None
 
+    @abstractstatic
+    def can_work_with():
+        pass
+
+    @abstractclassmethod
+    def create(cls):
+        pass
+
     @abstractmethod
     def download(self):
         pass

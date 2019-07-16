@@ -5,8 +5,9 @@ from tqdm import tqdm
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ..columns import Column, normalize_names
-from .utils import decode_geometry, compute_geodataframe, detect_encoding_type, map_geom_type
+from ...columns import Column, normalize_names
+from ...geojson import load_geojson
+from ..utils import decode_geometry, compute_geodataframe, detect_encoding_type, map_geom_type, is_geojson
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -17,6 +18,17 @@ class DataFrameDataset(BaseDataset):
         super(DataFrameDataset, self).__init__()
 
         self._df = data
+
+    @staticmethod
+    def can_work_with(data):
+        return isinstance(data, pd.DataFrame) or is_geojson(data)
+
+    @classmethod
+    def create(cls, data, credentials=None, schema=None):
+        if is_geojson(data):
+            data = load_geojson(data)
+
+        return cls(data)
 
     @property
     def dataframe(self):
