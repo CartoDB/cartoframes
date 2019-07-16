@@ -8,6 +8,7 @@ from copy import deepcopy
 from carto.exceptions import CartoException
 
 from ..context import create_context
+from ..columns import normalize_name
 
 try:
     import geopandas
@@ -278,6 +279,9 @@ def is_geojson_file(data):
 
 def is_geojson_file_path(data):
     return is_geojson_file(data) and os.path.exists(data)
+
+def is_table_name(data):
+    return normalize_name(data) == data
 
 
 def _save_index_as_column(df):

@@ -6,7 +6,7 @@ from .table_dataset import TableDataset
 from .dataset_info import DatasetInfo
 from ..geojson import load_geojson
 from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson_file_path, \
-    _save_index_as_column
+    is_table_name, _save_index_as_column
 
 DOWNLOAD_RETRY_TIMES = 3
 
@@ -40,10 +40,10 @@ class Dataset(object):
                 return self._getQueryDataset(data, credentials)
             elif is_geojson_file_path(data):
                 return self._getDataFrameDataset(load_geojson(data))
-            else:
+            elif is_table_name(data):
                 return self._getTableDataset(data, credentials, schema)
-        else:
-            raise ValueError('We can not detect the Dataset type')
+
+        raise ValueError('We can not detect the Dataset type')
 
     def _init_saved_in_carto(self):
         return self.is_remote()
