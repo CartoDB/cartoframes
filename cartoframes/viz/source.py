@@ -147,7 +147,7 @@ class Source(object):
                 self._init_source_geojson(data, bounds)
 
             elif _check_table_name(data):
-                 self._init_source_table(data, context, schema, bounds)
+                self._init_source_table(data, context, schema, bounds)
 
         elif isinstance(data, (list, dict)):
             self._init_source_geojson(data, bounds)

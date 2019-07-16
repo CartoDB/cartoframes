@@ -280,6 +280,7 @@ def is_geojson_file(data):
 def is_geojson_file_path(data):
     return is_geojson_file(data) and os.path.exists(data)
 
+
 def is_table_name(data):
     return normalize_name(data) == data
 
