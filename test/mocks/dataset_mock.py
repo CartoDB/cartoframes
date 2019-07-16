@@ -91,15 +91,6 @@ class StrategiesRegistryMock(StrategiesRegistry):
 
 
 class DatasetMock(Dataset):
-    def _getDataFrameDataset(self, data):
-        return DataFrameDatasetMock(data)
-
-    def _getQueryDataset(self, data, credentials):
-        return QueryDatasetMock(data, credentials)
-
-    def _getTableDataset(self, data, credentials, schema):
-        return TableDatasetMock(data, credentials, schema)
-
     def _get_strategies_registry(self):
         return StrategiesRegistryMock()
 
