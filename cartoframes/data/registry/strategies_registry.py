@@ -2,7 +2,6 @@ from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
 
-
 class StrategiesRegistry(object):
     """Class for managing all the strategies possible of a Dataset.
     It is implemented following the Singleton pattern.
@@ -14,7 +13,7 @@ class StrategiesRegistry(object):
         .. code::
         from cartoframes.data import StrategiesRegistry
 
-        strategyRegistry = StrategyRegistry()
+        strategyRegistry = StrategiesRegistry()
         strategyRegistry.add(CSVDataset)
     """
     class __StrategiesRegistry:

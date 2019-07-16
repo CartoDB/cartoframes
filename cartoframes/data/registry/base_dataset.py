@@ -3,11 +3,11 @@ import pandas as pd
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from .dataset_info import DatasetInfo
-from .utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, ENC_WKB_BHEX, \
+from ..dataset_info import DatasetInfo
+from ..utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, ENC_WKB_BHEX, \
     map_geom_type
-from .. import context
-from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
+from ... import context
+from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
 class BaseDataset():
@@ -24,11 +24,13 @@ class BaseDataset():
         self._schema = None
         self._dataset_info = None
 
-    @abstractstatic
+    @staticmethod
+    @abstractmethod
     def can_work_with():
         pass
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def create(cls):
         pass
 

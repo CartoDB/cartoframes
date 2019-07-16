@@ -17,9 +17,9 @@ from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
 from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock, CredsMock
-from cartoframes.data.dataframe_dataset import DataFrameDataset, _rows
-from cartoframes.data.table_dataset import TableDataset
-from cartoframes.data.query_dataset import QueryDataset
+from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.registry.table_dataset import TableDataset
+from cartoframes.data.registry.query_dataset import QueryDataset
 
 from utils import _UserUrlLoader
 
