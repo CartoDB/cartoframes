@@ -2,6 +2,7 @@ from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
 
+
 class StrategiesRegistry(object):
     """Class for managing all the strategies possible of a Dataset.
     It is implemented following the Singleton pattern.
@@ -34,4 +35,3 @@ class StrategiesRegistry(object):
 
     def add(self, strategy):
         StrategiesRegistry.instance.registry.append(strategy)
-

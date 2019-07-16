@@ -258,6 +258,7 @@ def convert_bool(x):
     else:
         return None
 
+
 def map_geom_type(geom_type):
     return {
         'Point': GEOM_TYPE_POINT,

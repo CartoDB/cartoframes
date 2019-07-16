@@ -72,4 +72,3 @@ class QueryDataset(BaseDataset):
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
-
