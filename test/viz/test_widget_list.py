@@ -77,22 +77,22 @@ class TestWidgetList(unittest.TestCase):
 
         widgets_info = widget_list.get_widgets_info()
         self.assertEqual(widgets_info, [
-          {
-            'type': 'formula',
-            'value': 'viewportSum($amount)',
-            'title': '[TITLE]',
-            'prop': '',
-            'description': '[description]',
-            'footer': '[footer]',
-            'has_bridge': False,
-            'options': {}
-          }, {
-            'type': 'default',
-            'title': '"Custom Info"',
-            'value': '',
-            'prop': '',
-            'description': '',
-            'footer': '',
-            'has_bridge': False,
-            'options': {}
-          }])
+            {
+                'type': 'formula',
+                'value': 'viewportSum($amount)',
+                'title': '[TITLE]',
+                'prop': '',
+                'description': '[description]',
+                'footer': '[footer]',
+                'has_bridge': False,
+                'options': {}
+            }, {
+                'type': 'default',
+                'title': '"Custom Info"',
+                'value': '',
+                'prop': '',
+                'description': '',
+                'footer': '',
+                'has_bridge': False,
+                'options': {}
+            }])
