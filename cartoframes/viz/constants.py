@@ -1,4 +1,4 @@
-CARTO_VL_VERSION = 'v1.3'
+CARTO_VL_VERSION = 'v1.4'
 CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
@@ -63,5 +63,6 @@ WIDGET_TYPES = [
     'formula',
     'histogram',
     'category',
-    'animation'
+    'animation',
+    'time-series'
 ]
