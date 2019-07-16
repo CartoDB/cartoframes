@@ -15,12 +15,12 @@ class QueryDataset(BaseDataset):
 
     @property
     def dataset_info(self):
-        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
-                             'to get or modify the info from a CARTO table.')
+        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
 
     def update_dataset_info(self, privacy=None, name=None):
-        raise CartoException('We can not extract Dataset info from a query. Use `Dataset.from_table()` method '
-                             'to get or modify the info from a CARTO table.')
+        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
