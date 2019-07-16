@@ -125,6 +125,10 @@ class Layer(object):
         )
         self.widgets_info = self.widgets.get_widgets_info()
 
+    def _repr_html_(self):
+        from .map import Map 
+        return Map(self)._repr_html_()
+
 
 def _set_source(source, context):
     """Set a Source class from the input"""
