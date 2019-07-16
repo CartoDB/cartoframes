@@ -5,8 +5,8 @@ from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
 from .dataset_info import DatasetInfo
 from ..geojson import load_geojson
-from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson_file_path, \
-    is_table_name, _save_index_as_column
+from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson, is_table_name, \
+    _save_index_as_column
 
 DOWNLOAD_RETRY_TIMES = 3
 
@@ -33,15 +33,12 @@ class Dataset(object):
 
         if isinstance(data, pd.DataFrame):
             return self._getDataFrameDataset(data)
-        elif isinstance(data, (list, dict)):
+        elif is_geojson(data):
             return self._getDataFrameDataset(load_geojson(data))
-        elif isinstance(data, str):
-            if is_sql_query(data):
-                return self._getQueryDataset(data, credentials)
-            elif is_geojson_file_path(data):
-                return self._getDataFrameDataset(load_geojson(data))
-            elif is_table_name(data):
-                return self._getTableDataset(data, credentials, schema)
+        elif is_sql_query(data):
+            return self._getQueryDataset(data, credentials)
+        elif is_table_name(data):
+            return self._getTableDataset(data, credentials, schema)
 
         raise ValueError('We can not detect the Dataset type for data={}'.format(data))
 

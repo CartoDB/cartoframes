@@ -270,7 +270,7 @@ def map_geom_type(geom_type):
 
 
 def is_sql_query(data):
-    return re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
+    return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
 
 
 def is_geojson_file(data):
@@ -281,8 +281,12 @@ def is_geojson_file_path(data):
     return is_geojson_file(data) and os.path.exists(data)
 
 
+def is_geojson(data):
+    return isinstance(data, (list, dict)) or (isinstance(data, str) and is_geojson_file_path(data))
+
+
 def is_table_name(data):
-    return normalize_name(data) == data
+    return isinstance(data, str) and normalize_name(data) == data
 
 
 def _save_index_as_column(df):
