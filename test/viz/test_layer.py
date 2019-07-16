@@ -80,7 +80,7 @@ class TestLayerStyle(unittest.TestCase):
         """Layer style should set only the valid properties"""
         with self.assertRaises(ValueError):
             Layer(
-                'layer_source',
+                SourceMock('layer_source'),
                 {
                     'invalid': 1
                 }
