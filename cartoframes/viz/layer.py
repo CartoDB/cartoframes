@@ -8,6 +8,7 @@ from .popup import Popup
 from .legend import Legend
 from .widget_list import WidgetList
 from ..data import Dataset
+from ..utils import merge_dicts
 
 try:
     import geopandas
@@ -112,7 +113,10 @@ class Layer(object):
         self.bounds = self.source.bounds
         self.orig_query = self.source.query
 
-        variables = self.popup.get_variables()
+        popup_variables = self.popup.get_variables()
+        widget_variables = self.widgets.get_variables()
+
+        variables = merge_dicts(popup_variables, widget_variables)
 
         self.viz = self.style.compute_viz(
             self.source.geom_type,

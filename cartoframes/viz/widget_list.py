@@ -50,3 +50,11 @@ class WidgetList(object):
                 widgets_info.append(widget.get_info())
 
         return widgets_info
+
+    def get_variables(self):
+        output = {}
+        for widget in self.widgets:
+            if widget._variable_name:
+                output[widget._variable_name] = '$' + widget._value if widget.has_bridge() else widget._value
+
+        return output

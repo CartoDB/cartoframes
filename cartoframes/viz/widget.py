@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from . import constants
-from ..utils import camel_dictionary
+from ..utils import camel_dictionary, gen_variable_name
 
 
 class Widget():
@@ -34,6 +34,7 @@ class Widget():
     def _init_widget(self, data, widget_type=''):
         self._type = ''
         self._value = ''
+        self._variable_name = ''
         self._title = ''
         self._prop = ''
         self._description = ''
@@ -43,6 +44,7 @@ class Widget():
         if data is not None:
             self._type = widget_type if widget_type else data.get('type', '')
             self._value = data.get('value', '')
+            self._variable_name = gen_variable_name(self._value) if self._value else ''
             self._title = data.get('title', '')
             self._description = data.get('description', '')
             self._footer = data.get('footer', '')
@@ -63,6 +65,7 @@ class Widget():
                 'type': self._type,
                 'prop': self._prop,
                 'value': self._value,
+                'variable_name': self._variable_name,
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer,
