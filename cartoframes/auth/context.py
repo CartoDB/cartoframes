@@ -253,7 +253,7 @@ class Context(object):
             :obj:`list` of :py:class:`Dataset <cartoframes.data.Dataset>`
 
         """
-        datasets = DatasetManager(self.auth_client).filter(
+        table_names = DatasetManager(self.auth_client).filter(
             show_table_size_and_row_count='false',
             show_table='false',
             show_stats='false',
@@ -263,7 +263,7 @@ class Context(object):
             show_uses_builder_features='false',
             show_synchronization='false',
             load_totals='false')
-        return [Dataset(d) for d in datasets]
+        return [Dataset(str(table_name)) for table_name in table_names]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
