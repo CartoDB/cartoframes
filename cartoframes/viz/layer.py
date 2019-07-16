@@ -126,7 +126,7 @@ class Layer(object):
         self.widgets_info = self.widgets.get_widgets_info()
 
     def _repr_html_(self):
-        from .map import Map 
+        from .map import Map
         return Map(self)._repr_html_()
 
 
