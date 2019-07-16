@@ -37,14 +37,10 @@ class Dataset(object):
             return self._getDataFrameDataset(load_geojson(data))
         elif isinstance(data, str):
             if is_sql_query(data):
-                if not credentials:
-                    raise ValueError('QueryDataset needs a Credentials object')
                 return self._getQueryDataset(data, credentials)
             elif is_geojson_file_path(data):
                 return self._getDataFrameDataset(load_geojson(data))
             else:
-                if not credentials:
-                    raise ValueError('TableDataset needs a Credentials object')
                 return self._getTableDataset(data, credentials, schema)
         else:
             raise ValueError('We can not detect the Dataset type')
