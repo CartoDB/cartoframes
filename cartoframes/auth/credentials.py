@@ -86,6 +86,26 @@ class Credentials(object):
     def __eq__(self, obj):
         return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
+    @property
+    def api_key(self):
+        """Credentials api_key"""
+        return self._api_key
+
+    @property
+    def username(self):
+        """Credentials username"""
+        return self._username
+
+    @property
+    def base_url(self):
+        """Credentials base_url"""
+        return self._base_url
+
+    @property
+    def session(self):
+        """Credentials session"""
+        return self._session
+
     def _norm_creds(self):
         """Standardize credentials"""
         if self._base_url:
