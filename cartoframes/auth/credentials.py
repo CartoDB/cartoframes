@@ -66,9 +66,9 @@ class Credentials(object):
         raise ValueError('`credentials` must a Credentials class instance')
 
     def __repr__(self):
-        return ('Credentials(username={username}, '
-                'api_key={api_key}, '
-                'base_url={base_url})').format(username=self._username,
+        return ("Credentials(username='{username}', "
+                "api_key='{api_key}', "
+                "base_url='{base_url}')").format(username=self._username,
                                                api_key=self._api_key,
                                                base_url=self._base_url)
 

@@ -92,9 +92,9 @@ class TestCredentials(unittest.TestCase):
     def test_credentials_repr(self):
         credentials = Credentials(self.api_key, self.username)
 
-        ans = ('Credentials(username={username}, '
-               'api_key={api_key}, '
-               'base_url=https://{username}.carto.com)').format(username=self.username,
+        ans = ("Credentials(username='{username}', "
+               "api_key='{api_key}', "
+               "base_url='https://{username}.carto.com')").format(username=self.username,
                                                                 api_key=self.api_key)
         self.assertEqual(str(credentials), ans)
 
