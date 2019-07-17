@@ -50,7 +50,7 @@ class Credentials(object):
         self._norm_credentials()
 
     @classmethod
-    def create_from_file(cls, config_file=None):
+    def from_file(cls, config_file=None):
         """Retrives credentials from a file. Defaults to the user config directory"""
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
@@ -58,7 +58,7 @@ class Credentials(object):
         return cls(credentials.get('api_key'), credentials.get('username'))
 
     @classmethod
-    def create_from_credentials(cls, credentials):
+    def from_credentials(cls, credentials):
         """Retrives credentials from another Credentials object"""
         if isinstance(credentials, Credentials):
             return cls(credentials.api_key, credentials.username, credentials.base_url, credentials.session)
@@ -173,7 +173,7 @@ class Credentials(object):
             To see if there is a default user credential file stored, do the
             following::
 
-                >>> credentials = Credentials.create_from_file()
+                >>> credentials = Credentials.from_file()
                 >>> print(credentials)
                 Credentials(username=eschbacher, api_key=abcdefg,
                         base_url=https://eschbacher.carto.com/)

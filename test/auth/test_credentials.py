@@ -54,7 +54,7 @@ class TestCredentials(unittest.TestCase):
 
     def test_credentials_create_from_credentials(self):
         credentials1 = Credentials(api_key='abc123', username='jackson-5')
-        credentials2 = Credentials.create_from_credentials(credentials1)
+        credentials2 = Credentials.from_credentials(credentials1)
 
         self.assertEqual(credentials1.api_key, credentials2.api_key)
         self.assertEqual(credentials1.username, credentials2.username)
@@ -62,7 +62,7 @@ class TestCredentials(unittest.TestCase):
 
     def test_credentials_create_from_credentials_with_no_credentials(self):
         with self.assertRaises(ValueError):
-            Credentials.create_from_credentials({})
+            Credentials.from_credentials({})
 
     def test_credentials_onprem_baseurl(self):
         credentials = Credentials(api_key=self.api_key, username=self.username, base_url=self.onprem_base_url)
@@ -100,7 +100,7 @@ class TestCredentials(unittest.TestCase):
 
     def test_credentials_eq_method(self):
         credentials1 = Credentials(api_key='abc123', username='jackson-5')
-        credentials2 = Credentials.create_from_credentials(credentials1)
+        credentials2 = Credentials.from_credentials(credentials1)
 
         self.assertEqual(credentials1, credentials2)
         credentials2.api_key = 'another_apy_key'
@@ -127,23 +127,23 @@ class TestCredentialsFromFile(unittest.TestCase):
         credentials1 = Credentials(self.api_key, self.username)
         credentials1.save()
 
-        credentials2 = Credentials.create_from_file()
+        credentials2 = Credentials.from_file()
         self.assertEqual(credentials1, credentials2)
 
         credentials1.delete()
 
         with self.assertRaises(FileNotFoundError):
-            Credentials.create_from_file()
+            Credentials.from_file()
 
     def test_credentials_with_file(self):
         file = '/tmp/credentials.json'
         credentials1 = Credentials(self.api_key, self.username)
         credentials1.save(file)
 
-        credentials2 = Credentials.create_from_file(file)
+        credentials2 = Credentials.from_file(file)
         self.assertEqual(credentials1, credentials2)
 
         credentials1.delete(file)
 
         with self.assertRaises(FileNotFoundError):
-            Credentials.create_from_file(file)
+            Credentials.from_file(file)
