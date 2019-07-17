@@ -3,6 +3,8 @@ import unittest
 from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source, constants
+from cartoframes.data import StrategiesRegistry
+
 from mocks.map_mock import MapMock
 from mocks.context_mock import ContextMock
 from mocks.dataset_mock import DatasetMock
@@ -169,6 +171,9 @@ class TestMapPublication(unittest.TestCase):
         self.context = ContextMock(username=self.username, api_key=self.api_key)
 
         self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
+
+    def tearDown(self):
+        StrategiesRegistry.instance = None
 
     def assert_kuviz(self, kuviz, name, privacy):
         self.assertIsNotNone(kuviz.id)
