@@ -91,20 +91,40 @@ class Credentials(object):
         """Credentials api_key"""
         return self._api_key
 
+    @api_key.setter
+    def api_key(self, api_key):
+        """Set api_key"""
+        self._api_key = api_key
+
     @property
     def username(self):
         """Credentials username"""
         return self._username
+
+    @username.setter
+    def api_key(self, username):
+        """Set username"""
+        self._username = username
 
     @property
     def base_url(self):
         """Credentials base_url"""
         return self._base_url
 
+    @base_url.setter
+    def base_url(self, base_url):
+        """Set base_url"""
+        self._base_url = base_url
+
     @property
     def session(self):
         """Credentials session"""
         return self._session
+
+    @session.setter
+    def session(self, session):
+        """Set session"""
+        self._session = session
 
     def _norm_creds(self):
         """Standardize credentials"""
@@ -166,47 +186,11 @@ class Credentials(object):
         path_to_remove = config_file or _DEFAULT_PATH
         try:
             os.remove(path_to_remove)
-            print('Credentials at {} successfully removed.'.format(
-                path_to_remove))
+            warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
-            warnings.warn('No credential file found at {}.'.format(
-                path_to_remove))
+            warnings.warn('No credential file found at {}.'.format(path_to_remove))
 
-    def set(self, key=None, username=None, base_url=None):
-        """Update the credentials of a Credentials instance instead with new
-        values.
 
-        Args:
-            key (str): API key of user account. Defaults to previous value if
-                not specified.
-            username (str): User name of account. This parameter is optional if
-                `base_url` is not specified, but defaults to the previous
-                value if not set.
-            base_url (str): Base URL of user account. This parameter is
-                optional if `username` is specified and on CARTO's
-                cloud-based account. Generally of the form
-                ``https://your_user_name.carto.com/`` for cloud-based accounts.
-                If on-prem or otherwise, contact your admin.
-
-        Example:
-
-            .. code::
-
-                from cartoframes import Credentials
-                # load credentials saved in previous session
-                creds = Credentials()
-                # set new API key
-                creds.set(key='new_api_key')
-                # save new creds to default user config directory
-                creds.save()
-
-        Note:
-            If the `username` is specified but the `base_url` is not, the
-            `base_url` will be updated to ``https://<username>.carto.com/``.
-        """
-        self.__init__(key=(key or self._key),
-                      username=(username or self._username),
-                      base_url=base_url)
 
     def key(self, key=None):
         """Return or set API `key`.
