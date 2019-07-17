@@ -88,10 +88,10 @@ class TestCredentials(unittest.TestCase):
     def test_credentials_repr(self):
         credentials = Credentials(self.api_key, self.username)
 
-        ans =('Credentials(username={username}, '
-              'api_key={api_key}, '
-              'base_url=https://{username}.carto.com)').format(username=self.username,
-                                                               api_key=self.api_key)
+        ans = ('Credentials(username={username}, '
+               'api_key={api_key}, '
+               'base_url=https://{username}.carto.com)').format(username=self.username,
+                                                                api_key=self.api_key)
         self.assertEqual(str(credentials), ans)
 
     def test_credentials_eq_method(self):
@@ -114,7 +114,6 @@ class TestCredentialsFromFile(unittest.TestCase):
 
         self.api_key = 'fake_api_key'
         self.username = 'fake_user'
-        credentials1 = None
 
     def tearDown(self):
         if os.path.exists(_USER_CONFIG_DIR):
@@ -130,7 +129,7 @@ class TestCredentialsFromFile(unittest.TestCase):
         credentials1.delete()
 
         with self.assertRaises(FileNotFoundError):
-            credentials = Credentials.create_from_file()
+            Credentials.create_from_file()
 
     def test_credentials_with_file(self):
         file = '/tmp/credentials.json'
@@ -143,4 +142,4 @@ class TestCredentialsFromFile(unittest.TestCase):
         credentials1.delete(file)
 
         with self.assertRaises(FileNotFoundError):
-            credentials = Credentials.create_from_file(file)
+            Credentials.create_from_file(file)
