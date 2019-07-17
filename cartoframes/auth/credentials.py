@@ -50,7 +50,7 @@ class Credentials(object):
         self._norm_credentials()
 
     @classmethod
-    def create_from_file(cls, file=None):
+    def create_from_file(cls, config_file=None):
         """Retrives credentials from a file. Defaults to the user config directory"""
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
@@ -67,9 +67,9 @@ class Credentials(object):
 
     def __repr__(self):
         return ('Credentials(username={username}, '
-                'api_key={key}, '
+                'api_key={api_key}, '
                 'base_url={base_url})').format(username=self._username,
-                                               key=self._api_key,
+                                               api_key=self._api_key,
                                                base_url=self._base_url)
 
     def __eq__(self, obj):
