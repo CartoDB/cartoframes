@@ -1,6 +1,7 @@
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
+from ..utils import is_sql_query
 
 
 class QueryDataset(BaseDataset):
@@ -8,6 +9,14 @@ class QueryDataset(BaseDataset):
         super(QueryDataset, self).__init__(credentials)
 
         self._query = data
+
+    @staticmethod
+    def can_work_with(data):
+        return is_sql_query(data)
+
+    @classmethod
+    def create(cls, data, credentials, schema=None):
+        return cls(data, credentials)
 
     @property
     def query(self):
@@ -63,4 +72,3 @@ class QueryDataset(BaseDataset):
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
-

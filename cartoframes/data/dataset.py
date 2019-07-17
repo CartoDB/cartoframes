@@ -1,12 +1,9 @@
-import pandas as pd
-
-from .dataframe_dataset import DataFrameDataset
-from .query_dataset import QueryDataset
-from .table_dataset import TableDataset
+from .registry.strategies_registry import StrategiesRegistry
+from .registry.dataframe_dataset import DataFrameDataset
+from .registry.query_dataset import QueryDataset
+from .registry.table_dataset import TableDataset
 from .dataset_info import DatasetInfo
-from ..geojson import load_geojson
-from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON, is_sql_query, is_geojson, is_table_name, \
-    _save_index_as_column
+from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
 
 DOWNLOAD_RETRY_TIMES = 3
 
@@ -25,20 +22,15 @@ class Dataset(object):
     GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
 
     def __init__(self, data, credentials=None, schema=None):
+        self._registry = self._get_strategies_registry()
         self._strategy = self._init_strategy(data, credentials, schema)
         self._is_saved_in_carto = self._init_saved_in_carto()
 
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or _get_default_credentials()
-
-        if isinstance(data, pd.DataFrame):
-            return self._getDataFrameDataset(data)
-        elif is_geojson(data):
-            return self._getDataFrameDataset(load_geojson(data))
-        elif is_sql_query(data):
-            return self._getQueryDataset(data, credentials)
-        elif is_table_name(data):
-            return self._getTableDataset(data, credentials, schema)
+        for strategy in self._registry.get_strategies():
+            if strategy.can_work_with(data):
+                return strategy.create(data, credentials, schema)
 
         raise ValueError('We can not detect the Dataset type')
 
@@ -48,15 +40,8 @@ class Dataset(object):
     def _set_strategy(self, strategy, data, credentials=None, schema=None):
         self._strategy = strategy(data, credentials, schema)
 
-    def _getDataFrameDataset(self, data):
-        _save_index_as_column(data)
-        return DataFrameDataset(data)
-
-    def _getQueryDataset(self, data, credentials):
-        return QueryDataset(data, credentials)
-
-    def _getTableDataset(self, data, credentials, schema):
-        return TableDataset(data, credentials, schema)
+    def _get_strategies_registry(self):
+        return StrategiesRegistry()
 
     @property
     def credentials(self):

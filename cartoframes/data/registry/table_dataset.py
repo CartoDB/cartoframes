@@ -3,7 +3,8 @@ from warnings import warn
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ..columns import Column, normalize_name
+from ...columns import Column, normalize_name
+from ..utils import is_table_name
 
 
 class TableDataset(BaseDataset):
@@ -15,6 +16,14 @@ class TableDataset(BaseDataset):
 
         if self._table_name != data:
             warn('Table will be named `{}`'.format(self._table_name))
+
+    @staticmethod
+    def can_work_with(data):
+        return is_table_name(data)
+
+    @classmethod
+    def create(cls, data, credentials, schema=None):
+        return cls(data, credentials, schema)
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()

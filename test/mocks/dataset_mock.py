@@ -2,9 +2,10 @@
 
 import pandas as pd
 
-from cartoframes.data.dataframe_dataset import DataFrameDataset
-from cartoframes.data.query_dataset import QueryDataset
-from cartoframes.data.table_dataset import TableDataset
+from cartoframes.data.registry.strategies_registry import StrategiesRegistry
+from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
+from cartoframes.data.registry.query_dataset import QueryDataset
+from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data import Dataset, DatasetInfo
 
 
@@ -84,15 +85,14 @@ class TableDatasetMock(TableDataset):
         return Dataset.GEOM_TYPE_POINT
 
 
+class StrategiesRegistryMock(StrategiesRegistry):
+    def _get_initial_strategies(self):
+        return [DataFrameDatasetMock, QueryDatasetMock, TableDatasetMock]
+
+
 class DatasetMock(Dataset):
-    def _getDataFrameDataset(self, data):
-        return DataFrameDatasetMock(data)
-
-    def _getQueryDataset(self, data, credentials):
-        return QueryDatasetMock(data, credentials)
-
-    def _getTableDataset(self, data, credentials, schema):
-        return TableDatasetMock(data, credentials, schema)
+    def _get_strategies_registry(self):
+        return StrategiesRegistryMock()
 
     def _set_strategy(self, strategy, data, credentials=None, schema=None):
         if strategy == DataFrameDataset:
@@ -103,3 +103,6 @@ class DatasetMock(Dataset):
             strategy = QueryDatasetMock
 
         super(DatasetMock, self)._set_strategy(strategy, data, credentials, schema)
+
+    def compute_geom_type(self):
+        return Dataset.GEOM_TYPE_POINT
