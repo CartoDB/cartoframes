@@ -49,46 +49,31 @@ class Credentials(object):
 
     """
 
-    def __init__(self, creds=None, key=None, username=None, base_url=None,
-                 cred_file=None, api_key=None):
-        self._key = None
-        self._username = None
-        self._base_url = None
-        key = key or api_key
-        if creds and isinstance(creds, Credentials):
-            self.key(key=creds.key())
-            self.username(username=creds.username())
-            self.base_url(base_url=creds.base_url())
-        elif (key and username) or (key and base_url):
-            self.key(key=key)
-            self.username(username=username)
-            if base_url:
-                self.base_url(base_url=base_url)
-            else:
-                self.base_url(
-                    base_url='https://{}.carto.com/'.format(self._username)
-                )
-        elif cred_file:
-            self._retrieve(cred_file)
-        else:
-            try:
-                self._retrieve(_DEFAULT_PATH)
-            except Exception:
-                raise RuntimeError(
-                    'Could not load CARTO credentials. Try setting them with '
-                    'the `key` and `username` arguments.'
-                )
+    def __init__(self, username=None, =None, base_url=None, session=None):
+        self._username = username
+        self._api_key = api_key
+        self._base_url = base_url or 'https://{}.carto.com/'.format(self._username)
+        self._session = session
+
         self._norm_creds()
+
+    @classmethod
+    def create_from_file(cls, file=None):
+        """Retrives credentials from a file. Defaults to the user config directory"""
+        with open(config_file or _DEFAULT_PATH, 'r') as f:
+            creds = json.load(f)
+
+        return cls(creds.get('username'), creds.get('api_key'))
 
     def __repr__(self):
         return ('Credentials(username={username}, '
-                'key={key}, '
+                'api_key={key}, '
                 'base_url={base_url})').format(username=self._username,
-                                               key=self._key,
+                                               key=self._api_key,
                                                base_url=self._base_url)
 
     def __eq__(self, obj):
-        return self._key == obj._key and self._username == obj._username and self._base_url == obj._base_url
+        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
     def _norm_creds(self):
         """Standardize credentials"""
@@ -118,15 +103,6 @@ class Credentials(object):
         with open(_DEFAULT_PATH, 'w') as f:
             json.dump({'key': self._key, 'base_url': self._base_url,
                        'username': self._username}, f)
-
-    def _retrieve(self, config_file=None):
-        """Retrives credentials from a file. Defaults to the user config
-        directory"""
-        with open(config_file or _DEFAULT_PATH, 'r') as f:
-            creds = json.load(f)
-        self._key = creds.get('key')
-        self._base_url = creds.get('base_url')
-        self._username = creds.get('username')
 
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
