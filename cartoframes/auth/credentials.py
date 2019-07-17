@@ -49,9 +49,12 @@ class Credentials(object):
 
     """
 
-    def __init__(self, username=None, =None, base_url=None, session=None):
-        self._username = username
+    def __init__(self, api_key, username=None, base_url=None, session=None):
+        if username is None and base_url is None:
+            raise ValueError('You must set at least a `username` or a `base_url` parameters')
+
         self._api_key = api_key
+        self._username = username
         self._base_url = base_url or 'https://{}.carto.com/'.format(self._username)
         self._session = session
 
@@ -63,7 +66,15 @@ class Credentials(object):
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             creds = json.load(f)
 
-        return cls(creds.get('username'), creds.get('api_key'))
+        return cls(creds.get('api_key'), creds.get('username'))
+
+    @classmethod
+    def create_from_credentials(cls, credentials):
+        """Retrives credentials from another Credentials object"""
+        if isinstance(creds, Credentials):
+            return cls(credentials.api_key, credentials.username, credentials.base_url, credentials.session)
+
+        raise ValueError('`credentials` must a Credentials class instance')
 
     def __repr__(self):
         return ('Credentials(username={username}, '
@@ -83,6 +94,11 @@ class Credentials(object):
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
 
+        Args:
+            config_loc (str, optional): Location where credentials are to be
+                stored. If no argument is provided, it will be send to the
+                default location.
+
         Example:
 
             .. code::
@@ -91,6 +107,11 @@ class Credentials(object):
                 creds = Credentials(username='eschbacher', key='abcdefg')
                 creds.save()  # save to default location
 
+            .. code::
+
+                from cartoframes import Credentials
+                creds = Credentials(username='eschbacher', key='abcdefg')
+                creds.save('path/to/credentials/file')
         """
 
         if config_file is None:
