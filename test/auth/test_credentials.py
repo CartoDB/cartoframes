@@ -60,6 +60,10 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(credentials1.username, credentials2.username)
         self.assertEqual(credentials1.base_url, credentials2.base_url)
 
+    def test_credentials_create_from_credentials_with_no_credentials(self):
+        with self.assertRaises(ValueError):
+            Credentials.create_from_credentials({})
+
     def test_credentials_onprem_baseurl(self):
         credentials = Credentials(api_key=self.api_key, username=self.username, base_url=self.onprem_base_url)
 
