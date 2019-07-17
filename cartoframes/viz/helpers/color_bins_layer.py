@@ -5,7 +5,8 @@ from ..layer import Layer
 
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, palette=None, description='', footer=''):
+        breaks=None, palette=None, description='', footer='',
+        legend=True, popup=True, widget=True, animate=None):
     """Helper function for quickly creating a classed color map
 
     Args:
@@ -21,6 +22,10 @@ def color_bins_layer(
           or other valid CARTO VL palette expression. Default is `purpor`.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): TODO.
+        popup (bool, optional): TODO.
+        widget (bool, optional): TODO.
+        animate (str, optional): TODO.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
@@ -40,30 +45,35 @@ def color_bins_layer(
         'equal': 'purpor',
         'stdev': 'temps'
     }.get(method)
+    
+    animation_filter = 'animation(linear(${0}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     return Layer(
         source,
         style={
             'point': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or default_palette)
+                    func, value, breaks or bins, palette or default_palette),
+                'filter': animation_filter
             },
             'line': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or default_palette)
+                    func, value, breaks or bins, palette or default_palette),
+                'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    func, value, breaks or bins, palette or default_palette)
+                    func, value, breaks or bins, palette or default_palette),
+                'filter': animation_filter
             }
         },
-        popup={
+        popup=popup and not animate and {
             'hover': {
                 'title': title or value,
                 'value': '$' + value
             }
         },
-        legend={
+        legend=legend and {
             'type': {
                 'point': 'color-bins-point',
                 'line': 'color-bins-line',
@@ -72,5 +82,17 @@ def color_bins_layer(
             'title': title or value,
             'description': description,
             'footer': footer
-        }
+        },
+        widgets=[
+            animate and {
+                'type': 'time-series',
+                'value': animate,
+                'title': 'Animation'
+            },
+            widget and {
+                'type': 'histogram',
+                'value': value,
+                'title': 'Distribution'
+            }
+        ]
     )
