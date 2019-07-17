@@ -46,7 +46,7 @@ def color_bins_layer(
         'stdev': 'temps'
     }.get(method)
     
-    animation_filter = 'animation(linear(${0}), 20, fade(1,1))'.format(animate) if animate else '1'
+    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     return Layer(
         source,
