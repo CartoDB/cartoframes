@@ -36,7 +36,7 @@ class KuvizPublisher(object):
 
     def get_layers(self, maps_api_key='default_public'):
         for layer in self._layers:
-            layer.source.dataset.context = self._context
+            layer.source.dataset.credentials = self._context
 
             layer.source.credentials = {
                 'username': self._context.creds.username(),
@@ -51,13 +51,13 @@ class KuvizPublisher(object):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
             from ..auth import _default_context
-            dataset_context = context or layer.source.dataset.context or _default_context
+            dataset_context = context or layer.source.dataset.credentials or _default_context
 
             self._sync_layer(layer, table_name, dataset_context)
 
     def _sync_layer(self, layer, table_name, context):
         if not layer.source.dataset.is_saved_in_carto:
-            layer.source.dataset.upload(table_name=table_name, context=context)
+            layer.source.dataset.upload(table_name=table_name, credentials=context)
             layer.source = Source(table_name, context=context)
             warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
                  'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '

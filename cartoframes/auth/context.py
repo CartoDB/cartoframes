@@ -242,7 +242,7 @@ class Context(object):
         schema = 'public' if not self.is_org else (
             shared_user or self.creds.username())
 
-        dataset = Dataset.from_table(table_name, schema=schema, context=self)
+        dataset = Dataset(table_name, schema=schema, credentials=self)
         return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
@@ -253,7 +253,7 @@ class Context(object):
             :obj:`list` of :py:class:`Dataset <cartoframes.data.Dataset>`
 
         """
-        datasets = DatasetManager(self.auth_client).filter(
+        table_names = DatasetManager(self.auth_client).filter(
             show_table_size_and_row_count='false',
             show_table='false',
             show_stats='false',
@@ -263,7 +263,7 @@ class Context(object):
             show_uses_builder_features='false',
             show_synchronization='false',
             load_totals='false')
-        return [Dataset(d) for d in datasets]
+        return [Dataset(str(table_name)) for table_name in table_names]
 
     def write(self, df, table_name, temp_dir=CACHE_DIR, overwrite=False,
               lnglat=None, encode_geom=False, geom_col=None, **kwargs):
@@ -340,13 +340,13 @@ class Context(object):
             the length of the DataFrame.
         """  # noqa
         tqdm.write('Params: encode_geom, geom_col and everything in kwargs are deprecated and not being used any more')
-        dataset = Dataset.from_dataframe(df)
+        dataset = Dataset(df)
 
         if_exists = Dataset.FAIL
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, context=self)
+        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, credentials=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url(),
@@ -383,7 +383,7 @@ class Context(object):
             bool: `True` if table is removed
 
         """
-        dataset = Dataset.from_table(table_name, context=self)
+        dataset = Dataset(table_name, credentials=self)
         deleted = dataset.delete()
         if deleted:
             return deleted
@@ -511,7 +511,7 @@ class Context(object):
                 )
 
         """
-        dataset = Dataset.from_query(query, context=self)
+        dataset = Dataset(query, credentials=self)
         return dataset.download(decode_geom=decode_geom)
 
     def execute(self, query):
@@ -673,7 +673,7 @@ class Context(object):
         is_select_query = is_select or (is_select is None and query.strip().lower().startswith('select'))
         if is_select_query:
             if table_name:
-                dataset = Dataset.from_query(query=query, context=self)
+                dataset = Dataset(query, credentials=self)
                 dataset.upload(table_name=table_name)
                 dataframe = dataset.download(decode_geom=decode_geom)
             else:
@@ -1569,7 +1569,7 @@ class Context(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset.from_table(table_name, context=self)
+        dataset = Dataset(table_name, credentials=self)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}

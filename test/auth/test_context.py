@@ -664,13 +664,13 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         df = df.astype({'vals': str, 'ids': str})
         con.write(df, self.test_write_table, overwrite=True)
 
-        self.assertEquals(Dataset.from_table(context=con, table_name=self.test_write_table).exists(), True)
+        self.assertEquals(Dataset(self.test_write_table, credentials=con).exists(), True)
 
         con.execute('''
             DROP TABLE {table_name}
             '''.format(table_name=self.test_write_table))
 
-        self.assertEquals(Dataset.from_table(context=con, table_name=self.test_write_table).exists(), False)
+        self.assertEquals(Dataset(self.test_write_table, credentials=con).exists(), False)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_Context_execute_wrong_query(self):

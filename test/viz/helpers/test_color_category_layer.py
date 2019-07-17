@@ -13,6 +13,8 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
     def test_color_category_layer(self):
         "should create a layer with the proper attributes"
+        Source._get_geom_type = Mock(return_value='point')
+
         layer = helpers.color_category_layer(
             source='sf_neighborhoods',
             value='name',
