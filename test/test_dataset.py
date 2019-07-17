@@ -15,11 +15,13 @@ from cartoframes.data import Dataset
 from cartoframes.data.utils import setting_value_exception
 from cartoframes.columns import normalize_name
 from cartoframes.geojson import load_geojson
+from cartoframes.data import StrategiesRegistry
+from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.registry.table_dataset import TableDataset
+from cartoframes.data.registry.query_dataset import QueryDataset
+
 from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock, CredsMock
-from cartoframes.data.dataframe_dataset import DataFrameDataset, _rows
-from cartoframes.data.table_dataset import TableDataset
-from cartoframes.data.query_dataset import QueryDataset
 
 from utils import _UserUrlLoader
 
@@ -107,6 +109,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                     self.con.sql_client.send(sql_drop.format(table))
                 except CartoException:
                     warnings.warn('Error deleting tables')
+
+        StrategiesRegistry.instance = None
 
     def test_dataset_upload_validation_fails_only_with_table_name(self):
         table_name = 'fake_table'

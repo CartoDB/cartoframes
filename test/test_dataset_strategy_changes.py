@@ -5,11 +5,13 @@ import unittest
 import pandas as pd
 
 from cartoframes.geojson import load_geojson
+from cartoframes.data import StrategiesRegistry
+from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
+from cartoframes.data.registry.table_dataset import TableDataset
+from cartoframes.data.registry.query_dataset import QueryDataset
+
 from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock
-from cartoframes.data.dataframe_dataset import DataFrameDataset
-from cartoframes.data.table_dataset import TableDataset
-from cartoframes.data.query_dataset import QueryDataset
 
 
 class TestDatasetStrategyChanges(unittest.TestCase):
@@ -34,6 +36,9 @@ class TestDatasetStrategyChanges(unittest.TestCase):
                 }
             ]
         }
+
+    def tearDown(self):
+        StrategiesRegistry.instance = None
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'

@@ -3,6 +3,7 @@
 import unittest
 
 from cartoframes.viz import Map, Layer, Source
+from cartoframes.data import StrategiesRegistry
 
 from mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from mocks.context_mock import ContextMock
@@ -18,6 +19,9 @@ class TestKuviz(unittest.TestCase):
         self.context = ContextMock(username=self.username, api_key=self.api_key)
 
         self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
+
+    def tearDown(self):
+        StrategiesRegistry.instance = None
 
     def test_kuviz_create(self):
         name = 'test-name'
