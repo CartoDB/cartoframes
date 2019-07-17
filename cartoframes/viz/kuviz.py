@@ -57,7 +57,7 @@ class KuvizPublisher(object):
 
     def _sync_layer(self, layer, table_name, context):
         if not layer.source.dataset.is_saved_in_carto:
-            layer.source.dataset.upload(table_name=table_name, context=context)
+            layer.source.dataset.upload(table_name=table_name, credentials=context)
             layer.source = Source(table_name, context=context)
             warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
                  'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
