@@ -7,6 +7,9 @@ from cartoframes.viz import helpers, Source
 
 
 class TestColorBinsLayerHelper(unittest.TestCase):
+    def setUp(self):
+        Source._get_geom_type = Mock(return_value='point')
+
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.color_bins_layer, None)

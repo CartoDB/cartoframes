@@ -1,5 +1,7 @@
 <as-time-series-widget
+  animated
   id="{{id}}"
+  time-format="{% if widget.options.timeFormat %}{{widget.options.timeFormat}}{% else %}auto{% endif %}"
   description="{{widget.description}}"
   heading="{{widget.title}}">
 </as-time-series-widget>

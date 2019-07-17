@@ -1,8 +1,15 @@
 import unittest
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 from cartoframes.viz import Layer, Source, Style, Popup, Legend
 
 
 class TestLayer(unittest.TestCase):
+    def setUp(self):
+        Source._get_geom_type = Mock(return_value='point')
+
     def test_is_layer_defined(self):
         """Layer"""
         self.assertNotEqual(Layer, None)
@@ -33,6 +40,9 @@ class TestLayer(unittest.TestCase):
 
 
 class TestLayerStyle(unittest.TestCase):
+    def setUp(self):
+        Source._get_geom_type = Mock(return_value='point')
+
     def test_style_dict(self):
         """Layer style should set the style when it is a dict"""
         layer = Layer(

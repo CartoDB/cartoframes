@@ -13,6 +13,8 @@ class TestSizeCategoryLayerHelper(unittest.TestCase):
 
     def test_size_category_layer(self):
         "should create a layer with the proper attributes"
+        Source._get_geom_type = Mock(return_value='point')
+
         layer = helpers.size_category_layer(
             source='sf_neighborhoods',
             value='name',
