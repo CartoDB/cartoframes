@@ -1,16 +1,22 @@
 import unittest
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 from cartoframes.viz import Layer, Source, Style, Popup, Legend
-from mocks.source_mock import SourceMock
 
 
 class TestLayer(unittest.TestCase):
+    def setUp(self):
+        Source._get_geom_type = Mock(return_value='point')
+
     def test_is_layer_defined(self):
         """Layer"""
         self.assertNotEqual(Layer, None)
 
     def test_initialization_objects(self):
         """Layer should initialize layer attributes"""
-        layer = Layer(SourceMock('layer_source'))
+        layer = Layer(Source('layer_source'))
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
@@ -22,7 +28,7 @@ class TestLayer(unittest.TestCase):
 
     def test_initialization_simple(self):
         """Layer should initialize layer attributes"""
-        layer = Layer(SourceMock('layer_source'), '')
+        layer = Layer('layer_source', '')
 
         self.assertFalse(layer.is_basemap)
         self.assertEqual(layer.orig_query, 'SELECT * FROM "public"."layer_source"')
@@ -34,10 +40,13 @@ class TestLayer(unittest.TestCase):
 
 
 class TestLayerStyle(unittest.TestCase):
+    def setUp(self):
+        Source._get_geom_type = Mock(return_value='point')
+
     def test_style_dict(self):
         """Layer style should set the style when it is a dict"""
         layer = Layer(
-            SourceMock('layer_source'),
+            'layer_source',
             {
                 'vars': {
                     'grad': '[red, green, blue]'
@@ -59,7 +68,7 @@ class TestLayerStyle(unittest.TestCase):
     def test_style_str(self):
         """Layer style should set the style when it is a dict"""
         layer = Layer(
-            SourceMock('layer_source'),
+            'layer_source',
             """
                 @grad: [red, green, blue]
                 color: blue
@@ -80,7 +89,7 @@ class TestLayerStyle(unittest.TestCase):
         """Layer style should set only the valid properties"""
         with self.assertRaises(ValueError):
             Layer(
-                SourceMock('layer_source'),
+                'layer_source',
                 {
                     'invalid': 1
                 }
