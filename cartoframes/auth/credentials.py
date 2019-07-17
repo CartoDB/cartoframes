@@ -69,8 +69,8 @@ class Credentials(object):
         return ("Credentials(username='{username}', "
                 "api_key='{api_key}', "
                 "base_url='{base_url}')").format(username=self._username,
-                                               api_key=self._api_key,
-                                               base_url=self._base_url)
+                                                 api_key=self._api_key,
+                                                 base_url=self._base_url)
 
     def __eq__(self, obj):
         return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
