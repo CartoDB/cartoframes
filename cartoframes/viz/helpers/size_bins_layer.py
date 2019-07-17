@@ -5,7 +5,8 @@ from ..layer import Layer
 
 def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, size=None, color=None, description='', footer=''):
+        breaks=None, size=None, color=None, description='', footer='',
+        legend=True, popup=True, widget=True, animate=None):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
@@ -25,10 +26,14 @@ def size_bins_layer(
           '#4CC8A3' for lines.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): TODO.
+        popup (bool, optional): TODO.
+        widget (bool, optional): TODO.
+        animate (str, optional): TODO.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
-        popup on `value`.
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
     """
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
@@ -39,6 +44,8 @@ def size_bins_layer(
         'stdev': 'globalStandardDev'
     }.get(method)
 
+    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+
     return Layer(
         source,
         style={
@@ -46,22 +53,24 @@ def size_bins_layer(
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, breaks or bins, size or [2, 14]),
                 'color': 'opacity({0}, 0.8)'.format(
-                    color or '#EE4D5A')
+                    color or '#EE4D5A'),
+                'filter': animation_filter
             },
             'line': {
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, breaks or bins, size or [1, 10]),
                 'color': 'opacity({0}, 0.8)'.format(
-                    color or '#4CC8A3')
+                    color or '#4CC8A3'),
+                'filter': animation_filter
             }
         },
-        popup={
+        popup=popup and not animate and {
             'hover': {
                 'title': title or value,
                 'value': '$' + value
             }
         },
-        legend={
+        legend=legend and {
             'type': {
                 'point': 'size-bins-point',
                 'line': 'size-bins-line',
@@ -70,5 +79,17 @@ def size_bins_layer(
             'title': title or value,
             'description': description,
             'footer': footer
-        }
+        },
+        widgets=[
+            animate and {
+                'type': 'time-series',
+                'value': animate,
+                'title': 'Animation'
+            },
+            widget and {
+                'type': 'histogram',
+                'value': value,
+                'title': 'Distribution'
+            }
+        ]
     )
