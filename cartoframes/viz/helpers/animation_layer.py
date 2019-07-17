@@ -5,7 +5,7 @@ from ..layer import Layer
 
 def animation_layer(
         source, value, title='', color=None, widget_type='time-series', description=''):
-    """Helper function for quickly creating an animated map
+    """Helper function for quickly creating an animated map.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset

@@ -6,7 +6,7 @@ from ..layer import Layer
 def color_continuous_layer(
         source, value, title='', palette=None, description='', footer='',
         legend=True, popup=True, widget=True, animate=None):
-    """Helper function for quickly creating a continuous color map
+    """Helper function for quickly creating a continuous color map.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset

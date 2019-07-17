@@ -7,7 +7,7 @@ def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, description='', footer='',
         legend=True, popup=True, widget=True, animate=None):
-    """Helper function for quickly creating a classed color map
+    """Helper function for quickly creating a classed color map.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
