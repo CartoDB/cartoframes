@@ -40,7 +40,7 @@ class Dataset(object):
         elif is_table_name(data):
             return self._getTableDataset(data, credentials, schema)
 
-        raise ValueError('We can not detect the Dataset type for data={}'.format(data))
+        raise ValueError('We can not detect the Dataset type')
 
     def _init_saved_in_carto(self):
         return self.is_remote()
