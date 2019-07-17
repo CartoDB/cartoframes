@@ -17,7 +17,9 @@ except ImportError:
 
 
 class Layer(object):
-    """Layer
+    """Layer to display data on a map. This class can be used as one or more
+    layers on :py:class`Map <cartoframes.viz.Map>` or on its own in a Jupyter
+    notebook to get a preview of a Layer.
 
     Args:
         source (str, :py:class:`Dataset <cartoframes.data.Dataset>`):
@@ -45,14 +47,16 @@ class Layer(object):
 
     Example:
 
+        Create a layer with a custom popup, legend, and widget.
+
         .. code::
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Layer
 
             set_default_context(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
+                base_url='https://cartovl.carto.com',
+                api_key='default_public'
             )
 
             Layer(
@@ -68,29 +72,51 @@ class Layer(object):
                 },
                 widgets=[{
                     'type': 'formula',
-                    'title': 'Avg $pop_max'
+                    'title': 'Avg $pop_max',
                     'value': 'viewportAvg($pop_max)'
                 }]
             )
 
-        Setting the context.
+        Create a layer specifically tied to a :py:class:`Context
+        <cartoframes.auth.Context>` and display it on a map.
 
         .. code::
 
             from cartoframes.auth import Context
-            from cartoframes.viz import Layer
+            from cartoframes.viz import Layer, Map
 
             context = Context(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
 
-            Layer(
+            pop_layer = Layer(
                 'populated_places',
-                'color: "red"',
+                'color: red',
                 context=context
             )
+            Map(pop_layer)
 
+        Preview a layer in a Jupyter notebook. Note: if in a Jupyter notebook,
+        it is not required to explicitly add a Layer to a :py:class:`Map
+        <cartoframes.viz.Map>` if only visualizing data as a single layer.
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.viz import Layer, Map
+
+            set_default_context('https://cartoframes.carto.com')
+
+            pop_layer = Layer(
+                'brooklyn_poverty',
+                'color: ramp($poverty_per_pop, sunset)',
+                legend={
+                    'type': 'color-continuous',
+                    'title': 'Poverty per pop'
+                }
+            )
+            pop_layer
     """
 
     def __init__(self,
