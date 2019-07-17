@@ -23,30 +23,19 @@ class Credentials(object):
     instantiate a :obj:`Credentials` object.
 
     Args:
-        creds (:obj:`cartoframes.Credentials`, optional): Credentials instance
-        key (str, optional): API key of user's CARTO account
+        api_key (str, optional): API key of user's CARTO account
         username (str, optional): Username of CARTO account
         base_url (str, optional): Base URL used for API calls. This is usually
             of the form `https://eschbacher.carto.com/` for user `eschbacher`.
             On premises installations (and others) have a different URL
             pattern.
-        cred_file (str, optional): Pull credentials from a stored file. If this
-            and all other args are not entered, Credentials will attempt to
-            load a user config credentials file that was previously set with
-            Credentials(...).save().
-
-    Raises:
-        RuntimeError: If not enough credential information is passed and no
-            stored credentials file is found, this error will be raised.
 
     Example:
 
         .. code::
 
             from cartoframes.auth import Credentials, Context
-            creds = Credentials(key='abcdefg', username='eschbacher')
-            con = Context(creds=creds)
-
+            credentials = Credentials(api_key='abcdefg', username='eschbacher')
     """
 
     def __init__(self, api_key, username=None, base_url=None, session=None):
@@ -58,20 +47,20 @@ class Credentials(object):
         self.base_url = base_url or 'https://{}.carto.com/'.format(self._username)
         self._session = session
 
-        self._norm_creds()
+        self._norm_credentials()
 
     @classmethod
     def create_from_file(cls, file=None):
         """Retrives credentials from a file. Defaults to the user config directory"""
         with open(config_file or _DEFAULT_PATH, 'r') as f:
-            creds = json.load(f)
+            credentials = json.load(f)
 
-        return cls(creds.get('api_key'), creds.get('username'))
+        return cls(credentials.get('api_key'), credentials.get('username'))
 
     @classmethod
     def create_from_credentials(cls, credentials):
         """Retrives credentials from another Credentials object"""
-        if isinstance(creds, Credentials):
+        if isinstance(credentials, Credentials):
             return cls(credentials.api_key, credentials.username, credentials.base_url, credentials.session)
 
         raise ValueError('`credentials` must a Credentials class instance')
@@ -106,7 +95,7 @@ class Credentials(object):
         return self._username
 
     @username.setter
-    def api_key(self, username):
+    def username(self, username):
         """Set username"""
         self._username = username
 
@@ -133,7 +122,7 @@ class Credentials(object):
         """Set session"""
         self._session = session
 
-    def _norm_creds(self):
+    def _norm_credentials(self):
         """Standardize credentials"""
         if self._base_url:
             self._base_url = self._base_url.strip('/')
@@ -151,14 +140,14 @@ class Credentials(object):
             .. code::
 
                 from cartoframes import Credentials
-                creds = Credentials(username='eschbacher', key='abcdefg')
-                creds.save()  # save to default location
+                credentials = Credentials(username='eschbacher', api_key='abcdefg')
+                credentials.save()  # save to default location
 
             .. code::
 
                 from cartoframes import Credentials
-                creds = Credentials(username='eschbacher', key='abcdefg')
-                creds.save('path/to/credentials/file')
+                credentials = Credentials(username='eschbacher', api_key='abcdefg')
+                credentials.save('path/to/credentials/file')
         """
 
         if config_file is None:
@@ -184,9 +173,9 @@ class Credentials(object):
             To see if there is a default user credential file stored, do the
             following::
 
-                >>> creds = Credentials()
-                >>> print(creds)
-                Credentials(username=eschbacher, key=abcdefg,
+                >>> credentials = Credentials.create_from_file()
+                >>> print(credentials)
+                Credentials(username=eschbacher, api_key=abcdefg,
                         base_url=https://eschbacher.carto.com/)
 
         """
