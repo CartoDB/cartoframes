@@ -18,13 +18,13 @@ except ImportError:
 
 class Layer(object):
     """Layer to display data on a map. This class can be used as one or more
-    layers on :py:class`Map <cartoframes.viz.Map>` or on its own in a Jupyter
+    layers on :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
     notebook to get a preview of a Layer.
 
     Args:
         source (str, :py:class:`Dataset <cartoframes.data.Dataset>`):
           The source data.
-        style (str, dict, :py:class:`Style <cartoframes.vis.Style>`, optional):
+        style (str, dict, :py:class:`Style <cartoframes.viz.Style>`, optional):
           The style of the visualization: `CARTO VL styling
           <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
         popup (dict, :py:class:`Popup <cartoframes.viz.Popup>`, optional):
@@ -39,7 +39,7 @@ class Layer(object):
         widgets (dict, :py:class `WidgetList <cartoframes.viz.WidgetList>`, optional):
            Widget or list of widgets for a layer. It contains the information to display
            different widget types on the top right of the map.
-        context (:py:class:`Context <cartoframes.Context>`):
+        context (:py:class:`Context <cartoframes.auth.Context>`):
           A Context instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           this context is simply ignored. If not provided the context will be
@@ -60,7 +60,7 @@ class Layer(object):
             )
 
             Layer(
-                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
+                "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
                 'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
                 popup={
                     'hover': '$name',
@@ -86,8 +86,8 @@ class Layer(object):
             from cartoframes.viz import Layer, Map
 
             context = Context(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
+                base_url='https://cartovl.carto.com',
+                api_key='default_public'
             )
 
             pop_layer = Layer(
