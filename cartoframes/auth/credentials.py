@@ -55,7 +55,7 @@ class Credentials(object):
 
         self._api_key = api_key
         self._username = username
-        self._base_url = base_url or 'https://{}.carto.com/'.format(self._username)
+        self.base_url = base_url or 'https://{}.carto.com/'.format(self._username)
         self._session = session
 
         self._norm_creds()
@@ -98,7 +98,11 @@ class Credentials(object):
 
     @property
     def username(self):
-        """Credentials username"""
+        """Credentials username
+
+        Note:
+            This does not update the `base_url` attribute. You should use `credentials.base_url = new_abse_url`
+        """
         return self._username
 
     @username.setter
@@ -114,6 +118,9 @@ class Credentials(object):
     @base_url.setter
     def base_url(self, base_url):
         """Set base_url"""
+        if urlparse(base_url).scheme != 'https':
+            raise ValueError('`base_url`s need to be over `https`. Update your `base_url`.')
+
         self._base_url = base_url
 
     @property
@@ -189,95 +196,3 @@ class Credentials(object):
             warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
-
-
-
-    def key(self, key=None):
-        """Return or set API `key`.
-
-        Args:
-            key (str, optional): If set, updates the API key, otherwise returns
-                current API key.
-
-        Example:
-
-            .. code::
-
-                >>> from cartoframes import Credentials
-                # load credentials saved in previous session
-                >>> creds = Credentials()
-                # returns current API key
-                >>> creds.key()
-                'abcdefg'
-                # updates API key with new value
-                >>> creds.key('new_api_key')
-        """
-        if key:
-            self._key = key
-        else:
-            return self._key
-
-    def username(self, username=None):
-        """Return or set `username`.
-
-        Args:
-            username (str, optional): If set, updates the `username`. Otherwise
-                returns current `username`.
-
-        Note:
-            This does not update the `base_url` attribute. Use
-            `Credentials.set` to have that updated with `username`.
-
-        Example:
-
-            .. code::
-
-                >>> from cartoframes import Credentials
-                # load credentials saved in previous session
-                >>> creds = Credentials()
-                # returns current username
-                >>> creds.username()
-                'eschbacher'
-                # updates username with new value
-                >>> creds.username('new_username')
-        """
-        if username:
-            self._username = username
-        else:
-            return self._username
-
-    def base_url(self, base_url=None):
-        """Return or set `base_url`.
-
-        Args:
-            base_url (str, optional): If set, updates the `base_url`. Otherwise
-                returns current `base_url`.
-
-        Note:
-            This does not update the `username` attribute. Separately update
-            the username with ``Credentials.username`` or update `base_url` and
-            `username` at the same time with ``Credentials.set``.
-
-        Example:
-
-            .. code::
-
-                >>> from cartoframes import Credentials
-                # load credentials saved in previous session
-                >>> creds = Credentials()
-                # returns current base_url
-                >>> creds.base_url()
-                'https://eschbacher.carto.com/'
-                # updates base_url with new value
-                >>> creds.base_url('new_base_url')
-        """
-        if base_url:
-            # POSTs need to be over HTTPS (e.g., Import API reverts to a GET)
-            if urlparse(base_url).scheme != 'https':
-                raise ValueError(
-                    '`base_url`s need to be over `https`. Update your '
-                    '`base_url`.'
-                )
-            self._base_url = base_url
-        else:
-            return self._base_url
