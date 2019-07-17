@@ -28,8 +28,8 @@ def color_category_layer(
         animate (str, optional): TODO.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
-        popup on `value`.
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
     """
     func = 'buckets' if cat else 'top'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'

@@ -28,8 +28,8 @@ def color_bins_layer(
         animate (str, optional): TODO.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
-        popup on `value`.
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
     """
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
