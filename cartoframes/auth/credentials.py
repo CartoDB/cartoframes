@@ -80,13 +80,8 @@ class Credentials(object):
         if self._base_url:
             self._base_url = self._base_url.strip('/')
 
-    def save(self, config_loc=None):
+    def save(self):
         """Saves current user credentials to user directory.
-
-        Args:
-            config_loc (str, optional): Location where credentials are to be
-                stored. If no argument is provided, it will be send to the
-                default location.
 
         Example:
 
@@ -101,8 +96,7 @@ class Credentials(object):
             """create directory if not exists"""
             os.makedirs(_USER_CONFIG_DIR)
         with open(_DEFAULT_PATH, 'w') as f:
-            json.dump({'key': self._key, 'base_url': self._base_url,
-                       'username': self._username}, f)
+            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, f)
 
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
