@@ -9,6 +9,71 @@ DOWNLOAD_RETRY_TIMES = 3
 
 
 class Dataset(object):
+    """Generic data class for cartoframes data operations. A `Dataset` instance
+    can be created from a dataframe, geodataframe, a table hosted on a CARTO
+    account, an arbitrary query against a CARTO account, or a local or hosted
+    GeoJSON source. If hosted, the data can be retrieved as a pandas DataFrame.
+    If local or as a query, a new table can be created in a CARTO account off
+    of the Dataset instance.
+
+    Examples:
+        Dataframe:
+
+        .. code::
+
+            from pandas
+            from cartoframes.data import Dataset
+
+            df = pandas.DataFrame(...)
+            Dataset(df)
+
+        GeoDataframe:
+
+        .. code::
+
+            from geopandas
+            from cartoframes.data import Dataset
+
+            gdf = geopandas.DataFrame(...)
+            Dataset(gdf)
+
+        GeoJSON file:
+
+        .. code::
+
+            from cartoframes.data import Dataset
+
+            Dataset('path/to/geojsonfile')
+
+        Table from CARTO
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.data import Dataset
+
+            set_default_context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            Dataset('table_name')
+
+        Query usign CARTO stuff
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.data import Dataset
+
+            set_default_context(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            Dataset('select * from table_name WHERE ...')
+    """
+
     FAIL = TableDataset.FAIL
     REPLACE = TableDataset.REPLACE
     APPEND = TableDataset.APPEND
