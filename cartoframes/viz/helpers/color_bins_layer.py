@@ -6,7 +6,7 @@ from ..layer import Layer
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, description='', footer='',
-        legend=True, popup=True, widget=True, animate=None):
+        legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a classed color map.
 
     Args:
@@ -26,8 +26,8 @@ def color_bins_layer(
             Set to "True" by default. 
         popup (bool, optional): Display popups on hover and click: "True" or "False". 
             Set to "True" by default.
-        widget (bool, optional): Display a widget for mapped data. 
-            Set to "True" by default.
+        widget (bool, optional): Display a widget for mapped data: "True" or "False". 
+            Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:

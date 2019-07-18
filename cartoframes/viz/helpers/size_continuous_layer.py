@@ -6,7 +6,7 @@ from ..layer import Layer
 def size_continuous_layer(
         source, value, title='', size=None,
         color=None, description='', footer='',
-        legend=True, popup=True, widget=True, animate=None):
+        legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by `value`.
 
@@ -22,10 +22,13 @@ def size_continuous_layer(
           '#4CC8A3' for lines.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
-        legend (bool, optional): TODO.
-        popup (bool, optional): TODO.
-        widget (bool, optional): TODO.
-        animate (str, optional): TODO.
+        legend (bool, optional): Display map legend: "True" or "False".
+            Set to "True" by default. 
+        popup (bool, optional): Display popups on hover and click: "True" or "False". 
+            Set to "True" by default.
+        widget (bool, optional): Display a widget for mapped data. 
+            Set to "False" by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
