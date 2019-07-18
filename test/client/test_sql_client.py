@@ -3,6 +3,7 @@ import unittest
 
 from cartoframes.client import SQLClient
 from cartoframes import context
+from cartoframes.auth import Credentials
 
 SQL_SELECT_RESPONSE = {
     'rows': [{
@@ -71,15 +72,6 @@ SQL_BATCH_RESPONSE = {
 }
 
 
-class MockCredentials():
-    def __init__(self, username, api_key):
-        self._username = username
-        self._api_key = api_key
-
-    def username(self):
-        return self._username
-
-
 class MockContext():
     def __init__(self):
         self.query = ''
@@ -99,8 +91,8 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context = MockContext()
         # Mock create_context method
         context.create_context = lambda c, s: self._mock_context
-        creds = MockCredentials('user_name', '1234567890')
-        self._sql_client = SQLClient(creds)
+        credentials = Credentials('1234567890', 'user_name')
+        self._sql_client = SQLClient(credentials)
 
     def test_query(self):
         """client.SQLClient.query"""
