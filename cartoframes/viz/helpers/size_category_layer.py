@@ -83,7 +83,7 @@ def size_category_layer(
             widget and {
                 'type': 'category',
                 'value': value,
-                'title': 'Distribution'
+                'title': 'Categories'
             }
         ]
     )
