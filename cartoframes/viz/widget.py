@@ -31,7 +31,7 @@ class Widget():
         else:
             raise ValueError('Wrong widget input.')
 
-    def _init_widget(self, data, widget_type=''):
+    def _init_widget(self, data, widget_type=None):
         self._type = ''
         self._value = ''
         self._variable_name = ''
@@ -50,10 +50,7 @@ class Widget():
             self._footer = data.get('footer', '')
             self._prop = self.get_default_prop(data)
 
-            options = {}
-            for key, value in data.items():
-                options[key] = value
-
+            options = self._get_options_from_data(data)
             self._options = camel_dictionary(options)
         else:
             raise ValueError('Wrong widget input.')
@@ -89,3 +86,12 @@ class Widget():
                 'Widget type is not valid. Valid widget types are: {}.'.format(
                     ', '.join(constants.WIDGET_TYPES)
                 ))
+
+    def _get_options_from_data(self, data):
+        options = {}
+        attributes = ['type', 'value', 'title', 'footer', 'prop', 'description']
+
+        for key, value in data.items():
+            if key not in attributes:
+                options[key] = value
+        return options
