@@ -54,12 +54,12 @@ class Credentials(object):
         self._norm_credentials()
 
     @classmethod
-    def from_file(cls, config_file=None):
+    def from_file(cls, config_file=None, session=None):
         """Retrives credentials from a file. Defaults to the user config directory"""
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
 
-        return cls(credentials.get('api_key'), credentials.get('username'), credentials.get('base_url'))
+        return cls(credentials.get('api_key'), credentials.get('username'), credentials.get('base_url'), session)
 
     @classmethod
     def from_credentials(cls, credentials):
