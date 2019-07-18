@@ -55,7 +55,7 @@ class Credentials(object):
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
 
-        return cls(credentials.get('api_key'), credentials.get('username'))
+        return cls(credentials.get('api_key'), credentials.get('username'), credentials.get('base_url'))
 
     @classmethod
     def from_credentials(cls, credentials):
@@ -63,7 +63,7 @@ class Credentials(object):
         if isinstance(credentials, Credentials):
             return cls(credentials.api_key, credentials.username, credentials.base_url, credentials.session)
 
-        raise ValueError('`credentials` must a Credentials class instance')
+        raise ValueError('`credentials` must be a Credentials class instance')
 
     def __repr__(self):
         return ("Credentials(username='{username}', "
