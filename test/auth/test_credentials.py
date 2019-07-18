@@ -6,6 +6,12 @@ import time
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
 
+# FIXME python 2.7 compatibility
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 
 class TestCredentials(unittest.TestCase):
     def setUp(self):
