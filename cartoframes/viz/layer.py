@@ -18,28 +18,28 @@ except ImportError:
 
 class Layer(object):
     """Layer to display data on a map. This class can be used as one or more
-    layers on :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
+    layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
     notebook to get a preview of a Layer.
 
     Args:
-        source (Union[str, :py:class:`Dataset <cartoframes.data.Dataset>`, pandas.DataFrame]):
+        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`, or pandas.DataFrame):
           The source data.
-        style (Union[str, dict, :py:class:`Style <cartoframes.viz.Style>`], optional):
+        style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
           The style of the visualization: `CARTO VL styling
           <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`__.
-        popup (Union[dict, :py:class:`Popup <cartoframes.viz.Popup>`], optional):
+        popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           This option adds interactivity (click and hover) to a layer to show popups.
           The columns to be shown must be added in a list format for each event. It
           must be written using `CARTO VL expressions syntax
           <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`__.
           See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
-        legend (Union[dict, :py:class:`Legend <cartoframes.viz.Legend>`], optional):
+        legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
           The legend definition for a layer. It contains the information
           to show a legend "type" (``color-category``, ``color-bins``,
           ``color-continuous``), "prop" (color) and also text information:
           "title", "description" and "footer". See :py:class:`Legend
           <cartoframes.viz.Legend>` for more information.
-        widgets (Union[dict, list, :py:class `WidgetList <cartoframes.viz.WidgetList>`], optional):
+        widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
            Widget or list of widgets for a layer. It contains the information to display
            different widget types on the top right of the map. See
            :py:class:`WidgetList` for more information.
