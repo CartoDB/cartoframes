@@ -8,8 +8,106 @@ from cartoframes.auth.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
 
 
 class TestCredentials(unittest.TestCase):
-    """Tests for functions in keys module"""
+    def setUp(self):
+        self.api_key = 'fake_api_key'
+        self.username = 'fake_user'
+        self.base_url = 'https://{}.carto.com/'.format(self.username)
+        self.onprem_base_url = 'https://turtleland.com/user/{}'.format(self.username)
 
+    def test_credentials_constructor(self):
+        credentials = Credentials(self.api_key, self.username)
+
+        self.assertEqual(credentials.api_key, self.api_key)
+        self.assertEqual(credentials.username, self.username)
+        self.assertEqual(credentials.base_url, self.base_url.strip('/'))
+
+    def test_credentials_constructor_props(self):
+        credentials = Credentials(api_key=self.api_key, username=self.username)
+
+        self.assertEqual(credentials.api_key, self.api_key)
+        self.assertEqual(credentials.username, self.username)
+        self.assertEqual(credentials.base_url, self.base_url.strip('/'))
+
+    def test_credentials_baseurl(self):
+        credentials = Credentials(api_key=self.api_key, base_url=self.base_url)
+
+        self.assertEqual(credentials.api_key, self.api_key)
+        self.assertEqual(credentials.username, None)
+        self.assertEqual(credentials.base_url, self.base_url.strip('/'))
+
+    def test_credentials_baseurl_without_https(self):
+        with self.assertRaises(ValueError):
+            Credentials(api_key=self.api_key, base_url=self.base_url.replace('https', 'http'))
+
+    def test_credentials_set_baseurl_without_https(self):
+        credentials = Credentials(api_key=self.api_key, base_url=self.base_url)
+
+        with self.assertRaises(ValueError):
+            credentials.base_url = self.base_url.replace('https', 'http')
+
+    def test_credentials_without_base_url_and_username(self):
+        with self.assertRaises(ValueError):
+            Credentials(api_key=self.api_key)
+
+        with self.assertRaises(ValueError):
+            Credentials(api_key=self.api_key, username=None, base_url=None)
+
+    def test_credentials_create_from_credentials(self):
+        credentials1 = Credentials(api_key='abc123', username='jackson-5')
+        credentials2 = Credentials.from_credentials(credentials1)
+
+        self.assertEqual(credentials1.api_key, credentials2.api_key)
+        self.assertEqual(credentials1.username, credentials2.username)
+        self.assertEqual(credentials1.base_url, credentials2.base_url)
+
+    def test_credentials_create_from_credentials_with_no_credentials(self):
+        with self.assertRaises(ValueError):
+            Credentials.from_credentials({})
+
+    def test_credentials_onprem_baseurl(self):
+        credentials = Credentials(api_key=self.api_key, username=self.username, base_url=self.onprem_base_url)
+
+        self.assertEqual(credentials.api_key, self.api_key)
+        self.assertEqual(credentials.username, self.username)
+        self.assertEqual(credentials.base_url, self.onprem_base_url.strip('/'))
+
+    def test_credentials_api_key_get_and_set(self):
+        credentials = Credentials(self.api_key, self.username)
+        new_api_key = 'new_api_key'
+        credentials.api_key = new_api_key
+        self.assertEqual(credentials.api_key, new_api_key)
+
+    def test_credentials_username_get_and_set(self):
+        credentials = Credentials(self.api_key, self.username)
+        new_username = 'new_username'
+        credentials.username = new_username
+        self.assertEqual(credentials.username, new_username)
+
+    def test_credentials_base_url_get_and_set(self):
+        credentials = Credentials(self.api_key, self.username)
+        new_base_url = credentials.base_url + 'new'
+        credentials.base_url = new_base_url
+        self.assertEqual(credentials.base_url, new_base_url)
+
+    def test_credentials_repr(self):
+        credentials = Credentials(self.api_key, self.username)
+
+        ans = ("Credentials(username='{username}', "
+               "api_key='{api_key}', "
+               "base_url='https://{username}.carto.com')").format(username=self.username,
+                                                                  api_key=self.api_key)
+        self.assertEqual(str(credentials), ans)
+
+    def test_credentials_eq_method(self):
+        credentials1 = Credentials(api_key='abc123', username='jackson-5')
+        credentials2 = Credentials.from_credentials(credentials1)
+
+        self.assertEqual(credentials1, credentials2)
+        credentials2.api_key = 'another_apy_key'
+        self.assertNotEqual(credentials1, credentials2)
+
+
+class TestCredentialsFromFile(unittest.TestCase):
     def setUp(self):
         # remove default credential file
         if os.path.exists(_DEFAULT_PATH):
@@ -17,183 +115,35 @@ class TestCredentials(unittest.TestCase):
         # delete path for user config data
         if os.path.exists(_USER_CONFIG_DIR):
             os.rmdir(_USER_CONFIG_DIR)
-        self.key = 'seaturtlexyz'
-        self.username = 'loggerhead'
-        self.base_url = 'https://loggerhead.carto.com/'
-        self.onprem_base_url = 'https://turtleland.com/user/{}'.format(
-            self.username)
-        self.default = {
-            'key': 'default_key',
-            'username': 'default_username',
-            'base_url': 'https://default_username.carto.com/'
-        }
-        self.default_cred = Credentials(**self.default)
-        self.default_cred.save()
+
+        self.api_key = 'fake_api_key'
+        self.username = 'fake_user'
 
     def tearDown(self):
-        self.default_cred.delete()
         if os.path.exists(_USER_CONFIG_DIR):
             os.rmdir(_USER_CONFIG_DIR)
 
-    def test_credentials(self):
-        """Credentials common usage"""
-        creds = Credentials(key=self.key,
-                            username=self.username)
+    def test_credentials_without_file(self):
+        credentials1 = Credentials(self.api_key, self.username)
+        credentials1.save()
 
-        self.assertEqual(creds.key(), self.key)
-        self.assertEqual(creds.username(), self.username)
-        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
+        credentials2 = Credentials.from_file()
+        self.assertEqual(credentials1, credentials2)
 
-    def test_credentials_constructor(self):
-        """Credentials object constructor"""
-        creds1 = Credentials(key='abc123', username='jackson-5')
-        creds2 = Credentials(creds=creds1)
+        credentials1.delete()
 
-        self.assertEqual(creds1.key(), creds2.key())
-        self.assertEqual(creds1.username(), creds2.username())
-        self.assertEqual(creds1.base_url(), creds2.base_url())
+        with self.assertRaises(FileNotFoundError):
+            Credentials.from_file()
 
-    def test_credentials_baseurl(self):
-        """Credentials carto.com base_url"""
-        creds = Credentials(key=self.key,
-                            base_url=self.base_url)
+    def test_credentials_with_file(self):
+        file = '/tmp/credentials.json'
+        credentials1 = Credentials(self.api_key, self.username)
+        credentials1.save(file)
 
-        self.assertEqual(creds.key(), self.key)
-        self.assertEqual(creds.username(), None)
-        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
+        credentials2 = Credentials.from_file(file)
+        self.assertEqual(credentials1, credentials2)
 
-        with self.assertRaises(ValueError):
-            creds = Credentials(
-                key=self.key,
-                base_url=self.base_url.replace('https', 'http')
-            )
+        credentials1.delete(file)
 
-    def test_credentials_onprem_baseurl(self):
-        """Credentials on-prem-style base_url"""
-        creds = Credentials(key=self.key,
-                            username=self.username,
-                            base_url=self.onprem_base_url)
-
-        self.assertEqual(creds.key(), self.key)
-        self.assertEqual(creds.username(), self.username)
-        self.assertEqual(creds.base_url(), self.onprem_base_url.strip('/'))
-
-    def test_credentials_no_args(self):
-        """credentials.Creentials load default cred file"""
-        creds = Credentials()
-
-        self.assertEqual(creds.key(), self.default['key'])
-        self.assertEqual(creds.username(), self.default['username'])
-        self.assertEqual(creds.base_url(), self.default['base_url'].strip('/'))
-
-    def test_credentials_invalid_key(self):
-        """Credentials invalid key"""
-        self.default_cred.delete()
-        with self.assertRaises(RuntimeError,
-                               msg='Did not specify key'):
-            Credentials(username=self.username)
-
-    def test_credentials_cred_file(self):
-        """Credentials cred_file"""
-        local_cred_file = './test_cred_file_{}.json'.format(
-            str(time.time())[-4:])
-
-        # create a credential file with arbitrary name
-        with open(local_cred_file, 'w') as f:
-            json.dump({'base_url': self.base_url,
-                       'key': self.key},
-                      f)
-        creds = Credentials(cred_file=local_cred_file)
-        self.assertEqual(creds.key(), self.key)
-        self.assertEqual(creds.base_url(), self.base_url.strip('/'))
-        creds.delete(local_cred_file)
-
-    def test_credentials_set(self):
-        """Credentials.set"""
-        new_creds = {
-            'username': 'andy',
-            'key': 'abcdefg'
-        }
-        self.default_cred.set(**new_creds)
-
-    def test_credentials_key(self):
-        """Credentials.key"""
-
-        creds = Credentials(key='abcdefg', username='andy')
-        creds.key('hijklmnop')
-        self.assertEqual(creds.key(), 'hijklmnop')
-
-    def test_credentials_retrieve(self):
-        """Credentials.retrieve"""
-        local_cred_file = './test_cred_file_{}.json'.format(
-            str(time.time())[-4:])
-
-        # create a credential file with arbitrary name
-        with open(local_cred_file, 'w') as f:
-            json.dump({'base_url': self.base_url,
-                       'key': self.key},
-                      f)
-        self.default_cred._retrieve(local_cred_file)
-        self.assertEqual(self.default_cred.key(), self.key)
-        self.assertEqual(self.default_cred.username(), None)
-        self.assertEqual(self.default_cred.base_url(), self.base_url)
-
-    def test_credentials_delete(self):
-        """Credentials.delete"""
-
-        local_cred_file = './test_cred_file_{}.json'.format(
-            str(time.time())[-4:])
-
-        # create a credentials file
-        with open(local_cred_file, 'w') as f:
-            json.dump({'base_url': self.base_url,
-                       'key': self.key},
-                      f)
-
-        # check if it's there
-        self.assertTrue(os.path.isfile(local_cred_file))
-
-        # load credentials file
-        creds = Credentials(cred_file=local_cred_file)
-
-        # delete credentials file
-        creds.delete(local_cred_file)
-
-        # ensure it's deleted
-        self.assertTrue(not os.path.isfile(local_cred_file))
-
-        self.assertIsNone(creds.delete('non_existent_file'))
-
-    def test_credentials_username(self):
-        """Credentials.username"""
-        self.default_cred.username('updated_username')
-        self.assertEqual(self.default_cred.username(),
-                         'updated_username')
-
-    def test_credentials_base_url(self):
-        """Credentials.base_url"""
-        new_base_url = 'https://updated_username.carto.com/'
-        self.default_cred.base_url(new_base_url)
-        self.assertEqual(self.default_cred.base_url(),
-                         new_base_url)
-
-    def test_credentials_repr(self):
-        """Credentials.__repr__"""
-        ans = ('Credentials(username=default_username, '
-               'key=default_key, '
-               'base_url=https://default_username.carto.com)')
-        self.assertEqual(str(self.default_cred), ans)
-
-    def test_credentials_comparing_equal_objects(self):
-        """Credentials.__eq__"""
-        creds1 = Credentials(key='abc123', username='jackson-5')
-        creds2 = Credentials(key='abc123', username='jackson-5')
-
-        self.assertTrue(creds1 == creds2)
-
-    def test_credentials_comparing_different_objects(self):
-        """Credentials.__eq__"""
-        creds1 = Credentials(key='abc123', username='jackson-5')
-        creds2 = Credentials(key='abc', username='jackson-5')
-
-        self.assertFalse(creds1 == creds2)
+        with self.assertRaises(FileNotFoundError):
+            Credentials.from_file(file)
