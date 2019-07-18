@@ -189,5 +189,5 @@ class BaseDataset():
         else:
             return None
 
-    def _get_dataset_info(self):
-        return DatasetInfo(self._credentials, self._table_name)
+    def _get_dataset_info(self, table_name=None):
+        return DatasetInfo(self._credentials, table_name or self._table_name)

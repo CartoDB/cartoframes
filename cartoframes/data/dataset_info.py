@@ -65,7 +65,7 @@ class DatasetInfo(object):
                 self._get_metadata(carto_context=carto_context, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
-                raise CartoException('We could not get the table metadata.'
+                raise CartoException('We could not get the table metadata. '
                                      'Please, try again in a few seconds or contact support for help')
 
     def _save_metadata(self):
