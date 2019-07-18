@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .registry.strategies_registry import StrategiesRegistry
 from .registry.dataframe_dataset import DataFrameDataset
 from .registry.query_dataset import QueryDataset
