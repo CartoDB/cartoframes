@@ -93,7 +93,7 @@ class Context(object):
          keyword argument. This method is more flexible.::
 
             from cartoframes.auth import Credentials
-            creds = Credentials(username='eschbacher', key='abcdefg')
+            creds = Credentials(username='eschbacher', api_key='abcdefg')
             con = Context(creds=creds)
 
     Attributes:
@@ -168,7 +168,7 @@ class Context(object):
     def __init__(self, base_url=None, api_key='default_public', creds=None, session=None,
                  verbose=0):
 
-        self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
+        self.creds = Credentials(creds=creds, api_key=api_key, base_url=base_url)
         self.session = session
         self.auth_client = APIKeyAuthClient(
             base_url=self.creds.base_url(),

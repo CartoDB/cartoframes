@@ -164,7 +164,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context.__init__ Credentials argument"""
         creds = Credentials(base_url=self.baseurl,
                             username=self.username,
-                            key=self.apikey)
+                            api_key=self.apikey)
         con = Context(creds=creds)
         self.assertIsInstance(con, Context)
         self.assertEqual(con.creds.username(), self.username)
@@ -173,7 +173,7 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         # Context pulls from saved credentials
         saved_creds = Credentials(base_url=self.baseurl,
                                   username=self.username,
-                                  key=self.apikey)
+                                  api_key=self.apikey)
         saved_creds.save()
         c_saved = Context()
         self.assertEqual(c_saved.creds.key(), self.apikey)
