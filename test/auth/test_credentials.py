@@ -27,7 +27,7 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(credentials.username, self.username)
         self.assertEqual(credentials.base_url, self.base_url.strip('/'))
 
-    def test_credentials_constructor(self):
+    def test_credentials_constructor_without_api_key(self):
         credentials = Credentials(self.username)
 
         self.assertEqual(credentials.api_key, 'default_public')
