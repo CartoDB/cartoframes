@@ -153,3 +153,13 @@ class TestCredentialsFromFile(unittest.TestCase):
 
         with self.assertRaises(FileNotFoundError):
             Credentials.from_file(file)
+
+    def test_credentials_with_session(self):
+        credentials1 = Credentials(self.api_key, self.username)
+        credentials1.save()
+
+        session = 'fake_session'
+        credentials2 = Credentials.from_file(session=session)
+        self.assertEqual(credentials2.session, session)
+
+        credentials1.delete()
