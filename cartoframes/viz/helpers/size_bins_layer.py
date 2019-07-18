@@ -26,10 +26,10 @@ def size_bins_layer(
           '#4CC8A3' for lines.
         description (str, optional): Description text legend placed under legend title.
         legend (bool, optional): Display map legend: "True" or "False".
-          Set to "True" by default. 
-        popup (bool, optional): Display popups on hover and click: "True" or "False". 
           Set to "True" by default.
-        widget (bool, optional): Display a widget for mapped data. 
+        popup (bool, optional): Display popups on hover and click: "True" or "False".
+          Set to "True" by default.
+        widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
 

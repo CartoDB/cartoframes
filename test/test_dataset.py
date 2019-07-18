@@ -500,6 +500,7 @@ class TestDatasetInfo(unittest.TestCase):
 
 class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     """Unit tests for cartoframes.Dataset"""
+
     def setUp(self):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
