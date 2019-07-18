@@ -181,7 +181,6 @@ class TestSizeCategoryLayerHelper(unittest.TestCase):
         self.assertEqual(layer.widgets._widgets[0]._type, 'category')
         self.assertEqual(layer.widgets._widgets[0]._title, 'Categories')
 
-
     def test_size_category_layer_animate(self):
         "should animate a property and disable the popups"
         layer = helpers.size_category_layer(

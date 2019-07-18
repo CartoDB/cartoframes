@@ -148,7 +148,6 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
         self.assertEqual(layer.widgets._widgets[0]._type, 'histogram')
         self.assertEqual(layer.widgets._widgets[0]._title, 'Distribution')
 
-
     def test_color_continuous_layer_animate(self):
         "should animate a property and disable the popups"
         layer = helpers.color_continuous_layer(

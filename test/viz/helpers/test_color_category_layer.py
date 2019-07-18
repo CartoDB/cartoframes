@@ -191,7 +191,6 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
         self.assertEqual(layer.widgets._widgets[0]._type, 'category')
         self.assertEqual(layer.widgets._widgets[0]._title, 'Categories')
 
-
     def test_color_category_layer_animate(self):
         "should animate a property and disable the popups"
         layer = helpers.color_category_layer(
