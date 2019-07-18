@@ -242,10 +242,9 @@ def setting_value_exception(prop, value):
 
 
 def get_context_with_public_creds(context):
-    # FIXME: api_key not used
-    api_key = 'default_public'
     public_creds = deepcopy(context.creds)
-    return create_context(public_creds, context.session)
+    public_creds.api_key = 'default_public'
+    return create_context(public_creds)
 
 
 def convert_bool(x):

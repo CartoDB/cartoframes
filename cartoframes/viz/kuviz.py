@@ -39,9 +39,9 @@ class KuvizPublisher(object):
             layer.source.dataset.credentials = self._context
 
             layer.source.credentials = {
-                'username': self._context.creds.username(),
+                'username': self._context.creds.username,
                 'api_key': maps_api_key,
-                'base_url': self._context.creds.base_url()
+                'base_url': self._context.creds.base_url
             }
 
         return self._layers

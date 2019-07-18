@@ -127,7 +127,7 @@ class SQLClient(object):
         """
         is_org_user = self._check_org_user()
         columns = ','.join(' '.join(x) for x in columns)
-        username = self._creds.username() if is_org_user else 'public'
+        username = self._creds.username if is_org_user else 'public'
         query = '''
             BEGIN;
             {drop};

@@ -23,7 +23,7 @@ class ContextMock():
         self.session = ''
 
     def get_default_schema(self):
-        return 'public' if not self.is_org else self.creds.username()
+        return 'public' if not self.is_org else self.creds.username
 
     def _get_bounds(self, layers):
         return {'west': None, 'south': None, 'east': None, 'north': None}
