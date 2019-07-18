@@ -48,7 +48,7 @@ class Credentials(object):
 
         self._api_key = api_key
         self._username = username
-        self.base_url = base_url or 'https://{}.carto.com/'.format(self._username)
+        self.base_url = base_url or self._base_url_from_username()
         self._session = session
 
         self._norm_credentials()
@@ -91,17 +91,18 @@ class Credentials(object):
 
     @property
     def username(self):
-        """Credentials username
-
-        Note:
-            This does not update the `base_url` attribute. You should use `credentials.base_url = new_abse_url`
-        """
+        """Credentials username"""
         return self._username
 
     @username.setter
     def username(self, username):
         """Set username"""
         self._username = username
+
+        new_base_url = self._base_url_from_username()
+        if new_base_url != self.base_url:
+            self.base_url = self._base_url_from_username()
+            warnings.warn('`base_url` has been updated to {}'.format(self.base_url))
 
     @property
     def base_url(self):
@@ -131,6 +132,9 @@ class Credentials(object):
         """Standardize credentials"""
         if self._base_url:
             self._base_url = self._base_url.strip('/')
+
+    def _base_url_from_username(self):
+        return 'https://{}.carto.com/'.format(self._username)
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.

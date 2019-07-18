@@ -83,6 +83,17 @@ class TestCredentials(unittest.TestCase):
         credentials.username = new_username
         self.assertEqual(credentials.username, new_username)
 
+    def test_credentials_updating_username_updates_base_url(self):
+        base_url = 'https://fakeurl'
+        credentials = Credentials(self.api_key, base_url=base_url)
+        self.assertEqual(credentials.base_url, base_url)
+
+        new_username = 'new_username'
+        expected_url = 'https://{}.carto.com'.format(new_username)
+        credentials.username = new_username
+        self.assertEqual(credentials.username, new_username)
+        self.assertEqual(credentials.base_url, expected_url)
+
     def test_credentials_base_url_get_and_set(self):
         credentials = Credentials(self.api_key, self.username)
         new_base_url = credentials.base_url + 'new'
