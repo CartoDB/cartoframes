@@ -90,9 +90,13 @@ class TestSQLClient(unittest.TestCase):
     def setUp(self):
         self._mock_context = MockContext()
         # Mock create_context method
+        self.original_create_context = context.create_context
         context.create_context = lambda c, s: self._mock_context
         credentials = Credentials('1234567890', 'user_name')
         self._sql_client = SQLClient(credentials)
+
+    def tearDown(self):
+        context.create_context = self.original_create_context
 
     def test_query(self):
         """client.SQLClient.query"""
