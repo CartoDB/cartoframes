@@ -42,7 +42,7 @@ class Credentials(object):
             credentials = Credentials(api_key='abcdefg', username='eschbacher')
     """
 
-    def __init__(self, api_key, username=None, base_url=None, session=None):
+    def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
         if username is None and base_url is None:
             raise ValueError('You must set at least a `username` or a `base_url` parameters')
 
@@ -59,13 +59,13 @@ class Credentials(object):
         with open(config_file or _DEFAULT_PATH, 'r') as f:
             credentials = json.load(f)
 
-        return cls(credentials.get('api_key'), credentials.get('username'), credentials.get('base_url'), session)
+        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
 
     @classmethod
     def from_credentials(cls, credentials):
         """Retrives credentials from another Credentials object"""
         if isinstance(credentials, Credentials):
-            return cls(credentials.api_key, credentials.username, credentials.base_url, credentials.session)
+            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
 
         raise ValueError('`credentials` must be a Credentials class instance')
 

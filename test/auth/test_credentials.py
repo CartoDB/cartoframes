@@ -21,9 +21,16 @@ class TestCredentials(unittest.TestCase):
         self.onprem_base_url = 'https://turtleland.com/user/{}'.format(self.username)
 
     def test_credentials_constructor(self):
-        credentials = Credentials(self.api_key, self.username)
+        credentials = Credentials(self.username, self.api_key)
 
         self.assertEqual(credentials.api_key, self.api_key)
+        self.assertEqual(credentials.username, self.username)
+        self.assertEqual(credentials.base_url, self.base_url.strip('/'))
+
+    def test_credentials_constructor(self):
+        credentials = Credentials(self.username)
+
+        self.assertEqual(credentials.api_key, 'default_public')
         self.assertEqual(credentials.username, self.username)
         self.assertEqual(credentials.base_url, self.base_url.strip('/'))
 
@@ -78,20 +85,20 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(credentials.base_url, self.onprem_base_url.strip('/'))
 
     def test_credentials_api_key_get_and_set(self):
-        credentials = Credentials(self.api_key, self.username)
+        credentials = Credentials(self.username, self.api_key)
         new_api_key = 'new_api_key'
         credentials.api_key = new_api_key
         self.assertEqual(credentials.api_key, new_api_key)
 
     def test_credentials_username_get_and_set(self):
-        credentials = Credentials(self.api_key, self.username)
+        credentials = Credentials(self.username, self.api_key)
         new_username = 'new_username'
         credentials.username = new_username
         self.assertEqual(credentials.username, new_username)
 
     def test_credentials_updating_username_updates_base_url(self):
         base_url = 'https://fakeurl'
-        credentials = Credentials(self.api_key, base_url=base_url)
+        credentials = Credentials(api_key=self.api_key, base_url=base_url)
         self.assertEqual(credentials.base_url, base_url)
 
         new_username = 'new_username'
@@ -101,13 +108,13 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(credentials.base_url, expected_url)
 
     def test_credentials_base_url_get_and_set(self):
-        credentials = Credentials(self.api_key, self.username)
+        credentials = Credentials(self.username, self.api_key)
         new_base_url = credentials.base_url + 'new'
         credentials.base_url = new_base_url
         self.assertEqual(credentials.base_url, new_base_url)
 
     def test_credentials_repr(self):
-        credentials = Credentials(self.api_key, self.username)
+        credentials = Credentials(self.username, self.api_key)
 
         ans = ("Credentials(username='{username}', "
                "api_key='{api_key}', "
@@ -141,7 +148,7 @@ class TestCredentialsFromFile(unittest.TestCase):
             os.rmdir(_USER_CONFIG_DIR)
 
     def test_credentials_without_file(self):
-        credentials1 = Credentials(self.api_key, self.username)
+        credentials1 = Credentials(self.username, self.api_key)
         credentials1.save()
 
         credentials2 = Credentials.from_file()
@@ -154,7 +161,7 @@ class TestCredentialsFromFile(unittest.TestCase):
 
     def test_credentials_with_file(self):
         file = '/tmp/credentials.json'
-        credentials1 = Credentials(self.api_key, self.username)
+        credentials1 = Credentials(self.username, self.api_key)
         credentials1.save(file)
 
         credentials2 = Credentials.from_file(file)
@@ -166,7 +173,7 @@ class TestCredentialsFromFile(unittest.TestCase):
             Credentials.from_file(file)
 
     def test_credentials_with_session(self):
-        credentials1 = Credentials(self.api_key, self.username)
+        credentials1 = Credentials(self.username, self.api_key)
         credentials1.save()
 
         session = 'fake_session'

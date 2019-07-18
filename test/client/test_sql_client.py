@@ -92,7 +92,7 @@ class TestSQLClient(unittest.TestCase):
         # Mock create_context method
         self.original_create_context = context.create_context
         context.create_context = lambda c: self._mock_context
-        credentials = Credentials('1234567890', 'user_name')
+        credentials = Credentials('user_name', '1234567890')
         self._sql_client = SQLClient(credentials)
 
     def tearDown(self):
