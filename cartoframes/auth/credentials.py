@@ -29,6 +29,10 @@ class Credentials(object):
             of the form `https://eschbacher.carto.com/` for user `eschbacher`.
             On premises installations (and others) have a different URL
             pattern.
+        session (requests.Session, optional): requests session. See `requests
+            documentation
+            <http://docs.python-requests.org/en/master/user/advanced/>`__
+            for more information.
 
     Example:
 
@@ -111,6 +115,7 @@ class Credentials(object):
             raise ValueError('`base_url`s need to be over `https`. Update your `base_url`.')
 
         self._base_url = base_url
+        self._norm_credentials()
 
     @property
     def session(self):
