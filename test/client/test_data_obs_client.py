@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.data.DataObs"""
+"""Unit tests for cartoframes.client.DataObsClient"""
 
 import unittest
 import os
@@ -14,7 +14,8 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 
 from cartoframes.auth import Credentials, Context
-from cartoframes.data import Dataset, DataObs
+from cartoframes.data import Dataset
+from cartoframes.client import DataObsClient
 from cartoframes.columns import normalize_name
 
 from utils import _UserUrlLoader
@@ -22,8 +23,8 @@ from utils import _UserUrlLoader
 warnings.filterwarnings('ignore')
 
 
-class TestDataObs(unittest.TestCase, _UserUrlLoader):
-    """Tests for cartoframes.data.DataObs"""
+class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
+    """Tests for cartoframes.client.DataObsClient"""
 
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -126,8 +127,8 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
                     warnings.warn('Error deleting tables')
 
     def test_boundaries(self):
-        """DataObs.boundaries"""
-        do = DataObs(self.creds)
+        """DataObsClient.boundaries"""
+        do = DataObsClient(self.creds)
 
         # all boundary metadata
         boundary_meta = do.boundaries()
@@ -190,8 +191,8 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
             do.boundaries(region=10)
 
     def test_discovery(self):
-        """DataObs.discovery"""
-        do = DataObs(self.creds)
+        """DataObsClient.discovery"""
+        do = DataObsClient(self.creds)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -256,8 +257,8 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         self.assertTrue(df_quantiles.shape[0] > 0)
 
     def test_augment(self):
-        """DataObs.augment"""
-        do = DataObs(self.creds)
+        """DataObsClient.augment"""
+        do = DataObsClient(self.creds)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -287,8 +288,8 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
             do.augment(self.test_read_table, meta)
 
     def test_augment_with_persist_as(self):
-        """DataObs.augment with persist_as"""
-        do = DataObs(self.creds)
+        """DataObsClient.augment with persist_as"""
+        do = DataObsClient(self.creds)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -334,7 +335,7 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         )
 
     def test_augment_column_name_collision(self):
-        """DataObs.augment column name collision"""
+        """DataObsClient.augment column name collision"""
         dup_col = 'female_third_level_studies_2011_by_female_pop'
         self.sql_client.send(
             """
@@ -352,7 +353,7 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
             )
         )
 
-        do = DataObs(self.creds)
+        do = DataObsClient(self.creds)
         meta = do.discovery(region=self.test_write_table, keywords='female')
         meta = meta[meta.suggested_name == dup_col]
         dataset = do.augment(

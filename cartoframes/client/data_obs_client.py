@@ -8,8 +8,8 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .dataset import Dataset
-from .utils import get_countrytag
+from ..data.dataset import Dataset
+from ..data.utils import get_countrytag
 
 from .. import utils
 from ..context import create_context
