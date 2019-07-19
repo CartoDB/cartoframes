@@ -207,7 +207,7 @@ def _dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
         'float64': 'numeric',
-        'int64': 'integer',
+        'int64': 'bigint',
         'float32': 'numeric',
         'int32': 'integer',
         'object': 'text',

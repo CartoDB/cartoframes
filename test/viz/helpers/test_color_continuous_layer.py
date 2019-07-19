@@ -83,3 +83,80 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             layer.style._style['polygon']['color'],
             'opacity(ramp(linear($name), prism), 0.9)'
         )
+
+    def test_color_continuous_layer_legend(self):
+        "should show/hide the legend"
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            legend=False
+        )
+
+        self.assertEqual(layer.legend._type, '')
+        self.assertEqual(layer.legend._title, '')
+
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            legend=True
+        )
+
+        self.assertEqual(layer.legend._type, {
+            'point': 'color-continuous-point',
+            'line': 'color-continuous-line',
+            'polygon': 'color-continuous-polygon'
+        })
+        self.assertEqual(layer.legend._title, 'name')
+
+    def test_color_continuous_layer_popup(self):
+        "should show/hide the popup"
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            popup=False
+        )
+
+        self.assertEqual(layer.popup._hover, [])
+
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            popup=True
+        )
+
+        self.assertEqual(layer.popup._hover, [{
+            'title': 'name',
+            'value': '$name'
+        }])
+
+    def test_color_continuous_layer_widget(self):
+        "should show/hide the widget"
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            widget=False
+        )
+
+        self.assertEqual(layer.widgets._widgets, [])
+
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            widget=True
+        )
+
+        self.assertEqual(layer.widgets._widgets[0]._type, 'histogram')
+        self.assertEqual(layer.widgets._widgets[0]._title, 'Distribution')
+
+    def test_color_continuous_layer_animate(self):
+        "should animate a property and disable the popups"
+        layer = helpers.color_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            animate='time'
+        )
+
+        self.assertEqual(layer.popup._hover, [])
+        self.assertEqual(layer.widgets._widgets[0]._type, 'time-series')
+        self.assertEqual(layer.widgets._widgets[0]._title, 'Animation')
+        self.assertEqual(layer.widgets._widgets[0]._value, 'time')

@@ -5,7 +5,8 @@ from ..layer import Layer
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,
-        size=None, color=None, description='', footer=''):
+        size=None, color=None, description='', footer='',
+        legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size category layer.
 
     Args:
@@ -24,12 +25,21 @@ def size_category_layer(
           '#4CC8A3' for lines.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: "True" or "False".
+          Set to "True" by default.
+        popup (bool, optional): Display popups on hover and click: "True" or "False".
+          Set to "True" by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to "False" by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`. Includes Legend and
-        popup on `value`.
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
     """
     func = 'buckets' if cat else 'top'
+    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+
     return Layer(
         source,
         style={
@@ -37,22 +47,24 @@ def size_category_layer(
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, cat or top, size or [2, 20]),
                 'color': 'opacity({0}, 0.8)'.format(
-                    color or '#F46D43')
+                    color or '#F46D43'),
+                'filter': animation_filter
             },
             'line': {
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, cat or top, size or [1, 10]),
                 'color': 'opacity({0}, 0.8)'.format(
-                    color or '#4CC8A3')
+                    color or '#4CC8A3'),
+                'filter': animation_filter
             }
         },
-        popup={
+        popup=popup and not animate and {
             'hover': {
                 'title': title or value,
                 'value': '$' + value
             }
         },
-        legend={
+        legend=legend and {
             'type': {
                 'point': 'size-category-point',
                 'line': 'size-category-line',
@@ -61,5 +73,17 @@ def size_category_layer(
             'title': title or value,
             'description': description,
             'footer': footer
-        }
+        },
+        widgets=[
+            animate and {
+                'type': 'time-series',
+                'value': animate,
+                'title': 'Animation'
+            },
+            widget and {
+                'type': 'category',
+                'value': value,
+                'title': 'Categories'
+            }
+        ]
     )
