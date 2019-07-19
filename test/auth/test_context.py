@@ -27,7 +27,7 @@ from cartoframes.utils import dict_items
 from cartoframes.columns import normalize_name
 from cartoframes.auth import Context, Credentials
 
-from utils import _UserUrlLoader
+from ..utils import _UserUrlLoader
 
 WILL_SKIP = False
 warnings.filterwarnings('ignore')

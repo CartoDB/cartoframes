@@ -5,9 +5,9 @@ import unittest
 from cartoframes.viz import Map, Layer, Source
 from cartoframes.data import StrategiesRegistry
 
-from mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
-from mocks.context_mock import ContextMock
-from mocks.dataset_mock import DatasetMock
+from ..mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from ..mocks.context_mock import ContextMock
+from ..mocks.dataset_mock import DatasetMock
 
 from .utils import build_geojson
 

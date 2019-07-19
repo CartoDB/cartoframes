@@ -15,7 +15,7 @@ from .. import utils
 from ..context import create_context
 
 
-class DataObs(object):
+class DataObsClient(object):
     """
     Data Observatory v1 class. `Data Observatory documentation
     <https://carto.com/developers/data-observatory/>`__.

@@ -18,7 +18,7 @@ from cartoframes.data import Dataset
 from cartoframes.client import DataObsClient
 from cartoframes.columns import normalize_name
 
-from utils import _UserUrlLoader
+from ..utils import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 

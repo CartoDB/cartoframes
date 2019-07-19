@@ -20,10 +20,10 @@ from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
 
-from mocks.dataset_mock import DatasetMock
-from mocks.context_mock import ContextMock, CredsMock
+from .mocks.dataset_mock import DatasetMock
+from .mocks.context_mock import ContextMock, CredsMock
 
-from utils import _UserUrlLoader
+from .utils import _UserUrlLoader
 
 try:
     import geopandas
