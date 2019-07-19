@@ -21,9 +21,9 @@ class DataObs(object):
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-      - boundary: returns a DataFrame with the world boundaries found
-      - discovery: returns a DataFrame with the measures found
-      - augment: returns a DataFrame with the augmented data
+      - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the world boundaries found.
+      - discovery: returns a DataFrame with the measures found.
+      - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
     """
 
     def __init__(self, credentials):
@@ -59,7 +59,7 @@ class DataObs(object):
                 creds = Credentials('user name', 'api key')
                 do = DataObs(creds)
                 au_boundaries = do.boundaries(region='Australia')
-                au_boundaries[['geom_name', 'geom_id']]
+                au_boundaries.dataframe[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
 
@@ -78,25 +78,23 @@ class DataObs(object):
                 set_default_credentials('user name', 'api key')
                 do = DataObs()
                 # will return DataFrame with columns `the_geom` and `geom_ref`
-                tracts_df = do.boundaries(
+                tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
                 # write geometries to a CARTO table
-                ds = Dataset(tracts_df)
-                ds.upload('idaho_falls_tracts')
+                tracts.upload('idaho_falls_tracts')
                 # gather metadata needed to look up median income
-                median_income_meta_df = do.discovery(
+                median_income_meta = do.discovery(
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
                 # get median income data and original table as new DataFrame
-                idaho_falls_income_df = do.augment(
+                idaho_falls_income = do.augment(
                     'idaho_falls_tracts',
-                    median_income_meta_df,
+                    median_income_meta,
                     how='geom_refs')
                 # overwrite existing table with newly-enriched DataFrame
-                ds = Dataset(idaho_falls_income_df)
-                ds.upload('idaho_falls_tracts', if_exists='replace')
+                idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
             boundary (str, optional): Boundary identifier for the boundaries
@@ -128,11 +126,12 @@ class DataObs(object):
               boundaries provided by, for example, US Census Tiger.
 
         Returns:
-            pandas.DataFrame: If `boundary` is specified, then all available
+            :py:class:`Dataset <cartoframes.data.Dataset>`:
+            If `boundary` is specified, then all available
             boundaries and accompanying `geom_refs` in `region` (or the world
             if `region` is ``None`` or not specified) are returned. If
-            `boundary` is not specified, then a DataFrame of all available
-            boundaries in `region` (or the world if `region` is ``None``)
+            `boundary` is not specified, then a Dataset of all available
+            boundaries in `region` (or the world if `region` is ``None``).
         """
         # TODO: create a function out of this?
         if isinstance(region, str):
@@ -458,7 +457,7 @@ class DataObs(object):
                 numers=numers,
                 quantiles=quantiles).strip()
         self._debug_print(query=query)
-        return self._fetch(query, decode_geom=True)
+        return self._fetch(query, decode_geom=True).dataframe
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
@@ -481,7 +480,7 @@ class DataObs(object):
                     'transaction_events',
                     egex='.*median income.*',
                     time='2011 - 2015')
-                df = do.augment('transaction_events', median_income)
+                ds = do.augment('transaction_events', median_income)
 
             Pass in cherry-picked measures from the Data Observatory catalog.
             The rest of the metadata will be filled in, but it's important to
@@ -493,7 +492,7 @@ class DataObs(object):
                 median_income = [{'numer_id': 'us.census.acs.B19013001',
                                   'geom_id': 'us.census.tiger.block_group',
                                   'numer_timespan': '2011 - 2015'}]
-                df = do.augment('transaction_events', median_income)
+                ds = do.augment('transaction_events', median_income)
 
         Args:
             table_name (str): Name of table on CARTO account that Data
@@ -516,7 +515,8 @@ class DataObs(object):
                 metadata.
 
         Returns:
-            pandas.DataFrame: A DataFrame representation of `table_name` which
+            :py:class:`Dataset <cartoframes.data.Dataset>`:
+            A Dataset representation of `table_name` which
             has new columns for each measure in `metadata`.
 
         Raises:
@@ -632,12 +632,11 @@ class DataObs(object):
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
     def _fetch(self, query, decode_geom=False, table_name=None):
-        # TODO: the current implementation of "fetch" is using the Dataset class.
-        # Maybe we could refactor to use copyto (?)
         dataset = Dataset(query, credentials=self._old_context)
         if table_name:
             dataset.upload(table_name=table_name)
-        return dataset.download(decode_geom=decode_geom)
+        dataset.download(decode_geom=decode_geom)
+        return dataset
 
     def _debug_print(self, **kwargs):
         if self._verbose <= 0:
