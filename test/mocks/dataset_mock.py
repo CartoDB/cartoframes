@@ -30,6 +30,9 @@ class DataFrameDatasetMock(DataFrameDataset):
     def exists(self):
         return False
 
+    def _get_dataset_info(self, table_name=None):
+        return DatasetInfoMock(self._credentials, table_name or self._table_name)
+
     def _create_table(self, _, _2):
         return True
 
@@ -46,6 +49,9 @@ class QueryDatasetMock(QueryDataset):
 
     def exists(self):
         return False
+
+    def _get_dataset_info(self, table_name=None):
+        return DatasetInfoMock(self._credentials, table_name or self._table_name)
 
     def _create_table_from_query(self):
         return True
@@ -68,8 +74,8 @@ class TableDatasetMock(TableDataset):
     def exists(self):
         return False
 
-    def _get_dataset_info(self):
-        return DatasetInfoMock(self._context, self._table_name)
+    def _get_dataset_info(self, table_name=None):
+        return DatasetInfoMock(self._credentials, table_name or self._table_name)
 
     def _copyto(self, _, _2, _3, _4, _5):
         self._df = pd.DataFrame({'column_name': [1]})
