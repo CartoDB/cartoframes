@@ -8,8 +8,8 @@ from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
 from cartoframes.data.utils import compute_query, compute_geodataframe, \
-    decode_geometry, detect_encoding_type, ENC_SHAPELY, ENC_WKB, ENC_WKB_HEX, \
-    ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
+    decode_geometry, detect_encoding_type, get_countrytag, ENC_SHAPELY, \
+    ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
 
 from mocks.context_mock import ContextMock
 
@@ -198,3 +198,16 @@ class TestDataUtils(unittest.TestCase):
         geom = decode_geometry('SRID=4326;POINT (1234 5789)', ENC_EWKT)  # ext
         self.assertEqual(lgeos.GEOSGetSRID(geom._geom), 4326)
         self.assertEqual(geom.wkt, 'POINT (1234 5789)')
+
+    def test_get_countrytag(self):
+        valid_regions = ('Australia', 'Brasil', 'EU', 'España', 'U.K.', )
+        valid_answers = ['section/tags.{c}'.format(c=c)
+                         for c in ('au', 'br', 'eu', 'spain', 'uk', )]
+        invalid_regions = ('USofA', None, '', 'Jupiter', )
+
+        for idx, r in enumerate(valid_regions):
+            self.assertEqual(get_countrytag(r.lower()), valid_answers[idx])
+
+        for r in invalid_regions:
+            with self.assertRaises(ValueError):
+                get_countrytag(r)

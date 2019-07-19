@@ -5,12 +5,9 @@ import collections
 from carto.exceptions import CartoException
 
 from .dataset import Dataset
-
-from ..dataobs import get_countrytag
+from .utils import get_countrytag
 
 from .. import utils
-from .. import context
-from ..auth import Context
 
 
 class DataObs(object):
@@ -19,7 +16,6 @@ class DataObs(object):
 
     def __init__(self, credentials, session=None):
         self._creds = credentials
-        # self._context = context.create_context(credentials, session)
     
     def augment(self, dataset, metadata):
         """Augment the dataset with the provided metadata."""
@@ -30,7 +26,7 @@ class DataObs(object):
         """
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
-        region specified (if any). This method is espeically useful for getting
+        region specified (if any). This method is especially useful for getting
         boundaries for a region and, with :py:meth:`Context.data
         <cartoframes.auth.Context.data>` and
         :py:meth:`Context.data_discovery
@@ -188,7 +184,7 @@ class DataObs(object):
                 time=utils.pgquote(timespan))
         return self._fetch(query, decode_geom=decode_geom)
 
-    def data_discovery(self, region, keywords=None, regex=None, time=None,
+    def discovery(self, region, keywords=None, regex=None, time=None,
                        boundaries=None, include_quantiles=False):
         """Discover Data Observatory measures. This method returns the full
         Data Observatory metadata model for each measure or measures that
@@ -452,7 +448,9 @@ class DataObs(object):
         return self._fetch(query, decode_geom=True)
 
     def _fetch(self, query, decode_geom=False):
-        # TODO: refactor to use copyto ?
+        # TODO: the current implementation of "fetch" is using the Dataset class.
+        # Maybe we could refactor to use copyto (?)
+        from ..auth import Context
         old_context = Context(self._creds)
         dataset = Dataset.from_query(query, context=old_context)
         return dataset.download(decode_geom=decode_geom)
