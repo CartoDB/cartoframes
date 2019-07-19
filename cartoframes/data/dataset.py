@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .registry.strategies_registry import StrategiesRegistry
 from .registry.dataframe_dataset import DataFrameDataset
 from .registry.query_dataset import QueryDataset
@@ -181,7 +183,7 @@ class Dataset(object):
 
         return self._strategy.dataset_info
 
-    def update_dataset_info(self, privacy=None, name=None):
+    def update_dataset_info(self, privacy=None, name=None, table_name=None):
         """Update/change Dataset privacy and name
 
         Args:
@@ -205,7 +207,8 @@ class Dataset(object):
                 d.update_dataset_info(privacy='link')
 
         """
-        return self._strategy.update_dataset_info(privacy, name)
+        return self._strategy.update_dataset_info(privacy, name, table_name
+        )
 
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account

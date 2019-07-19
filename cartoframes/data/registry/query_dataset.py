@@ -47,7 +47,7 @@ class QueryDataset(BaseDataset):
         elif table_name:
             self._dataset_info[table_name].update(privacy=privacy, name=name)
         else:
-            for dataset_info in self._dataset_info.itervalues():
+            for dataset_info in self._dataset_info.values():
                 dataset_info.update(privacy=privacy, name=name)
 
     def download(self, limit, decode_geom, retry_times):

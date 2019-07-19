@@ -86,7 +86,7 @@ class BaseDataset():
 
         return self._dataset_info
 
-    def update_dataset_info(self, privacy=None, name=None):
+    def update_dataset_info(self, privacy=None, name=None, table_name=None):
         self._dataset_info = self.dataset_info
         self._dataset_info.update(privacy=privacy, name=name)
 
