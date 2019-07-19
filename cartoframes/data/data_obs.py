@@ -77,7 +77,7 @@ class DataObs(object):
 
                 set_default_credentials('user name', 'api key')
                 do = DataObs()
-                # will return DataFrame with columns `the_geom` and `geom_ref`
+                # will return Dataset with columns `the_geom` and `geom_ref`
                 tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
@@ -88,12 +88,12 @@ class DataObs(object):
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
-                # get median income data and original table as new DataFrame
+                # get median income data and original table as new Dataset
                 idaho_falls_income = do.augment(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
-                # overwrite existing table with newly-enriched DataFrame
+                # overwrite existing table with newly-enriched Dataset
                 idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
@@ -569,7 +569,7 @@ class DataObs(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            _meta = self._fetch(query)
+            _meta = self._fetch(query).dataframe
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
