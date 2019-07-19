@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+import requests
 import collections
 import pandas as pd
 from warnings import warn
@@ -11,6 +12,7 @@ from .dataset import Dataset
 from .utils import get_countrytag
 
 from .. import utils
+from ..context import create_context
 
 
 class DataObs(object):
@@ -25,7 +27,10 @@ class DataObs(object):
     """
 
     def __init__(self, credentials):
-        self._creds = credentials
+        from ..auth import Context
+        self._verbose = 0
+        self._context = create_context(credentials)
+        self._old_context = Context(creds=credentials)
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -322,7 +327,7 @@ class DataObs(object):
             except ValueError:
                 # TODO: make this work for general queries
                 # see if it's a table
-                self.sql_client.send(
+                self._context.execute_query(
                     'EXPLAIN SELECT * FROM {}'.format(region))
                 boundary = (
                     'SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, '
@@ -564,7 +569,7 @@ class DataObs(object):
                 '      numeric, timespan_rownum numeric)',
             )).format(table_name=table_name,
                       meta=json.dumps(metadata).replace('\'', '\'\''))
-            _meta = self.fetch(query)
+            _meta = self._fetch(query)
 
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
@@ -578,7 +583,7 @@ class DataObs(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(table_name, credentials=self)
+        dataset = Dataset(table_name, credentials=self._old_context)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
@@ -629,9 +634,60 @@ class DataObs(object):
     def _fetch(self, query, decode_geom=False, table_name=None):
         # TODO: the current implementation of "fetch" is using the Dataset class.
         # Maybe we could refactor to use copyto (?)
-        from ..auth import Context
-        old_context = Context(self._creds)
-        dataset = Dataset(query, credentials=old_context)
+        dataset = Dataset(query, credentials=self._old_context)
         if table_name:
             dataset.upload(table_name=table_name)
         return dataset.download(decode_geom=decode_geom)
+
+    def _debug_print(self, **kwargs):
+        if self._verbose <= 0:
+            return
+
+        for key, value in utils.dict_items(kwargs):
+            if isinstance(value, requests.Response):
+                str_value = ("status_code: {status_code}, "
+                             "content: {content}").format(
+                                 status_code=value.status_code,
+                                 content=value.content)
+            else:
+                str_value = str(value)
+            if self._verbose < 2 and len(str_value) > 300:
+                str_value = '{}\n\n...\n\n{}'.format(str_value[:250],
+                                                     str_value[-50:])
+            print('{key}: {value}'.format(key=key,
+                                          value=str_value))
+
+    def _geom_type(self, source):
+        """gets geometry type(s) of specified layer"""
+        DEFAULT_SQL_ARGS = dict(do_post=False)
+        query = 'SELECT * FROM "{table}"'.format(table=source)
+        resp = self._context.execute_query(
+            utils.minify_sql((
+                'SELECT',
+                '    CASE WHEN ST_GeometryType(the_geom)',
+                '               in (\'ST_Point\', \'ST_MultiPoint\')',
+                '         THEN \'point\'',
+                '         WHEN ST_GeometryType(the_geom)',
+                '              in (\'ST_LineString\', \'ST_MultiLineString\')',
+                '         THEN \'line\'',
+                '         WHEN ST_GeometryType(the_geom)',
+                '              in (\'ST_Polygon\', \'ST_MultiPolygon\')',
+                '         THEN \'polygon\'',
+                '         ELSE null END AS geom_type,',
+                '    count(*) as cnt',
+                'FROM ({query}) AS _wrap',
+                'WHERE the_geom IS NOT NULL',
+                'GROUP BY 1',
+                'ORDER BY 2 DESC',
+            )).format(query=query),
+            **DEFAULT_SQL_ARGS)
+        if resp['total_rows'] > 1:
+            warn('There are multiple geometry types in {query}: '
+                 '{geoms}. Styling by `{common_geom}`, the most common'.format(
+                     query=query,
+                     geoms=','.join(g['geom_type'] for g in resp['rows']),
+                     common_geom=resp['rows'][0]['geom_type']))
+        elif resp['total_rows'] == 0:
+            raise ValueError('No geometry for layer. Check all layer tables '
+                             'and queries to ensure there are geometries.')
+        return resp['rows'][0]['geom_type']

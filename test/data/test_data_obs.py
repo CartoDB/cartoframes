@@ -17,7 +17,24 @@ from cartoframes.auth import Credentials, Context
 from cartoframes.data import Dataset, DataObs
 from cartoframes.columns import normalize_name
 
-from ..utils import _UserUrlLoader
+# from utils import _UserUrlLoader
+
+
+class _UserUrlLoader:
+    def user_url(self):
+        user_url = None
+        if (os.environ.get('USERURL') is None):
+            try:
+                creds = json.loads(open('test/secret.json').read())
+                user_url = creds['USERURL']
+            except:  # noqa: E722
+                warnings.warn('secret.json not found')
+
+        if user_url in (None, ''):
+            user_url = 'https://{username}.carto.com/'
+
+        return user_url
+
 
 warnings.filterwarnings('ignore')
 
@@ -29,7 +46,7 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
             try:
-                self.creds = json.loads(open('test/secret.json').read())
+                creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except:  # noqa: E722
@@ -43,6 +60,9 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
+
+        self.creds = Credentials(username=self.username, api_key=self.apikey)
+        self.con = Context(creds=self.creds)
 
         if self.username and self.apikey:
             self.baseurl = self.user_url().format(username=self.username)
@@ -222,7 +242,7 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dd['numer_id'][0], 'eu.eurostat.tgs00078')
 
         dd = do.discovery('Australia',
-                                regex='.*Torres Strait Islander.*')
+                          regex='.*Torres Strait Islander.*')
         for nid in dd['numer_id'].values:
             self.assertRegexpMatches(nid, '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
 
@@ -230,8 +250,8 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
             do.discovery('non_existent_table_abcdefg')
 
         dd = do.discovery('United States',
-                                boundaries='us.epa.huc.hydro_unit',
-                                time=('2006', '2010', ))
+                          boundaries='us.epa.huc.hydro_unit',
+                          time=('2006', '2010', ))
         self.assertTrue(dd.shape[0] >= 1)
 
         poverty = do.discovery(
@@ -257,11 +277,13 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         do = DataObs(self.creds)
 
         meta = do.discovery(self.test_read_table,
-                                  keywords=('poverty', ),
-                                  time=('2010 - 2014', ))
+                            keywords=('poverty', ),
+                            time=('2010 - 2014', ))
         data = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(Dataset(self.test_data_table).download(limit=1, decode_geom=True).columns)
+        origcols = set(
+            Dataset(self.test_data_table, credentials=self.con
+                    ).download(limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
@@ -278,32 +300,33 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(ValueError, msg='too many metadata measures'):
             # returns ~180 measures
             meta = do.discovery(region='united states',
-                                      keywords='education')
+                                keywords='education')
             do.augment(self.test_read_table, meta)
 
     def test_augment_with_persist_as(self):
         """DataObs.augment with persist_as"""
-        con = Context(base_url=self.baseurl,
-                      api_key=self.apikey)
+        do = DataObs(self.creds)
 
         meta = do.discovery(self.test_read_table,
-                                  keywords=('poverty', ),
-                                  time=('2010 - 2014', ))
-        data = con.data(self.test_data_table, meta)
+                            keywords=('poverty', ),
+                            time=('2010 - 2014', ))
+        data = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
-        origcols = set(con.read(self.test_data_table, limit=1, decode_geom=True).columns)
+        origcols = set(
+            Dataset(self.test_data_table, credentials=self.con
+                    ).download(limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
 
         meta = [{'numer_id': 'us.census.acs.B19013001',
                  'geom_id': 'us.census.tiger.block_group',
                  'numer_timespan': '2011 - 2015'}, ]
-        data = con.data(self.test_data_table, meta, persist_as=self.test_write_table)
+        data = do.augment(self.test_data_table, meta, persist_as=self.test_write_table)
         self.assertSetEqual(set(('median_income_2011_2015', )),
                             set(data.columns) - origcols - {'the_geom', 'cartodb_id'})
         self.assertEqual(data.index.name, 'cartodb_id')
         self.assertEqual(data.index.dtype, 'int64')
 
-        df = con.read(self.test_write_table, decode_geom=False)
+        df = Dataset(self.test_write_table, credentials=self.con).download(decode_geom=False)
 
         self.assertEqual(df.index.name, 'cartodb_id')
         self.assertEqual(data.index.dtype, 'int64')
