@@ -207,8 +207,7 @@ class Dataset(object):
                 d.update_dataset_info(privacy='link')
 
         """
-        return self._strategy.update_dataset_info(privacy, name, table_name
-        )
+        return self._strategy.update_dataset_info(privacy, name, table_name)
 
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account
