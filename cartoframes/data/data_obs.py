@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 
+import json
 import collections
+import pandas as pd
+from warnings import warn
 
 from carto.exceptions import CartoException
 
@@ -12,14 +15,17 @@ from .. import utils
 
 class DataObs(object):
     """
+    Data Observatory v1 class. `Data Observatory documentation
+    <https://carto.com/developers/data-observatory/>`__.
+
+    This class provides the following methods to interact with Data Observatory:
+      - boundary: returns a DataFrame with the world boundaries found
+      - discovery: returns a DataFrame with the measures found
+      - augment: returns a DataFrame with the augmented data
     """
 
-    def __init__(self, credentials, session=None):
+    def __init__(self, credentials):
         self._creds = credentials
-    
-    def augment(self, dataset, metadata):
-        """Augment the dataset with the provided metadata."""
-        pass
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -79,9 +85,9 @@ class DataObs(object):
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
                 # get median income data and original table as new DataFrame
-                idaho_falls_income_df = con.data(
+                idaho_falls_income_df = do.augment(
                     'idaho_falls_tracts',
-                    median_income_meta,
+                    median_income_meta_df,
                     how='geom_refs')
                 # overwrite existing table with newly-enriched DataFrame
                 ds = Dataset(idaho_falls_income_df)
@@ -449,10 +455,183 @@ class DataObs(object):
         self._debug_print(query=query)
         return self._fetch(query, decode_geom=True)
 
-    def _fetch(self, query, decode_geom=False):
+    def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
+        """Get an augmented CARTO dataset with `Data Observatory
+        <https://carto.com/data-observatory>`__ measures. Use
+        `DataObs.discovery
+        <#DataObs.discovery>`__ to search for available
+        measures, or see the full `Data Observatory catalog
+        <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
+        persist the data as a new table.
+
+        Example:
+            Get a DataFrame with Data Observatory measures based on the
+            geometries in a CARTO table.
+
+            .. code::
+
+                creds = Credentials('user name', 'api key')
+                do = DataObs(creds)
+                median_income = do.discovery(
+                    'transaction_events',
+                    egex='.*median income.*',
+                    time='2011 - 2015')
+                df = do.augment('transaction_events', median_income)
+
+            Pass in cherry-picked measures from the Data Observatory catalog.
+            The rest of the metadata will be filled in, but it's important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            .. code::
+
+                median_income = [{'numer_id': 'us.census.acs.B19013001',
+                                  'geom_id': 'us.census.tiger.block_group',
+                                  'numer_timespan': '2011 - 2015'}]
+                df = do.augment('transaction_events', median_income)
+
+        Args:
+            table_name (str): Name of table on CARTO account that Data
+                Observatory measures are to be added to.
+            metadata (pandas.DataFrame): List of all measures to add to
+                `table_name`. See :py:meth:`DataObs.discovery
+                <cartoframes.data.DataObs.discovery>` outputs
+                for a full list of metadata columns.
+            persist_as (str, optional): Output the results of augmenting
+                `table_name` to `persist_as` as a persistent table on CARTO.
+                Defaults to ``None``, which will not create a table.
+            how (str, optional): **Not fully implemented**. Column name for
+                identifying the geometry from which to fetch the data. Defaults
+                to `the_geom`, which results in measures that are spatially
+                interpolated (e.g., a neighborhood boundary's population will
+                be calculated from underlying census tracts). Specifying a
+                column that has the geometry identifier (for example, GEOID for
+                US Census boundaries), results in measures directly from the
+                Census for that GEOID but normalized how it is specified in the
+                metadata.
+
+        Returns:
+            pandas.DataFrame: A DataFrame representation of `table_name` which
+            has new columns for each measure in `metadata`.
+
+        Raises:
+            NameError: If the columns in `table_name` are in the
+              ``suggested_name`` column of `metadata`.
+            ValueError: If metadata object is invalid or empty, or if the
+              number of requested measures exceeds 50.
+            CartoException: If user account consumes all of Data Observatory
+              quota
+        """
+        # if how != 'the_geom':
+        #   raise NotImplementedError('Data gathering currently only works if '
+        #                             'a geometry is present')
+        if isinstance(metadata, pd.DataFrame):
+            _meta = metadata.copy().reset_index()
+        elif isinstance(metadata, collections.Iterable):
+            query = utils.minify_sql((
+                'WITH envelope AS (',
+                '  SELECT',
+                '    ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,',
+                '    count(*)::int AS cnt',
+                '  FROM {table_name}',
+                ')',
+                'SELECT *',
+                '  FROM json_to_recordset(',
+                '      (SELECT OBS_GetMeta(',
+                '          envelope.env,',
+                '          (\'{meta}\')::json,',
+                '          10, 1, envelope.cnt',
+                '      ) AS meta',
+                '  FROM envelope',
+                '  GROUP BY env, cnt)) as data(',
+                '      denom_aggregate text, denom_colname text,',
+                '      denom_description text, denom_geomref_colname text,',
+                '      denom_id text, denom_name text, denom_reltype text,',
+                '      denom_t_description text, denom_tablename text,',
+                '      denom_type text, geom_colname text,',
+                '      geom_description text,geom_geomref_colname text,',
+                '      geom_id text, geom_name text, geom_t_description text,',
+                '      geom_tablename text, geom_timespan text,',
+                '      geom_type text, id numeric, max_score_rank text,',
+                '      max_timespan_rank text, normalization text, num_geoms',
+                '      numeric,numer_aggregate text, numer_colname text,',
+                '      numer_description text, numer_geomref_colname text,',
+                '      numer_id text, numer_name text, numer_t_description',
+                '      text, numer_tablename text, numer_timespan text,',
+                '      numer_type text, score numeric, score_rank numeric,',
+                '      score_rownum numeric, suggested_name text,',
+                '      target_area text, target_geoms text, timespan_rank',
+                '      numeric, timespan_rownum numeric)',
+            )).format(table_name=table_name,
+                      meta=json.dumps(metadata).replace('\'', '\'\''))
+            _meta = self.fetch(query)
+
+        if _meta.shape[0] == 0:
+            raise ValueError('There are no valid metadata entries. Check '
+                             'inputs.')
+        elif _meta.shape[0] > 50:
+            raise ValueError('The number of metadata entries exceeds 50. Tip: '
+                             'If `metadata` is a pandas.DataFrame, iterate '
+                             'over this object using `metadata.groupby`. If '
+                             'it is a list, iterate over chunks of it. Then '
+                             'combine resulting DataFrames using '
+                             '`pandas.concat`')
+
+        # get column names except the_geom_webmercator
+        dataset = Dataset(table_name, credentials=self)
+        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
+
+        names = {}
+        for suggested in _meta['suggested_name']:
+            if suggested in table_columns:
+                names[suggested] = utils.unique_colname(suggested, table_columns)
+                warn(
+                    '{s0} was augmented as {s1} because of name '
+                    'collision'.format(s0=suggested, s1=names[suggested])
+                )
+            else:
+                names[suggested] = suggested
+
+        # drop description columns to lighten the query
+        meta_columns = _meta.columns.values
+        drop_columns = []
+        for meta_column in meta_columns:
+            if meta_column.endswith('_description'):
+                drop_columns.append(meta_column)
+
+        if len(drop_columns) > 0:
+            _meta.drop(drop_columns, axis=1, inplace=True)
+
+        cols = ', '.join(
+            '(data->{n}->>\'value\')::{pgtype} AS {col}'.format(
+                n=row[0],
+                pgtype=row[1]['numer_type'],
+                col=names[row[1]['suggested_name']])
+            for row in _meta.iterrows())
+        query = utils.minify_sql((
+            'SELECT {table_cols}, {cols}',
+            '  FROM OBS_GetData(',
+            '       (SELECT array_agg({how})',
+            '        FROM "{tablename}"),',
+            '       (SELECT \'{meta}\'::json)) as m,',
+            '       {tablename} as t',
+            ' WHERE t."{rowid}" = m.id',)).format(
+                how=('(the_geom, cartodb_id)::geomval'
+                     if how == 'the_geom' else how),
+                tablename=table_name,
+                rowid='cartodb_id' if how == 'the_geom' else how,
+                cols=cols,
+                table_cols=','.join('t.{}'.format(c) for c in table_columns),
+                meta=_meta.to_json(orient='records').replace('\'', '\'\''))
+
+        return self._fetch(query, decode_geom=False, table_name=persist_as)
+
+    def _fetch(self, query, decode_geom=False, table_name=None):
         # TODO: the current implementation of "fetch" is using the Dataset class.
         # Maybe we could refactor to use copyto (?)
         from ..auth import Context
         old_context = Context(self._creds)
-        dataset = Dataset.from_query(query, context=old_context)
+        dataset = Dataset(query, credentials=old_context)
+        if table_name:
+            dataset.upload(table_name=table_name)
         return dataset.download(decode_geom=decode_geom)
