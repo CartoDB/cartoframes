@@ -27,10 +27,10 @@ class DataObs(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is especially useful for getting
-        boundaries for a region and, with :py:meth:`Context.data
-        <cartoframes.auth.Context.data>` and
-        :py:meth:`Context.data_discovery
-        <cartoframes.auth.Context.data_discovery>`, getting tables of
+        boundaries for a region and, with :py:meth:`DataObs.augment
+        <cartoframes.data.DataObs.augment>` and
+        :py:meth:`DataObs.discovery
+        <cartoframes.data.DataObs.discovery>`, getting tables of
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
@@ -43,19 +43,20 @@ class DataObs(object):
 
             .. code:: python
 
-                import cartoframes
-                con = cartoframes.auth.Context('base url', 'api key')
-                au_boundaries = con.data_boundaries(region='Australia')
+                from cartoframes.auth import Credentials
+                from cartoframes.data import DataObs
+                creds = Credentials('user name', 'api key')
+                do = DataObs(creds)
+                au_boundaries = do.boundaries(region='Australia')
                 au_boundaries[['geom_name', 'geom_id']]
 
             Get the boundaries for Australian Postal Areas and map them.
 
             .. code:: python
 
-                from cartoframes import Layer
-                au_postal_areas = con.data_boundaries(boundary='au.geo.POA')
-                con.write(au_postal_areas, 'au_postal_areas')
-                con.map(Layer('au_postal_areas'))
+                from cartoframes.viz import Layer
+                au_postal_areas = do.boundaries(boundary='au.geo.POA')
+                Layer(au_postal_areas)
 
             Get census tracts around Idaho Falls, Idaho, USA, and add median
             income from the US census. Without limiting the metadata, we get
@@ -63,35 +64,36 @@ class DataObs(object):
 
             .. code:: python
 
-                con = cartoframes.auth.Context('base url', 'api key')
+                set_default_credentials('user name', 'api key')
+                do = DataObs()
                 # will return DataFrame with columns `the_geom` and `geom_ref`
-                tracts = con.data_boundaries(
+                tracts_df = do.boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
                 # write geometries to a CARTO table
-                con.write(tracts, 'idaho_falls_tracts')
+                ds = Dataset(tracts_df)
+                ds.upload('idaho_falls_tracts')
                 # gather metadata needed to look up median income
-                median_income_meta = con.data_discovery(
+                median_income_meta_df = do.discovery(
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
-                # get median income data and original table as new dataframe
-                idaho_falls_income = con.data(
+                # get median income data and original table as new DataFrame
+                idaho_falls_income_df = con.data(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
-                # overwrite existing table with newly-enriched dataframe
-                con.write(idaho_falls_income,
-                         'idaho_falls_tracts',
-                         overwrite=True)
+                # overwrite existing table with newly-enriched DataFrame
+                ds = Dataset(idaho_falls_income_df)
+                ds.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
             boundary (str, optional): Boundary identifier for the boundaries
               that are of interest. For example, US census tracts have a
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running :py:meth:`Context.data_boundaries
-              <cartoframes.auth.Context.data_boundaries>`
+              running :py:meth:`DataObs.boundaries
+              <cartoframes.data.DataObs.boundaries>`
               without any arguments, or by looking in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
@@ -185,7 +187,7 @@ class DataObs(object):
         return self._fetch(query, decode_geom=decode_geom)
 
     def discovery(self, region, keywords=None, regex=None, time=None,
-                       boundaries=None, include_quantiles=False):
+                  boundaries=None, include_quantiles=False):
         """Discover Data Observatory measures. This method returns the full
         Data Observatory metadata model for each measure or measures that
         match the conditions from the inputs. The full metadata in each row
@@ -219,11 +221,11 @@ class DataObs(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        :py:meth:`Context.data <cartoframes.auth.Context.data>`.
+        :py:meth:`DataObs.augment <cartoframes.data.DataObs.augment>`.
         For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `Context.data <cartoframes.auth.Context.data>`
+        columns as `DataObs.augment <cartoframes.data.DataObs.augment>`
         generally needs the full metadata.
 
         .. note::
@@ -243,10 +245,10 @@ class DataObs(object):
 
             .. code::
 
-                meta = con.data_discovery('European Union',
-                                         keywords='freight',
-                                         time='2010')
-                print(meta['numer_name'].values)
+                meta_df = do.discovery('European Union',
+                                       keywords='freight',
+                                       time='2010')
+                print(meta_df['numer_name'].values)
 
         Arguments:
             region (str or list of float): Information about the region of
