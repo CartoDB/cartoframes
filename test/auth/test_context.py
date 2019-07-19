@@ -21,18 +21,17 @@ from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
-import IPython
 
 import cartoframes
 from cartoframes.data import Dataset
 from cartoframes.utils import dict_items
-from cartoframes.columns import Column, normalize_name
+from cartoframes.columns import normalize_name
 from cartoframes.auth import Context, Credentials
 
-from ..utils import _UserUrlLoader
+from utils import _UserUrlLoader
 
 WILL_SKIP = False
-warnings.filterwarnings("ignore")
+warnings.filterwarnings('ignore')
 
 
 class TestContext(unittest.TestCase, _UserUrlLoader):
@@ -139,12 +138,6 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
                     con.sql_client.send(sql_drop.format(table))
                 except CartoException:
                     warnings.warn('Error deleting tables')
-
-        # TODO: remove the named map templates
-
-    def add_map_template(self):
-        """Add generated named map templates to class"""
-        pass
 
     @unittest.skipIf(WILL_SKIP, 'Skipping test, no carto credentials found')
     def test_Context(self):
@@ -403,13 +396,6 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
                 CartoException,
                 msg='''The table `{}` doesn't exist'''.format(table_name)):
             con.delete(table_name)
-
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
-    def test_cartoframes_sync(self):
-        """Context.sync"""
-        con = Context(base_url=self.baseurl,
-                      api_key=self.apikey)
-        self.assertIsNone(con.sync(pd.DataFrame(), 'acadia'))
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping')
     def test_get_bounds(self):
