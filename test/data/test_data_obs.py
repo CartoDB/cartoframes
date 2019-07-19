@@ -17,24 +17,7 @@ from cartoframes.auth import Credentials, Context
 from cartoframes.data import Dataset, DataObs
 from cartoframes.columns import normalize_name
 
-# from utils import _UserUrlLoader
-
-
-class _UserUrlLoader:
-    def user_url(self):
-        user_url = None
-        if (os.environ.get('USERURL') is None):
-            try:
-                creds = json.loads(open('test/secret.json').read())
-                user_url = creds['USERURL']
-            except:  # noqa: E722
-                warnings.warn('secret.json not found')
-
-        if user_url in (None, ''):
-            user_url = 'https://{username}.carto.com/'
-
-        return user_url
-
+from utils import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 
@@ -244,7 +227,7 @@ class TestDataObs(unittest.TestCase, _UserUrlLoader):
         dd = do.discovery('Australia',
                           regex='.*Torres Strait Islander.*')
         for nid in dd['numer_id'].values:
-            self.assertRegexpMatches(nid, '^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
+            self.assertRegexpMatches(nid, r'^au\.data\.B01_Indig_[A-Za-z_]+Torres_St[A-Za-z_]+[FMP]$')
 
         with self.assertRaises(CartoException):
             do.discovery('non_existent_table_abcdefg')

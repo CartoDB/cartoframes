@@ -3,16 +3,11 @@ This class is the workhorse of CARTOframes by providing all functionality relate
 data access to CARTO, map creation, and Data Observatory functionality.
 """
 from __future__ import absolute_import
-import json
-import os
-import random
-import sys
-import collections
-from warnings import warn
 
+import os
+import json
 import requests
-from IPython.display import HTML, Image
-import pandas as pd
+
 from tqdm import tqdm
 from appdirs import user_cache_dir
 
@@ -24,17 +19,9 @@ from pyrestcli.exceptions import NotFoundException
 
 from .credentials import Credentials
 from .. import utils
-from ..layer import BaseMap, AbstractLayer
-from ..maps import (non_basemap_layers, get_map_name,
-                    get_map_template, top_basemap_layer_url)
 from ..__version__ import __version__
 from ..data import Dataset
 
-if sys.version_info >= (3, 0):
-    from urllib.parse import urlparse, urlencode
-else:
-    from urlparse import urlparse
-    from urllib import urlencode
 try:
     import matplotlib.image as mpi
     import matplotlib.pyplot as plt
@@ -482,25 +469,6 @@ class Context(object):
                                          cols=', '.join(['`{}`'.format(c)
                                                          for c in style_cols]),
                                          err=err))
-
-    def _send_map_template(self, layers, has_zoom):
-        map_name = get_map_name(layers, has_zoom=has_zoom)
-        if map_name not in self._map_templates:
-            resp = self._auth_send(
-                'api/v1/map/named', 'POST',
-                headers={'Content-Type': 'application/json'},
-                data=get_map_template(layers, has_zoom=has_zoom))
-            if 'errors' in resp:
-                resp = self._auth_send(
-                    'api/v1/map/named/{}'.format(map_name),
-                    'PUT',
-                    headers={'Content-Type': 'application/json'},
-                    data=get_map_template(layers, has_zoom=has_zoom))
-                if 'errors' in resp:
-                    raise CartoException(resp)
-
-            self._map_templates[map_name] = True
-        return map_name
 
     def _get_iframe_srcdoc(self, config, bounds, options, map_options,
                            top_layer_url=None):

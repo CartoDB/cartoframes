@@ -10,7 +10,7 @@ from .registry.strategies_registry import StrategiesRegistry
 __all__ = [
     'Dataset',
     'DatasetInfo',
-    'DataObs'
+    'DataObs',
     'is_sql_query',
     'is_geojson_file',
     'StrategiesRegistry'

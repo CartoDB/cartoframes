@@ -22,7 +22,6 @@ from carto.auth import APIKeyAuthClient
 from carto.sql import SQLClient
 import pandas as pd
 
-import cartoframes
 from cartoframes.data import Dataset
 from cartoframes.utils import dict_items
 from cartoframes.columns import normalize_name
