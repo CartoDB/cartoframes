@@ -7,7 +7,7 @@ class Themes(object):  # pylint: disable=too-few-public-methods
         light (str)
 
     Example:
-        Create an embedded map using CARTO's Positron style with no data layers
+        Create an embedded map using CARTO's Positron style with the dark theme
 
         .. code::
 
