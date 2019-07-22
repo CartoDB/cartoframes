@@ -9,7 +9,7 @@ from warnings import warn
 from carto.exceptions import CartoException
 
 from ..data.dataset import Dataset
-from ..data.utils import get_countrytag
+from ..data.utils import get_query_geom_type, get_countrytag
 
 from .. import utils
 from ..context import create_context
@@ -21,8 +21,9 @@ class DataObsClient(object):
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-      - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the world boundaries found.
-      - discovery: returns a DataFrame with the measures found.
+      - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with
+        the geographic boundaries (geometries) or their metadata.
+      - discovery: returns a pandas.DataFrame with the measures found.
       - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
     """
 
@@ -38,10 +39,10 @@ class DataObsClient(object):
         Find all boundaries available for the world or a `region`. If
         `boundary` is specified, get all available boundary polygons for the
         region specified (if any). This method is especially useful for getting
-        boundaries for a region and, with :py:meth:`DataObs.augment
-        <cartoframes.data.DataObs.augment>` and
-        :py:meth:`DataObs.discovery
-        <cartoframes.data.DataObs.discovery>`, getting tables of
+        boundaries for a region and, with :py:meth:`DataObsClient.augment
+        <cartoframes.client.DataObsClient.augment>` and
+        :py:meth:`DataObsClient.discovery
+        <cartoframes.client.DataObsClient.discovery>`, getting tables of
         geometries and the corresponding raw measures. For example, if you want
         to analyze how median income has changed in a region (see examples
         section for more).
@@ -55,9 +56,9 @@ class DataObsClient(object):
             .. code:: python
 
                 from cartoframes.auth import Credentials
-                from cartoframes.data import DataObs
+                from cartoframes.client import DataObsClient
                 creds = Credentials('user name', 'api key')
-                do = DataObs(creds)
+                do = DataObsClient(creds)
                 au_boundaries = do.boundaries(region='Australia')
                 au_boundaries.dataframe[['geom_name', 'geom_id']]
 
@@ -75,8 +76,10 @@ class DataObsClient(object):
 
             .. code:: python
 
+                from cartoframes.auth import set_default_credentials
+                from cartoframes.client import DataObsClient
                 set_default_credentials('user name', 'api key')
-                do = DataObs()
+                do = DataObsClient()
                 # will return Dataset with columns `the_geom` and `geom_ref`
                 tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
@@ -101,8 +104,8 @@ class DataObsClient(object):
               that are of interest. For example, US census tracts have a
               boundary ID of ``us.census.tiger.census_tract``, and Brazilian
               Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running :py:meth:`DataObs.boundaries
-              <cartoframes.data.DataObs.boundaries>`
+              running :py:meth:`DataObsClient.boundaries
+              <cartoframes.client.DataObsClient.boundaries>`
               without any arguments, or by looking in the `Data Observatory
               catalog <http://cartodb.github.io/bigmetadata/>`__.
             region (str, optional): Region where boundary information or,
@@ -204,7 +207,7 @@ class DataObsClient(object):
         uniquely defines a measure based on the timespan, geographic
         resolution, and normalization (if any). Read more about the metadata
         response in `Data Observatory
-        <https://carto.com/docs/carto-engine/data/measures-functions/#obs_getmetaextent-geometry-metadata-json-max_timespan_rank-max_score_rank-target_geoms>`__
+        <https://carto.com/developers/data-observatory/reference/#discovery-functions>`__
         documentation.
 
         Internally, this method finds all measures in `region` that match the
@@ -231,11 +234,11 @@ class DataObsClient(object):
 
         The metadata returned from this method can then be used to create raw
         tables or for augmenting an existing table from these measures using
-        :py:meth:`DataObs.augment <cartoframes.data.DataObs.augment>`.
+        :py:meth:`DataObsClient.augment <cartoframes.client.DataObsClient.augment>`.
         For the full Data Observatory catalog, visit
         https://cartodb.github.io/bigmetadata/. When working with the metadata
         DataFrame returned from this method, be careful to only remove rows not
-        columns as `DataObs.augment <cartoframes.data.DataObs.augment>`
+        columns as `DataObsClient.augment <cartoframes.client.DataObsClient.augment>`
         generally needs the full metadata.
 
         .. note::
@@ -255,10 +258,10 @@ class DataObsClient(object):
 
             .. code::
 
-                meta_df = do.discovery('European Union',
+                freight_meta = do.discovery('European Union',
                                        keywords='freight',
                                        time='2010')
-                print(meta_df['numer_name'].values)
+                freight_meta['numer_name'].head()
 
         Arguments:
             region (str or list of float): Information about the region of
@@ -462,8 +465,8 @@ class DataObsClient(object):
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
         """Get an augmented CARTO dataset with `Data Observatory
         <https://carto.com/data-observatory>`__ measures. Use
-        `DataObs.discovery
-        <#DataObs.discovery>`__ to search for available
+        `DataObsClient.discovery
+        <#DataObsClient.discovery>`__ to search for available
         measures, or see the full `Data Observatory catalog
         <https://cartodb.github.io/bigmetadata/index.html>`__. Optionally
         persist the data as a new table.
@@ -474,11 +477,13 @@ class DataObsClient(object):
 
             .. code::
 
+                from cartoframes.auth import Credentials
+                from cartoframes.data import DataObsClient
                 creds = Credentials('user name', 'api key')
-                do = DataObs(creds)
+                do = DataObsClient(creds)
                 median_income = do.discovery(
                     'transaction_events',
-                    egex='.*median income.*',
+                    regex='.*median income.*',
                     time='2011 - 2015')
                 ds = do.augment('transaction_events', median_income)
 
@@ -498,13 +503,13 @@ class DataObsClient(object):
             table_name (str): Name of table on CARTO account that Data
                 Observatory measures are to be added to.
             metadata (pandas.DataFrame): List of all measures to add to
-                `table_name`. See :py:meth:`DataObs.discovery
-                <cartoframes.data.DataObs.discovery>` outputs
+                `table_name`. See :py:meth:`DataObsClient.discovery
+                <cartoframes.client.DataObsClient.discovery>` outputs
                 for a full list of metadata columns.
             persist_as (str, optional): Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
                 Defaults to ``None``, which will not create a table.
-            how (str, optional): **Not fully implemented**. Column name for
+            how (str, optional): Column name for
                 identifying the geometry from which to fetch the data. Defaults
                 to `the_geom`, which results in measures that are spatially
                 interpolated (e.g., a neighborhood boundary's population will
@@ -527,9 +532,6 @@ class DataObsClient(object):
             CartoException: If user account consumes all of Data Observatory
               quota
         """
-        # if how != 'the_geom':
-        #   raise NotImplementedError('Data gathering currently only works if '
-        #                             'a geometry is present')
         if isinstance(metadata, pd.DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):
@@ -656,37 +658,7 @@ class DataObsClient(object):
             print('{key}: {value}'.format(key=key,
                                           value=str_value))
 
-    def _geom_type(self, source):
+    def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""
-        DEFAULT_SQL_ARGS = dict(do_post=False)
-        query = 'SELECT * FROM "{table}"'.format(table=source)
-        resp = self._context.execute_query(
-            utils.minify_sql((
-                'SELECT',
-                '    CASE WHEN ST_GeometryType(the_geom)',
-                '               in (\'ST_Point\', \'ST_MultiPoint\')',
-                '         THEN \'point\'',
-                '         WHEN ST_GeometryType(the_geom)',
-                '              in (\'ST_LineString\', \'ST_MultiLineString\')',
-                '         THEN \'line\'',
-                '         WHEN ST_GeometryType(the_geom)',
-                '              in (\'ST_Polygon\', \'ST_MultiPolygon\')',
-                '         THEN \'polygon\'',
-                '         ELSE null END AS geom_type,',
-                '    count(*) as cnt',
-                'FROM ({query}) AS _wrap',
-                'WHERE the_geom IS NOT NULL',
-                'GROUP BY 1',
-                'ORDER BY 2 DESC',
-            )).format(query=query),
-            **DEFAULT_SQL_ARGS)
-        if resp['total_rows'] > 1:
-            warn('There are multiple geometry types in {query}: '
-                 '{geoms}. Styling by `{common_geom}`, the most common'.format(
-                     query=query,
-                     geoms=','.join(g['geom_type'] for g in resp['rows']),
-                     common_geom=resp['rows'][0]['geom_type']))
-        elif resp['total_rows'] == 0:
-            raise ValueError('No geometry for layer. Check all layer tables '
-                             'and queries to ensure there are geometries.')
-        return resp['rows'][0]['geom_type']
+        query = 'SELECT * FROM "{table}"'.format(table=table)
+        return get_query_geom_type(self._context, query)

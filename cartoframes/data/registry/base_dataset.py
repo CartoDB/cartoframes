@@ -4,7 +4,7 @@ import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
-from ..utils import decode_geometry, convert_bool, compute_query \
+from ..utils import decode_geometry, convert_bool, compute_query, \
     get_context_with_public_creds, get_query_geom_type, ENC_WKB_BHEX
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
