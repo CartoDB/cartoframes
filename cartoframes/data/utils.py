@@ -289,9 +289,22 @@ def is_table_name(data):
     return isinstance(data, str) and normalize_name(data) == data
 
 
-def _save_index_as_column(df):
+def save_index_as_column(df):
     index_name = df.index.name
     if index_name is not None:
         if index_name not in df.columns:
             df.reset_index(inplace=True)
             df.set_index(index_name, drop=False, inplace=True)
+
+
+def get_query_geom_type(context, query):
+    """Fetch geom type of a remote table"""
+    response = context.execute_query('''
+        SELECT distinct ST_GeometryType(the_geom) AS geom_type
+        FROM ({}) q
+        LIMIT 5
+    '''.format(query), do_post=False)
+    if response and response.get('rows') and len(response.get('rows')) > 0:
+        st_geom_type = response.get('rows')[0].get('geom_type')
+        if st_geom_type:
+            return map_geom_type(st_geom_type[3:])

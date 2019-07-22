@@ -4,8 +4,8 @@ import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
-from ..utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, ENC_WKB_BHEX, \
-    map_geom_type
+from ..utils import decode_geometry, convert_bool, compute_query, \
+    get_context_with_public_creds, get_query_geom_type, ENC_WKB_BHEX
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
@@ -172,16 +172,7 @@ class BaseDataset():
         return Column.from_sql_api_fields(table_info['fields'])
 
     def _get_geom_type(self, query=None):
-        """Fetch geom type of a remote table"""
-        response = self._context.execute_query('''
-            SELECT distinct ST_GeometryType(the_geom) AS geom_type
-            FROM ({}) q
-            LIMIT 5
-        '''.format(query or self.get_query()))
-        if response and response.get('rows') and len(response.get('rows')) > 0:
-            st_geom_type = response.get('rows')[0].get('geom_type')
-            if st_geom_type:
-                return map_geom_type(st_geom_type[3:])
+        return get_query_geom_type(self._context, query or self.get_query())
 
     def _get_schema(self):
         if self._credentials:

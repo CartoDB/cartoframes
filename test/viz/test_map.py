@@ -5,10 +5,10 @@ from carto.exceptions import CartoException
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.data import StrategiesRegistry
 
-from mocks.map_mock import MapMock
-from mocks.context_mock import ContextMock
-from mocks.dataset_mock import DatasetMock
-from mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from ..mocks.map_mock import MapMock
+from ..mocks.context_mock import ContextMock
+from ..mocks.dataset_mock import DatasetMock
+from ..mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 from .utils import build_geojson
 

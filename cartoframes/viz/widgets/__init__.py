@@ -21,12 +21,12 @@ def _inspect(widget):
 
 
 __all__ = [
-  'Widget',
-  'WidgetList',
-  'animation_widget',
-  'category_widget',
-  'default_widget',
-  'formula_widget',
-  'histogram_widget',
-  'time_series_widget',
+    'Widget',
+    'WidgetList',
+    'animation_widget',
+    'category_widget',
+    'default_widget',
+    'formula_widget',
+    'histogram_widget',
+    'time_series_widget',
 ]
