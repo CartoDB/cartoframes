@@ -119,6 +119,9 @@ class BaseDataset():
         except CartoException:
             return False
 
+    def get_table_names(self):
+        return [self._table_name]
+
     def _create_context(self):
         if self._credentials:
             return context.create_context(self._credentials.creds)

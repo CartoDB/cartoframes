@@ -58,6 +58,21 @@ class QueryDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type(self._query)
 
+    def get_table_names(self):
+        query = "SELECT CDB_QueryTablesText('{}') as tables".format(self._query)
+        result = self._context.execute_query(query)
+        tables = []
+        if result['total_rows'] > 0:
+            # Dataset_info only works with tables without schema
+            for t in result['rows'][0]['tables']:
+                if '.' in t:
+                    _, table_name = t.split('.')
+                    tables.append(table_name)
+                else:
+                    tables.append(t)
+
+        return tables
+
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=self._drop_table_query(),
@@ -73,18 +88,3 @@ class QueryDataset(BaseDataset):
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
-
-    def _get_tables_used_by_query(self):
-        query = "SELECT CDB_QueryTablesText('{}') as tables".format(self._query)
-        result = self._context.execute_query(query)
-        tables = []
-        if result['total_rows'] > 0:
-            # Dataset_info only works with tables without schema
-            for t in result['rows'][0]['tables']:
-                if '.' in t:
-                    _, table_name = t.split('.')
-                    tables.append(table_name)
-                else:
-                    tables.append(t)
-
-        return tables

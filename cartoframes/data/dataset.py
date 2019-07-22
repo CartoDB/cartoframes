@@ -352,6 +352,15 @@ class Dataset(object):
         """Get column names and types from a table"""
         return self._strategy.get_table_column_names(exclude)
 
+    def get_table_names(self):
+        """Get table names used by Dataset instance"""
+        if not self._is_saved_in_carto:
+            raise CartoException('Your data is not synchronized with CARTO.'
+                                 'First of all, you should call upload method '
+                                 'to save your data in CARTO.')
+
+        return self._strategy.get_table_names()
+
 
 def _get_default_credentials():
     from ..auth import _default_context
