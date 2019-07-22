@@ -146,17 +146,13 @@ class Layer(object):
         popup_variables = self.popup.get_variables()
         widget_variables = self.widgets.get_variables()
 
+        geom_type = self.source.get_geom_type()
         variables = merge_dicts(popup_variables, widget_variables)
 
-        self.viz = self.style.compute_viz(
-            self.source.geom_type,
-            variables
-        )
+        self.viz = self.style.compute_viz(geom_type, variables)
 
         self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(
-            self.source.geom_type
-        )
+        self.legend_info = self.legend.get_info(geom_type)
         self.widgets_info = self.widgets.get_widgets_info()
 
     def _repr_html_(self):

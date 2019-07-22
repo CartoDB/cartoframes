@@ -138,3 +138,7 @@ def snake_to_camel(snake_str):
 
 def in_snake_case(str):
     return str.find('_') != -1
+
+
+def is_url(text):
+    return not re.match(r'^https?://.*$', text)
