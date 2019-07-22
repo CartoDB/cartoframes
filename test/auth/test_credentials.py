@@ -1,8 +1,6 @@
 """Unit tests for cartoframes.keys"""
 import unittest
-import json
 import os
-import time
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
 
