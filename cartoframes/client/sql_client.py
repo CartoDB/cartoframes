@@ -11,11 +11,7 @@ class SQLClient(object):
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
           A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `username`/`api_key` combination.
-        session (requests.Session, optional): requests session. See `requests
-          documentation
-          <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
-          for more information.
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
     Example:
 
@@ -24,8 +20,8 @@ class SQLClient(object):
             from cartoframes.auth import Credentials
             from cartoframes.client import SQLClient
 
-            creds = Credentials(username='<USER NAME>', api_key='<API KEY>')
-            sql = SQLClient(creds)
+            credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
+            sql = SQLClient(credentials)
 
             sql.query('SELECT * FROM table_name')
             sql.execute('DROP TABLE table_name')
@@ -37,7 +33,7 @@ class SQLClient(object):
 
     def __init__(self, credentials, session=None):
         self._is_org_user = None
-        self._creds = credentials
+        self._credentials = credentials
         self._context = self._create_context()
 
     def query(self, query, verbose=False):
@@ -127,7 +123,7 @@ class SQLClient(object):
         """
         is_org_user = self._check_org_user()
         columns = ','.join(' '.join(x) for x in columns)
-        username = self._creds.username if is_org_user else 'public'
+        username = self._credentials.username if is_org_user else 'public'
         query = '''
             BEGIN;
             {drop};
@@ -168,7 +164,7 @@ class SQLClient(object):
         return self.execute(query)
 
     def _create_context(self):
-        return context.create_context(self._creds)
+        return context.create_context(self._credentials)
 
     def _check_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
