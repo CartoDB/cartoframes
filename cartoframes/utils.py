@@ -160,3 +160,9 @@ def debug_print(verbose=0, **kwargs):
         if verbose < 2 and len(str_value) > 300:
             str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
         print('{key}: {value}'.format(key=key, value=str_value))
+
+def is_org_user(context):
+    """Report whether user is in a multiuser CARTO organization or not"""
+    query = 'SELECT unnest(current_schemas(\'f\'))'
+    res = context.execute_query(query, do_post=False)
+    return  res['rows'][0]['unnest'] != 'public'

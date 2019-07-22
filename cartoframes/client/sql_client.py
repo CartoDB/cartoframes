@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from .. import context
+from ..utils import is_org_user
 
 
 class SQLClient(object):
@@ -164,11 +165,8 @@ class SQLClient(object):
         return self.execute(query)
 
     def _check_org_user(self):
-        """Report whether user is in a multiuser CARTO organization or not"""
         if self._is_org_user is None:
-            query = 'SELECT unnest(current_schemas(\'f\'))'
-            res = self._context.execute_query(query, do_post=False)
-            self._is_org_user = res['rows'][0]['unnest'] != 'public'
+            self._is_org_user = is_org_user(self._context)
         return self._is_org_user
 
     def _get_column_type(self, table_name, column_name):

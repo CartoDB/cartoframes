@@ -4,8 +4,8 @@ import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
-from ..utils import decode_geometry, convert_bool, compute_query, \
-    get_context_with_public_creds, get_query_geom_type, debug_print, ENC_WKB_BHEX
+from ..utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, \
+    get_query_geom_type, debug_print, is_org_user, ENC_WKB_BHEX
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
@@ -19,6 +19,7 @@ class BaseDataset():
 
     def __init__(self, credentials=None):
         self._verbose = 0
+        self._is_org_user = False
         self._credentials = credentials
         self._context = self._create_context()
         self._table_name = None
@@ -56,7 +57,7 @@ class BaseDataset():
     def credentials(self, credentials):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._credentials = credentials
-        self._schema = credentials.get_default_schema()
+        self._schema = self._get_schema()
         self._context = self._create_context()
 
     @property
@@ -177,9 +178,15 @@ class BaseDataset():
 
     def _get_schema(self):
         if self._credentials:
-            return self._credentials.get_default_schema()
+            is_org_user = self._check_org_user()
+            return 'public' if not is_org_user else self._credentials.username
         else:
             return None
 
     def _get_dataset_info(self):
         return DatasetInfo(self._credentials, self._table_name)
+
+    def _check_org_user(self):
+        if self._is_org_user is None:
+            self._is_org_user = is_org_user(self._context)
+        return self._is_org_user
