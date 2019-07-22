@@ -18,27 +18,33 @@ except ImportError:
 
 
 class Layer(object):
-    """Layer
+    """Layer to display data on a map. This class can be used as one or more
+    layers in :py:class:`Map <cartoframes.viz.Map>` or on its own in a Jupyter
+    notebook to get a preview of a Layer.
 
     Args:
-        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`):
+        source (str, :py:class:`Dataset <cartoframes.data.Dataset>`, or pandas.DataFrame):
           The source data.
-        style (str, dict, :py:class:`Style <cartoframes.vis.Style>`, optional):
+        style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):
           The style of the visualization: `CARTO VL styling
-          <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`.
-        popup (dict, :py:class:`Popup <cartoframes.viz.Popup>`, optional):
+          <https://carto.com/developers/carto-vl/guides/style-with-expressions/>`__.
+        popup (dict or :py:class:`Popup <cartoframes.viz.Popup>`, optional):
           This option adds interactivity (click and hover) to a layer to show popups.
           The columns to be shown must be added in a list format for each event. It
           must be written using `CARTO VL expressions syntax
-          <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`.
-        legend (dict, :py:class:`Legend <cartoframes.viz.Legend>`, optional):
+          <https://carto.com/developers/carto-vl/reference/#cartoexpressions>`__.
+          See :py:class:`Popup <cartoframes.viz.Popup>` for more information.
+        legend (dict or :py:class:`Legend <cartoframes.viz.Legend>`, optional):
           The legend definition for a layer. It contains the information
-          to show a legend "type" (color-category, color-bins, color-continuous),
-          "prop" (color) and also text information: "title", "description" and "footer".
-        widgets (dict, :py:class `WidgetList <cartoframes.viz.WidgetList>`, optional):
+          to show a legend "type" (``color-category``, ``color-bins``,
+          ``color-continuous``), "prop" (color) and also text information:
+          "title", "description" and "footer". See :py:class:`Legend
+          <cartoframes.viz.Legend>` for more information.
+        widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
            Widget or list of widgets for a layer. It contains the information to display
-           different widget types on the top right of the map.
-        context (:py:class:`Context <cartoframes.Context>`):
+           different widget types on the top right of the map. See
+           :py:class:`WidgetList` for more information.
+        context (:py:class:`Context <cartoframes.auth.Context>`):
           A Context instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           this context is simply ignored. If not provided the context will be
@@ -46,18 +52,20 @@ class Layer(object):
 
     Example:
 
+        Create a layer with a custom popup, legend, and widget.
+
         .. code::
 
             from cartoframes.auth import set_default_context
             from cartoframes.viz import Layer
 
             set_default_context(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
+                base_url='https://cartovl.carto.com',
+                api_key='default_public'
             )
 
             Layer(
-                'SELECT * FROM populated_places WHERE adm0name = \'Spain\'',
+                "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
                 'color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))',
                 popup={
                     'hover': '$name',
@@ -69,29 +77,51 @@ class Layer(object):
                 },
                 widgets=[{
                     'type': 'formula',
-                    'title': 'Avg $pop_max'
+                    'title': 'Avg $pop_max',
                     'value': 'viewportAvg($pop_max)'
                 }]
             )
 
-        Setting the context.
+        Create a layer specifically tied to a :py:class:`Context
+        <cartoframes.auth.Context>` and display it on a map.
 
         .. code::
 
             from cartoframes.auth import Context
-            from cartoframes.viz import Layer
+            from cartoframes.viz import Layer, Map
 
             context = Context(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
+                base_url='https://cartovl.carto.com',
+                api_key='default_public'
             )
 
-            Layer(
+            pop_layer = Layer(
                 'populated_places',
-                'color: "red"',
+                'color: red',
                 context=context
             )
+            Map(pop_layer)
 
+        Preview a layer in a Jupyter notebook. Note: if in a Jupyter notebook,
+        it is not required to explicitly add a Layer to a :py:class:`Map
+        <cartoframes.viz.Map>` if only visualizing data as a single layer.
+
+        .. code::
+
+            from cartoframes.auth import set_default_context
+            from cartoframes.viz import Layer, Map
+
+            set_default_context('https://cartoframes.carto.com')
+
+            pop_layer = Layer(
+                'brooklyn_poverty',
+                'color: ramp($poverty_per_pop, sunset)',
+                legend={
+                    'type': 'color-continuous',
+                    'title': 'Poverty per pop'
+                }
+            )
+            pop_layer
     """
 
     def __init__(self,
@@ -128,6 +158,10 @@ class Layer(object):
             self.source.geom_type
         )
         self.widgets_info = self.widgets.get_widgets_info()
+
+    def _repr_html_(self):
+        from .map import Map
+        return Map(self)._repr_html_()
 
 
 def _set_source(source, context):

@@ -165,7 +165,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     )
 
     # create a dataset object
-    d = Dataset.from_table('brooklyn_poverty_census_tracts')
+    d = Dataset('brooklyn_poverty_census_tracts')
 
     # read a table from your CARTO account to a DataFrame
     df = d.download()
@@ -174,7 +174,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
     df['poverty_per_pop'] = df['poverty_count'] / df['total_population']
 
     # update CARTO table with all changes from this session
-    d_updated = Dataset.from_dataframe(df)
+    d_updated = Dataset(df)
     d_updated.upload(
         table_name='brooklyn_poverty_census_tracts',
         if_exists='replace'
