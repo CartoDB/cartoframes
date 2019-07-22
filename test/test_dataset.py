@@ -20,7 +20,11 @@ from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
 
-from .mocks.dataset_mock import DatasetMock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+from .mocks.dataset_mock import DatasetMock, QueryDatasetMock
 from .mocks.context_mock import ContextMock
 
 from .utils import _UserUrlLoader
@@ -648,6 +652,29 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset.credentials)
+
+    def test_dataset_get_table_names_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock(table_name, credentials=self.context)
+        self.assertEqual(dataset.get_table_names(), [table_name])
+
+    def test_dataset_get_table_names_from_query(self):
+        table_name = 'fake_table'
+
+        QueryDatasetMock.get_table_names = Mock(return_value=[table_name])
+
+        query = 'SELECT * FROM {}'.format(table_name)
+        dataset = DatasetMock(query, credentials=self.context)
+        self.assertEqual(dataset.get_table_names(), [table_name])
+
+    def test_dataset_get_table_names_from_dataframe(self):
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset(df)
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method '
+                     'to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_table_names()
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
