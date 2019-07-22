@@ -93,7 +93,7 @@ class Context(object):
          keyword argument. This method is more flexible.::
 
             from cartoframes.auth import Credentials
-            creds = Credentials(username='eschbacher', key='abcdefg')
+            creds = Credentials(username='eschbacher', api_key='abcdefg')
             con = Context(creds=creds)
 
     Attributes:
@@ -168,24 +168,27 @@ class Context(object):
     def __init__(self, base_url=None, api_key='default_public', creds=None, session=None,
                  verbose=0):
 
-        self.creds = Credentials(creds=creds, key=api_key, base_url=base_url)
-        self.session = session
+        if creds:
+            self.creds = Credentials.from_credentials(creds)
+        else:
+            self.creds = Credentials(api_key=api_key, base_url=base_url, session=session)
+
         self.auth_client = APIKeyAuthClient(
-            base_url=self.creds.base_url(),
-            api_key=self.creds.key(),
+            base_url=self.creds.base_url,
+            api_key=self.creds.api_key,
             session=session,
             client_id='cartoframes_{}'.format(__version__),
             user_agent='cartoframes_{}'.format(__version__)
         )
         self.auth_api_client = AuthAPIClient(
-            base_url=self.creds.base_url(),
-            api_key=self.creds.key(),
+            base_url=self.creds.base_url,
+            api_key=self.creds.api_key,
             session=session
         )
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
-        self.creds.username(self.auth_client.username)
+        self.creds.username = self.auth_client.username
         self._is_authenticated()
         self.is_org = self._is_org_user()
 
@@ -196,9 +199,7 @@ class Context(object):
     def _is_authenticated(self):
         """Checks if credentials allow for authenticated carto access"""
         if not self.auth_api_client.is_valid_api_key():
-            raise CartoException(
-                'Cannot authenticate user `{}`. Check credentials.'.format(
-                    self.creds.username()))
+            raise CartoException('Cannot authenticate user `{}`. Check credentials.'.format(self.creds.username))
 
     def _is_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""
@@ -208,7 +209,7 @@ class Context(object):
         return res['rows'][0]['unnest'] != 'public'
 
     def get_default_schema(self):
-        return 'public' if not self.is_org else self.creds.username()
+        return 'public' if not self.is_org else self.creds.username
 
     def read(self, table_name, limit=None, decode_geom=False, shared_user=None, retry_times=3):
         """Read a table from CARTO into a pandas DataFrames. Column types are inferred from database types, to
@@ -239,8 +240,7 @@ class Context(object):
                 df = con.read('acadia_biodiversity')
         """
         # choose schema (default user - org or standalone - or shared)
-        schema = 'public' if not self.is_org else (
-            shared_user or self.creds.username())
+        schema = 'public' if not self.is_org else (shared_user or self.creds.username)
 
         dataset = Dataset(table_name, schema=schema, credentials=self)
         return dataset.download(limit, decode_geom, retry_times)
@@ -349,7 +349,7 @@ class Context(object):
         dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, credentials=self)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
-            table_url=utils.join_url(self.creds.base_url(),
+            table_url=utils.join_url(self.creds.base_url,
                                      'dataset',
                                      dataset.table_name)))
 
@@ -404,7 +404,7 @@ class Context(object):
                 raise CartoException(
                     'Over CARTO account storage limit for user `{}`. Try '
                     'subsetting your DataFrame or dropping columns to reduce '
-                    'the data size.'.format(self.creds.username())
+                    'the data size.'.format(self.creds.username)
                 )
             elif import_job['error_code'] == 6668:
                 raise CartoException(
@@ -873,7 +873,7 @@ class Context(object):
             params.update(dict(bbox=bbox))
 
         map_name = self._send_map_template(layers, has_zoom=has_zoom)
-        api_url = utils.join_url(self.creds.base_url(), 'api/v1/map')
+        api_url = utils.join_url(self.creds.base_url, 'api/v1/map')
 
         static_url = ('{url}.png?{params}').format(
             url=utils.join_url(api_url, 'static/named',
@@ -885,13 +885,13 @@ class Context(object):
 
         # TODO: write this as a private method
         if interactive:
-            netloc = urlparse(self.creds.base_url()).netloc
+            netloc = urlparse(self.creds.base_url).netloc
             domain = 'carto.com' if netloc.endswith('.carto.com') else netloc
 
             config = {
-                'user_name': self.creds.username(),
-                'maps_api_template': self.creds.base_url(),
-                'sql_api_template': self.creds.base_url(),
+                'user_name': self.creds.username,
+                'maps_api_template': self.creds.base_url,
+                'sql_api_template': self.creds.base_url,
                 'tiler_protocol': 'https',
                 'tiler_domain': domain,
                 'tiler_port': '80',
@@ -931,7 +931,7 @@ class Context(object):
                     'order': 1,
                     'options': {
                         'query': time_layer.query,
-                        'user_name': self.creds.username(),
+                        'user_name': self.creds.username,
                         'tile_style': layer.cartocss
                     }
                 })

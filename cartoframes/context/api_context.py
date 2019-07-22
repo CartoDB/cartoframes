@@ -12,11 +12,11 @@ DEFAULT_RETRY_TIMES = 3
 
 
 class APIContext(BaseContext):
-    def __init__(self, creds, session=None):
+    def __init__(self, creds):
         self.auth_client = APIKeyAuthClient(
-            base_url=creds.base_url(),
-            api_key=creds.key(),
-            session=session,
+            base_url=creds.base_url,
+            api_key=creds.api_key,
+            session=creds.session,
             client_id='cartoframes_{}'.format(__version__),
             user_agent='cartoframes_{}'.format(__version__)
         )

@@ -204,9 +204,9 @@ class Source(object):
         context = self._get_context()
         if context and context.creds:
             return {
-                'username': context.creds.username(),
-                'api_key': context.creds.key(),
-                'base_url': context.creds.base_url()
+                'username': context.creds.username,
+                'api_key': context.creds.api_key,
+                'base_url': context.creds.base_url
             }
         else:
             return defaults.CREDENTIALS
