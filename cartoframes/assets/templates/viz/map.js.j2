@@ -104,7 +104,11 @@ function onReady() {
         layer.widgets
           .filter((widget) => !widget.has_bridge)
           .forEach((widget) => {
-            renderWidget(widget);
+            const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name]
+              ? mapLayer.viz.variables[widget.variable_name].value
+              : null;
+
+            renderWidget(widget, value);
           })
       });
 

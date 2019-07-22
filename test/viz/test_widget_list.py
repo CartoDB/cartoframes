@@ -26,35 +26,35 @@ class TestWidgetList(unittest.TestCase):
         """WidgetList should be properly initialized"""
         widget_list = WidgetList(widget_a)
 
-        self.assertEqual(widget_list.widgets[0]._type, 'formula')
-        self.assertEqual(widget_list.widgets[0]._value, 'viewportSum($amount)')
-        self.assertEqual(widget_list.widgets[0]._title, '[TITLE]')
-        self.assertEqual(widget_list.widgets[0]._description, '[description]')
-        self.assertEqual(widget_list.widgets[0]._footer, '[footer]')
-        self.assertTrue(isinstance(widget_list.widgets[0], Widget))
+        self.assertEqual(widget_list._widgets[0]._type, 'formula')
+        self.assertEqual(widget_list._widgets[0]._value, 'viewportSum($amount)')
+        self.assertEqual(widget_list._widgets[0]._title, '[TITLE]')
+        self.assertEqual(widget_list._widgets[0]._description, '[description]')
+        self.assertEqual(widget_list._widgets[0]._footer, '[footer]')
+        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
 
     def test_widget_list_init_with_a_list_of_dict(self):
         """WidgetList should be properly initialized"""
 
         widget_list = WidgetList([widget_a, widget_b])
 
-        self.assertEqual(widget_list.widgets[0]._type, 'formula')
-        self.assertEqual(widget_list.widgets[0]._value, 'viewportSum($amount)')
-        self.assertEqual(widget_list.widgets[0]._title, '[TITLE]')
-        self.assertEqual(widget_list.widgets[0]._description, '[description]')
-        self.assertEqual(widget_list.widgets[0]._footer, '[footer]')
-        self.assertTrue(isinstance(widget_list.widgets[0], Widget))
+        self.assertEqual(widget_list._widgets[0]._type, 'formula')
+        self.assertEqual(widget_list._widgets[0]._value, 'viewportSum($amount)')
+        self.assertEqual(widget_list._widgets[0]._title, '[TITLE]')
+        self.assertEqual(widget_list._widgets[0]._description, '[description]')
+        self.assertEqual(widget_list._widgets[0]._footer, '[footer]')
+        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
 
-        self.assertEqual(widget_list.widgets[1]._type, 'default')
-        self.assertEqual(widget_list.widgets[1]._title, '"Custom Info"')
-        self.assertEqual(widget_list.widgets[1]._description, '')
-        self.assertEqual(widget_list.widgets[1]._footer, '')
-        self.assertTrue(isinstance(widget_list.widgets[1], Widget))
+        self.assertEqual(widget_list._widgets[1]._type, 'default')
+        self.assertEqual(widget_list._widgets[1]._title, '"Custom Info"')
+        self.assertEqual(widget_list._widgets[1]._description, '')
+        self.assertEqual(widget_list._widgets[1]._footer, '')
+        self.assertTrue(isinstance(widget_list._widgets[1], Widget))
 
     def test_widget_list_init_with_a_widget(self):
         """WidgetList should be properly initialized"""
         widget_list = WidgetList(Widget(widget_a))
-        self.assertTrue(isinstance(widget_list.widgets[0], Widget))
+        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
 
     def test_widget_list_init_with_a_list_of_widgets(self):
         """WidgetList should be properly initialized"""
@@ -64,8 +64,8 @@ class TestWidgetList(unittest.TestCase):
             Widget(widget_b)
         ])
 
-        self.assertTrue(isinstance(widget_list.widgets[0], Widget))
-        self.assertTrue(isinstance(widget_list.widgets[1], Widget))
+        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
+        self.assertTrue(isinstance(widget_list._widgets[1], Widget))
 
     def test_widget_list_get_widgets_info(self):
         """Widget List should return a proper widgets info object"""
@@ -85,6 +85,7 @@ class TestWidgetList(unittest.TestCase):
                 'description': '[description]',
                 'footer': '[footer]',
                 'has_bridge': False,
+                'variable_name': 'vb6dbcf',
                 'options': {}
             }, {
                 'type': 'default',
@@ -94,5 +95,6 @@ class TestWidgetList(unittest.TestCase):
                 'description': '',
                 'footer': '',
                 'has_bridge': False,
+                'variable_name': '',
                 'options': {}
             }])

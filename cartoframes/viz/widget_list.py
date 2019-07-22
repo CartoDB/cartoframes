@@ -25,7 +25,7 @@ class WidgetList(object):
     """
 
     def __init__(self, widgets=None):
-        self.widgets = self._init_widgets(widgets)
+        self._widgets = self._init_widgets(widgets)
 
     def _init_widgets(self, widgets):
         if isinstance(widgets, list):
@@ -45,8 +45,16 @@ class WidgetList(object):
 
     def get_widgets_info(self):
         widgets_info = []
-        for widget in self.widgets:
+        for widget in self._widgets:
             if widget:
                 widgets_info.append(widget.get_info())
 
         return widgets_info
+
+    def get_variables(self):
+        output = {}
+        for widget in self._widgets:
+            if widget._variable_name:
+                output[widget._variable_name] = '$' + widget._value if widget.has_bridge() else widget._value
+
+        return output

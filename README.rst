@@ -289,7 +289,7 @@ You can also set your credentials using the `Credentials` class:
 
     from cartoframes.auth import Credentials, Context
     con = Context(
-        creds=Credentials(key='{your_api_key}', username='{your_user_name}')
+        creds=Credentials(api_key='{your_api_key}', username='{your_user_name}')
     )
 
 
@@ -299,7 +299,7 @@ Save/update credentials for later use
 .. code:: python
 
     from cartoframes.auth import Credentials, Context
-    creds = Credentials(username='eschbacher', key='abcdefg')
+    creds = Credentials(username='eschbacher', api_key='abcdefg')
     creds.save()  # save credentials for later use (not dependent on Python session)
 
 Once you save your credentials, you can get started in future sessions more quickly:
