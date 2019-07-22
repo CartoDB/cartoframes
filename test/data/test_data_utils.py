@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Unit tests for cartoframes.data.utils"""
 import unittest
 import pandas as pd
