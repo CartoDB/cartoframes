@@ -15,7 +15,7 @@ from carto.sql import SQLClient
 
 from cartoframes.auth import Credentials, Context
 from cartoframes.data import Dataset
-from cartoframes.client import DataObsClient
+from cartoframes.client import DataObsClient, get_countrytag
 from cartoframes.columns import normalize_name
 
 from ..utils import _UserUrlLoader
@@ -362,3 +362,16 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         )
 
         self.assertIn('_' + dup_col, dataset.dataframe.keys())
+
+    def test_get_countrytag(self):
+        valid_regions = ('Australia', 'Brasil', 'EU', 'España', 'U.K.', )
+        valid_answers = ['section/tags.{c}'.format(c=c)
+                         for c in ('au', 'br', 'eu', 'spain', 'uk', )]
+        invalid_regions = ('USofA', None, '', 'Jupiter', )
+
+        for idx, r in enumerate(valid_regions):
+            self.assertEqual(get_countrytag(r.lower()), valid_answers[idx])
+
+        for r in invalid_regions:
+            with self.assertRaises(ValueError):
+                get_countrytag(r)
