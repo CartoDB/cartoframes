@@ -14,7 +14,7 @@ from ..data.dataset import Dataset
 from ..data.utils import get_query_geom_type
 
 from .. import utils
-from ..context import create_context
+from .. import context
 
 
 class DataObsClient(object):
@@ -27,13 +27,17 @@ class DataObsClient(object):
         the geographic boundaries (geometries) or their metadata.
       - discovery: returns a pandas.DataFrame with the measures found.
       - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
+
+    Args:
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          A :py:class:`Credentials <cartoframes.auth.Credentials>`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
     """
 
     def __init__(self, credentials):
-        from ..auth import Context
         self._verbose = 0
-        self._context = create_context(credentials)
-        self._old_context = Context(creds=credentials)
+        self._credentials = credentials
+        self._context = context.create_context(credentials)
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -587,7 +591,7 @@ class DataObsClient(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(table_name, credentials=self._old_context)
+        dataset = Dataset(table_name, credentials=self._credentials)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
@@ -636,7 +640,7 @@ class DataObsClient(object):
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
     def _fetch(self, query, decode_geom=False, table_name=None):
-        dataset = Dataset(query, credentials=self._old_context)
+        dataset = Dataset(query, credentials=self._credentials)
         if table_name:
             dataset.upload(table_name=table_name)
         dataset.download(decode_geom=decode_geom)
