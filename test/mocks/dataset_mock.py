@@ -50,9 +50,6 @@ class QueryDatasetMock(QueryDataset):
     def exists(self):
         return False
 
-    def _get_dataset_info(self, table_name=None):
-        return DatasetInfoMock(self._credentials, table_name or self._table_name)
-
     def _create_table_from_query(self):
         return True
 

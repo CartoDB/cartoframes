@@ -183,13 +183,14 @@ class Dataset(object):
 
         return self._strategy.dataset_info
 
-    def update_dataset_info(self, privacy=None, name=None, table_name=None):
+    def update_dataset_info(self, privacy=None, table_name=None):
         """Update/change Dataset privacy and name
 
         Args:
           privacy (str, optional): One of DatasetInfo.PRIVATE,
             DatasetInfo.PUBLIC, or DatasetInfo.LINK
-          name (str, optional): Name of the dataset on CARTO.
+          table_name (str, optional): Name of the dataset on CARTO. After updating it,
+            the table_name will be changed too.
 
         Example:
 
@@ -207,7 +208,7 @@ class Dataset(object):
                 d.update_dataset_info(privacy='link')
 
         """
-        return self._strategy.update_dataset_info(privacy, name, table_name)
+        return self._strategy.update_dataset_info(privacy, table_name)
 
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account

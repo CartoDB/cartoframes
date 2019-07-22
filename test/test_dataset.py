@@ -508,64 +508,21 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table', credentials=self.context)
         self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
 
-    def test_dataset_info_from_query_0_table(self):
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=[])
-
+    def test_dataset_info_from_query(self):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.context)
-        error_msg = ('We can not extract the table/s used by the QueryDataset, so we can not get the '
-                     'Dataset info. Try using `Dataset(table_name)` instead if possible.')
+        error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                     '`Dataset(table_name)` to get or modify the info from a CARTO table.')
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.dataset_info
 
-    def test_dataset_info_from_query_1_table(self):
-        tables = ['fake_table']
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=tables)
-
+    def test_dataset_info_from_query_update(self):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.context)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
-
-    def test_dataset_info_from_query_1_table_set_privacy(self):
-        tables = ['fake_table']
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=tables)
-
-        query = 'SELECT 1'
-        dataset = DatasetMock(query, credentials=self.context)
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
-
-    def test_dataset_info_from_query_several_tables(self):
-        tables = ['fake_table1', 'fake_table2']
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=tables)
-
-        query = 'SELECT 1'
-        dataset = DatasetMock(query, credentials=self.context)
-        self.assertEqual(dataset.dataset_info['fake_table1'].privacy, Dataset.PRIVATE)
-        self.assertEqual(dataset.dataset_info['fake_table2'].privacy, Dataset.PRIVATE)
-
-    def test_dataset_info_from_query_several_tables_set_privacy_one_by_one(self):
-        tables = ['fake_table1', 'fake_table2']
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=tables)
-
-        query = 'SELECT 1'
-        dataset = DatasetMock(query, credentials=self.context)
-
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC, table_name='fake_table1')
-        self.assertEqual(dataset.dataset_info['fake_table1'].privacy, Dataset.PUBLIC)
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC, table_name='fake_table2')
-        self.assertEqual(dataset.dataset_info['fake_table2'].privacy, Dataset.PUBLIC)
-
-    def test_dataset_info_from_query_several_tables_set_privacy_all(self):
-        tables = ['fake_table1', 'fake_table2']
-        QueryDatasetMock._get_tables_used_by_query = Mock(return_value=tables)
-
-        query = 'SELECT 1'
-        dataset = DatasetMock(query, credentials=self.context)
-
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
-        self.assertEqual(dataset.dataset_info['fake_table1'].privacy, Dataset.PUBLIC)
-        self.assertEqual(dataset.dataset_info['fake_table2'].privacy, Dataset.PUBLIC)
+        error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                     '`Dataset(table_name)` to get or modify the info from a CARTO table.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.update_dataset_info()
 
 
 class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):

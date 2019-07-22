@@ -26,29 +26,12 @@ class QueryDataset(BaseDataset):
 
     @property
     def dataset_info(self):
-        if self._dataset_info is None:
-            tables = self._get_tables_used_by_query()
-            if not tables or len(tables) == 0:
-                raise CartoException('We can not extract the table/s used by the QueryDataset, so we can not get the '
-                                     'Dataset info. Try using `Dataset(table_name)` instead if possible.')
-            elif len(tables) == 1:
-                self._dataset_info = self._get_dataset_info(tables[0])
-            else:
-                self._dataset_info = {}
-                for table_name in tables:
-                    self._dataset_info[table_name] = self._get_dataset_info(table_name)
+        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
 
-        return self._dataset_info
-
-    def update_dataset_info(self, privacy=None, name=None, table_name=None):
-        self._dataset_info = self.dataset_info
-        if isinstance(self._dataset_info, DatasetInfo):
-            self._dataset_info.update(privacy=privacy, name=name)
-        elif table_name:
-            self._dataset_info[table_name].update(privacy=privacy, name=name)
-        else:
-            for dataset_info in self._dataset_info.values():
-                dataset_info.update(privacy=privacy, name=name)
+    def update_dataset_info(self, privacy=None, table_name=None):
+        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
