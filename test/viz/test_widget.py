@@ -41,6 +41,7 @@ class TestWidget(unittest.TestCase):
             'footer': '[footer]',
             'has_bridge': False,
             'prop': '',
+            'variable_name': 'vb6dbcf',
             'options': {}
         })
 
@@ -71,6 +72,7 @@ class TestWidget(unittest.TestCase):
             'footer': '',
             'has_bridge': True,
             'prop': 'filter',
+            'variable_name': '',
             'options': {}
         })
 
@@ -89,5 +91,6 @@ class TestWidget(unittest.TestCase):
             'footer': '',
             'has_bridge': True,
             'prop': 'width',
+            'variable_name': '',
             'options': {}
         })

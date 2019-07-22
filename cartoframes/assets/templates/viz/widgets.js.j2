@@ -1,17 +1,17 @@
 {% include 'utils/format.js.j2' %}
 
-function renderWidget(widget, variable) {
-  widget.element = widget.element || document.querySelector(`#${widget.id}`);
-
-  if (widget.value) {
+function renderWidget(widget, value) {
+  widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
+  
+  if (value && widget.element) {
     widget.element.innerText = typeof value === 'number' ? format(value) : value;
   }
 }
 
 function renderBridge(bridge, widget) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
-  let options = { ...widget };
-  console.log('!!! options', options);
+  let options = { ...widget.options };
+
   switch (widget.type) {
     case 'histogram':
       bridge.histogram(widget.element, widget.value, options);
@@ -26,9 +26,6 @@ function renderBridge(bridge, widget) {
     case 'time-series':
       options['propertyName'] = widget.prop;
       bridge.timeSeries(widget.element, widget.value, options);
-      break;
-    default:
-      widget.element.innerText = typeof widget.value === 'number' ? format(widget.value) : widget.value;
       break;
   }
 }
