@@ -143,9 +143,9 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context.__init__ normal usage"""
         con = Context(base_url=self.baseurl,
                       api_key=self.apikey)
-        self.assertEqual(con.creds.key(), self.apikey)
-        self.assertEqual(con.creds.base_url(), self.baseurl.strip('/'))
-        self.assertEqual(con.creds.username(), self.username)
+        self.assertEqual(con.creds.api_key, self.apikey)
+        self.assertEqual(con.creds.base_url, self.baseurl.strip('/'))
+        self.assertEqual(con.creds.username, self.username)
         self.assertTrue(not con.is_org)
         with self.assertRaises(CartoException):
             Context(base_url=self.baseurl,
@@ -156,19 +156,20 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         """Context.__init__ Credentials argument"""
         creds = Credentials(base_url=self.baseurl,
                             username=self.username,
-                            key=self.apikey)
+                            api_key=self.apikey)
         con = Context(creds=creds)
         self.assertIsInstance(con, Context)
-        self.assertEqual(con.creds.username(), self.username)
-        self.assertEqual(con.creds.key(), self.apikey)
+        self.assertEqual(con.creds.username, self.username)
+        self.assertEqual(con.creds.api_key, self.apikey)
 
+        # NOTE: this behaviour is not supported by "new" Credentials
         # Context pulls from saved credentials
-        saved_creds = Credentials(base_url=self.baseurl,
-                                  username=self.username,
-                                  key=self.apikey)
-        saved_creds.save()
-        c_saved = Context()
-        self.assertEqual(c_saved.creds.key(), self.apikey)
+        # saved_creds = Credentials(base_url=self.baseurl,
+        #                           username=self.username,
+        #                           api_key=self.apikey)
+        # saved_creds.save()
+        # c_saved = Context()
+        # self.assertEqual(c_saved.creds.api_key, self.apikey)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_Context_authenticated(self):

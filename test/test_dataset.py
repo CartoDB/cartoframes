@@ -10,7 +10,7 @@ import pandas as pd
 
 from carto.exceptions import CartoException
 
-from cartoframes.auth import Context
+from cartoframes.auth import Context, Credentials
 from cartoframes.data import Dataset
 from cartoframes.data.utils import setting_value_exception
 from cartoframes.columns import normalize_name
@@ -21,7 +21,7 @@ from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
 
 from .mocks.dataset_mock import DatasetMock
-from .mocks.context_mock import ContextMock, CredsMock
+from .mocks.context_mock import ContextMock
 
 from .utils import _UserUrlLoader
 
@@ -405,7 +405,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         class FakeContext():
             def __init__(self):
                 self.is_org = True
-                self.creds = CredsMock(key='', username=username)
+                self.creds = Credentials(api_key='', username=username)
                 self.version = ''
                 self.session = ''
 

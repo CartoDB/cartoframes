@@ -38,7 +38,7 @@ class SQLClient(object):
     def __init__(self, credentials, session=None):
         self._is_org_user = None
         self._creds = credentials
-        self._context = context.create_context(credentials, session)
+        self._context = self._create_context()
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a `list` with content of the response.
@@ -127,7 +127,7 @@ class SQLClient(object):
         """
         is_org_user = self._check_org_user()
         columns = ','.join(' '.join(x) for x in columns)
-        username = self._creds.username() if is_org_user else 'public'
+        username = self._creds.username if is_org_user else 'public'
         query = '''
             BEGIN;
             {drop};
@@ -166,6 +166,9 @@ class SQLClient(object):
         """Remove a table from its table name."""
         query = 'DROP TABLE IF EXISTS {0};'.format(table_name)
         return self.execute(query)
+
+    def _create_context(self):
+        return context.create_context(self._creds)
 
     def _check_org_user(self):
         """Report whether user is in a multiuser CARTO organization or not"""

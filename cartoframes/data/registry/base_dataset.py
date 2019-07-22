@@ -117,7 +117,7 @@ class BaseDataset():
 
     def _create_context(self):
         if self._credentials:
-            return context.create_context(self._credentials.creds, self._credentials.session)
+            return context.create_context(self._credentials.creds)
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
