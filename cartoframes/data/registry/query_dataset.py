@@ -1,6 +1,5 @@
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..dataset_info import DatasetInfo
 from .base_dataset import BaseDataset
 from ..utils import is_sql_query
 

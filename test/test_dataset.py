@@ -20,11 +20,7 @@ from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
 
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
-from mocks.dataset_mock import DatasetMock, QueryDatasetMock
+from mocks.dataset_mock import DatasetMock
 from mocks.context_mock import ContextMock, CredsMock
 
 from utils import _UserUrlLoader
