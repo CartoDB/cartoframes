@@ -7,4 +7,5 @@ def histogram_widget(value, **kwargs):
     data = kwargs
     data['type'] = 'histogram'
     data['value'] = value
+    data['read_only'] = kwargs.get('read_only', False)
     return Widget(data)
