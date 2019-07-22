@@ -11,7 +11,9 @@ from cartoframes.viz.widgets import formula_widget
 
 Map(
     Layer('spend_data',
-        widgets=formula_widget('$amount', 'avg', title="Avg Amount", description="Some description", footer="data source")
+        widgets=[
+            formula_widget('$amount', 'avg', title="Avg Amount", description="Some description", footer="data source")
+        ]
     )
 )
 ```
@@ -35,6 +37,16 @@ The Formula Widget calculates aggregated values from numeric columns. The operat
 - Viewport Sum: `formula_widget('$numeric_value', 'sum')`
 - Global Sum: `formula_widget('$numeric_value', 'sum', is_global=True)`
 
+```py
+from cartoframes.viz.widgets import formula_widget
+
+Map(
+    Layer('spend_data',
+        widgets=[formula_widget('count', title="Feature Count", is_global=True)]
+    )
+)
+```
+
 #### Histogram Widgets
 
 The Histogram Widget examines numerical values within a given range, distributed across your data map. You can configure values by a data column and define the number of buckets with the `buckets` parameter.
@@ -46,7 +58,7 @@ from cartoframes.viz.widgets import histogram_widget
 
 Map(
     Layer('spend_data',
-        widgets=histogram_widget('$amount', title="Amount", footer="data source", buckets=10)
+        widgets=[histogram_widget('$amount', title="Amount", footer="data source", buckets=10)]
     )
 )
 ```
