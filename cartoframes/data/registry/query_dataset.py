@@ -9,7 +9,6 @@ class QueryDataset(BaseDataset):
         super(QueryDataset, self).__init__(credentials)
 
         self._query = data
-        self._dataset_info = None
 
     @staticmethod
     def can_work_with(data):

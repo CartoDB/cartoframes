@@ -28,7 +28,7 @@ class DatasetInfo(object):
 
     @property
     def table_name(self):
-        return self._name
+        return self._table_name
 
     @table_name.setter
     def table_name(self, table_name):
