@@ -241,8 +241,8 @@ def setting_value_exception(prop, value):
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_context_with_public_creds(context):
-    public_creds = deepcopy(context.creds)
+def get_context_with_public_creds(credentials):
+    public_creds = deepcopy(credentials)
     public_creds.api_key = 'default_public'
     return create_context(public_creds)
 
