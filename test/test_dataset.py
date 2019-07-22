@@ -513,7 +513,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset = DatasetMock(query, credentials=self.context)
         error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
                      '`Dataset(table_name)` to get or modify the info from a CARTO table.')
-        with self.assertRaises(CartoException, msg=error_msg):
+        with self.assertRaises(ValueError, msg=error_msg):
             dataset.dataset_info
 
     def test_dataset_info_from_query_update(self):
@@ -521,7 +521,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset = DatasetMock(query, credentials=self.context)
         error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
                      '`Dataset(table_name)` to get or modify the info from a CARTO table.')
-        with self.assertRaises(CartoException, msg=error_msg):
+        with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info()
 
 

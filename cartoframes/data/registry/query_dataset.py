@@ -26,12 +26,12 @@ class QueryDataset(BaseDataset):
 
     @property
     def dataset_info(self):
-        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
-                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
+        raise ValueError('The dataset_info method is not allowed on Datasets built on queries. '
+                         'Use a table-based dataset instead: Dataset(my_table)')
 
     def update_dataset_info(self, privacy=None, table_name=None):
-        raise CartoException('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
-                             '`Dataset(table_name)` to get or modify the info from a CARTO table.')
+        raise ValueError('The dataset_info method is not allowed on Datasets built on queries. '
+                         'Use a table-based dataset instead: Dataset(my_table)')
 
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
@@ -50,7 +50,8 @@ class QueryDataset(BaseDataset):
             raise self._already_exists_error()
 
     def delete(self):
-        raise ValueError('Method not allowed in QueryDataset. You should use a TableDataset: `Dataset(my_table)`')
+        raise ValueError('The delete method is not allowed on Datasets built on queries. '
+                         'Use a table-based dataset instead: Dataset(my_table)')
 
     def get_query(self):
         return self._query
