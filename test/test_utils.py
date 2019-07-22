@@ -2,9 +2,11 @@
 
 """Unit tests for cartoframes.utils"""
 import unittest
+import requests
 from collections import OrderedDict
 
-from cartoframes.utils import (dict_items, cssify, importify_params, snake_to_camel, camel_dictionary)
+from cartoframes.utils import dict_items, cssify, importify_params, snake_to_camel, \
+    camel_dictionary, debug_print
 
 
 class TestUtils(unittest.TestCase):
@@ -152,3 +154,23 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(test_dictionary['kinky-kebab'], 'spice')
         with self.assertRaises(KeyError):
             self.assertEqual(test_dictionary['sneaky-snake'], None)
+
+
+    def test_debug_print(self):
+        # verbose = True
+        verbose = 1
+
+        # request-response usage
+        resp = requests.get('http://httpbin.org/get')
+        debug_print(verbose, resp=resp)
+        debug_print(verbose, resp=resp.text)
+
+        # non-requests-response usage
+        test_str = 'this is a test'
+        long_test_str = ', '.join([test_str] * 100)
+        self.assertIsNone(debug_print(verbose, test_str=test_str))
+        self.assertIsNone(debug_print(verbose, long_str=long_test_str))
+
+        # verbose = False
+        verbose = 0
+        self.assertIsNone(debug_print(verbose, resp=test_str))

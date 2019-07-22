@@ -11,7 +11,7 @@ from warnings import warn
 from carto.exceptions import CartoException
 
 from ..data.dataset import Dataset
-from ..data.utils import get_query_geom_type
+from ..data.utils import get_query_geom_type, debug_print
 
 from .. import utils
 from .. import context
@@ -465,7 +465,7 @@ class DataObsClient(object):
                 boundary=boundary,
                 numers=numers,
                 quantiles=quantiles).strip()
-        self._debug_print(query=query)
+        debug_print(self._verbose, query=query)
         return self._fetch(query, decode_geom=True).dataframe
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
@@ -645,24 +645,6 @@ class DataObsClient(object):
             dataset.upload(table_name=table_name)
         dataset.download(decode_geom=decode_geom)
         return dataset
-
-    def _debug_print(self, **kwargs):
-        if self._verbose <= 0:
-            return
-
-        for key, value in utils.dict_items(kwargs):
-            if isinstance(value, requests.Response):
-                str_value = ("status_code: {status_code}, "
-                             "content: {content}").format(
-                                 status_code=value.status_code,
-                                 content=value.content)
-            else:
-                str_value = str(value)
-            if self._verbose < 2 and len(str_value) > 300:
-                str_value = '{}\n\n...\n\n{}'.format(str_value[:250],
-                                                     str_value[-50:])
-            print('{key}: {value}'.format(key=key,
-                                          value=str_value))
 
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""

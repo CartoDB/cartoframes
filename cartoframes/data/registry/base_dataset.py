@@ -5,7 +5,7 @@ from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
 from ..utils import decode_geometry, convert_bool, compute_query, \
-    get_context_with_public_creds, get_query_geom_type, ENC_WKB_BHEX
+    get_context_with_public_creds, get_query_geom_type, debug_print, ENC_WKB_BHEX
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
@@ -18,6 +18,7 @@ class BaseDataset():
     APPEND = 'append'
 
     def __init__(self, credentials=None):
+        self._verbose = 0
         self._credentials = credentials
         self._context = self._create_context()
         self._table_name = None
@@ -101,7 +102,7 @@ class BaseDataset():
             raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
-            self._credentials._debug_print(err=err)
+            debug_print(self._verbose, err=err)
             return False
 
     def is_public(self):
@@ -117,7 +118,7 @@ class BaseDataset():
 
     def _create_context(self):
         if self._credentials:
-            return context.create_context(self._credentials.creds)
+            return context.create_context(self._credentials)
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \

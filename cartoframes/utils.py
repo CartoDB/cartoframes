@@ -3,6 +3,7 @@
 import re
 import sys
 import hashlib
+import requests
 
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
@@ -142,3 +143,20 @@ def in_snake_case(str):
 
 def is_url(text):
     return not re.match(r'^https?://.*$', text)
+
+
+def debug_print(verbose=0, **kwargs):
+    if verbose <= 0:
+        return
+
+    for key, value in dict_items(kwargs):
+        if isinstance(value, requests.Response):
+            str_value = ("status_code: {status_code}, "
+                            "content: {content}").format(
+                                status_code=value.status_code,
+                                content=value.content)
+        else:
+            str_value = str(value)
+        if verbose < 2 and len(str_value) > 300:
+            str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
+        print('{key}: {value}'.format(key=key, value=str_value))

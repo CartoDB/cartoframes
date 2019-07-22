@@ -353,5 +353,5 @@ class Dataset(object):
 
 
 def _get_default_credentials():
-    from ..auth import _default_context
-    return _default_context
+    from ..auth import _default_credentials
+    return _default_credentials
