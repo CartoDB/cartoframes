@@ -7,18 +7,17 @@ from shapely.geos import lgeos
 from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
+from cartoframes.auth import Credentials
 from cartoframes.data.utils import compute_query, compute_geodataframe, \
     decode_geometry, detect_encoding_type, ENC_SHAPELY, \
     ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
-
-from ..mocks.context_mock import ContextMock
 
 
 class TestDataUtils(unittest.TestCase):
     """Tests for functions in data.utils module"""
 
     def setUp(self):
-        self.context = ContextMock(username='', api_key='1234')
+        self.credentials = Credentials(username='', api_key='1234')
         self.geom = [
             '010100000000000000000000000000000000000000',
             '010100000000000000000024400000000000002e40',
@@ -40,13 +39,13 @@ class TestDataUtils(unittest.TestCase):
 
     def test_compute_query(self):
         """data.utils.compute_query"""
-        ds = Dataset('table_name', schema='schema', credentials=self.context)
+        ds = Dataset('table_name', schema='schema', credentials=self.credentials)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "schema"."table_name"')
 
     def test_compute_query_default_schema(self):
         """data.utils.compute_query"""
-        ds = Dataset('table_name', credentials=self.context)
+        ds = Dataset('table_name', credentials=self.credentials)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "public"."table_name"')
 
