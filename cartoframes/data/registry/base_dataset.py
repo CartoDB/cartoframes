@@ -185,7 +185,7 @@ class BaseDataset():
             return None
 
     def _get_dataset_info(self):
-        return DatasetInfo(self._credentials, self._table_name)
+        return DatasetInfo(self._context, self._table_name)
 
     def _check_org_user(self):
         if self._is_org_user is None:
