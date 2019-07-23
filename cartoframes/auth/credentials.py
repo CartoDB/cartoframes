@@ -1,8 +1,9 @@
 """Credentials management for cartoframes usage."""
-import appdirs
+
 import os
-import json
 import sys
+import json
+import appdirs
 import warnings
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
@@ -186,7 +187,6 @@ class Credentials(object):
                 >>> print(credentials)
                 Credentials(username=eschbacher, api_key=abcdefg,
                         base_url=https://eschbacher.carto.com/)
-
         """
         path_to_remove = config_file or _DEFAULT_PATH
         try:
