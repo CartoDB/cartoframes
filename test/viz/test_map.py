@@ -2,15 +2,30 @@ import unittest
 
 from carto.exceptions import CartoException
 
+from cartoframes import context
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.data import StrategiesRegistry
+from cartoframes.auth import Credentials
 
 from ..mocks.map_mock import MapMock
-from ..mocks.context_mock import ContextMock
 from ..mocks.dataset_mock import DatasetMock
 from ..mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 from .utils import build_geojson
+
+
+class MockContext():
+    def __init__(self):
+        self.query = ''
+        self.response = ''
+
+    def execute_query(self, q, **kwargs):
+        self.query = q
+        return self.response
+
+    def execute_long_running_query(self, q):
+        self.query = q
+        return self.response
 
 
 class TestMap(unittest.TestCase):
@@ -38,7 +53,7 @@ class TestMapInitialization(unittest.TestCase):
             'north': -10,
             'south': 10
         })
-        self.assertEqual(map.bounds, '[[-10, 10], [10, -10]]')
+        self.assertEqual(map.bounds, [[-10, 10], [10, -10]])
 
     def test_bounds_clamp(self):
         """Map should set the bounds clamped"""
@@ -48,7 +63,7 @@ class TestMapInitialization(unittest.TestCase):
             'north': -1000,
             'south': 1000
         })
-        self.assertEqual(map.bounds, '[[-180, 90], [180, -90]]')
+        self.assertEqual(map.bounds, [[-180, 90], [180, -90]])
 
 
 class TestMapLayer(unittest.TestCase):
@@ -168,11 +183,17 @@ class TestMapPublication(unittest.TestCase):
     def setUp(self):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
-        self.context = ContextMock(username=self.username, api_key=self.api_key)
+        self.credentials = Credentials(username=self.username, api_key=self.api_key)
+        self._mock_context = MockContext()
+
+        # Mock create_context method
+        self.original_create_context = context.create_context
+        context.create_context = lambda c: self._mock_context
 
         self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
 
     def tearDown(self):
+        context.create_context = self.original_create_context
         StrategiesRegistry.instance = None
 
     def assert_kuviz(self, kuviz, name, privacy):
@@ -188,72 +209,72 @@ class TestMapPublication(unittest.TestCase):
         self.assertEqual(kuviz_dict['privacy'], privacy)
 
     def test_map_publish_remote(self):
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        kuviz_dict = map.publish(name, context=self.context)
+        kuviz_dict = map.publish(name, credentials=self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
         query = "SELECT 1"
-        dataset = DatasetMock(query, credentials=self.context)
+        dataset = DatasetMock(query, credentials=self.credentials)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
         msg = 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
         with self.assertRaises(CartoException, msg=msg):
-            map.publish('test', context=self.context)
+            map.publish('test', credentials=self.credentials)
 
     def test_map_publish_unsync_sync_data_and_publish(self):
         query = "SELECT 1"
-        dataset = DatasetMock(query, credentials=self.context)
+        dataset = DatasetMock(query, credentials=self.credentials)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
-        map.sync_data(table_name='fake_table', context=self.context)
+        map.sync_data(table_name='fake_table', credentials=self.credentials)
 
         name = 'cf_publish'
-        kuviz_dict = map.publish(name, context=self.context)
+        kuviz_dict = map.publish(name, credentials=self.credentials)
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_with_password(self):
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        kuviz_dict = map.publish(name, context=self.context, password="1234")
+        kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
     def test_map_publish_deletion(self):
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        map.publish(name, context=self.context)
+        map.publish(name, credentials=self.credentials)
         map.delete_publication()
         self.assertIsNone(map._kuviz)
 
     def test_map_publish_update_name(self):
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        map.publish(name, context=self.context)
+        map.publish(name, credentials=self.credentials)
         new_name = 'cf_update'
         kuviz_dict = map.update_publication(new_name, password=None)
         self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
         self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
 
     def test_map_publish_update_password(self):
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
-        map.publish(name, context=self.context)
+        map.publish(name, credentials=self.credentials)
         kuviz_dict = map.update_publication(name, password="1234")
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
@@ -266,7 +287,7 @@ class TestMapPublication(unittest.TestCase):
 
         KuvizPublisherMock.is_public = is_not_public
 
-        dataset = DatasetMock('fake_table', credentials=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         msg = ('The datasets used in your map are not public. '
@@ -274,6 +295,6 @@ class TestMapPublication(unittest.TestCase):
                'You can do it from your CARTO dashboard or using the Auth API. You can get more '
                'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
         with self.assertRaises(CartoException, msg=msg):
-            map.publish('test', context=self.context)
+            map.publish('test', credentials=self.credentials)
 
         KuvizPublisherMock.is_public = is_public

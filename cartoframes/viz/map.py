@@ -15,7 +15,7 @@ from .. import utils
 
 # TODO: refactor
 
-WORLD_BOUNDS = [[-180, -85.1], [180, 85.1]]
+WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
 
 class Map(object):
@@ -427,6 +427,9 @@ def _conv2nan(val):
 
 
 def _compute_bounds(layers):
+    if layers is None or len(layers) == 0:
+        return None
+
     bounds = _format_bounds(layers[0].bounds)
 
     for layer in layers[1:]:
