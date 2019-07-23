@@ -50,10 +50,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -64,10 +64,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -81,10 +81,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer, basemaps
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -99,10 +99,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your CARTO API key'
             )
@@ -121,10 +121,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -138,10 +138,10 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -164,14 +164,14 @@ class Map(object):
 
         .. code::
 
-            from cartoframes.auth import Context, set_default_context
+            from cartoframes.auth import Credentials, set_default_credentials
             from cartoframes.viz import Map, Layer
 
-            context = Context(
+            credentials = Credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
-            set_default_context(context)
+            set_default_credentials(credentials)
 
             Map(Layer('table in your account'), show_info=True)
     """

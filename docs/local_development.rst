@@ -147,10 +147,10 @@ In order to get Airship and CARTO VL libraries we're serving locally in CARTOFra
 
 .. code:: python
 
-  from cartoframes.auth import set_default_context
+  from cartoframes.auth import set_default_credentials
   from cartoframes.viz import Map, Layer
 
-  set_default_context(
+  set_default_credentials(
       base_url='https://cartoframes.carto.com/', # or https://cartovl.carto.com/
       api_key='default_public'
   )
