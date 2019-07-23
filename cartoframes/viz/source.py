@@ -181,12 +181,18 @@ class Source(object):
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY
         query = dataset.get_query()
-        context = dataset._strategy._context
         self.query = query
-        self.bounds = bounds or get_query_bounds(context, query)
+        self.bounds = bounds or self._compute_query_bounds(dataset, query)
 
     def _set_source_geojson(self, dataset, bounds):
         self.type = SourceType.GEOJSON
         gdf = dataset.get_geodataframe()
         self.query = encode_geodataframe(gdf)
-        self.bounds = bounds or get_geodataframe_bounds(gdf)
+        self.bounds = bounds or self._compute_geojson_bounds(gdf)
+
+    def _compute_query_bounds(self, dataset, query):
+        context = dataset._strategy._context
+        return get_query_bounds(context, query)
+
+    def _compute_geojson_bounds(self, gdf):
+        return get_geodataframe_bounds(gdf)
