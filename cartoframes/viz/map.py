@@ -15,6 +15,8 @@ from .. import utils
 
 # TODO: refactor
 
+WORLD_BOUNDS = [[-180, -85.1], [180, 85.1]]
+
 
 class Map(object):
     """Map
@@ -150,6 +152,8 @@ class Map(object):
                 'north': -10,
                 'south': 10
             }
+
+            # or bounds = [[-10, 10], [10, -10]]
 
             Map(
                 Layer('table in your account'),
@@ -420,119 +424,36 @@ def _clamp_and_format_bounds(west, south, east, north):
 
 
 def _clamp(value, minimum, maximum):
-    return max(minimum, min(value, maximum))
-
-
-def _compute_bounds(layers):
-    pass
-
-
-def _get_super_bounds(layers):
-    """"""
-    # TODO: refactor this method:
-    # Compute the bounds in the source class
-    if layers:
-        hosted_layers = [
-            layer for layer in layers
-            if layer.source.type != SourceType.GEOJSON
-        ]
-        local_layers = [
-            layer for layer in layers
-            if layer.source.type == SourceType.GEOJSON
-        ]
-    else:
-        hosted_layers = []
-        local_layers = []
-
-    hosted_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
-    local_bounds = dict.fromkeys(['west', 'south', 'east', 'north'])
-
-    if hosted_layers:
-        hosted_bounds = _get_bounds_hosted(hosted_layers)
-
-    if local_layers:
-        local_bounds = _get_bounds_local(local_layers)
-
-    bounds = _get_bounds(layers)
-
-    return _format_bounds(bounds)
-
-
-def _get_bounds(layers):
-    """Aggregates bounding boxes of all layers
-
-        return: dict of bounding box of all bounds in layers
-    """
-    if not layers:
-        return {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
-
-    bounds = layers[0].bounds
-
-    for layer in layers[1:]:
-        bounds = np.concatenate(
-            (
-                np.minimum(
-                    bounds[:2],
-                    layer.bounds[:2]
-                ),
-                np.maximum(
-                    bounds[2:],
-                    layer.bounds[2:]
-                )
-            )
-        )
-
-    if bounds is None:
-        return {'west': None, 'south': None, 'east': None, 'north': None}
-
-    return dict(zip(['west', 'south', 'east', 'north'], bounds))
-
-
-def _combine_bounds(bbox1, bbox2):
-    """Takes two bounding boxes dicts and gives a new bbox that encompasses
-    them both"""
-    WORLD = {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
-    ALL_KEYS = set(WORLD.keys())
-
-    # if neither are defined, use the world
-    if not bbox1 and not bbox2:
-        return WORLD
-    # if all nones, use the world
-    if _dict_all_nones(bbox1) and _dict_all_nones(bbox2):
-        return WORLD
-
-    # if one is none return the other
-    if not bbox1 or not bbox2:
-        return bbox1 or bbox2
-
-    assert ALL_KEYS == set(bbox1.keys()) and ALL_KEYS == set(bbox2.keys()),\
-        'Input bounding boxes must have the same dictionary keys'
-    # create dict with cardinal directions and None-valued keys
-    outbbox = dict.fromkeys(['west', 'south', 'east', 'north'])
-
-    # set values and/or defaults
-    for coord in ('north', 'east'):
-        outbbox[coord] = np.nanmax([
-            _conv2nan(bbox1[coord]),
-            _conv2nan(bbox2[coord])
-        ])
-    for coord in ('south', 'west'):
-        outbbox[coord] = np.nanmin([
-            _conv2nan(bbox1[coord]),
-            _conv2nan(bbox2[coord])
-        ])
-
-    return outbbox
-
-
-def _dict_all_nones(bbox_dict):
-    """Returns True if all dict values are None"""
-    return bbox_dict and all(v is None for v in bbox_dict.values())
+    return _conv2nan(max(minimum, min(value, maximum)))
 
 
 def _conv2nan(val):
     """convert Nones to np.nans"""
     return np.nan if val is None else val
+
+
+def _compute_bounds(layers):
+    if len(layers) == 0:
+        return WORLD_BOUNDS
+
+    bounds = _format_bounds(layers[0].bounds)
+
+    for layer in layers[1:]:
+        layer_bounds = _format_bounds(layer.bounds)
+
+        if layer_bounds[0][0] < bounds[0][0]:
+            bounds[0][0] = layer_bounds[0][0]
+    
+        if layer_bounds[0][1] < bounds[0][1]:
+            bounds[0][1] = layer_bounds[0][1]
+
+        if layer_bounds[1][0] > bounds[1][0]:
+            bounds[1][0] = layer_bounds[1][0]
+
+        if layer_bounds[1][1] > bounds[1][1]:
+            bounds[1][1] = layer_bounds[1][1]
+
+    return bounds
 
 
 class HTMLMap(object):
