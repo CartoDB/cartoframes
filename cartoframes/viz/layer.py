@@ -49,6 +49,10 @@ class Layer(object):
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           these credentials is simply ignored. If not provided the credentials will be
           automatically obtained from the default credentials.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
 
     Example:
 
@@ -130,11 +134,12 @@ class Layer(object):
                  popup=None,
                  legend=None,
                  widgets=None,
-                 credentials=None):
+                 credentials=None,
+                 bounds=None):
 
         self.is_basemap = False
 
-        self.source = _set_source(source, credentials)
+        self.source = _set_source(source, credentials, bounds)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
@@ -158,11 +163,11 @@ class Layer(object):
         return Map(self)._repr_html_()
 
 
-def _set_source(source, credentials):
+def _set_source(source, credentials, bounds):
     """Set a Source class from the input"""
     if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or \
        HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
-        return Source(source, credentials)
+        return Source(source, credentials, bounds)
     elif isinstance(source, Source):
         return source
     else:
