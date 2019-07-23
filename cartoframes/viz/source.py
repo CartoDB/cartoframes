@@ -181,8 +181,9 @@ class Source(object):
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY
         query = dataset.get_query()
+        context = dataset._strategy._context
         self.query = query
-        self.bounds = bounds or get_query_bounds(query)
+        self.bounds = bounds or get_query_bounds(context, query)
 
     def _set_source_geojson(self, dataset, bounds):
         self.type = SourceType.GEOJSON

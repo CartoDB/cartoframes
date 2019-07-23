@@ -374,6 +374,8 @@ def _get_layer_def(layer):
 
 
 def _format_bounds(bounds):
+    if bounds is None:
+        return WORLD_BOUNDS
     if isinstance(bounds, list):
         return _format_list_bounds(bounds)
     elif isinstance(bounds, dict):
@@ -383,7 +385,7 @@ def _format_bounds(bounds):
 
 
 def _format_list_bounds(bounds):
-    if not (len(bounds) == 2 and len(bounds[0]) == 2 and len(bounds[1] == 2)):
+    if not (len(bounds) == 2 and len(bounds[0]) == 2 and len(bounds[1]) == 2):
         raise ValueError('Bounds list must have exactly four values in the '
                          'order: [[west, south], [east, north]]')
 
@@ -407,13 +409,12 @@ def _format_dict_bounds(bounds):
 
 
 def _clamp_and_format_bounds(west, south, east, north):
-    clamped_bounds = {
-        'west': _clamp(west, -180, 180),
-        'east': _clamp(east, -180, 180),
-        'south': _clamp(south, -90, 90),
-        'north': _clamp(north, -90, 90)
-    }
-    return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
+    west = _clamp(west, -180, 180)
+    east = _clamp(east, -180, 180)
+    south =_clamp(south, -90, 90)
+    north =_clamp(north, -90, 90)
+
+    return [[west, south], [east, north]]
 
 
 def _clamp(value, minimum, maximum):
@@ -426,9 +427,6 @@ def _conv2nan(val):
 
 
 def _compute_bounds(layers):
-    if len(layers) == 0:
-        return WORLD_BOUNDS
-
     bounds = _format_bounds(layers[0].bounds)
 
     for layer in layers[1:]:

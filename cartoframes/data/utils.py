@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from carto.exceptions import CartoException
 
-from ..context import create_context
+from .. import context
 
 try:
     import geopandas
@@ -239,7 +239,7 @@ def setting_value_exception(prop, value):
 def get_context_with_public_creds(credentials):
     public_creds = deepcopy(credentials)
     public_creds.api_key = 'default_public'
-    return create_context(public_creds)
+    return context.create_context(public_creds)
 
 
 def convert_bool(x):
