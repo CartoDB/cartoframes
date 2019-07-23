@@ -29,10 +29,10 @@ class Map(object):
           - if a `dict`, Mapbox or other style as the value of the `style` key.
             If a Mapbox style, the access token is the value of the `token`
             key.
-        bounds (dict or list, optional): a dict with `east`, `north`, `west`,
-          `south` properties, or a list of floats in the following order:
-          [west, south, east, north]. If not provided the bounds will be
-          automatically calculated to fit all features.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
         size (tuple, optional): a (width, height) pair for the size of the map.
           Default is (1024, 632).
         viewport (dict, optional): Properties for display of the map viewport.
@@ -343,11 +343,10 @@ class Map(object):
 
 
 def _get_bounds(bounds, layers):
-    return (
-        _format_bounds(bounds)
-        if bounds
-        else _get_super_bounds(layers)
-    )
+    if bounds:
+        return _format_bounds(bounds)
+    else:
+        return _compute_bounds(layers)
 
 
 def _init_layers(layers):
@@ -378,43 +377,54 @@ def _get_layer_def(layer):
 
 
 def _format_bounds(bounds):
-    if isinstance(bounds, dict):
-        return _dict_bounds(bounds)
-
-    return _list_bounds(bounds)
-
-
-def _list_bounds(bounds):
-    if len(bounds) != 4:
-        raise ValueError('bounds list must have exactly four values in the '
-                         'order: [west, south, east, north]')
-
-    return _dict_bounds({
-        'west': bounds[0],
-        'south': bounds[1],
-        'east': bounds[2],
-        'north': bounds[3]
-    })
+    if isinstance(bounds, list):
+        return _format_list_bounds(bounds)
+    elif isinstance(bounds, dict):
+        return _format_dict_bounds(bounds)
+    else:
+        raise ValueError('Bounds must be a list or a dict')
 
 
-def _dict_bounds(bounds):
-    if 'west' not in bounds or 'east' not in bounds or \
-       'north' not in bounds or 'south' not in bounds:
-        raise ValueError('bounds must have east, west, north and '
-                         'south properties')
+def _format_list_bounds(bounds):
+    if not (len(bounds) == 2 and len(bounds[0]) == 2 and len(bounds[1] == 2)):
+        raise ValueError('Bounds list must have exactly four values in the '
+                         'order: [[west, south], [east, north]]')
 
+    return _clamp_and_format_bounds(
+        bounds[0][0],
+        bounds[0][1],
+        bounds[1][0],
+        bounds[1][1])
+
+def _format_dict_bounds(bounds):
+    if 'west' not in bounds or 'south' not in bounds or \
+       'east' not in bounds or 'north' not in bounds:
+        raise ValueError('Bounds must have "west", "south", "east" and '
+                         '"north" properties')
+
+    return _clamp_and_format_bounds(
+        bounds.get('west'),
+        bounds.get('east'),
+        bounds.get('south'),
+        bounds.get('north'))
+
+
+def _clamp_and_format_bounds(west, south, east, north):
     clamped_bounds = {
-        'west': _clamp(bounds.get('west'), -180, 180),
-        'east': _clamp(bounds.get('east'), -180, 180),
-        'south': _clamp(bounds.get('south'), -90, 90),
-        'north': _clamp(bounds.get('north'), -90, 90)
+        'west': _clamp(west, -180, 180),
+        'east': _clamp(east, -180, 180),
+        'south': _clamp(south, -90, 90),
+        'north': _clamp(north, -90, 90)
     }
-
     return '[[{west}, {south}], [{east}, {north}]]'.format(**clamped_bounds)
 
 
 def _clamp(value, minimum, maximum):
     return max(minimum, min(value, maximum))
+
+
+def _compute_bounds(layers):
+    pass
 
 
 def _get_super_bounds(layers):
@@ -443,18 +453,18 @@ def _get_super_bounds(layers):
     if local_layers:
         local_bounds = _get_bounds_local(local_layers)
 
-    bounds = _combine_bounds(hosted_bounds, local_bounds)
+    bounds = _get_bounds(layers)
 
     return _format_bounds(bounds)
 
 
-def _get_bounds_local(layers):
-    """Aggregates bounding boxes of all local layers
+def _get_bounds(layers):
+    """Aggregates bounding boxes of all layers
 
         return: dict of bounding box of all bounds in layers
     """
     if not layers:
-        return {'west': None, 'south': None, 'east': None, 'north': None}
+        return {'west': -180, 'south': -85.1, 'east': 180, 'north': 85.1}
 
     bounds = layers[0].bounds
 
@@ -476,25 +486,6 @@ def _get_bounds_local(layers):
         return {'west': None, 'south': None, 'east': None, 'north': None}
 
     return dict(zip(['west', 'south', 'east', 'north'], bounds))
-
-
-def _get_bounds_hosted(layers):
-    """Aggregates bounding boxes of all hosted layers
-
-        return: dict of bounding box of all bounds in layers
-    """
-    if not layers:
-        return {'west': None, 'south': None, 'east': None, 'north': None}
-
-    context = layers[0].source.context
-    bounds = context and context._get_bounds([layers[0]])
-
-    for layer in layers[1:]:
-        context = layer.source.context
-        next_bounds = context and context._get_bounds([layer])
-        bounds = _combine_bounds(bounds, next_bounds)
-
-    return bounds
 
 
 def _combine_bounds(bbox1, bbox2):

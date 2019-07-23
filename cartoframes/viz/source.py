@@ -30,9 +30,9 @@ class Source(object):
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. If not provided, the credentials will be automatically
           obtained from the default credentials if available.
-        bounds (dict or list, optional): a dict with `east`, `north`, `west`, `south`
-          keys, or a list of floats in the following order: [west,
-          south, east, north]. If not provided the bounds will be automatically
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
           calculated to fit all features.
 
     Example:
