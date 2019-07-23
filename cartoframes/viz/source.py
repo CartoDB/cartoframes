@@ -3,7 +3,8 @@ from __future__ import absolute_import
 import pandas
 
 from . import defaults
-from ..geojson import get_encoded_data, get_bounds
+from ..utils import get_query_bounds
+from ..geojson import get_geodataframe_bounds, encode_geodataframe
 from ..data import Dataset, is_sql_query, is_geojson_file
 
 try:
@@ -178,11 +179,12 @@ class Source(object):
 
     def _set_source_query(self, dataset, bounds):
         self.type = SourceType.QUERY
-        self.query = dataset.get_query()
-        self.bounds = bounds
+        query = dataset.get_query()
+        self.query = query
+        self.bounds = bounds or get_query_bounds(query)
 
     def _set_source_geojson(self, dataset, bounds):
         self.type = SourceType.GEOJSON
         gdf = dataset.get_geodataframe()
-        self.query = get_encoded_data(gdf)
-        self.bounds = bounds or get_bounds(gdf)
+        self.query = encode_geodataframe(gdf)
+        self.bounds = bounds or get_geodataframe_bounds(gdf)

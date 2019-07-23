@@ -10,11 +10,9 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from ..data.dataset import Dataset
-from ..data.utils import get_query_geom_type
-
 from .. import utils
 from .. import context
+from ..data.dataset import Dataset
 
 
 class DataObsClient(object):
@@ -649,7 +647,7 @@ class DataObsClient(object):
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""
         query = 'SELECT * FROM "{table}"'.format(table=table)
-        return get_query_geom_type(self._context, query)
+        return utils.get_query_geom_type(self._context, query)
 
 
 # Country names are pegged to the following query:

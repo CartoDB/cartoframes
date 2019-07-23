@@ -5,7 +5,8 @@ from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
 from ..utils import decode_geometry, convert_bool, compute_query, get_context_with_public_creds, \
-    get_query_geom_type, debug_print, is_org_user, ENC_WKB_BHEX
+    debug_print, is_org_user, ENC_WKB_BHEX
+from ... import utils
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
@@ -174,7 +175,7 @@ class BaseDataset():
         return Column.from_sql_api_fields(table_info['fields'])
 
     def _get_geom_type(self, query=None):
-        return get_query_geom_type(self._context, query or self.get_query())
+        return utils.get_query_geom_type(self._context, query or self.get_query())
 
     def _get_schema(self):
         if self._credentials:

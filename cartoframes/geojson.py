@@ -13,10 +13,10 @@ except ImportError:
 def load_geojson(input_data):
     if not HAS_GEOPANDAS:
         raise ValueError(
-            """
+            '''
             GeoJSON source only works with GeoDataFrames from
             the geopandas package http://geopandas.org/data_structures.html#geodataframe
-            """)
+            ''')
 
     if isinstance(input_data, str):
         # File name
@@ -44,15 +44,15 @@ def load_geojson(input_data):
 
     else:
         raise ValueError(
-            """
+            '''
             GeoJSON source only works with GeoDataFrames from
             the geopandas package http://geopandas.org/data_structures.html#geodataframe
-            """)
+            ''')
 
     return data
 
 
-def get_encoded_data(data):
+def encode_geodataframe(data):
     filtered_geometries = _filter_null_geometries(data)
     data = _set_time_cols_epoc(filtered_geometries).to_json()
     encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
@@ -60,11 +60,11 @@ def get_encoded_data(data):
     return encoded_data
 
 
-def get_bounds(data):
+def get_geodataframe_bounds(data):
     filtered_geometries = _filter_null_geometries(data)
-    bounds = filtered_geometries.total_bounds.tolist()
+    xmin, ymin, xmax, ymax = filtered_geometries.total_bounds
 
-    return bounds
+    return [[xmin, ymin], [xmax, ymax]]
 
 
 def _filter_null_geometries(data):

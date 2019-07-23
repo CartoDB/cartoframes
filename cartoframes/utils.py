@@ -9,6 +9,22 @@ from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
 
+GEOM_TYPE_POINT = 'point'
+GEOM_TYPE_LINE = 'line'
+GEOM_TYPE_POLYGON = 'polygon'
+
+
+def map_geom_type(geom_type):
+    return {
+        'Point': GEOM_TYPE_POINT,
+        'MultiPoint': GEOM_TYPE_POINT,
+        'LineString': GEOM_TYPE_LINE,
+        'MultiLineString': GEOM_TYPE_LINE,
+        'Polygon': GEOM_TYPE_POLYGON,
+        'MultiPolygon': GEOM_TYPE_POLYGON
+    }[geom_type]
+
+
 def dict_items(indict):
     """function for iterating through dict items compatible with py2 and 3
 
@@ -161,8 +177,38 @@ def debug_print(verbose=0, **kwargs):
             str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
         print('{key}: {value}'.format(key=key, value=str_value))
 
+
 def is_org_user(context):
     """Report whether user is in a multiuser CARTO organization or not"""
     query = 'SELECT unnest(current_schemas(\'f\'))'
     res = context.execute_query(query, do_post=False)
     return  res['rows'][0]['unnest'] != 'public'
+
+
+def get_query_geom_type(context, query):
+    """Fetch geom type of a remote table"""
+    distict_query = '''
+        SELECT distinct ST_GeometryType(the_geom) AS geom_type
+        FROM ({}) q
+        LIMIT 5
+    '''.format(query)
+    response = context.execute_query(distict_query, do_post=False)
+    if response and response.get('rows') and len(response.get('rows')) > 0:
+        st_geom_type = response.get('rows')[0].get('geom_type')
+        if st_geom_type:
+            return map_geom_type(st_geom_type[3:])
+
+
+def get_query_bounds(context, query):
+    extent_query = '''
+        SELECT ARRAY[
+            ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+            ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+        ] bounds FROM (
+            SELECT ST_Extent(the_geom) geom_env
+            FROM ({}) q
+        ) q;
+    '''.format(query)
+    response = context.execute_query(extent_query, do_post=False)
+    if response and response.get('rows') and len(response.get('rows')) > 0:
+        return response.get('rows')[0].get('bounds')

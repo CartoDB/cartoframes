@@ -155,7 +155,6 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.assertEqual(test_dictionary['sneaky-snake'], None)
 
-
     def test_debug_print(self):
         # verbose = True
         verbose = 1
