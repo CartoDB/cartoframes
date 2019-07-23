@@ -110,7 +110,7 @@ def set_default_credentials(
         _default_credentials = _credentials
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
-        if is_url(_base_url):
+        if _base_url and is_url(_base_url):
             _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
         else:
             _default_credentials = Credentials(username=_username, api_key=_api_key)

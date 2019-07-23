@@ -165,7 +165,7 @@ def in_snake_case(str):
 
 
 def is_url(text):
-    return not re.match(r'^https?://.*$', text)
+    return re.match(r'^https?://.*$', text)
 
 
 def debug_print(verbose=0, **kwargs):
