@@ -27,6 +27,6 @@ def get_value_expression(operation, value, is_global):
     else:
         if operation:
             formula_operation = get_formula_operation(operation, is_global)
-            return formula_operation + '(' + value + ')'
+            return formula_operation + '($' + value + ')'
         else:
-            return value
+            return '$' + value
