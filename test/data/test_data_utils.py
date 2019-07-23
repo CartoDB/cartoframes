@@ -8,10 +8,10 @@ from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
 from cartoframes.data.utils import compute_query, compute_geodataframe, \
-    decode_geometry, detect_encoding_type, ENC_SHAPELY, ENC_WKB, ENC_WKB_HEX, \
-    ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
+    decode_geometry, detect_encoding_type, ENC_SHAPELY, \
+    ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
 
-from mocks.context_mock import ContextMock
+from ..mocks.context_mock import ContextMock
 
 
 class TestDataUtils(unittest.TestCase):
