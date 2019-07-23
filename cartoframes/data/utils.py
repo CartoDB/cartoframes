@@ -8,7 +8,6 @@ from copy import deepcopy
 from carto.exceptions import CartoException
 
 from ..context import create_context
-from ..columns import normalize_name
 
 try:
     import geopandas
@@ -252,26 +251,6 @@ def convert_bool(x):
         return bool(x)
     else:
         return None
-
-
-def is_sql_query(data):
-    return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
-
-
-def is_geojson_file(data):
-    return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
-
-
-def is_geojson_file_path(data):
-    return is_geojson_file(data) and os.path.exists(data)
-
-
-def is_geojson(data):
-    return isinstance(data, (list, dict)) or (isinstance(data, str) and is_geojson_file_path(data))
-
-
-def is_table_name(data):
-    return isinstance(data, str) and normalize_name(data) == data
 
 
 def save_index_as_column(df):

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import os
 import re
 import sys
 import base64
@@ -11,6 +12,8 @@ import numpy as np
 
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
+
+from .columns import normalize_name
 
 
 GEOM_TYPE_POINT = 'point'
@@ -292,3 +295,23 @@ def _set_time_cols_epoc(geometries):
         geometries[column] = geometries[column].astype(np.int64)
 
     return geometries
+
+
+def is_sql_query(data):
+    return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
+
+
+def is_geojson_file(data):
+    return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
+
+
+def is_geojson_file_path(data):
+    return is_geojson_file(data) and os.path.exists(data)
+
+
+def is_geojson(data):
+    return isinstance(data, (list, dict)) or (isinstance(data, str) and is_geojson_file_path(data))
+
+
+def is_table_name(data):
+    return isinstance(data, str) and normalize_name(data) == data

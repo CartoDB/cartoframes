@@ -3,8 +3,10 @@ from __future__ import absolute_import
 import pandas
 
 from . import defaults
-from ..utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
-from ..data import Dataset, is_sql_query, is_geojson_file
+
+from ..data import Dataset
+from ..utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe, \
+    is_sql_query, is_geojson_file
 
 try:
     import geopandas

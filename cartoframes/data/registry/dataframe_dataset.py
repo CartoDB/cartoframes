@@ -7,8 +7,8 @@ from carto.exceptions import CartoException, CartoRateLimitException
 from .base_dataset import BaseDataset
 from ...columns import Column, normalize_names
 from ..utils import decode_geometry, compute_geodataframe, \
-    detect_encoding_type, is_geojson, save_index_as_column
-from ...utils import map_geom_type, load_geojson
+    detect_encoding_type, save_index_as_column
+from ...utils import map_geom_type, load_geojson, is_geojson
 
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
