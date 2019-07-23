@@ -14,7 +14,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data import Dataset
 from cartoframes.data.utils import setting_value_exception
 from cartoframes.columns import normalize_name
-from cartoframes.geojson import load_geojson
+from cartoframes.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
 from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.registry.table_dataset import TableDataset

@@ -4,7 +4,7 @@
 import unittest
 import pandas as pd
 
-from cartoframes.geojson import load_geojson
+from cartoframes.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
 from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
 from cartoframes.data.registry.table_dataset import TableDataset
