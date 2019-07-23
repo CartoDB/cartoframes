@@ -108,9 +108,9 @@ class BaseDataset():
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_credentials = get_context_with_public_creds(self._credentials)
+        public_context = get_context_with_public_creds(self._credentials)
         try:
-            public_credentials.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            public_context.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoRateLimitException as err:
             raise err

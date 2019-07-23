@@ -11,7 +11,7 @@ from warnings import warn
 from carto.exceptions import CartoException
 
 from ..data.dataset import Dataset
-from ..data.utils import get_query_geom_type, debug_print
+from ..data.utils import get_query_geom_type
 
 from .. import utils
 from .. import context
@@ -465,7 +465,7 @@ class DataObsClient(object):
                 boundary=boundary,
                 numers=numers,
                 quantiles=quantiles).strip()
-        debug_print(self._verbose, query=query)
+        utils.debug_print(self._verbose, query=query)
         return self._fetch(query, decode_geom=True).dataframe
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):

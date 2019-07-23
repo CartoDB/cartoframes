@@ -43,7 +43,7 @@ class SQLClient(object):
         For more information check the `SQL API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
-        response = self._context.execute_query(query.strip())
+        response = self._context.execute_query(query)
         if not verbose:
             return response.get('rows')
         else:
@@ -54,7 +54,7 @@ class SQLClient(object):
         status and information of the job. For more information check the `Batch API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
-        return self._context.execute_long_running_query(query.strip())
+        return self._context.execute_long_running_query(query)
 
     def distinct(self, table_name, column_name):
         """Get the distict values and their count in a table
