@@ -7,10 +7,16 @@ class Legend(object):
     """Legend
 
     Args:
-        data (dict): The legend definition for a layer. It contains the information to render a legend:
-          `type`: color-category, color-bins, color-continuous, size-bins, size-continuous.
-          `prop` (optional): color, width, strokeColor, strokeWidth.
-          The legend also can display text information: `title`, `description` and `footer`.
+        data (dict): The legend definition for a layer. It contains the
+          information to render a legend:
+
+          - `type`: ``color-category``, ``color-bins``, ``color-continuous``,
+            ``size-bins``, or ``size-continuous``
+          - `prop` (optional): ``color``, ``width``, ``strokeColor``, or ``strokeWidth``
+          - `title` (optional): Title of legend
+          - `description` (optional): Description in legend
+          - `footer` (optional): Footer of legend. This is often used to
+            attribute data sources.
 
     Example:
 

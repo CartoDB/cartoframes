@@ -3,10 +3,12 @@ import unittest
 from carto.exceptions import CartoException
 
 from cartoframes.viz import Map, Layer, Source, constants
-from mocks.map_mock import MapMock
-from mocks.context_mock import ContextMock
-from mocks.dataset_mock import DatasetMock
-from mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from cartoframes.data import StrategiesRegistry
+
+from ..mocks.map_mock import MapMock
+from ..mocks.context_mock import ContextMock
+from ..mocks.dataset_mock import DatasetMock
+from ..mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 from .utils import build_geojson
 
@@ -170,6 +172,9 @@ class TestMapPublication(unittest.TestCase):
 
         self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
 
+    def tearDown(self):
+        StrategiesRegistry.instance = None
+
     def assert_kuviz(self, kuviz, name, privacy):
         self.assertIsNotNone(kuviz.id)
         self.assertIsNotNone(kuviz.url)
@@ -183,7 +188,7 @@ class TestMapPublication(unittest.TestCase):
         self.assertEqual(kuviz_dict['privacy'], privacy)
 
     def test_map_publish_remote(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -193,7 +198,7 @@ class TestMapPublication(unittest.TestCase):
 
     def test_map_publish_unsync_fails(self):
         query = "SELECT 1"
-        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset = DatasetMock(query, credentials=self.context)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
@@ -203,7 +208,7 @@ class TestMapPublication(unittest.TestCase):
 
     def test_map_publish_unsync_sync_data_and_publish(self):
         query = "SELECT 1"
-        dataset = DatasetMock.from_query(query=query, context=self.context)
+        dataset = DatasetMock(query, credentials=self.context)
         dataset._is_saved_in_carto = False
         map = MapMock(Layer(Source(dataset)))
 
@@ -215,7 +220,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_with_password(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -224,7 +229,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
     def test_map_publish_deletion(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -233,7 +238,7 @@ class TestMapPublication(unittest.TestCase):
         self.assertIsNone(map._kuviz)
 
     def test_map_publish_update_name(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -244,7 +249,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
 
     def test_map_publish_update_password(self):
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         name = 'cf_publish'
@@ -261,7 +266,7 @@ class TestMapPublication(unittest.TestCase):
 
         KuvizPublisherMock.is_public = is_not_public
 
-        dataset = DatasetMock.from_table(table_name='fake_table', context=self.context)
+        dataset = DatasetMock('fake_table', credentials=self.context)
         map = MapMock(Layer(Source(dataset)))
 
         msg = ('The datasets used in your map are not public. '

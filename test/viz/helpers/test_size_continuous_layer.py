@@ -13,6 +13,8 @@ class TestSizeContinuousLayerHelper(unittest.TestCase):
 
     def test_size_continuous_layer(self):
         "should create a layer with the proper attributes"
+        Source._get_geom_type = Mock(return_value='point')
+
         layer = helpers.size_continuous_layer(
             source='sf_neighborhoods',
             value='name'
@@ -77,3 +79,80 @@ class TestSizeContinuousLayerHelper(unittest.TestCase):
             layer.style._style['line']['color'],
             'opacity(blue, 0.8)'
         )
+
+    def test_size_continuous_layer_legend(self):
+        "should show/hide the legend"
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            legend=False
+        )
+
+        self.assertEqual(layer.legend._type, '')
+        self.assertEqual(layer.legend._title, '')
+
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            legend=True
+        )
+
+        self.assertEqual(layer.legend._type, {
+            'point': 'size-continuous-point',
+            'line': 'size-continuous-line',
+            'polygon': 'size-continuous-polygon'
+        })
+        self.assertEqual(layer.legend._title, 'name')
+
+    def test_size_continuous_layer_popup(self):
+        "should show/hide the popup"
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            popup=False
+        )
+
+        self.assertEqual(layer.popup._hover, [])
+
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            popup=True
+        )
+
+        self.assertEqual(layer.popup._hover, [{
+            'title': 'name',
+            'value': '$name'
+        }])
+
+    def test_size_continuous_layer_widget(self):
+        "should show/hide the widget"
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            widget=False
+        )
+
+        self.assertEqual(layer.widgets._widgets, [])
+
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            widget=True
+        )
+
+        self.assertEqual(layer.widgets._widgets[0]._type, 'histogram')
+        self.assertEqual(layer.widgets._widgets[0]._title, 'Distribution')
+
+    def test_size_continuous_layer_animate(self):
+        "should animate a property and disable the popups"
+        layer = helpers.size_continuous_layer(
+            'sf_neighborhoods',
+            'name',
+            animate='time'
+        )
+
+        self.assertEqual(layer.popup._hover, [])
+        self.assertEqual(layer.widgets._widgets[0]._type, 'time-series')
+        self.assertEqual(layer.widgets._widgets[0]._title, 'Animation')
+        self.assertEqual(layer.widgets._widgets[0]._value, 'time')

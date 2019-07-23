@@ -14,3 +14,4 @@ class TestTimeSeriesWidget(unittest.TestCase):
         self.assertEqual(widget_info.get('type'), 'time-series')
         self.assertEqual(widget_info.get('value'), '$value')
         self.assertEqual(widget_info.get('title'), 'Time Series Widget')
+        self.assertEqual(widget_info.get('read_only'), False)

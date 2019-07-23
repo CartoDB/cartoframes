@@ -8,10 +8,10 @@ from geopandas.geoseries import GeoSeries
 
 from cartoframes.data import Dataset
 from cartoframes.data.utils import compute_query, compute_geodataframe, \
-    decode_geometry, detect_encoding_type, ENC_SHAPELY, ENC_WKB, ENC_WKB_HEX, \
-    ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
+    decode_geometry, detect_encoding_type, ENC_SHAPELY, \
+    ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
 
-from mocks.context_mock import ContextMock
+from ..mocks.context_mock import ContextMock
 
 
 class TestDataUtils(unittest.TestCase):
@@ -40,83 +40,83 @@ class TestDataUtils(unittest.TestCase):
 
     def test_compute_query(self):
         """data.utils.compute_query"""
-        ds = Dataset.from_table('table_name', schema='schema', context=self.context)
+        ds = Dataset('table_name', schema='schema', credentials=self.context)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "schema"."table_name"')
 
     def test_compute_query_default_schema(self):
         """data.utils.compute_query"""
-        ds = Dataset.from_table('table_name', context=self.context)
+        ds = Dataset('table_name', credentials=self.context)
         query = compute_query(ds)
         self.assertEqual(query, 'SELECT * FROM "public"."table_name"')
 
     def test_compute_geodataframe_geometry(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'geometry': self.geom}))
+        ds = Dataset(pd.DataFrame({'geometry': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_the_geom(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'the_geom': self.geom}))
+        ds = Dataset(pd.DataFrame({'the_geom': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_wkt_geometry(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'wkt_geometry': self.geom}))
+        ds = Dataset(pd.DataFrame({'wkt_geometry': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_wkb_geometry(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'wkb_geometry': self.geom}))
+        ds = Dataset(pd.DataFrame({'wkb_geometry': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_geom(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'geom': self.geom}))
+        ds = Dataset(pd.DataFrame({'geom': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_wkt(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'wkt': self.geom}))
+        ds = Dataset(pd.DataFrame({'wkt': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_wkb(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'wkb': self.geom}))
+        ds = Dataset(pd.DataFrame({'wkb': self.geom}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_wrong(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'wrong': []}))
+        ds = Dataset(pd.DataFrame({'wrong': []}))
         with self.assertRaises(ValueError, msg=self.msg):
             compute_geodataframe(ds)
 
     def test_compute_geodataframe_latitude_longitude(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'latitude': self.lat, 'longitude': self.lng}))
+        ds = Dataset(pd.DataFrame({'latitude': self.lat, 'longitude': self.lng}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_lat_lng(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'lat': self.lat, 'lng': self.lng}))
+        ds = Dataset(pd.DataFrame({'lat': self.lat, 'lng': self.lng}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_lat_lon(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'lat': self.lat, 'lon': self.lng}))
+        ds = Dataset(pd.DataFrame({'lat': self.lat, 'lon': self.lng}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_lat_long(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'lat': self.lat, 'long': self.lng}))
+        ds = Dataset(pd.DataFrame({'lat': self.lat, 'long': self.lng}))
         gdf = compute_geodataframe(ds)
         self.assertEqual(str(gdf.geometry), str(self.geometry))
 
     def test_compute_geodataframe_only_latitude(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'latitude': self.lat}))
+        ds = Dataset(pd.DataFrame({'latitude': self.lat}))
         with self.assertRaises(ValueError, msg=self.msg):
             compute_geodataframe(ds)
 
     def test_compute_geodataframe_only_longitude(self):
-        ds = Dataset.from_dataframe(pd.DataFrame({'longitude': self.lng}))
+        ds = Dataset(pd.DataFrame({'longitude': self.lng}))
         with self.assertRaises(ValueError, msg=self.msg):
             compute_geodataframe(ds)
 

@@ -62,7 +62,7 @@ Map(Layer(df))
 from cartoframes.viz import Map, Layer
 from cartoframes.data import Dataset
 
-ds = Dataset.from_table('your_table_name')
+ds = Dataset('your_table_name')
 
 df = ds.download(limit=10)
 
@@ -75,7 +75,7 @@ Map(Layer(df))
 from cartoframes.viz import Map, Layer
 from cartoframes.data import Dataset
 
-ds = Dataset.from_table('populated_places')
+ds = Dataset('populated_places')
 
 Map(Layer(ds))
 ```
@@ -88,7 +88,7 @@ import pandas as pd
 
 data = {'latitude': [0, 10, 20, 30], 'longitude': [0, 10, 20, 30]}
 df = pd.DataFrame.from_dict(data)
-ds = Dataset.from_dataframe(df)
+ds = Dataset(df)
 
 Map(Layer(ds))
 ```

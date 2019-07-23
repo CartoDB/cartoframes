@@ -58,7 +58,7 @@ Finally, we will be ready to publish the visualization!
 from cartoframes.viz import Map, Layer
 from cartoframes.data import Dataset
 
-ds = Dataset.from_table('private_table_name')
+ds = Dataset('private_table_name')
 ds.download()
 
 tmap = Map(Layer(ds))

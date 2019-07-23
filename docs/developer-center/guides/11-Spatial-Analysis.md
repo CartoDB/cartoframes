@@ -2,7 +2,7 @@
 
 ### About this Guide
 
-CARTOframes provides the `Dataset.from_query` method for performing analysis and returning the results as a pandas dataframe, and the `Layer` class for visualizing analysis as a map layer. Both methods run the quries against a **PostgreSQL** database with **PostGIS**. CARTO also provides more advanced spatial analysis through the crankshaft extension.
+CARTOframes provides the `Dataset(your_query)` method for performing analysis and returning the results as a pandas dataframe, and the `Layer` class for visualizing analysis as a map layer. Both methods run the quries against a **PostgreSQL** database with **PostGIS**. CARTO also provides more advanced spatial analysis through the crankshaft extension.
 
 In this guide, we will analyze McDonald’s locations in US Census tracts using spatial analysis functionality in CARTO.
 
@@ -37,7 +37,7 @@ McDonald's:
 mcdonalds_nyc_data = Dataset('mcdonalds_nyc', context=cf_context)
 mcdonalds_nyc_data_df = mcdonalds_nyc_data.download()
 
-mcdonalds_nyc = Dataset.from_dataframe(mcdonalds_nyc_data_df)
+mcdonalds_nyc = Dataset(mcdonalds_nyc_data_df)
 mcdonalds_nyc.upload(table_name='mcdonalds_nyc', if_exists='replace', context=context)
 ```
 
@@ -47,7 +47,7 @@ NYC Census Tracts:
 nyc_census_tracts_data = Dataset('nyc_census_tracts', context=cf_context)
 nyc_census_tracts_data_df = nyc_census_tracts_data.download()
 
-nyc_census_tracts = Dataset.from_dataframe(nyc_census_tracts_data_df)
+nyc_census_tracts = Dataset(nyc_census_tracts_data_df)
 nyc_census_tracts.upload(table_name='nyc_census_tracts', if_exists='replace', context=context)
 ```
 
@@ -56,7 +56,7 @@ nyc_census_tracts.upload(table_name='nyc_census_tracts', if_exists='replace', co
 Find the number of McDonald’s in each census tract in New York City.
 
 ```py
-mcdonalds_per_census_tracts = Dataset.from_query('''
+mcdonalds_per_census_tracts = Dataset('''
     SELECT
       tracts.geom_refs AS FIPS_code,
       tracts.the_geom as the_geom,
@@ -91,7 +91,7 @@ Build 100 meter buffer area for each McDonald’s by updating the geometry.
 #### Create a new table and save it as `nyc_mcdonalds_buffer_100m`.
 
 ```py
-nyc_mcdonalds_buffer_100m = Dataset.from_query(
+nyc_mcdonalds_buffer_100m = Dataset(
     '''
     SELECT name, id, address, city, zip,
         ST_Buffer(the_geom::geography, 100)::geometry AS the_geom
@@ -127,7 +127,7 @@ Map([
 > Note: for more complicated queries, it is best to create a temporary table from the query and then visualize it.
 
 ```py
-k_means_dataset = Dataset.from_query('''
+k_means_dataset = Dataset('''
        SELECT
          row_number() OVER () AS cartodb_id,
          con.cluster_no,

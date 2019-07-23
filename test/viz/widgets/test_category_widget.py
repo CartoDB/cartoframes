@@ -14,3 +14,4 @@ class TestCategoryWidget(unittest.TestCase):
         self.assertEqual(widget_info.get('type'), 'category')
         self.assertEqual(widget_info.get('value'), '$value')
         self.assertEqual(widget_info.get('title'), 'Category Widget')
+        self.assertEqual(widget_info.get('read_only'), False)

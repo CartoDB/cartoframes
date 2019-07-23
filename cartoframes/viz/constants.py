@@ -66,3 +66,19 @@ WIDGET_TYPES = [
     'animation',
     'time-series'
 ]
+
+FORMULA_OPERATIONS_VIEWPORT = {
+  'count': 'viewportCount',
+  'avg': 'viewportAvg',
+  'min': 'viewportMin',
+  'max': 'viewportMax',
+  'sum': 'viewportSum'
+}
+
+FORMULA_OPERATIONS_GLOBAL = {
+  'count': 'globalCount',
+  'avg': 'globalAvg',
+  'min': 'globalMin',
+  'max': 'globalMax',
+  'sum': 'globalSum'
+}

@@ -69,7 +69,7 @@ def set_default_context(first=None, second=None, base_url=None, api_key=None, co
             from cartoframes.auth import Credentials, set_default_context
 
             creds = Credentials(
-                key='abcdefg',
+                api_key='abcdefg',
                 username='cartoframes'
             )
             set_default_context(creds)

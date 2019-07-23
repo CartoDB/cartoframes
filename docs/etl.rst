@@ -42,7 +42,7 @@ Read data from PostgreSQL to CARTO
     Map(Layer(raw_data))
 
     # send to carto
-    pg_dataset = Dataset.from_dataframe(df)
+    pg_dataset = Dataset(df)
     pg_dataset.upload(table_name='table_from_pg_db')
 
 
