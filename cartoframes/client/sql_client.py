@@ -32,7 +32,7 @@ class SQLClient(object):
             ...
     """
 
-    def __init__(self, credentials, session=None):
+    def __init__(self, credentials):
         self._is_org_user = None
         self._credentials = credentials
         self._context = context.create_context(credentials)

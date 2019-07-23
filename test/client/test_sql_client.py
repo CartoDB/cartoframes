@@ -128,7 +128,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_DISTINCT_RESPONSE
         output = self._sql_client.distinct('table_name', 'column_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT column_name, COUNT(*) FROM table_name
             GROUP BY 1 ORDER BY 2 DESC
         '''.strip())
@@ -139,7 +139,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_COUNT_RESPONSE
         output = self._sql_client.count('table_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT COUNT(*) FROM table_name;
         '''.strip())
         self.assertEqual(output, 12345)
@@ -149,7 +149,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_BOUNDS_RESPONSE
         output = self._sql_client.bounds('query')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT ARRAY[
                 ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
                 ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
@@ -168,7 +168,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_SCHEMA_RESPONSE
         output = self._sql_client.schema('table_name', raw=True)
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT * FROM table_name LIMIT 0;
         '''.strip())
         self.assertEqual(output, {
@@ -183,7 +183,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_DESCRIBE_NUMBER
         self._sql_client.describe('table_name', 'column_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT COUNT(*)
             FROM table_name;
         '''.strip())
@@ -194,7 +194,7 @@ class TestSQLClient(unittest.TestCase):
         self._mock_context.response = SQL_DESCRIBE_NUMBER
         self._sql_client.describe('table_name', 'column_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             SELECT COUNT(*),AVG(column_name),MIN(column_name),MAX(column_name)
             FROM table_name;
         '''.strip())
@@ -205,7 +205,7 @@ class TestSQLClient(unittest.TestCase):
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
@@ -219,7 +219,7 @@ class TestSQLClient(unittest.TestCase):
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
@@ -233,7 +233,7 @@ class TestSQLClient(unittest.TestCase):
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             BEGIN;
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
@@ -245,7 +245,7 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.insert_table"""
         self._sql_client.insert_table('table_name', ['id', 'name'], [0, 'a'])
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             INSERT INTO table_name (id,name) VALUES(0,'a');
         '''.strip())
 
@@ -253,7 +253,7 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.update_table"""
         self._sql_client.update_table('table_name', 'name', 'b', 'id = 0')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             UPDATE table_name SET name='b' WHERE id = 0;
         '''.strip())
 
@@ -261,7 +261,7 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.rename_table"""
         self._sql_client.rename_table('table_name', 'new_table_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             ALTER TABLE table_name RENAME TO new_table_name;
         '''.strip())
 
@@ -269,6 +269,6 @@ class TestSQLClient(unittest.TestCase):
         """client.SQLClient.drop_table"""
         self._sql_client.drop_table('table_name')
 
-        self.assertEqual(self._mock_context.query, '''
+        self.assertEqual(self._mock_context.query.strip(), '''
             DROP TABLE IF EXISTS table_name;
         '''.strip())
