@@ -14,7 +14,6 @@ import sys
 import json
 import random
 import warnings
-import requests
 from datetime import datetime
 
 from carto.exceptions import CartoException

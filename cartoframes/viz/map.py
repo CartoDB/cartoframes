@@ -9,7 +9,6 @@ from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
-from .source import SourceType
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .. import utils
 
@@ -395,6 +394,7 @@ def _format_list_bounds(bounds):
         bounds[1][0],
         bounds[1][1])
 
+
 def _format_dict_bounds(bounds):
     if 'west' not in bounds or 'south' not in bounds or \
        'east' not in bounds or 'north' not in bounds:
@@ -411,8 +411,8 @@ def _format_dict_bounds(bounds):
 def _clamp_and_format_bounds(west, south, east, north):
     west = _clamp(west, -180, 180)
     east = _clamp(east, -180, 180)
-    south =_clamp(south, -90, 90)
-    north =_clamp(north, -90, 90)
+    south = _clamp(south, -90, 90)
+    north = _clamp(north, -90, 90)
 
     return [[west, south], [east, north]]
 
@@ -437,7 +437,7 @@ def _compute_bounds(layers):
 
         if layer_bounds[0][0] < bounds[0][0]:
             bounds[0][0] = layer_bounds[0][0]
-    
+
         if layer_bounds[0][1] < bounds[0][1]:
             bounds[0][1] = layer_bounds[0][1]
 

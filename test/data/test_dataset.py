@@ -413,9 +413,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dataset.schema, 'public')
 
     def test_dataset_schema_from_org_context(self):
-        username = 'fake_username'
-        dataset = DatasetMock('fake_table', credentials=self.credentials)
-        # self.assertEqual(dataset.schema, username)
+        pass
+        # dataset = DatasetMock('fake_table', credentials=self.credentials)
+        # self.assertEqual(dataset.schema, 'fake_username')
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)

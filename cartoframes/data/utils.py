@@ -1,5 +1,4 @@
 import re
-import os
 import sys
 import binascii as ba
 from warnings import warn

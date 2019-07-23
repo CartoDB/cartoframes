@@ -11,8 +11,8 @@ _default_credentials = None
 
 
 def set_default_credentials(
-    first=None, second=None, credentials=None,
-    username=None, base_url=None, api_key=None, session=None):
+        first=None, second=None, credentials=None,
+        username=None, base_url=None, api_key=None, session=None):
     """set_default_credentials
 
     Args:
@@ -100,7 +100,7 @@ def set_default_credentials(
             set_default_credentials(credentials)
     """
     global _default_credentials
-    
+
     _base_url = base_url if first is None else first
     _username = username if first is None else first
     _api_key = (api_key if second is None else second) or 'default_public'
