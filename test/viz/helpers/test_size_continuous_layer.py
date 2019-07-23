@@ -7,6 +7,13 @@ from cartoframes.viz import helpers, Source
 
 
 class TestSizeContinuousLayerHelper(unittest.TestCase):
+    def setUp(self):
+        self.orig_compute_query_bounds = Source._compute_query_bounds
+        Source._compute_query_bounds = Mock(return_valye=None)
+
+    def tearDown(self):
+        Source._compute_query_bounds = self.orig_compute_query_bounds
+
     def test_helpers(self):
         "should be defined"
         self.assertNotEqual(helpers.size_continuous_layer, None)
