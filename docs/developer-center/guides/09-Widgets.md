@@ -94,9 +94,9 @@ from cartoframes.viz.widgets import animation_widget
 
 Map(
     Layer(
-        'spend_data',
-        'filter: animation($date, 30, fade(1, 1))'
-        widgets=animation_widget()
+        'seattle_collisions',
+        'filter: animation($incdate, 30, fade(1, 1))',
+        widgets=[animation_widget()]
     )
 )
 ```
@@ -110,8 +110,8 @@ from cartoframes.viz.widgets import animation_widget
 
 Map(
     Layer(
-        'spend_data',
-        'width: animation(linear($date), 20,fade(1, 1)) * ramp(linear($amount, 2, 5), [5, 20])'
+        'seattle_collisions',
+        'width: animation(linear($incdate), 20,fade(1, 1)) * ramp(linear($personcount, 2, 5), [5, 20])',
         widgets=animation_widget(prop='width')
     )
 )
