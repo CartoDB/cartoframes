@@ -185,8 +185,8 @@ class Credentials(object):
 
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
-                Credentials(username=eschbacher, api_key=abcdefg,
-                        base_url=https://eschbacher.carto.com/)
+                Credentials(username='eschbacher', api_key='abcdefg',
+                    base_url='https://eschbacher.carto.com/')
         """
         path_to_remove = config_file or _DEFAULT_PATH
         try:

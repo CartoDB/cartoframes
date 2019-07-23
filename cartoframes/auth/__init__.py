@@ -18,7 +18,7 @@ def set_default_credentials(
     Args:
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
           A :py:class:`Credentials <cartoframes.credentials.Credentials>`
-          instance can be used in place of a `uesrname | base_url`/`api_key` combination.
+          instance can be used in place of a `username | base_url`/`api_key` combination.
         base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
           should use the form ``https://{username}.carto.com`` (e.g.,
           https://eschbacher.carto.com for user ``eschbacher``) whether on
