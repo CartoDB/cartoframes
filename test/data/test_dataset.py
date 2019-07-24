@@ -22,7 +22,11 @@ from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
 from cartoframes import context
 
-from ..mocks.dataset_mock import DatasetMock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+from ..mocks.dataset_mock import DatasetMock, QueryDatasetMock
 from ..mocks.context_mock import ContextMock
 
 from ..utils import _UserUrlLoader
@@ -462,19 +466,16 @@ class TestDatasetInfo(unittest.TestCase):
     def tearDown(self):
         context.create_context = self.original_create_context
 
+    def test_dataset_info_should_work_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock(table_name, credentials=self.credentials)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+
     def test_dataset_get_privacy_from_new_table(self):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.credentials)
         dataset.upload(table_name='fake_table')
         self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
-
-    def test_dataset_get_privacy_from_not_sync(self):
-        query = 'SELECT 1'
-        dataset = DatasetMock(query, credentials=self.credentials)
-        error_msg = ("We can not extract Dataset info from a query. Use `Dataset('table_name')` method "
-                     "to get or modify the info from a CARTO table.")
-        with self.assertRaises(CartoException, msg=error_msg):
-            dataset.dataset_info
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
@@ -493,11 +494,6 @@ class TestDatasetInfo(unittest.TestCase):
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info(privacy=wrong_privacy)
 
-    def test_dataset_info_should_work_from_table(self):
-        table_name = 'fake_table'
-        dataset = DatasetMock(table_name, credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
-
     def test_dataset_info_props_are_private(self):
         table_name = 'fake_table'
         dataset = DatasetMock(table_name, credentials=self.credentials)
@@ -508,6 +504,37 @@ class TestDatasetInfo(unittest.TestCase):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset_info.privacy = privacy
         self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+
+    def test_dataset_info_from_dataframe(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        dataset = DatasetMock(df)
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method '
+                     'to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.dataset_info
+
+    def test_dataset_info_from_dataframe_sync(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
+        dataset = DatasetMock(df)
+        dataset.upload(table_name='fake_table', credentials=self.credentials)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+
+    def test_dataset_info_from_query(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock(query, credentials=self.credentials)
+        error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                     '`Dataset(table_name)` to get or modify the info from a CARTO table.')
+        with self.assertRaises(ValueError, msg=error_msg):
+            dataset.dataset_info
+
+    def test_dataset_info_from_query_update(self):
+        query = 'SELECT 1'
+        dataset = DatasetMock(query, credentials=self.credentials)
+        error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
+                     '`Dataset(table_name)` to get or modify the info from a CARTO table.')
+        with self.assertRaises(ValueError, msg=error_msg):
+            dataset.update_dataset_info()
 
 
 class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
@@ -646,6 +673,29 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset.credentials)
+
+    def test_dataset_get_table_names_from_table(self):
+        table_name = 'fake_table'
+        dataset = DatasetMock(table_name, credentials=self.credentials)
+        self.assertEqual(dataset.get_table_names(), [table_name])
+
+    def test_dataset_get_table_names_from_query(self):
+        table_name = 'fake_table'
+
+        QueryDatasetMock.get_table_names = Mock(return_value=[table_name])
+
+        query = 'SELECT * FROM {}'.format(table_name)
+        dataset = DatasetMock(query, credentials=self.credentials)
+        self.assertEqual(dataset.get_table_names(), [table_name])
+
+    def test_dataset_get_table_names_from_dataframe(self):
+        df = load_geojson(self.test_geojson)
+        dataset = Dataset(df)
+        error_msg = ('Your data is not synchronized with CARTO.'
+                     'First of all, you should call upload method '
+                     'to save your data in CARTO.')
+        with self.assertRaises(CartoException, msg=error_msg):
+            dataset.get_table_names()
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
