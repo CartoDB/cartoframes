@@ -94,4 +94,6 @@ class Widget():
         for key, value in data.items():
             if key not in attributes:
                 options[key] = value
+
+        options['read_only'] = data.get('read_only', False)
         return options

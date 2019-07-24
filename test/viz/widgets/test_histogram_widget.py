@@ -14,4 +14,4 @@ class TestHistogramWidget(unittest.TestCase):
         self.assertEqual(widget_info.get('type'), 'histogram')
         self.assertEqual(widget_info.get('value'), '$value')
         self.assertEqual(widget_info.get('title'), 'Histogram Widget')
-        self.assertEqual(widget_info.get('read_only'), False)
+        self.assertEqual(widget_info.get('options').get('readOnly'), False)

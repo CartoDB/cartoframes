@@ -9,7 +9,7 @@ class TestFormulaWidget(unittest.TestCase):
 
     def test_factory(self):
         "should create a default formula widget"
-        widget = widgets.formula_widget('$value', title='Formula Widget')
+        widget = widgets.formula_widget('value', title='Formula Widget')
         widget_info = widget.get_info()
         self.assertEqual(widget_info.get('type'), 'formula')
         self.assertEqual(widget_info.get('value'), '$value')
@@ -29,12 +29,12 @@ class TestFormulaWidget(unittest.TestCase):
 
     def test_formula_viewport(self):
         "should create a formula widget to get a viewport operation"
-        widget = widgets.formula_widget('$value', 'avg')
+        widget = widgets.formula_widget('value', 'avg')
         widget_info = widget.get_info()
         self.assertEqual(widget_info.get('value'), 'viewportAvg($value)')
 
     def test_formula_global(self):
         "should create a formula widget to get a global operation"
-        widget = widgets.formula_widget('$value', 'avg', is_global=True)
+        widget = widgets.formula_widget('value', 'avg', is_global=True)
         widget_info = widget.get_info()
         self.assertEqual(widget_info.get('value'), 'globalAvg($value)')
