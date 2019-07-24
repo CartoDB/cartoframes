@@ -65,13 +65,14 @@ good method:
             lnglat=('pickup_latitude', 'pickup_longitude')
         )
 """  # noqa
-from cartoframes.auth import Context
+from cartoframes.auth import set_default_credentials
+from cartoframes.data import Dataset, tables
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
 
 
-class Examples(Context):
+class Examples():
     """A Context with a CARTO account containing example data. This
     special :py:class:`Context <cartoframes.auth.Context>`
     provides read access to all the datasets in the cartoframes CARTO account.
@@ -110,7 +111,7 @@ class Examples(Context):
     """
 
     def __init__(self):
-        super(Examples, self).__init__(
+        set_default_credentials(
             base_url=EXAMPLE_BASE_URL,
             api_key=EXAMPLE_API_KEY
         )
@@ -125,11 +126,11 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_brooklyn_poverty()
+            from cartoframes.examples import examples
+            df = examples.read_brooklyn_poverty()
 
         """
-        return self.read('brooklyn_poverty', limit, **kwargs)
+        return Dataset('brooklyn_poverty').download(limit, **kwargs)
 
     def read_ne_50m_graticules_15(self, limit=None, **kwargs):
         """50m world Mercator grid
@@ -139,11 +140,11 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_ne_50m_graticules_15()
+            from cartoframes.examples import examples
+            df = examples.read_ne_50m_graticules_15()
 
         """
-        return self.read('ne_50m_graticules_15', limit, **kwargs)
+        return Dataset('ne_50m_graticules_15').download(limit, **kwargs)
 
     def read_mcdonalds_nyc(self, limit=None, **kwargs):
         """McDonald's locations for New York City, USA. See the function
@@ -154,11 +155,11 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_mcdonalds_nyc()
+            from cartoframes.examples import examples
+            df = examples.read_mcdonalds_nyc()
 
         """
-        return self.read('mcdonalds_nyc', limit, **kwargs)
+        return Dataset('mcdonalds_nyc').download(limit, **kwargs)
 
     def read_nyc_census_tracts(self, limit=None, **kwargs):
         """Census tracts for New York City, USA. See the function
@@ -169,11 +170,11 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_nyc_census_tracts()
+            from cartoframes.examples import examples
+            df = examples.read_nyc_census_tracts()
 
         """
-        return self.read('nyc_census_tracts', limit, **kwargs)
+        return Dataset('nyc_census_tracts').download(limit, **kwargs)
 
     def read_taxi(self, limit=None, **kwargs):
         """Taxi pickup and drop-off logs for New York City, USA. See the
@@ -184,11 +185,11 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_taxi()
+            from cartoframes.examples import examples
+            df = examples.read_taxi()
 
         """
-        return self.read('taxi_50k', limit, **kwargs)
+        return Dataset('taxi_50k').download(limit, **kwargs)
 
     def read_nat(self, limit=None, **kwargs):
         """Historical homicide rates for the United States at the county level.
@@ -199,37 +200,18 @@ class Examples(Context):
 
         .. code::
 
-            from cartoframes.examples import example_context
-            df = example_context.read_nat()
+            from cartoframes.examples import examples
+            df = examples.read_nat()
 
         """
-        return self.read('nat', limit, **kwargs)
+        return Dataset('nat').download(limit, **kwargs)
 
-    # override behavior of Context methods
-    def data(self, table_name, metadata, persist_as=None, how='the_geom'):
-        raise RuntimeError('Context.data method disabled for Examples')
-
-    def write(self, df, table_name, temp_dir=None, overwrite=False,
-              lnglat=None, encode_geom=False, geom_col=None,
-              **kwargs):
-        raise RuntimeError('Context.write method disabled for Examples')
-
-    def data_boundaries(self, boundary=None, region=None, decode_geom=False,
-                        timespan=None, include_nonclipped=False):
-        raise RuntimeError(
-            'Context.data_boundaries method disabled for Examples')
-
-    def data_discovery(self, region, keywords=None, regex=None, time=None,
-                       boundaries=None, include_quantiles=False):
-        raise RuntimeError(
-            'Context.data_discovery method disabled for Examples')
-
-    def data_augment(self, table_name, metadata):
-        raise RuntimeError(
-            'Context.data_augment method disabled for Examples')
+    def tables(self):
+        from cartoframes.auth import _default_credentials
+        return tables(_default_credentials)
 
 
-example_context = Examples()
+examples = Examples()
 
 
 def read_ne_50m_graticules_15(limit=None, **kwargs):
@@ -257,7 +239,7 @@ def read_ne_50m_graticules_15(limit=None, **kwargs):
         df = read_ne_50m_graticules_15()
 
     """
-    return example_context.read_ne_50m_graticules_15(limit=limit, **kwargs)
+    return examples.read_ne_50m_graticules_15(limit=limit, **kwargs)
 
 
 def read_brooklyn_poverty(limit=None, **kwargs):
@@ -289,7 +271,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
         df = read_brooklyn_poverty()
 
     """  # noqa
-    return example_context.read_brooklyn_poverty(limit=limit, **kwargs)
+    return examples.read_brooklyn_poverty(limit=limit, **kwargs)
 
 
 def read_mcdonalds_nyc(limit=None, **kwargs):
@@ -322,7 +304,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
         df = read_mcdonalds_nyc()
 
     """  # noqa
-    return example_context.read_mcdonalds_nyc(limit=limit, **kwargs)
+    return examples.read_mcdonalds_nyc(limit=limit, **kwargs)
 
 
 def read_nyc_census_tracts(limit=None, **kwargs):
@@ -355,7 +337,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
         df = read_nyc_census_tracts()
 
     """  # noqa
-    return example_context.read_nyc_census_tracts(limit=limit, **kwargs)
+    return examples.read_nyc_census_tracts(limit=limit, **kwargs)
 
 
 def read_taxi(limit=None, **kwargs):
@@ -407,7 +389,7 @@ def read_taxi(limit=None, **kwargs):
         df = read_taxi()
 
     """  # noqa
-    return example_context.read_taxi(limit=limit, **kwargs)
+    return examples.read_taxi(limit=limit, **kwargs)
 
 
 def read_nat(limit=None, **kwargs):
@@ -440,4 +422,4 @@ def read_nat(limit=None, **kwargs):
         df = read_nat()
 
     """  # noqa
-    return example_context.read_nat(limit=limit, **kwargs)
+    return examples.read_nat(limit=limit, **kwargs)

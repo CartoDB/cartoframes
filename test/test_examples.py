@@ -18,19 +18,6 @@ class TestExamples(unittest.TestCase):
         tables = self.examples.tables()
         self.assertTrue(tables)
 
-    def test_disabled_context_functions(self):
-        """examples.Example.x_methods that are disabled"""
-        with self.assertRaises(RuntimeError):
-            self.examples.data(None, None)
-        with self.assertRaises(RuntimeError):
-            self.examples.write(None, table_name='t')
-        with self.assertRaises(RuntimeError):
-            self.examples.data_boundaries()
-        with self.assertRaises(RuntimeError):
-            self.examples.data_discovery(None)
-        with self.assertRaises(RuntimeError):
-            self.examples.data_augment(None, None)
-
     def test_read_taxi(self):
         """examples.read_taxi"""
         from cartoframes.examples import read_taxi
