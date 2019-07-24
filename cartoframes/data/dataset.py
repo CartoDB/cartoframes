@@ -96,6 +96,10 @@ class Dataset(object):
         self._strategy = self._init_strategy(data, credentials, schema)
         self._is_saved_in_carto = self._init_saved_in_carto()
 
+    def __add__(self, style=None):
+        from ..viz import Layer
+        return Layer(self, style)
+
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or _get_default_credentials()
         for strategy in self._registry.get_strategies():
