@@ -130,7 +130,7 @@ class Source(object):
         credentials = self.dataset.credentials
         if credentials:
             return {
-                # VL requires !username but CF allows passing only the base_url.
+                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
                 # That's why 'user' is used by default if username is empty.
                 'username': credentials.username or 'user',
                 'api_key': credentials.api_key,
