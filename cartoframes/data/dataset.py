@@ -5,7 +5,8 @@ from .registry.dataframe_dataset import DataFrameDataset
 from .registry.query_dataset import QueryDataset
 from .registry.table_dataset import TableDataset
 from .dataset_info import DatasetInfo
-from .utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
+
+from ..utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
 
 from carto.exceptions import CartoException
 
@@ -53,10 +54,10 @@ class Dataset(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.data import Dataset
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -67,10 +68,10 @@ class Dataset(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.data import Dataset
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
@@ -166,10 +167,10 @@ class Dataset(object):
 
             .. code::
 
-               from cartoframes.auth import set_default_context
+               from cartoframes.auth import set_default_credentials
                from cartoframes.data import Dataset
 
-               set_default_context(
+               set_default_credentials(
                    base_url='https://your_user_name.carto.com/',
                    api_key='your api key'
                )
@@ -199,9 +200,9 @@ class Dataset(object):
             .. code::
 
                 from cartoframes.data import Dataset, DatasetInfo
-                from cartoframes.auth import set_default_context
+                from cartoframes.auth import set_default_credentials
 
-                set_default_context(
+                set_default_credentials(
                     base_url='https://your_user_name.carto.com/',
                     api_key='your api key'
                 )
@@ -227,9 +228,9 @@ class Dataset(object):
         Example:
             .. code::
                 from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
+                from cartoframes.auth import set_default_credentials
                 # use cartoframes example account
-                set_default_context('https://cartoframes.carto.com')
+                set_default_credentials('https://cartoframes.carto.com')
                 d = Dataset('brooklyn_poverty')
                 df = d.download(decode_geom=True)
         """
@@ -265,16 +266,16 @@ class Dataset(object):
               and other special characters.
             credentials (:py:class:`Context <cartoframes.auth.Context>`, optional):
               credentials of user account to send Dataset to. If not provided,
-              a default credentials (if set with :py:meth:`set_default_context
-              <cartoframes.auth.set_default_context>`) will attempted to be
+              a default credentials (if set with :py:meth:`set_default_credentials
+              <cartoframes.auth.set_default_credentials>`) will attempted to be
               used.
         Example:
             Send a pandas DataFrame to CARTO.
             .. code::
-                from cartoframes.auth import set_default_context
+                from cartoframes.auth import set_default_credentials
                 from cartoframes.data import Dataset
                 import pandas as pd
-                set_default_context(
+                set_default_credentials(
                     base_url='https://your_user_name.carto.com',
                     api_key='your api key'
                 )
@@ -312,9 +313,9 @@ class Dataset(object):
             .. code::
 
                 from cartoframes.data import Dataset
-                from cartoframes.auth import set_default_context
+                from cartoframes.auth import set_default_credentials
 
-                set_default_context(
+                set_default_credentials(
                     base_url='https://your_user_name.carto.com',
                     api_key='your api key'
                 )
@@ -363,5 +364,5 @@ class Dataset(object):
 
 
 def _get_default_credentials():
-    from ..auth import _default_context
-    return _default_context
+    from ..auth import _default_credentials
+    return _default_credentials

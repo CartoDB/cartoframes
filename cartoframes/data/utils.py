@@ -1,5 +1,4 @@
 import re
-import os
 import sys
 import binascii as ba
 from warnings import warn
@@ -7,8 +6,7 @@ from copy import deepcopy
 
 from carto.exceptions import CartoException
 
-from ..context import create_context
-from ..columns import normalize_name
+from .. import context
 
 try:
     import geopandas
@@ -48,10 +46,6 @@ ENC_EWKT = 'ewkt'
 
 if (sys.version_info < (3, 0)):
     ENC_WKB_BHEX = ENC_WKB_HEX
-
-GEOM_TYPE_POINT = 'point'
-GEOM_TYPE_LINE = 'line'
-GEOM_TYPE_POLYGON = 'polygon'
 
 
 def compute_query(dataset):
@@ -241,10 +235,10 @@ def setting_value_exception(prop, value):
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_context_with_public_creds(context):
-    public_creds = deepcopy(context.creds)
+def get_context_with_public_creds(credentials):
+    public_creds = deepcopy(credentials)
     public_creds.api_key = 'default_public'
-    return create_context(public_creds)
+    return context.create_context(public_creds)
 
 
 def convert_bool(x):
@@ -258,53 +252,9 @@ def convert_bool(x):
         return None
 
 
-def map_geom_type(geom_type):
-    return {
-        'Point': GEOM_TYPE_POINT,
-        'MultiPoint': GEOM_TYPE_POINT,
-        'LineString': GEOM_TYPE_LINE,
-        'MultiLineString': GEOM_TYPE_LINE,
-        'Polygon': GEOM_TYPE_POLYGON,
-        'MultiPolygon': GEOM_TYPE_POLYGON
-    }[geom_type]
-
-
-def is_sql_query(data):
-    return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
-
-
-def is_geojson_file(data):
-    return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
-
-
-def is_geojson_file_path(data):
-    return is_geojson_file(data) and os.path.exists(data)
-
-
-def is_geojson(data):
-    return isinstance(data, (list, dict)) or (isinstance(data, str) and is_geojson_file_path(data))
-
-
-def is_table_name(data):
-    return isinstance(data, str) and normalize_name(data) == data
-
-
 def save_index_as_column(df):
     index_name = df.index.name
     if index_name is not None:
         if index_name not in df.columns:
             df.reset_index(inplace=True)
             df.set_index(index_name, drop=False, inplace=True)
-
-
-def get_query_geom_type(context, query):
-    """Fetch geom type of a remote table"""
-    response = context.execute_query('''
-        SELECT distinct ST_GeometryType(the_geom) AS geom_type
-        FROM ({}) q
-        LIMIT 5
-    '''.format(query), do_post=False)
-    if response and response.get('rows') and len(response.get('rows')) > 0:
-        st_geom_type = response.get('rows')[0].get('geom_type')
-        if st_geom_type:
-            return map_geom_type(st_geom_type[3:])

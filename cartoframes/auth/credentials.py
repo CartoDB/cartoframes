@@ -1,8 +1,9 @@
 """Credentials management for cartoframes usage."""
-import appdirs
+
 import os
-import json
 import sys
+import json
+import appdirs
 import warnings
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
@@ -39,7 +40,7 @@ class Credentials(object):
         .. code::
 
             from cartoframes.auth import Credentials, Context
-            credentials = Credentials(api_key='abcdefg', username='eschbacher')
+            credentials = Credentials(username='eschbacher', api_key='abcdefg')
     """
 
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
@@ -184,9 +185,8 @@ class Credentials(object):
 
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
-                Credentials(username=eschbacher, api_key=abcdefg,
-                        base_url=https://eschbacher.carto.com/)
-
+                Credentials(username='eschbacher', api_key='abcdefg',
+                    base_url='https://eschbacher.carto.com/')
         """
         path_to_remove = config_file or _DEFAULT_PATH
         try:

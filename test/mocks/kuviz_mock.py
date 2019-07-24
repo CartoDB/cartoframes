@@ -23,15 +23,15 @@ class CartoKuvizMock(Kuviz):
         return True
 
 
-def _create_kuviz(html, name, context=None, password=None):
+def _create_kuviz(html, name, credentials=None, password=None):
     return CartoKuvizMock(name=name, password=password)
 
 
 class KuvizPublisherMock(KuvizPublisher):
     def publish(self, html, name, password=None):
-        return _create_kuviz(html=html, name=name, context=self._context, password=password)
+        return _create_kuviz(html=html, name=name, credentials=self._credentials, password=password)
 
-    def _sync_layer(self, layer, table_name, context):
+    def _sync_layer(self, layer, table_name, credentials):
         layer.source.dataset._is_saved_in_carto = True
 
     def is_public(self):

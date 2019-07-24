@@ -4,8 +4,9 @@ import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ..dataset_info import DatasetInfo
-from ..utils import decode_geometry, convert_bool, compute_query, \
-    get_context_with_public_creds, get_query_geom_type, ENC_WKB_BHEX
+from ..utils import decode_geometry, compute_query, convert_bool, \
+    get_context_with_public_creds, ENC_WKB_BHEX
+from ... import utils
 from ... import context
 from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
@@ -18,6 +19,7 @@ class BaseDataset():
     APPEND = 'append'
 
     def __init__(self, credentials=None):
+        self._verbose = 0
         self._credentials = credentials
         self._context = self._create_context()
         self._table_name = None
@@ -55,8 +57,8 @@ class BaseDataset():
     def credentials(self, credentials):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._credentials = credentials
-        self._schema = credentials.get_default_schema()
         self._context = self._create_context()
+        self._schema = self._get_schema()
 
     @property
     def table_name(self):
@@ -105,14 +107,14 @@ class BaseDataset():
             raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
-            self._credentials._debug_print(err=err)
+            utils.debug_print(self._verbose, err=err)
             return False
 
     def is_public(self):
         """Checks to see if table or table used by query has public privacy"""
-        public_credentials = get_context_with_public_creds(self.credentials)
+        public_context = get_context_with_public_creds(self._credentials)
         try:
-            public_credentials.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
+            public_context.execute_query('EXPLAIN {}'.format(self.get_query()), do_post=False)
             return True
         except CartoRateLimitException as err:
             raise err
@@ -124,7 +126,7 @@ class BaseDataset():
 
     def _create_context(self):
         if self._credentials:
-            return context.create_context(self._credentials.creds)
+            return context.create_context(self._credentials)
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -179,13 +181,14 @@ class BaseDataset():
         return Column.from_sql_api_fields(table_info['fields'])
 
     def _get_geom_type(self, query=None):
-        return get_query_geom_type(self._context, query or self.get_query())
+        return utils.get_query_geom_type(self._context, query or self.get_query())
 
     def _get_schema(self):
         if self._credentials:
-            return self._credentials.get_default_schema()
+            is_org_user = self._context.is_org_user()
+            return 'public' if not is_org_user else self._credentials.username
         else:
             return None
 
     def _get_dataset_info(self, table_name=None):
-        return DatasetInfo(self._credentials, table_name or self._table_name)
+        return DatasetInfo(self._context, table_name or self._table_name)

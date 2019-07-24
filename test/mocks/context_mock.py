@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-
-from cartoframes.auth import Credentials
-
 
 class ContextMock():
-    def __init__(self, username, api_key):
-        self.is_org = False
-        self.creds = Credentials(api_key=api_key, username=username)
-        self.session = ''
+    def __init__(self):
+        self.query = ''
+        self.response = ''
 
-    def get_default_schema(self):
-        return 'public' if not self.is_org else self.creds.username
+    def is_org_user(self):
+        return False
 
-    def _get_bounds(self, layers):
-        return {'west': None, 'south': None, 'east': None, 'north': None}
+    def execute_query(self, q, **kwargs):
+        self.query = q
+        return self.response
+
+    def execute_long_running_query(self, q):
+        self.query = q
+        return self.response

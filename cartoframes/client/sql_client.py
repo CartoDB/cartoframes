@@ -11,11 +11,7 @@ class SQLClient(object):
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
           A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `username`/`api_key` combination.
-        session (requests.Session, optional): requests session. See `requests
-          documentation
-          <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
-          for more information.
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
     Example:
 
@@ -24,8 +20,8 @@ class SQLClient(object):
             from cartoframes.auth import Credentials
             from cartoframes.client import SQLClient
 
-            creds = Credentials(username='<USER NAME>', api_key='<API KEY>')
-            sql = SQLClient(creds)
+            credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
+            sql = SQLClient(credentials)
 
             sql.query('SELECT * FROM table_name')
             sql.execute('DROP TABLE table_name')
@@ -35,10 +31,9 @@ class SQLClient(object):
             ...
     """
 
-    def __init__(self, credentials, session=None):
-        self._is_org_user = None
-        self._creds = credentials
-        self._context = self._create_context()
+    def __init__(self, credentials):
+        self._credentials = credentials
+        self._context = context.create_context(credentials)
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a `list` with content of the response.
@@ -46,7 +41,7 @@ class SQLClient(object):
         For more information check the `SQL API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement>`."""
-        response = self._context.execute_query(query.strip())
+        response = self._context.execute_query(query)
         if not verbose:
             return response.get('rows')
         else:
@@ -57,7 +52,7 @@ class SQLClient(object):
         status and information of the job. For more information check the `Batch API
         documentation
         <https://carto.com/developers/sql-api/reference/#tag/Batch-Queries>`."""
-        return self._context.execute_long_running_query(query.strip())
+        return self._context.execute_long_running_query(query)
 
     def distinct(self, table_name, column_name):
         """Get the distict values and their count in a table
@@ -125,9 +120,9 @@ class SQLClient(object):
         By default, geometry columns are added to the table.
         To disable this pass `cartodbfy=False`.
         """
-        is_org_user = self._check_org_user()
+        is_org_user = self._context.is_org_user()
         columns = ','.join(' '.join(x) for x in columns)
-        username = self._creds.username if is_org_user else 'public'
+        username = self._credentials.username if is_org_user else 'public'
         query = '''
             BEGIN;
             {drop};
@@ -166,17 +161,6 @@ class SQLClient(object):
         """Remove a table from its table name."""
         query = 'DROP TABLE IF EXISTS {0};'.format(table_name)
         return self.execute(query)
-
-    def _create_context(self):
-        return context.create_context(self._creds)
-
-    def _check_org_user(self):
-        """Report whether user is in a multiuser CARTO organization or not"""
-        if self._is_org_user is None:
-            query = 'SELECT unnest(current_schemas(\'f\'))'
-            res = self._context.execute_query(query, do_post=False)
-            self._is_org_user = res['rows'][0]['unnest'] != 'public'
-        return self._is_org_user
 
     def _get_column_type(self, table_name, column_name):
         query = 'SELECT {0} FROM {1} LIMIT 0;'.format(column_name, table_name)

@@ -3,18 +3,15 @@
 from __future__ import absolute_import
 
 import json
-import requests
 import collections
 import pandas as pd
 from warnings import warn
 
 from carto.exceptions import CartoException
 
-from ..data.dataset import Dataset
-from ..data.utils import get_query_geom_type
-
 from .. import utils
-from ..context import create_context
+from .. import context
+from ..data.dataset import Dataset
 
 
 class DataObsClient(object):
@@ -27,13 +24,17 @@ class DataObsClient(object):
         the geographic boundaries (geometries) or their metadata.
       - discovery: returns a pandas.DataFrame with the measures found.
       - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
+
+    Args:
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          A :py:class:`Credentials <cartoframes.auth.Credentials>`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
     """
 
     def __init__(self, credentials):
-        from ..auth import Context
         self._verbose = 0
-        self._context = create_context(credentials)
-        self._old_context = Context(creds=credentials)
+        self._credentials = credentials
+        self._context = context.create_context(credentials)
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -461,7 +462,7 @@ class DataObsClient(object):
                 boundary=boundary,
                 numers=numers,
                 quantiles=quantiles).strip()
-        self._debug_print(query=query)
+        utils.debug_print(self._verbose, query=query)
         return self._fetch(query, decode_geom=True).dataframe
 
     def augment(self, table_name, metadata, persist_as=None, how='the_geom'):
@@ -587,7 +588,7 @@ class DataObsClient(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(table_name, credentials=self._old_context)
+        dataset = Dataset(table_name, credentials=self._credentials)
         table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
@@ -636,34 +637,16 @@ class DataObsClient(object):
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
     def _fetch(self, query, decode_geom=False, table_name=None):
-        dataset = Dataset(query, credentials=self._old_context)
+        dataset = Dataset(query, credentials=self._credentials)
         if table_name:
             dataset.upload(table_name=table_name)
         dataset.download(decode_geom=decode_geom)
         return dataset
 
-    def _debug_print(self, **kwargs):
-        if self._verbose <= 0:
-            return
-
-        for key, value in utils.dict_items(kwargs):
-            if isinstance(value, requests.Response):
-                str_value = ("status_code: {status_code}, "
-                             "content: {content}").format(
-                                 status_code=value.status_code,
-                                 content=value.content)
-            else:
-                str_value = str(value)
-            if self._verbose < 2 and len(str_value) > 300:
-                str_value = '{}\n\n...\n\n{}'.format(str_value[:250],
-                                                     str_value[-50:])
-            print('{key}: {value}'.format(key=key,
-                                          value=str_value))
-
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""
         query = 'SELECT * FROM "{table}"'.format(table=table)
-        return get_query_geom_type(self._context, query)
+        return utils.get_query_geom_type(self._context, query)
 
 
 # Country names are pegged to the following query:

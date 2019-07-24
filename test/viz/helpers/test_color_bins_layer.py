@@ -8,7 +8,11 @@ from cartoframes.viz import helpers, Source
 
 class TestColorBinsLayerHelper(unittest.TestCase):
     def setUp(self):
-        Source._get_geom_type = Mock(return_value='point')
+        self.orig_compute_query_bounds = Source._compute_query_bounds
+        Source._compute_query_bounds = Mock(return_valye=None)
+
+    def tearDown(self):
+        Source._compute_query_bounds = self.orig_compute_query_bounds
 
     def test_helpers(self):
         "should be defined"
