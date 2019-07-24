@@ -5,7 +5,7 @@ from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
 from .utils import setting_value_exception
-from ..columns import normalize_name
+from .columns import normalize_name
 
 
 class DatasetInfo(object):

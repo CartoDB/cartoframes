@@ -3,7 +3,7 @@ from warnings import warn
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ...columns import Column, normalize_name
+from ..columns import Column, normalize_name
 from ...utils import is_table_name
 
 

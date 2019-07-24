@@ -13,7 +13,7 @@ import numpy as np
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
-from .columns import normalize_name
+from .data.columns import normalize_name
 
 
 GEOM_TYPE_POINT = 'point'
