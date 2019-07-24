@@ -62,14 +62,9 @@ class QueryDataset(BaseDataset):
         query = "SELECT CDB_QueryTablesText('{}') as tables".format(self._query)
         result = self._context.execute_query(query)
         tables = []
-        if result['total_rows'] > 0:
+        if result['total_rows'] > 0 and result['rows'][0]['tables']:
             # Dataset_info only works with tables without schema
-            for t in result['rows'][0]['tables']:
-                if '.' in t:
-                    _, table_name = t.split('.')
-                    tables.append(table_name)
-                else:
-                    tables.append(t)
+            tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
 
         return tables
 

@@ -189,8 +189,8 @@ class Dataset(object):
         """Update/change Dataset privacy and name
 
         Args:
-          privacy (str, optional): One of DatasetInfo.PRIVATE,
-            DatasetInfo.PUBLIC, or DatasetInfo.LINK
+          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
+            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
           table_name (str, optional): Name of the dataset on CARTO. After updating it,
             the table_name will be changed too.
 
@@ -198,7 +198,7 @@ class Dataset(object):
 
             .. code::
 
-                from cartoframes.data import Dataset
+                from cartoframes.data import Dataset, DatasetInfo
                 from cartoframes.auth import set_default_context
 
                 set_default_context(
@@ -207,7 +207,7 @@ class Dataset(object):
                 )
 
                 d = Dataset('tablename')
-                d.update_dataset_info(privacy='link')
+                d.update_dataset_info(privacy=DatasetInfo.LINK)
 
         """
         return self._strategy.update_dataset_info(privacy, table_name)
@@ -355,8 +355,8 @@ class Dataset(object):
     def get_table_names(self):
         """Get table names used by Dataset instance"""
         if not self._is_saved_in_carto:
-            raise CartoException('Your data is not synchronized with CARTO.'
-                                 'First of all, you should call upload method '
+            raise CartoException('Your data is not synchronized with CARTO. '
+                                 'First of all, you should call the Dataset.upload() method '
                                  'to save your data in CARTO.')
 
         return self._strategy.get_table_names()
