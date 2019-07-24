@@ -73,8 +73,7 @@ class TestKuvizPublisher(unittest.TestCase):
             layer_2
         ])
 
-        kp = KuvizPublisherMock(vmap)
-        self.assertEqual(kp._credentials, None)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertNotEqual(kp._layers, vmap.layers)
         self.assertEqual(len(kp._layers), len(vmap.layers))
 
@@ -83,7 +82,7 @@ class TestKuvizPublisher(unittest.TestCase):
         layer_1 = Layer(source_1)
         vmap = Map(layer_1)
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertEqual(len(kp._layers), len(vmap.layers))
 
         kp._layers = []
@@ -94,15 +93,14 @@ class TestKuvizPublisher(unittest.TestCase):
         layer_1 = Layer(source_1)
         vmap = Map(layer_1)
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertEqual(kp.is_sync(), False)
 
     def test_kuviz_publisher_create_remote(self):
         dataset = DatasetMock('fake_table', credentials=self.credentials)
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
-        self.assertEqual(kp._credentials, None)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertNotEqual(kp._layers, vmap.layers)
         self.assertEqual(len(kp._layers), len(vmap.layers))
 
@@ -110,21 +108,21 @@ class TestKuvizPublisher(unittest.TestCase):
         dataset = DatasetMock('fake_table', credentials=self.credentials)
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertEqual(kp.is_sync(), True)
 
     def test_kuviz_publisher_unsync(self):
         dataset = DatasetMock(build_geojson([-10, 0], [-10, 0]))
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         self.assertEqual(kp.is_sync(), False)
 
     def test_kuviz_publisher_sync_layers(self):
         dataset = DatasetMock(build_geojson([-10, 0], [-10, 0]))
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         kp.sync_layers(table_name='fake_table', credentials=self.credentials)
         self.assertEqual(kp.is_sync(), True)
 
@@ -132,7 +130,7 @@ class TestKuvizPublisher(unittest.TestCase):
         dataset = DatasetMock('fake_table', credentials=self.credentials)
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         kp.set_credentials(self.credentials)
         layers = kp.get_layers()
 
@@ -147,7 +145,7 @@ class TestKuvizPublisher(unittest.TestCase):
         dataset = DatasetMock('fake_table', credentials=self.credentials)
         vmap = Map(Layer(Source(dataset)))
 
-        kp = KuvizPublisherMock(vmap)
+        kp = KuvizPublisherMock(vmap.layers)
         kp.set_credentials(self.credentials)
         maps_api_key = '1234'
         layers = kp.get_layers(maps_api_key=maps_api_key)

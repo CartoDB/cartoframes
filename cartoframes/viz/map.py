@@ -328,7 +328,7 @@ class Map(object):
         return html_map.html
 
     def _get_publisher(self):
-        return KuvizPublisher(self)
+        return KuvizPublisher(self.layers)
 
     def _validate_public_publication(self):
         if not self._publisher.is_public():
