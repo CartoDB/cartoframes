@@ -67,12 +67,12 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             'sf_neighborhoods',
             'name',
             'Neighborhoods',
-            palette='prism'
+            palette='[blue,#F00]'
         )
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(linear($name), prism)'
+            'ramp(linear($name), [blue,#F00])'
         )
 
     def test_color_continuous_layer_polygon(self):
@@ -83,12 +83,12 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             'sf_neighborhoods',
             'name',
             'Neighborhoods',
-            palette='prism'
+            palette=['blue', '#F00']
         )
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
-            'opacity(ramp(linear($name), prism), 0.9)'
+            'opacity(ramp(linear($name), [blue,#F00]), 0.9)'
         )
 
     def test_color_continuous_layer_legend(self):

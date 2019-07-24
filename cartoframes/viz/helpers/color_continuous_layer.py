@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from .utils import serialize_palette
+
 from ..layer import Layer
 
 
@@ -29,6 +31,7 @@ def color_continuous_layer(
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
+    default_palette = 'bluyl'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     return Layer(
@@ -36,17 +39,17 @@ def color_continuous_layer(
         style={
             'point': {
                 'color': 'ramp(linear(${0}), {1})'.format(
-                    value, palette or 'bluyl'),
+                    value, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'ramp(linear(${0}), {1})'.format(
-                    value, palette or 'bluyl'),
+                    value, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp(linear(${0}), {1}), 0.9)'.format(
-                    value, palette or 'bluyl'),
+                    value, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             }
         },

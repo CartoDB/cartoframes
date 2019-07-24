@@ -68,12 +68,12 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             'name',
             'Neighborhoods',
             bins=3,
-            palette='prism'
+            palette='[blue,#F00]'
         )
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalQuantiles($name, 3), prism)'
+            'ramp(globalQuantiles($name, 3), [blue,#F00])'
         )
 
     def test_color_bins_layer_polygon(self):
@@ -85,12 +85,12 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             'name',
             'Neighborhoods',
             bins=3,
-            palette='prism'
+            palette=['blue', '#F00']
         )
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
-            'opacity(ramp(globalQuantiles($name, 3), prism), 0.9)'
+            'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]), 0.9)'
         )
 
     def test_color_bins_layer_method(self):

@@ -88,9 +88,13 @@ class BaseDataset():
 
         return self._dataset_info
 
-    def update_dataset_info(self, privacy=None, name=None):
+    def update_dataset_info(self, privacy=None, table_name=None):
         self._dataset_info = self.dataset_info
-        self._dataset_info.update(privacy=privacy, name=name)
+        self._dataset_info.update(privacy=privacy, table_name=table_name)
+
+        # update table_name if metadata table_name has been changed
+        if table_name and self.table_name != self._dataset_info.table_name:
+            self.table_name = self._dataset_info.table_name
 
     def exists(self):
         """Checks to see if table exists"""
@@ -116,6 +120,9 @@ class BaseDataset():
             raise err
         except CartoException:
             return False
+
+    def get_table_names(self):
+        return [self._table_name]
 
     def _create_context(self):
         if self._credentials:
@@ -183,5 +190,5 @@ class BaseDataset():
         else:
             return None
 
-    def _get_dataset_info(self):
-        return DatasetInfo(self._context, self._table_name)
+    def _get_dataset_info(self, table_name=None):
+        return DatasetInfo(self._context, table_name or self._table_name)
