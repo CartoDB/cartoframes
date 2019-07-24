@@ -66,12 +66,12 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
-            palette='[red, blue]'
+            palette=['red', 'blue']
         )
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            "ramp(buckets($name, ['A', 'B']), [red, blue])"
+            "ramp(buckets($name, ['A', 'B']), [red,blue])"
         )
 
     def test_color_category_layer_line(self):
@@ -96,12 +96,12 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
-            palette='[red, blue]'
+            palette=['red', 'blue']
         )
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            "ramp(buckets($name, ['A', 'B']), [red, blue])"
+            "ramp(buckets($name, ['A', 'B']), [red,blue])"
         )
 
     def test_color_category_layer_polygon(self):
@@ -126,12 +126,12 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
-            palette='[red, blue]'
+            palette=['red', 'blue']
         )
 
         self.assertEqual(
             layer.style._style['polygon']['color'],
-            "opacity(ramp(buckets($name, ['A', 'B']), [red, blue]), 0.9)"
+            "opacity(ramp(buckets($name, ['A', 'B']), [red,blue]), 0.9)"
         )
 
     def test_color_category_layer_legend(self):

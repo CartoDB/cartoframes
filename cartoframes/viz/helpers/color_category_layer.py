@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from .utils import serialize_palette
+
 from ..layer import Layer
 
 
@@ -35,6 +37,7 @@ def color_category_layer(
         Includes a legend, popup and widget on `value`.
     """
     func = 'buckets' if cat else 'top'
+    default_palette = 'bold'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     return Layer(
@@ -42,17 +45,17 @@ def color_category_layer(
         style={
             'point': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, palette or 'bold'),
+                    func, value, cat or top, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, palette or 'bold'),
+                    func, value, cat or top, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    func, value, cat or top, palette or 'bold'),
+                    func, value, cat or top, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             }
         },

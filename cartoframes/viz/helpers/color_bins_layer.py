@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from .utils import serialize_palette
+
 from ..layer import Layer
 
 
@@ -56,17 +58,17 @@ def color_bins_layer(
         style={
             'point': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or default_palette),
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, palette or default_palette),
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    func, value, breaks or bins, palette or default_palette),
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
                 'filter': animation_filter
             }
         },
