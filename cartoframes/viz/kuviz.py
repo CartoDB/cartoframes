@@ -81,6 +81,7 @@ def _create_auth_client(credentials):
         user_agent='cartoframes_{}'.format(__version__)
     )
 
+
 def _get_kuviz_manager(auth_client=None):
     return KuvizManager(auth_client)
 
