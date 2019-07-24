@@ -185,13 +185,6 @@ def debug_print(verbose=0, **kwargs):
         print('{key}: {value}'.format(key=key, value=str_value))
 
 
-def is_org_user(context):
-    """Report whether user is in a multiuser CARTO organization or not"""
-    query = 'SELECT unnest(current_schemas(\'f\'))'
-    res = context.execute_query(query, do_post=False)
-    return res['rows'][0]['unnest'] != 'public'
-
-
 def get_query_geom_type(context, query):
     """Fetch geom type of a remote table"""
     distict_query = '''

@@ -23,6 +23,7 @@ class APIContext(BaseContext):
         self.sql_client = SQLClient(self.auth_client)
         self.copy_client = CopySQLClient(self.auth_client)
         self.batch_sql_client = BatchSQLClient(self.auth_client)
+        self._is_org_user = None
 
     def download(self, query, retry_times=DEFAULT_RETRY_TIMES):
         try:
@@ -47,3 +48,11 @@ class APIContext(BaseContext):
 
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
+
+    def is_org_user(self):
+        """Report whether user is in a multiuser CARTO organization or not"""
+        if self._is_org_user is None:
+            query = 'SELECT unnest(current_schemas(\'f\'))'
+            response = self.execute_query(query, do_post=False)
+            self._is_org_user = response['rows'][0]['unnest'] != 'public'
+        return self._is_org_user

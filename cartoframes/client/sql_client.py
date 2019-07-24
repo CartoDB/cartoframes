@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from .. import context
-from ..utils import is_org_user
 
 
 class SQLClient(object):
@@ -33,7 +32,6 @@ class SQLClient(object):
     """
 
     def __init__(self, credentials):
-        self._is_org_user = None
         self._credentials = credentials
         self._context = context.create_context(credentials)
 
@@ -122,7 +120,7 @@ class SQLClient(object):
         By default, geometry columns are added to the table.
         To disable this pass `cartodbfy=False`.
         """
-        is_org_user = self._check_org_user()
+        is_org_user = self._context.is_org_user()
         columns = ','.join(' '.join(x) for x in columns)
         username = self._credentials.username if is_org_user else 'public'
         query = '''
@@ -163,11 +161,6 @@ class SQLClient(object):
         """Remove a table from its table name."""
         query = 'DROP TABLE IF EXISTS {0};'.format(table_name)
         return self.execute(query)
-
-    def _check_org_user(self):
-        if self._is_org_user is None:
-            self._is_org_user = is_org_user(self._context)
-        return self._is_org_user
 
     def _get_column_type(self, table_name, column_name):
         query = 'SELECT {0} FROM {1} LIMIT 0;'.format(column_name, table_name)

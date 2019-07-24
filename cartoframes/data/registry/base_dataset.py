@@ -20,7 +20,6 @@ class BaseDataset():
 
     def __init__(self, credentials=None):
         self._verbose = 0
-        self._is_org_user = False
         self._credentials = credentials
         self._context = self._create_context()
         self._table_name = None
@@ -58,8 +57,8 @@ class BaseDataset():
     def credentials(self, credentials):
         """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
         self._credentials = credentials
-        self._schema = self._get_schema()
         self._context = self._create_context()
+        self._schema = self._get_schema()
 
     @property
     def table_name(self):
@@ -179,15 +178,10 @@ class BaseDataset():
 
     def _get_schema(self):
         if self._credentials:
-            is_org_user = self._check_org_user()
+            is_org_user = self._context.is_org_user()
             return 'public' if not is_org_user else self._credentials.username
         else:
             return None
 
     def _get_dataset_info(self):
         return DatasetInfo(self._context, self._table_name)
-
-    def _check_org_user(self):
-        if self._is_org_user is None:
-            self._is_org_user = utils.is_org_user(self._context)
-        return self._is_org_user
