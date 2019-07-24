@@ -15,15 +15,7 @@ Submodules
 
 .. toctree::
 
-   cartoframes.analysis
-   cartoframes.columns
-   cartoframes.credentials
-   cartoframes.dataobs
    cartoframes.examples
-   cartoframes.geojson
-   cartoframes.layer
-   cartoframes.maps
-   cartoframes.styling
    cartoframes.utils
 
 Module contents
