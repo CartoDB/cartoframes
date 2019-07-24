@@ -130,7 +130,9 @@ class Source(object):
         credentials = self.dataset.credentials
         if credentials:
             return {
-                'username': credentials.username,
+                # VL requires !username but CF allows passing only the base_url.
+                # That's why 'user' is used by default if username is empty.
+                'username': credentials.username or 'user',
                 'api_key': credentials.api_key,
                 'base_url': credentials.base_url
             }
