@@ -12,8 +12,6 @@ from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .. import utils
 
-# TODO: refactor
-
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
 
@@ -42,6 +40,7 @@ class Map(object):
           display for each layer.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
+        theme (string, optional): Use a different UI theme
 
     Examples:
 
@@ -183,6 +182,7 @@ class Map(object):
                  viewport=None,
                  default_legend=False,
                  show_info=None,
+                 theme=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -193,6 +193,7 @@ class Map(object):
         self.show_info = show_info
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
+        self.theme = _get_theme(theme, basemap)
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
@@ -207,6 +208,7 @@ class Map(object):
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
+            theme=self.theme,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -320,6 +322,7 @@ class Map(object):
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=False,
+            theme=self.theme,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path,
             title=name,
@@ -470,16 +473,16 @@ class HTMLMap(object):
 
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
-            default_legend=None, show_info=None, _carto_vl_path=None,
+            default_legend=None, show_info=None, theme=None, _carto_vl_path=None,
             _airship_path=None, title='CARTOframes', is_embed=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, basemap, default_legend,
-            show_info, _carto_vl_path, _airship_path, title, is_embed)
+            show_info, theme, _carto_vl_path, _airship_path, title, is_embed)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False):
+            show_info=None, theme=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False):
 
         token = ''
         basecolor = ''
@@ -547,6 +550,7 @@ class HTMLMap(object):
             has_widgets=has_widgets,
             default_legend=default_legend,
             show_info=show_info,
+            theme=theme,
             carto_vl_path=carto_vl_path,
             airship_components_path=airship_components_path,
             airship_module_path=airship_module_path,
@@ -581,3 +585,15 @@ def _get_center(center):
         return None
 
     return [center.get('lng'), center.get('lat')]
+
+
+def _get_theme(theme, basemap):
+    if theme and theme not in constants.THEMES:
+        raise ValueError(
+            'This theme is not valid. Valid themes types are: {}.'.format(
+                ', '.join(constants.THEMES)
+            ))
+    if not theme and basemap == Basemaps.darkmatter:
+        return 'dark'
+
+    return theme

@@ -20,132 +20,14 @@
 
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    #map {
-      position: absolute;
-      height: 100%;
-      width: 100%;
-    }
-
-    #error-container {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: white;
-      visibility: hidden;
-      padding: 1em;
-      font-family: "Courier New", Courier, monospace;
-      margin: 0 auto;
-      font-size: 14px;
-      overflow: auto;
-      z-index: 1000;
-    }
-
-    .error-section {
-      padding: 1em;
-      border-radius: 5px;
-      background-color: #fee;
-    }
-
-    #error-container #error-highlight {
-      font-weight: bold;
-      color: inherit;
-    }
-
-    #error-container #error-type {
-      color: #008000;
-    }
-
-    #error-container #error-name {
-      color: #ba2121;
-    }
-
-    #error-container #error-content {
-      margin-top: 0.4em;
-    }
-
-    .error-details {
-      margin-top: 1em;
-    }
-
-    #error-stacktrace {
-      list-style: none;
-    }
-
-    .popup-content {
-      display: flex;
-      flex-direction: column;
-      padding: 8px;
-    }
-
-    .popup-name {
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 20px;
-      margin-bottom: 4px;
-    }
-
-    .popup-value {
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 20px;
-    }
-
-    .popup-value:not(:last-of-type) {
-      margin-bottom: 16px;
-    }
-
-    .map-info {
-      position: absolute;
-      bottom: 0;
-      padding: 0 5px;
-      background-color: rgba(255, 255, 255, 0.5);
-      margin: 0;
-      color: rgba(0, 0, 0, 0.75);
-      font-size: 12px;
-      width: auto;
-      height: 18px;
-      font-family: 'Open Sans';
-    }
-
-    .map-footer {
-      background: #F2F6F9;
-      font-family: Roboto;
-      font-size: 12px;
-      line-height: 24px;
-      color: #162945;
-      text-align: center;
-    }
-
-    .map-footer a {
-      text-decoration: none;
-    }
-
-    .map-footer a:hover {
-      text-decoration: underline;
-    }
-
-    as-widget-header .as-widget-header__header {
-      margin-bottom: 8px;
-    }
-
-    as-widget-header .as-widget-header__subheader {
-      margin-bottom: 12px;
-    }
-
-    as-category-widget {
-      max-height: 250px;
-    }
-
-    aside.as-sidebar {
-      min-width: 300px;
-    }
-  </style>
+  {% if theme %}
+    {% include 'style/themes/' + theme + '.html.j2' %}
+  {% endif %}
+  {% include 'style/common.html.j2' %}
+  {% include 'style/map.html.j2' %}
+  {% include 'style/error.html.j2' %}
+  {% include 'style/popup.html.j2' %}
+  {% include 'style/widgets.html.j2' %}
 </head>
 
 <body class="as-app-body as-app">

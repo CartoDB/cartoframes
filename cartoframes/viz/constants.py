@@ -66,3 +66,5 @@ WIDGET_TYPES = [
     'animation',
     'time-series'
 ]
+
+THEMES = ['dark', 'light']
