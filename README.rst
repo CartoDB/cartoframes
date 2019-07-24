@@ -155,11 +155,11 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
 
 .. code:: python
 
-    from cartoframes.auth import set_default_context
+    from cartoframes.auth import set_default_credentials
     from cartoframes.data import Dataset
 
     # `base_url`s are of the form `https://username.carto.com/` for most users
-    set_default_context(
+    set_default_credentials(
         base_url='https://your_user_name.carto.com/',
         api_key='your API key'
     )
@@ -197,9 +197,9 @@ Interactive vector maps can be created programmatically in CARTOframes. In addit
 
     from cartoframes.viz import Map
     from cartoframes.viz.helpers import color_continuous_layer
-    from cartoframes.auth import set_default_context
+    from cartoframes.auth import set_default_credentials
 
-    set_default_context('https://cartoframes.carto.com')
+    set_default_credentials('https://cartoframes.carto.com')
 
     # display map in a notebook
     Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
@@ -210,9 +210,9 @@ Publish map to CARTO
 
     from cartoframes.viz import Map
     from cartoframes.viz.helpers import color_continuous_layer
-    from cartoframes.auth import set_default_context
+    from cartoframes.auth import set_default_credentials
 
-    set_default_context(
+    set_default_credentials(
         base_url='https://your_user_name.carto.com',
         api_key='your api key'
     )
@@ -289,7 +289,7 @@ You can also set your credentials using the `Credentials` class:
 
     from cartoframes.auth import Credentials, Context
     con = Context(
-        creds=Credentials(key='{your_api_key}', username='{your_user_name}')
+        creds=Credentials(api_key='{your_api_key}', username='{your_user_name}')
     )
 
 
@@ -299,7 +299,7 @@ Save/update credentials for later use
 .. code:: python
 
     from cartoframes.auth import Credentials, Context
-    creds = Credentials(username='eschbacher', key='abcdefg')
+    creds = Credentials(username='eschbacher', api_key='abcdefg')
     creds.save()  # save credentials for later use (not dependent on Python session)
 
 Once you save your credentials, you can get started in future sessions more quickly:
