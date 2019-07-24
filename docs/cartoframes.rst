@@ -17,7 +17,6 @@ Submodules
 
    cartoframes.analysis
    cartoframes.columns
-   cartoframes.context
    cartoframes.credentials
    cartoframes.dataobs
    cartoframes.examples

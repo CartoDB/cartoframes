@@ -2,7 +2,6 @@
 It also includes the utility method set_default_credentials."""
 from __future__ import absolute_import
 
-from .context import Context
 from .credentials import Credentials
 
 from ..utils import is_url
@@ -124,7 +123,6 @@ def set_default_credentials(
 
 
 __all__ = [
-    'Context',
     'Credentials',
     'set_default_credentials'
 ]
