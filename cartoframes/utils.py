@@ -1,11 +1,35 @@
 """general utility functions"""
 
+from __future__ import absolute_import
+
+import os
 import re
 import sys
+import base64
 import hashlib
+import requests
+import numpy as np
 
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
+
+from .columns import normalize_name
+
+
+GEOM_TYPE_POINT = 'point'
+GEOM_TYPE_LINE = 'line'
+GEOM_TYPE_POLYGON = 'polygon'
+
+
+def map_geom_type(geom_type):
+    return {
+        'Point': GEOM_TYPE_POINT,
+        'MultiPoint': GEOM_TYPE_POINT,
+        'LineString': GEOM_TYPE_LINE,
+        'MultiLineString': GEOM_TYPE_LINE,
+        'Polygon': GEOM_TYPE_POLYGON,
+        'MultiPolygon': GEOM_TYPE_POLYGON
+    }[geom_type]
 
 
 def dict_items(indict):
@@ -138,3 +162,149 @@ def snake_to_camel(snake_str):
 
 def in_snake_case(str):
     return str.find('_') != -1
+
+
+def is_url(text):
+    return re.match(r'^https?://.*$', text)
+
+
+def debug_print(verbose=0, **kwargs):
+    if verbose <= 0:
+        return
+
+    for key, value in dict_items(kwargs):
+        if isinstance(value, requests.Response):
+            str_value = ("status_code: {status_code}, "
+                         "content: {content}").format(
+                status_code=value.status_code,
+                content=value.content)
+        else:
+            str_value = str(value)
+        if verbose < 2 and len(str_value) > 300:
+            str_value = '{}\n\n...\n\n{}'.format(str_value[:250], str_value[-50:])
+        print('{key}: {value}'.format(key=key, value=str_value))
+
+
+def get_query_geom_type(context, query):
+    """Fetch geom type of a remote table"""
+    distict_query = '''
+        SELECT distinct ST_GeometryType(the_geom) AS geom_type
+        FROM ({}) q
+        LIMIT 5
+    '''.format(query)
+    response = context.execute_query(distict_query, do_post=False)
+    if response and response.get('rows') and len(response.get('rows')) > 0:
+        st_geom_type = response.get('rows')[0].get('geom_type')
+        if st_geom_type:
+            return map_geom_type(st_geom_type[3:])
+
+
+def get_query_bounds(context, query):
+    extent_query = '''
+        SELECT ARRAY[
+            ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+            ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+        ] bounds FROM (
+            SELECT ST_Extent(the_geom) geom_env
+            FROM ({}) q
+        ) q;
+    '''.format(query)
+    response = context.execute_query(extent_query, do_post=False)
+    if response and response.get('rows') and len(response.get('rows')) > 0:
+        return response.get('rows')[0].get('bounds')
+
+
+def load_geojson(input_data):
+    try:
+        import geopandas
+        HAS_GEOPANDAS = True
+    except ImportError:
+        HAS_GEOPANDAS = False
+
+    if not HAS_GEOPANDAS:
+        raise ValueError(
+            '''
+            GeoJSON source only works with GeoDataFrames from
+            the geopandas package http://geopandas.org/data_structures.html#geodataframe
+            ''')
+
+    if isinstance(input_data, str):
+        # File name
+        data = geopandas.read_file(input_data)
+
+    elif isinstance(input_data, list):
+        # List of features
+        data = geopandas.GeoDataFrame.from_features(input_data)
+
+    elif isinstance(input_data, dict):
+        # GeoJSON object
+        if input_data.get('features'):
+            # From features
+            data = geopandas.GeoDataFrame.from_features(input_data['features'])
+        elif input_data.get('type') == 'Feature':
+            # From feature
+            data = geopandas.GeoDataFrame.from_features([input_data])
+        elif input_data.get('type'):
+            # From geometry
+            data = geopandas.GeoDataFrame.from_features([{
+                'type': 'Feature',
+                'properties': {},
+                'geometry': input_data
+            }])
+
+    else:
+        raise ValueError(
+            '''
+            GeoJSON source only works with GeoDataFrames from
+            the geopandas package http://geopandas.org/data_structures.html#geodataframe
+            ''')
+
+    return data
+
+
+def get_geodataframe_bounds(data):
+    filtered_geometries = _filter_null_geometries(data)
+    xmin, ymin, xmax, ymax = filtered_geometries.total_bounds
+
+    return [[xmin, ymin], [xmax, ymax]]
+
+
+def encode_geodataframe(data):
+    filtered_geometries = _filter_null_geometries(data)
+    data = _set_time_cols_epoc(filtered_geometries).to_json()
+    encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
+
+    return encoded_data
+
+
+def _filter_null_geometries(data):
+    return data[~data.geometry.isna()]
+
+
+def _set_time_cols_epoc(geometries):
+    include = ['datetimetz', 'datetime', 'timedelta']
+
+    for column in geometries.select_dtypes(include=include).columns:
+        geometries[column] = geometries[column].astype(np.int64)
+
+    return geometries
+
+
+def is_sql_query(data):
+    return isinstance(data, str) and re.match(r'^\s*(WITH|SELECT)\s+', data, re.IGNORECASE)
+
+
+def is_geojson_file(data):
+    return re.match(r'^.*\.(geojson|json)\s*$', data, re.IGNORECASE)
+
+
+def is_geojson_file_path(data):
+    return is_geojson_file(data) and os.path.exists(data)
+
+
+def is_geojson(data):
+    return isinstance(data, (list, dict)) or (isinstance(data, str) and is_geojson_file_path(data))
+
+
+def is_table_name(data):
+    return isinstance(data, str) and normalize_name(data) == data

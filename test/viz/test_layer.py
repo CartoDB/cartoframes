@@ -3,12 +3,18 @@ try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
+
 from cartoframes.viz import Layer, Source, Style, Popup, Legend
 
 
 class TestLayer(unittest.TestCase):
     def setUp(self):
-        Source._get_geom_type = Mock(return_value='point')
+        Source.get_geom_type = Mock(return_value='point')
+        self.orig_compute_query_bounds = Source._compute_query_bounds
+        Source._compute_query_bounds = Mock(return_valye=None)
+
+    def tearDown(self):
+        Source._compute_query_bounds = self.orig_compute_query_bounds
 
     def test_is_layer_defined(self):
         """Layer"""
@@ -41,7 +47,12 @@ class TestLayer(unittest.TestCase):
 
 class TestLayerStyle(unittest.TestCase):
     def setUp(self):
-        Source._get_geom_type = Mock(return_value='point')
+        Source.get_geom_type = Mock(return_value='point')
+        self.orig_compute_query_bounds = Source._compute_query_bounds
+        Source._compute_query_bounds = Mock(return_valye=None)
+
+    def tearDown(self):
+        Source._compute_query_bounds = self.orig_compute_query_bounds
 
     def test_style_dict(self):
         """Layer style should set the style when it is a dict"""

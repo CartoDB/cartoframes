@@ -10,12 +10,10 @@ import warnings
 import pandas as pd
 
 from carto.exceptions import CartoException
-from carto.auth import APIKeyAuthClient
-from carto.sql import SQLClient
 
-from cartoframes.auth import Credentials, Context
+from cartoframes.auth import Credentials
 from cartoframes.data import Dataset
-from cartoframes.client import DataObsClient, get_countrytag
+from cartoframes.client import DataObsClient, SQLClient, get_countrytag
 from cartoframes.columns import normalize_name
 
 from ..utils import _UserUrlLoader
@@ -45,14 +43,9 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
 
-        self.creds = Credentials(username=self.username, api_key=self.apikey)
-        self.con = Context(creds=self.creds)
-
-        if self.username and self.apikey:
-            self.baseurl = self.user_url().format(username=self.username)
-            self.auth_client = APIKeyAuthClient(base_url=self.baseurl,
-                                                api_key=self.apikey)
-            self.sql_client = SQLClient(self.auth_client)
+        self.base_url = self.user_url().format(username=self.username)
+        self.credentials = Credentials(self.username, self.apikey, self.base_url)
+        self.sql_client = SQLClient(self.credentials)
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
@@ -116,19 +109,16 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
                   self.write_named_index, )
         sql_drop = 'DROP TABLE IF EXISTS {};'
 
-        if self.apikey and self.baseurl:
-            con = Context(base_url=self.baseurl,
-                          api_key=self.apikey)
-            for table in tables:
-                try:
-                    con.delete(table)
-                    con.sql_client.send(sql_drop.format(table))
-                except CartoException:
-                    warnings.warn('Error deleting tables')
+        for table in tables:
+            try:
+                Dataset(table, credentials=self.credentials).delete()
+                self.sql_client.query(sql_drop.format(table))
+            except CartoException:
+                warnings.warn('Error deleting tables')
 
     def test_boundaries(self):
         """DataObsClient.boundaries"""
-        do = DataObsClient(self.creds)
+        do = DataObsClient(self.credentials)
 
         # all boundary metadata
         boundary_meta = do.boundaries()
@@ -192,7 +182,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
     def test_discovery(self):
         """DataObsClient.discovery"""
-        do = DataObsClient(self.creds)
+        do = DataObsClient(self.credentials)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -258,7 +248,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
     def test_augment(self):
         """DataObsClient.augment"""
-        do = DataObsClient(self.creds)
+        do = DataObsClient(self.credentials)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -266,7 +256,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         dataset = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
-            Dataset(self.test_data_table, credentials=self.con
+            Dataset(self.test_data_table, credentials=self.credentials
                     ).download(limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
 
@@ -289,7 +279,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
 
     def test_augment_with_persist_as(self):
         """DataObsClient.augment with persist_as"""
-        do = DataObsClient(self.creds)
+        do = DataObsClient(self.credentials)
 
         meta = do.discovery(self.test_read_table,
                             keywords=('poverty', ),
@@ -297,7 +287,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         dataset = do.augment(self.test_data_table, meta)
         anscols = set(meta['suggested_name'])
         origcols = set(
-            Dataset(self.test_data_table, credentials=self.con
+            Dataset(self.test_data_table, credentials=self.credentials
                     ).download(limit=1, decode_geom=True).columns)
         self.assertSetEqual(anscols, set(dataset.dataframe.columns) - origcols - {'the_geom', 'cartodb_id'})
 
@@ -310,7 +300,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(dataset.dataframe.index.name, 'cartodb_id')
         self.assertEqual(dataset.dataframe.index.dtype, 'int64')
 
-        df = Dataset(self.test_write_table, credentials=self.con).download(decode_geom=False)
+        df = Dataset(self.test_write_table, credentials=self.credentials).download(decode_geom=False)
 
         self.assertEqual(df.index.name, 'cartodb_id')
         self.assertEqual(dataset.dataframe.index.dtype, 'int64')
@@ -337,7 +327,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
     def test_augment_column_name_collision(self):
         """DataObsClient.augment column name collision"""
         dup_col = 'female_third_level_studies_2011_by_female_pop'
-        self.sql_client.send(
+        self.sql_client.query(
             """
             create table {table} as (
                 select cdb_latlng(40.4165,-3.70256) the_geom,
@@ -347,13 +337,13 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
                 table=self.test_write_table
             )
         )
-        self.sql_client.send(
+        self.sql_client.query(
             "select cdb_cartodbfytable('public', '{table}')".format(
                 table=self.test_write_table
             )
         )
 
-        do = DataObsClient(self.creds)
+        do = DataObsClient(self.credentials)
         meta = do.discovery(region=self.test_write_table, keywords='female')
         meta = meta[meta.suggested_name == dup_col]
         dataset = do.augment(

@@ -13,8 +13,8 @@ class DatasetInfo(object):
     PUBLIC = 'PUBLIC'
     LINK = 'LINK'
 
-    def __init__(self, carto_context, table_name):
-        self._metadata = self._get_metadata(carto_context, table_name)
+    def __init__(self, context, table_name):
+        self._metadata = self._get_metadata(context, table_name)
         self._privacy = self._metadata.privacy
         self._name = self._metadata.name
 
@@ -53,8 +53,8 @@ class DatasetInfo(object):
         if modified:
             self._save_metadata()
 
-    def _get_metadata(self, carto_context, table_name, retries=6, retry_wait_time=1):
-        ds_manager = DatasetManager(carto_context.auth_client)
+    def _get_metadata(self, context, table_name, retries=6, retry_wait_time=1):
+        ds_manager = DatasetManager(context.auth_client)
         try:
             return ds_manager.get(table_name)
         except Exception as e:
@@ -62,7 +62,7 @@ class DatasetInfo(object):
                 # if retry_wait_time > 7: # it should be after more than 15 seconds
                 # warn('We are still procesing the CARTO table. Sorry for the delay.')
                 time.sleep(retry_wait_time)
-                self._get_metadata(carto_context=carto_context, table_name=table_name,
+                self._get_metadata(context=context, table_name=table_name,
                                    retries=retries-1, retry_wait_time=retry_wait_time*2)
             else:
                 raise CartoException('We could not get the table metadata.'
