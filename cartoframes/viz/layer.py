@@ -44,11 +44,15 @@ class Layer(object):
            Widget or list of widgets for a layer. It contains the information to display
            different widget types on the top right of the map. See
            :py:class:`WidgetList` for more information.
-        context (:py:class:`Context <cartoframes.auth.Context>`):
-          A Context instance. This is only used for the simplified Source API.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          A Credentials instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
-          this context is simply ignored. If not provided the context will be
-          automatically obtained from the default context.
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
 
     Example:
 
@@ -56,10 +60,10 @@ class Layer(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Layer
 
-            set_default_context(
+            set_default_credentials(
                 base_url='https://cartovl.carto.com',
                 api_key='default_public'
             )
@@ -82,15 +86,15 @@ class Layer(object):
                 }]
             )
 
-        Create a layer specifically tied to a :py:class:`Context
-        <cartoframes.auth.Context>` and display it on a map.
+        Create a layer specifically tied to a :py:class:`Credentials
+        <cartoframes.auth.Credentials>` and display it on a map.
 
         .. code::
 
-            from cartoframes.auth import Context
+            from cartoframes.auth import Credentials
             from cartoframes.viz import Layer, Map
 
-            context = Context(
+            credentials = Credentials(
                 base_url='https://cartovl.carto.com',
                 api_key='default_public'
             )
@@ -98,7 +102,7 @@ class Layer(object):
             pop_layer = Layer(
                 'populated_places',
                 'color: red',
-                context=context
+                credentials=credentials
             )
             Map(pop_layer)
 
@@ -108,10 +112,10 @@ class Layer(object):
 
         .. code::
 
-            from cartoframes.auth import set_default_context
+            from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Layer, Map
 
-            set_default_context('https://cartoframes.carto.com')
+            set_default_credentials('https://cartoframes.carto.com')
 
             pop_layer = Layer(
                 'brooklyn_poverty',
@@ -130,45 +134,40 @@ class Layer(object):
                  popup=None,
                  legend=None,
                  widgets=None,
-                 context=None):
+                 credentials=None,
+                 bounds=None):
 
         self.is_basemap = False
 
-        self.source = _set_source(source, context)
+        self.source = _set_source(source, credentials, bounds)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
         self.widgets = _set_widgets(widgets)
 
-        self.bounds = self.source.bounds
-        self.orig_query = self.source.query
-
+        geom_type = self.source.get_geom_type()
         popup_variables = self.popup.get_variables()
         widget_variables = self.widgets.get_variables()
-
         variables = merge_dicts(popup_variables, widget_variables)
 
-        self.viz = self.style.compute_viz(
-            self.source.geom_type,
-            variables
-        )
-
+        self.bounds = self.source.bounds
+        self.orig_query = self.source.query
+        self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(
-            self.source.geom_type
-        )
+        self.legend_info = self.legend.get_info(geom_type)
         self.widgets_info = self.widgets.get_widgets_info()
+        self.viz = self.style.compute_viz(geom_type, variables)
 
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
 
 
-def _set_source(source, context):
+def _set_source(source, credentials, bounds):
     """Set a Source class from the input"""
     if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or \
        HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
-        return Source(source, context)
+        return Source(source, credentials, bounds)
     elif isinstance(source, Source):
         return source
     else:

@@ -228,7 +228,7 @@ class Context(object):
         # choose schema (default user - org or standalone - or shared)
         schema = 'public' if not self.is_org else (shared_user or self.creds.username)
 
-        dataset = Dataset(table_name, schema=schema, credentials=self)
+        dataset = Dataset(table_name, schema=schema, credentials=self.creds)
         return dataset.download(limit, decode_geom, retry_times)
 
     @utils.temp_ignore_warnings
@@ -332,7 +332,7 @@ class Context(object):
         if overwrite:
             if_exists = Dataset.REPLACE
 
-        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, credentials=self)
+        dataset.upload(with_lnglat=lnglat, if_exists=if_exists, table_name=table_name, credentials=self.creds)
 
         tqdm.write('Table successfully written to CARTO: {table_url}'.format(
             table_url=utils.join_url(self.creds.base_url,
@@ -369,7 +369,7 @@ class Context(object):
             bool: `True` if table is removed
 
         """
-        dataset = Dataset(table_name, credentials=self)
+        dataset = Dataset(table_name, credentials=self.creds)
         deleted = dataset.delete()
         if deleted:
             return deleted

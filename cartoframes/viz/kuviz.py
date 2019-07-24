@@ -2,31 +2,33 @@ from copy import deepcopy
 from warnings import warn
 
 from carto.kuvizs import KuvizManager
+from carto.auth import APIKeyAuthClient
 
 from .source import Source
 from ..columns import normalize_name
+from ..__version__ import __version__
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
 class KuvizPublisher(object):
-    def __init__(self, vmap, context=None):
-        self._layers = deepcopy(vmap.layers)
-        self._context = context
+    def __init__(self, layers):
+        self._layers = deepcopy(layers)
 
     @staticmethod
-    def all(context=None):
-        km = _get_kuviz_manager(context)
+    def all(credentials=None):
+        km = _get_kuviz_manager(credentials)
         kuvizs = km.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
-    def set_context(self, context=None):
-        from ..auth import _default_context
-        self._context = context or _default_context
+    def set_credentials(self, credentials=None):
+        from ..auth import _default_credentials
+        self._credentials = credentials or _default_credentials
+        self._auth_client = _create_auth_client(self._credentials)
 
     def publish(self, html, name, password=None):
-        return _create_kuviz(html=html, name=name, context=self._context, password=password)
+        return _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
 
     def is_sync(self):
         return all(layer.source.dataset.is_saved_in_carto for layer in self._layers)
@@ -36,45 +38,52 @@ class KuvizPublisher(object):
 
     def get_layers(self, maps_api_key='default_public'):
         for layer in self._layers:
-            layer.source.dataset.credentials = self._context
+            layer.source.dataset.credentials = self._credentials
 
             layer.source.credentials = {
-                'username': self._context.creds.username,
+                'username': self._credentials.username,
                 'api_key': maps_api_key,
-                'base_url': self._context.creds.base_url
+                'base_url': self._credentials.base_url
             }
 
         return self._layers
 
-    def sync_layers(self, table_name, context=None):
+    def sync_layers(self, table_name, credentials=None):
         for idx, layer in enumerate(self._layers):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
-            from ..auth import _default_context
-            dataset_context = context or layer.source.dataset.credentials or _default_context
+            from ..auth import _default_credentials
+            dataset_credentials = credentials or layer.source.dataset.credentials or _default_credentials
 
-            self._sync_layer(layer, table_name, dataset_context)
+            self._sync_layer(layer, table_name, dataset_credentials)
 
-    def _sync_layer(self, layer, table_name, context):
+    def _sync_layer(self, layer, table_name, credentials):
         if not layer.source.dataset.is_saved_in_carto:
-            layer.source.dataset.upload(table_name=table_name, credentials=context)
-            layer.source = Source(table_name, context=context)
+            layer.source.dataset.upload(table_name=table_name, credentials=credentials)
+            layer.source = Source(table_name, credentials=credentials)
             warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
                  'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
                  'using the Auth API. You can get more info at '
                  'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
 
 
-def _create_kuviz(html, name, context=None, password=None):
-    km = _get_kuviz_manager(context)
+def _create_kuviz(html, name, auth_client=None, password=None):
+    km = _get_kuviz_manager(auth_client)
     return km.create(html=html, name=name, password=password)
 
 
-def _get_kuviz_manager(context=None):
-    from cartoframes.auth import _default_context
-    context = context or _default_context
+def _create_auth_client(credentials):
+    return APIKeyAuthClient(
+        base_url=credentials.base_url,
+        api_key=credentials.api_key,
+        session=credentials.session,
+        client_id='cartoframes_{}'.format(__version__),
+        user_agent='cartoframes_{}'.format(__version__)
+    )
 
-    return KuvizManager(context.auth_client)
+
+def _get_kuviz_manager(auth_client=None):
+    return KuvizManager(auth_client)
 
 
 def kuviz_to_dict(kuviz):

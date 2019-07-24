@@ -14,7 +14,6 @@ import sys
 import json
 import random
 import warnings
-import requests
 from datetime import datetime
 
 from carto.exceptions import CartoException
@@ -463,28 +462,6 @@ class TestContext(unittest.TestCase, _UserUrlLoader):
         # table exists but columns don't
         with self.assertRaises(ValueError):
             con._check_query(success_query, style_cols=fail_cols)
-
-    def test_debug_print(self):
-        """_debug_print"""
-        con = Context(base_url=self.baseurl,
-                      api_key=self.apikey,
-                      verbose=True)
-        # request-response usage
-        resp = requests.get('http://httpbin.org/get')
-        con._debug_print(resp=resp)
-        con._debug_print(resp=resp.text)
-
-        # non-requests-response usage
-        test_str = 'this is a test'
-        long_test_str = ', '.join([test_str] * 100)
-        self.assertIsNone(con._debug_print(test_str=test_str))
-        self.assertIsNone(con._debug_print(long_str=long_test_str))
-
-        # verbose = False test
-        con = Context(base_url=self.baseurl,
-                      api_key=self.apikey,
-                      verbose=False)
-        self.assertIsNone(con._debug_print(resp=test_str))
 
     def test_tables(self):
         """Context.tables normal usage"""
