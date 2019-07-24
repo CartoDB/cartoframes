@@ -210,6 +210,23 @@ class Map(object):
     def _repr_html_(self):
         return self._htmlMap.html
 
+    def to_html(self, file, maps_api_key='default_public', context=None):
+        if not self._publisher.is_sync():
+            raise CartoException('The map layers are not synchronized with CARTO. '
+                                 'Please, use the `sync_data` method before publishing the map')
+
+        if maps_api_key == 'default_public':
+            self._validate_public_publication()
+
+        self._publisher.set_context(context)
+        html = self._get_publication_html(None, maps_api_key)
+
+        f = open(file, "a")
+        f.write(html)
+        f.close()
+
+        return True
+
     def publish(self, name, maps_api_key='default_public', context=None, password=None):
         """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
 
