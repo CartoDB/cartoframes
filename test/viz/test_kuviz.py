@@ -9,22 +9,9 @@ from cartoframes.auth import Credentials
 
 from ..mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from ..mocks.dataset_mock import DatasetMock
+from ..mocks.context_mock import ContextMock
 
 from .utils import build_geojson
-
-
-class MockContext():
-    def __init__(self):
-        self.query = ''
-        self.response = ''
-
-    def execute_query(self, q, **kwargs):
-        self.query = q
-        return self.response
-
-    def execute_long_running_query(self, q):
-        self.query = q
-        return self.response
 
 
 class TestKuviz(unittest.TestCase):
@@ -60,11 +47,11 @@ class TestKuvizPublisher(unittest.TestCase):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
-        self._mock_context = MockContext()
+        self._context_mock = ContextMock()
 
         # Mock create_context method
         self.original_create_context = context.create_context
-        context.create_context = lambda c: self._mock_context
+        context.create_context = lambda c: self._context_mock
 
     def tearDown(self):
         context.create_context = self.original_create_context

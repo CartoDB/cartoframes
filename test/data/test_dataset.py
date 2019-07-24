@@ -20,8 +20,10 @@ from cartoframes.data import StrategiesRegistry
 from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
+from cartoframes import context
 
 from ..mocks.dataset_mock import DatasetMock
+from ..mocks.context_mock import ContextMock
 
 from ..utils import _UserUrlLoader
 
@@ -452,6 +454,14 @@ class TestDatasetInfo(unittest.TestCase):
         self.api_key = 'fake_api_key'
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
 
+        self._context_mock = ContextMock()
+        # Mock create_context method
+        self.original_create_context = context.create_context
+        context.create_context = lambda c: self._context_mock
+
+    def tearDown(self):
+        context.create_context = self.original_create_context
+
     def test_dataset_get_privacy_from_new_table(self):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.credentials)
@@ -523,6 +533,15 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
                 }
             ]
         }
+
+        self._context_mock = ContextMock()
+        # Mock create_context method
+        self.original_create_context = context.create_context
+        context.create_context = lambda c: self._context_mock
+
+    def tearDown(self):
+        StrategiesRegistry.instance = None
+        context.create_context = self.original_create_context
 
     def assertIsTableDatasetInstance(self, table_name):
         ds = DatasetMock(table_name, credentials=self.credentials)

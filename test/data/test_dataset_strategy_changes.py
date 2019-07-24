@@ -10,8 +10,10 @@ from cartoframes.data import StrategiesRegistry
 from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
 from cartoframes.data.registry.table_dataset import TableDataset
 from cartoframes.data.registry.query_dataset import QueryDataset
+from cartoframes import context
 
 from ..mocks.dataset_mock import DatasetMock
+from ..mocks.context_mock import ContextMock
 
 
 class TestDatasetStrategyChanges(unittest.TestCase):
@@ -37,8 +39,14 @@ class TestDatasetStrategyChanges(unittest.TestCase):
             ]
         }
 
+        self._context_mock = ContextMock()
+        # Mock create_context method
+        self.original_create_context = context.create_context
+        context.create_context = lambda c: self._context_mock
+
     def tearDown(self):
         StrategiesRegistry.instance = None
+        context.create_context = self.original_create_context
 
     def test_dataset_from_table(self):
         table_name = 'fake_table'
