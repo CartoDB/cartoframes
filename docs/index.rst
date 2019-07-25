@@ -9,12 +9,11 @@
    :maxdepth: 2
 
    Overview <overview>
+   Authentication <credentials>
    Data-driven maps <maps>
    Publishing and sharing a map <kuviz>
    Data workflows <data>
-   Authentication <credentials>
    Example functionalty <example_context>
-   Credentials <credentials>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
    Local development setup <local_development>
