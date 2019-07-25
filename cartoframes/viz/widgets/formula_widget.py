@@ -11,7 +11,7 @@ def formula_widget(value, operation=None, **kwargs):
     or counts of features ('Count') in a dataset.
 
     A formula widget's aggregations can be calculated on 'global' or 'viewport' based values.
-    If you want the values in a formula widget to update on zoom and/or pan, use viewport based aggregations. 
+    If you want the values in a formula widget to update on zoom and/or pan, use viewport based aggregations.
 
     Args:
         value (str): Column name of the numeric value
