@@ -29,19 +29,19 @@ def time_series_widget(value, **kwargs):
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import time_series_widget
 
-        Map(
-            Layer(
-                'seattle_collisions',
-                'filter: animation($incdate, 20, fade(0.5,0.5))',
-                widgets=[
-                    time_series_widget(
-                        value='incdate',
-                        title='Number of Collisions by Date',
-                        description= 'Play, pause, or select a range for the animation',
-                        buckets=10
-                    )]
+            Map(
+                Layer(
+                    'seattle_collisions',
+                    'filter: animation($incdate, 20, fade(0.5,0.5))',
+                    widgets=[
+                        time_series_widget(
+                            value='incdate',
+                            title='Number of Collisions by Date',
+                            description= 'Play, pause, or select a range for the animation',
+                            buckets=10
+                        )]
+                )
             )
-        )
     """
     data = kwargs
     data['type'] = 'time-series'
