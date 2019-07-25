@@ -11,7 +11,6 @@ class Widget():
         data (dict): The widget definition for a layer. It contains the information to render a widget:
             `type`: 'default', 'formula', time-series', 'animation', 'category', 'histogram'
             `value`: A constant value or a CARTO VL expression
-            `options`: Options for the widget, this varies depending on the widget
 
             The widget also can display text information: `title`, `description` and `footer`.
     Example:
