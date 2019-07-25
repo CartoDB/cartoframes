@@ -111,7 +111,7 @@ class Examples():
     """
 
     def __init__(self):
-      self._credentials = Credentials(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+        self._credentials = Credentials(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
 
     # example dataset read methods
     def read_brooklyn_poverty(self, limit=None, **kwargs):
