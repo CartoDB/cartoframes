@@ -12,7 +12,7 @@
    Data-driven maps <maps>
    Publishing and sharing a map <kuviz>
    Data workflows <data>
-   Authentication <context>
+   Authentication <credentials>
    Example functionalty <example_context>
    Credentials <credentials>
    Cookbook <cookbook>

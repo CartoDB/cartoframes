@@ -1,5 +1,5 @@
 Credentials Management
 ======================
-.. automodule:: cartoframes.credentials
+.. automodule:: cartoframes.auth.credentials
     :noindex:
     :members:

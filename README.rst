@@ -223,47 +223,47 @@ Publish map to CARTO
 
 This will publish a map like `this one <https://cartoframes.carto.com/kuviz/2a7badc3-00b3-49d0-9bc8-3b138542cdcf>`__.
 
-CARTO.js-based Maps
-^^^^^^^^^^^^^^^^^^^
-
-The following will embed a CARTO map in a Jupyter notebook, allowing for custom styling of the maps driven by `TurboCARTO <https://github.com/CartoDB/turbo-carto>`__ and `CARTOColors <https://carto.com/blog/introducing-cartocolors>`__. See the `CARTOColors wiki <https://github.com/CartoDB/CartoColor/wiki/CARTOColor-Scheme-Names>`__ for a full list of available color schemes.
-
-.. code:: python
-
-    from cartoframes import Layer, BaseMap, styling
-    con = cartoframes.auth.Context(base_url=BASEURL,
-                                  api_key=APIKEY)
-    con.map(layers=[BaseMap('light'),
-                   Layer('acadia_biodiversity',
-                         color={'column': 'simpson_index',
-                                'scheme': styling.tealRose(5)}),
-                   Layer('peregrine_falcon_nest_sites',
-                         size='num_eggs',
-                         color={'column': 'bird_id',
-                                'scheme': styling.vivid(10)})],
-           interactive=True)
-
-.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/map_demo.gif
-
 Data Observatory
 ----------------
 
 Interact with CARTO's `Data Observatory <https://carto.com/docs/carto-engine/data>`__:
 
+Example: Get census tracts around Idaho Falls, Idaho, USA, and add median income from the US census. Without limiting the metadata, we get median income measures for each census in the Data Observatory.
+
 .. code:: python
 
-    import cartoframes
-    con = cartoframes.auth.Context(BASEURL, APIKEY)
+    from cartoframes.auth import set_default_credentials
+    from cartoframes.client import DataObsClient
 
-    # total pop, high school diploma (normalized), median income, poverty status (normalized)
-    # See Data Observatory catalog for codes: https://cartodb.github.io/bigmetadata/index.html
-    data_obs_measures = [{'numer_id': 'us.census.acs.B01003001'},
-                         {'numer_id': 'us.census.acs.B15003017',
-                          'normalization': 'predenominated'},
-                         {'numer_id': 'us.census.acs.B19013001'},
-                         {'numer_id': 'us.census.acs.B17001002',
-                          'normalization': 'predenominated'},]
-    df = con.data('transactions', data_obs_measures)
+    set_default_credentials(
+        base_url='https://your_user_name.carto.com',
+        api_key='your api key'
+    )
+
+    do = DataObsClient()
+
+    # will return Dataset with columns `the_geom` and `geom_ref`
+    tracts = do.boundaries(
+        boundary='us.census.tiger.census_tract',
+        region=[-112.096642,43.429932,-111.974213,43.553539])
+
+    # write geometries to a CARTO table
+    tracts.upload('idaho_falls_tracts')
+
+    # gather metadata needed to look up median income
+    median_income_meta = do.discovery(
+        'idaho_falls_tracts',
+        keywords='median income',
+        boundaries='us.census.tiger.census_tract')
+
+    # get median income data and original table as new Dataset
+    idaho_falls_income = do.augment(
+        'idaho_falls_tracts',
+        median_income_meta,
+        how='geom_refs')
+
+    # overwrite existing table with newly-enriched Dataset
+    idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
 
 CARTO Credential Management
@@ -272,24 +272,26 @@ CARTO Credential Management
 Typical usage
 ^^^^^^^^^^^^^
 
-The most common way to input credentials into cartoframes is through the `Context`, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
+The most common way to input credentials into cartoframes is through the `set_default_credentials` method, as below. Replace `{your_user_name}` with your CARTO username and `{your_api_key}` with your API key, which you can find at ``https://{your_user_name}.carto.com/your_apps``.
 
 .. code:: python
 
-    from cartoframes.auth import Context
-    con = Context(
-        base_url='https://{your_user_name}.carto.com',
+    from cartoframes.auth import set_default_credentials
+
+    set_default_credentials(
+        username='{your_user_name}',
         api_key='{your_api_key}'
     )
 
-
-You can also set your credentials using the `Credentials` class:
+You can also set your credentials using the `base_url` parameter:
 
 .. code:: python
 
-    from cartoframes.auth import Credentials, Context
-    con = Context(
-        creds=Credentials(api_key='{your_api_key}', username='{your_user_name}')
+    from cartoframes.auth import set_default_credentials
+
+    set_default_credentials(
+        base_url='https://{your_user_name}.carto.com',
+        api_key='{your_api_key}'
     )
 
 
@@ -298,13 +300,14 @@ Save/update credentials for later use
 
 .. code:: python
 
-    from cartoframes.auth import Credentials, Context
-    creds = Credentials(username='eschbacher', api_key='abcdefg')
-    creds.save()  # save credentials for later use (not dependent on Python session)
+    from cartoframes.auth import Credentials
+
+    credentials = Credentials('{your_user_name}', '{your_api_key}')
+    credentials.save()  # save credentials for later use (not dependent on Python session)
 
 Once you save your credentials, you can get started in future sessions more quickly:
 
 .. code:: python
 
-    from cartoframes.auth import Context
-    con = Context()  # automatically loads credentials if previously saved
+    from cartoframes.auth import Credentials
+    credentials = Credentials.from_file()  # automatically loads credentials if previously saved
