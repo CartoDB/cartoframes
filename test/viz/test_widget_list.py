@@ -86,7 +86,7 @@ class TestWidgetList(unittest.TestCase):
                 'footer': '[footer]',
                 'has_bridge': False,
                 'variable_name': 'vb6dbcf',
-                'options': {}
+                'options': {'readOnly': False}
             }, {
                 'type': 'default',
                 'title': '"Custom Info"',
@@ -96,5 +96,5 @@ class TestWidgetList(unittest.TestCase):
                 'footer': '',
                 'has_bridge': False,
                 'variable_name': '',
-                'options': {}
+                'options': {'readOnly': False}
             }])

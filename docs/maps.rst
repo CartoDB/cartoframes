@@ -32,6 +32,13 @@ Helper Functions
    :noindex:
    :members:
 
+Widget Functions
+^^^^^^^^^^^^^^^^
+
+.. automodule:: cartoframes.viz.widgets
+   :noindex:
+   :members:
+
 Vector Layers
 ^^^^^^^^^^^^^
 
