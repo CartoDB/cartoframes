@@ -32,19 +32,19 @@ def histogram_widget(value, **kwargs):
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import histogram_widget
 
-        Map(
-            Layer(
-                'seattle_collisions',
-                widgets=[
-                    histogram_widget(
-                        'vehcount',
-                        title='Number of Vehicles Involved',
-                        description='Select a range of values to filter',
-                        buckets=9
-                    )
-                ]
+            Map(
+                Layer(
+                    'seattle_collisions',
+                    widgets=[
+                        histogram_widget(
+                            'vehcount',
+                            title='Number of Vehicles Involved',
+                            description='Select a range of values to filter',
+                            buckets=9
+                        )
+                    ]
+                )
             )
-        )
     """
 
     data = kwargs

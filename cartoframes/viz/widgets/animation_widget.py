@@ -19,26 +19,6 @@ def animation_widget(**kwargs):
 
     Returns:
         cartoframes.viz.Widget: Widget with type='animation'
-
-    Example:
-        Create a Default Widget
-
-        .. code::python
-
-            from cartoframes.viz import Map, Layer
-            from cartoframes.viz.widgets import animation_widget
-
-            Map(
-                Layer(
-                    'seattle_collisions',
-                    'filter: animation($incdate, 20, fade(0.5,0.5))',
-                    widgets=[
-                        animation_widget(
-                            title='Collision Date',
-                            description= 'Play, pause, or select the range of the animation'
-                        )]
-                )
-            )
     """
 
     data = kwargs
