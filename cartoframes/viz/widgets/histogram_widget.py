@@ -25,9 +25,7 @@ def histogram_widget(value, **kwargs):
 
     Example:
 
-        Create a Histogram Widget
-
-        .. code::python
+        .. code::
 
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import histogram_widget

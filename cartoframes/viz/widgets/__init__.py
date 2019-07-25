@@ -1,45 +1,5 @@
 """
 Widget helpers to generate widgets faster.
-
-Example:
-    Create an Animation Widget
-
-    .. code::python
-
-        from cartoframes.viz import Map, Layer
-        from cartoframes.viz.widgets import animation_widget
-
-        Map(
-            Layer(
-                'seattle_collisions',
-                'filter: animation($incdate, 20, fade(0.5,0.5))',
-                widgets=[
-                    animation_widget(
-                        title='Collision Date',
-                        description= 'Play, pause, or select the range of the animation'
-                    )]
-            )
-        )
-
-    Create a Category Widget
-
-    .. code::python
-
-        from cartoframes.viz import Map, Layer
-        from cartoframes.viz.widgets import category_widget
-
-        Map(
-            Layer(
-                'seattle_collisions',
-                widgets=[
-                    category_widget(
-                        'collisiontype',
-                        title='Type of Collision',
-                        description='Select a category to filter',
-                    )
-                ]
-            )
-        )
 """
 
 from __future__ import absolute_import

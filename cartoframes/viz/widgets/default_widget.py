@@ -17,9 +17,8 @@ def default_widget(**kwargs):
         cartoframes.viz.Widget: Widget with type='default'
 
     Example:
-        Create a Default Widget
 
-        .. code::python
+        .. code::
 
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import default_widget

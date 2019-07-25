@@ -16,6 +16,26 @@ def category_widget(value, **kwargs):
 
     Returns:
         cartoframes.viz.Widget: Widget with type='category'
+
+    Example:
+
+        .. code::
+
+            from cartoframes.viz import Map, Layer
+            from cartoframes.viz.widgets import category_widget
+
+            Map(
+                Layer(
+                    'seattle_collisions',
+                    widgets=[
+                        category_widget(
+                            'collisiontype',
+                            title='Type of Collision',
+                            description='Select a category to filter',
+                        )
+                    ]
+                )
+            )
     """
 
     data = kwargs
