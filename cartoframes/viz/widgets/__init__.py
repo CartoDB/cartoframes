@@ -1,5 +1,5 @@
 """
-Widget functions to generate widgets faster.
+Widget helpers to generate widgets faster.
 """
 
 from __future__ import absolute_import
