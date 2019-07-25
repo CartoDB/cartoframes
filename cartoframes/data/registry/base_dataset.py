@@ -8,7 +8,7 @@ from ..utils import decode_geometry, compute_query, convert_bool, \
     get_context_with_public_creds, ENC_WKB_BHEX
 from ... import utils
 from ... import context
-from ...columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
+from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
 class BaseDataset():

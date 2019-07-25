@@ -39,7 +39,7 @@ class Credentials(object):
 
         .. code::
 
-            from cartoframes.auth import Credentials, Context
+            from cartoframes.auth import Credentials
             credentials = Credentials(username='eschbacher', api_key='abcdefg')
     """
 

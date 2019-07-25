@@ -13,8 +13,7 @@ import numpy as np
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
-from .columns import normalize_name
-
+from .data.columns import normalize_name
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -162,10 +161,6 @@ def snake_to_camel(snake_str):
 
 def in_snake_case(str):
     return str.find('_') != -1
-
-
-def is_url(text):
-    return re.match(r'^https?://.*$', text)
 
 
 def debug_print(verbose=0, **kwargs):

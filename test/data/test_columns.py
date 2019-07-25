@@ -1,9 +1,9 @@
 # coding=UTF-8
 
-"""Unit tests for cartoframes.columns"""
+"""Unit tests for cartoframes.data.columns"""
 import unittest
 
-from cartoframes.columns import Column, normalize_names, pg2dtypes
+from cartoframes.data.columns import Column, normalize_names, pg2dtypes
 
 
 class TestColumns(unittest.TestCase):

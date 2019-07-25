@@ -1,11 +1,9 @@
 """Auth namespace contains the class to manage authentication: Credentials.
 It also includes the utility method set_default_credentials."""
 from __future__ import absolute_import
+import re
 
-from .context import Context
 from .credentials import Credentials
-
-from ..utils import is_url
 
 _default_credentials = None
 
@@ -110,7 +108,7 @@ def set_default_credentials(
         _default_credentials = _credentials
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
-        if _base_url and is_url(_base_url):
+        if _base_url and _is_url(_base_url):
             _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
         else:
             _default_credentials = Credentials(username=_username, api_key=_api_key)
@@ -123,8 +121,11 @@ def set_default_credentials(
         _default_credentials.session = session
 
 
+def _is_url(text):
+    return re.match(r'^https?://.*$', text)
+
+
 __all__ = [
-    'Context',
     'Credentials',
     'set_default_credentials'
 ]

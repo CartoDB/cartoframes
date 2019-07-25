@@ -5,7 +5,7 @@ from carto.kuvizs import KuvizManager
 from carto.auth import APIKeyAuthClient
 
 from .source import Source
-from ..columns import normalize_name
+from ..data.columns import normalize_name
 from ..__version__ import __version__
 
 from warnings import filterwarnings
