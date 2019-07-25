@@ -20,7 +20,8 @@ def category_widget(value, **kwargs):
     Example:
         Create a Category Widget
 
-        .. code::
+        .. code::python
+
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import category_widget
 

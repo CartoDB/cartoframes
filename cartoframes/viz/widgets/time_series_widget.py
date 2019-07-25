@@ -25,7 +25,8 @@ def time_series_widget(value, **kwargs):
     Example:
         Create a Time Series Widget
 
-        .. code::
+        .. code::python
+
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import time_series_widget
 

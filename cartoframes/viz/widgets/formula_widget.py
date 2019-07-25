@@ -28,7 +28,8 @@ def formula_widget(value, operation=None, **kwargs):
     Example:
         Create a 'count' Formula Widget
 
-        .. code::
+        .. code::python
+
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import formula_widget
 

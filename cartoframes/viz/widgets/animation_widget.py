@@ -10,7 +10,7 @@ def animation_widget(**kwargs):
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
     the animation and the widget. Only **one** animation can be controlled per layer.
     To learn more about creating animations visit:
-      - [Animated visualizations](https://carto.com/developers/carto-vl/guides/animated-visualizations/).
+      - https://carto.com/developers/carto-vl/guides/animated-visualizations.
 
     Args:
         title (str, optional): Title of widget.
@@ -23,7 +23,8 @@ def animation_widget(**kwargs):
     Example:
         Create a Default Widget
 
-        .. code::
+        .. code::python
+
             from cartoframes.viz import Map, Layer
             from cartoframes.viz.widgets import animation_widget
 
