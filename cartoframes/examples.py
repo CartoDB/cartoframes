@@ -65,7 +65,7 @@ good method:
             lnglat=('pickup_latitude', 'pickup_longitude')
         )
 """  # noqa
-from cartoframes.auth import set_default_credentials
+from cartoframes.auth import Credentials
 from cartoframes.data import Dataset, tables
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
@@ -111,10 +111,7 @@ class Examples():
     """
 
     def __init__(self):
-        set_default_credentials(
-            base_url=EXAMPLE_BASE_URL,
-            api_key=EXAMPLE_API_KEY
-        )
+      self._credentials = Credentials(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
 
     # example dataset read methods
     def read_brooklyn_poverty(self, limit=None, **kwargs):
@@ -130,7 +127,7 @@ class Examples():
             df = examples.read_brooklyn_poverty()
 
         """
-        return Dataset('brooklyn_poverty').download(limit, **kwargs)
+        return Dataset('brooklyn_poverty', self._credentials).download(limit, **kwargs)
 
     def read_ne_50m_graticules_15(self, limit=None, **kwargs):
         """50m world Mercator grid
@@ -144,7 +141,7 @@ class Examples():
             df = examples.read_ne_50m_graticules_15()
 
         """
-        return Dataset('ne_50m_graticules_15').download(limit, **kwargs)
+        return Dataset('ne_50m_graticules_15', self._credentials).download(limit, **kwargs)
 
     def read_mcdonalds_nyc(self, limit=None, **kwargs):
         """McDonald's locations for New York City, USA. See the function
@@ -159,7 +156,7 @@ class Examples():
             df = examples.read_mcdonalds_nyc()
 
         """
-        return Dataset('mcdonalds_nyc').download(limit, **kwargs)
+        return Dataset('mcdonalds_nyc', self._credentials).download(limit, **kwargs)
 
     def read_nyc_census_tracts(self, limit=None, **kwargs):
         """Census tracts for New York City, USA. See the function
@@ -174,7 +171,7 @@ class Examples():
             df = examples.read_nyc_census_tracts()
 
         """
-        return Dataset('nyc_census_tracts').download(limit, **kwargs)
+        return Dataset('nyc_census_tracts', self._credentials).download(limit, **kwargs)
 
     def read_taxi(self, limit=None, **kwargs):
         """Taxi pickup and drop-off logs for New York City, USA. See the
@@ -189,7 +186,7 @@ class Examples():
             df = examples.read_taxi()
 
         """
-        return Dataset('taxi_50k').download(limit, **kwargs)
+        return Dataset('taxi_50k', self._credentials).download(limit, **kwargs)
 
     def read_nat(self, limit=None, **kwargs):
         """Historical homicide rates for the United States at the county level.
@@ -204,11 +201,10 @@ class Examples():
             df = examples.read_nat()
 
         """
-        return Dataset('nat').download(limit, **kwargs)
+        return Dataset('nat', self._credentials).download(limit, **kwargs)
 
     def tables(self):
-        from cartoframes.auth import _default_credentials
-        return tables(_default_credentials)
+        return tables(self._credentials)
 
 
 examples = Examples()
