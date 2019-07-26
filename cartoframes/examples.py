@@ -1,8 +1,6 @@
 """Download, preview, and query example datasets for use in cartoframes
 examples. Try examples by `running the notebooks in binder
-<https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples>`__,
-or trying the `Example Datasets notebook
-<https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__.
+<https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples>`__
 
 In addition to the functions listed below, this examples module is
 authenticated against all public datasets in the https://cartoframes.carto.com
