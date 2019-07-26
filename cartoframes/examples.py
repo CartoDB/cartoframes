@@ -348,12 +348,16 @@ def read_taxi(limit=None, **kwargs):
 
     .. note:: This dataset does not have geometries. The geometries have to be
         created by using the pickup or drop-off lng/lat pairs. These can be
-        specified in `Context.write`.
+        specified in `Dataset.upload`.
 
-        To create geometries with `example_context.query`, write a query such
+        To create geometries with `examples.query`, write a query such
         as this::
 
-            example_context.query('''
+            from cartoframes.client import SQLClient
+
+            sql = SQLClient(examples.get_credentials())
+
+            sql.query('''
                 SELECT
                   CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
                   cartodb_id,
