@@ -4,8 +4,7 @@ examples. Try examples by `running the notebooks in binder
 or trying the `Example Datasets notebook
 <https://github.com/CartoDB/cartoframes/blob/master/examples/Example%20Datasets.ipynb>`__.
 
-In addition to the functions listed below, this examples module provides a
-:py:class:`Context <cartoframes.auth.Context>` that is
+In addition to the functions listed below, this examples module is
 authenticated against all public datasets in the https://cartoframes.carto.com
 account. This means that besides reading the datasets from CARTO, users can
 also create maps from these datasets.
@@ -15,33 +14,36 @@ census tracts in Brooklyn, New York (preview of static version below code).
 
     .. code::
 
-        from cartoframes.examples import example_context
-        from cartoframes import Layer
-        example_context.map(Layer('brooklyn_poverty', color='poverty_per_pop'))
+        from cartoframes.examples import examples
+
+        examples.map('brooklyn_poverty')
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&anti_cache=0.2903456538919632&bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
 
-To query datasets, use the :py:meth:`Context.query
-<cartoframes.auth.Context.query>` method. The following example finds
-the poverty rate in the census tract a McDonald's fast food joint is located
-(preview of static map below code).
+To query datasets, use the :py:class:`Dataset <cartoframes.data.Dataset>` class.
+The following example finds the poverty rate in the census tract a McDonald's fast
+food joint is located (preview of static map below code).
 
     .. code::
 
-        from cartoframes.examples import import example_context
+        from cartoframes.examples import examples
+        from cartoframes.data import Dataset
 
         # query to get poverty rates where mcdonald's are located in brooklyn
-        q = '''
-            SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, con.poverty_per_pop
-            FROM mcdonalds_nyc as m, brooklyn_poverty as c
-            WHERE ST_Intersects(m.the_geom, con.the_geom)
-        '''
-        # get data
-        df = example_context.query(q)
+        query = '''
+                    SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
+                    FROM mcdonalds_nyc as m, brooklyn_poverty as c WHERE ST_Intersects(m.the_geom, c.the_geom)
+                '''
 
-        # visualize data
-        from cartoframes import QueryLayer
-        example_context.map(QueryLayer(q, size='poverty_per_pop'))
+        credentials = examples.get_credentials()
+        ds = Dataset(query, credentials=credentials)
+
+        # download and show the data
+        ds.download()
+        ds.dataframe
+
+        # map
+        examples.map(ds)
 
 .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&anti_cache=0.040403611167980635&bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001
 
@@ -51,45 +53,43 @@ good method:
 
     .. code::
 
-        from cartoframes.auth import Context
+        from cartoframes.auth import Credentials
+        from cartoframes.data import Dataset
         from cartoframes.examples import read_taxi
+
         USERNAME = 'your user name'
         APIKEY = 'your API key'
-        con = Context(
-            base_url='https://{}.carto.com'.format(USERNAME),
+
+        credentials = Credentials(
+            username=USERNAME,
             api_key=APIKEY
         )
-        con.write(
-            read_taxi(),
-            'taxi_data_examples_acct',
-            lnglat=('pickup_latitude', 'pickup_longitude')
-        )
+
+        Dataset(read_taxi()).upload(
+          table_name='taxi_data_examples_acct',
+          lnglat=('pickup_latitude', 'pickup_longitude')
+          credentials=credentials)
 """  # noqa
 from cartoframes.auth import Credentials
 from cartoframes.data import Dataset, tables
+from cartoframes.viz import Map, Layer
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
 
 
 class Examples():
-    """A Context with a CARTO account containing example data. This
-    special :py:class:`Context <cartoframes.auth.Context>`
-    provides read access to all the datasets in the cartoframes CARTO account.
+    """This special class provides read access to all the datasets in the cartoframes CARTO account.
 
-    The recommended way to use this class is to import the `example_context`
+    The recommended way to use this class is to import the `examples`
     from the `cartoframes.examples` module:
 
     .. code::
 
-        from cartoframes.examples import example_context
-        df = example_context.read_taxi()
+        from cartoframes.examples import examples
+        df = examples.read_taxi()
 
-    The following tables are available for use with the
-    :py:meth:`Context.read <cartoframes.auth.Context.read>`,
-    :py:meth:`Context.map <cartoframes.auth.Context.map>`, and
-    :py:meth:`Context.query <cartoframes.auth.Context.query>`
-    methods.
+    The following tables are available:
 
     - ``brooklyn_poverty`` - basic poverty information for Brooklyn, New York
     - ``mcdonalds_nyc`` - McDonald's locations in New York City
@@ -100,13 +100,11 @@ class Examples():
       `pickup_latitude`/`pickup_longitude` columns, the
       `dropoff_latitude`/`dropoff_longitude` columns, or through some other
       process. When writing this table to your account, make sure to specify
-      the `lnglat` flag in :py:meth:`Context.write
-      <cartoframes.auth.Context.write>`
+      the `lnglat` flag in :py:meth:`Dataset.upload
+      <cartoframes.data.Dataset.upload>`
 
-    Besides the standard :py:class:`Context
-    <cartoframes.auth.Context>` methods, this class includes a
-    convenience method for each of the tables listed above. See the full list
-    below.
+    This class includes a convenience method for each of the tables listed above.
+    See the full list below.
 
     """
 
@@ -206,6 +204,12 @@ class Examples():
     def tables(self):
         return tables(self._credentials)
 
+    def map(self, source):
+        return Map(Layer(source, credentials=self._credentials))
+
+    def get_credentials(self):
+        return self._credentials
+
 
 examples = Examples()
 
@@ -220,7 +224,7 @@ def read_ne_50m_graticules_15(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 
@@ -252,7 +256,7 @@ def read_brooklyn_poverty(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 
@@ -285,7 +289,7 @@ def read_mcdonalds_nyc(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 
@@ -318,7 +322,7 @@ def read_nyc_census_tracts(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 
@@ -369,8 +373,7 @@ def read_taxi(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read
-        <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 
@@ -402,8 +405,7 @@ def read_nat(limit=None, **kwargs):
 
       limit (int, optional): Limit results to `limit`. Defaults to return all
         rows of the original dataset
-      **kwargs: Arguments accepted in :py:meth:`Context.read
-        <cartoframes.auth.Context.read>`
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download <cartoframes.data.Dataset.download>`
 
     Returns:
 

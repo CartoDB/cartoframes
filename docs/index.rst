@@ -13,7 +13,7 @@
    Data-driven maps <maps>
    Publishing and sharing a map <kuviz>
    Data workflows <data>
-   Example functionalty <example_context>
+   Example functionalty <examples>
    Cookbook <cookbook>
    ETL with CARTOframes <etl>
    Local development setup <local_development>
