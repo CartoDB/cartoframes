@@ -116,48 +116,6 @@ Engineer your DO metadata if you already have GEOID or another geom_ref
 
 Use `how='geom_ref_col'` and specify the appropriate boundary in the metadata.
 
-How to get a matplotlib figure with four maps
----------------------------------------------
-
-Creating a small multiple is a handy for data science visualizations for comparing data on multiple maps.
-
-In this example, we use the :py:class:`Examples <cartoframes.examples.Examples>`, so no CARTO account is required for the snippet to work.
-
-.. code::
-
-   from cartoframes import BaseMap, Layer, styling
-   from cartoframes.examples import example_context
-   import matplotlib.pyplot as plt
-
-   # table in examples account
-   # preview with:
-   #    example_context.read_brooklyn_poverty()
-   table = 'brooklyn_poverty'
-
-   # columns and color scheme for visualization
-   # view available columns with:
-   #    example_context.read_brooklyn_poverty().columns
-   cols = [('pop_determined_poverty_status_2011_2015', 'Sunset'),
-           ('poverty_per_pop', 'Mint'),
-           ('walked_to_work_2011_2015_per_pop', 'TealRose'),
-           ('total_population', 'Peach')]
-
-   fig, axs = plt.subplots(2, 2, figsize=(8, 8))
-
-   for idx, col in enumerate(cols):
-       example_context.map(layers=[BaseMap('dark'), Layer(table,
-                           color={'column': col[0],
-                                  'scheme': styling.scheme(col[1], 7, 'quantiles')})],
-             ax=axs[idx // 2][idx % 2],
-             zoom=11, lng=-73.9476, lat=40.6437,
-             interactive=False,
-             size=(288, 288))
-       axs[idx // 2][idx % 2].set_title(col[0])
-   fig.tight_layout()
-   plt.show()
-
-.. image:: img/small_multiple.png
-   :alt: Small multiple example with matplotlib and Context.map
 
 Get a table as a GeoDataFrame
 -----------------------------
