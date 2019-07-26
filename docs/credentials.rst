@@ -26,6 +26,10 @@ You can also set your credentials using the `base_url` parameter:
         api_key='{your_api_key}'
     )
 
+
+The Credentials class
+^^^^^^^^^^^^^^^^^^^^^
+
 .. automodule:: cartoframes.auth.credentials
     :noindex:
     :members:
