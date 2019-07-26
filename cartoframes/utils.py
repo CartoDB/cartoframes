@@ -13,8 +13,6 @@ import numpy as np
 from functools import wraps
 from warnings import filterwarnings, catch_warnings
 
-from .data.columns import normalize_name
-
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
 GEOM_TYPE_POLYGON = 'polygon'
@@ -302,4 +300,6 @@ def is_geojson(data):
 
 
 def is_table_name(data):
+    # avoid circular dependecies
+    from .data.columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
