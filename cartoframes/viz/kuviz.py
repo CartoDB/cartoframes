@@ -69,7 +69,7 @@ class KuvizPublisher(object):
                  'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
 
 
-def _create_kuviz(html, name, auth_client=None, password=None):
+def _create_kuviz(html, name, auth_client, password=None):
     km = _get_kuviz_manager(auth_client)
     return km.create(html=html, name=name, password=password)
 
@@ -84,7 +84,7 @@ def _create_auth_client(credentials):
     )
 
 
-def _get_kuviz_manager(auth_client=None):
+def _get_kuviz_manager(auth_client):
     return KuvizManager(auth_client)
 
 
