@@ -18,13 +18,13 @@ Or follow the following steps to download them directly from the CARTOframes acc
 #### Create the contexts:
 
 ```py
-from cartoframes.auth import set_default_context, Context
+from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, Legend, Source
 from cartoframes.data import Dataset
 
 ## Add here your CARTO credentials:
-context = Context(base_url='https://your_user_name.carto.com', api_key='your_api_key')
-cf_context = Context(base_url='https://cartoframes.carto.com', api_key='default_public')
+credentials = Credentials(base_url='https://your_user_name.carto.com', api_key='your_api_key')
+cf_credentials = Credentials(base_url='https://cartoframes.carto.com', api_key='default_public')
 ```
 
 #### Get the data
@@ -34,21 +34,21 @@ And upload it to your account:
 McDonald's:
 
 ```py
-mcdonalds_nyc_data = Dataset('mcdonalds_nyc', context=cf_context)
+mcdonalds_nyc_data = Dataset('mcdonalds_nyc', credentials=cf_credentials)
 mcdonalds_nyc_data_df = mcdonalds_nyc_data.download()
 
 mcdonalds_nyc = Dataset(mcdonalds_nyc_data_df)
-mcdonalds_nyc.upload(table_name='mcdonalds_nyc', if_exists='replace', context=context)
+mcdonalds_nyc.upload(table_name='mcdonalds_nyc', if_exists='replace', credentials=credentials)
 ```
 
 NYC Census Tracts:
 
 ```py
-nyc_census_tracts_data = Dataset('nyc_census_tracts', context=cf_context)
+nyc_census_tracts_data = Dataset('nyc_census_tracts', credentials=cf_credentials)
 nyc_census_tracts_data_df = nyc_census_tracts_data.download()
 
 nyc_census_tracts = Dataset(nyc_census_tracts_data_df)
-nyc_census_tracts.upload(table_name='nyc_census_tracts', if_exists='replace', context=context)
+nyc_census_tracts.upload(table_name='nyc_census_tracts', if_exists='replace', credentials=credentials)
 ```
 
 ### Example 1
@@ -65,7 +65,7 @@ mcdonalds_per_census_tracts = Dataset('''
     WHERE ST_Intersects(tracts.the_geom, mcd.the_geom)
     GROUP BY tracts.geom_refs, tracts.the_geom
     ORDER BY num_mcdonalds DESC
-''', context=context)
+''', credentials=credentials)
 ```
 
 ```py
@@ -97,9 +97,9 @@ nyc_mcdonalds_buffer_100m = Dataset(
         ST_Buffer(the_geom::geography, 100)::geometry AS the_geom
     FROM mcdonalds_nyc
     ''',
-    context=context)
+    credentials=credentials)
 
-nyc_mcdonalds_buffer_100m.upload(table_name='nyc_mcdonalds_buffer_100m', if_exists='replace', context=context)
+nyc_mcdonalds_buffer_100m.upload(table_name='nyc_mcdonalds_buffer_100m', if_exists='replace', credentials=credentials)
 nyc_mcdonalds_buffer_100m_df = nyc_mcdonalds_buffer_100m.download()
 nyc_mcdonalds_buffer_100m_df.iloc[0, :]
 ```
@@ -110,8 +110,8 @@ nyc_mcdonalds_buffer_100m_df.iloc[0, :]
 from cartoframes.viz import Map, Layer
 
 Map([
-    Layer('nyc_mcdonalds_buffer_100m', 'color: lightgray width: 20', context=context),
-    Layer('mcdonalds_nyc', 'color: red width: 3', context=context),
+    Layer('nyc_mcdonalds_buffer_100m', 'color: lightgray width: 20', credentials=credentials),
+    Layer('mcdonalds_nyc', 'color: red width: 3', credentials=credentials),
   ],
   viewport={'zoom': 13.00, 'lat': 40.74, 'lng': -73.98}
 )
@@ -143,9 +143,9 @@ k_means_dataset = Dataset('''
          ON a.cartodb_id = b.cartodb_id
          ) AS c
         ''',
-        context=context)
+        credentials=credentials)
 
-k_means_dataset.upload(table_name='mcdonalds_clusters', if_exists='replace', context=context)
+k_means_dataset.upload(table_name='mcdonalds_clusters', if_exists='replace', credentials=credentials)
 ```
 
 #### Visualize the results:
@@ -153,7 +153,7 @@ k_means_dataset.upload(table_name='mcdonalds_clusters', if_exists='replace', con
 ```py
 from cartoframes.viz import Map, Layer
 
-Map(Layer('mcdonalds_clusters', 'color: ramp($cluster_no, Prism)', context=context))
+Map(Layer('mcdonalds_clusters', 'color: ramp($cluster_no, Prism)', credentials=credentials))
 ```
 
 [Live Visualization](https://cartovl.carto.com/kuviz/8c5b6b66-ab5e-41d3-b3e5-c2d08d6831d4)

@@ -78,18 +78,18 @@ Next, create a new notebook. See Jupyter's [running a notebook](https://jupyter.
 
 ### Authentication
 
-Before you can interact with CARTOframes, you need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps. 
+Before you can interact with CARTOframes, you need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
 
 If you don't have a CARTO account but want to try out CARTOframes, you only need the cartoframes library. To learn more, take a look at the Sources examples to visualize data from either a Dataframe or a GeoJSON.
 
-The elements we need to create contexts are under the `cartoframes.auth` namespace. For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
+The elements we need to authenticate are under the `cartoframes.auth` namespace. For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 
-set_default_context(
-    base_url='https://cartoframes.carto.com/',
+set_default_credentials(
+    username='cartoframes',
     api_key='default_public'
 )
 
@@ -129,7 +129,7 @@ Map(
 
 ## Styles, Legends and Popups
 
-To overwrite the default color and size of the points, we can modify the second parameter `Style` of the layer using the [CARTO VL String API](https://carto.com/developers/carto-vl/guides/style-with-expressions/). This API is very powerful because it allows you to style your visualizations with a few lines of code. 
+To overwrite the default color and size of the points, we can modify the second parameter `Style` of the layer using the [CARTO VL String API](https://carto.com/developers/carto-vl/guides/style-with-expressions/). This API is very powerful because it allows you to style your visualizations with a few lines of code.
 
 But, as a data scientist, your primary focus is likely on the data vs. the visualization style, for this purpose,CARTOframes also provides you with a series of Helper Methods to create default visualization types.
 

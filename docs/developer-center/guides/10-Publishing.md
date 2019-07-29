@@ -2,12 +2,12 @@
 
 This guide walks through the steps to publish a visualization and get a URL to share it. To do this, we'll need to use "CARTO custom visualizations", also known as **Kuviz**.
 
-Let's start by creating a default context.
+Let's start by creating a default credentials.
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 
-set_default_context('https://your_carto_user.carto.com/')
+set_default_credentials('your_carto_user')
 ```
 
 ### Publish

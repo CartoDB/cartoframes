@@ -7,8 +7,9 @@ If you're already familiar with Jupyter Notebooks, you can also take a look to o
 ### Content
 
 * [Quickstart]({{ site.url }}/developers/cartoframes/guides/Quickstart/)
-* [Context]({{ site.url }}/developers/cartoframes/guides/Context/)
+* [Authentication]({{ site.url }}/developers/cartoframes/guides/Credentials/)
 * [Basemaps And Viewport]({{ site.url }}/developers/cartoframes/guides/Basemaps-And-Viewport/)
+* [Datasets]({{ site.url }}/developers/cartoframes/guides/Datasets/)
 * [Sources]({{ site.url }}/developers/cartoframes/guides/Sources/)
 * [Legends]({{ site.url }}/developers/cartoframes/guides/Legends/)
 * [Popups]({{ site.url }}/developers/cartoframes/guides/Popups/)

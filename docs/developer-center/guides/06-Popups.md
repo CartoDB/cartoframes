@@ -3,10 +3,10 @@
 **Popups** are useful for interactively displaying additional information about a feature on a map. The events that allow us to interact with the feature are `hover` and `click`. A feature can listen to both events and display different information for each one.
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 
-set_default_context('https://cartovl.carto.com/')
+set_default_credentials('cartovl')
 ```
 
 ### Basic popups
