@@ -32,7 +32,7 @@ To open a pull request:
 
 ### `carto-python` dependency
 
-CARTOframes uses [carto-python](https://github.com/CartoDB/carto-python) intensively. It has the clients to connect to the different CARTO APIs. Usually, when we are developing in CARTOframes, we should add the following line in the `requirements.txt` file to work with the last code in the master branch:
+CARTOframes uses [carto-python](https://github.com/CartoDB/carto-python) intensively. It has the clients to connect to the different CARTO APIs. Usually, when we are developing in CARTOframes, we add the following line in the `requirements.txt` file to work with the last code in the master branch:
 
 ```
 -e git+https://github.com/CartoDB/carto-python.git#egg=carto
