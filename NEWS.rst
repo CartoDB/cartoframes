@@ -43,8 +43,7 @@ Updates
   - geopandas Polygon / MultiPolygon display error
   - heavy_plus_sign Add more params in the existing helpers (#830)
   - heavy_plus_sign Helper methods palette expressions as python lists (#825)
-- Documentation and examples (#879, #790, #873)
-
+- Documentation and examples (#859, #879, #790, #873)
 
 1.0b1
 ------
