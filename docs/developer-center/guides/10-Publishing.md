@@ -7,7 +7,7 @@ Let's start by creating a default credentials.
 ```py
 from cartoframes.auth import set_default_credentials
 
-set_default_credentials('https://your_carto_user.carto.com/')
+set_default_credentials('your_carto_user')
 ```
 
 ### Publish

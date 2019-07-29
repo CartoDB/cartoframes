@@ -37,7 +37,7 @@ from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.widgets import animation_widget
 
-set_default_credentials('https://cartovl.carto.com/')
+set_default_credentials('cartovl')
 
 Map(
     Layer(
@@ -55,7 +55,7 @@ from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.widgets import animation_widget
 
-set_default_credentials('https://cartovl.carto.com/')
+set_default_credentials('cartovl')
 
 Map(
     Layer(

@@ -164,7 +164,7 @@ from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map
 from cartoframes.viz.helpers import color_bins_layer
 
-set_default_credentials('https://cartovl.carto.com/')
+set_default_credentials('cartovl')
 
 Map(
     color_bins_layer(

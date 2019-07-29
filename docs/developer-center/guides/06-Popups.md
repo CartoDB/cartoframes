@@ -6,7 +6,7 @@
 from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 
-set_default_credentials('https://cartovl.carto.com/')
+set_default_credentials('cartovl')
 ```
 
 ### Basic popups
