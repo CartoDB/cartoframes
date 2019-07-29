@@ -1,6 +1,6 @@
-## Context
+## Credentials
 
-To get started using CARTOframes, you first need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`username`) and an API key (`api_key`), which can be found at **http://your_user_name.carto.com/your_apps.**
+When you works using CARTOframes, if you need to connect with your CARTO account (to use your datasets, creating new ones, ...), you first need to authenticate against a CARTO account by passing in CARTO credentials. You will need your username (`username`) and an API key (`api_key`), which can be found at **http://your_user_name.carto.com/your_apps.**
 
 ![API Key - CARTO Dashboard](../../img/guides/context/api-keys.png)
 
@@ -45,9 +45,20 @@ from cartoframes.auth import set_default_credentials
 set_default_context('your_user_name')
 ```
 
+### Dataset Credentials
+
+You can set a `Credentials` for a `Dataset` if you are working with data from your CARTO account
+
+```py
+from cartoframes.auth import Credentials
+from cartoframes.data import Dataset
+
+Dataset('dataset', credentials=Credentials('your_user_name', 'your_api_key'))
+```
+
 ### Layer Credentials
 
-You can set a `Credentials` for a `Layer`, and different contexts for different leyers:
+You can set a `Credentials` for a `Layer`, and different contexts for different layers:
 
 ```py
 from cartoframes.auth import Credentials
