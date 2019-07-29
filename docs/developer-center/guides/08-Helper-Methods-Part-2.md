@@ -15,7 +15,7 @@ In this guide, you will see how to modify the default visualization parameters o
 
 ### Color helper methods parameters
 
-Let's explore what parameters are available to customize for each color-based helper method. 
+Let's explore what parameters are available to customize for each color-based helper method.
 
 #### `color_category_layer`
 
@@ -56,7 +56,7 @@ Map(
     color_bins_layer('table_name', 'numeric_attribute','legend/hover title', bins=5, palette='purpor')
 )
 ```
-  
+
 #### `color_continuous_layer`
 
 For the color continuous helper, you can customize the sequential color palette.
@@ -79,7 +79,7 @@ Map(
 
 ### Size helper methods parameters
 
-Let's explore what parameters are available to customize for each size-based helper method. 
+Let's explore what parameters are available to customize for each size-based helper method.
 
 #### `size_category_layer`
 
@@ -128,7 +128,7 @@ Map(
     color_bins_layer('table_name', 'numeric_attribute','legend/hover title', bins=5, size="[10, 100]", color='blue')
 )
 ```
-  
+
 #### `size_continuous_layer`
 
 For the size continuous helper, you can customize the size and the color
@@ -153,18 +153,18 @@ Map(
 
 #### Example 1: Population Density in Dallas County
 
-In the example below, we will modify the visualization parameters number of `bins` and `pallete` to customize a choropleth map of population density in Dallas County, Texas. 
+In the example below, we will modify the visualization parameters number of `bins` and `pallete` to customize a choropleth map of population density in Dallas County, Texas.
 
 Customizations:
-- set the number of `bins` to `7` 
+- set the number of `bins` to `7`
 - custom sequential color palette (note that the three colors provided were interpolated to provide 7 colors for each class break)
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map
 from cartoframes.viz.helpers import color_bins_layer
 
-set_default_context('https://cartovl.carto.com/')
+set_default_credentials('https://cartovl.carto.com/')
 
 Map(
     color_bins_layer(

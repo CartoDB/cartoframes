@@ -33,9 +33,11 @@ Map(
 As mentioned above, the animation widget gets the animation expression from the `filter` property:
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.widgets import animation_widget
+
+set_default_credentials('https://cartovl.carto.com/')
 
 Map(
     Layer(
@@ -49,9 +51,11 @@ Map(
 However, if you want to animate the features by another property, for example, by `width`, you have to provide this information to the widget throught the `prop` parameter:
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map, Layer
 from cartoframes.viz.widgets import animation_widget
+
+set_default_credentials('https://cartovl.carto.com/')
 
 Map(
     Layer(
