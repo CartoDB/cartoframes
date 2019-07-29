@@ -5,11 +5,11 @@
 By default, CARTOframes sets the center and zoom of your map to encompass all features in a dataset. In the cases where you want to modify this, you can set `show_info=True` which will place zoom and center lat/long information at the bottom left corner of your map. This information is then used to set the `viewport` of a map.
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map
 from cartoframes.viz.helpers import color_bins_layer
 
-set_default_context('https://cartovl.carto.com/')
+set_default_credentials('https://cartovl.carto.com/')
 
 Map(
     color_bins_layer(
@@ -57,11 +57,11 @@ Map(
 The default basemap, Positron comes from CARTO's suite of basemaps. They have been designed to sit in the background so the visual analysis of the most important information (the story!) can more easily come to the foreground. There are other times where you will prefer not to have a basemap, add another layer to provide the right amount of geographic context, or bring in your own!
 
 ```py
-from cartoframes.auth import set_default_context
+from cartoframes.auth import set_default_credentials
 from cartoframes.viz import Map
 from cartoframes.viz.helpers import color_category_layer
 
-set_default_context('https://cartovl.carto.com/')
+set_default_credentials('https://cartovl.carto.com/')
 Map(
     color_category_layer(
         'pittsburgh_311',
