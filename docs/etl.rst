@@ -5,12 +5,10 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
 
 .. code::
 
-    from cartoframes.auth import Context
+    from cartoframes.auth import Credentials
     from cartoframes.data import Dataset
-    import pandas as pd
 
-    # create context for your carto account
-    con = Context(<your credentials>)
+    credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
 
     # Extract into a pandas' DataFrame (can be replaced by other operation)
     raw_data = pd.read_csv('https://<remote location>.csv')
@@ -19,7 +17,7 @@ One common use case for cartoframes is its use in an ETL (Extract, Transform, an
     processed_data = <some processing pipeline>
 
     # Load into your carto account
-    con.write(processed_data, 'processed_data')
+    Dataset(processed_data, credentials=credentials).upload(table_name='processed_data')
 
 
 Read data from PostgreSQL to CARTO
@@ -27,11 +25,13 @@ Read data from PostgreSQL to CARTO
 
 .. code::
 
-    from cartoframes.auth import Context
+    from cartoframes.auth import Credentials
     from cartoframes.data import Dataset
 
+    credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
+
     import pandas as pd
-    import sqlalchemy as sqla
+    import sqlalchemy as sql
 
     connection_string = 'postgresql://localhost:5432'  # replace with your connection string
     engine = sql.create_engine(connect_string)
@@ -43,7 +43,7 @@ Read data from PostgreSQL to CARTO
 
     # send to carto
     pg_dataset = Dataset(df)
-    pg_dataset.upload(table_name='table_from_pg_db')
+    pg_dataset.upload(table_name='table_from_pg_db', credentials=credentials)
 
 
 Use cases

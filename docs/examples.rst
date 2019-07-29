@@ -10,7 +10,7 @@ Data access functions
 .. autofunction:: cartoframes.examples.read_nyc_census_tracts
 .. autofunction:: cartoframes.examples.read_taxi
 
-Example Context
+Examples class
 --------------------
 
 .. autoclass:: cartoframes.examples.Examples
