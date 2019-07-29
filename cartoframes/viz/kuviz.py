@@ -18,7 +18,9 @@ class KuvizPublisher(object):
 
     @staticmethod
     def all(credentials=None):
-        km = _get_kuviz_manager(credentials)
+        from ..auth import _default_credentials
+        auth_client = _create_auth_client(credentials or _default_credentials)
+        km = _get_kuviz_manager(auth_client)
         kuvizs = km.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
