@@ -15,6 +15,14 @@ The most common way to input credentials into cartoframes is through the `set_de
         api_key='{your_api_key}'
     )
 
+When the data we’re going to use is public, we don’t need the api_key parameter, it’s automatically set to default_public:
+
+.. code:: python
+
+    from cartoframes.auth import set_default_credentials
+
+    set_default_credentials('your_user_name')
+
 You can also set your credentials using the `base_url` parameter:
 
 .. code:: python
