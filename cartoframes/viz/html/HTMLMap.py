@@ -9,7 +9,6 @@ class HTMLMap(object):
         self.width = None
         self.height = None
         self.srcdoc = None
-
         self._env = Environment(
             loader=PackageLoader('cartoframes', 'assets/templates'),
             autoescape=True
@@ -25,15 +24,17 @@ class HTMLMap(object):
     def set_content(
         self, size, layers, bounds, viewport=None, basemap=None,
             default_legend=None, show_info=None, theme=None, _carto_vl_path=None,
-            _airship_path=None, title='CARTOframes', is_embed=False):
+            _airship_path=None, title='CARTOframes', is_embed=False,
+            is_static=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, basemap, default_legend,
-            show_info, theme, _carto_vl_path, _airship_path, title, is_embed)
+            show_info, theme, _carto_vl_path, _airship_path, title, is_embed, is_static)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, theme=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False):
+            show_info=None, theme=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False,
+            is_static=False):
 
         token = ''
         basecolor = ''
@@ -109,7 +110,8 @@ class HTMLMap(object):
             airship_styles_path=airship_styles_path,
             airship_icons_path=airship_icons_path,
             title=title,
-            is_embed=is_embed
+            is_embed=is_embed,
+            is_static=is_static
         )
 
     def _repr_html_(self):

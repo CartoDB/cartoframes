@@ -180,6 +180,7 @@ class Map(object):
                  default_legend=False,
                  show_info=None,
                  theme=None,
+                 is_static=False,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -191,6 +192,7 @@ class Map(object):
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
+        self.is_static = is_static
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
@@ -206,6 +208,7 @@ class Map(object):
             default_legend=self.default_legend,
             show_info=self.show_info,
             theme=self.theme,
+            is_static=self.is_static,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
@@ -323,7 +326,8 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path,
             title=name,
-            is_embed=True)
+            is_embed=True,
+            is_static=self.is_static)
 
         return html_map.html
 
