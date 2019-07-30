@@ -29,6 +29,15 @@ REQUIRES = [
     'webcolors>=1.9.1,<2.0'
 ]
 
+EXTRAS_REQUIRE = {
+    ':python_version == "2.7"': [
+        'IPython>=5.0.0,<6.0.0',
+    ],
+    ':python_version >= "3.4"': [
+        'IPython>=6.0.0'
+    ],
+}
+
 PACKAGE_DATA = {
     '': [
         'LICENSE',
@@ -76,6 +85,7 @@ setup(
     packages=find_packages(),
     install_requires=REQUIRES,
     python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+    extras_require=EXTRAS_REQUIRE,
     include_package_data=True,
     package_dir={'cartoframes': 'cartoframes'},
     package_data=PACKAGE_DATA,
