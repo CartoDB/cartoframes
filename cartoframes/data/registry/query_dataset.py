@@ -34,7 +34,8 @@ class QueryDataset(BaseDataset):
     def download(self, limit, decode_geom, retry_times):
         self._is_ready_for_dowload_validation()
         columns = self._get_query_columns()
-        return self._copyto(columns, self._query, limit, decode_geom, retry_times)
+        query = self._get_read_query(columns, limit)
+        return self._copyto(columns, query, limit, decode_geom, retry_times)
 
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
@@ -83,3 +84,19 @@ class QueryDataset(BaseDataset):
 
     def _get_query_to_create_table_from_query(self):
         return '''CREATE TABLE {table_name} AS ({query})'''.format(table_name=self._table_name, query=self._query)
+
+    def _get_read_query(self, table_columns, limit=None):
+        """Create the read (COPY TO) query"""
+        query_columns = [column.name for column in table_columns if column.name != 'the_geom_webmercator']
+
+        query = 'SELECT {columns} FROM ({query}) _q'.format(
+            query=self._query,
+            columns=', '.join(query_columns))
+
+        if limit is not None:
+            if isinstance(limit, int) and (limit >= 0):
+                query += ' LIMIT {limit}'.format(limit=limit)
+            else:
+                raise ValueError("`limit` parameter must an integer >= 0")
+
+        return query

@@ -72,15 +72,21 @@ class DataFrameDataset(BaseDataset):
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
-        columns = ','.join(norm for norm, orig in normalized_column_names)
 
-        query = """COPY {table_name}({columns},the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
+        columns_normalized = []
+        columns_origin = [geom_col]
+        for norm, orig in normalized_column_names:
+            columns_normalized.append(norm)
+            columns_origin.append(orig)
+        columns_normalized.append('the_geom')
+
+        query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
-            columns=columns)
+            columns=','.join(columns_normalized))
 
         data = _rows(
             self._df,
-            [c for c in self._df.columns if c != 'cartodb_id'],
+            columns_origin,
             with_lnglat,
             geom_col,
             enc_type)
@@ -127,13 +133,11 @@ class DataFrameDataset(BaseDataset):
 
 def _rows(df, cols, with_lnglat, geom_col, enc_type):
     for i, row in df.iterrows():
-        csv_row = ''
+        row_data = []
         the_geom_val = None
         lng_val = None
         lat_val = None
         for col in cols:
-            if with_lnglat and col in Column.SUPPORTED_GEOM_COL_NAMES:
-                continue
             val = row[col]
             if _is_null(val):
                 val = ''
@@ -145,16 +149,22 @@ def _rows(df, cols, with_lnglat, geom_col, enc_type):
             if col == geom_col:
                 the_geom_val = row[col]
             else:
-                csv_row += '{val}|'.format(val=val)
+                row_data.append('{}'.format(val))
 
         if the_geom_val is not None:
             geom = decode_geometry(the_geom_val, enc_type)
             if geom:
-                csv_row += 'SRID=4326;{geom}'.format(geom=geom.wkt)
-        if with_lnglat is not None and lng_val is not None and lat_val is not None:
-            csv_row += 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val)
+                row_data.append('SRID=4326;{geom}'.format(geom=geom.wkt))
 
+        if len(row_data) < len(cols) and with_lnglat is not None and lng_val is not None and lat_val is not None:
+            row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+
+        if len(row_data) < len(cols):
+            row_data.append('')
+
+        csv_row = '|'.join(row_data)
         csv_row += '\n'
+
         yield csv_row.encode()
 
 

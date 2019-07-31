@@ -185,8 +185,8 @@ class BaseDataset():
 
     def _get_schema(self):
         if self._credentials:
-            is_org_user = self._context.is_org_user()
-            return 'public' if not is_org_user else self._credentials.username
+            self._schema = self._context.get_schema()
+            return self._schema
         else:
             return None
 
