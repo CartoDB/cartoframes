@@ -8,13 +8,42 @@ Release 2019-xx-xx
 
 Updates
 
-- Optimize Dataset df/gdf (#704)
-- Decoupling clients from Dataset (#831)
-- Client Architecture (#833)
-- Fix retry_times usage in Dataset.download (#783)
+- Dataset improvements
+  - Optimize Dataset df/gdf (#704)
+  - Decoupling clients from Dataset (#831)
+  - Client Architecture (#833)
+  - Deprecate cartoframes.analysis.Table in favor of Dataset (#587)
+  - Fix retry_times usage in Dataset.download (#783)
+  - Strategy pattern, factory pattern and dynamic sources in Dataset (#834)
+  - Improve geometry decoding strategy (#798)
+  - decode_geometry to support EWKT (#773)
+  - Fix RateLimitException in write/upload operations (#804)
+- Refactoring AUTH API
+  - Refactor auth namespace (#789)
+  - deprecate _auth_send (#624)
+  - Refactor Context API: Credentials (#661)
+  - Clean old API (#807)
+  - Tables used by a quer (#730)
 - New SQLClient API (#808)
-- Deprecate cartoframes.analysis.Table in favor of Dataset (#587)
-- Strategy pattern, factory pattern and dynamic sources in Dataset (#834)
+- New Data Observatory API (#806)
+- Widgets
+  - Define Widget API (#809)
+  - Add Histogram Widget (#810)
+  - Add Category Widget (#811)
+  - Add Animation Control Widget (#812)
+  - Add Time Series Widget (#813)
+  - heavy_plus_sign Review Widget AP (#827)
+  - heavy_plus_sign Add Widgets Documentation (#859)
+- Helper methods & Map improvements
+  - Animation helper method (#657)
+  - Implement embed map design (#805)
+  - Responsive panel tab shows when there's no legend (#771)
+  - vector legends for small values shouldn't round (#544)
+  - heavy_plus_sign Published map not holding viewport settings (#820)
+  - geopandas Polygon / MultiPolygon display error
+  - heavy_plus_sign Add more params in the existing helpers (#830)
+  - heavy_plus_sign Helper methods palette expressions as python lists (#825)
+- Documentation and examples (#859, #879, #790, #873)
 
 
 1.0b1
