@@ -119,9 +119,12 @@ function onReady() {
   {% if is_static %}
     carto.on('loaded', mapLayers, () => {
         const canvas = map.getCanvas();
-        const url = canvas.toDataURL("image/png");
-        //const $maincontainer = document.getElementById('main-container');
-        document.body.innerHTML = `<img src="${url}"/>`;
+        const url = canvas.toDataURL('image/png');
+        const image = document.getElementById('map-image');
+        window.frameElement.style.height = '600px';
+        map.getContainer().style.display = 'none'
+        image.setAttribute('src', url);
+        image.style.display = 'block';
     });
   {% endif %}
 
