@@ -136,7 +136,7 @@ class TestKuvizPublisher(unittest.TestCase):
 
         self.assertEqual(layers[0].source.dataset.credentials, self.credentials)
         self.assertEqual(
-            layers[0].source.credentials,
+            layers[0].credentials,
             {'username': self.username,
              'api_key': 'default_public',
              'base_url': 'https://{}.carto.com'.format(self.username)})
@@ -152,7 +152,7 @@ class TestKuvizPublisher(unittest.TestCase):
 
         self.assertEqual(layers[0].source.dataset.credentials, self.credentials)
         self.assertEqual(
-            layers[0].source.credentials,
+            layers[0].credentials,
             {'username': self.username,
              'api_key': maps_api_key,
              'base_url': 'https://{}.carto.com'.format(self.username)})

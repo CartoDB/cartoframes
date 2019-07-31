@@ -42,7 +42,7 @@ class KuvizPublisher(object):
         for layer in self._layers:
             layer.source.dataset.credentials = self._credentials
 
-            layer.source.credentials = {
+            layer.credentials = {
                 'username': self._credentials.username,
                 'api_key': maps_api_key,
                 'base_url': self._credentials.base_url
