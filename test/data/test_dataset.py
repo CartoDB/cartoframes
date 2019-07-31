@@ -703,10 +703,22 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
         rows = _rows(df, ['test'], None, '', '')
 
-        self.assertEqual(list(rows), [b'True|\n', b'[1, 2]|\n'])
+        self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
         rows = _rows(df, ['test'], None, '', '')
 
-        self.assertEqual(list(rows), [b'|\n', b'|\n'])
+        self.assertEqual(list(rows), [b'\n', b'\n'])
+
+    def test_rows_with_geom(self):
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': [None, None]})
+        rows = _rows(df, ['test'], None, '', '')
+
+        self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
+
+    def test_rows_null_geom(self):
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
+        rows = _rows(df, ['test'], None, '', '')
+
+        self.assertEqual(list(rows), [b'\n', b'\n'])
