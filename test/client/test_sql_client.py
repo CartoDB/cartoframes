@@ -80,9 +80,6 @@ class MockContext():
         self.query = ''
         self.response = ''
 
-    def is_org_user():
-        return False
-
     def execute_query(self, q):
         self.query = q
         return self.response
@@ -207,7 +204,6 @@ class TestSQLClient(unittest.TestCase):
 
     def test_create_table_no_cartodbfy(self):
         """client.SQLClient.create_table"""
-        self._sql_client._context.is_org_user = lambda: False
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')], cartodbfy=False)
 
@@ -219,23 +215,10 @@ class TestSQLClient(unittest.TestCase):
             COMMIT;
         '''.strip())
 
-    def test_create_table_cartodbfy_public_user(self):
-        """client.SQLClient.create_table cartodbfy: public user"""
-        self._sql_client._context.is_org_user = lambda: False
-        self._sql_client.create_table(
-            'table_name', [('id', 'INT'), ('name', 'TEXT')])
-
-        self.assertEqual(self._context_mock.query.strip(), '''
-            BEGIN;
-            DROP TABLE IF EXISTS table_name;
-            CREATE TABLE table_name (id INT,name TEXT);
-            SELECT CDB_CartoDBFyTable('public', 'table_name');
-            COMMIT;
-        '''.strip())
-
     def test_create_table_cartodbfy_org_user(self):
         """client.SQLClient.create_table cartodbfy: organization user"""
-        self._sql_client._context.is_org_user = lambda: True
+        original_get_schema = self._sql_client._context.get_schema
+        self._sql_client._context.get_schema = lambda: 'user_name'
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
 
@@ -244,6 +227,20 @@ class TestSQLClient(unittest.TestCase):
             DROP TABLE IF EXISTS table_name;
             CREATE TABLE table_name (id INT,name TEXT);
             SELECT CDB_CartoDBFyTable('user_name', 'table_name');
+            COMMIT;
+        '''.strip())
+        self._sql_client._context.get_schema = original_get_schema
+
+    def test_create_table_cartodbfy_public_user(self):
+        """client.SQLClient.create_table cartodbfy: public user"""
+        self._sql_client.create_table(
+            'table_name', [('id', 'INT'), ('name', 'TEXT')])
+
+        self.assertEqual(self._context_mock.query.strip(), '''
+            BEGIN;
+            DROP TABLE IF EXISTS table_name;
+            CREATE TABLE table_name (id INT,name TEXT);
+            SELECT CDB_CartoDBFyTable('public', 'table_name');
             COMMIT;
         '''.strip())
 

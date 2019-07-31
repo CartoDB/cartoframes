@@ -4,9 +4,6 @@ class ContextMock():
         self.query = ''
         self.response = ''
 
-    def is_org_user(self):
-        return False
-
     def execute_query(self, q, **kwargs):
         self.query = q
         return self.response
@@ -14,3 +11,6 @@ class ContextMock():
     def execute_long_running_query(self, q):
         self.query = q
         return self.response
+
+    def get_schema(self):
+        return 'public'

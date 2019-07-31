@@ -120,9 +120,8 @@ class SQLClient(object):
         By default, geometry columns are added to the table.
         To disable this pass `cartodbfy=False`.
         """
-        is_org_user = self._context.is_org_user()
         columns = ','.join(' '.join(x) for x in columns)
-        username = self._credentials.username if is_org_user else 'public'
+        schema = self._context.get_schema()
         query = '''
             BEGIN;
             {drop};
@@ -133,7 +132,7 @@ class SQLClient(object):
             drop='DROP TABLE IF EXISTS {}'.format(table_name),
             create='CREATE TABLE {0} ({1})'.format(table_name, columns),
             cartodbfy='SELECT CDB_CartoDBFyTable(\'{0}\', \'{1}\')'.format(
-                username, table_name) if cartodbfy else ''
+                schema, table_name) if cartodbfy else ''
         )
         return self.execute(query)
 
