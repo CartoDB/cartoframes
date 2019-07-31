@@ -217,7 +217,6 @@ class TestSQLClient(unittest.TestCase):
 
     def test_create_table_cartodbfy_org_user(self):
         """client.SQLClient.create_table cartodbfy: organization user"""
-        original_get_schema = self._sql_client._context.get_schema
         self._sql_client._context.get_schema = lambda: 'user_name'
         self._sql_client.create_table(
             'table_name', [('id', 'INT'), ('name', 'TEXT')])
@@ -229,7 +228,6 @@ class TestSQLClient(unittest.TestCase):
             SELECT CDB_CartoDBFyTable('user_name', 'table_name');
             COMMIT;
         '''.strip())
-        self._sql_client._context.get_schema = original_get_schema
 
     def test_create_table_cartodbfy_public_user(self):
         """client.SQLClient.create_table cartodbfy: public user"""
