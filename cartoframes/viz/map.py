@@ -37,6 +37,8 @@ class Map(object):
           display for each layer.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
+        is_static (bool, optional): Default False. If True, instead of showing and interactive
+            map, a png image will be displayed.
         theme (string, optional): Use a different UI theme
 
     Examples:
