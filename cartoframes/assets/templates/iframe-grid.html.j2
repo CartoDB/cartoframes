@@ -1,0 +1,20 @@
+<div id="iframe-grid">
+  <iframe
+    frameborder="0"
+    style="
+      border: 1px solid #cfcfcf;
+      width: {% if width %}{{ width | iframe_size }}{% else %}49%{% endif %};
+      height: {% if height %}{{ height | iframe_size }}{% else %}632px{% endif %};
+      "
+    srcDoc="{% filter quot %}{% block srcDoc1 %}{% endblock %}{% endfilter %}">
+  </iframe>
+  <iframe
+    frameborder="0"
+    style="
+      border: 1px solid #cfcfcf;
+      width: {% if width %}{{ width | iframe_size }}{% else %}49%{% endif %};
+      height: {% if height %}{{ height | iframe_size }}{% else %}632px{% endif %};
+      "
+    srcDoc="{% filter quot %}{% block srcDoc2 %}{% endblock %}{% endfilter %}">
+  </iframe>
+<div>
