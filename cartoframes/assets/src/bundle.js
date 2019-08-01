@@ -214,6 +214,150 @@ var init = (function () {
     };
   }
 
+  function displayError(e) {
+    const error$ = document.getElementById('error-container');
+    const errors$ = error$.getElementsByClassName('errors');
+    const stacktrace$ = document.getElementById('error-stacktrace');
+
+    errors$[0].innerHTML = e.name;
+    errors$[1].innerHTML = e.name;
+    errors$[2].innerHTML = e.type;
+    errors$[3].innerHTML = e.message.replace(e.type, '');
+
+    error$.style.visibility = 'visible';
+
+    const stack = parse(e.stack);
+    const list = stack.map(item => {
+      return `<li>
+      at <span class="stacktrace-method">${item.methodName}:</span>
+      (${item.file}:${item.lineNumber}:${item.column})
+    </li>`;
+    });
+
+    stacktrace$.innerHTML = list.join('\n');
+  }
+
+  function SourceFactory() {
+    const sourceTypes = {
+      GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
+      Query: (layer) => {
+        const auth = {
+          username: layer.credentials['username'],
+          apiKey: layer.credentials['api_key'] || 'default_public'
+        };
+        const config = {
+          serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
+        };
+        return new carto.source.SQL(layer.query, auth, config)
+      },
+      MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
+    };
+
+    this.createSource = (layer) => {
+      return sourceTypes[layer.type](layer);
+    };
+  }
+
+  function _decodeJSONQuery(query) {
+    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')))
+  }
+
+  function resetPopupClick(interactivity) {
+    interactivity.off('featureClick');
+  }
+
+  function resetPopupHover(interactivity) {
+    interactivity.off('featureHover');
+  }
+
+  function setPopupsClick(map, popup, interactivity, attrs) {
+    interactivity.on('featureClick', (event) => {
+      updatePopup(map, popup, event, attrs);
+    });
+  }
+
+  function setPopupsHover(map, popup, interactivity, attrs) {
+    interactivity.on('featureHover', (event) => {
+      updatePopup(map, popup, event, attrs);
+    });
+  }
+
+  function updatePopup(map, popup, event, attrs) {
+    if (event.features.length > 0) {
+      let popupHTML = '';
+      const layerIDs = [];
+
+      for (const feature of event.features) {
+        if (layerIDs.includes(feature.layerId)) {
+          continue;
+        }
+        // Track layers to add only one feature per layer
+        layerIDs.push(feature.layerId);
+    
+        for (const item of attrs) {
+          const variable = feature.variables[item.name];
+          if (variable) {
+            let value = variable.value;
+            value = formatValue(value);
+
+            popupHTML = `
+            <span class="popup-name">${item.title}</span>
+            <span class="popup-value">${value}</span>
+          ` + popupHTML;
+          }
+        }
+      }
+
+      popup
+          .setLngLat([event.coordinates.lng, event.coordinates.lat])
+          .setHTML(`<div class="popup-content">${popupHTML}</div>`);
+
+      if (!popup.isOpen()) {
+        popup.addTo(map);
+      }
+    } else {
+      popup.remove();
+    }
+  }
+
+  function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
+    const interactivity = new carto.Interactivity(interactiveMapLayers);
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    const { clickAttrs, hoverAttrs } = _setInteractivityAttrs(interactiveLayers);
+
+    resetPopupClick(map);
+    resetPopupHover(map);
+
+    if (clickAttrs.length > 0) {
+      setPopupsClick(map, popup, interactivity, clickAttrs);
+    }
+
+    if (hoverAttrs.length > 0) {
+      setPopupsHover(map, popup, interactivity, hoverAttrs);
+    }
+  }
+
+  function _setInteractivityAttrs(interactiveLayers) {
+    let clickAttrs = [];
+    let hoverAttrs = [];
+
+    interactiveLayers.forEach((interactiveLayer) => {
+      interactiveLayer.interactivity.forEach((interactivityDef) => {
+        if (interactivityDef.event === 'click') {
+          clickAttrs = clickAttrs.concat(interactivityDef.attrs);
+        } else if (interactivityDef.event === 'hover') {
+          hoverAttrs = hoverAttrs.concat(interactivityDef.attrs);
+        }
+      });
+    });
+
+    return { clickAttrs, hoverAttrs };
+  }
+
   function setReady (settings) {
     try {
       onReady(settings);
@@ -273,7 +417,6 @@ var init = (function () {
     }
 
     const mapLayers = [];
-
     const interactiveLayers = [];
     const interactiveMapLayers = [];
 
@@ -325,144 +468,12 @@ var init = (function () {
     });
 
     if (interactiveLayers.length > 0) {
-      const interactivity = new carto.Interactivity(interactiveMapLayers);
-      const popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-      });
-
-      let clickAttrs = [];
-      let hoverAttrs = [];
-      interactiveLayers.forEach((interactiveLayer) => {
-        interactiveLayer.interactivity.forEach((interactivityDef) => {
-          if (interactivityDef.event === 'click') {
-            clickAttrs = clickAttrs.concat(interactivityDef.attrs);
-          } else if (interactivityDef.event === 'hover') {
-            hoverAttrs = hoverAttrs.concat(interactivityDef.attrs);
-          }
-        });
-      });
-
-      resetPopupClick(interactivity);
-      if (clickAttrs.length > 0) {
-        setPopupsClick(popup, interactivity, clickAttrs);
-      }
-
-      resetPopupHover(interactivity);
-      if (hoverAttrs.length > 0) {
-        setPopupsHover(popup, interactivity, hoverAttrs);
-      }
+      setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }
 
     if (settings.default_legend) {
       createDefaultLegend(mapLayers);
     }
-
-    function updatePopup(popup, event, attrs) {
-      if (event.features.length > 0) {
-        let popupHTML = '';
-        const layerIDs = [];
-
-        for (const feature of event.features) {
-          if (layerIDs.includes(feature.layerId)) {
-            continue;
-          }
-          // Track layers to add only one feature per layer
-          layerIDs.push(feature.layerId);
-      
-          for (const item of attrs) {
-            const variable = feature.variables[item.name];
-            if (variable) {
-              let value = variable.value;
-              value = formatValue(value);
-
-              popupHTML = `
-              <span class="popup-name">${item.title}</span>
-              <span class="popup-value">${value}</span>
-            ` + popupHTML;
-            }
-          }
-        }
-
-        popup
-            .setLngLat([event.coordinates.lng, event.coordinates.lat])
-            .setHTML(`<div class="popup-content">${popupHTML}</div>`);
-
-        if (!popup.isOpen()) {
-          popup.addTo(map);
-        }
-      } else {
-        popup.remove();
-      }
-    }
-
-    function resetPopupClick(interactivity) {
-      interactivity.off('featureClick');
-    }
-
-    function resetPopupHover(interactivity) {
-      interactivity.off('featureHover');
-    }
-
-    function setPopupsClick(popup, interactivity, attrs) {
-      interactivity.on('featureClick', (event) => {
-        updatePopup(popup, event, attrs);
-      });
-    }
-
-    function setPopupsHover(popup, interactivity, attrs) {
-      interactivity.on('featureHover', (event) => {
-        updatePopup(popup, event, attrs);
-      });
-    }
-
-    function SourceFactory() {
-      const sourceTypes = {
-        GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
-        Query: (layer) => {
-          const auth = {
-            username: layer.credentials['username'],
-            apiKey: layer.credentials['api_key'] || 'default_public'
-          };
-          const config = {
-            serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
-          };
-          return new carto.source.SQL(layer.query, auth, config)
-        },
-        MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
-      };
-
-      this.createSource = (layer) => {
-        return sourceTypes[layer.type](layer);
-      };
-    }
-  }
-
-  function displayError(e) {
-    const error$ = document.getElementById('error-container');
-    const errors$ = error$.getElementsByClassName('errors');
-    const stacktrace$ = document.getElementById('error-stacktrace');
-
-    errors$[0].innerHTML = e.name;
-    errors$[1].innerHTML = e.name;
-    errors$[2].innerHTML = e.type;
-    errors$[3].innerHTML = e.message.replace(e.type, '');
-
-    error$.style.visibility = 'visible';
-
-    const stack = parse(e.stack);
-    const list = stack.map(item => {
-      return `<li>
-      at <span class="stacktrace-method">${item.methodName}:</span>
-      (${item.file}:${item.lineNumber}:${item.column})
-    </li>`;
-    });
-
-    stacktrace$.innerHTML = list.join('\n');
-  }
-
-  function _decodeJSONQuery(query) {
-    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')))
   }
 
   function init(settings) {

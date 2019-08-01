@@ -313,7 +313,7 @@ class Map(object):
         return KuvizPublisher.all(credentials)
 
     def _get_publication_html(self, name, maps_api_key):
-        html_map = HTMLMap('viz/main.html.j2')
+        html_map = HTMLMap('templates/viz/main.html.j2')
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
             bounds=self.bounds,
@@ -454,13 +454,13 @@ def _compute_bounds(layers):
 
 
 class HTMLMap(object):
-    def __init__(self, template_path='viz/basic.html.j2'):
+    def __init__(self, template_path='templates/viz/basic.html.j2'):
         self.width = None
         self.height = None
         self.srcdoc = None
 
         self._env = Environment(
-            loader=PackageLoader('cartoframes', 'assets/templates'),
+            loader=PackageLoader('cartoframes', 'assets'),
             autoescape=True
         )
 
