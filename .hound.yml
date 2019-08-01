@@ -1,3 +1,7 @@
 flake8:
   enabled: true
   config_file: .flake8
+
+jshint:
+  enabled: true
+  config_file: .jshintrc
