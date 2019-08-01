@@ -1,4 +1,5 @@
-function createDefaultLegend(layers) {
+
+export function createDefaultLegend(layers) {
   const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
   defaultLegendContainer.style.display = 'none';
 
@@ -10,8 +11,8 @@ function createDefaultLegend(layers) {
     }
   )
 }
-
-function createLegend(layer, legendData, layerIndex) {
+  
+export function  createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.prop) {
@@ -31,4 +32,4 @@ function createLegend(layer, legendData, layerIndex) {
   } else {
     // TODO: we don't have a bridge for this case, should this even be a case?
   }
-}
+};

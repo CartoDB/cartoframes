@@ -1,5 +1,5 @@
 
-function format(value) {
+export function format(value) {
   if (Array.isArray(value)) {
     const [first, second] = value;
     if (first === -Infinity) {
@@ -13,14 +13,14 @@ function format(value) {
   return formatValue(value);
 }
 
-function formatValue(value) {
+export function formatValue(value) {
   if (typeof value === 'number') {
     return formatNumber(value);
   }
   return value;
 }
 
-function formatNumber(value) {
+export function formatNumber(value) {
   const log = Math.log10(Math.abs(value))
   if ((log > 4 || log < -2.00000001) && value) {
     return value.toExponential(2);

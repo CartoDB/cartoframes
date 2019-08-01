@@ -57,9 +57,14 @@
   {% endif %}
 
   {% include 'error/basic.html.j2' %}
-
-  <script>
-    {% include 'viz/map.js.j2' %}
-  </script>
 </body>
+<script>
+  {% include 'utils/base64.js.j2' %}
+</script>
+<script>
+  {% include 'src/bundle.js' %}
+</script>
+<script>
+  {% include 'viz/init.js.j2' %}
+</script>
 </html>

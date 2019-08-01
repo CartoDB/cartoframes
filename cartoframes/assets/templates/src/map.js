@@ -1,36 +1,37 @@
-{% if has_legends %}
-  {% include 'viz/legends.js.j2' %}
-{% endif %}
-{% if has_widgets %}
-  {% include 'viz/widgets.js.j2' %}
-{% endif %}
-{% include 'error/parser.js.j2' %}
-{% include 'utils/base64.js.j2' %}
-{% include 'utils/format.js.j2' %}
+import * as legends from './legends';
+import * as widgets from './widgets';
+import * as utils from './utils';
+import * as errors from './errors';
 
-const responsive = document.querySelector('as-responsive-content');
+export function setReady (settings) {
+  try {
+    onReady(settings)
+  } catch (e) {
+    displayError(e);
+  }
+}
 
-function onReady() {
+export function onReady(settings) {
   const BASEMAPS = {
     DarkMatter: carto.basemaps.darkmatter,
     Voyager: carto.basemaps.voyager,
     Positron: carto.basemaps.positron
   };
 
-  if ("{{mapboxtoken}}") {
-    mapboxgl.accessToken = "{{mapboxtoken}}";
+  if (settings.mapboxtoken) {
+    mapboxgl.accessToken = settings.mapboxtoken;
   }
   // Fetch CARTO basemap if it's there, else try to use other supplied style
   const map = new mapboxgl.Map({
     container: 'map',
-    style: BASEMAPS['{{basemap}}'] || '{{basemap}}' || {
+    style: BASEMAPS[settings.basemap] || settings.basemap || {
         'version': 8,
         'sources': {},
         'layers': [{
             'id': 'background',
             'type': 'background',
             'paint': {
-                'background-color': '{{basecolor}}'
+                'background-color': settings.basecolor
             }
         }]
     },
@@ -40,7 +41,7 @@ function onReady() {
 
   const mapInfo$ = document.getElementById('map-info');
 
-  {% if show_info %}
+  if (settings.show_info) {
     function updateMapInfo() {
       const center = map.getCenter();
       const lat = center.lat.toFixed(6);
@@ -52,22 +53,20 @@ function onReady() {
 
     map.on('zoom', updateMapInfo);
     map.on('move', updateMapInfo);
-  {% endif %}
+  }
 
-  const layers = {{layers|tojson}};
+  map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
-  map.fitBounds({{bounds}}, {animate: false, padding: 50, maxZoom: 14});
-
-  {% if camera != none %}
-    map.flyTo({{ camera|clear_none|tojson }});
-  {% endif %}
+  if (settings.camera) {
+    map.flyTo(settings.camera);
+  }
 
   const mapLayers = [];
 
   const interactiveLayers = [];
   const interactiveMapLayers = [];
 
-  layers.forEach((layer, index) => {
+  settings.layers.forEach((layer, index) => {
     const factory = new SourceFactory();
     const mapSource = factory.createSource(layer);
     const mapViz = new carto.Viz(layer['viz']);
@@ -88,11 +87,9 @@ function onReady() {
       interactiveMapLayers.push(mapLayer);
     }
 
-    {% if has_legends %}
-    if (layer.legend) {
-      createLegend(mapLayer, layer.legend, layers.length - index - 1);
+    if (settings.has_legends && layer.legend) {
+      legends.createLegend(mapLayer, layer.legend, layers.length - index - 1);
     }
-    {% endif %}
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
@@ -108,11 +105,11 @@ function onReady() {
               ? mapLayer.viz.variables[widget.variable_name].value
               : null;
 
-            renderWidget(widget, value);
+            widgets.renderWidget(widget, value);
           })
       });
 
-      bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
+      widgets.bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
     }
   });
 
@@ -146,9 +143,9 @@ function onReady() {
     }
   }
 
-  {% if default_legend %}
-    createDefaultLegend(mapLayers);
-  {% endif %}
+  if (settings.default_legend) {
+    legends.createDefaultLegend(mapLayers);
+  }
 
   function updatePopup(popup, event, attrs) {
     if (event.features.length > 0) {
@@ -166,7 +163,7 @@ function onReady() {
           const variable = feature.variables[item.name];
           if (variable) {
             let value = variable.value;
-            value = formatValue(value)
+            value = utils.formatValue(value)
 
             popupHTML = `
               <span class="popup-name">${item.title}</span>
@@ -230,15 +227,7 @@ function onReady() {
   }
 }
 
-function setReady () {
-  try {
-    onReady()
-  } catch (e) {
-    displayError(e);
-  }
-}
-
-function displayError(e) {
+export function displayError(e) {
   const error$ = document.getElementById('error-container');
   const errors$ = error$.getElementsByClassName('errors');
   const stacktrace$ = document.getElementById('error-stacktrace');
@@ -250,7 +239,7 @@ function displayError(e) {
 
   error$.style.visibility = 'visible';
 
-  const stack = parse(e.stack);
+  const stack = errors.parse(e.stack);
   const list = stack.map(item => {
     return `<li>
       at <span class="stacktrace-method">${item.methodName}:</span>
@@ -264,5 +253,3 @@ function displayError(e) {
 function _decodeJSONQuery(query) {
   return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')))
 }
-
-responsive.addEventListener('ready', setReady);

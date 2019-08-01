@@ -1,6 +1,6 @@
-{% include 'utils/format.js.j2' %}
+import { format } from './utils';
 
-function renderWidget(widget, value) {
+export function renderWidget(widget, value) {
   widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
   
   if (value && widget.element) {
@@ -8,7 +8,7 @@ function renderWidget(widget, value) {
   }
 }
 
-function renderBridge(bridge, widget) {
+export function renderBridge(bridge, widget) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
   let options = { ...widget.options };
 
@@ -30,7 +30,7 @@ function renderBridge(bridge, widget) {
   }
 }
 
-function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
+export function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
   const bridge = new AsBridge.VL.Bridge({
     carto: carto,
     layer: mapLayer,
