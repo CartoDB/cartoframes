@@ -81,17 +81,6 @@ def pgquote(string):
     """single-quotes a string if not None, else returns null"""
     return '\'{}\''.format(string) if string else 'null'
 
-
-def safe_quotes(text, escape_single_quotes=False):
-    """htmlify string"""
-    if isinstance(text, str):
-        safe_text = text.replace('"', "&quot;")
-        if escape_single_quotes:
-            safe_text = safe_text.replace("'", "&#92;'")
-        return safe_text.replace('True', 'true')
-    return text
-
-
 def temp_ignore_warnings(func):
     """Temporarily ignores warnings like those emitted by the carto python sdk
     """

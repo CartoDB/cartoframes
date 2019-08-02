@@ -116,6 +116,18 @@ function onReady() {
     }
   });
 
+  {% if is_static %}
+    carto.on('loaded', mapLayers, () => {
+        const canvas = map.getCanvas();
+        const url = canvas.toDataURL('image/png');
+        const image = document.getElementById('map-image');
+        window.frameElement.style.height = '600px';
+        map.getContainer().style.display = 'none'
+        image.setAttribute('src', url);
+        image.style.display = 'block';
+    });
+  {% endif %}
+
   if (interactiveLayers.length > 0) {
     const interactivity = new carto.Interactivity(interactiveMapLayers);
     const popup = new mapboxgl.Popup({
