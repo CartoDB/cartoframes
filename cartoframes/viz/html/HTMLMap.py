@@ -10,7 +10,7 @@ class HTMLMap(object):
         self.height = None
         self.srcdoc = None
         self._env = Environment(
-            loader=PackageLoader('cartoframes', 'assets/templates'),
+            loader=PackageLoader('cartoframes', 'assets'),
             autoescape=True
         )
 
