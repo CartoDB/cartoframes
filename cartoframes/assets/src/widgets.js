@@ -10,22 +10,21 @@ export function renderWidget(widget, value) {
 
 export function renderBridge(bridge, widget) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
-  let options = { ...widget.options };
 
   switch (widget.type) {
     case 'histogram':
-      bridge.histogram(widget.element, widget.value, options);
+      bridge.histogram(widget.element, widget.value, widget.options);
       break;
     case 'category':
-      bridge.category(widget.element, widget.value, options);
+      bridge.category(widget.element, widget.value, widget.options);
       break;
     case 'animation':
-      options.propertyName = widget.prop;
-      bridge.animationControls(widget.element, widget.value, options);
+      widget.options.propertyName = widget.prop;
+      bridge.animationControls(widget.element, widget.value, widget.options);
       break;
     case 'time-series':
-      options.propertyName = widget.prop;
-      bridge.timeSeries(widget.element, widget.value, options);
+      widget.options.propertyName = widget.prop;
+      bridge.timeSeries(widget.element, widget.value, widget.options);
       break;
   }
 }
