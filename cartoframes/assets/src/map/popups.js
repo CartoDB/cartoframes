@@ -1,4 +1,4 @@
-import * as utils from '../utils';
+import { formatValue } from '../utils';
 
 export function resetPopupClick(interactivity) {
   interactivity.off('featureClick');
@@ -36,7 +36,7 @@ export function updatePopup(map, popup, event, attrs) {
         const variable = feature.variables[item.name];
         if (variable) {
           let value = variable.value;
-          value = utils.formatValue(value)
+          value = formatValue(value);
 
           popupHTML = `
             <span class="popup-name">${item.title}</span>

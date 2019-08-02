@@ -1,4 +1,9 @@
-import * as popups from './popups';
+import {
+  resetPopupClick,
+  resetPopupHover,
+  setPopupsClick,
+  setPopupsHover
+} from './popups';
 
 export function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
   const interactivity = new carto.Interactivity(interactiveMapLayers);
@@ -9,15 +14,15 @@ export function setInteractivity(map, interactiveLayers, interactiveMapLayers) {
 
   const { clickAttrs, hoverAttrs } = _setInteractivityAttrs(interactiveLayers);
 
-  popups.resetPopupClick(map, interactivity);
-  popups.resetPopupHover(map, interactivity);
+  resetPopupClick(map, interactivity);
+  resetPopupHover(map, interactivity);
 
   if (clickAttrs.length > 0) {
-    popups.setPopupsClick(map, popup, interactivity, clickAttrs);
+    setPopupsClick(map, popup, interactivity, clickAttrs);
   }
 
   if (hoverAttrs.length > 0) {
-    popups.setPopupsHover(map, popup, interactivity, hoverAttrs);
+    setPopupsHover(map, popup, interactivity, hoverAttrs);
   }
 }
 

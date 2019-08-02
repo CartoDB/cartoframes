@@ -11,8 +11,8 @@ export function createDefaultLegend(layers) {
     }
   )
 }
-  
-export function  createLegend(layer, legendData, layerIndex) {
+
+export function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.prop) {

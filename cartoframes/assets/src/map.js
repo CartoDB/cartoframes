@@ -1,6 +1,5 @@
 import * as legends from './legends';
 import * as widgets from './widgets';
-import * as utils from './utils';
 import { displayError } from './errors/display';
 import SourceFactory from './map/SourceFactory';
 import { setInteractivity } from './map/interactivity';
@@ -20,26 +19,32 @@ export function onReady(settings) {
     Positron: carto.basemaps.positron
   };
 
+  const BASECOLOR = {
+    'version': 8,
+    'sources': {},
+    'layers': [{
+        'id': 'background',
+        'type': 'background',
+        'paint': {
+            'background-color': settings.basecolor
+        }
+    }]
+  };
+
   if (settings.mapboxtoken) {
     mapboxgl.accessToken = settings.mapboxtoken;
   }
-  // Fetch CARTO basemap if it's there, else try to use other supplied style
+
+  const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
+
   const map = new mapboxgl.Map({
     container: 'map',
-    style: BASEMAPS[settings.basemap] || settings.basemap || {
-        'version': 8,
-        'sources': {},
-        'layers': [{
-            'id': 'background',
-            'type': 'background',
-            'paint': {
-                'background-color': settings.basecolor
-            }
-        }]
-    },
+    style: basemapStyle,
     zoom: 9,
     dragRotate: false
   });
+
+  map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
   const mapInfo$ = document.getElementById('map-info');
 
@@ -57,8 +62,6 @@ export function onReady(settings) {
     map.on('move', updateMapInfo);
   }
 
-  map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
-
   if (settings.camera) {
     map.flyTo(settings.camera);
   }
@@ -66,9 +69,9 @@ export function onReady(settings) {
   const mapLayers = [];
   const interactiveLayers = [];
   const interactiveMapLayers = [];
+  const factory = new SourceFactory();
 
   settings.layers.forEach((layer, index) => {
-    const factory = new SourceFactory();
     const mapSource = factory.createSource(layer);
     const mapViz = new carto.Viz(layer['viz']);
     const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
