@@ -2,6 +2,7 @@ from warnings import warn
 from jinja2 import Environment, PackageLoader
 from .. import constants
 from ..basemaps import Basemaps
+from . import utils
 
 
 class HTMLMap(object):
@@ -14,9 +15,9 @@ class HTMLMap(object):
             autoescape=True
         )
 
-        self._env.filters['quot'] = _quote_filter
-        self._env.filters['iframe_size'] = _iframe_size_filter
-        self._env.filters['clear_none'] = _clear_none_filter
+        self._env.filters['quot'] = utils.quote_filter
+        self._env.filters['iframe_size'] = utils.iframe_size_filter
+        self._env.filters['clear_none'] = utils.clear_none_filter
 
         self.html = None
         self._template = self._env.get_template(template_path)
@@ -80,7 +81,7 @@ class HTMLMap(object):
         camera = None
         if viewport is not None:
             camera = {
-                'center': _get_center(viewport),
+                'center': utils.get_center(viewport),
                 'zoom': viewport.get('zoom'),
                 'bearing': viewport.get('bearing'),
                 'pitch': viewport.get('pitch')
@@ -116,35 +117,3 @@ class HTMLMap(object):
 
     def _repr_html_(self):
         return self.html
-
-
-def _safe_quotes(text, escape_single_quotes=False):
-    """htmlify string"""
-    if isinstance(text, str):
-        safe_text = text.replace('"', "&quot;")
-        if escape_single_quotes:
-            safe_text = safe_text.replace("'", "&#92;'")
-        return safe_text.replace('True', 'true')
-    return text
-
-
-def _quote_filter(value):
-    return _safe_quotes(value.unescape())
-
-
-def _iframe_size_filter(value):
-    if isinstance(value, str):
-        return value
-
-    return '%spx;' % value
-
-
-def _clear_none_filter(value):
-    return dict(filter(lambda item: item[1] is not None, value.items()))
-
-
-def _get_center(center):
-    if 'lng' not in center or 'lat' not in center:
-        return None
-
-    return [center.get('lng'), center.get('lat')]

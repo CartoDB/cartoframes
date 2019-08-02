@@ -4,6 +4,7 @@ import collections
 import numpy as np
 from carto.exceptions import CartoException
 
+from warnings import warn
 from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
@@ -195,10 +196,15 @@ class Map(object):
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
         self.is_static = is_static
+        self.token = get_token(basemap)
+        self.basecolor = get_basecolor(basemap)
+
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
         self._kuviz = None
+
+    def _repr_html_(self):
         self._htmlMap = HTMLMap()
 
         self._htmlMap.set_content(
@@ -214,8 +220,24 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-    def _repr_html_(self):
         return self._htmlMap.html
+
+    def get_content(self):
+        return {
+            'layers': self.layer_defs,
+            'bounds': self.bounds,
+            'size': self.size,
+            'viewport': self.viewport,
+            'basemap': self.basemap,
+            'basecolor': self.basecolor,
+            'token': self.token,
+            'default_legend': self.default_legend,
+            'show_info': self.show_info,
+            'theme': self.theme,
+            'is_static': self.is_static,
+            '_carto_vl_path': self._carto_vl_path,
+            '_airship_path': self._airship_path
+        }
 
     def publish(self, name, maps_api_key='default_public', credentials=None, password=None):
         """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
@@ -466,3 +488,30 @@ def _get_theme(theme, basemap):
         return 'dark'
 
     return theme
+
+
+def get_token(basemap):
+    if isinstance(basemap, dict):
+        return get_token(basemap)
+    return ''
+
+
+def get_basecolor(basemap):
+    if basemap is None:
+        return 'white'
+    elif isinstance(basemap, str):
+        if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+            return basemap  # Basemap is a color
+    return ''
+
+
+def get_basemap(basemap):
+    if isinstance(basemap, dict):
+        token = get_token(basemap)
+        if 'style' in basemap:
+            if not token and basemap.get('style').startswith('mapbox://'):
+                warn('A Mapbox style usually needs a token')
+            return basemap.get('style')
+        else:
+            raise ValueError('If basemap is a dict, it must have a `style` key')
+    return ''

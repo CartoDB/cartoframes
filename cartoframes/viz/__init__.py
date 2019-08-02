@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from .basemaps import Basemaps as basemaps
 from .themes import Themes as themes
 from .map import Map
+from .mapgrid import MapGrid
 from .layer import Layer
 from .source import Source
 from .style import Style
@@ -18,6 +19,7 @@ __all__ = [
     'basemaps',
     'themes',
     'Map',
+    'MapGrid',
     'Layer',
     'Source',
     'Style',
