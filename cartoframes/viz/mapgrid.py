@@ -22,12 +22,10 @@ def _init_map_grid(maps):
 
     for i, row in enumerate(maps):
         for j, viz in enumerate(row):
-            map_row = []
             if not isinstance(viz, Map):
                 raise CartoException('All the elements in the MapGrid should be an instance of Map')
             else:
                 map_settings = viz.get_content()
-                map_row.append(map_settings)
-        map_grid.append(map_row)
+                map_grid.append(map_settings)
 
     return map_grid

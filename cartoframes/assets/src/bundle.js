@@ -370,13 +370,19 @@ var init = (function () {
 
   function setReady (settings) {
     try {
-      onReady(settings);
+      if (settings.maps) {
+        settings.maps.forEach((mapSettings, mapIndex) => {
+          initMap(mapSettings, mapIndex);
+        });
+      } else {
+        initMap(settings);
+      }
     } catch (e) {
       displayError(e);
     }
   }
 
-  function onReady(settings) {
+  function initMap(settings, mapIndex) {
     const BASEMAPS = {
       DarkMatter: carto.basemaps.darkmatter,
       Voyager: carto.basemaps.voyager,
@@ -400,9 +406,9 @@ var init = (function () {
     }
 
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
-
+    const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
     const map = new mapboxgl.Map({
-      container: 'map',
+      container,
       style: basemapStyle,
       zoom: 9,
       dragRotate: false

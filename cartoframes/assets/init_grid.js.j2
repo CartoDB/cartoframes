@@ -1,13 +1,7 @@
-document
-  .querySelector('as-responsive-content')
-  .addEventListener('ready', () => {
-    const show_info = '{{show_info}}' === 'True';
-    const maps = {{ maps|tojson }};
-    const bounds = {{ bounds }};
+const maps = {{ maps|tojson }};
+const show_info = '{{show_info}}' === 'True';
 
-    init({
-      show_info,
-      maps,
-      bounds
-    });
+init({
+  show_info,
+  maps
 });

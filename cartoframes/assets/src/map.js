@@ -6,13 +6,19 @@ import { setInteractivity } from './map/interactivity';
 
 export function setReady (settings) {
   try {
-    onReady(settings);
+    if (settings.maps) {
+      settings.maps.forEach((mapSettings, mapIndex) => {
+        initMap(mapSettings, mapIndex);
+      });
+    } else {
+      initMap(settings);
+    }
   } catch (e) {
     displayError(e);
   }
 }
 
-export function onReady(settings) {
+export function initMap(settings, mapIndex) {
   const BASEMAPS = {
     DarkMatter: carto.basemaps.darkmatter,
     Voyager: carto.basemaps.voyager,
@@ -36,9 +42,9 @@ export function onReady(settings) {
   }
 
   const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
-
+  const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
   const map = new mapboxgl.Map({
-    container: 'map',
+    container,
     style: basemapStyle,
     zoom: 9,
     dragRotate: false

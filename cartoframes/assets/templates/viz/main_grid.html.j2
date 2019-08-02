@@ -27,12 +27,17 @@
   {% include 'style/map.html.j2' %}
   {% include 'style/error.html.j2' %}
   {% include 'style/popup.html.j2' %}
-  {% include 'style/widgets.html.j2' %}
 </head>
 
 <body class="as-app-body as-app">
-  <div>Multi Map</div>
-
+  {% for map in maps %}
+    <div class="as-main">
+      <div class="as-map-area">
+        <div id="map-{{ loop.index0 }}" class="map"></div>
+        <img id="map-image{{ loop.index0 }}" class="map-image" alt='Static map image' />
+      </div> <!-- as-map-area -->
+    </div> <!-- as-main -->
+  {% endfor %}
   {% if is_embed %}
     {% include 'templates/viz/footer.html.j2' %}
   {% endif %}
