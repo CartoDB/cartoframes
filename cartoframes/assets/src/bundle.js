@@ -13,8 +13,8 @@ var init = (function () {
       }
     );
   }
-    
-  function  createLegend(layer, legendData, layerIndex) {
+
+  function createLegend(layer, legendData, layerIndex) {
     const element = document.querySelector(`#layer${layerIndex}_legend`);
 
     if (legendData.prop) {
@@ -43,7 +43,7 @@ var init = (function () {
       if (second === Infinity) {
         return `> ${formatValue(first)}`;
       }
-      return `${formatValue(first)} - ${formatValue(second)}`
+      return `${formatValue(first)} - ${formatValue(second)}`;
     }
     return formatValue(value);
   }
@@ -57,16 +57,19 @@ var init = (function () {
 
   function formatNumber(value) {
     const log = Math.log10(Math.abs(value));
+
     if ((log > 4 || log < -2.00000001) && value) {
       return value.toExponential(2);
-    } else if (!Number.isInteger(value)) {
+    }
+    
+    if (!Number.isInteger(value)) {
       return value.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 3
       });
-    } else {
-      return value.toLocaleString();
     }
+    
+    return value.toLocaleString();
   }
 
   function renderWidget(widget, value) {
@@ -89,11 +92,11 @@ var init = (function () {
         bridge.category(widget.element, widget.value, options);
         break;
       case 'animation':
-        options['propertyName'] = widget.prop;
+        options.propertyName = widget.prop;
         bridge.animationControls(widget.element, widget.value, options);
         break;
       case 'time-series':
-        options['propertyName'] = widget.prop;
+        options.propertyName = widget.prop;
         bridge.timeSeries(widget.element, widget.value, options);
         break;
     }
@@ -238,28 +241,36 @@ var init = (function () {
   }
 
   function SourceFactory() {
-    const sourceTypes = {
-      GeoJSON: (layer) => new carto.source.GeoJSON(_decodeJSONQuery(layer.query)),
-      Query: (layer) => {
-        const auth = {
-          username: layer.credentials['username'],
-          apiKey: layer.credentials['api_key'] || 'default_public'
-        };
-        const config = {
-          serverURL: layer.credentials['base_url'] || `https://${layer.credentials['username']}.carto.com/`
-        };
-        return new carto.source.SQL(layer.query, auth, config)
-      },
-      MVT: (layer) => new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata)),
-    };
+    const sourceTypes = { GeoJSON, Query, MVT };
 
     this.createSource = (layer) => {
       return sourceTypes[layer.type](layer);
     };
   }
 
+  function GeoJSON(layer) {
+    new carto.source.GeoJSON(_decodeJSONQuery(layer.query));
+  }
+
+  function Query(layer) {
+    const auth = {
+      username: layer.credentials.username,
+      apiKey: layer.credentials.api_key || 'default_public'
+    };
+
+    const config = {
+      serverURL: layer.credentials.base_url || `https://${layer.credentials.username}.carto.com/`
+    };
+
+    return new carto.source.SQL(layer.query, auth, config);
+  }
+
+  function MVT(layer) {
+    return new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata));
+  }
+
   function _decodeJSONQuery(query) {
-    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')))
+    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')));
   }
 
   function resetPopupClick(interactivity) {
@@ -373,44 +384,37 @@ var init = (function () {
       Positron: carto.basemaps.positron
     };
 
+    const BASECOLOR = {
+      'version': 8,
+      'sources': {},
+      'layers': [{
+          'id': 'background',
+          'type': 'background',
+          'paint': {
+              'background-color': settings.basecolor
+          }
+      }]
+    };
+
     if (settings.mapboxtoken) {
       mapboxgl.accessToken = settings.mapboxtoken;
     }
-    // Fetch CARTO basemap if it's there, else try to use other supplied style
+
+    const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
+
     const map = new mapboxgl.Map({
       container: 'map',
-      style: BASEMAPS[settings.basemap] || settings.basemap || {
-          'version': 8,
-          'sources': {},
-          'layers': [{
-              'id': 'background',
-              'type': 'background',
-              'paint': {
-                  'background-color': settings.basecolor
-              }
-          }]
-      },
+      style: basemapStyle,
       zoom: 9,
       dragRotate: false
     });
 
-    const mapInfo$ = document.getElementById('map-info');
+    map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
     if (settings.show_info) {
-      function updateMapInfo() {
-        const center = map.getCenter();
-        const lat = center.lat.toFixed(6);
-        const lng = center.lng.toFixed(6);
-        const zoom = map.getZoom().toFixed(2);
-
-        mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
-      }
-
-      map.on('zoom', updateMapInfo);
-      map.on('move', updateMapInfo);
+      map.on('zoom', _updateMapInfo.bind(this, map));
+      map.on('move', _updateMapInfo.bind(this, map));
     }
-
-    map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
     if (settings.camera) {
       map.flyTo(settings.camera);
@@ -419,11 +423,11 @@ var init = (function () {
     const mapLayers = [];
     const interactiveLayers = [];
     const interactiveMapLayers = [];
+    const factory = new SourceFactory();
 
     settings.layers.forEach((layer, index) => {
-      const factory = new SourceFactory();
       const mapSource = factory.createSource(layer);
-      const mapViz = new carto.Viz(layer['viz']);
+      const mapViz = new carto.Viz(layer.viz);
       const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
 
       mapLayers.push(mapLayer);
@@ -455,8 +459,8 @@ var init = (function () {
           layer.widgets
             .filter((widget) => !widget.has_bridge)
             .forEach((widget) => {
-              const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name]
-                ? mapLayer.viz.variables[widget.variable_name].value
+              const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name] ?
+                mapLayer.viz.variables[widget.variable_name].value
                 : null;
 
               renderWidget(widget, value);
@@ -474,6 +478,17 @@ var init = (function () {
     if (settings.default_legend) {
       createDefaultLegend(mapLayers);
     }
+  }
+
+  function _updateMapInfo(map) {
+    const mapInfo$ = document.getElementById('map-info');
+
+    const center = map.getCenter();
+    const lat = center.lat.toFixed(6);
+    const lng = center.lng.toFixed(6);
+    const zoom = map.getZoom().toFixed(2);
+
+    mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
   }
 
   function init(settings) {

@@ -8,7 +8,7 @@ export function format(value) {
     if (second === Infinity) {
       return `> ${formatValue(first)}`;
     }
-    return `${formatValue(first)} - ${formatValue(second)}`
+    return `${formatValue(first)} - ${formatValue(second)}`;
   }
   return formatValue(value);
 }
@@ -21,15 +21,18 @@ export function formatValue(value) {
 }
 
 export function formatNumber(value) {
-  const log = Math.log10(Math.abs(value))
+  const log = Math.log10(Math.abs(value));
+
   if ((log > 4 || log < -2.00000001) && value) {
     return value.toExponential(2);
-  } else if (!Number.isInteger(value)) {
+  }
+  
+  if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 3
     });
-  } else {
-    return value.toLocaleString();
   }
+  
+  return value.toLocaleString();
 }

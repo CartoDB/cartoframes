@@ -6,7 +6,7 @@ import { setInteractivity } from './map/interactivity';
 
 export function setReady (settings) {
   try {
-    onReady(settings)
+    onReady(settings);
   } catch (e) {
     displayError(e);
   }
@@ -46,20 +46,9 @@ export function onReady(settings) {
 
   map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
-  const mapInfo$ = document.getElementById('map-info');
-
   if (settings.show_info) {
-    function updateMapInfo() {
-      const center = map.getCenter();
-      const lat = center.lat.toFixed(6);
-      const lng = center.lng.toFixed(6);
-      const zoom = map.getZoom().toFixed(2);
-
-      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
-    }
-
-    map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo);
+    map.on('zoom', _updateMapInfo.bind(this, map));
+    map.on('move', _updateMapInfo.bind(this, map));
   }
 
   if (settings.camera) {
@@ -73,7 +62,7 @@ export function onReady(settings) {
 
   settings.layers.forEach((layer, index) => {
     const mapSource = factory.createSource(layer);
-    const mapViz = new carto.Viz(layer['viz']);
+    const mapViz = new carto.Viz(layer.viz);
     const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
 
     mapLayers.push(mapLayer);
@@ -105,12 +94,12 @@ export function onReady(settings) {
         layer.widgets
           .filter((widget) => !widget.has_bridge)
           .forEach((widget) => {
-            const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name]
-              ? mapLayer.viz.variables[widget.variable_name].value
+            const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name] ?
+              mapLayer.viz.variables[widget.variable_name].value
               : null;
 
             widgets.renderWidget(widget, value);
-          })
+          });
       });
 
       widgets.bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
@@ -124,4 +113,15 @@ export function onReady(settings) {
   if (settings.default_legend) {
     legends.createDefaultLegend(mapLayers);
   }
+}
+
+function _updateMapInfo(map) {
+  const mapInfo$ = document.getElementById('map-info');
+
+  const center = map.getCenter();
+  const lat = center.lat.toFixed(6);
+  const lng = center.lng.toFixed(6);
+  const zoom = map.getZoom().toFixed(2);
+
+  mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
 }

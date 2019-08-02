@@ -10,13 +10,13 @@ export function resetPopupHover(interactivity) {
 
 export function setPopupsClick(map, popup, interactivity, attrs) {
   interactivity.on('featureClick', (event) => {
-    updatePopup(map, popup, event, attrs)
+    updatePopup(map, popup, event, attrs);
   });
 }
 
 export function setPopupsHover(map, popup, interactivity, attrs) {
   interactivity.on('featureHover', (event) => {
-    updatePopup(map, popup, event, attrs)
+    updatePopup(map, popup, event, attrs);
   });
 }
 

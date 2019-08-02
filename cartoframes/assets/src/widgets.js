@@ -20,11 +20,11 @@ export function renderBridge(bridge, widget) {
       bridge.category(widget.element, widget.value, options);
       break;
     case 'animation':
-      options['propertyName'] = widget.prop;
+      options.propertyName = widget.prop;
       bridge.animationControls(widget.element, widget.value, options);
       break;
     case 'time-series':
-      options['propertyName'] = widget.prop;
+      options.propertyName = widget.prop;
       bridge.timeSeries(widget.element, widget.value, options);
       break;
   }
