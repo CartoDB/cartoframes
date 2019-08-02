@@ -411,8 +411,10 @@ var init = (function () {
     map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
     if (settings.show_info) {
-      map.on('zoom', _updateMapInfo.bind(this, map));
-      map.on('move', _updateMapInfo.bind(this, map));
+      const updateMapInfo = _updateMapInfo.bind(this, map);
+
+      map.on('zoom', updateMapInfo);
+      map.on('move', updateMapInfo);
     }
 
     if (settings.camera) {
