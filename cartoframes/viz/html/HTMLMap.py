@@ -5,12 +5,12 @@ from ..basemaps import Basemaps
 
 
 class HTMLMap(object):
-    def __init__(self, template_path='viz/basic.html.j2'):
+    def __init__(self, template_path='templates/viz/basic.html.j2'):
         self.width = None
         self.height = None
         self.srcdoc = None
         self._env = Environment(
-            loader=PackageLoader('cartoframes', 'assets/templates'),
+            loader=PackageLoader('cartoframes', 'assets'),
             autoescape=True
         )
 

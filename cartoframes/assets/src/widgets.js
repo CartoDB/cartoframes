@@ -1,6 +1,6 @@
-{% include 'utils/format.js.j2' %}
+import { format } from './utils';
 
-function renderWidget(widget, value) {
+export function renderWidget(widget, value) {
   widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
   
   if (value && widget.element) {
@@ -8,29 +8,28 @@ function renderWidget(widget, value) {
   }
 }
 
-function renderBridge(bridge, widget) {
+export function renderBridge(bridge, widget) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
-  let options = { ...widget.options };
 
   switch (widget.type) {
     case 'histogram':
-      bridge.histogram(widget.element, widget.value, options);
+      bridge.histogram(widget.element, widget.value, widget.options);
       break;
     case 'category':
-      bridge.category(widget.element, widget.value, options);
+      bridge.category(widget.element, widget.value, widget.options);
       break;
     case 'animation':
-      options['propertyName'] = widget.prop;
-      bridge.animationControls(widget.element, widget.value, options);
+      widget.options.propertyName = widget.prop;
+      bridge.animationControls(widget.element, widget.value, widget.options);
       break;
     case 'time-series':
-      options['propertyName'] = widget.prop;
-      bridge.timeSeries(widget.element, widget.value, options);
+      widget.options.propertyName = widget.prop;
+      bridge.timeSeries(widget.element, widget.value, widget.options);
       break;
   }
 }
 
-function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
+export function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
   const bridge = new AsBridge.VL.Bridge({
     carto: carto,
     layer: mapLayer,

@@ -315,7 +315,7 @@ class Map(object):
         return KuvizPublisher.all(credentials)
 
     def _get_publication_html(self, name, maps_api_key):
-        html_map = HTMLMap('viz/main.html.j2')
+        html_map = HTMLMap('templates/viz/main.html.j2')
         html_map.set_content(
             layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
             bounds=self.bounds,

@@ -1,0 +1,31 @@
+{
+  "name": "cartoframes",
+  "version": "1.0.0",
+  "description": "*********** CARTOframes ***********",
+  "main": "./cartoframes/assets/src/index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "rollup --config --watch",
+    "build": "rollup --config"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CartoDB/cartoframes.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CartoDB/cartoframes/issues"
+  },
+  "homepage": "https://github.com/CartoDB/cartoframes#readme",
+  "devDependencies": {
+    "jshint": "^2.10.2",
+    "rollup": "^1.17.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
+}

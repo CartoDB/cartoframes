@@ -47,6 +47,9 @@ SITEKEY.txt
 test/secret.json
 examples/scratch/*
 
+# JavaScript 
+node_modules
+
 # Tests
 .coverage
 test_*.json

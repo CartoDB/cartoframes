@@ -1,12 +1,18 @@
 /** From https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
 
-const UNKNOWN_FUNCTION = '<unknown>';
-
 /**
  * This parses the different stack traces and puts them into one format
  * This borrows heavily from TraceKit (https://github.com/csnover/TraceKit)
  */
-function parse(stackString) {
+
+const UNKNOWN_FUNCTION = '<unknown>';
+const chromeRe = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+const chromeEvalRe = /\((\S*)(?::(\d+))(?::(\d+))\)/;
+const winjsRe = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
+const geckoRe = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i;
+const geckoEvalRe = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
+
+export function parse(stackString) {
   const lines = stackString.split('\n');
 
   return lines.reduce((stack, line) => {
@@ -23,10 +29,7 @@ function parse(stackString) {
   }, []);
 }
 
-const chromeRe = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
-const chromeEvalRe = /\((\S*)(?::(\d+))(?::(\d+))\)/;
-
-function parseChrome(line) {
+export function parseChrome(line) {
   const parts = chromeRe.exec(line);
 
   if (!parts) {
@@ -53,9 +56,7 @@ function parseChrome(line) {
   };
 }
 
-const winjsRe = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-
-function parseWinjs(line) {
+export function parseWinjs(line) {
   const parts = winjsRe.exec(line);
 
   if (!parts) {
@@ -71,10 +72,7 @@ function parseWinjs(line) {
   };
 }
 
-const geckoRe = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i;
-const geckoEvalRe = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
-
-function parseGecko(line) {
+export function parseGecko(line) {
   const parts = geckoRe.exec(line);
 
   if (!parts) {

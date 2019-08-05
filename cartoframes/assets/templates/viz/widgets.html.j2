@@ -1,7 +1,7 @@
 {% macro createWidget(widget, id) -%}
   <section class="as-body">
     {% with id = id %}
-      {% include 'viz/widgets/' + widget.type + '.html.j2' %}
+      {% include 'templates/viz/widgets/' + widget.type + '.html.j2' %}
     {% endwith %}
   </section>
 {%- endmacro %}

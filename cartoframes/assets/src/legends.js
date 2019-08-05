@@ -1,4 +1,5 @@
-function createDefaultLegend(layers) {
+
+export function createDefaultLegend(layers) {
   const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
   defaultLegendContainer.style.display = 'none';
 
@@ -8,14 +9,14 @@ function createDefaultLegend(layers) {
     {
       onLoad: () => defaultLegendContainer.style.display = 'unset'
     }
-  )
+  );
 }
 
-function createLegend(layer, legendData, layerIndex) {
+export function createLegend(layer, legendData, layerIndex) {
   const element = document.querySelector(`#layer${layerIndex}_legend`);
 
   if (legendData.prop) {
-    const config = { othersLabel: 'Others' }  // TODO: i18n
+    const config = { othersLabel: 'Others' };  // TODO: i18n
     const opts = { format, config };
 
     if (legendData.type.startsWith('size-continuous')) {

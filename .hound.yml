@@ -3,4 +3,5 @@ flake8:
   config_file: .flake8
 
 jshint:
-  esversion: 6
+  enabled: true
+  config_file: .jshintrc

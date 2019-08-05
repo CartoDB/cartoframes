@@ -113,6 +113,26 @@ Let's clone the Airship repository as well.
 
 The local installation of Airship is explained `in this guide <https://github.com/CartoDB/airship/blob/master/DEVELOPERS.md/>`__
 
+CARTOframes JavaScript code
+^^^^^^^^
+
+The JavaScript code is generated using Rollup, a module bundler. In order to save changes in the all the .js files, we need to bundle the code:
+
+Watch changes:
+
+.. code::
+
+  cd cartoframes
+  npm run dev
+
+Build:
+
+.. code::
+
+  cd cartoframes
+  npm run build
+
+
 Run all the projects
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -133,8 +153,8 @@ We've to serve now all the projects as follows:
   |                           |                           |
   |                           |                           |
   +---------------------------+---------------------------+
-  |/cartoframes               |                           |
-  |(env)$ jupyter notebook    |                           |
+  |/cartoframes               |/cartoframes               |
+  |(env)$ jupyter notebook    |$ npm run dev              |
   |                           |                           |
   |                           |                           |
   |                           |                           |

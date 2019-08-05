@@ -1,5 +1,5 @@
 
-function format(value) {
+export function format(value) {
   if (Array.isArray(value)) {
     const [first, second] = value;
     if (first === -Infinity) {
@@ -8,28 +8,31 @@ function format(value) {
     if (second === Infinity) {
       return `> ${formatValue(first)}`;
     }
-    return `${formatValue(first)} - ${formatValue(second)}`
+    return `${formatValue(first)} - ${formatValue(second)}`;
   }
   return formatValue(value);
 }
 
-function formatValue(value) {
+export function formatValue(value) {
   if (typeof value === 'number') {
     return formatNumber(value);
   }
   return value;
 }
 
-function formatNumber(value) {
-  const log = Math.log10(Math.abs(value))
+export function formatNumber(value) {
+  const log = Math.log10(Math.abs(value));
+
   if ((log > 4 || log < -2.00000001) && value) {
     return value.toExponential(2);
-  } else if (!Number.isInteger(value)) {
+  }
+  
+  if (!Number.isInteger(value)) {
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 3
     });
-  } else {
-    return value.toLocaleString();
   }
+  
+  return value.toLocaleString();
 }

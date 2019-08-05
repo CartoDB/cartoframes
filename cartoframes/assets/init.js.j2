@@ -1,0 +1,25 @@
+document
+  .querySelector('as-responsive-content')
+  .addEventListener('ready', () => {
+    const show_info = '{{show_info}}' === 'True';
+    const layers = {{ layers|tojson }};
+    const bounds = {{ bounds }};
+    const camera = null;
+    const mapboxtoken = '{{mapboxtoken}}';
+    const basemap = '{{basemap}}';
+    const basecolor = '{{basecolor}}';
+    const has_legends = '{{has_legends}}' === 'True';
+    const default_legend = '{{default_legend}}' === 'True';
+
+    init({
+      show_info,
+      layers,
+      bounds,
+      camera,
+      mapboxtoken,
+      basemap,
+      basecolor,
+      has_legends,
+      default_legend
+    });
+});
