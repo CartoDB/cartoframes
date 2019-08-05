@@ -475,6 +475,19 @@ var init = (function () {
       }
     });
 
+    if (settings.is_static) {
+      carto.on('loaded', mapLayers, () => {
+          const imageId = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+          const canvas = map.getCanvas();
+          const url = canvas.toDataURL('image/png');
+          const image = document.getElementById(imageId);
+          window.frameElement.style.height = '600px';
+          map.getContainer().style.display = 'none';
+          image.setAttribute('src', url);
+          image.style.display = 'block';
+      });
+    }
+
     if (interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }

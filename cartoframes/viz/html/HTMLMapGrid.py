@@ -22,13 +22,13 @@ class HTMLMapGrid(object):
 
     def set_content(self, maps, size=None, show_info=None, theme=None, _carto_vl_path=None,
                     _airship_path=None, title='CARTOframes', is_embed=False,
-                    is_static=False):
+                    is_static=False, n=None, m=None):
         self.html = self._parse_html_content(
             maps, size, show_info, theme, _carto_vl_path, _airship_path, title,
-            is_embed, is_static)
+            is_embed, is_static, n, m)
 
     def _parse_html_content(self, maps, size, show_info=None, theme=None, _carto_vl_path=None,
-                            _airship_path=None, title=None, is_embed=False, is_static=False):
+                            _airship_path=None, title=None, is_embed=False, is_static=False, n=None, m=None):
 
         if _carto_vl_path is None:
             carto_vl_path = constants.CARTO_VL_URL
@@ -62,7 +62,9 @@ class HTMLMapGrid(object):
             airship_icons_path=airship_icons_path,
             title=title,
             is_embed=is_embed,
-            is_static=is_static
+            is_static=is_static,
+            n=n,
+            m=m
         )
 
     def _repr_html_(self):

@@ -41,6 +41,7 @@ class Map(object):
         is_static (bool, optional): Default False. If True, instead of showing and interactive
             map, a png image will be displayed.
         theme (string, optional): Use a different UI theme
+        title (string, optional): Title to label the map
 
     Examples:
 
@@ -183,6 +184,7 @@ class Map(object):
                  default_legend=False,
                  show_info=None,
                  theme=None,
+                 title=None,
                  is_static=False,
                  **kwargs):
 
@@ -195,6 +197,7 @@ class Map(object):
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
+        self.title = title
         self.is_static = is_static
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
@@ -216,6 +219,7 @@ class Map(object):
             default_legend=self.default_legend,
             show_info=self.show_info,
             theme=self.theme,
+            title=self.title,
             is_static=self.is_static,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
@@ -234,6 +238,7 @@ class Map(object):
             'default_legend': self.default_legend,
             'show_info': self.show_info,
             'theme': self.theme,
+            'title': self.title,
             'is_static': self.is_static,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path

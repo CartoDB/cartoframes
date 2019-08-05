@@ -82,4 +82,7 @@ FORMULA_OPERATIONS_GLOBAL = {
   'max': 'globalMax',
   'sum': 'globalSum'
 }
+
 THEMES = ['dark', 'light']
+
+DEFAULT_GRID_M_SIZE = 1

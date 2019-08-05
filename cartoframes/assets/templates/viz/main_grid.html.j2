@@ -25,19 +25,32 @@
   {% endif %}
   {% include 'style/common.html.j2' %}
   {% include 'style/map.html.j2' %}
+  {% include 'style/map_grid.html.j2' %}
   {% include 'style/error.html.j2' %}
   {% include 'style/popup.html.j2' %}
 </head>
 
 <body class="as-app-body as-app">
-  {% for map in maps %}
-    <div class="as-main">
-      <div class="as-map-area">
-        <div id="map-{{ loop.index0 }}" class="map"></div>
-        <img id="map-image{{ loop.index0 }}" class="map-image" alt='Static map image' />
-      </div> <!-- as-map-area -->
-    </div> <!-- as-main -->
+  <div class="grid-map-container">
+  {% for i in range(n) %}
+    <div class="grid-map-row">
+    {% for j in range(m) %}
+      {% set index = i + j * m %}
+      {% set title = maps[index]['title'] or 'Map %s'| format(index) %}
+      <div class="grid-map-cell">
+          <p>{{ title }}</p>
+          <div class="as-main grid-map">
+            <div class="as-map-area">
+            <div id="map-{{ index }}" class="map"></div>
+            <img id="map-image-{{ index }}" class="map-image" alt='{{ title }}' />
+          </div> <!-- as-map-area -->
+        </div> <!-- as-main -->
+      </div>
+    {% endfor %}
+    </div>
   {% endfor %}
+  </div>
+
   {% if is_embed %}
     {% include 'templates/viz/footer.html.j2' %}
   {% endif %}
