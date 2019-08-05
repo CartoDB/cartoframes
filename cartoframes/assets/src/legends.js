@@ -1,3 +1,4 @@
+import { format } from './utils';
 
 export function createDefaultLegend(layers) {
   const defaultLegendContainer = document.querySelector('#defaultLegendContainer');

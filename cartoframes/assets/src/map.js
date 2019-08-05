@@ -83,12 +83,12 @@ export function onReady(settings) {
     }
 
     if (settings.has_legends && layer.legend) {
-      legends.createLegend(mapLayer, layer.legend, layers.length - index - 1);
+      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
     }
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
-        const id = `layer${layers.length - index - 1}_widget${widgetIndex}`;
+        const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
         widget.id = id;
       });
 
