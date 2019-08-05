@@ -474,17 +474,12 @@ var init = (function () {
         bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
       }
     });
-
-    if (settings.is_static) {
+    
+    if (settings.is_static && !!settings.maps) {
       carto.on('loaded', mapLayers, () => {
-          const imageId = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
-          const canvas = map.getCanvas();
-          const url = canvas.toDataURL('image/png');
-          const image = document.getElementById(imageId);
-          window.frameElement.style.height = '600px';
-          map.getContainer().style.display = 'none';
-          image.setAttribute('src', url);
-          image.style.display = 'block';
+        html2canvas(document.body).then(canvas => {
+          document.body.appendChild(canvas);
+        });
       });
     }
 
