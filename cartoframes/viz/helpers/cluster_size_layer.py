@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 
 
-def cluster_size_continuous_layer(
+def cluster_size_layer(
         source, value=None, resolution=32, title='', size=None,
         color=None, description='', footer='',
         legend=True, popup=True, widget=False, animate=None):
@@ -37,9 +37,9 @@ def cluster_size_continuous_layer(
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     breakpoints = ', '.join([
-      '4^2',
-      '{0}^2'.format(resolution / 2),
-      '{0}^2'.format(resolution)
+      'sqrt({0}^2)'.format(resolution / 8),
+      'sqrt({0}^2)'.format(resolution / 2),
+      'sqrt({0}^2)'.format(resolution)
     ])
 
     clusterOperation = 'clusterCount()'
@@ -48,7 +48,7 @@ def cluster_size_continuous_layer(
         source,
         style={
             'point': {
-                'width': 'sqrt(ramp(linear({0}, viewportMIN({1}), viewportMAX({2})), [{3}]))'.format(
+                'width': 'ramp(linear({0}, viewportMIN({1}), viewportMAX({2})), [{3}])'.format(
                     clusterOperation, clusterOperation, clusterOperation, breakpoints),
                 'color': 'opacity({0}, 0.8)'.format(color or '#FFB927'),
                 'strokeColor': 'opacity(#222, ramp(linear(zoom(), 0, 18),[0, 0.6]))',
@@ -64,9 +64,7 @@ def cluster_size_continuous_layer(
         },
         legend=legend and {
             'type': {
-                'point': 'size-continuous-point',
-                'line': 'size-continuous-line',
-                'polygon': 'size-continuous-polygon'
+                'point': 'size-continuous-point'
             },
             'title': title,
             'description': description,
