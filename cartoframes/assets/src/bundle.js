@@ -417,10 +417,7 @@ var init = (function () {
     map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
 
     if (settings.show_info) {
-      const updateMapInfo = _updateMapInfo.bind(this, map);
-
-      map.on('zoom', updateMapInfo);
-      map.on('move', updateMapInfo);
+      _updateViewport(map);
     }
 
     if (settings.camera) {
@@ -487,15 +484,20 @@ var init = (function () {
     }
   }
 
-  function _updateMapInfo(map) {
-    const mapInfo$ = document.getElementById('map-info');
+  function _updateViewport(map) {
+    function updateMapInfo(map) {
+      const mapInfo$ = document.getElementById('map-info');
+    
+      const center = map.getCenter();
+      const lat = center.lat.toFixed(6);
+      const lng = center.lng.toFixed(6);
+      const zoom = map.getZoom().toFixed(2);
+    
+      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+    }
 
-    const center = map.getCenter();
-    const lat = center.lat.toFixed(6);
-    const lng = center.lng.toFixed(6);
-    const zoom = map.getZoom().toFixed(2);
-
-    mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+    map.on('zoom', updateMapInfo);
+    map.on('move', updateMapInfo); 
   }
 
   function init(settings) {
