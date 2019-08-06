@@ -26,6 +26,6 @@ __all__ = [
     'size_bins_layer',
     'size_category_layer',
     'size_continuous_layer',
-    'cluster_size_continuous_layer',
+    'cluster_size_layer',
     'animation_layer'
 ]
