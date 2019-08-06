@@ -32,7 +32,7 @@ Updates
   - Add Category Widget (#811)
   - Add Animation Control Widget (#812)
   - Add Time Series Widget (#813)
-  - Review Widget AP (#827)
+  - Review Widget API (#827)
   - Add Widgets Documentation (#859)
 - Helper methods & Map improvements
   - Animation helper method (#657)
