@@ -1,11 +1,11 @@
 from __future__ import absolute_import
-
+from ..constants import CLUSTER_OPERATIONS
 from ..layer import Layer
 
 
 def cluster_size_layer(
-        source, value=None, resolution=32, title='', size=None,
-        color=None, description='', footer='',
+        source, operation='count', value=None, resolution=32,
+        title='', size=None, color=None, description='', footer='',
         legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by cluster.
@@ -34,22 +34,18 @@ def cluster_size_layer(
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
-    animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
-    breakpoints = ', '.join([
-      'sqrt({0}^2)'.format(resolution / 8),
-      'sqrt({0}^2)'.format(resolution / 2),
-      'sqrt({0}^2)'.format(resolution)
-    ])
-
-    clusterOperation = 'clusterCount()'
+    breakpoints = _get_breakpoints(resolution)
+    cluster_operation = _get_cluster_operation(operation, value)
+    cluster_operation_title = _get_cluster_operation_title(operation, value)
+    animation_filter = _get_animation(animate, cluster_operation)
 
     return Layer(
         source,
         style={
             'point': {
                 'width': 'ramp(linear({0}, viewportMIN({1}), viewportMAX({2})), [{3}])'.format(
-                    clusterOperation, clusterOperation, clusterOperation, breakpoints),
+                    cluster_operation, cluster_operation, cluster_operation, breakpoints),
                 'color': 'opacity({0}, 0.8)'.format(color or '#FFB927'),
                 'strokeColor': 'opacity(#222, ramp(linear(zoom(), 0, 18),[0, 0.6]))',
                 'filter': animation_filter,
@@ -58,15 +54,15 @@ def cluster_size_layer(
         },
         popup=popup and not animate and {
             'hover': {
-                'title': title,
-                'value': clusterOperation
+                'title': title or cluster_operation_title,
+                'value': cluster_operation
             }
         },
         legend=legend and {
             'type': {
                 'point': 'size-continuous-point'
             },
-            'title': title,
+            'title': title or cluster_operation_title,
             'description': description,
             'footer': footer
         },
@@ -76,10 +72,36 @@ def cluster_size_layer(
                 'value': animate,
                 'title': 'Animation'
             },
-            widget and {
+            widget and value is not None and {
                 'type': 'histogram',
-                'value': clusterOperation,
+                'value': value,
                 'title': 'Distribution'
             }
         ]
     )
+
+
+def _get_animation(animate, cluster_operation):
+    return 'animation(linear({0}), 5, fade(1,1))'.format(cluster_operation) if animate else '1'
+
+
+def _get_breakpoints(resolution):
+    return ', '.join([
+        'sqrt({0}^2)'.format(resolution / 8),
+        'sqrt({0}^2)'.format(resolution / 2),
+        'sqrt({0}^2)'.format(resolution)
+    ])
+
+
+def _get_cluster_operation_title(operation, value):
+    if value is not None and operation != 'count':
+        return '{0} ({1})'.format(value, operation)
+
+    return operation
+
+
+def _get_cluster_operation(operation, value):
+    if value is not None and operation != 'count':
+        return '{0}(${1})'.format(CLUSTER_OPERATIONS[operation], value)
+
+    return '{0}()'.format(CLUSTER_OPERATIONS[operation])

@@ -82,4 +82,13 @@ FORMULA_OPERATIONS_GLOBAL = {
   'max': 'globalMax',
   'sum': 'globalSum'
 }
+
+CLUSTER_OPERATIONS = {
+  'count': 'clusterCount',
+  'avg': 'clusterAvg',
+  'min': 'clusterMin',
+  'max': 'clusterMax',
+  'sum': 'clusterSum'
+}
+
 THEMES = ['dark', 'light']
