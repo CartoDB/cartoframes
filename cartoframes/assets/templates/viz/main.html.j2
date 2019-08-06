@@ -31,26 +31,26 @@
 </head>
 
 <body class="as-app-body as-app">
-    <as-responsive-content>
-      {% if has_widgets %}
-        {% include 'templates/viz/widgets.html.j2' %}
-      {% endif %}
-      <main class="as-main">
-        <div class="as-map-area">
-          <div id="map" class="map"></div>
-          <img id="map-image" class="map-image" alt='Static map image' />
-          {% if show_info %}
-            {% include 'templates/viz/info.html.j2' %}
-          {% endif %}
-          {% if has_legends %}
-            <div class="as-map-panels" data-name="Legends">
-              <div class="as-panel as-panel--left as-panel--top">
-                {% include 'templates/viz/legends.html.j2' %}
-              </div> <!-- as-panel -->
-            </div> <!-- as-map-panels -->
-          {% endif %}
-        </div> <!-- as-map-area -->
-      </main> <!-- as-main -->
+  <img id="map-image" class="map-image" alt='Static map image' />
+  <as-responsive-content id="map-container">
+    {% if has_widgets %}
+      {% include 'templates/viz/widgets.html.j2' %}
+    {% endif %}
+    <main class="as-main">
+      <div class="as-map-area">
+        <div id="map" class="map"></div>
+        {% if show_info %}
+          {% include 'templates/viz/info.html.j2' %}
+        {% endif %}
+        {% if has_legends %}
+          <div class="as-map-panels" data-name="Legends">
+            <div class="as-panel as-panel--left as-panel--top">
+              {% include 'templates/viz/legends.html.j2' %}
+            </div> <!-- as-panel -->
+          </div> <!-- as-map-panels -->
+        {% endif %}
+      </div> <!-- as-map-area -->
+    </main> <!-- as-main -->
   </as-responsive-content>
 
   {% if is_embed %}

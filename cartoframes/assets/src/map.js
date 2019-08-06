@@ -17,25 +17,37 @@ const attributionControl = new mapboxgl.AttributionControl({
 
 const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
 
-export function setReady (settings) {
+export async function setReady(settings) {
   try {
     if (settings.maps) {
-      initMaps(settings.maps);
-    } else {
-      initMap(settings);
+      return await initMaps(settings.maps);
     }
+    
+    return await initMap(settings);
   } catch (e) {
     displayError(e);
   }
 }
 
-export function initMaps(maps) {
-  maps.forEach((mapSettings, mapIndex) => {
-    initMap(mapSettings, mapIndex);
+export async function saveImage() {
+  const $image = document.getElementById('map-image');
+  const $container = document.getElementById('map-container');
+
+  html2canvas($container)
+    .then((canvas) => {
+      document.body.removeChild($container);
+      $image.setAttribute('src', canvas.toDataURL());
+      $image.style.display = 'block';
+    });
+}
+
+export async function initMaps(maps) {
+  return await maps.map(async function (mapSettings, mapIndex) {
+    return await initMap(mapSettings, mapIndex);
   });
 }
 
-export function initMap(settings, mapIndex) {
+export async function initMap(settings, mapIndex) {
   const basecolor = getBasecolorSettings(settings.basecolor);
   const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
   const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
@@ -49,10 +61,10 @@ export function initMap(settings, mapIndex) {
     map.flyTo(settings.camera);
   }
 
-  initLayers(map, settings);
+  return await initLayers(map, settings);
 }
 
-function initLayers(map, settings) {
+async function initLayers(map, settings) {
   const mapLayers = [];
   const interactiveLayers = [];
   const interactiveMapLayers = [];
@@ -79,12 +91,12 @@ function initLayers(map, settings) {
     }
 
     if (settings.has_legends && layer.legend) {
-      legends.createLegend(mapLayer, layer.legend, layers.length - index - 1);
+      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
     }
 
     if (layer.widgets.length) {
       layer.widgets.forEach((widget, widgetIndex) => {
-        const id = `layer${layers.length - index - 1}_widget${widgetIndex}`;
+        const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
         widget.id = id;
       });
 
@@ -103,14 +115,6 @@ function initLayers(map, settings) {
       widgets.bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
     }
   });
-  
-  if (settings.is_static && !!settings.maps) {
-    carto.on('loaded', mapLayers, () => {
-      html2canvas(document.body).then(canvas => {
-        document.body.appendChild(canvas);
-      });
-    });
-  }
 
   if (interactiveLayers.length > 0) {
     setInteractivity(map, interactiveLayers, interactiveMapLayers);
@@ -119,6 +123,13 @@ function initLayers(map, settings) {
   if (settings.default_legend) {
     legends.createDefaultLegend(mapLayers);
   }
+
+  // return new Promise((resolve) => {
+  //   carto.on('loaded', mapLayers, () => {
+  //       resolve(mapLayers);
+  //   });
+  // });
+  return Promise.resolve(mapLayers);
 }
 
 function createMap(container, basemapStyle, bounds, accessToken) {

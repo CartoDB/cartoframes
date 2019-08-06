@@ -1,40 +1,7 @@
 var init = (function () {
   'use strict';
 
-  function createDefaultLegend(layers) {
-    const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
-    defaultLegendContainer.style.display = 'none';
-
-    AsBridge.VL.Legends.layersLegend(
-      '#defaultLegend',
-      layers,
-      {
-        onLoad: () => defaultLegendContainer.style.display = 'unset'
-      }
-    );
-  }
-
-  function createLegend(layer, legendData, layerIndex) {
-    const element = document.querySelector(`#layer${layerIndex}_legend`);
-
-    if (legendData.prop) {
-      const config = { othersLabel: 'Others' };  // TODO: i18n
-      const opts = { format, config };
-
-      if (legendData.type.startsWith('size-continuous')) {
-        config.samples = 4;
-      }
-      
-      AsBridge.VL.Legends.rampLegend(
-        element,
-        layer,
-        legendData.prop,
-        opts
-      );
-    }
-  }
-
-  function format$1(value) {
+  function format(value) {
     if (Array.isArray(value)) {
       const [first, second] = value;
       if (first === -Infinity) {
@@ -102,11 +69,44 @@ var init = (function () {
     };
   }
 
+  function createDefaultLegend(layers) {
+    const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
+    defaultLegendContainer.style.display = 'none';
+
+    AsBridge.VL.Legends.layersLegend(
+      '#defaultLegend',
+      layers,
+      {
+        onLoad: () => defaultLegendContainer.style.display = 'unset'
+      }
+    );
+  }
+
+  function createLegend(layer, legendData, layerIndex) {
+    const element = document.querySelector(`#layer${layerIndex}_legend`);
+
+    if (legendData.prop) {
+      const config = { othersLabel: 'Others' };  // TODO: i18n
+      const opts = { format, config };
+
+      if (legendData.type.startsWith('size-continuous')) {
+        config.samples = 4;
+      }
+      
+      AsBridge.VL.Legends.rampLegend(
+        element,
+        layer,
+        legendData.prop,
+        opts
+      );
+    }
+  }
+
   function renderWidget(widget, value) {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
     
     if (value && widget.element) {
-      widget.element.innerText = typeof value === 'number' ? format$1(value) : value;
+      widget.element.innerText = typeof value === 'number' ? format(value) : value;
     }
   }
 
@@ -410,25 +410,25 @@ var init = (function () {
 
   const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
 
-  function setReady (settings) {
+  async function setReady(settings) {
     try {
       if (settings.maps) {
-        initMaps(settings.maps);
-      } else {
-        initMap(settings);
+        return await initMaps(settings.maps);
       }
+      
+      return await initMap(settings);
     } catch (e) {
       displayError(e);
     }
   }
 
-  function initMaps(maps) {
-    maps.forEach((mapSettings, mapIndex) => {
-      initMap(mapSettings, mapIndex);
+  async function initMaps(maps) {
+    return await maps.map(async function (mapSettings, mapIndex) {
+      return await initMap(mapSettings, mapIndex);
     });
   }
 
-  function initMap(settings, mapIndex) {
+  async function initMap(settings, mapIndex) {
     const basecolor = getBasecolorSettings(settings.basecolor);
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
@@ -442,10 +442,10 @@ var init = (function () {
       map.flyTo(settings.camera);
     }
 
-    initLayers(map, settings);
+    return await initLayers(map, settings);
   }
 
-  function initLayers(map, settings) {
+  async function initLayers(map, settings) {
     const mapLayers = [];
     const interactiveLayers = [];
     const interactiveMapLayers = [];
@@ -472,12 +472,12 @@ var init = (function () {
       }
 
       if (settings.has_legends && layer.legend) {
-        createLegend(mapLayer, layer.legend, layers.length - index - 1);
+        createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
       }
 
       if (layer.widgets.length) {
         layer.widgets.forEach((widget, widgetIndex) => {
-          const id = `layer${layers.length - index - 1}_widget${widgetIndex}`;
+          const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
           widget.id = id;
         });
 
@@ -496,14 +496,6 @@ var init = (function () {
         bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
       }
     });
-    
-    if (settings.is_static && !!settings.maps) {
-      carto.on('loaded', mapLayers, () => {
-        html2canvas(document.body).then(canvas => {
-          document.body.appendChild(canvas);
-        });
-      });
-    }
 
     if (interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
@@ -512,6 +504,13 @@ var init = (function () {
     if (settings.default_legend) {
       createDefaultLegend(mapLayers);
     }
+
+    // return new Promise((resolve) => {
+    //   carto.on('loaded', mapLayers, () => {
+    //       resolve(mapLayers);
+    //   });
+    // });
+    return Promise.resolve(mapLayers);
   }
 
   function createMap(container, basemapStyle, bounds, accessToken) {
