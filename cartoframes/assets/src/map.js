@@ -61,10 +61,10 @@ export async function initMap(settings, mapIndex) {
     map.flyTo(settings.camera);
   }
 
-  return await initLayers(map, settings);
+  return await initLayers(map, settings, mapIndex);
 }
 
-async function initLayers(map, settings) {
+async function initLayers(map, settings, mapIndex=0) {
   const mapLayers = [];
   const interactiveLayers = [];
   const interactiveMapLayers = [];
@@ -91,7 +91,7 @@ async function initLayers(map, settings) {
     }
 
     if (settings.has_legends && layer.legend) {
-      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
+      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1, mapIndex);
     }
 
     if (layer.widgets.length) {
@@ -124,11 +124,6 @@ async function initLayers(map, settings) {
     legends.createDefaultLegend(mapLayers);
   }
 
-  // return new Promise((resolve) => {
-  //   carto.on('loaded', mapLayers, () => {
-  //       resolve(mapLayers);
-  //   });
-  // });
   return Promise.resolve(mapLayers);
 }
 

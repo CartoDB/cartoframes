@@ -13,8 +13,8 @@ export function createDefaultLegend(layers) {
   );
 }
 
-export function createLegend(layer, legendData, layerIndex) {
-  const element = document.querySelector(`#layer${layerIndex}_legend`);
+export function createLegend(layer, legendData, layerIndex, mapIndex) {
+  const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
 
   if (legendData.prop) {
     const config = { othersLabel: 'Others' };  // TODO: i18n

@@ -227,6 +227,9 @@ class Map(object):
         return self._htmlMap.html
 
     def get_content(self):
+        has_legends = any(layer['legend'] for layer in self.layer_defs) or self.default_legend
+        has_widgets = any(len(layer['widgets']) != 0 for layer in self.layer_defs)
+
         return {
             'layers': self.layer_defs,
             'bounds': self.bounds,
@@ -237,6 +240,8 @@ class Map(object):
             'token': self.token,
             'default_legend': self.default_legend,
             'show_info': self.show_info,
+            'has_legends': has_legends,
+            'has_widgets': has_widgets,
             'theme': self.theme,
             'title': self.title,
             'is_static': self.is_static,

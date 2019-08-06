@@ -82,8 +82,8 @@ var init = (function () {
     );
   }
 
-  function createLegend(layer, legendData, layerIndex) {
-    const element = document.querySelector(`#layer${layerIndex}_legend`);
+  function createLegend(layer, legendData, layerIndex, mapIndex) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
 
     if (legendData.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
@@ -442,10 +442,10 @@ var init = (function () {
       map.flyTo(settings.camera);
     }
 
-    return await initLayers(map, settings);
+    return await initLayers(map, settings, mapIndex);
   }
 
-  async function initLayers(map, settings) {
+  async function initLayers(map, settings, mapIndex=0) {
     const mapLayers = [];
     const interactiveLayers = [];
     const interactiveMapLayers = [];
@@ -472,7 +472,7 @@ var init = (function () {
       }
 
       if (settings.has_legends && layer.legend) {
-        createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
+        createLegend(mapLayer, layer.legend, settings.layers.length - index - 1, mapIndex);
       }
 
       if (layer.widgets.length) {
@@ -505,11 +505,6 @@ var init = (function () {
       createDefaultLegend(mapLayers);
     }
 
-    // return new Promise((resolve) => {
-    //   carto.on('loaded', mapLayers, () => {
-    //       resolve(mapLayers);
-    //   });
-    // });
     return Promise.resolve(mapLayers);
   }
 
