@@ -4,6 +4,7 @@ from warnings import warn
 from carto.kuvizs import KuvizManager
 from carto.auth import APIKeyAuthClient
 
+from ..auth import get_default_credentials
 from .source import Source
 from ..data.columns import normalize_name
 from ..__version__ import __version__
@@ -18,15 +19,13 @@ class KuvizPublisher(object):
 
     @staticmethod
     def all(credentials=None):
-        from ..auth import _default_credentials
-        auth_client = _create_auth_client(credentials or _default_credentials)
+        auth_client = _create_auth_client(credentials or get_default_credentials())
         km = _get_kuviz_manager(auth_client)
         kuvizs = km.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
     def set_credentials(self, credentials=None):
-        from ..auth import _default_credentials
-        self._credentials = credentials or _default_credentials
+        self._credentials = credentials or get_default_credentials()
         self._auth_client = _create_auth_client(self._credentials)
 
     def publish(self, html, name, password=None):
@@ -54,8 +53,7 @@ class KuvizPublisher(object):
         for idx, layer in enumerate(self._layers):
             table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
 
-            from ..auth import _default_credentials
-            dataset_credentials = credentials or layer.source.dataset.credentials or _default_credentials
+            dataset_credentials = credentials or layer.source.dataset.credentials or get_default_credentials()
 
             self._sync_layer(layer, table_name, dataset_credentials)
 

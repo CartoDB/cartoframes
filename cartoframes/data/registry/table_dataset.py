@@ -33,7 +33,7 @@ class TableDataset(BaseDataset):
 
     def upload(self, if_exists, with_lnglat):
         raise ValueError('Nothing to upload. Dataset needs a DataFrame, a '
-                         'GeoDataFrame, or a query to upload data to CARTO.')
+                         'GeoDataFrame or a query to upload data to CARTO.')
 
     def delete(self):
         if self.exists():
