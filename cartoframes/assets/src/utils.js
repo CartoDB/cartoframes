@@ -36,3 +36,33 @@ export function formatNumber(value) {
   
   return value.toLocaleString();
 }
+
+export function updateViewport(map) {
+  function updateMapInfo(map) {
+    const mapInfo$ = document.getElementById('map-info');
+  
+    const center = map.getCenter();
+    const lat = center.lat.toFixed(6);
+    const lng = center.lng.toFixed(6);
+    const zoom = map.getZoom().toFixed(2);
+  
+    mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+  }
+
+  map.on('zoom', updateMapInfo);
+  map.on('move', updateMapInfo); 
+}
+
+export function getBasecolorSettings(basecolor) {
+  return {
+    'version': 8,
+    'sources': {},
+    'layers': [{
+        'id': 'background',
+        'type': 'background',
+        'paint': {
+            'background-color': basecolor
+        }
+    }]
+  };
+}

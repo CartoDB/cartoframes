@@ -72,6 +72,36 @@ var init = (function () {
     return value.toLocaleString();
   }
 
+  function updateViewport(map) {
+    function updateMapInfo(map) {
+      const mapInfo$ = document.getElementById('map-info');
+    
+      const center = map.getCenter();
+      const lat = center.lat.toFixed(6);
+      const lng = center.lng.toFixed(6);
+      const zoom = map.getZoom().toFixed(2);
+    
+      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+    }
+
+    map.on('zoom', updateMapInfo);
+    map.on('move', updateMapInfo); 
+  }
+
+  function getBasecolorSettings(basecolor) {
+    return {
+      'version': 8,
+      'sources': {},
+      'layers': [{
+          'id': 'background',
+          'type': 'background',
+          'paint': {
+              'background-color': basecolor
+          }
+      }]
+    };
+  }
+
   function renderWidget(widget, value) {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
     
@@ -368,12 +398,22 @@ var init = (function () {
     return { clickAttrs, hoverAttrs };
   }
 
+  const BASEMAPS = {
+    DarkMatter: carto.basemaps.darkmatter,
+    Voyager: carto.basemaps.voyager,
+    Positron: carto.basemaps.positron
+  };
+
+  const attributionControl = new mapboxgl.AttributionControl({
+    compact: false
+  });
+
+  const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
+
   function setReady (settings) {
     try {
       if (settings.maps) {
-        settings.maps.forEach((mapSettings, mapIndex) => {
-          initMap(mapSettings, mapIndex);
-        });
+        initMaps(settings.maps);
       } else {
         initMap(settings);
       }
@@ -382,48 +422,30 @@ var init = (function () {
     }
   }
 
-  function initMap(settings, mapIndex) {
-    const BASEMAPS = {
-      DarkMatter: carto.basemaps.darkmatter,
-      Voyager: carto.basemaps.voyager,
-      Positron: carto.basemaps.positron
-    };
-
-    const BASECOLOR = {
-      'version': 8,
-      'sources': {},
-      'layers': [{
-          'id': 'background',
-          'type': 'background',
-          'paint': {
-              'background-color': settings.basecolor
-          }
-      }]
-    };
-
-    if (settings.mapboxtoken) {
-      mapboxgl.accessToken = settings.mapboxtoken;
-    }
-
-    const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
-    const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
-    const map = new mapboxgl.Map({
-      container,
-      style: basemapStyle,
-      zoom: 9,
-      dragRotate: false
+  function initMaps(maps) {
+    maps.forEach((mapSettings, mapIndex) => {
+      initMap(mapSettings, mapIndex);
     });
+  }
 
-    map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
+  function initMap(settings, mapIndex) {
+    const basecolor = getBasecolorSettings(settings.basecolor);
+    const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
+    const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
+    const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
 
     if (settings.show_info) {
-      _updateViewport(map);
+      updateViewport(map);
     }
 
     if (settings.camera) {
       map.flyTo(settings.camera);
     }
 
+    initLayers(map, settings);
+  }
+
+  function initLayers(map, settings) {
     const mapLayers = [];
     const interactiveLayers = [];
     const interactiveMapLayers = [];
@@ -438,8 +460,8 @@ var init = (function () {
 
       try {
         mapLayer._updateLayer.catch(displayError);
-      } catch (err) {
-        throw err;
+      } catch (e) {
+        throw e;
       }
 
       mapLayer.addTo(map);
@@ -492,20 +514,20 @@ var init = (function () {
     }
   }
 
-  function _updateViewport(map) {
-    function updateMapInfo(map) {
-      const mapInfo$ = document.getElementById('map-info');
-    
-      const center = map.getCenter();
-      const lat = center.lat.toFixed(6);
-      const lng = center.lng.toFixed(6);
-      const zoom = map.getZoom().toFixed(2);
-    
-      mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+  function createMap(container, basemapStyle, bounds, accessToken) {
+    if (accessToken) {
+      mapboxgl.accessToken = accessToken;
     }
 
-    map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo); 
+    return new mapboxgl.Map({
+      container,
+      style: basemapStyle,
+      zoom: 9,
+      dragRotate: false,
+      attributionControl: false
+    })
+    .addControl(attributionControl)
+    .fitBounds(bounds, FIT_BOUNDS_SETTINGS);
   }
 
   function init(settings) {
