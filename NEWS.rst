@@ -32,17 +32,17 @@ Updates
   - Add Category Widget (#811)
   - Add Animation Control Widget (#812)
   - Add Time Series Widget (#813)
-  - heavy_plus_sign Review Widget AP (#827)
-  - heavy_plus_sign Add Widgets Documentation (#859)
+  - Review Widget AP (#827)
+  - Add Widgets Documentation (#859)
 - Helper methods & Map improvements
   - Animation helper method (#657)
   - Implement embed map design (#805)
   - Responsive panel tab shows when there's no legend (#771)
-  - vector legends for small values shouldn't round (#544)
-  - heavy_plus_sign Published map not holding viewport settings (#820)
+  - Vector legends for small values shouldn't round (#544)
+  - Published map not holding viewport settings (#820)
   - geopandas Polygon / MultiPolygon display error
-  - heavy_plus_sign Add more params in the existing helpers (#830)
-  - heavy_plus_sign Helper methods palette expressions as python lists (#825)
+  - Add more params in the existing helpers (#830)
+  - Helper methods palette expressions as python lists (#825)
 - Documentation and examples (#859, #879, #790, #873)
 
 
