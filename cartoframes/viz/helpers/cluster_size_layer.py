@@ -87,9 +87,9 @@ def _get_animation(animate, cluster_operation):
 
 def _get_breakpoints(resolution):
     return ', '.join([
-        'sqrt({0}^2)'.format(resolution / 8),
-        'sqrt({0}^2)'.format(resolution / 2),
-        'sqrt({0}^2)'.format(resolution)
+        '{0}'.format(resolution / 8),
+        '{0}'.format(resolution / 2),
+        '{0}'.format(resolution)
     ])
 
 
