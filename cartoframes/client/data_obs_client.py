@@ -482,7 +482,7 @@ class DataObsClient(object):
             .. code::
 
                 from cartoframes.auth import Credentials
-                from cartoframes.data import DataObsClient
+                from cartoframes.client import DataObsClient
                 creds = Credentials('user name', 'api key')
                 do = DataObsClient(creds)
                 median_income = do.discovery(
