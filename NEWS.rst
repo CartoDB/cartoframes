@@ -45,7 +45,6 @@ Updates
   - Helper methods palette expressions as python lists (#825)
 - Documentation and examples (#859, #879, #790, #873)
 
-
 1.0b1
 ------
 
