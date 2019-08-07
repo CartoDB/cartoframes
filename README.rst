@@ -16,12 +16,16 @@ Try it Out
 
 * Stable (v0.10.1): |stable|
 * Latest (develop branch): |develop|
+* Beta 2 (v1.0b2): |beta 2|
 
 .. |stable| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v0.10.1?filepath=examples
 
 .. |develop| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/develop?filepath=examples
+
+.. |beta 2| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b2?filepath=examples
 
 Features
 ========

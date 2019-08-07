@@ -4,7 +4,7 @@ Changelog
 1.0b2
 ------
 
-Release 2019-xx-xx
+Release 2019-08-07
 
 Updates
 
