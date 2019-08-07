@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.0rc1
+------
+
+Release 2019-xx-xx
+
+Updates
+
+- SQLClient & DataObsClient support for set_default_credentials (#876)
+
 1.0b2
 ------
 
