@@ -80,10 +80,11 @@ class DataObsClient(object):
 
             .. code:: python
 
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.auth import Credentials
                 from cartoframes.client import DataObsClient
-                set_default_credentials('user name', 'api key')
-                do = DataObsClient()
+                credentials = Credentials('user name', 'api key')
+                # Note: default credentials will be supported in a future release
+                do = DataObsClient(credentials)
                 # will return Dataset with columns `the_geom` and `geom_ref`
                 tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
