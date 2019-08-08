@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from .. import context
+from ..auth import get_default_credentials
 
 
 class SQLClient(object):
@@ -31,9 +32,9 @@ class SQLClient(object):
             ...
     """
 
-    def __init__(self, credentials):
-        self._credentials = credentials
-        self._context = context.create_context(credentials)
+    def __init__(self, credentials=None):
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
 
     def query(self, query, verbose=False):
         """Run a SQL query. It returns a `list` with content of the response.
