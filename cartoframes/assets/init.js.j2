@@ -4,15 +4,14 @@ document
     const show_info = '{{show_info}}' === 'True';
     const layers = {{ layers|tojson }};
     const bounds = {{ bounds }};
-    const camera = null;
+    const camera = {{ camera|tojson }};
     const mapboxtoken = '{{mapboxtoken}}';
     const basemap = '{{basemap}}';
     const basecolor = '{{basecolor}}';
     const has_legends = '{{has_legends}}' === 'True';
+    const is_static = '{{is_static}}' === 'True';
     const default_legend = '{{default_legend}}' === 'True';
 
-    console.log('!!!', has_legends);
-    
     init({
       show_info,
       layers,
@@ -22,6 +21,7 @@ document
       basemap,
       basecolor,
       has_legends,
+      is_static,
       default_legend
     });
 });

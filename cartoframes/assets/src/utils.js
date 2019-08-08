@@ -38,7 +38,7 @@ export function formatNumber(value) {
 }
 
 export function updateViewport(map) {
-  function updateMapInfo(map) {
+  function updateMapInfo() {
     const mapInfo$ = document.getElementById('map-info');
   
     const center = map.getCenter();
@@ -48,6 +48,8 @@ export function updateViewport(map) {
   
     mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
   }
+
+  updateMapInfo();
 
   map.on('zoom', updateMapInfo);
   map.on('move', updateMapInfo); 

@@ -19,11 +19,15 @@ const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
 
 export async function setReady(settings) {
   try {
-    if (settings.maps) {
-      return await initMaps(settings.maps);
-    }
+    const maps = settings.maps ?
+      await initMaps(settings.maps)
+      : await initMap(settings);
     
-    return await initMap(settings);
+    if (settings.is_static) {
+      Promise
+        .all(maps)
+        .then(saveImage);
+    }
   } catch (e) {
     displayError(e);
   }
@@ -31,12 +35,13 @@ export async function setReady(settings) {
 
 export async function saveImage() {
   const $image = document.getElementById('map-image');
-  const $container = document.getElementById('map-container');
+  const $container = document.getElementById('main-container');
 
   html2canvas($container)
     .then((canvas) => {
+      const src = canvas.toDataURL();
       document.body.removeChild($container);
-      $image.setAttribute('src', canvas.toDataURL());
+      $image.setAttribute('src', src);
       $image.style.display = 'block';
     });
 }
@@ -124,7 +129,11 @@ async function initLayers(map, settings, mapIndex=0) {
     legends.createDefaultLegend(mapLayers);
   }
 
-  return Promise.resolve(mapLayers);
+  return new Promise((resolve) => {
+    carto.on('loaded', mapLayers, () => {
+      resolve(mapLayers);
+    });
+  });
 }
 
 function createMap(container, basemapStyle, bounds, accessToken) {
@@ -132,13 +141,16 @@ function createMap(container, basemapStyle, bounds, accessToken) {
     mapboxgl.accessToken = accessToken;
   }
 
-  return new mapboxgl.Map({
+  const map = new mapboxgl.Map({
     container,
     style: basemapStyle,
     zoom: 9,
     dragRotate: false,
     attributionControl: false
-  })
-  .addControl(attributionControl)
-  .fitBounds(bounds, FIT_BOUNDS_SETTINGS);
+  });
+
+  map.addControl(attributionControl);
+  map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
+
+  return map;
 }

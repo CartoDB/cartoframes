@@ -31,7 +31,8 @@
 </head>
 
 <body class="as-app-body as-app">
-  <div id="map-container" class="grid-map-container">
+  <img id="map-image" class="map-image" alt='Static map image' />
+  <main id="main-container" class="grid-map-container">
   {% for i in range(n) %}
     <div class="grid-map-row">
     {% for j in range(m) %}
@@ -54,7 +55,7 @@
     {% endfor %}
     </div>
   {% endfor %}
-  </div>
+  </main>
 
   {% if is_embed %}
     {% include 'templates/viz/footer.html.j2' %}

@@ -40,7 +40,7 @@ var init = (function () {
   }
 
   function updateViewport(map) {
-    function updateMapInfo(map) {
+    function updateMapInfo() {
       const mapInfo$ = document.getElementById('map-info');
     
       const center = map.getCenter();
@@ -50,6 +50,8 @@ var init = (function () {
     
       mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
     }
+
+    updateMapInfo();
 
     map.on('zoom', updateMapInfo);
     map.on('move', updateMapInfo); 
@@ -412,14 +414,31 @@ var init = (function () {
 
   async function setReady(settings) {
     try {
-      if (settings.maps) {
-        return await initMaps(settings.maps);
-      }
+      const maps = settings.maps ?
+        await initMaps(settings.maps)
+        : await initMap(settings);
       
-      return await initMap(settings);
+      if (settings.is_static) {
+        Promise
+          .all(maps)
+          .then(saveImage);
+      }
     } catch (e) {
       displayError(e);
     }
+  }
+
+  async function saveImage() {
+    const $image = document.getElementById('map-image');
+    const $container = document.getElementById('main-container');
+
+    html2canvas($container)
+      .then((canvas) => {
+        const src = canvas.toDataURL();
+        document.body.removeChild($container);
+        $image.setAttribute('src', src);
+        $image.style.display = 'block';
+      });
   }
 
   async function initMaps(maps) {
@@ -505,7 +524,11 @@ var init = (function () {
       createDefaultLegend(mapLayers);
     }
 
-    return Promise.resolve(mapLayers);
+    return new Promise((resolve) => {
+      carto.on('loaded', mapLayers, () => {
+        resolve(mapLayers);
+      });
+    });
   }
 
   function createMap(container, basemapStyle, bounds, accessToken) {
@@ -513,15 +536,18 @@ var init = (function () {
       mapboxgl.accessToken = accessToken;
     }
 
-    return new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container,
       style: basemapStyle,
       zoom: 9,
       dragRotate: false,
       attributionControl: false
-    })
-    .addControl(attributionControl)
-    .fitBounds(bounds, FIT_BOUNDS_SETTINGS);
+    });
+
+    map.addControl(attributionControl);
+    map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
+
+    return map;
   }
 
   function init(settings) {

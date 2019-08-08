@@ -22,13 +22,14 @@ class HTMLMapGrid(object):
 
     def set_content(self, maps, size=None, show_info=None, theme=None, _carto_vl_path=None,
                     _airship_path=None, title='CARTOframes', is_embed=False,
-                    is_static=False, n=None, m=None):
+                    is_static=False, viewport=None, n=None, m=None):
         self.html = self._parse_html_content(
             maps, size, show_info, theme, _carto_vl_path, _airship_path, title,
-            is_embed, is_static, n, m)
+            is_embed, is_static, viewport, n, m)
 
     def _parse_html_content(self, maps, size, show_info=None, theme=None, _carto_vl_path=None,
-                            _airship_path=None, title=None, is_embed=False, is_static=False, n=None, m=None):
+                            _airship_path=None, title=None, is_embed=False, is_static=False,
+                            viewport=None, n=None, m=None):
 
         if _carto_vl_path is None:
             carto_vl_path = constants.CARTO_VL_URL

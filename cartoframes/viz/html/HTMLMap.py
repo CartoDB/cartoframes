@@ -23,19 +23,20 @@ class HTMLMap(object):
         self._template = self._env.get_template(template_path)
 
     def set_content(
-        self, size, layers, bounds, viewport=None, basemap=None,
+        self, size, layers, bounds, viewport=None, camera=None, basemap=None,
             default_legend=None, show_info=None, theme=None, _carto_vl_path=None,
             _airship_path=None, title='CARTOframes', is_embed=False,
             is_static=False):
 
         self.html = self._parse_html_content(
-            size, layers, bounds, viewport, basemap, default_legend,
+            size, layers, bounds, viewport, camera, basemap, default_legend,
             show_info, theme, _carto_vl_path, _airship_path, title, is_embed, is_static)
 
     def _parse_html_content(
-        self, size, layers, bounds, viewport, basemap=None, default_legend=None,
-            show_info=None, theme=None, _carto_vl_path=None, _airship_path=None, title=None, is_embed=False,
-            is_static=False):
+        self, size, layers, bounds, viewport, camera=None,
+            basemap=None, default_legend=None, show_info=None,
+            theme=None, _carto_vl_path=None, _airship_path=None,
+            title=None, is_embed=False, is_static=False):
 
         token = ''
         basecolor = ''
@@ -77,15 +78,6 @@ class HTMLMap(object):
             airship_module_path = _airship_path + constants.AIRSHIP_MODULE_DEV
             airship_styles_path = _airship_path + constants.AIRSHIP_STYLES_DEV
             airship_icons_path = _airship_path + constants.AIRSHIP_ICONS_DEV
-
-        camera = None
-        if viewport is not None:
-            camera = {
-                'center': utils.get_center(viewport),
-                'zoom': viewport.get('zoom'),
-                'bearing': viewport.get('bearing'),
-                'pitch': viewport.get('pitch')
-            }
 
         has_legends = any(layer['legend'] for layer in layers) or default_legend
         has_widgets = any(len(layer['widgets']) != 0 for layer in layers)

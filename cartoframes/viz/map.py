@@ -9,6 +9,7 @@ from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .html.HTMLMap import HTMLMap
+from ..utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
@@ -207,6 +208,15 @@ class Map(object):
         self._publisher = self._get_publisher()
         self._kuviz = None
 
+        self.camera = None
+        if viewport is not None:
+            self.camera = {
+                'center': get_center(viewport),
+                'zoom': viewport.get('zoom'),
+                'bearing': viewport.get('bearing'),
+                'pitch': viewport.get('pitch')
+            }
+
     def _repr_html_(self):
         self._htmlMap = HTMLMap()
 
@@ -215,6 +225,7 @@ class Map(object):
             bounds=self.bounds,
             size=self.size,
             viewport=self.viewport,
+            camera=self.camera,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
@@ -235,6 +246,7 @@ class Map(object):
             'bounds': self.bounds,
             'size': self.size,
             'viewport': self.viewport,
+            'camera': self.camera,
             'basemap': self.basemap,
             'basecolor': self.basecolor,
             'token': self.token,

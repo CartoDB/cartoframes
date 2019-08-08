@@ -26,10 +26,3 @@ def iframe_size_filter(value):
 
 def clear_none_filter(value):
     return dict(filter(lambda item: item[1] is not None, value.items()))
-
-
-def get_center(center):
-    if 'lng' not in center or 'lat' not in center:
-        return None
-
-    return [center.get('lng'), center.get('lat')]
