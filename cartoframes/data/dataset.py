@@ -95,7 +95,6 @@ class Dataset(object):
     def __init__(self, data, credentials=None, schema=None):
         self._registry = self._get_strategies_registry()
         self._strategy = self._init_strategy(data, credentials, schema)
-        self._is_saved_in_carto = self._init_saved_in_carto()
 
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or get_default_credentials()
@@ -152,11 +151,6 @@ class Dataset(object):
         return self._strategy.get_geodataframe()
 
     @property
-    def is_saved_in_carto(self):
-        """Property on whether Dataset is saved in CARTO account"""
-        return self._is_saved_in_carto
-
-    @property
     def dataset_info(self):
         """:py:class:`DatasetInfo <cartoframes.data.DatasetInfo>` associated with Dataset instance
 
@@ -180,10 +174,10 @@ class Dataset(object):
                d.dataset_info
 
         """
-        if not self._is_saved_in_carto:
-            raise CartoException('Your data is not synchronized with CARTO.'
-                                 'First of all, you should call upload method '
-                                 'to save your data in CARTO.')
+        if self.is_local():
+            raise CartoException('Your data is not synchronized with CARTO. If you want to upload it to CARTO, '
+                                 'you should use: `Dataset.upload(table_name="new_table")` '
+                                 'Then, if you want to work with the remote data, use `Dataset("new_table")`')
 
         return self._strategy.dataset_info
 
@@ -335,9 +329,9 @@ class Dataset(object):
 
     def get_table_names(self):
         """Get table names used by Dataset instance"""
-        if not self._is_saved_in_carto:
-            raise CartoException('Your data is not synchronized with CARTO. '
-                                 'First of all, you should call the Dataset.upload() method '
-                                 'to save your data in CARTO.')
+        if self.is_local():
+            raise CartoException('Your data is not synchronized with CARTO. If you want to upload it to CARTO, '
+                                 'you should use: `Dataset.upload(table_name="new_table")` '
+                                 'Then, if you want to work with the remote data, use `Dataset("new_table")`')
 
         return self._strategy.get_table_names()
