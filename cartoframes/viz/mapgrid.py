@@ -6,6 +6,91 @@ from ..utils import get_center
 
 
 class MapGrid(object):
+    """Create a grid of visualizations in order to compare them.
+
+    Args:
+        maps (list of :py:class:`Map <cartoframes.viz.Map>`): List of
+          maps. Zero or more of :py:class:`Map <cartoframes.viz.Map>`.
+        N_SIZE (number, optional): Number of columns of the grid
+        M_SIZE (number, optional): Number of rows of the grid
+        viewport (dict, optional): Properties for display of the maps viewport.
+          Keys can be `bearing` or `pitch`.
+
+    Examples:
+
+        Basic usage.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, MapGrid
+
+            set_default_credentials('your_account')
+
+            MapGrid([
+                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+            ])
+        
+        Display a 2x2 grid.
+    
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, MapGrid
+
+            set_default_credentials('your_account')
+
+            MapGrid([
+                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
+            ], 2, 2)
+
+        Custom Titles.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, MapGrid
+
+            set_default_credentials('your_account')
+
+            MapGrid([
+                Map(Layer('table_in_your_account'), title="Visualization 1 custom title"),
+                Map(Layer('table_in_your_account'), title="Visualization 2 custom title")),
+            ])
+        
+        Viewport.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, MapGrid
+
+            set_default_credentials('your_account')
+
+            MapGrid([
+                Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account'))
+            ], viewport={ 'zoom': 2 })
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, MapGrid
+
+            set_default_credentials('your_account')
+
+            MapGrid([
+                Map(Layer('table_in_your_account'), viewport={ 'zoom': 0.5 }),
+                Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account')),
+                Map(Layer('table_in_your_account'))
+            ], viewport={ 'zoom': 2 })
+    """
+
     def __init__(self,
                  maps,
                  N_SIZE=None,

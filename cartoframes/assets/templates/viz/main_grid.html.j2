@@ -36,12 +36,14 @@
   {% for i in range(n) %}
     <div class="grid-map-row">
     {% for j in range(m) %}
-      {% set index = i + j * m %}
-      {% set title = maps[index]['title'] or 'Map %s'| format(index) %}
+      {% set index = i + j * m if n >= m else j + i * m %}
+      {% set title = maps[index]['title'] %}
       {% set has_legends = maps[index]['has_legends'] %}
       
       <div class="grid-map-cell">
-          <p>{{ title }}</p>
+          {% if title %}
+            <p>{{ title }}</p>
+          {% endif %}
           <div class="as-main grid-map">
             <div class="as-map-area">
               {% if has_legends %}
