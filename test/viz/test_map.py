@@ -30,6 +30,7 @@ class TestMapInitialization(unittest.TestCase):
     def test__init(self):
         """Map should return a valid template"""
         map = Map()
+        map._repr_html_()
         self.assertIsNotNone(map._htmlMap)
 
     def test_bounds(self):
@@ -134,6 +135,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
     def test_default_carto_vl_path(self):
         """Map dev path should use default paths if none are given"""
         map = Map()
+        map._repr_html_()
         template = map._htmlMap.html
         self.assertTrue(constants.CARTO_VL_URL in template)
 
@@ -141,12 +143,14 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """Map dev path should use custom paths"""
         _carto_vl_path = 'custom_carto_vl_path'
         map = Map(_carto_vl_path=_carto_vl_path)
+        map._repr_html_()
         template = map._htmlMap.html
         self.assertTrue(_carto_vl_path + constants.CARTO_VL_DEV in template)
 
     def test_default_airship_path(self):
         """Map dev path should use default paths if none are given"""
         map = Map()
+        map._repr_html_()
         template = map._htmlMap.html
         self.assertTrue(constants.AIRSHIP_COMPONENTS_URL in template)
         self.assertTrue(constants.AIRSHIP_BRIDGE_URL in template)
@@ -158,6 +162,7 @@ class TestMapDevelopmentPath(unittest.TestCase):
         """Map dev path should use custom paths"""
         _airship_path = 'custom_airship_path'
         map = Map(_airship_path=_airship_path)
+        map._repr_html_()
         template = map._htmlMap.html
         self.assertTrue(_airship_path + constants.AIRSHIP_COMPONENTS_DEV in template)
         self.assertTrue(_airship_path + constants.AIRSHIP_BRIDGE_DEV in template)
