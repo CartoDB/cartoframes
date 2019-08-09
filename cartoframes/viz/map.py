@@ -186,7 +186,7 @@ class Map(object):
                  show_info=None,
                  theme=None,
                  title=None,
-                 is_static=False,
+                 is_static=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)

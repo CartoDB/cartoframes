@@ -59,7 +59,7 @@ class MapGrid(object):
                 Map(Layer('table_in_your_account'), title="Visualization 1 custom title"),
                 Map(Layer('table_in_your_account'), title="Visualization 2 custom title")),
             ])
-        
+
         Viewport.
 
         .. code::
@@ -96,7 +96,7 @@ class MapGrid(object):
                  N_SIZE=None,
                  M_SIZE=None,
                  viewport=None,
-                 is_static=None):
+                 is_static=True):
         self._map_grid = _init_map_grid(maps, is_static, viewport)
         self._N_SIZE = N_SIZE if N_SIZE is not None else len(self._map_grid)
         self._M_SIZE = M_SIZE if M_SIZE is not None else constants.DEFAULT_GRID_M_SIZE

@@ -22,27 +22,23 @@ export async function setReady(settings) {
     const maps = settings.maps ?
       await initMaps(settings.maps)
       : await initMap(settings);
-    
-    if (settings.is_static) {
-      Promise
-        .all(maps)
-        .then(saveImage);
-    }
   } catch (e) {
     displayError(e);
   }
 }
 
-export async function saveImage() {
-  const $image = document.getElementById('map-image');
-  const $container = document.getElementById('main-container');
+export async function saveImage(mapIndex) {
+  const img = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+  const container = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
+  const $img = document.getElementById(img);
+  const $container = document.getElementById(container);
 
   html2canvas($container)
     .then((canvas) => {
       const src = canvas.toDataURL();
-      document.body.removeChild($container);
-      $image.setAttribute('src', src);
-      $image.style.display = 'block';
+      $img.setAttribute('src', src);
+      $img.style.display = 'block';
+      $container.style.display = 'none';
     });
 }
 
@@ -69,7 +65,7 @@ export async function initMap(settings, mapIndex) {
   return await initLayers(map, settings, mapIndex);
 }
 
-async function initLayers(map, settings, mapIndex=0) {
+async function initLayers(map, settings, mapIndex) {
   const mapLayers = [];
   const interactiveLayers = [];
   const interactiveMapLayers = [];
@@ -131,6 +127,10 @@ async function initLayers(map, settings, mapIndex=0) {
 
   return new Promise((resolve) => {
     carto.on('loaded', mapLayers, () => {
+      if (settings.is_static) {
+        saveImage(mapIndex);
+      }
+
       resolve(mapLayers);
     });
   });

@@ -84,7 +84,7 @@ var init = (function () {
     );
   }
 
-  function createLegend(layer, legendData, layerIndex, mapIndex) {
+  function createLegend(layer, legendData, layerIndex, mapIndex=0) {
     const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
 
     if (legendData.prop) {
@@ -417,27 +417,23 @@ var init = (function () {
       const maps = settings.maps ?
         await initMaps(settings.maps)
         : await initMap(settings);
-      
-      if (settings.is_static) {
-        Promise
-          .all(maps)
-          .then(saveImage);
-      }
     } catch (e) {
       displayError(e);
     }
   }
 
-  async function saveImage() {
-    const $image = document.getElementById('map-image');
-    const $container = document.getElementById('main-container');
+  async function saveImage(mapIndex) {
+    const img = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+    const container = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
+    const $img = document.getElementById(img);
+    const $container = document.getElementById(container);
 
     html2canvas($container)
       .then((canvas) => {
         const src = canvas.toDataURL();
-        document.body.removeChild($container);
-        $image.setAttribute('src', src);
-        $image.style.display = 'block';
+        $img.setAttribute('src', src);
+        $img.style.display = 'block';
+        $container.style.display = 'none';
       });
   }
 
@@ -464,7 +460,7 @@ var init = (function () {
     return await initLayers(map, settings, mapIndex);
   }
 
-  async function initLayers(map, settings, mapIndex=0) {
+  async function initLayers(map, settings, mapIndex) {
     const mapLayers = [];
     const interactiveLayers = [];
     const interactiveMapLayers = [];
@@ -526,6 +522,10 @@ var init = (function () {
 
     return new Promise((resolve) => {
       carto.on('loaded', mapLayers, () => {
+        if (settings.is_static) {
+          saveImage(mapIndex);
+        }
+
         resolve(mapLayers);
       });
     });

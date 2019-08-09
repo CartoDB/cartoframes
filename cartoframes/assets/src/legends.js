@@ -13,7 +13,7 @@ export function createDefaultLegend(layers) {
   );
 }
 
-export function createLegend(layer, legendData, layerIndex, mapIndex) {
+export function createLegend(layer, legendData, layerIndex, mapIndex=0) {
   const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
 
   if (legendData.prop) {
