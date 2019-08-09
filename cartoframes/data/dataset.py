@@ -235,19 +235,7 @@ class Dataset(object):
                 d = Dataset('brooklyn_poverty')
                 df = d.download(decode_geom=True)
         """
-        data = self._strategy.download(limit, decode_geom, retry_times)
-
-        table_name = self._strategy.table_name
-        credentials = self._strategy.credentials
-        schema = self._strategy.schema
-
-        self._set_strategy(DataFrameDataset, data)
-
-        self._strategy.table_name = table_name
-        self._strategy.credentials = credentials
-        self._strategy.schema = schema
-
-        return data
+        return self._strategy.download(limit, decode_geom, retry_times)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
         """Upload Dataset to CARTO account associated with `credentials`.
@@ -295,15 +283,6 @@ class Dataset(object):
             self._strategy.schema = schema
 
         self._strategy.upload(if_exists, with_lnglat)
-        self._is_saved_in_carto = True
-
-        if isinstance(self._strategy, QueryDataset):
-            self._set_strategy(
-                TableDataset,
-                self._strategy.table_name,
-                self._strategy.credentials,
-                self._strategy.schema)
-
         return self
 
     def delete(self):
