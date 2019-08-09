@@ -1,7 +1,7 @@
 from carto.kuvizs import Kuviz
 
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
-from dataset_mock import DatasetMock
+from .dataset_mock import DatasetMock
 
 PRIVACY_PUBLIC = 'public'
 PRIVACY_PASSWORD = 'password'
