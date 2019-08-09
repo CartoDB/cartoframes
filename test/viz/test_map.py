@@ -205,9 +205,8 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
-        query = "SELECT 1"
-        dataset = DatasetMock(query, credentials=self.credentials)
-        dataset._is_saved_in_carto = False
+        local_data = {}
+        dataset = DatasetMock(local_data, credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         msg = 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
@@ -215,9 +214,8 @@ class TestMapPublication(unittest.TestCase):
             map.publish('test', credentials=self.credentials)
 
     def test_map_publish_unsync_sync_data_and_publish(self):
-        query = "SELECT 1"
-        dataset = DatasetMock(query, credentials=self.credentials)
-        dataset._is_saved_in_carto = False
+        local_data = {}
+        dataset = DatasetMock(local_data, credentials=self.credentials)
         map = MapMock(Layer(Source(dataset)))
 
         map.sync_data(table_name='fake_table', credentials=self.credentials)
