@@ -1,4 +1,4 @@
-## Basemaps And Viewport
+## Viewport, Basemaps and Grid
 
 ### Viewport
 
@@ -107,3 +107,82 @@ Map(
 `basemap='#FABADA'`
 
 ![Hexadecimal color as basemap](../../img/guides/basemap/guide-basemaps-6.png)
+
+### Grid
+
+CARTOframes includes the  `MapGrid` class to create a grid of visualizations to be compared.
+
+**Parameters:**
+    * maps (list): List of maps
+    * N_SIZE (number, optional): Number of columns
+    * M_SIZE (number, optional): Number of rows
+    * viewport (dict, optional): Properties for display of the maps viewport. Keys can be `bearing` or `pitch`.
+    * is_static (boolean): By default, the maps in the grid are static images. They can be interactive by setting `is_static=True`
+
+- Default Grid
+
+```py
+from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer, MapGrid
+
+set_default_credentials('cartovl')
+
+MapGrid([
+    Map(Layer('populated_places')),
+    Map(Layer('populated_places')),
+    Map(Layer('populated_places')),
+    Map(Layer('populated_places'))
+])
+```
+
+![Default MapGrid](../../img/guides/mapgrid/mapgrid-1.png)
+
+- Custom placement of rows and columns
+
+```py
+from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer, MapGrid
+
+set_default_credentials('cartovl')
+
+MapGrid([
+    Map(Layer('populated_places')), Map(Layer('populated_places')),
+    Map(Layer('populated_places')), Map(Layer('populated_places'))
+], 2, 2)
+```
+
+![2x2 MapGrid](../../img/guides/mapgrid/mapgrid-2.png)
+
+- Vertical orientation and custom title
+
+```py
+from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer, MapGrid
+
+set_default_credentials('cartovl')
+
+MapGrid([
+    Map(Layer('populated_places'), title="Visualization 1 custom title"),
+    Map(Layer('populated_places'), title="Visualization 2 custom title"),
+], 1, 2)
+```
+
+![Vertical oriented MapGrid with custom titles](../../img/guides/mapgrid/mapgrid-3.png)
+
+- Change viewport settings
+
+```py
+from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer, MapGrid
+
+set_default_credentials('cartovl')
+
+MapGrid([
+    Map(Layer('populated_places'), viewport={ 'zoom': 0.5 }),
+    Map(Layer('populated_places')),
+    Map(Layer('populated_places')),
+    Map(Layer('populated_places'))
+], viewport={ 'zoom': 2 })
+```
+
+![MapGrid with viewport settings](../../img/guides/mapgrid/mapgrid-4.png)

@@ -1,25 +1,27 @@
 document
   .querySelector('as-responsive-content')
   .addEventListener('ready', () => {
-    const show_info = '{{show_info}}' === 'True';
-    const layers = {{ layers|tojson }};
-    const bounds = {{ bounds }};
-    const camera = null;
-    const mapboxtoken = '{{mapboxtoken}}';
-    const basemap = '{{basemap}}';
     const basecolor = '{{basecolor}}';
-    const has_legends = '{{has_legends}}' === 'True';
+    const basemap = '{{basemap}}';
+    const bounds = {{ bounds }};
+    const camera = {{ camera|tojson }};
     const default_legend = '{{default_legend}}' === 'True';
+    const has_legends = '{{has_legends}}' === 'True';
+    const is_static = '{{is_static}}' === 'True';
+    const layers = {{ layers|tojson }};
+    const mapboxtoken = '{{mapboxtoken}}';
+    const show_info = '{{show_info}}' === 'True';
 
     init({
-      show_info,
-      layers,
+      basecolor,
+      basemap,
       bounds,
       camera,
+      defaultLegend: default_legend,
+      has_legends: has_legends,
+      is_static: is_static,
+      layers,
       mapboxtoken,
-      basemap,
-      basecolor,
-      has_legends,
-      default_legend
+      showInfo: show_info
     });
 });

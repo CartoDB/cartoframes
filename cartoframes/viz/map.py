@@ -4,10 +4,12 @@ import collections
 import numpy as np
 from carto.exceptions import CartoException
 
+from warnings import warn
 from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .html.HTMLMap import HTMLMap
+from ..utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
@@ -40,6 +42,7 @@ class Map(object):
         is_static (bool, optional): Default False. If True, instead of showing and interactive
             map, a png image will be displayed.
         theme (string, optional): Use a different UI theme
+        title (string, optional): Title to label the map
 
     Examples:
 
@@ -182,7 +185,8 @@ class Map(object):
                  default_legend=False,
                  show_info=None,
                  theme=None,
-                 is_static=False,
+                 title=None,
+                 is_static=None,
                  **kwargs):
 
         self.layers = _init_layers(layers)
@@ -194,11 +198,26 @@ class Map(object):
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
+        self.title = title
         self.is_static = is_static
+        self.token = get_token(basemap)
+        self.basecolor = get_basecolor(basemap)
+
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
         self._publisher = self._get_publisher()
         self._kuviz = None
+
+        self.camera = None
+        if viewport is not None:
+            self.camera = {
+                'center': get_center(viewport),
+                'zoom': viewport.get('zoom'),
+                'bearing': viewport.get('bearing'),
+                'pitch': viewport.get('pitch')
+            }
+
+    def _repr_html_(self):
         self._htmlMap = HTMLMap()
 
         self._htmlMap.set_content(
@@ -206,16 +225,41 @@ class Map(object):
             bounds=self.bounds,
             size=self.size,
             viewport=self.viewport,
+            camera=self.camera,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=self.show_info,
             theme=self.theme,
+            title=self.title,
             is_static=self.is_static,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-    def _repr_html_(self):
         return self._htmlMap.html
+
+    def get_content(self):
+        has_legends = any(layer['legend'] for layer in self.layer_defs) or self.default_legend
+        has_widgets = any(len(layer['widgets']) != 0 for layer in self.layer_defs)
+
+        return {
+            'layers': self.layer_defs,
+            'bounds': self.bounds,
+            'size': self.size,
+            'viewport': self.viewport,
+            'camera': self.camera,
+            'basemap': self.basemap,
+            'basecolor': self.basecolor,
+            'token': self.token,
+            'default_legend': self.default_legend,
+            'show_info': self.show_info,
+            'has_legends': has_legends,
+            'has_widgets': has_widgets,
+            'theme': self.theme,
+            'title': self.title,
+            'is_static': self.is_static,
+            '_carto_vl_path': self._carto_vl_path,
+            '_airship_path': self._airship_path
+        }
 
     def publish(self, name, maps_api_key='default_public', credentials=None, password=None):
         """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
@@ -466,3 +510,30 @@ def _get_theme(theme, basemap):
         return 'dark'
 
     return theme
+
+
+def get_token(basemap):
+    if isinstance(basemap, dict):
+        return get_token(basemap)
+    return ''
+
+
+def get_basecolor(basemap):
+    if basemap is None:
+        return 'white'
+    elif isinstance(basemap, str):
+        if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+            return basemap  # Basemap is a color
+    return ''
+
+
+def get_basemap(basemap):
+    if isinstance(basemap, dict):
+        token = get_token(basemap)
+        if 'style' in basemap:
+            if not token and basemap.get('style').startswith('mapbox://'):
+                warn('A Mapbox style usually needs a token')
+            return basemap.get('style')
+        else:
+            raise ValueError('If basemap is a dict, it must have a `style` key')
+    return ''
