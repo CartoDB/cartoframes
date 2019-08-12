@@ -79,17 +79,17 @@ export function getContainerElement(mapIndex) {
   return document.getElementById(id);
 }
 
-export function setMapImage(canvas, $img, $container) {
-  const src = canvas.toDataURL();
-  $img.setAttribute('src', src);
-  $img.style.display = 'block';
-  $container.style.display = 'none';
-}
-
-export async function saveImage(mapIndex) {
+export function saveImage(mapIndex) {
   const $img = getImageElement(mapIndex);
   const $container = getContainerElement(mapIndex);
 
   html2canvas($container)
     .then((canvas) => setMapImage.bind(this, canvas, $img, $container));
+}
+
+export function setMapImage(canvas, $img, $container) {
+  const src = canvas.toDataURL();
+  $img.setAttribute('src', src);
+  $img.style.display = 'block';
+  $container.style.display = 'none';
 }

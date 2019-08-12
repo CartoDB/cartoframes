@@ -93,19 +93,19 @@ var init = (function () {
     return document.getElementById(id);
   }
 
-  function setMapImage(canvas, $img, $container) {
-    const src = canvas.toDataURL();
-    $img.setAttribute('src', src);
-    $img.style.display = 'block';
-    $container.style.display = 'none';
-  }
-
-  async function saveImage(mapIndex) {
+  function saveImage(mapIndex) {
     const $img = getImageElement(mapIndex);
     const $container = getContainerElement(mapIndex);
 
     html2canvas($container)
       .then((canvas) => setMapImage.bind(this, canvas, $img, $container));
+  }
+
+  function setMapImage(canvas, $img, $container) {
+    const src = canvas.toDataURL();
+    $img.setAttribute('src', src);
+    $img.style.display = 'block';
+    $container.style.display = 'none';
   }
 
   function createDefaultLegend(layers) {
@@ -514,21 +514,21 @@ var init = (function () {
     return name && variables[name] ? variables[name].value : null;
   }
 
-  async function setReady(settings) {
+  function setReady(settings) {
     try {
-      return settings.maps ? await initMaps(settings.maps) : await initMap(settings);
+      return settings.maps ? initMaps(settings.maps) : initMap(settings);
     } catch (e) {
       displayError(e);
     }
   }
 
-  async function initMaps(maps) {
-    return await maps.map(async function (mapSettings, mapIndex) {
-      return await initMap(mapSettings, mapIndex);
+  function initMaps(maps) {
+    return maps.map((mapSettings, mapIndex) => {
+      return initMap(mapSettings, mapIndex);
     });
   }
 
-  async function initMap(settings, mapIndex) {
+  function initMap(settings, mapIndex) {
     const basecolor = getBasecolorSettings(settings.basecolor);
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
@@ -542,10 +542,10 @@ var init = (function () {
       map.flyTo(settings.camera);
     }
 
-    return await initLayers(map, settings, mapIndex);
+    return initLayers(map, settings, mapIndex);
   }
 
-  async function initLayers(map, settings, mapIndex) {
+  function initLayers(map, settings, mapIndex) {
     const numLayers = settings.layers.length;
     const hasLegends = settings.has_legends;
     const isDefaultLegend = settings.default_legend;
@@ -565,7 +565,7 @@ var init = (function () {
     return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
   }
 
-  async function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
+  function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
     return new Promise((resolve) => {
       carto.on('loaded', mapLayers, onMapLayersLoaded.bind(
         this, isStatic, mapIndex, mapLayers, resolve)

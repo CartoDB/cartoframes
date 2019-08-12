@@ -5,21 +5,21 @@ import { setInteractivity } from './map/interactivity';
 import { updateViewport, getBasecolorSettings, saveImage } from './utils';
 import { initMapLayer, getInteractiveLayers } from './layers';
 
-export async function setReady(settings) {
+export function setReady(settings) {
   try {
-    return settings.maps ? await initMaps(settings.maps) : await initMap(settings);
+    return settings.maps ? initMaps(settings.maps) : initMap(settings);
   } catch (e) {
     displayError(e);
   }
 }
 
-export async function initMaps(maps) {
-  return await maps.map(async function (mapSettings, mapIndex) {
-    return await initMap(mapSettings, mapIndex);
+export function initMaps(maps) {
+  return maps.map((mapSettings, mapIndex) => {
+    return initMap(mapSettings, mapIndex);
   });
 }
 
-export async function initMap(settings, mapIndex) {
+export function initMap(settings, mapIndex) {
   const basecolor = getBasecolorSettings(settings.basecolor);
   const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
   const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
@@ -33,10 +33,10 @@ export async function initMap(settings, mapIndex) {
     map.flyTo(settings.camera);
   }
 
-  return await initLayers(map, settings, mapIndex);
+  return initLayers(map, settings, mapIndex);
 }
 
-export async function initLayers(map, settings, mapIndex) {
+export function initLayers(map, settings, mapIndex) {
   const numLayers = settings.layers.length;
   const hasLegends = settings.has_legends;
   const isDefaultLegend = settings.default_legend;
@@ -56,7 +56,7 @@ export async function initLayers(map, settings, mapIndex) {
   return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
 }
 
-export async function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
+export function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
   return new Promise((resolve) => {
     carto.on('loaded', mapLayers, onMapLayersLoaded.bind(
       this, isStatic, mapIndex, mapLayers, resolve)
