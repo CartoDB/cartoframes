@@ -31,9 +31,9 @@ class MapGrid(object):
                 Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account')),
                 Map(Layer('table_in_your_account')), Map(Layer('table_in_your_account'))
             ])
-        
+
         Display a 2x2 grid.
-    
+
         .. code::
 
             from cartoframes.auth import set_default_credentials
