@@ -104,12 +104,6 @@ class Dataset(object):
 
         raise ValueError('We can not detect the Dataset type')
 
-    def _init_saved_in_carto(self):
-        return self.is_remote()
-
-    def _set_strategy(self, strategy, data, credentials=None, schema=None):
-        self._strategy = strategy(data, credentials, schema)
-
     def _get_strategies_registry(self):
         return StrategiesRegistry()
 
