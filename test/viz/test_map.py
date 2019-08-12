@@ -173,6 +173,23 @@ class TestMapPublication(unittest.TestCase):
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
         self._context_mock = ContextMock()
 
+        self.test_geojson = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -3.1640625,
+                            42.032974332441405
+                        ]
+                    }
+                }
+            ]
+        }
+
         # Mock create_context method
         self.original_create_context = context.create_context
         context.create_context = lambda c: self._context_mock
@@ -205,8 +222,7 @@ class TestMapPublication(unittest.TestCase):
         self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
     def test_map_publish_unsync_fails(self):
-        local_data = {}
-        dataset = DatasetMock(local_data, credentials=self.credentials)
+        dataset = DatasetMock(self.test_geojson)
         map = MapMock(Layer(Source(dataset)))
 
         msg = 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
@@ -214,8 +230,7 @@ class TestMapPublication(unittest.TestCase):
             map.publish('test', credentials=self.credentials)
 
     def test_map_publish_unsync_sync_data_and_publish(self):
-        local_data = {}
-        dataset = DatasetMock(local_data, credentials=self.credentials)
+        dataset = DatasetMock(self.test_geojson)
         map = MapMock(Layer(Source(dataset)))
 
         map.sync_data(table_name='fake_table', credentials=self.credentials)
