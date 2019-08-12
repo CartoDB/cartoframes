@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 
 from ..constants import CLUSTER_OPERATIONS
 from ..layer import Layer
