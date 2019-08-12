@@ -1,6 +1,18 @@
 var init = (function () {
   'use strict';
 
+  const BASEMAPS = {
+    DarkMatter: carto.basemaps.darkmatter,
+    Voyager: carto.basemaps.voyager,
+    Positron: carto.basemaps.positron
+  };
+
+  const attributionControl = new mapboxgl.AttributionControl({
+    compact: false
+  });
+
+  const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
+
   function format(value) {
     if (Array.isArray(value)) {
       const [first, second] = value;
@@ -71,6 +83,31 @@ var init = (function () {
     };
   }
 
+  function getImageElement(mapIndex) {
+    const id = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+    return document.getElementById(id);
+  }
+
+  function getContainerElement(mapIndex) {
+    const id = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
+    return document.getElementById(id);
+  }
+
+  function setMapImage(canvas, $img, $container) {
+    const src = canvas.toDataURL();
+    $img.setAttribute('src', src);
+    $img.style.display = 'block';
+    $container.style.display = 'none';
+  }
+
+  async function saveImage(mapIndex) {
+    const $img = getImageElement(mapIndex);
+    const $container = getContainerElement(mapIndex);
+
+    html2canvas($container)
+      .then((canvas) => setMapImage.bind(this, canvas, $img, $container));
+  }
+
   function createDefaultLegend(layers) {
     const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
     defaultLegendContainer.style.display = 'none';
@@ -102,50 +139,6 @@ var init = (function () {
         opts
       );
     }
-  }
-
-  function renderWidget(widget, value) {
-    widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
-    
-    if (value && widget.element) {
-      widget.element.innerText = typeof value === 'number' ? format(value) : value;
-    }
-  }
-
-  function renderBridge(bridge, widget) {
-    widget.element = widget.element || document.querySelector(`#${widget.id}`);
-
-    switch (widget.type) {
-      case 'histogram':
-        bridge.histogram(widget.element, widget.value, widget.options);
-        break;
-      case 'category':
-        bridge.category(widget.element, widget.value, widget.options);
-        break;
-      case 'animation':
-        widget.options.propertyName = widget.prop;
-        bridge.animationControls(widget.element, widget.value, widget.options);
-        break;
-      case 'time-series':
-        widget.options.propertyName = widget.prop;
-        bridge.timeSeries(widget.element, widget.value, widget.options);
-        break;
-    }
-  }
-
-  function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
-    const bridge = new AsBridge.VL.Bridge({
-      carto: carto,
-      layer: mapLayer,
-      source: mapSource,
-      map: map
-    });
-
-    widgets
-      .filter((widget) => widget.has_bridge)
-      .forEach((widget) => renderBridge(bridge, widget));
-
-    bridge.build();
   }
 
   /** From https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js */
@@ -271,39 +264,6 @@ var init = (function () {
     stacktrace$.innerHTML = list.join('\n');
   }
 
-  function SourceFactory() {
-    const sourceTypes = { GeoJSON, Query, MVT };
-
-    this.createSource = (layer) => {
-      return sourceTypes[layer.type](layer);
-    };
-  }
-
-  function GeoJSON(layer) {
-    return new carto.source.GeoJSON(_decodeJSONQuery(layer.query));
-  }
-
-  function Query(layer) {
-    const auth = {
-      username: layer.credentials.username,
-      apiKey: layer.credentials.api_key || 'default_public'
-    };
-
-    const config = {
-      serverURL: layer.credentials.base_url || `https://${layer.credentials.username}.carto.com/`
-    };
-
-    return new carto.source.SQL(layer.query, auth, config);
-  }
-
-  function MVT(layer) {
-    return new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata));
-  }
-
-  function _decodeJSONQuery(query) {
-    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')));
-  }
-
   function resetPopupClick(interactivity) {
     interactivity.off('featureClick');
   }
@@ -400,41 +360,166 @@ var init = (function () {
     return { clickAttrs, hoverAttrs };
   }
 
-  const BASEMAPS = {
-    DarkMatter: carto.basemaps.darkmatter,
-    Voyager: carto.basemaps.voyager,
-    Positron: carto.basemaps.positron
-  };
-
-  const attributionControl = new mapboxgl.AttributionControl({
-    compact: false
-  });
-
-  const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
-
-  async function setReady(settings) {
-    try {
-      const maps = settings.maps ?
-        await initMaps(settings.maps)
-        : await initMap(settings);
-    } catch (e) {
-      displayError(e);
+  function renderWidget(widget, value) {
+    widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
+    
+    if (value && widget.element) {
+      widget.element.innerText = typeof value === 'number' ? format(value) : value;
     }
   }
 
-  async function saveImage(mapIndex) {
-    const img = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
-    const container = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
-    const $img = document.getElementById(img);
-    const $container = document.getElementById(container);
+  function renderBridge(bridge, widget) {
+    widget.element = widget.element || document.querySelector(`#${widget.id}`);
 
-    html2canvas($container)
-      .then((canvas) => {
-        const src = canvas.toDataURL();
-        $img.setAttribute('src', src);
-        $img.style.display = 'block';
-        $container.style.display = 'none';
+    switch (widget.type) {
+      case 'histogram':
+        bridge.histogram(widget.element, widget.value, widget.options);
+        break;
+      case 'category':
+        bridge.category(widget.element, widget.value, widget.options);
+        break;
+      case 'animation':
+        widget.options.propertyName = widget.prop;
+        bridge.animationControls(widget.element, widget.value, widget.options);
+        break;
+      case 'time-series':
+        widget.options.propertyName = widget.prop;
+        bridge.timeSeries(widget.element, widget.value, widget.options);
+        break;
+    }
+  }
+
+  function bridgeLayerWidgets(map, mapLayer, mapSource, widgets) {
+    const bridge = new AsBridge.VL.Bridge({
+      carto: carto,
+      layer: mapLayer,
+      source: mapSource,
+      map: map
+    });
+
+    widgets
+      .filter((widget) => widget.has_bridge)
+      .forEach((widget) => renderBridge(bridge, widget));
+
+    bridge.build();
+  }
+
+  function SourceFactory() {
+    const sourceTypes = { GeoJSON, Query, MVT };
+
+    this.createSource = (layer) => {
+      return sourceTypes[layer.type](layer);
+    };
+  }
+
+  function GeoJSON(layer) {
+    return new carto.source.GeoJSON(_decodeJSONQuery(layer.query));
+  }
+
+  function Query(layer) {
+    const auth = {
+      username: layer.credentials.username,
+      apiKey: layer.credentials.api_key || 'default_public'
+    };
+
+    const config = {
+      serverURL: layer.credentials.base_url || `https://${layer.credentials.username}.carto.com/`
+    };
+
+    return new carto.source.SQL(layer.query, auth, config);
+  }
+
+  function MVT(layer) {
+    return new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata));
+  }
+
+  function _decodeJSONQuery(query) {
+    return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')));
+  }
+
+  const factory = new SourceFactory();
+
+  function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapIndex) {
+    const mapSource = factory.createSource(layer);
+    const mapViz = new carto.Viz(layer.viz);
+    const mapLayer = new carto.Layer(`layer${layerIndex}`, mapSource, mapViz);
+    const mapLayerIndex = numLayers - layerIndex - 1;
+
+    try {
+      mapLayer._updateLayer.catch(displayError);
+    } catch (e) {
+      throw e;
+    }
+
+    setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex);
+    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
+
+    mapLayer.addTo(map);
+
+    return mapLayer;
+  }
+
+  function getInteractiveLayers(layers, mapLayers) {
+    const interativeLayers = [];
+    const interactiveMapLayers = [];
+
+    layers.forEach((layer, index) => {
+      if (layer.interactivity) {
+        interativeLayers.push(layer);
+        interactiveMapLayers.push(mapLayers[index]);
+      }
+    });
+
+    return { interativeLayers, interactiveMapLayers };
+  }
+
+  function setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex) {
+    if (hasLegends && layer.legend) {
+      createLegend(mapLayer, layer.legend, mapLayerIndex, mapIndex);
+    }
+  }
+
+  function setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource) {
+    if (layer.widgets.length) {
+      initLayerWidgets(layer.widgets, mapLayerIndex);
+      updateLayerWidgets(layer.widgets, mapLayer);
+      bridgeLayerWidgets(map, mapLayer, mapSource, layer.widgets);
+    }
+  }
+
+  function initLayerWidgets(widgets, mapLayerIndex) {
+    widgets.forEach((widget, widgetIndex) => {
+      const id = `layer${mapLayerIndex}_widget${widgetIndex}`;
+      widget.id = id;
+    });
+  }
+
+  function updateLayerWidgets(widgets, mapLayer) {
+    mapLayer.on('updated', () => renderLayerWidgets(widgets, mapLayer));
+  }
+
+  function renderLayerWidgets(widgets, mapLayer) {
+    const variables = mapLayer.viz.variables;
+
+    widgets
+      .filter((widget) => !widget.has_bridge)
+      .forEach((widget) => {
+        const name = widget.variable_name;
+        const value = getWidgetValue(name, variables);
+        renderWidget(widget, value);
       });
+  }
+
+  function getWidgetValue(name, variables) {
+    return name && variables[name] ? variables[name].value : null;
+  }
+
+  async function setReady(settings) {
+    try {
+      return settings.maps ? await initMaps(settings.maps) : await initMap(settings);
+    } catch (e) {
+      displayError(e);
+    }
   }
 
   async function initMaps(maps) {
@@ -461,93 +546,82 @@ var init = (function () {
   }
 
   async function initLayers(map, settings, mapIndex) {
-    const mapLayers = [];
-    const interactiveLayers = [];
-    const interactiveMapLayers = [];
-    const factory = new SourceFactory();
+    const numLayers = settings.layers.length;
+    const hasLegends = settings.has_legends;
+    const isDefaultLegend = settings.default_legend;
+    const isStatic = settings.is_static;
+    const layers = settings.layers;
+    const mapLayers = getMapLayers(
+      layers,
+      numLayers,
+      hasLegends,
+      map,
+      mapIndex
+    );
 
-    settings.layers.forEach((layer, index) => {
-      const mapSource = factory.createSource(layer);
-      const mapViz = new carto.Viz(layer.viz);
-      const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
+    createLegend$1(isDefaultLegend, mapLayers);
+    setInteractiveLayers(map, layers, mapLayers);
 
-      mapLayers.push(mapLayer);
+    return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
+  }
 
-      try {
-        mapLayer._updateLayer.catch(displayError);
-      } catch (e) {
-        throw e;
-      }
-
-      mapLayer.addTo(map);
-
-      if (layer.interactivity) {
-        interactiveLayers.push(layer);
-        interactiveMapLayers.push(mapLayer);
-      }
-
-      if (settings.has_legends && layer.legend) {
-        createLegend(mapLayer, layer.legend, settings.layers.length - index - 1, mapIndex);
-      }
-
-      if (layer.widgets.length) {
-        layer.widgets.forEach((widget, widgetIndex) => {
-          const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
-          widget.id = id;
-        });
-
-        mapLayer.on('updated', () => {
-          layer.widgets
-            .filter((widget) => !widget.has_bridge)
-            .forEach((widget) => {
-              const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name] ?
-                mapLayer.viz.variables[widget.variable_name].value
-                : null;
-
-              renderWidget(widget, value);
-            });
-        });
-
-        bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
-      }
-    });
-
-    if (interactiveLayers.length > 0) {
-      setInteractivity(map, interactiveLayers, interactiveMapLayers);
-    }
-
-    if (settings.default_legend) {
-      createDefaultLegend(mapLayers);
-    }
-
+  async function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
     return new Promise((resolve) => {
-      carto.on('loaded', mapLayers, () => {
-        if (settings.is_static) {
-          saveImage(mapIndex);
-        }
-
-        resolve(mapLayers);
-      });
+      carto.on('loaded', mapLayers, onMapLayersLoaded.bind(
+        this, isStatic, mapIndex, mapLayers, resolve)
+      );
     });
   }
 
-  function createMap(container, basemapStyle, bounds, accessToken) {
-    if (accessToken) {
-      mapboxgl.accessToken = accessToken;
+  function onMapLayersLoaded(isStatic, mapIndex, mapLayers, resolve) {
+    if (isStatic) {
+      saveImage(mapIndex);
     }
 
-    const map = new mapboxgl.Map({
-      container,
-      style: basemapStyle,
-      zoom: 9,
-      dragRotate: false,
-      attributionControl: false
+    resolve(mapLayers);
+  }
+
+  function getMapLayers(layers, numLayers, hasLegends, map, mapIndex) {
+    return layers.map((layer, layerIndex) => {
+      return initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapIndex);
     });
+  }
+
+  function setInteractiveLayers(map, layers, mapLayers) {
+    const interactiveLayers = getInteractiveLayers(layers, mapLayers);
+    
+    if (interactiveLayers.length > 0) {
+      setInteractivity(map, interactiveLayers, interactiveMapLayers);
+    }
+  }
+
+  function createLegend$1(isDefaultLegend, mapLayers) {
+    if (isDefaultLegend) {
+      createDefaultLegend(mapLayers);
+    }
+  }
+
+  function createMap(container, basemapStyle, bounds, accessToken) {
+    const map = createMapboxGLMap(container, basemapStyle, accessToken);
 
     map.addControl(attributionControl);
     map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
 
     return map;
+  }
+
+  function createMapboxGLMap(container, style, accessToken) {
+    if (accessToken) {
+      mapboxgl.accessToken = accessToken;
+    }
+
+    return new mapboxgl.Map({
+      container,
+      style,
+      zoom: 9,
+      dragRotate: false,
+      attributionControl: false
+    });
   }
 
   function init(settings) {

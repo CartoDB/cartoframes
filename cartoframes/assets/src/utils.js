@@ -68,3 +68,28 @@ export function getBasecolorSettings(basecolor) {
     }]
   };
 }
+
+export function getImageElement(mapIndex) {
+  const id = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
+  return document.getElementById(id);
+}
+
+export function getContainerElement(mapIndex) {
+  const id = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
+  return document.getElementById(id);
+}
+
+export function setMapImage(canvas, $img, $container) {
+  const src = canvas.toDataURL();
+  $img.setAttribute('src', src);
+  $img.style.display = 'block';
+  $container.style.display = 'none';
+}
+
+export async function saveImage(mapIndex) {
+  const $img = getImageElement(mapIndex);
+  const $container = getContainerElement(mapIndex);
+
+  html2canvas($container)
+    .then((canvas) => setMapImage.bind(this, canvas, $img, $container));
+}

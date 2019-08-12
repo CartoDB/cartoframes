@@ -1,45 +1,16 @@
-import * as legends from './legends';
-import * as widgets from './widgets';
+import { BASEMAPS, attributionControl, FIT_BOUNDS_SETTINGS } from './constants';
+import { createDefaultLegend } from './legends';
 import { displayError } from './errors/display';
-import SourceFactory from './map/SourceFactory';
 import { setInteractivity } from './map/interactivity';
-import { updateViewport, getBasecolorSettings } from './utils';
-
-const BASEMAPS = {
-  DarkMatter: carto.basemaps.darkmatter,
-  Voyager: carto.basemaps.voyager,
-  Positron: carto.basemaps.positron
-};
-
-const attributionControl = new mapboxgl.AttributionControl({
-  compact: false
-});
-
-const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
+import { updateViewport, getBasecolorSettings, saveImage } from './utils';
+import { initMapLayer, getInteractiveLayers } from './layers';
 
 export async function setReady(settings) {
   try {
-    const maps = settings.maps ?
-      await initMaps(settings.maps)
-      : await initMap(settings);
+    return settings.maps ? await initMaps(settings.maps) : await initMap(settings);
   } catch (e) {
     displayError(e);
   }
-}
-
-export async function saveImage(mapIndex) {
-  const img = mapIndex !== undefined ? `map-image-${mapIndex}` : 'map-image';
-  const container = mapIndex !== undefined ? `main-container-${mapIndex}` : 'main-container';
-  const $img = document.getElementById(img);
-  const $container = document.getElementById(container);
-
-  html2canvas($container)
-    .then((canvas) => {
-      const src = canvas.toDataURL();
-      $img.setAttribute('src', src);
-      $img.style.display = 'block';
-      $container.style.display = 'none';
-    });
 }
 
 export async function initMaps(maps) {
@@ -65,92 +36,81 @@ export async function initMap(settings, mapIndex) {
   return await initLayers(map, settings, mapIndex);
 }
 
-async function initLayers(map, settings, mapIndex) {
-  const mapLayers = [];
-  const interactiveLayers = [];
-  const interactiveMapLayers = [];
-  const factory = new SourceFactory();
+export async function initLayers(map, settings, mapIndex) {
+  const numLayers = settings.layers.length;
+  const hasLegends = settings.has_legends;
+  const isDefaultLegend = settings.default_legend;
+  const isStatic = settings.is_static;
+  const layers = settings.layers;
+  const mapLayers = getMapLayers(
+    layers,
+    numLayers,
+    hasLegends,
+    map,
+    mapIndex
+  );
 
-  settings.layers.forEach((layer, index) => {
-    const mapSource = factory.createSource(layer);
-    const mapViz = new carto.Viz(layer.viz);
-    const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
+  createLegend(isDefaultLegend, mapLayers);
+  setInteractiveLayers(map, layers, mapLayers);
 
-    mapLayers.push(mapLayer);
+  return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
+}
 
-    try {
-      mapLayer._updateLayer.catch(displayError);
-    } catch (e) {
-      throw e;
-    }
-
-    mapLayer.addTo(map);
-
-    if (layer.interactivity) {
-      interactiveLayers.push(layer);
-      interactiveMapLayers.push(mapLayer);
-    }
-
-    if (settings.has_legends && layer.legend) {
-      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1, mapIndex);
-    }
-
-    if (layer.widgets.length) {
-      layer.widgets.forEach((widget, widgetIndex) => {
-        const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
-        widget.id = id;
-      });
-
-      mapLayer.on('updated', () => {
-        layer.widgets
-          .filter((widget) => !widget.has_bridge)
-          .forEach((widget) => {
-            const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name] ?
-              mapLayer.viz.variables[widget.variable_name].value
-              : null;
-
-            widgets.renderWidget(widget, value);
-          });
-      });
-
-      widgets.bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
-    }
-  });
-
-  if (interactiveLayers.length > 0) {
-    setInteractivity(map, interactiveLayers, interactiveMapLayers);
-  }
-
-  if (settings.default_legend) {
-    legends.createDefaultLegend(mapLayers);
-  }
-
+export async function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
   return new Promise((resolve) => {
-    carto.on('loaded', mapLayers, () => {
-      if (settings.is_static) {
-        saveImage(mapIndex);
-      }
-
-      resolve(mapLayers);
-    });
+    carto.on('loaded', mapLayers, onMapLayersLoaded.bind(
+      this, isStatic, mapIndex, mapLayers, resolve)
+    );
   });
 }
 
-function createMap(container, basemapStyle, bounds, accessToken) {
-  if (accessToken) {
-    mapboxgl.accessToken = accessToken;
+export function onMapLayersLoaded(isStatic, mapIndex, mapLayers, resolve) {
+  if (isStatic) {
+    saveImage(mapIndex);
   }
 
-  const map = new mapboxgl.Map({
-    container,
-    style: basemapStyle,
-    zoom: 9,
-    dragRotate: false,
-    attributionControl: false
+  resolve(mapLayers);
+}
+
+export function getMapLayers(layers, numLayers, hasLegends, map, mapIndex) {
+  return layers.map((layer, layerIndex) => {
+    return initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapIndex);
   });
+}
+
+export function setInteractiveLayers(map, layers, mapLayers) {
+  const interactiveLayers = getInteractiveLayers(layers, mapLayers);
+  
+  if (interactiveLayers.length > 0) {
+    setInteractivity(map, interactiveLayers, interactiveMapLayers);
+  }
+}
+
+export function createLegend(isDefaultLegend, mapLayers) {
+  if (isDefaultLegend) {
+    createDefaultLegend(mapLayers);
+  }
+}
+
+export function createMap(container, basemapStyle, bounds, accessToken) {
+  const map = createMapboxGLMap(container, basemapStyle, accessToken);
 
   map.addControl(attributionControl);
   map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
 
   return map;
+}
+
+export function createMapboxGLMap(container, style, accessToken) {
+  if (accessToken) {
+    mapboxgl.accessToken = accessToken;
+  }
+
+  return new mapboxgl.Map({
+    container,
+    style,
+    zoom: 9,
+    dragRotate: false,
+    attributionControl: false
+  });
 }
