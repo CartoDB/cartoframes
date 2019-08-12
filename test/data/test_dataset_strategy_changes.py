@@ -71,3 +71,25 @@ class TestDatasetStrategyChanges(unittest.TestCase):
         dataset = DatasetMock(geojson)
         self.assertTrue(isinstance(dataset._strategy, DataFrameDataset))
         self.assertTrue(dataset.is_local())
+
+    def test_local_dataset_upload_returns_table_dataset(self):
+        gdf = load_geojson(self.test_geojson)
+        local_dataset = DatasetMock(gdf)
+        table_dataset = local_dataset.upload(table_name='fake_table', credentials=self.credentials)
+        self.assertTrue(isinstance(local_dataset._strategy, DataFrameDataset))
+        self.assertTrue(isinstance(table_dataset._strategy, TableDataset))
+
+    def test_table_dataset_download_returns_dataframe(self):
+        table_dataset = DatasetMock('fake_table', credentials=self.credentials)
+        df = table_dataset.download()
+        self.assertTrue(isinstance(df, pd.DataFrame))
+        self.assertTrue(df.equals(table_dataset.dataframe))
+        self.assertTrue(isinstance(table_dataset._strategy, TableDataset))
+
+    def test_query_dataset_download_returns_dataframe(self):
+        query = 'SELECT * FROM fake_table'
+        query_dataset = DatasetMock(query, credentials=self.credentials)
+        df = query_dataset.download()
+        self.assertTrue(isinstance(df, pd.DataFrame))
+        self.assertTrue(df.equals(query_dataset.dataframe))
+        self.assertTrue(isinstance(query_dataset._strategy, QueryDataset))
