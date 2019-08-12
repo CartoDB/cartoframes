@@ -451,7 +451,7 @@ var init = (function () {
       throw e;
     }
 
-    setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex);
+    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
     setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     mapLayer.addTo(map);
@@ -460,20 +460,20 @@ var init = (function () {
   }
 
   function getInteractiveLayers(layers, mapLayers) {
-    const interativeLayers = [];
+    const interactiveLayers = [];
     const interactiveMapLayers = [];
 
     layers.forEach((layer, index) => {
       if (layer.interactivity) {
-        interativeLayers.push(layer);
+        interactiveLayers.push(layer);
         interactiveMapLayers.push(mapLayers[index]);
       }
     });
 
-    return { interativeLayers, interactiveMapLayers };
+    return { interactiveLayers, interactiveMapLayers };
   }
 
-  function setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex) {
+  function setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends) {
     if (hasLegends && layer.legend) {
       createLegend(mapLayer, layer.legend, mapLayerIndex, mapIndex);
     }
@@ -588,9 +588,9 @@ var init = (function () {
   }
 
   function setInteractiveLayers(map, layers, mapLayers) {
-    const interactiveLayers = getInteractiveLayers(layers, mapLayers);
-    
-    if (interactiveLayers.length > 0) {
+    const { interactiveLayers, interactiveMapLayers } = getInteractiveLayers(layers, mapLayers);
+
+    if (interactiveLayers && interactiveLayers.length > 0) {
       setInteractivity(map, interactiveLayers, interactiveMapLayers);
     }
   }

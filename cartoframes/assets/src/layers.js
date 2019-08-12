@@ -17,7 +17,7 @@ export function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapI
     throw e;
   }
 
-  setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex);
+  setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
   setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
   mapLayer.addTo(map);
@@ -26,17 +26,17 @@ export function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapI
 }
 
 export function getInteractiveLayers(layers, mapLayers) {
-  const interativeLayers = [];
+  const interactiveLayers = [];
   const interactiveMapLayers = [];
 
   layers.forEach((layer, index) => {
     if (layer.interactivity) {
-      interativeLayers.push(layer);
+      interactiveLayers.push(layer);
       interactiveMapLayers.push(mapLayers[index]);
     }
   });
 
-  return { interativeLayers, interactiveMapLayers };
+  return { interactiveLayers, interactiveMapLayers };
 }
 
 
@@ -46,7 +46,7 @@ export function setLayerInteractivity(layer, mapLayer) {
     : { interactiveLayer: null, interactiveMapLayer: null };
 }
 
-export function setLayerLegend(layer, mapLayerIndex, hasLegends, mapIndex) {
+export function setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends) {
   if (hasLegends && layer.legend) {
     createLegend(mapLayer, layer.legend, mapLayerIndex, mapIndex);
   }

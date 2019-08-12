@@ -79,9 +79,9 @@ export function getMapLayers(layers, numLayers, hasLegends, map, mapIndex) {
 }
 
 export function setInteractiveLayers(map, layers, mapLayers) {
-  const interactiveLayers = getInteractiveLayers(layers, mapLayers);
-  
-  if (interactiveLayers.length > 0) {
+  const { interactiveLayers, interactiveMapLayers } = getInteractiveLayers(layers, mapLayers);
+
+  if (interactiveLayers && interactiveLayers.length > 0) {
     setInteractivity(map, interactiveLayers, interactiveMapLayers);
   }
 }
