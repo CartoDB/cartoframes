@@ -62,9 +62,11 @@
 <script>
   {% include 'utils/base64.js.j2' %}
 </script>
-<script>
-  {% include 'utils/html2canvas.js.j2' %}
-</script>
+{% if is_static %}
+  <script>
+    {% include 'utils/html2canvas.js.j2' %}
+  </script>
+{% endif %}
 <script>
   {% include 'src/bundle.js' %}
 </script>

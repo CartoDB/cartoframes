@@ -80,16 +80,16 @@ export function getContainerElement(mapIndex) {
 }
 
 export function saveImage(mapIndex) {
-  const $img = getImageElement(mapIndex);
-  const $container = getContainerElement(mapIndex);
+  const img = getImageElement(mapIndex);
+  const container = getContainerElement(mapIndex);
 
-  html2canvas($container)
-    .then((canvas) => setMapImage.bind(this, canvas, $img, $container));
+  html2canvas(container)
+    .then((canvas) => setMapImage(canvas, img, container));
 }
 
-export function setMapImage(canvas, $img, $container) {
+export function setMapImage(canvas, img, container) {
   const src = canvas.toDataURL();
-  $img.setAttribute('src', src);
-  $img.style.display = 'block';
-  $container.style.display = 'none';
+  img.setAttribute('src', src);
+  img.style.display = 'block';
+  container.style.display = 'none';
 }
