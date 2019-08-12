@@ -277,7 +277,8 @@ class Dataset(object):
             self._strategy.schema = schema
 
         self._strategy.upload(if_exists, with_lnglat)
-        return self
+
+        return Dataset(self._strategy.table_name, self._strategy.credentials, self._strategy.schema)
 
     def delete(self):
         """Delete table on CARTO account associated with a Dataset instance
