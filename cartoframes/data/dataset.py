@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from ..auth import get_default_credentials
 from .registry.strategies_registry import StrategiesRegistry
 from .registry.dataframe_dataset import DataFrameDataset
 from .registry.query_dataset import QueryDataset
@@ -97,7 +98,7 @@ class Dataset(object):
         self._is_saved_in_carto = self._init_saved_in_carto()
 
     def _init_strategy(self, data, credentials=None, schema=None):
-        credentials = credentials or _get_default_credentials()
+        credentials = credentials or get_default_credentials()
         for strategy in self._registry.get_strategies():
             if strategy.can_work_with(data):
                 return strategy.create(data, credentials, schema)
@@ -361,8 +362,3 @@ class Dataset(object):
                                  'to save your data in CARTO.')
 
         return self._strategy.get_table_names()
-
-
-def _get_default_credentials():
-    from ..auth import _default_credentials
-    return _default_credentials

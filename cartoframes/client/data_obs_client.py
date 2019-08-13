@@ -11,6 +11,7 @@ from carto.exceptions import CartoException
 
 from .. import utils
 from .. import context
+from ..auth import get_default_credentials
 from ..data.dataset import Dataset
 
 
@@ -31,10 +32,10 @@ class DataObsClient(object):
           instance can be used in place of a `username`|`base_url` / `api_key` combination.
     """
 
-    def __init__(self, credentials):
+    def __init__(self, credentials=None):
         self._verbose = 0
-        self._credentials = credentials
-        self._context = context.create_context(credentials)
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -79,10 +80,11 @@ class DataObsClient(object):
 
             .. code:: python
 
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.auth import Credentials
                 from cartoframes.client import DataObsClient
-                set_default_credentials('user name', 'api key')
-                do = DataObsClient()
+                credentials = Credentials('user name', 'api key')
+                # Note: default credentials will be supported in a future release
+                do = DataObsClient(credentials)
                 # will return Dataset with columns `the_geom` and `geom_ref`
                 tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
@@ -481,7 +483,7 @@ class DataObsClient(object):
             .. code::
 
                 from cartoframes.auth import Credentials
-                from cartoframes.data import DataObsClient
+                from cartoframes.client import DataObsClient
                 creds = Credentials('user name', 'api key')
                 do = DataObsClient(creds)
                 median_income = do.discovery(

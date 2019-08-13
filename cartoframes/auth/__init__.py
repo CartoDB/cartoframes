@@ -121,11 +121,16 @@ def set_default_credentials(
         _default_credentials.session = session
 
 
+def get_default_credentials():
+    return _default_credentials
+
+
 def _is_url(text):
     return re.match(r'^https?://.*$', text)
 
 
 __all__ = [
     'Credentials',
-    'set_default_credentials'
+    'set_default_credentials',
+    'get_default_credentials'
 ]

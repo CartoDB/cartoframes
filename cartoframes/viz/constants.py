@@ -92,3 +92,5 @@ CLUSTER_OPERATIONS = {
 }
 
 THEMES = ['dark', 'light']
+
+DEFAULT_GRID_M_SIZE = 1

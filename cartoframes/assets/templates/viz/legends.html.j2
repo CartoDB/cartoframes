@@ -15,7 +15,7 @@
         heading="{{layer.legend.title}}"
         description="{{layer.legend.description}}"
       >
-        {{ createLegend(layer.legend, 'layer%d_legend' % loop.index0) }}
+        {{ createLegend(layer.legend, 'layer%d_map%d_legend' | format(loop.index0, 0)) }}
         {% if layer.legend.footer %}
           <span slot="footer">{{layer.legend.footer}}</span>
         {% endif %}

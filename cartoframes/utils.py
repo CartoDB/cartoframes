@@ -292,3 +292,10 @@ def is_table_name(data):
     # avoid circular dependecies
     from .data.columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
+
+
+def get_center(center):
+    if 'lng' not in center or 'lat' not in center:
+        return None
+
+    return [center.get('lng'), center.get('lat')]

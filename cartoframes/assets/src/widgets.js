@@ -29,7 +29,7 @@ export function renderBridge(bridge, widget) {
   }
 }
 
-export function bridgeLayerWidgets(carto, mapLayer, mapSource, map, widgets) {
+export function bridgeLayerWidgets(map, mapLayer, mapSource, widgets) {
   const bridge = new AsBridge.VL.Bridge({
     carto: carto,
     layer: mapLayer,

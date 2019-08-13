@@ -1,4 +1,4 @@
--e git+https://github.com/cartodb/cartoframes.git@develop#egg=cartoframes
+cartoframes==1.0b2
 # Additional dependencies from examples
 matplotlib
 pandas
@@ -6,4 +6,3 @@ geopandas
 dask
 # needed for pandas.read_excel in data obs notebook
 xlrd
-

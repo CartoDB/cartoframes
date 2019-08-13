@@ -1,129 +1,116 @@
-import * as legends from './legends';
-import * as widgets from './widgets';
+import { BASEMAPS, attributionControl, FIT_BOUNDS_SETTINGS } from './constants';
+import { createDefaultLegend } from './legends';
 import { displayError } from './errors/display';
-import SourceFactory from './map/SourceFactory';
 import { setInteractivity } from './map/interactivity';
+import { updateViewport, getBasecolorSettings, saveImage } from './utils';
+import { initMapLayer, getInteractiveLayers } from './layers';
 
-export function setReady (settings) {
+export function setReady(settings) {
   try {
-    onReady(settings);
+    return settings.maps ? initMaps(settings.maps) : initMap(settings);
   } catch (e) {
     displayError(e);
   }
 }
 
-export function onReady(settings) {
-  const BASEMAPS = {
-    DarkMatter: carto.basemaps.darkmatter,
-    Voyager: carto.basemaps.voyager,
-    Positron: carto.basemaps.positron
-  };
-
-  const BASECOLOR = {
-    'version': 8,
-    'sources': {},
-    'layers': [{
-        'id': 'background',
-        'type': 'background',
-        'paint': {
-            'background-color': settings.basecolor
-        }
-    }]
-  };
-
-  if (settings.mapboxtoken) {
-    mapboxgl.accessToken = settings.mapboxtoken;
-  }
-
-  const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || BASECOLOR;
-
-  const map = new mapboxgl.Map({
-    container: 'map',
-    style: basemapStyle,
-    zoom: 9,
-    dragRotate: false
+export function initMaps(maps) {
+  return maps.map((mapSettings, mapIndex) => {
+    return initMap(mapSettings, mapIndex);
   });
+}
 
-  map.fitBounds(settings.bounds, { animate: false, padding: 50, maxZoom: 14 });
+export function initMap(settings, mapIndex) {
+  const basecolor = getBasecolorSettings(settings.basecolor);
+  const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
+  const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
+  const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
 
   if (settings.show_info) {
-    const updateMapInfo = _updateMapInfo.bind(this, map);
-
-    map.on('zoom', updateMapInfo);
-    map.on('move', updateMapInfo);
+    updateViewport(map);
   }
 
   if (settings.camera) {
     map.flyTo(settings.camera);
   }
 
-  const mapLayers = [];
-  const interactiveLayers = [];
-  const interactiveMapLayers = [];
-  const factory = new SourceFactory();
+  return initLayers(map, settings, mapIndex);
+}
 
-  settings.layers.forEach((layer, index) => {
-    const mapSource = factory.createSource(layer);
-    const mapViz = new carto.Viz(layer.viz);
-    const mapLayer = new carto.Layer(`layer${index}`, mapSource, mapViz);
+export function initLayers(map, settings, mapIndex) {
+  const numLayers = settings.layers.length;
+  const hasLegends = settings.has_legends;
+  const isDefaultLegend = settings.default_legend;
+  const isStatic = settings.is_static;
+  const layers = settings.layers;
+  const mapLayers = getMapLayers(
+    layers,
+    numLayers,
+    hasLegends,
+    map,
+    mapIndex
+  );
 
-    mapLayers.push(mapLayer);
+  createLegend(isDefaultLegend, mapLayers);
+  setInteractiveLayers(map, layers, mapLayers);
 
-    try {
-      mapLayer._updateLayer.catch(displayError);
-    } catch (err) {
-      throw err;
-    }
+  return waitForMapLayersLoad(isStatic, mapIndex, mapLayers);
+}
 
-    mapLayer.addTo(map);
-
-    if (layer.interactivity) {
-      interactiveLayers.push(layer);
-      interactiveMapLayers.push(mapLayer);
-    }
-
-    if (settings.has_legends && layer.legend) {
-      legends.createLegend(mapLayer, layer.legend, settings.layers.length - index - 1);
-    }
-
-    if (layer.widgets.length) {
-      layer.widgets.forEach((widget, widgetIndex) => {
-        const id = `layer${settings.layers.length - index - 1}_widget${widgetIndex}`;
-        widget.id = id;
-      });
-
-      mapLayer.on('updated', () => {
-        layer.widgets
-          .filter((widget) => !widget.has_bridge)
-          .forEach((widget) => {
-            const value = widget.variable_name && mapLayer.viz.variables[widget.variable_name] ?
-              mapLayer.viz.variables[widget.variable_name].value
-              : null;
-
-            widgets.renderWidget(widget, value);
-          });
-      });
-
-      widgets.bridgeLayerWidgets(carto, mapLayer, mapSource, map, layer.widgets);
-    }
+export function waitForMapLayersLoad(isStatic, mapIndex, mapLayers) {
+  return new Promise((resolve) => {
+    carto.on('loaded', mapLayers, onMapLayersLoaded.bind(
+      this, isStatic, mapIndex, mapLayers, resolve)
+    );
   });
+}
 
-  if (interactiveLayers.length > 0) {
-    setInteractivity(map, interactiveLayers, interactiveMapLayers);
+export function onMapLayersLoaded(isStatic, mapIndex, mapLayers, resolve) {
+  if (isStatic) {
+    saveImage(mapIndex);
   }
 
-  if (settings.default_legend) {
-    legends.createDefaultLegend(mapLayers);
+  resolve(mapLayers);
+}
+
+export function getMapLayers(layers, numLayers, hasLegends, map, mapIndex) {
+  return layers.map((layer, layerIndex) => {
+    return initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapIndex);
+  });
+}
+
+export function setInteractiveLayers(map, layers, mapLayers) {
+  const { interactiveLayers, interactiveMapLayers } = getInteractiveLayers(layers, mapLayers);
+
+  if (interactiveLayers && interactiveLayers.length > 0) {
+    setInteractivity(map, interactiveLayers, interactiveMapLayers);
   }
 }
 
-function _updateMapInfo(map) {
-  const mapInfo$ = document.getElementById('map-info');
+export function createLegend(isDefaultLegend, mapLayers) {
+  if (isDefaultLegend) {
+    createDefaultLegend(mapLayers);
+  }
+}
 
-  const center = map.getCenter();
-  const lat = center.lat.toFixed(6);
-  const lng = center.lng.toFixed(6);
-  const zoom = map.getZoom().toFixed(2);
+export function createMap(container, basemapStyle, bounds, accessToken) {
+  const map = createMapboxGLMap(container, basemapStyle, accessToken);
 
-  mapInfo$.innerText = `viewport={'zoom': ${zoom}, 'lat': ${lat}, 'lng': ${lng}}`;
+  map.addControl(attributionControl);
+  map.fitBounds(bounds, FIT_BOUNDS_SETTINGS);
+
+  return map;
+}
+
+export function createMapboxGLMap(container, style, accessToken) {
+  if (accessToken) {
+    mapboxgl.accessToken = accessToken;
+  }
+
+  return new mapboxgl.Map({
+    container,
+    style,
+    zoom: 9,
+    dragRotate: false,
+    attributionControl: false
+  });
 }
