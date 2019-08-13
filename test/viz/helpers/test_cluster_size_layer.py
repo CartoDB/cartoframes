@@ -50,7 +50,7 @@ class TestClusterSizeLayerHelper(unittest.TestCase):
         self.assertEqual(layer.legend._title, 'count')
         self.assertEqual(layer.legend._description, '')
         self.assertEqual(layer.legend._footer, '')
-    
+
     def test_valid_operation(self):
         """cluster_size_layer should raise an error if the operation is invalid"""
 
