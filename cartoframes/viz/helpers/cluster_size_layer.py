@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 
+from carto.exceptions import CartoException
 from ..constants import CLUSTER_OPERATIONS
 from ..layer import Layer
 
@@ -15,6 +16,8 @@ def cluster_size_layer(
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
+        operation (str): Cluster operation, defaults to 'count'. Other options
+          available are 'avg', 'min', 'max', and 'sum'.
         value (str): Column to symbolize by.
         title (str, optional): Title of legend.
         size (str, optiona): Min/max size array in CARTO VL syntax. Default is
@@ -37,9 +40,9 @@ def cluster_size_layer(
         Includes a legend, popup and widget on `value`.
     """
 
-    breakpoints = _get_breakpoints(resolution)
     cluster_operation = _get_cluster_operation(operation, value)
     cluster_operation_title = _get_cluster_operation_title(operation, value)
+    breakpoints = _get_breakpoints(resolution)
     animation_filter = _get_animation(animate, cluster_operation)
 
     return Layer(
@@ -103,7 +106,17 @@ def _get_cluster_operation_title(operation, value):
 
 
 def _get_cluster_operation(operation, value):
+    _check_valid_operation(operation)
+
     if value is not None and operation != 'count':
         return '{0}(${1})'.format(CLUSTER_OPERATIONS[operation], value)
 
     return '{0}()'.format(CLUSTER_OPERATIONS[operation])
+
+
+def _check_valid_operation(operation):
+    valid_operations = CLUSTER_OPERATIONS.keys()
+
+    if operation not in valid_operations:
+        err = '"{0}" is not a valid operation. Valid operations are {1}'
+        raise CartoException(err.format(operation, ', '.join(valid_operations)))

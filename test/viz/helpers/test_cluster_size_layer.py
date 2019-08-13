@@ -1,3 +1,4 @@
+from carto.exceptions import CartoException
 import unittest
 try:
     from unittest.mock import Mock
@@ -49,3 +50,14 @@ class TestClusterSizeLayerHelper(unittest.TestCase):
         self.assertEqual(layer.legend._title, 'count')
         self.assertEqual(layer.legend._description, '')
         self.assertEqual(layer.legend._footer, '')
+    
+    def test_valid_operation(self):
+        """cluster_size_layer should raise an error if the operation is invalid"""
+
+        msg = '"invalid" is not a valid operation. Valid operations are count, min, max, avg, sum'
+        with self.assertRaises(CartoException, msg=msg):
+            helpers.cluster_size_layer(
+                source='sf_neighborhoods',
+                value='name',
+                operation='invalid'
+            )
