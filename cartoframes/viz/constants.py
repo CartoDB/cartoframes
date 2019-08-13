@@ -83,6 +83,14 @@ FORMULA_OPERATIONS_GLOBAL = {
   'sum': 'globalSum'
 }
 
+CLUSTER_OPERATIONS = {
+  'count': 'clusterCount',
+  'avg': 'clusterAvg',
+  'min': 'clusterMin',
+  'max': 'clusterMax',
+  'sum': 'clusterSum'
+}
+
 THEMES = ['dark', 'light']
 
 DEFAULT_GRID_M_SIZE = 1

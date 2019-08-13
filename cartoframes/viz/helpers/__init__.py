@@ -9,6 +9,7 @@ from .color_continuous_layer import color_continuous_layer
 from .size_bins_layer import size_bins_layer
 from .size_category_layer import size_category_layer
 from .size_continuous_layer import size_continuous_layer
+from .cluster_size_layer import cluster_size_layer
 from .animation_layer import animation_layer
 
 
@@ -25,5 +26,6 @@ __all__ = [
     'size_bins_layer',
     'size_category_layer',
     'size_continuous_layer',
+    'cluster_size_layer',
     'animation_layer'
 ]

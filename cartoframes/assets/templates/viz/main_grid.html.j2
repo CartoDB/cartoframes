@@ -31,7 +31,6 @@
 </head>
 
 <body class="as-app-body as-app">
-  <img id="test-image"/>
   <main id="main-container" class="grid-map-container">
   {% for i in range(n) %}
     <div class="grid-map-row">
@@ -40,15 +39,15 @@
       {% set title = maps[index]['title'] %}
       {% set has_legends = maps[index]['has_legends'] %}
       
-      <div class="grid-map-cell">
+      <div class="grid-map-cell {{'grid-map-cell-legend' if has_legends }}">
           {% if title %}<p>{{ title }}</p>{% endif %}
+          {% if has_legends %}
+            {% set layers = maps[index]['layers'] %}
+            {% include 'templates/viz/legends_grid.html.j2' %}
+          {% endif %}
           <img id="map-image-{{ index }}" class="map-image" alt="Static Map {{index}}" />
           <div class="as-main grid-map" id="main-container-{{index}}">
             <div class="as-map-area">
-              {% if has_legends %}
-                {% set layers = maps[index]['layers'] %}
-                {% include 'templates/viz/legends_grid.html.j2' %}
-              {% endif %}
               <div id="map-{{ index }}" class="map"></div>
             </div> <!-- as-map-area -->
           </div> <!-- as-main -->

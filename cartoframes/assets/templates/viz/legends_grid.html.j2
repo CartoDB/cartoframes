@@ -2,7 +2,7 @@
   <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
 {%- endmacro %}
 
-<div id="legends" class="legends">
+<div id="legends" class="legends grid-legends">
   {% for layer in layers|reverse %}
     {% if layer.legend %}
       <as-legend
