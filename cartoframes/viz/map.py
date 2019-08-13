@@ -45,8 +45,6 @@ class Map(object):
         title (string, optional): Title to label the map
         description (string, optional): Text that describes the map and will be displayed in the
           default legend after the title.
-        footer (string, optional): Text that will be displayed in the bottom of the
-          default legend.
 
     Examples:
 
@@ -191,7 +189,6 @@ class Map(object):
                  theme=None,
                  title=None,
                  description=None,
-                 footer=None,
                  is_static=None,
                  **kwargs):
 
@@ -204,7 +201,6 @@ class Map(object):
         self.default_legend = default_legend
         self.title = title
         self.description = description
-        self.footer = footer
         self.show_info = show_info
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
@@ -242,7 +238,6 @@ class Map(object):
             theme=self.theme,
             title=self.title,
             description=self.description,
-            footer=self.footer,
             is_static=self.is_static,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
@@ -269,7 +264,6 @@ class Map(object):
             'theme': self.theme,
             'title': self.title,
             'description': self.description,
-            'footer': self.footer,
             'is_static': self.is_static,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
@@ -387,7 +381,6 @@ class Map(object):
             _airship_path=self._airship_path,
             title=name,
             description=self.description,
-            footer=self.footer,
             is_embed=True,
             is_static=self.is_static)
 

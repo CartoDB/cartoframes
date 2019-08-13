@@ -25,20 +25,19 @@ class HTMLMap(object):
     def set_content(
         self, size, layers, bounds, viewport=None, camera=None, basemap=None,
             default_legend=None, show_info=None, theme=None, _carto_vl_path=None,
-            _airship_path=None, title='CARTOframes', description=None, footer=None,
+            _airship_path=None, title='CARTOframes', description=None,
             is_embed=False, is_static=False):
 
         self.html = self._parse_html_content(
             size, layers, bounds, viewport, camera, basemap, default_legend,
             show_info, theme, _carto_vl_path, _airship_path, title, description,
-            footer, is_embed, is_static)
+            is_embed, is_static)
 
     def _parse_html_content(
         self, size, layers, bounds, viewport, camera=None,
             basemap=None, default_legend=None, show_info=None,
             theme=None, _carto_vl_path=None, _airship_path=None,
-            title=None, description=None, footer=None,
-            is_embed=False, is_static=False):
+            title=None, description=None, is_embed=False, is_static=False):
 
         token = ''
         basecolor = ''
@@ -106,7 +105,6 @@ class HTMLMap(object):
             airship_icons_path=airship_icons_path,
             title=title,
             description=description,
-            footer=footer,
             is_embed=is_embed,
             is_static=is_static
         )
