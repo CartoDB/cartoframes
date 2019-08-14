@@ -144,7 +144,6 @@ class Source(object):
             self.query = self.dataset.get_query()
             self.bounds = bounds or self._compute_query_bounds()
 
-
     def _compute_query_bounds(self):
         context = self.dataset._strategy._context
         return get_query_bounds(context, self.query)
