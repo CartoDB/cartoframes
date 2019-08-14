@@ -53,6 +53,13 @@ class TestMapInitialization(unittest.TestCase):
         })
         self.assertEqual(map.bounds, [[-180, 90], [180, -90]])
 
+    def test_default_legend(self):
+        """Map should raise an error if default_legend is True but there is no title"""
+
+        msg = 'The default legend needs a map title to be displayed'
+        with self.assertRaises(CartoException, msg=msg):
+            Map(default_legend=True)
+
 
 class TestMapLayer(unittest.TestCase):
     def test_one_layer(self):

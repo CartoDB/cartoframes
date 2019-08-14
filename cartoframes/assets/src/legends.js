@@ -1,11 +1,11 @@
 import { format } from './utils';
 
 export function createDefaultLegend(layers) {
-  const defaultLegendContainer = document.querySelector('#defaultLegendContainer');
+  const defaultLegendContainer = document.getElementById('default-legend-container');
   defaultLegendContainer.style.display = 'none';
 
   AsBridge.VL.Legends.layersLegend(
-    '#defaultLegend',
+    '#default-legend',
     layers,
     {
       onLoad: () => defaultLegendContainer.style.display = 'unset'
