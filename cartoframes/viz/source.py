@@ -44,10 +44,7 @@ class Source(object):
             from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Source
 
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
+            set_default_credentials('your_user_name', 'your api key')
 
             Source('table_name')
 
@@ -58,10 +55,7 @@ class Source(object):
             from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Source
 
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
+            set_default_credentials('your_user_name', 'your api key')
 
             Source('SELECT * FROM table_name')
 
@@ -80,6 +74,8 @@ class Source(object):
             from cartoframes.viz import Source
             from cartoframes.data import Dataset
 
+            set_default_credentials('your_user_name', 'your api key')
+
             ds = Dataset('table_name')
 
             Source(ds)
@@ -91,10 +87,7 @@ class Source(object):
             from cartoframes.auth import Credentials
             from cartoframes.viz import Source
 
-            credentials = Credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
+            credentials = Credentials('your_user_name', 'your api key')
 
             Source('table_name', credentials)
 
@@ -105,10 +98,7 @@ class Source(object):
             from cartoframes.auth import set_default_credentials
             from cartoframes.viz import Source
 
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
+            set_default_credentials('your_user_name', 'your api key')
 
             bounds = {
                 'west': -10,
@@ -121,7 +111,12 @@ class Source(object):
     """
 
     def __init__(self, data, credentials=None, bounds=None, schema=None):
-        self._init_source(data, credentials, bounds, schema)
+        if isinstance(data, Dataset):
+            self.dataset = data
+        else:
+            self.dataset = Dataset(data, credentials, schema)
+
+        self._init_source_dataset(bounds)
 
     def get_geom_type(self):
         return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
@@ -139,62 +134,21 @@ class Source(object):
         else:
             return defaults.CREDENTIALS
 
-    def _init_source(self, data, credentials, bounds, schema):
-        if isinstance(data, str):
-            if is_sql_query(data):
-                self._init_source_query(data, credentials, bounds)
-
-            elif is_geojson_file(data):
-                self._init_source_geojson(data, bounds)
-
-            else:
-                self._init_source_query(data, credentials, bounds, schema)
-
-        elif isinstance(data, (list, dict)):
-            self._init_source_geojson(data, bounds)
-
-        elif HAS_GEOPANDAS and isinstance(data, geopandas.GeoDataFrame):
-            self._init_source_geojson(data, bounds)
-
-        elif isinstance(data, pandas.DataFrame):
-            self._init_source_geojson(data, bounds)
-
-        elif isinstance(data, Dataset):
-            self._init_source_dataset(data, bounds)
-
-        else:
-            raise ValueError('Wrong source input')
-
-    def _init_source_query(self, data, credentials, bounds, schema=None):
-        self.dataset = Dataset(data, credentials, schema)
-        self._set_source_query(self.dataset, bounds)
-
-    def _init_source_geojson(self, data, bounds):
-        self.dataset = Dataset(data)
-        self._set_source_geojson(self.dataset, bounds)
-
-    def _init_source_dataset(self, data, bounds):
-        self.dataset = data
+    def _init_source_dataset(self, bounds):
         if self.dataset.is_local():
-            self._set_source_geojson(self.dataset, bounds)
+            gdf = self.dataset.get_geodataframe()
+            self.type = SourceType.GEOJSON
+            self.query = encode_geodataframe(gdf)
+            self.bounds = bounds or self._compute_geojson_bounds(gdf)
         else:
-            self._set_source_query(self.dataset, bounds)
+            self.type = SourceType.QUERY
+            self.query = self.dataset.get_query()
+            self.bounds = bounds or self._compute_query_bounds()
 
-    def _set_source_query(self, dataset, bounds):
-        self.type = SourceType.QUERY
-        query = dataset.get_query()
-        self.query = query
-        self.bounds = bounds or self._compute_query_bounds(dataset, query)
 
-    def _set_source_geojson(self, dataset, bounds):
-        self.type = SourceType.GEOJSON
-        gdf = dataset.get_geodataframe()
-        self.query = encode_geodataframe(gdf)
-        self.bounds = bounds or self._compute_geojson_bounds(gdf)
-
-    def _compute_query_bounds(self, dataset, query):
-        context = dataset._strategy._context
-        return get_query_bounds(context, query)
+    def _compute_query_bounds(self):
+        context = self.dataset._strategy._context
+        return get_query_bounds(context, self.query)
 
     def _compute_geojson_bounds(self, gdf):
         return get_geodataframe_bounds(gdf)
