@@ -3,6 +3,14 @@
 {%- endmacro %}
 
 <div id="legends" class="legends grid-legends">
+  {% if default_legend and title %}
+    <as-legend
+      id="default-legend-container"
+      heading="{{ title }}"
+      description="{{ description if description else ''}}">
+    </as-legend>
+  {% endif %}
+
   {% for layer in layers|reverse %}
     {% if layer.legend %}
       <as-legend

@@ -35,14 +35,16 @@ class Map(object):
           Default is (1024, 632).
         viewport (dict, optional): Properties for display of the map viewport.
           Keys can be `bearing` or `pitch`.
-        default_legend (bool, optional): Default False. If True, a legend will
-          display for each layer.
+        default_legend (bool, optional): Default False. If True, it displays the map title.
+          Therefore, it needs the `title` value to be defined.
         show_info (bool, optional): Whether to display center and zoom information in the
           map or not. It is False by default.
         is_static (bool, optional): Default False. If True, instead of showing and interactive
-            map, a png image will be displayed.
+          map, a png image will be displayed.
         theme (string, optional): Use a different UI theme
         title (string, optional): Title to label the map
+        description (string, optional): Text that describes the map and will be displayed in the
+          default legend after the title.
 
     Examples:
 
@@ -186,19 +188,23 @@ class Map(object):
                  show_info=None,
                  theme=None,
                  title=None,
+                 description=None,
                  is_static=None,
                  **kwargs):
+
+        self._validate_default_legend(default_legend, title)
 
         self.layers = _init_layers(layers)
         self.basemap = basemap
         self.size = size
         self.viewport = viewport
         self.default_legend = default_legend
+        self.title = title
+        self.description = description
         self.show_info = show_info
         self.layer_defs = _get_layer_defs(self.layers)
         self.bounds = _get_bounds(bounds, self.layers)
         self.theme = _get_theme(theme, basemap)
-        self.title = title
         self.is_static = is_static
         self.token = get_token(basemap)
         self.basecolor = get_basecolor(basemap)
@@ -231,6 +237,7 @@ class Map(object):
             show_info=self.show_info,
             theme=self.theme,
             title=self.title,
+            description=self.description,
             is_static=self.is_static,
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
@@ -256,6 +263,7 @@ class Map(object):
             'has_widgets': has_widgets,
             'theme': self.theme,
             'title': self.title,
+            'description': self.description,
             'is_static': self.is_static,
             '_carto_vl_path': self._carto_vl_path,
             '_airship_path': self._airship_path
@@ -372,10 +380,15 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path,
             title=name,
+            description=self.description,
             is_embed=True,
             is_static=self.is_static)
 
         return html_map.html
+
+    def _validate_default_legend(self, default_legend, title):
+        if default_legend and not title:
+            raise CartoException('The default legend needs a map title to be displayed')
 
     def _get_publisher(self):
         return KuvizPublisher(self.layers)
