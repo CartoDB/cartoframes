@@ -77,6 +77,7 @@ def cluster_color_continuous_layer(
         ]
     )
 
+
 def _get_animation(animate, cluster_operation):
     return 'animation(linear({0}), 5, fade(1,1))'.format(cluster_operation) if animate else '1'
 

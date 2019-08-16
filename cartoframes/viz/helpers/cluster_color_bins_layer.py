@@ -6,7 +6,6 @@ from ..constants import CLUSTER_OPERATIONS
 from ..layer import Layer
 
 
-
 def cluster_color_bins_layer(
         source, operation='count', value=None, resolution=32,
         title='', method='quantiles', bins=5, breaks=None,
@@ -97,6 +96,7 @@ def cluster_color_bins_layer(
             }
         ]
     )
+
 
 def _get_animation(animate, cluster_operation):
     return 'animation(linear({0}), 5, fade(1,1))'.format(cluster_operation) if animate else '1'
