@@ -49,9 +49,9 @@ def cluster_color_bins_layer(
     animation_filter = _get_animation(animate, cluster_operation)
 
     func = 'buckets' if breaks else {
-        'quantiles': 'globalQuantiles',
-        'equal': 'globalEqIntervals',
-        'stdev': 'globalStandardDev'
+        'quantiles': 'viewportQuantiles',
+        'equal': 'viewportEqIntervals',
+        'stdev': 'viewportStandardDev'
     }.get(method)
 
     default_palette = 'purpor' if breaks else {
@@ -64,9 +64,10 @@ def cluster_color_bins_layer(
         source,
         style={
             'point': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(
+                'color': 'ramp({0}({1}, {2}), {3})'.format(
                     func, cluster_operation, breaks or bins, serialize_palette(palette) or default_palette),
-                'filter': animation_filter
+                'filter': animation_filter,
+                'resolution': '{0}'.format(resolution)
             }
         },
         popup=popup and not animate and {

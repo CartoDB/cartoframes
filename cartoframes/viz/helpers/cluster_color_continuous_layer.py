@@ -43,9 +43,10 @@ def cluster_color_continuous_layer(
         source,
         style={
             'point': {
-                'color': 'ramp(linear(${0}), {1})'.format(
+                'color': 'ramp(linear({0}, viewportMin({0}), viewportMax({0})), {1})'.format(
                     cluster_operation, serialize_palette(palette) or default_palette),
-                'filter': animation_filter
+                'filter': animation_filter,
+                'resolution': '{0}'.format(resolution)
             }
         },
         popup=popup and not animate and {
