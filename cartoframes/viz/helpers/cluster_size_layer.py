@@ -7,24 +7,23 @@ from ..layer import Layer
 
 
 def cluster_size_layer(
-        source, operation='count', value=None, resolution=32,
-        title='', size=None, color=None, description='', footer='',
+        source, value=None, operation='count', resolution=32,
+        title='', color=None, description='', footer='',
         legend=True, popup=True, widget=False, animate=None):
-    """Helper function for quickly creating a size symbol map with
-    continuous size scaled by cluster.
+    """Helper function for quickly creating a cluster map with
+    continuously sized points.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
         operation (str): Cluster operation, defaults to 'count'. Other options
           available are 'avg', 'min', 'max', and 'sum'.
-        value (str): Column to symbolize by.
-        title (str, optional): Title of legend.
-        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
-          '[2, 40]' for point geometries and '[1, 10]' for lines.
+        value (str): Numeric column to aggregate.
+        resolution (int): Resolution of aggregation grid cell.
+            Set to 32 by default.
         color (str, optional): Hex value, rgb expression, or other valid
-          CARTO VL color. Defaults is '#FFB927' for point geometries and
-          '#4CC8A3' for lines.
+          CARTO VL color. Defaults is '#FFB927' for point geometries.
+        title (str, optional): Title of legend and hover.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
