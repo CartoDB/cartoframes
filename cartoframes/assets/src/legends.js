@@ -18,7 +18,7 @@ export function createLegend(layer, legendData, layerIndex, mapIndex=0) {
 
   if (legendData.prop) {
     const config = { othersLabel: 'Others' };  // TODO: i18n
-    const opts = { format, config };
+    const opts = { format, config, dynamic:true };
 
     if (legendData.type.startsWith('size-continuous')) {
       config.samples = 4;
