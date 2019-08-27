@@ -154,7 +154,7 @@ class Layer(object):
         self.orig_query = self.source.query
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(geom_type)
+        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
         self.widgets_info = self.widgets.get_widgets_info()
         self.viz = self.style.compute_viz(geom_type, variables)
 
@@ -202,7 +202,7 @@ def _set_legend(legend):
     elif isinstance(legend, Legend):
         return legend
     else:
-        return Legend('default')
+        return Legend('')
 
 
 def _set_widgets(widgets):

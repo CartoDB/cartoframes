@@ -24,13 +24,15 @@ class Legend(object):
         Legend('color-category', title='Legend Title', 'description': '[description]', 'footer': '[footer]')
     """
 
-    def __init__(self, f_arg='default', **kwargs):
-        if isinstance(f_arg, dict):
-            self._init_legend(f_arg)
-        elif isinstance(f_arg, str):
+    def __init__(self, f_arg, **kwargs):
+        if isinstance(f_arg, str):
             self._init_legend(kwargs, f_arg)
+        elif f_arg is None:
+            self._init_legend()
+        elif isinstance(f_arg, dict):
+            self._init_legend(f_arg)
         else:
-            raise ValueError('Wrong widget input.')
+            raise ValueError('Wrong legend input.')
 
     def _init_legend(self, data, legend_type=None):
         self._type = ''
@@ -40,16 +42,13 @@ class Legend(object):
         self._description = ''
         self._footer = ''
 
-        
         if data is not None:
-            self._type = legend_type if legend_type else data.get('type', 'default')
+            self._type = legend_type if legend_type else data.get('type', '')
             self._prop = data.get('prop', '')
             self._dynamic = data.get('dynamic', True)
             self._title = data.get('title', '')
             self._description = data.get('description', '')
             self._footer = data.get('footer', '')
-        else:
-            raise ValueError('Wrong legend input.')
 
     def get_info(self, geom_type=None):
         if self._type or self._title or self._description or self._footer:
