@@ -28,12 +28,11 @@ class TestLegend(unittest.TestCase):
     def test_legend_init_properties(self):
         """Legend should be properly initialized when passing properties"""
         legend = Legend('color-category',
-            prop='strokeColor',
-            title='[TITLE]',
-            description='[description]',
-            footer='[footer]',
-            dynamic=False
-        )
+                        prop='strokeColor',
+                        title='[TITLE]',
+                        description='[description]',
+                        footer='[footer]',
+                        dynamic=False)
 
         self.assertEqual(legend._type, 'color-category')
         self.assertEqual(legend._prop, 'strokeColor')
