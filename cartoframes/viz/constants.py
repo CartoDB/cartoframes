@@ -35,6 +35,7 @@ LEGEND_PROPERTIES = [
 ]
 
 LEGEND_TYPES = [
+    'default',
     'color-bins',
     'color-bins-line',
     'color-bins-point',

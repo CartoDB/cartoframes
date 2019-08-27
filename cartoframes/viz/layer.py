@@ -196,12 +196,13 @@ def _set_popup(popup):
 
 def _set_legend(legend):
     """Set a Legend class from the input"""
+
     if isinstance(legend, dict):
         return Legend(legend)
     elif isinstance(legend, Legend):
         return legend
     else:
-        return Legend()
+        return Legend('default')
 
 
 def _set_widgets(widgets):
