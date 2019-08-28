@@ -12,15 +12,10 @@ export function renderBridge(bridge, widget, mapLayer) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
   const type = mapLayer.metadata.properties[widget.value].type;
 
-  console.log('!!! renderBridge', widget);
-
   switch (widget.type) {
     case 'histogram':
-      if (type === 'category') {
-        bridge.categoricalHistogram(widget.element, widget.value, widget.options);
-      } else {
-        bridge.numericalHistogram(widget.element, widget.value, widget.options);
-      }
+      const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
+      bridge[histogram](widget.element, widget.value, widget.options);
 
       break;
     case 'category':
