@@ -1,2 +1,2 @@
--e git+https://github.com/CartoDB/carto-python.git#egg=carto
+-e git+https://github.com/CartoDB/carto-python.git@super-py2#egg=carto
 .
