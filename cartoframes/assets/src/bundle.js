@@ -122,20 +122,28 @@ var init = (function () {
   }
 
   function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
+    if (legendData.length) {
+      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+    } else {
+      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    }
+  }
 
-    if (legendData.prop) {
+  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
+
+    if (legend.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
       const opts = { format, config };
 
-      if (legendData.type.startsWith('size-continuous')) {
+      if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
       AsBridge.VL.Legends.rampLegend(
         element,
         layer,
-        legendData.prop,
+        legend.prop,
         opts
       );
     }
