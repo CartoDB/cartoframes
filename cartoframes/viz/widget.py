@@ -95,4 +95,6 @@ class Widget():
                 options[key] = value
 
         options['read_only'] = data.get('read_only', False)
+        options['buckets'] = data.get('buckets', 20)
+
         return options
