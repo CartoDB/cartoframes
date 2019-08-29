@@ -543,8 +543,6 @@ var init = (function () {
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
     const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
 
-    console.log('!!! settings', settings);
-
     if (settings.show_info) {
       updateViewport(map);
     }
