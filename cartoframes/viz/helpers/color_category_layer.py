@@ -4,11 +4,13 @@ from .utils import serialize_palette
 
 from ..layer import Layer
 
+from .. import defaults
+
 
 def color_category_layer(
-        source, value, title='', top=11, cat=None,
-        palette=None, description='', footer='',
-        legend=True, popup=True, widget=False, animate=None):
+        source, value, title='', top=11, cat=None, palette=None, 
+        size=None, opacity=None, strokecolor=None, strokewidth=None, 
+        description='', footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a category color map.
 
     Args:
@@ -44,13 +46,23 @@ def color_category_layer(
         source,
         style={
             'point': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, serialize_palette(palette) or default_palette),
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
+                    func, value, cat or top, serialize_palette(palette) or default_palette,
+                    opacity or '1'),
+                'width': '{0}'.format(
+                    size or defaults.STYLE['point']['width']),
+                'strokeColor': '{0}'.format(
+                    strokecolor or defaults.STYLE['point']['strokeColor']),
+                'strokeWidth': '{0}'.format(
+                    strokewidth or defaults.STYLE['point']['strokeWidth']),
                 'filter': animation_filter
             },
             'line': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, cat or top, serialize_palette(palette) or default_palette),
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
+                    func, value, cat or top, serialize_palette(palette) or default_palette,
+                    opacity or '1'),
+                'width': '{0}'.format(
+                    size or defaults.STYLE['line']['width']),
                 'filter': animation_filter
             },
             'polygon': {
