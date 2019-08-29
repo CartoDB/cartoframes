@@ -125,18 +125,15 @@ var init = (function () {
 
     if (legendData.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
-      const opts = { format, config };
+      const prop = legendData.prop;
+      const dynamic = legendData.dynamic;
+      const opts = { format, config, dynamic };
 
       if (legendData.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
-      AsBridge.VL.Legends.rampLegend(
-        element,
-        layer,
-        legendData.prop,
-        opts
-      );
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, opts);
     }
   }
 
