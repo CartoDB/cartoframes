@@ -4,11 +4,13 @@ from .utils import serialize_palette
 
 from ..layer import Layer
 
+from .. import defaults
+
 
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, palette=None, description='', footer='',
-        legend=True, popup=True, widget=False, animate=None):
+        breaks=None, size=None, palette=None, opacity=None, strokecolor=None, strokewidth=None, 
+        description='', footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a classed color map.
 
     Args:
@@ -22,6 +24,11 @@ def color_bins_layer(
         breaks (int[], optional): Assign manual class break values.
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `purpor`.
+        opacity (str, optional): Opacity value for point color and line features. 
+            Default is '0.8'.
+        strokewidth (str, optional): Size of the stroke on point features.
+        strokecolor (str, optional): Color of the stroke on point features.
+            Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
@@ -57,18 +64,33 @@ def color_bins_layer(
         source,
         style={
             'point': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
+                    opacity or '1'),
+                'width': '{0}'.format(
+                    size or defaults.STYLE['point']['width']),
+                'strokeColor': '{0}'.format(
+                    strokecolor or defaults.STYLE['point']['strokeColor']),
+                'strokeWidth': '{0}'.format(
+                    strokewidth or defaults.STYLE['point']['strokeWidth']),
                 'filter': animation_filter
             },
             'line': {
-                'color': 'ramp({0}(${1}, {2}), {3})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
+                    opacity or '1'),
+                'width': '{0}'.format(
+                    size or defaults.STYLE['line']['width']),
                 'filter': animation_filter
             },
             'polygon': {
-                'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette),
+                'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette, 
+                    opacity or '0.9'),
+                'strokeColor': '{0}'.format(
+                    strokecolor or defaults.STYLE['polygon']['strokeColor']),
+                'strokeWidth': '{0}'.format(
+                    strokewidth or defaults.STYLE['polygon']['strokeWidth']),
                 'filter': animation_filter
             }
         },
