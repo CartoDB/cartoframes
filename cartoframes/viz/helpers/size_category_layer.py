@@ -2,10 +2,12 @@ from __future__ import absolute_import
 
 from ..layer import Layer
 
+from .. import defaults
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,
-        size=None, color=None, description='', footer='',
+        size=None, color=None, opacity=None, strokewidth=None, 
+        strokecolor=None, description='', footer='',
         legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size category layer.
 
@@ -23,6 +25,11 @@ def size_category_layer(
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
+         opacity (str, optional): Opacity value for point color and line features. 
+            Default is '0.8'.
+        strokewidth (str, optional): Size of the stroke on point features.
+        strokecolor (str, optional): Color of the stroke on point features.
+            Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
@@ -46,15 +53,19 @@ def size_category_layer(
             'point': {
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, cat or top, size or [2, 20]),
-                'color': 'opacity({0}, 0.8)'.format(
-                    color or '#F46D43'),
-                'filter': animation_filter
+                'color': 'opacity({0}, {1})'.format(
+                    color or '#F46D43', opacity or '0.8'),
+                'filter': animation_filter,
+                'strokeWidth': '{0}'.format(
+                    strokewidth or defaults.STYLE['point']['strokeWidth']),
+                'strokeColor': '{0}'.format(
+                    strokecolor or defaults.STYLE['point']['strokeColor'])
             },
             'line': {
                 'width': 'ramp({0}(${1}, {2}), {3})'.format(
                     func, value, cat or top, size or [1, 10]),
-                'color': 'opacity({0}, 0.8)'.format(
-                    color or '#4CC8A3'),
+                'color': 'opacity({0}, {1})'.format(
+                    color or '#4CC8A3', opacity or '0.8'),
                 'filter': animation_filter
             }
         },
