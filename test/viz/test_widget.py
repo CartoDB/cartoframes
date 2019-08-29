@@ -42,7 +42,10 @@ class TestWidget(unittest.TestCase):
             'has_bridge': False,
             'prop': '',
             'variable_name': 'vb6dbcf',
-            'options': {'readOnly': False}
+            'options': {
+                'readOnly': False,
+                'buckets': 20
+            }
         })
 
     def test_wrong_input(self):
@@ -73,7 +76,10 @@ class TestWidget(unittest.TestCase):
             'has_bridge': True,
             'prop': 'filter',
             'variable_name': '',
-            'options': {'readOnly': False}
+            'options': {
+                'readOnly': False,
+                'buckets': 20
+            }
         })
 
     def test_animation_widget_prop(self):
@@ -92,5 +98,8 @@ class TestWidget(unittest.TestCase):
             'has_bridge': True,
             'prop': 'width',
             'variable_name': '',
-            'options': {'readOnly': False}
+            'options': {
+                'readOnly': False,
+                'buckets': 20
+            }
         })
