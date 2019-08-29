@@ -26,18 +26,15 @@ function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
 
   if (legend.prop) {
     const config = { othersLabel: 'Others' };  // TODO: i18n
-    const opts = { format, config };
+    const prop = legend.prop;
+    const dynamic = legend.dynamic;
+    const opts = { format, config, dynamic };
 
     if (legend.type.startsWith('size-continuous')) {
       config.samples = 4;
     }
     
-    AsBridge.VL.Legends.rampLegend(
-      element,
-      layer,
-      legend.prop,
-      opts
-    );
+    AsBridge.VL.Legends.rampLegend(element, layer, prop, opts);
   } else {
     // TODO: we don't have a bridge for this case, should this even be a case?
   }

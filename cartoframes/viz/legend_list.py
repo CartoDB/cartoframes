@@ -24,7 +24,7 @@ class LegendList(object):
         if isinstance(legends, list):
             legend_list = []
             for legend in legends:
-                if isinstance(legend, dict):
+                if isinstance(legend, (dict, str)):
                     legend_list.append(Legend(legend))
                 elif isinstance(legend, Legend):
                     legend_list.append(legend)
