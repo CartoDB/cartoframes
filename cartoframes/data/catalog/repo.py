@@ -1,5 +1,4 @@
 from data.catalog.repo_client import RepoClient
-from data.catalog.category import Category
 
 
 class Repository(object):
@@ -16,6 +15,10 @@ class Repository(object):
     @staticmethod
     def get_categories(self):
         return self.client.get_categories()
+
+    @staticmethod
+    def get_datasets(self):
+        return self.client.get_datasets()
 
     def __new__(cls):
         if Repository.__instance is None:
