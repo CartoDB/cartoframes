@@ -14,7 +14,7 @@ BATCH_SIZE = 200
 def _lock(context, lock_id):
     sql = 'select pg_try_advisory_lock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
-    locked = result and result.next()[0]
+    locked = result and result.get('rows', [])[0].get('pg_try_advisory_lock')
     logging.debug('LOCK %s : %s' % (lock_id, locked))
     return locked
 
@@ -23,7 +23,7 @@ def _unlock(context, lock_id):
     logging.debug('UNLOCK %s' % lock_id)
     sql = 'select pg_advisory_unlock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
-    return result and result.next()[0]
+    return result and result.get('rows', [])[0].get('pg_advisory_unlock')
 
 
 class table_geocoding_lock:
@@ -189,7 +189,7 @@ class GeocodeAnalysis(object):
         self._credentials = credentials or get_default_credentials()
         self._context = context.create_context(self._credentials)
 
-    def preview_geocode(self, dataset, street, city=None, state=None, country=None, metadata=None):
+    def preview(self, dataset, street, city=None, state=None, country=None, metadata=None):
         return self.geocode(dataset, street, city=city, state=state, country=country, metadata=metadata, dry=True)
 
     def geocode(self, dataset, street, city=None, state=None, country=None, metadata=None, dry=None):
@@ -199,7 +199,7 @@ class GeocodeAnalysis(object):
         # response.get('rows')
         # rows[0].get('column')
 
-        logging.info('dataset = "%s"' % dataset)
+        logging.info('dataset = "%s"' % dataset.table_name)
         logging.info('street = "%s"' % street)
         logging.info('city = "%s"' % city)
         logging.info('state = "%s"' % state)
@@ -223,9 +223,11 @@ class GeocodeAnalysis(object):
         # hence a Python `with` statement is not used here.
         # transaction = connection.begin()
 
-        result = self._execute_prior_summary(dataset, street, city, state, country)
+        result = self._execute_prior_summary(dataset.table_name, street, city, state, country)
         if result:
-            for (gc_state, count) in result:
+            for row in result.get('rows'):
+                gc_state = row.get('gc_state')
+                count = row.get('count')
                 summary[gc_state] = count
 
         logging.debug(summary)
@@ -275,15 +277,17 @@ class GeocodeAnalysis(object):
                         # transaction.commit()
 
                     if result and not aborted:
-                        output['updated_rows'] = result.rowcount
-                        logging.info('Number of rows updated: %d', output['updated_rows'])
+                        # Nummber of updated rows not available for batch queries
+                        # output['updated_rows'] = result.rowcount
+                        # logging.info('Number of rows updated: %d', output['updated_rows'])
+                        pass
 
             if not aborted:
                 sql = _posterior_summary_query(dataset.table_name, street, city, state, country)
                 logging.debug("Executing result summary query: %s" % sql)
                 result = self._context.execute_query(sql)
-                if result:
-                    null_geom_count = result.next()[0]
+                if result and result.get('total_rows', 0) == 1:
+                    null_geom_count = result.get('rows')[0].get('count')
                     geom_count = output['total_rows'] - null_geom_count
                     output['final_records_with_geometry'] = geom_count
                     # output['final_records_without_geometry'] = null_geom_count
@@ -302,7 +306,7 @@ class GeocodeAnalysis(object):
         sql = _exists_hash_query(dataset_name)
         logging.debug("Executing check first time query: %s" % sql)
         result = self._context.execute_query(sql)
-        if not result or result.rowcount == 0:
+        if not result or result.get('total_rows', 0) == 0:
             sql = _first_time_summary_query(dataset_name, street, city, state, country)
             logging.debug("Executing first time summary query: %s" % sql)
         else:
