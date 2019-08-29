@@ -25,8 +25,7 @@ REQUIRES = [
     'pandas>=0.24.2<1.0',
     'shapely>=1.6.4,<2.0',
     'tqdm>=4.32.1,<5.0',
-    'unidecode>=1.1.0,<2.0',
-    'webcolors>=1.9.1,<2.0'
+    'unidecode>=1.1.0,<2.0'
 ]
 
 PACKAGE_DATA = {
