@@ -6,7 +6,6 @@ from ..layer import Layer
 
 from .. import defaults
 
-
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, size=None, palette=None, opacity=None, strokecolor=None, strokewidth=None, 

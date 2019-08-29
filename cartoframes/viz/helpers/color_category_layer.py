@@ -24,6 +24,11 @@ def color_category_layer(
           list.
         palette (str, optional): Palette that can be a named CARTOColor palette
           or other valid CARTO VL palette expression. Default is `bold`.
+        opacity (int, optional): Opacity value for point color and line features. 
+            Default is '0.8'.
+        strokewidth (int, optional): Size of the stroke on point features.
+        strokecolor (int, optional): Color of the stroke on point features.
+            Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
@@ -68,6 +73,10 @@ def color_category_layer(
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), 0.9)'.format(
                     func, value, cat or top, serialize_palette(palette) or default_palette),
+                 'strokeColor': '{0}'.format(
+                    strokecolor or defaults.STYLE['polygon']['strokeColor']),
+                'strokeWidth': '{0}'.format(
+                    strokewidth or defaults.STYLE['polygon']['strokeWidth']),
                 'filter': animation_filter
             }
         },
