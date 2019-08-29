@@ -54,7 +54,6 @@ var init = (function () {
   function updateViewport(map) {
     function updateMapInfo() {
       const mapInfo$ = document.getElementById('map-info');
-    
       const center = map.getCenter();
       const lat = center.lat.toFixed(6);
       const lng = center.lng.toFixed(6);
@@ -126,18 +125,15 @@ var init = (function () {
 
     if (legendData.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
-      const opts = { format, config };
+      const prop = legendData.prop;
+      const dynamic = legendData.dynamic;
+      const opts = { format, config, dynamic };
 
       if (legendData.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
-      AsBridge.VL.Legends.rampLegend(
-        element,
-        layer,
-        legendData.prop,
-        opts
-      );
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, opts);
     }
   }
 
@@ -362,18 +358,21 @@ var init = (function () {
 
   function renderWidget(widget, value) {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
-    
+
     if (value && widget.element) {
       widget.element.innerText = typeof value === 'number' ? format(value) : value;
     }
   }
 
-  function renderBridge(bridge, widget) {
+  function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
+    const type = mapLayer.metadata.properties[widget.value].type;
 
     switch (widget.type) {
       case 'histogram':
-        bridge.histogram(widget.element, widget.value, widget.options);
+        const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
+        bridge[histogram](widget.element, widget.value, widget.options);
+
         break;
       case 'category':
         bridge.category(widget.element, widget.value, widget.options);
@@ -397,11 +396,13 @@ var init = (function () {
       map: map
     });
 
-    widgets
-      .filter((widget) => widget.has_bridge)
-      .forEach((widget) => renderBridge(bridge, widget));
+    mapLayer.on('loaded', () => {
+      widgets
+        .filter((widget) => widget.has_bridge)
+        .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-    bridge.build();
+      bridge.build();
+    });
   }
 
   function SourceFactory() {
@@ -533,6 +534,8 @@ var init = (function () {
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
     const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
+
+    console.log('!!! settings', settings);
 
     if (settings.show_info) {
       updateViewport(map);

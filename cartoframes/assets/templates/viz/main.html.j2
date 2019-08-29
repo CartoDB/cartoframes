@@ -21,6 +21,16 @@
 
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
 
+  <!-- External libraries -->
+  
+  <!-- base64-js -->
+  <script src='http://libs.cartocdn.com/cartoframes/dependencies/base64.js'></script>
+  
+  <!-- html2canvas -->
+  {% if is_static %}
+    <script src="http://libs.cartocdn.com/cartoframes/dependencies/html2canvas.min.js"></script>
+  {% endif %}
+
   {% if theme %}
     {% include 'style/themes/' + theme + '.html.j2' %}
   {% endif %}
@@ -60,14 +70,7 @@
 
   {% include 'templates/error/basic.html.j2' %}
 </body>
-<script>
-  {% include 'utils/base64.js.j2' %}
-</script>
-{% if is_static %}
-  <script>
-    {% include 'utils/html2canvas.js.j2' %}
-  </script>
-{% endif %}
+
 <script>
   {% include 'src/bundle.js' %}
 </script>
