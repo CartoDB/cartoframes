@@ -362,18 +362,21 @@ var init = (function () {
 
   function renderWidget(widget, value) {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
-    
+
     if (value && widget.element) {
       widget.element.innerText = typeof value === 'number' ? format(value) : value;
     }
   }
 
-  function renderBridge(bridge, widget) {
+  function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
+    const type = mapLayer.metadata.properties[widget.value].type;
 
     switch (widget.type) {
       case 'histogram':
-        bridge.histogram(widget.element, widget.value, widget.options);
+        const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
+        bridge[histogram](widget.element, widget.value, widget.options);
+
         break;
       case 'category':
         bridge.category(widget.element, widget.value, widget.options);
@@ -397,11 +400,13 @@ var init = (function () {
       map: map
     });
 
-    widgets
-      .filter((widget) => widget.has_bridge)
-      .forEach((widget) => renderBridge(bridge, widget));
+    mapLayer.on('loaded', () => {
+      widgets
+        .filter((widget) => widget.has_bridge)
+        .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-    bridge.build();
+      bridge.build();
+    });
   }
 
   function SourceFactory() {
