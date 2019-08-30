@@ -56,7 +56,7 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(linear($name), prism)'
+            'opacity(ramp(linear($name), prism), 1)'
         )
 
     def test_color_continuous_layer_line(self):
@@ -72,7 +72,7 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(linear($name), [blue,#F00])'
+            'opacity(ramp(linear($name), [blue,#F00]), 1)'
         )
 
     def test_color_continuous_layer_polygon(self):
