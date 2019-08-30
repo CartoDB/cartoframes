@@ -1,12 +1,13 @@
-from data.catalog.country import Country
-from data.catalog.repo import Repository
+from .category import get_categories
+from .country import get_countries
 
 
 class DO(object):
 
-    def __init__(self):
-        self.repo = Repository()
+    @staticmethod
+    def countries():
+        return get_countries()
 
     @staticmethod
-    def countries(self):
-        return [Country(country['country_iso_code3'] for country in self.repo.get_countries())]
+    def categories():
+        return get_categories()
