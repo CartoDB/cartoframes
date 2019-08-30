@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from ..layer import Layer
-
 from .. import defaults
 
 def size_bins_layer(
@@ -27,10 +26,10 @@ def size_bins_layer(
           CARTO VL color. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features. 
-            Default is '0.8'.
+          Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
-        strokecolor (int, optional): Color of the stroke on point features.
-            Default is '#222'.
+        strokecolor (str, optional): Color of the stroke on point features.
+          Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".

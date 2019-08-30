@@ -25,11 +25,11 @@ def size_category_layer(
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
-        opacity (str, optional): Opacity value for point color and line features. 
-            Default is '0.8'.
-        strokewidth (str, optional): Size of the stroke on point features.
+        opacity (int, optional): Opacity value for point color and line features. 
+          Default is '0.8'.
+        strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.
-            Default is '#222'.
+          Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
         legend (bool, optional): Display map legend: "True" or "False".
