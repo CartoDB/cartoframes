@@ -7,7 +7,7 @@ def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, size=None, color=None, opacity=None,
         strokewidth=None, strokecolor=None, description='',
-        footer='',legend=True, popup=True, widget=False, animate=None):
+        footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
