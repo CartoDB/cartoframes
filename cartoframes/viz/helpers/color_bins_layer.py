@@ -3,13 +3,12 @@ from __future__ import absolute_import
 from .utils import serialize_palette
 
 from ..layer import Layer
-
 from .. import defaults
 
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, palette=None, size=None, opacity=None, 
-        strokecolor=None, strokewidth=None, description='', 
+        breaks=None, palette=None, size=None, opacity=None,
+        strokecolor=None, strokewidth=None, description='',
         footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a classed color map.
 
@@ -25,7 +24,7 @@ def color_bins_layer(
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `purpor`.
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features. 
+        opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.

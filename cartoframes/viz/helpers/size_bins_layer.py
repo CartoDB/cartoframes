@@ -5,9 +5,9 @@ from .. import defaults
 
 def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
-        breaks=None, size=None, color=None, opacity=None, strokewidth=None, 
-        strokecolor=None, description='', footer='',legend=True, 
-        popup=True, widget=False, animate=None):
+        breaks=None, size=None, color=None, opacity=None,
+        strokewidth=None, strokecolor=None, description='',
+        footer='',legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     classification method/buckets.
 
@@ -25,7 +25,7 @@ def size_bins_layer(
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#EE5D5A' for point geometries and
           '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features. 
+        opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.

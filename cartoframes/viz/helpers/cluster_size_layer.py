@@ -9,8 +9,9 @@ from .. import defaults
 
 def cluster_size_layer(
         source, operation='count', value=None, resolution=32,
-        title='', size=None, color=None, opacity=None, strokewidth=None, strokecolor=None, 
-        description='', footer='', legend=True, popup=True, widget=False, animate=None):
+        title='', size=None, color=None, opacity=None,
+        strokewidth=None, strokecolor=None, description='',
+        footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by cluster.
 
@@ -26,7 +27,7 @@ def cluster_size_layer(
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Defaults is '#FFB927' for point geometries and
           '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features. 
+        opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.

@@ -7,9 +7,9 @@ from .. import defaults
 
 
 def color_continuous_layer(
-        source, value, title='', palette=None, size=None, 
-        opacity=None, strokecolor=None, strokewidth=None, 
-        description='', footer='', legend=True, popup=True, 
+        source, value, title='', palette=None, size=None,
+        opacity=None, strokecolor=None, strokewidth=None,
+        description='', footer='', legend=True, popup=True,
         widget=False, animate=None):
     """Helper function for quickly creating a continuous color map.
 
@@ -21,7 +21,7 @@ def color_continuous_layer(
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `bluyl`.
         size (int, optional): Size of point or line features.
-        opacity (int, optional): Opacity value for point color and line features. 
+        opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.

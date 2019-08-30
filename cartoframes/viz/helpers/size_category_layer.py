@@ -6,7 +6,7 @@ from .. import defaults
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,
-        size=None, color=None, opacity=None, strokewidth=None, 
+        size=None, color=None, opacity=None, strokewidth=None,
         strokecolor=None, description='', footer='',
         legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size category layer.
@@ -25,7 +25,7 @@ def size_category_layer(
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Default is '#F46D43' for point geometries and
           '#4CC8A3' for lines.
-        opacity (int, optional): Opacity value for point color and line features. 
+        opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
         strokewidth (int, optional): Size of the stroke on point features.
         strokecolor (str, optional): Color of the stroke on point features.
