@@ -209,12 +209,16 @@ class GeocodeAnalysis(object):
         logging.info('dry = "%s"' % dry)
 
 
-        if not dataset.is_saved_in_carto:
+        if not dataset.is_saved_in_carto:  # dataset.is_local()
             # TODO: handle this either by uploading the dataset,
             # uploading to a temporary table or geocoding addresses per row
             raise CartoException('Your data is not synchronized with CARTO. '
                                  'First of all, you should call the Dataset.upload() method '
-                                 'to save your data in CARTO.')
+                                 'to save your data in CARTO.'
+                                 'Geocoding is supported only for synchronized data.')
+        if dataset.table_name is None:
+            # TODO: how should we support this case?
+            raise CartoException('Geocoding is supported only for table datasets.')
 
         output = {}
 
