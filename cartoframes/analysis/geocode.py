@@ -186,12 +186,13 @@ def _hash_as_big_int(text):
     return int(hashlib.sha1(text.encode()).hexdigest(), 16) & ((2**63)-1)
 
 
-
 def _generate_temp_table_name(base=None):
     return (base or 'table') + '_' + uuid.uuid4().hex[:10]
 
+
 def _generate_new_table_name(base):
     return _generate_temp_table_name(base)
+
 
 class GeocodeAnalysis(object):
 
