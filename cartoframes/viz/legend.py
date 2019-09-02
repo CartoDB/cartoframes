@@ -37,6 +37,7 @@ class Legend(object):
     def _init_legend(self, data, legend_type=None):
         self._type = ''
         self._prop = ''
+        self._variable = ''
         self._dynamic = True
         self._title = ''
         self._description = ''
@@ -45,6 +46,7 @@ class Legend(object):
         if data is not None:
             self._type = legend_type if legend_type else data.get('type', '')
             self._prop = data.get('prop', '')
+            self._variable = data.get('variable', '')
             self._dynamic = data.get('dynamic', True)
             self._title = data.get('title', '')
             self._description = data.get('description', '')
@@ -58,6 +60,7 @@ class Legend(object):
             return {
                 'type': _type,
                 'prop': _prop,
+                'variable': self._variable,
                 'dynamic': self._dynamic,
                 'title': self._title,
                 'description': self._description,

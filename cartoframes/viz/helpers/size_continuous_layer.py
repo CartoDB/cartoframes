@@ -40,6 +40,8 @@ def size_continuous_layer(
         source,
         style={
             'point': {
+                '@width_value': 'ramp(linear(${0}, globalMin(${0}), globalMax(${0})), {1})'.format(
+                    value, size or [2, 40]),
                 'width': 'ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})'.format(
                     value, size or [2, 40]),
                 'color': 'opacity({0}, 0.8)'.format(
@@ -67,6 +69,7 @@ def size_continuous_layer(
                 'line': 'size-continuous-line',
                 'polygon': 'size-continuous-polygon'
             },
+            'variable': 'width_value',
             'title': title or value,
             'description': description,
             'footer': footer

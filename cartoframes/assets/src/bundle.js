@@ -122,12 +122,13 @@ var init = (function () {
 
   function createLegend(layer, legendData, layerIndex, mapIndex=0) {
     const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
-
+    
     if (legendData.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
       const prop = legendData.prop;
       const dynamic = legendData.dynamic;
-      const opts = { format, config, dynamic };
+      const variable = legendData.variable;
+      const opts = { format, config, dynamic, variable };
 
       if (legendData.type.startsWith('size-continuous')) {
         config.samples = 4;
@@ -534,8 +535,6 @@ var init = (function () {
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
     const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
-
-    console.log('!!! settings', settings);
 
     if (settings.show_info) {
       updateViewport(map);
