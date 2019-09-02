@@ -4,6 +4,7 @@ from cartoframes.auth import Credentials
 
 class RepoClient(object):
 
+    # TODO: Fix singleton
     # __instance = None
 
     def __init__(self):
@@ -19,6 +20,10 @@ class RepoClient(object):
 
     def get_variables(self, field=None, value=None):
         query = 'select * from variables'
+        return self._run_query(query, field, value)
+
+    def get_geographies(self, field=None, value=None):
+        query = 'select * from geographies'
         return self._run_query(query, field, value)
 
     def get_datasets(self, field=None, value=None):

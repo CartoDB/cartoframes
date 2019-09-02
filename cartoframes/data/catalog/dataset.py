@@ -4,6 +4,7 @@ from .repository.dataset_repo import get_dataset_repo
 class Dataset(object):
 
     def __init__(self, metadata):
+        # TODO: Confirm which properties from the DDL we should include here
         self.id = metadata.id
         self.name = metadata.name
         self.provider_id = metadata.provider_id
@@ -23,3 +24,11 @@ class Dataset(object):
 class Datasets(list):
     def __init__(self, items):
         super(Datasets, self).__init__(items)
+
+    @staticmethod
+    def get_all():
+        return [Dataset(dataset) for dataset in get_dataset_repo().get_all()]
+
+    @staticmethod
+    def get(dataset_id):
+        return Dataset.get(dataset_id)

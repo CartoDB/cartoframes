@@ -1,13 +1,13 @@
-from .category import get_categories
-from .country import get_countries
+from .category import Categories
+from .country import Countries
 
 
 class DO(object):
 
-    @staticmethod
-    def countries():
-        return get_countries()
+    @property
+    def countries(self):
+        return Countries.get_all()
 
-    @staticmethod
-    def categories():
-        return get_categories()
+    @property
+    def categories(self):
+        return Categories.get_all()
