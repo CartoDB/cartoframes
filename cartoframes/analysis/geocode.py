@@ -6,6 +6,7 @@ import logging
 
 from .. import context
 from ..auth import get_default_credentials
+from carto.exceptions import CartoException
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
@@ -207,6 +208,14 @@ class GeocodeAnalysis(object):
         logging.info('metadata = "%s"' % metadata)
         logging.info('dry = "%s"' % dry)
 
+
+        if not dataset.is_saved_in_carto:
+            # TODO: handle this either by uploading the dataset,
+            # uploading to a temporary table or geocoding addresses per row
+            raise CartoException('Your data is not synchronized with CARTO. '
+                                 'First of all, you should call the Dataset.upload() method '
+                                 'to save your data in CARTO.')
+
         output = {}
 
         summary = {s: 0 for s in ['ng', 'nn', 'cg', 'cn', 'pg', 'pn']}
@@ -277,7 +286,7 @@ class GeocodeAnalysis(object):
                         # transaction.commit()
 
                     if result and not aborted:
-                        # Nummber of updated rows not available for batch queries
+                        # Number of updated rows not available for batch queries
                         # output['updated_rows'] = result.rowcount
                         # logging.info('Number of rows updated: %d', output['updated_rows'])
                         pass
