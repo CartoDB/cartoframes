@@ -245,8 +245,7 @@ class GeocodeAnalysis(object):
         return result
 
     # Geocode into new table dataset
-    def geocoded_as_table(self, dataset, street, city=None, state=None, country=None, metadata=None):
-        table_name = _generate_new_table_name(dataset.table_name)
+    def geocoded_as_table(self, table_name, dataset, street, city=None, state=None, country=None, metadata=None):
         if dataset.is_saved_in_carto and dataset.table_name:
             # TODO: select only needed columns
             query = 'SELECT * FROM {table}'.format(table=dataset.table_name)

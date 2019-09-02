@@ -47,5 +47,5 @@ records that haven't changed from being geocoded again.
 .. code:: python
 
     dataset = Dataset('SELECT * FROM my_data WHERE value > 100')
-    result = geocoder.geocoded_as_table(dataset, street='address', country='country')
+    result = geocoder.geocoded_as_table('my_geocoded_data', dataset, street='address', country='country')
     print result.get('result').download().head
