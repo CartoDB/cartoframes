@@ -15,6 +15,8 @@ class Legend(object):
         title (str, optional): Title of legend.
         description (str, optional): Description in legend.
         footer (str, optional): Footer of legend. This is often used to attribute data sources.
+        variable (optional): If the information in the legend depends on a different value than the
+            information set to the style property, it is possible to set an independent variable
 
     Example:
 
@@ -22,6 +24,18 @@ class Legend(object):
         from cartoframes.viz import Legend
 
         Legend('color-category', title='Legend Title', 'description': '[description]', 'footer': '[footer]')
+
+    .. code::
+        from cartoframes.viz import Layer, Legend, Style
+
+        Layer(
+            "SELECT * FROM populated_places WHERE adm0name = 'Spain'",
+            Style('''
+                color: ramp(globalQuantiles($pop_max, 5), reverse(purpor))
+                @custom_legend: ramp($pop_max, reverse(purpor))
+            '''),
+            legend=Legend('color-category', title='Population', variable='custom_legend')
+        )
     """
 
     def __init__(self, f_arg, **kwargs):
