@@ -65,4 +65,3 @@ class TestCountryRepo(unittest.TestCase):
 
         # Then
         self.assertEqual(None, country)
-

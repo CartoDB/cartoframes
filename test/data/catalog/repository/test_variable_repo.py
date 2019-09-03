@@ -77,4 +77,3 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         self.assertEqual(None, variable)
-

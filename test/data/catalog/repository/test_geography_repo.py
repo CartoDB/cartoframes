@@ -89,4 +89,3 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         self.assertEqual(None, geography)
-

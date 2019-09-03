@@ -1,6 +1,6 @@
 import unittest
 
-from cartoframes.data.catalog.repository.category_repo import  CategoryRepository
+from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
 
 try:
@@ -73,4 +73,3 @@ class TestCategoryRepo(unittest.TestCase):
 
         # Then
         self.assertEqual(None, category)
-
