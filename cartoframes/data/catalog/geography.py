@@ -9,7 +9,7 @@ class Geography(object):
         self.id = metadata.id
         self.name = metadata.name
         self.provider_id = metadata.provider_id
-        self.country = metadata.country
+        self.country_iso_code3 = metadata.country_iso_code3
         self.version = metadata.version
         self.is_public = metadata.is_public
 

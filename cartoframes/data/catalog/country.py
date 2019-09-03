@@ -6,24 +6,24 @@ from .repository.dataset_repo import get_dataset_repo
 
 class Country(object):
 
-    def __init__(self, iso_code):
-        self.iso_code = iso_code
+    def __init__(self, metadata):
+        self.iso_code3 = metadata.iso_code3
 
     @staticmethod
-    def get(iso_code):
-        return Country(get_country_repo().get_by_iso_code(iso_code))
+    def get(iso_code3):
+        return Country(get_country_repo().get_by_iso_code(iso_code3))
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_country(self.iso_code)
+        return get_dataset_repo().get_by_country(self.iso_code3)
 
     @property
     def categories(self):
-        return get_category_repo().get_by_country(self.iso_code)
+        return get_category_repo().get_by_country(self.iso_code3)
 
     @property
     def geographies(self):
-        return get_geography_repo().get_by_country(self.iso_code)
+        return get_geography_repo().get_by_country(self.iso_code3)
 
 
 class Countries(list):
@@ -33,8 +33,8 @@ class Countries(list):
 
     @staticmethod
     def get_all():
-        return [Country(iso_code) for iso_code in get_country_repo().get_all()]
+        return [Country(country) for country in get_country_repo().get_all()]
 
     @staticmethod
-    def get(iso_code):
-        return Country.get(iso_code)
+    def get(iso_code3):
+        return Country.get(iso_code3)

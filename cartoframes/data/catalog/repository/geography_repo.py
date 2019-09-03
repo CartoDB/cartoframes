@@ -1,4 +1,4 @@
-from data.catalog.repository.repo_client import RepoClient
+from .repo_client import RepoClient
 
 
 def get_geography_repo():
@@ -14,8 +14,12 @@ class GeographyRepository(object):
         return [self._to_geography(result) for result in self.client.get_geographies()]
 
     def get_by_id(self, geography_id):
-        result = self.client.get_geographies('id', geography_id)[0]
-        return self._to_geography(result)
+        result = self.client.get_geographies('id', geography_id)
+
+        if len(result) == 0:
+            return None
+
+        return self._to_geography(result[0])
 
     def get_by_country(self, iso_code):
         # TODO
@@ -27,7 +31,7 @@ class GeographyRepository(object):
             'id': result['id'],
             'name': result['name'],
             'provider_id': result['provider_id'],
-            'country': result['country_iso_code3'],
+            'country_iso_code3': result['country_iso_code3'],
             'version': result['version'],
             'is_public': result['is_public_data']
         }

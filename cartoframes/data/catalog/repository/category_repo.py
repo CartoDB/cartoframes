@@ -14,8 +14,12 @@ class CategoryRepository(object):
         return [self._to_category(result) for result in self.client.get_categories()]
 
     def get_by_id(self, category_id):
-        result = self.client.get_categories('id', category_id)[0]
-        return self._to_category(result)
+        result = self.client.get_categories('id', category_id)
+
+        if len(result) == 0:
+            return None
+
+        return self._to_category(result[0])
 
     def get_by_country(self, iso_code):
         # TODO

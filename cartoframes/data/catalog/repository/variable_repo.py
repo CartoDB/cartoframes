@@ -1,4 +1,4 @@
-from data.catalog.repository.repo_client import RepoClient
+from .repo_client import RepoClient
 
 
 def get_variable_repo():
@@ -14,8 +14,12 @@ class VariableRepository(object):
         return [self._to_variable(result) for result in self.client.get_variables()]
 
     def get_by_id(self, variable_id):
-        result = self.client.get_variables('id', variable_id)[0]
-        return self._to_variable(result)
+        result = self.client.get_variables('id', variable_id)
+
+        if len(result) == 0:
+            return None
+
+        return self._to_variable(result[0])
 
     @staticmethod
     def _to_variable(result):

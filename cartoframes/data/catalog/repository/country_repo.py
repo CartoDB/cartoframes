@@ -13,11 +13,16 @@ class CountryRepository(object):
     def get_all(self):
         return [self._to_country(result) for result in self.client.get_countries()]
 
-    def get_by_iso_code(self, iso3):
-        result = self.client.get_countries('country_iso_code3', iso3)[0]
-        return self._to_country(result)
+    def get_by_iso_code(self, iso_code3):
+        result = self.client.get_countries('country_iso_code3', iso_code3)
+
+        if len(result) == 0:
+            return None
+
+        return self._to_country(result[0])
 
     @staticmethod
     def _to_country(result):
-        # TODO: what if result is empty? What should we return then? And what should the caller do with that?
-        return result['country_iso_code3']
+        return {
+            'iso_code3': result['country_iso_code3']
+        }

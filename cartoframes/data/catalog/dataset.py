@@ -9,11 +9,13 @@ class Dataset(object):
         self.name = metadata.name
         self.provider_id = metadata.provider_id
         self.category_id = metadata.category_id
+        self.country_iso_code3 = metadata.country_iso_code3
         self.geography_id = metadata.geography_id
         self.temporal_aggregations = metadata.temporal_aggregations
         self.time_coverage = metadata.time_coverage
         self.group_id = metadata.group_id
         self.version = metadata.version
+        self.is_public = metadata.is_public
 
     @staticmethod
     def get(dataset_id):
