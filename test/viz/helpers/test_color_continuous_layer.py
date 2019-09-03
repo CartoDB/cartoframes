@@ -28,8 +28,8 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(linear($name), bluyl), 1)')
-        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(linear($name), bluyl), 1)')
+        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(linear($name), bluyl),1)')
+        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(linear($name), bluyl),1)')
         self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(linear($name), bluyl), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
@@ -56,7 +56,7 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'opacity(ramp(linear($name), prism), 1)'
+            'opacity(ramp(linear($name), prism),1)'
         )
 
     def test_color_continuous_layer_line(self):
@@ -72,7 +72,7 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'opacity(ramp(linear($name), [blue,#F00]), 1)'
+            'opacity(ramp(linear($name), [blue,#F00]),1)'
         )
 
     def test_color_continuous_layer_polygon(self):
