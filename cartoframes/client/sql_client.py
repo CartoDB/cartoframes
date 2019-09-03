@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .. import context
+from cartoframes.lib import context
 from ..auth import get_default_credentials
 
 

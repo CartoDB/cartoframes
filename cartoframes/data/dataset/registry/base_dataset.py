@@ -3,12 +3,12 @@ import pandas as pd
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..dataset_info import DatasetInfo
-from ..utils import decode_geometry, compute_query, convert_bool, \
+from cartoframes.data.dataset.dataset_info import DatasetInfo
+from cartoframes.utils.geom_utils import decode_geometry, compute_query, convert_bool, \
     get_context_with_public_creds, ENC_WKB_BHEX
-from ... import utils
-from ... import context
-from ..columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
+from cartoframes import utils
+from cartoframes.lib import context
+from cartoframes.utils.columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
 
 class BaseDataset():

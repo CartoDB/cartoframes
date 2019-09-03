@@ -1,7 +1,7 @@
 """Unit tests for cartoframes.client.SQLClient"""
 import unittest
 
-from cartoframes import context
+from cartoframes.lib import context
 from cartoframes.client import SQLClient
 from cartoframes.auth import Credentials
 
