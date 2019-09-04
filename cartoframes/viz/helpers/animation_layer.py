@@ -4,7 +4,7 @@ from ..layer import Layer
 
 
 def animation_layer(
-        source, value, title='', color=None, widget_type='time-series', description=''):
+        source, value, title='', duration=None, fade=None, color=None, widget_type='time-series', description=''):
     """Helper function for quickly creating an animated map.
 
     Args:
@@ -27,7 +27,8 @@ def animation_layer(
         style={
             'point': {
                 'color': 'opacity({0}, 0.8)'.format(color or '#EE4D5A'),
-                'filter': 'animation(linear(${0}), 20, fade(1,1))'.format(value)
+                'filter': 'animation(linear(${0}), {1}, fade({2}))'.format(value,
+                duration or 20, fade or 1,1)
             },
             'line': {
                 'color': 'opacity({0}, 0.8)'.format(color or '#4CC8A3'),
