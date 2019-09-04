@@ -8,7 +8,7 @@ from .popup import Popup
 from .legend import Legend
 from .widget_list import WidgetList
 from ..data import Dataset
-from ..utils import merge_dicts
+from cartoframes.utils.utils import merge_dicts
 
 try:
     import geopandas

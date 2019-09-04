@@ -6,7 +6,7 @@ from carto.auth import APIKeyAuthClient
 
 from ..auth import get_default_credentials
 from .source import Source
-from ..data.columns import normalize_name
+from cartoframes.utils.columns import normalize_name
 from ..__version__ import __version__
 
 from warnings import filterwarnings

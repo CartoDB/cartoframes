@@ -14,7 +14,7 @@ from carto.exceptions import CartoException
 from cartoframes.auth import Credentials
 from cartoframes.data import Dataset
 from cartoframes.client import DataObsClient, SQLClient, get_countrytag
-from cartoframes.data.columns import normalize_name
+from cartoframes.utils.columns import normalize_name
 
 from ..utils import _UserUrlLoader
 

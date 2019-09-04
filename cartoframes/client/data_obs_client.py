@@ -9,7 +9,7 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .. import utils
+from cartoframes.utils import utils
 from cartoframes.lib import context
 from ..auth import get_default_credentials
 from cartoframes.data.dataset.dataset import Dataset

@@ -69,7 +69,8 @@ good method:
           credentials=credentials)
 """  # noqa
 from cartoframes.auth import Credentials
-from cartoframes.data import Dataset, tables
+from cartoframes.data import Dataset
+from cartoframes.utils.table import tables
 from cartoframes.viz import Map, Layer
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'

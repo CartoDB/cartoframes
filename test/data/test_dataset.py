@@ -13,13 +13,13 @@ from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.client import SQLClient
-from cartoframes.utils.utils import setting_value_exception
-from cartoframes.data.columns import normalize_name
-from cartoframes.utils import load_geojson
+from cartoframes.utils.geom_utils import setting_value_exception
+from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry import DataFrameDataset, _rows
-from cartoframes.data.dataset.registry import TableDataset
-from cartoframes.data.dataset.registry import QueryDataset
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
 
 try:

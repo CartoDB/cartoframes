@@ -4,8 +4,8 @@ import pandas
 
 from . import defaults
 
-from ..data import Dataset
-from ..utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
+from cartoframes.data import Dataset
+from cartoframes.utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
 
 try:
     import geopandas

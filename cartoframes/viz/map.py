@@ -9,7 +9,7 @@ from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .html.HTMLMap import HTMLMap
-from ..utils import get_center
+from cartoframes.utils.utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 

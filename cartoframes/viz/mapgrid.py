@@ -2,7 +2,7 @@ from carto.exceptions import CartoException
 from .map import Map
 from .html.HTMLMapGrid import HTMLMapGrid
 from . import constants
-from ..utils import get_center
+from cartoframes.utils.utils import get_center
 
 
 class MapGrid(object):

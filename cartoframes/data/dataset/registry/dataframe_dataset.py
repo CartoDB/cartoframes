@@ -8,7 +8,7 @@ from .base_dataset import BaseDataset
 from cartoframes.utils.columns import Column, normalize_names
 from cartoframes.utils.geom_utils import decode_geometry, compute_geodataframe, \
     detect_encoding_type, save_index_as_column
-from cartoframes.utils.ut import map_geom_type, load_geojson, is_geojson
+from cartoframes.utils.utils import map_geom_type, load_geojson, is_geojson
 
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
