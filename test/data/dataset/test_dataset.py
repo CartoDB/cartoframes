@@ -29,7 +29,7 @@ except ImportError:
 from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
 from test.mocks.context_mock import ContextMock
 
-from test.utils import _UserUrlLoader
+from test.helpers import _UserUrlLoader
 
 try:
     import geopandas

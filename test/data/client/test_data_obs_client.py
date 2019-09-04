@@ -17,7 +17,7 @@ from cartoframes.data.clients import DataObsClient, SQLClient
 from cartoframes.data.clients.data_obs_client import get_countrytag
 from cartoframes.utils.columns import normalize_name
 
-from test.utils import _UserUrlLoader
+from test.helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 
