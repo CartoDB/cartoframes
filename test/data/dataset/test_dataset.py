@@ -26,10 +26,10 @@ try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
-from ..mocks.dataset_mock import DatasetMock, QueryDatasetMock
-from ..mocks.context_mock import ContextMock
+from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
+from test.mocks.context_mock import ContextMock
 
-from ..utils import _UserUrlLoader
+from test.utils import _UserUrlLoader
 
 try:
     import geopandas

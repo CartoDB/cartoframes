@@ -13,7 +13,7 @@ from cartoframes.utils.geom_utils import compute_query, compute_geodataframe, \
     ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
 
 from cartoframes.lib import context
-from ..mocks.context_mock import ContextMock
+from test.mocks.context_mock import ContextMock
 
 
 class TestDataUtils(unittest.TestCase):
