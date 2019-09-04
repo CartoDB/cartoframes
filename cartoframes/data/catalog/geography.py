@@ -1,4 +1,7 @@
 import pandas as pd
+
+from cartoframes.data.catalog.dataset import Datasets
+
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
@@ -22,7 +25,7 @@ class Geography(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
+        return Datasets(get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID]))
 
 
 class Geographies(pd.DataFrame):

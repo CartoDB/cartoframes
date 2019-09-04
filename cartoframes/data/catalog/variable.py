@@ -1,6 +1,9 @@
 import pandas as pd
-from data.catalog.repository.dataset_repo import get_dataset_repo
-from data.catalog.repository.variable_repo import get_variable_repo
+
+from cartoframes.data.catalog.dataset import Datasets
+
+from .repository.dataset_repo import get_dataset_repo
+from .repository.variable_repo import get_variable_repo
 
 _VARIABLE_FIELD_ID = 'id'
 
@@ -22,7 +25,7 @@ class Variable(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
+        return Datasets(get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID]))
 
 
 class Variables(pd.DataFrame):

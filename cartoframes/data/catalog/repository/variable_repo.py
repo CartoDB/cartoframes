@@ -21,6 +21,14 @@ class VariableRepository(object):
 
         return self._to_variable(result[0])
 
+    def get_by_dataset(self, dataset_id):
+        result = self.client.get_variables('dataset_id', dataset_id)
+
+        if len(result) == 0:
+            return None
+
+        return self._to_variable(result[0])
+
     @staticmethod
     def _to_variable(result):
         return {

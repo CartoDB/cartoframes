@@ -1,4 +1,7 @@
 import pandas as pd
+
+from cartoframes.data.catalog.dataset import Datasets
+
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
 
@@ -22,7 +25,7 @@ class Category(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
+        return Datasets(get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD]))
 
 
 class Categories(pd.DataFrame):

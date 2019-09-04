@@ -1,4 +1,9 @@
 import pandas as pd
+
+from cartoframes.data.catalog.geography import Geographies
+from cartoframes.data.catalog.category import Categories
+from cartoframes.data.catalog.dataset import Datasets
+
 from .repository.geography_repo import get_geography_repo
 from .repository.category_repo import get_category_repo
 from .repository.country_repo import get_country_repo
@@ -23,15 +28,15 @@ class Country(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_country(self[_COUNTRY_ID_FIELD])
+        return Datasets(get_dataset_repo().get_by_country(self[_COUNTRY_ID_FIELD]))
 
     @property
     def categories(self):
-        return get_category_repo().get_by_country(self[_COUNTRY_ID_FIELD])
+        return Categories(get_category_repo().get_by_country(self[_COUNTRY_ID_FIELD]))
 
     @property
     def geographies(self):
-        return get_geography_repo().get_by_country(self[_COUNTRY_ID_FIELD])
+        return Geographies(get_geography_repo().get_by_country(self[_COUNTRY_ID_FIELD]))
 
 
 class Countries(pd.DataFrame):

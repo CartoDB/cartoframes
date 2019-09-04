@@ -1,5 +1,9 @@
 import pandas as pd
+
 from .repository.dataset_repo import get_dataset_repo
+from .repository.variable_repo import get_variable_repo
+
+_DATASET_ID_FIELD = 'id'
 
 
 class Dataset(pd.Series):
@@ -16,6 +20,10 @@ class Dataset(pd.Series):
     def get_by_id(dataset_id):
         dataset = get_dataset_repo().get_by_id(dataset_id)
         return Dataset(dataset)
+
+    # @property
+    # def variables(self):
+    #     return Variables(get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD]))
 
 
 class Datasets(pd.DataFrame):
