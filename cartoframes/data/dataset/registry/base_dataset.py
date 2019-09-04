@@ -6,7 +6,7 @@ from carto.exceptions import CartoException, CartoRateLimitException
 from cartoframes.data.dataset.dataset_info import DatasetInfo
 from cartoframes.utils.geom_utils import decode_geometry, compute_query, convert_bool, \
     get_context_with_public_creds, ENC_WKB_BHEX
-from cartoframes import utils
+from cartoframes.utils import utils
 from cartoframes.lib import context
 from cartoframes.utils.columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
 
