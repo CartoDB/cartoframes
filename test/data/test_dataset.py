@@ -193,8 +193,10 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset.upload(table_name=self.test_write_table)
 
         dataset = Dataset(self.test_write_table, credentials=self.credentials)
-        dataset.download()
-        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
+        df = dataset.download()
+
+        dataset = Dataset(df)
+        dataset.upload(table_name=self.test_write_table, credentials=self.credentials, if_exists=Dataset.REPLACE)
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -475,12 +477,16 @@ class TestDatasetInfo(unittest.TestCase):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.credentials)
         dataset.upload(table_name='fake_table')
+
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
         dataset = DatasetMock(query, credentials=self.credentials)
         dataset.upload(table_name='fake_table')
+
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         dataset.update_dataset_info(privacy=Dataset.PUBLIC)
         self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
 
@@ -518,6 +524,8 @@ class TestDatasetInfo(unittest.TestCase):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
         dataset = DatasetMock(df)
         dataset.upload(table_name='fake_table', credentials=self.credentials)
+
+        dataset = DatasetMock('fake_table', credentials=self.credentials)
         self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
 
     def test_dataset_info_from_query(self):

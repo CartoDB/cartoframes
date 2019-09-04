@@ -101,15 +101,5 @@ class DatasetMock(Dataset):
     def _get_strategies_registry(self):
         return StrategiesRegistryMock()
 
-    def _set_strategy(self, strategy, data, credentials=None, schema=None):
-        if strategy == DataFrameDataset:
-            strategy = DataFrameDatasetMock
-        elif strategy == TableDataset:
-            strategy = TableDatasetMock
-        elif strategy == QueryDataset:
-            strategy = QueryDatasetMock
-
-        super(DatasetMock, self)._set_strategy(strategy, data, credentials, schema)
-
     def compute_geom_type(self):
         return Dataset.GEOM_TYPE_POINT
