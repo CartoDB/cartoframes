@@ -23,7 +23,7 @@ class TestVariableRepo(unittest.TestCase):
     }
 
     def setUp(self):
-        sql_variables = [{
+        mocked_sql_result = [{
             'id': 'var1',
             'name': 'Population',
             'group_id': 'vargroup1'
@@ -33,16 +33,18 @@ class TestVariableRepo(unittest.TestCase):
             'group_id': 'vargroup1'
         }]
 
-        RepoClient.get_variables = Mock(return_value=sql_variables)
+        RepoClient.get_variables = Mock(return_value=mocked_sql_result)
 
     def test_get_all(self):
-        # When
+        # Given
         repo = VariableRepository()
+
+        # When
         variables = repo.get_all()
 
         # Then
         expected_variables = [self.test_variable1, self.test_variable2]
-        self.assertEqual(expected_variables, variables)
+        assert variables == expected_variables
 
     def test_get_all_when_empty(self):
         # Given
@@ -53,7 +55,7 @@ class TestVariableRepo(unittest.TestCase):
         variables = repo.get_all()
 
         # Then
-        self.assertEqual([], variables)
+        assert variables == []
 
     def test_get_by_id(self):
         # Given
@@ -64,7 +66,7 @@ class TestVariableRepo(unittest.TestCase):
         variable = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(self.test_variable1, variable)
+        assert variable == self.test_variable1
 
     def test_get_by_id_unknown(self):
         # Given
@@ -76,4 +78,4 @@ class TestVariableRepo(unittest.TestCase):
         variable = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(None, variable)
+        assert variable is None

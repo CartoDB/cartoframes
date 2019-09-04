@@ -21,7 +21,7 @@ class TestCategoryRepo(unittest.TestCase):
     }
 
     def setUp(self):
-        sql_categories = [{
+        mocked_sql_result = [{
             'id': 'cat1',
             'name': 'Financial'
         }, {
@@ -29,11 +29,13 @@ class TestCategoryRepo(unittest.TestCase):
             'name': 'Demographics'
         }]
 
-        RepoClient.get_categories = Mock(return_value=sql_categories)
+        RepoClient.get_categories = Mock(return_value=mocked_sql_result)
 
     def test_get_all(self):
-        # When
+        # Given
         repo = CategoryRepository()
+
+        # When
         categories = repo.get_all()
 
         # Then
@@ -43,33 +45,33 @@ class TestCategoryRepo(unittest.TestCase):
     def test_get_all_when_empty(self):
         # Given
         RepoClient.get_categories = Mock(return_value=[])
+        repo = CategoryRepository()
 
         # When
-        repo = CategoryRepository()
         categories = repo.get_all()
 
         # Then
-        self.assertEqual([], categories)
+        assert categories == []
 
     def test_get_by_id(self):
         # Given
         requested_id = self.test_category1['id']
+        repo = CategoryRepository()
 
         # When
-        repo = CategoryRepository()
         category = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(self.test_category1, category)
+        assert category == self.test_category1
 
     def test_get_by_id_unknown(self):
         # Given
         RepoClient.get_categories = Mock(return_value=[])
         requested_id = 'unknown_id'
+        repo = CategoryRepository()
 
         # When
-        repo = CategoryRepository()
         category = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(None, category)
+        assert category is None

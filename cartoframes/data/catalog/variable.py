@@ -2,11 +2,18 @@ import pandas as pd
 from data.catalog.repository.dataset_repo import get_dataset_repo
 from data.catalog.repository.variable_repo import get_variable_repo
 
+_VARIABLE_FIELD_ID = 'id'
+
 
 class Variable(pd.Series):
 
-    def __init__(self, variable):
-        super(Variable, self).__init__(variable)
+    @property
+    def _constructor(self):
+        return Variable
+
+    @property
+    def _constructor_expanddim(self):
+        return Variables
 
     @staticmethod
     def get_by_id(variable_id):
@@ -15,13 +22,18 @@ class Variable(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self.id)
+        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
 
 
 class Variables(pd.DataFrame):
 
-    def __init__(self, items):
-        super(Variables, self).__init__(items)
+    @property
+    def _constructor(self):
+        return Variables
+
+    @property
+    def _constructor_sliced(self):
+        return Variable
 
     @staticmethod
     def get_all():

@@ -29,7 +29,7 @@ class TestGeographyRepo(unittest.TestCase):
     }
 
     def setUp(self):
-        sql_geographies = [{
+        mocked_sql_result = [{
             'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
             'name': 'ESP - Census',
             'provider_id': 'bbva',
@@ -45,38 +45,40 @@ class TestGeographyRepo(unittest.TestCase):
             'is_public_data': False
         }]
 
-        RepoClient.get_geographies = Mock(return_value=sql_geographies)
+        RepoClient.get_geographies = Mock(return_value=mocked_sql_result)
 
     def test_get_all(self):
-        # When
+        # Given
         repo = GeographyRepository()
+
+        # When
         geographies = repo.get_all()
 
         # Then
         expected_geographies = [self.test_geograhy1, self.test_geography2]
-        self.assertEqual(expected_geographies, geographies)
+        assert geographies == expected_geographies
 
     def test_get_all_when_empty(self):
         # Given
         RepoClient.get_geographies = Mock(return_value=[])
+        repo = GeographyRepository()
 
         # When
-        repo = GeographyRepository()
         geographies = repo.get_all()
 
         # Then
-        self.assertEqual([], geographies)
+        assert geographies == []
 
     def test_get_by_id(self):
         # Given
         requested_id = self.test_geograhy1['id']
+        repo = GeographyRepository()
 
         # When
-        repo = GeographyRepository()
         geography = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(self.test_geograhy1, geography)
+        assert geography == self.test_geograhy1
 
     def test_get_by_id_unknown(self):
         # Given
@@ -88,4 +90,4 @@ class TestGeographyRepo(unittest.TestCase):
         geography = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(None, geography)
+        assert geography is None

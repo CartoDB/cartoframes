@@ -38,7 +38,7 @@ class TestDatasetRepo(unittest.TestCase):
     }
 
     def setUp(self):
-        sql_datasets = [{
+        mocked_sql_result = [{
             'id': 'basicstats-census',
             'name': 'Basic Stats - Census',
             'provider_id': 'bbva',
@@ -64,47 +64,49 @@ class TestDatasetRepo(unittest.TestCase):
             'is_public_data': False
         }]
 
-        RepoClient.get_datasets = Mock(return_value=sql_datasets)
+        RepoClient.get_datasets = Mock(return_value=mocked_sql_result)
 
     def test_get_all(self):
-        # When
+        # Given
         repo = DatasetRepository()
+
+        # When
         datasets = repo.get_all()
 
         # Then
         expected_datasets = [self.test_dataset1, self.test_dataset2]
-        self.assertEqual(expected_datasets, datasets)
+        assert datasets == expected_datasets
 
     def test_get_all_when_empty(self):
         # Given
         RepoClient.get_datasets = Mock(return_value=[])
+        repo = DatasetRepository()
 
         # When
-        repo = DatasetRepository()
         datasets = repo.get_all()
 
         # Then
-        self.assertEqual([], datasets)
+        assert datasets == []
 
-    def test_get_by_id(self):
+    def test_get_by_id(self,):
         # Given
         requested_id = self.test_dataset1['id']
+        repo = DatasetRepository()
 
         # When
-        repo = DatasetRepository()
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(self.test_dataset1, dataset)
+        assert dataset == self.test_dataset1
 
     def test_get_by_id_unknown(self):
         # Given
         RepoClient.get_datasets = Mock(return_value=[])
         requested_id = 'unknown_id'
+        repo = DatasetRepository()
 
         # When
-        repo = DatasetRepository()
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        self.assertEqual(None, dataset)
+        assert dataset is None

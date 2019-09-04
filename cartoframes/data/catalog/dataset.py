@@ -4,8 +4,13 @@ from .repository.dataset_repo import get_dataset_repo
 
 class Dataset(pd.Series):
 
-    def __init__(self, dataset):
-        super(Dataset, self).__init__(dataset)
+    @property
+    def _constructor(self):
+        return Dataset
+
+    @property
+    def _constructor_expanddim(self):
+        return Datasets
 
     @staticmethod
     def get_by_id(dataset_id):
@@ -14,8 +19,14 @@ class Dataset(pd.Series):
 
 
 class Datasets(pd.DataFrame):
-    def __init__(self, items):
-        super(Datasets, self).__init__(items)
+
+    @property
+    def _constructor(self):
+        return Datasets
+
+    @property
+    def _constructor_sliced(self):
+        return Dataset
 
     @staticmethod
     def get_all():

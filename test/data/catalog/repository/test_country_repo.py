@@ -15,53 +15,55 @@ class TestCountryRepo(unittest.TestCase):
     test_country2 = {'iso_code3': 'usa'}
 
     def setUp(self):
-        sql_countries = [{
+        mocked_sql_result = [{
             'country_iso_code3': 'esp'
         }, {
             'country_iso_code3': 'usa'
         }]
 
-        RepoClient.get_countries = Mock(return_value=sql_countries)
+        RepoClient.get_countries = Mock(return_value=mocked_sql_result)
 
     def test_get_all(self):
-        # When
+        # Given
         repo = CountryRepository()
+
+        # When
         countries = repo.get_all()
 
         # Then
         expected_countries = [self.test_country1, self.test_country2]
-        self.assertEqual(expected_countries, countries)
+        assert countries == expected_countries
 
     def test_get_all_when_empty(self):
         # Given
         RepoClient.get_countries = Mock(return_value=[])
+        repo = CountryRepository()
 
         # When
-        repo = CountryRepository()
         countries = repo.get_all()
 
         # Then
-        self.assertEqual([], countries)
+        assert countries == []
 
-    def test_get_by_iso_code(self):
+    def test_get_by_id(self):
         # Given
         requested_iso_code = self.test_country1['iso_code3']
+        repo = CountryRepository()
 
         # When
-        repo = CountryRepository()
-        country = repo.get_by_iso_code(requested_iso_code)
+        country = repo.get_by_id(requested_iso_code)
 
         # Then
-        self.assertEqual(self.test_country1, country)
+        assert country == self.test_country1
 
     def test_get_by_iso_code_unknown(self):
         # Given
         RepoClient.get_countries = Mock(return_value=[])
         requested_iso_code = 'fra'
+        repo = CountryRepository()
 
         # When
-        repo = CountryRepository()
-        country = repo.get_by_iso_code(requested_iso_code)
+        country = repo.get_by_id(requested_iso_code)
 
         # Then
-        self.assertEqual(None, country)
+        assert country is None

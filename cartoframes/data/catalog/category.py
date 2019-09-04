@@ -2,11 +2,18 @@ import pandas as pd
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
 
+_CATEGORY_ID_FIELD = 'id'
+
 
 class Category(pd.Series):
 
-    def __init__(self, category):
-        super(Category, self).__init__(category)
+    @property
+    def _constructor(self):
+        return Category
+
+    @property
+    def _constructor_expanddim(self):
+        return Categories
 
     @staticmethod
     def get_by_id(category_id):
@@ -15,13 +22,18 @@ class Category(pd.Series):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_category(self.id)
+        return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
 
 
 class Categories(pd.DataFrame):
 
-    def __init__(self, items):
-        super(Categories, self).__init__(items)
+    @property
+    def _constructor(self):
+        return Categories
+
+    @property
+    def _constructor_sliced(self):
+        return Category
 
     @staticmethod
     def get_all():

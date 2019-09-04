@@ -8,7 +8,7 @@ class RepoClient(object):
     # __instance = None
 
     def __init__(self):
-        self.client = SQLClient(Credentials('do-metadata', '56fe654b5687739f3afcdfb685173441d319091e'))
+        self.client = SQLClient(Credentials('do-metadata', 'default_public'))
 
     def get_countries(self, field=None, value=None):
         query = 'select distinct country_iso_code3 from datasets'
