@@ -2,7 +2,7 @@
 import unittest
 
 from cartoframes.lib import context
-from cartoframes.client import SQLClient
+from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
 
 from ..mocks.context_mock import ContextMock

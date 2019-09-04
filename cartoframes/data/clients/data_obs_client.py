@@ -11,7 +11,7 @@ from carto.exceptions import CartoException
 
 from cartoframes.utils import utils
 from cartoframes.lib import context
-from ..auth import get_default_credentials
+from cartoframes.auth import get_default_credentials
 from cartoframes.data.dataset.dataset import Dataset
 
 

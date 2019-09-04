@@ -12,7 +12,7 @@ from carto.exceptions import CartoException
 
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
-from cartoframes.client import SQLClient
+from cartoframes.data.clients import SQLClient
 from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
