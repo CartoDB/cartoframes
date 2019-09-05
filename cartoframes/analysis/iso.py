@@ -29,22 +29,23 @@ class IsoAnalysis(object):
         return self._iso(source, range, **args, function='isodistance')
 
     def _iso(self,
-        source,
-        range,
-        dry_run=False,
-        table_name=None,
-        if_exists=None,
-        dataframe=False,
-        is_destination=None,
-        mode='car',
-        mode_type=None,
-        mode_traffic=None,
-        resolution=None,
-        maxpoints=None,
-        quality=None,
-        with_source_id=True,
-        with_source_geom=False,
-        function=None):
+             source,
+             range,
+             dry_run=False,
+             table_name=None,
+             if_exists=None,
+             dataframe=False,
+             is_destination=None,
+             mode='car',
+             mode_type=None,
+             mode_traffic=None,
+             resolution=None,
+             maxpoints=None,
+             quality=None,
+             with_source_id=True,
+             with_source_geom=False,
+             function=None
+    ):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
 
