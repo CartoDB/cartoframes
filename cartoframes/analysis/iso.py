@@ -113,8 +113,6 @@ class IsoAnalysis(object):
             result = {}
         else:
             # It would be nice to use execute_long_running_query, but we need the results
-            print(sql)
-            # result = self._context.execute_query(sql)
             result = Dataset(sql).download()
 
         return result
