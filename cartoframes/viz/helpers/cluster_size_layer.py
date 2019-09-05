@@ -10,7 +10,7 @@ from .. import defaults
 def cluster_size_layer(
         source, operation='count', value=None, resolution=32,
         title='', size=None, color=None, opacity=None,
-        strokewidth=None, strokecolor=None, description='',
+        stroke_width=None, stroke_color=None, description='',
         footer='', legend=True, popup=True, widget=False, animate=None):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by cluster.
@@ -29,8 +29,8 @@ def cluster_size_layer(
           '#4CC8A3' for lines.
         opacity (int, optional): Opacity value for point color and line features.
           Default is '0.8'.
-        strokewidth (int, optional): Size of the stroke on point features.
-        strokecolor (str, optional): Color of the stroke on point features.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
           Default is '#222'.
         description (str, optional): Description text legend placed under legend title.
         footer (str, optional): Footer text placed under legend items.
@@ -61,9 +61,9 @@ def cluster_size_layer(
                 'color': 'opacity({0}, {1})'.format(
                     color or '#FFB927', opacity or '0.8'),
                 'strokeWidth': '{0}'.format(
-                    strokewidth or defaults.STYLE['point']['strokeWidth']),
+                    stroke_width or defaults.STYLE['point']['strokeWidth']),
                 'strokeColor': '{0}'.format(
-                    strokecolor or defaults.STYLE['point']['strokeColor']),
+                    stroke_color or defaults.STYLE['point']['strokeColor']),
                 'filter': animation_filter,
                 'resolution': '{0}'.format(resolution)
             }
