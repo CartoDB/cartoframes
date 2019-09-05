@@ -367,7 +367,7 @@ var init = (function () {
 
   function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
-    const type = mapLayer.metadata.properties[widget.value].type;
+    const type = _getWidgetType(mapLayer, widget.value, widget.prop);
 
     switch (widget.type) {
       case 'histogram':
@@ -404,6 +404,18 @@ var init = (function () {
 
       bridge.build();
     });
+  }
+
+  function _getWidgetType(layer, property, value) {
+    return layer.metadata.properties[value] ?
+      layer.metadata.properties[value].type
+      : _getWidgetPropertyType(layer, property);
+  }
+
+  function _getWidgetPropertyType(layer, property) {
+    return layer.metadata.properties[property] ?
+      layer.metadata.properties[property].type
+      : null;
   }
 
   function SourceFactory() {
@@ -453,10 +465,10 @@ var init = (function () {
       throw e;
     }
 
-    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
-    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     mapLayer.addTo(map);
+    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
+    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     return mapLayer;
   }

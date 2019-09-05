@@ -35,7 +35,8 @@ class QueryDataset(BaseDataset):
         self._is_ready_for_dowload_validation()
         columns = self._get_query_columns()
         query = self._get_read_query(columns, limit)
-        return self._copyto(columns, query, limit, decode_geom, retry_times)
+        self._df = self._copyto(columns, query, limit, decode_geom, retry_times)
+        return self._df
 
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()

@@ -22,6 +22,7 @@ class BaseDataset():
         self._verbose = 0
         self._credentials = credentials
         self._context = self._create_context()
+        self._df = None
         self._table_name = None
         self._schema = None
         self._dataset_info = None
@@ -59,6 +60,11 @@ class BaseDataset():
         self._credentials = credentials
         self._context = self._create_context()
         self._schema = self._get_schema()
+
+    @property
+    def dataframe(self):
+        """Dataset DataFrame"""
+        return self._df
 
     @property
     def table_name(self):
