@@ -123,15 +123,25 @@ var init = (function () {
   function createLegend(layer, legendData, layerIndex, mapIndex=0) {
     const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
     
-    if (legendData.prop) {
+    if (legendData.length) {
+      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+    } else {
+      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    }
+  }
+
+  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
+
+    if (legend.prop) {
       const othersLabel = 'Others';   // TODO: i18n
-      const prop = legendData.prop;
-      const dynamic = legendData.dynamic;
-      const variable = legendData.variable;
+      const prop = legend.prop;
+      const dynamic = legend.dynamic;
+      const variable = legend.variable;
       const config = { othersLabel, variable };
       const options = { format, config, dynamic };
 
-      if (legendData.type.startsWith('size-continuous')) {
+      if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
