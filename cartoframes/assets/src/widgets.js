@@ -10,7 +10,7 @@ export function renderWidget(widget, value) {
 
 export function renderBridge(bridge, widget, mapLayer) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
-  const type = mapLayer.metadata.properties[widget.value].type;
+  const type = _getWidgetType(mapLayer, widget.value, widget.prop);
 
   switch (widget.type) {
     case 'histogram':
@@ -47,4 +47,16 @@ export function bridgeLayerWidgets(map, mapLayer, mapSource, widgets) {
 
     bridge.build();
   });
+}
+
+function _getWidgetType(layer, property, value) {
+  return layer.metadata.properties[value]
+    ? layer.metadata.properties[value].type
+    : _getWidgetPropertyType(layer, property);
+}
+
+function _getWidgetPropertyType(layer, property) {
+  return layer.metadata.properties[property]
+    ? layer.metadata.properties[property].type
+    : null;
 }
