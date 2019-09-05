@@ -22,7 +22,13 @@ class IsoAnalysis(object):
         self._credentials = credentials or get_default_credentials()
         self._context = context.create_context(self._credentials)
 
-    def isochrones(self,
+    def isochrones(self, source, range, **args):
+        return self._iso(source, range, **args, function='isochrone')
+
+    def isodistances(self, source, range, **args):
+        return self._iso(source, range, **args, function='isodistance')
+
+    def _iso(self,
         source,
         range,
         dry_run=False,
@@ -37,7 +43,8 @@ class IsoAnalysis(object):
         maxpoints=None,
         quality=None,
         with_source_id=True,
-        with_source_geom=False):
+        with_source_geom=False,
+        function=None):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
 
@@ -51,7 +58,7 @@ class IsoAnalysis(object):
         else:
             source_query = 'SELECT * FROM {table}'.format(table=source.table_name)
 
-        iso_function = '_cdb_isochrone_exception_safe'
+        iso_function = '_cdb_{function}_exception_safe'.format(function=function)
         # TODO: use **options argument?
         options = {
             'is_destination': is_destination,
