@@ -1,5 +1,6 @@
 from cartoframes.client import SQLClient
 from cartoframes.auth import Credentials
+from do_metadata_key import key
 
 
 class RepoClient(object):
@@ -8,7 +9,7 @@ class RepoClient(object):
     # __instance = None
 
     def __init__(self):
-        self.client = SQLClient(Credentials('do-metadata', 'default_public'))
+        self.client = SQLClient(Credentials('do-metadata', key))
 
     def get_countries(self, field=None, value=None):
         query = 'select distinct country_iso_code3 from datasets'
