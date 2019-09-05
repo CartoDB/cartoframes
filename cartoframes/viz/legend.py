@@ -15,7 +15,7 @@ class Legend(object):
         title (str, optional): Title of legend.
         description (str, optional): Description in legend.
         footer (str, optional): Footer of legend. This is often used to attribute data sources.
-        variable (optional): If the information in the legend depends on a different value than the
+        variable (str, optional): If the information in the legend depends on a different value than the
             information set to the style property, it is possible to set an independent variable
 
     Example:
