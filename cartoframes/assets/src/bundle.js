@@ -378,10 +378,10 @@ var init = (function () {
 
   function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
-    const type = _getWidgetType(mapLayer, widget.value, widget.prop);
 
     switch (widget.type) {
       case 'histogram':
+        const type = _getWidgetType(mapLayer, widget.value, widget.prop);
         const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
         bridge[histogram](widget.element, widget.value, widget.options);
 
@@ -408,13 +408,11 @@ var init = (function () {
       map: map
     });
 
-    mapLayer.on('loaded', () => {
-      widgets
-        .filter((widget) => widget.has_bridge)
-        .forEach((widget) => renderBridge(bridge, widget, mapLayer));
+    widgets
+      .filter((widget) => widget.has_bridge)
+      .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-      bridge.build();
-    });
+    bridge.build();
   }
 
   function _getWidgetType(layer, property, value) {
@@ -478,6 +476,7 @@ var init = (function () {
 
 
     mapLayer.addTo(map);
+
     setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
     setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
