@@ -11,7 +11,7 @@ class GeographyRepository(object):
         self.client = RepoClient()
 
     def get_all(self):
-        return [self._to_geography(result) for result in self.client.get_geographies()]
+        return self._to_geographies(self.client.get_geographies())
 
     def get_by_id(self, geography_id):
         result = self.client.get_geographies('id', geography_id)
@@ -27,11 +27,19 @@ class GeographyRepository(object):
 
     @staticmethod
     def _to_geography(result):
-        return {
+        from cartoframes.data.catalog.geography import Geography
+
+        return Geography({
             'id': result['id'],
             'name': result['name'],
             'provider_id': result['provider_id'],
             'country_iso_code3': result['country_iso_code3'],
             'version': result['version'],
             'is_public': result['is_public_data']
-        }
+        })
+
+    @staticmethod
+    def _to_geographies(results):
+        from cartoframes.data.catalog.geography import Geographies
+
+        return Geographies(GeographyRepository._to_geography(result) for result in results)

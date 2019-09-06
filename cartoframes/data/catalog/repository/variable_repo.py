@@ -11,7 +11,7 @@ class VariableRepository(object):
         self.client = RepoClient()
 
     def get_all(self):
-        return [self._to_variable(result) for result in self.client.get_variables()]
+        return self._to_variables(self.client.get_variables())
 
     def get_by_id(self, variable_id):
         result = self.client.get_variables('id', variable_id)
@@ -22,17 +22,20 @@ class VariableRepository(object):
         return self._to_variable(result[0])
 
     def get_by_dataset(self, dataset_id):
-        result = self.client.get_variables('dataset_id', dataset_id)
-
-        if len(result) == 0:
-            return None
-
-        return self._to_variable(result[0])
+        return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
 
     @staticmethod
     def _to_variable(result):
-        return {
+        from cartoframes.data.catalog.variable import Variable
+
+        return Variable({
             'id': result['id'],
             'name': result['name'],
-            'group_id': result['group_id']
-        }
+            'group_id': result['variable_group_id']
+        })
+
+    @staticmethod
+    def _to_variables(results):
+        from cartoframes.data.catalog.variable import Variables
+
+        return Variables([VariableRepository._to_variable(result) for result in results])

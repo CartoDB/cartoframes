@@ -1,7 +1,5 @@
 import pandas as pd
 
-from cartoframes.data.catalog.dataset import Datasets
-
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
 
@@ -20,12 +18,17 @@ class Category(pd.Series):
 
     @staticmethod
     def get_by_id(category_id):
-        category = get_category_repo().get_by_id(category_id)
-        return Category(category)
+        return get_category_repo().get_by_id(category_id)
 
     @property
     def datasets(self):
-        return Datasets(get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD]))
+        return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class Categories(pd.DataFrame):
@@ -40,8 +43,14 @@ class Categories(pd.DataFrame):
 
     @staticmethod
     def get_all():
-        return Categories([Category(cat) for cat in get_category_repo().get_all()])
+        return get_category_repo().get_all()
 
     @staticmethod
     def get_by_id(category_id):
         return Category.get_by_id(category_id)
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other

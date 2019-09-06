@@ -11,7 +11,7 @@ class CountryRepository(object):
         self.client = RepoClient()
 
     def get_all(self):
-        return [self._to_country(result) for result in self.client.get_countries()]
+        return self._to_countries(self.client.get_countries())
 
     def get_by_id(self, iso_code3):
         result = self.client.get_countries('country_iso_code3', iso_code3)
@@ -23,6 +23,14 @@ class CountryRepository(object):
 
     @staticmethod
     def _to_country(result):
-        return {
+        from cartoframes.data.catalog.country import Country
+
+        return Country({
             'iso_code3': result['country_iso_code3']
-        }
+        })
+
+    @staticmethod
+    def _to_countries(results):
+        from cartoframes.data.catalog.country import Countries
+
+        return Countries([CountryRepository._to_country(result) for result in results])

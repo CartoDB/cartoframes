@@ -11,7 +11,7 @@ class CategoryRepository(object):
         self.client = RepoClient()
 
     def get_all(self):
-        return [self._to_category(result) for result in self.client.get_categories()]
+        return self._to_categories(self.client.get_categories())
 
     def get_by_id(self, category_id):
         result = self.client.get_categories('id', category_id)
@@ -27,7 +27,15 @@ class CategoryRepository(object):
 
     @staticmethod
     def _to_category(result):
-        return {
+        from cartoframes.data.catalog.category import Category
+
+        return Category({
             'id': result['id'],
             'name': result['name']
-        }
+        })
+
+    @staticmethod
+    def _to_categories(results):
+        from cartoframes.data.catalog.category import Categories
+
+        return Categories([CategoryRepository._to_category(result) for result in results])

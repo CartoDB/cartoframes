@@ -1,7 +1,10 @@
 import unittest
 
+from cartoframes.data.catalog.category import Categories
+
 from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
+from data.catalog.examples import test_category1, test_categories
 
 try:
     from unittest.mock import Mock
@@ -10,15 +13,6 @@ except ImportError:
 
 
 class TestCategoryRepo(unittest.TestCase):
-
-    test_category1 = {
-        'id': 'cat1',
-        'name': 'Financial'
-    }
-    test_category2 = {
-        'id': 'cat2',
-        'name': 'Demographics'
-    }
 
     def setUp(self):
         mocked_sql_result = [{
@@ -39,8 +33,7 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all()
 
         # Then
-        expected_categories = [self.test_category1, self.test_category2]
-        self.assertEqual(expected_categories, categories)
+        assert categories == test_categories
 
     def test_get_all_when_empty(self):
         # Given
@@ -51,18 +44,18 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all()
 
         # Then
-        assert categories == []
+        assert categories == Categories([])
 
     def test_get_by_id(self):
         # Given
-        requested_id = self.test_category1['id']
+        requested_id = test_category1['id']
         repo = CategoryRepository()
 
         # When
         category = repo.get_by_id(requested_id)
 
         # Then
-        assert category == self.test_category1
+        assert category == test_category1
 
     def test_get_by_id_unknown(self):
         # Given

@@ -18,12 +18,17 @@ class Dataset(pd.Series):
 
     @staticmethod
     def get_by_id(dataset_id):
-        dataset = get_dataset_repo().get_by_id(dataset_id)
-        return Dataset(dataset)
+        return get_dataset_repo().get_by_id(dataset_id)
 
-    # @property
-    # def variables(self):
-    #     return Variables(get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD]))
+    @property
+    def variables(self):
+        return get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD])
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class Datasets(pd.DataFrame):
@@ -38,8 +43,14 @@ class Datasets(pd.DataFrame):
 
     @staticmethod
     def get_all():
-        return Datasets([Dataset(dataset) for dataset in get_dataset_repo().get_all()])
+        return get_dataset_repo().get_all()
 
     @staticmethod
     def get_by_id(dataset_id):
         return Dataset.get_by_id(dataset_id)
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other

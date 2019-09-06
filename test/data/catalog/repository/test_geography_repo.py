@@ -1,7 +1,10 @@
 import unittest
 
+from cartoframes.data.catalog.geography import Geographies
+
 from cartoframes.data.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
+from data.catalog.examples import test_geography1, test_geographies
 
 try:
     from unittest.mock import Mock
@@ -10,23 +13,6 @@ except ImportError:
 
 
 class TestGeographyRepo(unittest.TestCase):
-
-    test_geograhy1 = {
-        'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
-        'name': 'ESP - Census',
-        'provider_id': 'bbva',
-        'country_iso_code3': 'esp',
-        'version': '20190203',
-        'is_public': True
-    }
-    test_geography2 = {
-        'id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
-        'name': 'ESP - Municipalities',
-        'provider_id': 'bbva',
-        'country_iso_code3': 'esp',
-        'version': '20190203',
-        'is_public': False
-    }
 
     def setUp(self):
         mocked_sql_result = [{
@@ -55,8 +41,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        expected_geographies = [self.test_geograhy1, self.test_geography2]
-        assert geographies == expected_geographies
+        assert geographies == test_geographies
 
     def test_get_all_when_empty(self):
         # Given
@@ -67,18 +52,18 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        assert geographies == []
+        assert geographies == Geographies([])
 
     def test_get_by_id(self):
         # Given
-        requested_id = self.test_geograhy1['id']
+        requested_id = test_geography1['id']
         repo = GeographyRepository()
 
         # When
         geography = repo.get_by_id(requested_id)
 
         # Then
-        assert geography == self.test_geograhy1
+        assert geography == test_geography1
 
     def test_get_by_id_unknown(self):
         # Given

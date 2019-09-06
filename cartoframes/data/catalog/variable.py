@@ -1,7 +1,5 @@
 import pandas as pd
 
-from cartoframes.data.catalog.dataset import Datasets
-
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
@@ -20,12 +18,17 @@ class Variable(pd.Series):
 
     @staticmethod
     def get_by_id(variable_id):
-        metadata = get_variable_repo().get_by_id(variable_id)
-        return Variable(metadata)
+        return get_variable_repo().get_by_id(variable_id)
 
     @property
     def datasets(self):
-        return Datasets(get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID]))
+        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class Variables(pd.DataFrame):
@@ -40,8 +43,14 @@ class Variables(pd.DataFrame):
 
     @staticmethod
     def get_all():
-        return Variables([Variable(var) for var in get_variable_repo().get_all()])
+        return get_variable_repo().get_all()
 
     @staticmethod
     def get_by_id(variable_id):
         return Variable.get_by_id(variable_id)
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other

@@ -1,8 +1,12 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.catalog.dataset import Datasets
+from cartoframes.data.catalog.variable import Variables
+from cartoframes.data.catalog.dataset import Datasets, Dataset
+from cartoframes.data.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
+
+from data.catalog.examples import test_dataset1, test_datasets, test_variables
 
 try:
     from unittest.mock import Mock, patch
@@ -10,40 +14,41 @@ except ImportError:
     from mock import Mock, patch
 
 
-@patch.object(DatasetRepository, 'get_all')
+class TestDataset(unittest.TestCase):
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    def test_get_by_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_dataset1
+
+        # When
+        dataset = Dataset.get_by_id(test_dataset1['id'])
+
+        # Then
+        assert isinstance(dataset, pd.Series)
+        assert isinstance(dataset, Dataset)
+        assert dataset == test_dataset1
+
+    @patch.object(VariableRepository, 'get_by_dataset')
+    def test_get_variables(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_variables
+
+        # When
+        variables = test_dataset1.variables
+
+        # Then
+        assert isinstance(variables, pd.DataFrame)
+        assert isinstance(variables, Variables)
+        assert variables == test_variables
+
+
 class TestDatasets(unittest.TestCase):
 
-    test_dataset1 = {
-        'id': 'basicstats-census',
-        'name': 'Basic Stats - Census',
-        'provider_id': 'bbva',
-        'category_id': 'demographics',
-        'country_iso_code3': 'esp',
-        'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019',
-        'temporal_aggregations': '5yrs',
-        'time_coverage': ['2006-01-01', '2010-01-01'],
-        'group_id': 'basicstats_esp_2019',
-        'version': '20190203',
-        'is_public': True
-    }
-    test_dataset2 = {
-        'id': 'basicstats-municipalities',
-        'name': 'Basic Stats - Municipalities',
-        'provider_id': 'bbva',
-        'category_id': 'demographics',
-        'country_iso_code3': 'esp',
-        'geography_id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
-        'temporal_aggregations': '5yrs',
-        'time_coverage': ['2006-01-01', '2010-01-01'],
-        'group_id': 'basicstats_esp_2019',
-        'version': '20190203',
-        'is_public': False
-    }
-    expected_datasets = [test_dataset1, test_dataset2]
-
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
-        mocked_repo.return_value = self.expected_datasets
+        mocked_repo.return_value = test_datasets
 
         # When
         datasets = Datasets.get_all()
@@ -51,3 +56,16 @@ class TestDatasets(unittest.TestCase):
         # Then
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    def test_get_by_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_dataset1
+
+        # When
+        dataset = Datasets.get_by_id(test_dataset1['id'])
+
+        # Then
+        assert isinstance(dataset, pd.Series)
+        assert isinstance(dataset, Dataset)
+        assert dataset == test_dataset1

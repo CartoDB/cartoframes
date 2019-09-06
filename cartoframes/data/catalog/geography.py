@@ -1,7 +1,5 @@
 import pandas as pd
 
-from cartoframes.data.catalog.dataset import Datasets
-
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
@@ -20,12 +18,17 @@ class Geography(pd.Series):
 
     @staticmethod
     def get_by_id(geography_id):
-        metadata = get_geography_repo().get_by_id(geography_id)
-        return Geography(metadata)
+        return get_geography_repo().get_by_id(geography_id)
 
     @property
     def datasets(self):
-        return Datasets(get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID]))
+        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class Geographies(pd.DataFrame):
@@ -40,8 +43,14 @@ class Geographies(pd.DataFrame):
 
     @staticmethod
     def get_all():
-        return Geographies([Geography(var) for var in get_geography_repo().get_all()])
+        return get_geography_repo().get_all()
 
     @staticmethod
     def get_by_id(geography_id):
         return Geography.get_by_id(geography_id)
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self == other
