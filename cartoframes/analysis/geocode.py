@@ -64,11 +64,11 @@ def _needs_geocoding_expr(hash_expr):
     )
 
 
-def _exists_hash_query(table):
+def _exists_column_query(table, column):
     return """
       SELECT TRUE FROM pg_catalog.pg_attribute a
       WHERE
-        a.attname = '{hash_column}'
+        a.attname = '{column}'
         AND a.attnum > 0
         AND NOT a.attisdropped
         AND a.attrelid = (
@@ -80,7 +80,7 @@ def _exists_hash_query(table):
         );
     """.format(
         table=table,
-        hash_column=HASH_COLUMN
+        column=column
     )
 
 
@@ -456,7 +456,7 @@ class GeocodeAnalysis(object):
         return output  # TODO: GeocodeResult object
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
-        sql = _exists_hash_query(dataset_name)
+        sql = _exists_column_query(dataset_name, HASH_COLUMN)
         logging.debug("Executing check first time query: %s" % sql)
         result = self._context.execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
