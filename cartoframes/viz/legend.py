@@ -7,50 +7,48 @@ class Legend(object):
     """Legend
 
     Args:
-        data (dict): The legend definition for a layer. It contains the
-          information to render a legend:
-
-          - `type`: ``color-category``, ``color-bins``, ``color-continuous``,
-            ``size-bins``, or ``size-continuous``
-          - `prop` (optional): ``color``, ``width``, ``strokeColor``, or ``strokeWidth``
-          - `title` (optional): Title of legend
-          - `description` (optional): Description in legend
-          - `footer` (optional): Footer of legend. This is often used to
-            attribute data sources.
+        type (str): 'color-category', 'color-bins', 'color-continuous',
+            'size-bins', or 'size-continuous'.
+        prop (str, optional): 'color', 'width', 'strokeColor', or 'strokeWidth'.
+        dynamic (boolean, optional): Update an render the legend depending on viewport changes.
+            Defaults to ``True``.
+        title (str, optional): Title of legend.
+        description (str, optional): Description in legend.
+        footer (str, optional): Footer of legend. This is often used to attribute data sources.
 
     Example:
 
     .. code::
-
         from cartoframes.viz import Legend
 
-        Legend({
-            'type': 'color-category',
-            'title': '[TITLE]',
-            'description': '[description]',
-            'footer': '[footer]'
-        })
-
+        Legend('color-category', title='Legend Title', 'description': '[description]', 'footer': '[footer]')
     """
 
-    def __init__(self, data=None):
-        self._init_legend(data)
+    def __init__(self, f_arg, **kwargs):
+        if isinstance(f_arg, str):
+            self._init_legend(kwargs, f_arg)
+        elif f_arg is None:
+            self._init_legend()
+        elif isinstance(f_arg, dict):
+            self._init_legend(f_arg)
+        else:
+            raise ValueError('Wrong legend input.')
 
-    def _init_legend(self, data):
+    def _init_legend(self, data, legend_type=None):
         self._type = ''
         self._prop = ''
+        self._dynamic = True
         self._title = ''
         self._description = ''
         self._footer = ''
+
         if data is not None:
-            if isinstance(data, dict):
-                self._type = data.get('type', '')
-                self._prop = data.get('prop', '')
-                self._title = data.get('title', '')
-                self._description = data.get('description', '')
-                self._footer = data.get('footer', '')
-            else:
-                raise ValueError('Wrong legend input.')
+            self._type = legend_type if legend_type else data.get('type', '')
+            self._prop = data.get('prop', '')
+            self._dynamic = data.get('dynamic', True)
+            self._title = data.get('title', '')
+            self._description = data.get('description', '')
+            self._footer = data.get('footer', '')
 
     def get_info(self, geom_type=None):
         if self._type or self._title or self._description or self._footer:
@@ -60,6 +58,7 @@ class Legend(object):
             return {
                 'type': _type,
                 'prop': _prop,
+                'dynamic': self._dynamic,
                 'title': self._title,
                 'description': self._description,
                 'footer': self._footer

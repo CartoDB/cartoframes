@@ -1,5 +1,5 @@
-{% macro createLegend(legend_data, id) -%}
-  <as-legend-{{legend_data.type}} id="{{id}}" slot="legends"></as-legend-{{legend_data.type}}>
+{% macro createLegend(legend, id) -%}
+  <as-legend-{{legend.type}} id="{{id}}" slot="legends"></as-legend-{{legend.type}}>
 {%- endmacro %}
 
 <div class="as-panel__element" id="legends">
@@ -13,14 +13,28 @@
 
   {% for layer in layers|reverse %}
     {% if layer.legend %}
-      <as-legend
-        heading="{{layer.legend.title}}"
-        description="{{layer.legend.description}}">
-        {{ createLegend(layer.legend, 'layer%d_map%d_legend' | format(loop.index0, 0)) }}
-        {% if layer.legend.footer %}
-          <span slot="footer">{{layer.legend.footer}}</span>
-        {% endif %}
-      </as-legend>
+    {% set layer_index = loop.index0 %}
+      {% if layer.has_legend_list %}
+        {% for legend in layer.legend %}
+          <as-legend
+            heading="{{legend.title}}"
+            description="{{legend.description}}">
+            {{ createLegend(legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, loop.index0)) }}
+            {% if legend.footer %}
+              <span slot="footer">{{legend.footer}}</span>
+            {% endif %}
+          </as-legend>
+        {% endfor %}
+      {% else %}
+        <as-legend
+          heading="{{layer.legend.title}}"
+          description="{{layer.legend.description}}">
+          {{ createLegend(layer.legend, 'layer%d_map%d_legend%d' | format(layer_index, 0, 0)) }}
+          {% if layer.legend.footer %}
+            <span slot="footer">{{layer.legend.footer}}</span>
+          {% endif %}
+        </as-legend>
+      {% endif %}
     {% endif %}
   {% endfor %}
 </div>
