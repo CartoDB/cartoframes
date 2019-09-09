@@ -1,0 +1,9 @@
+const maps = {{ maps|tojson }};
+const show_info = '{{show_info}}' === 'True';
+const is_static = '{{is_static}}' === 'True';
+
+init({
+  show_info,
+  is_static,
+  maps
+});

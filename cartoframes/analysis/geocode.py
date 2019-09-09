@@ -64,11 +64,11 @@ def _needs_geocoding_expr(hash_expr):
     )
 
 
-def _exists_hash_query(table):
+def _exists_column_query(table, column):
     return """
       SELECT TRUE FROM pg_catalog.pg_attribute a
       WHERE
-        a.attname = '{hash_column}'
+        a.attname = '{column}'
         AND a.attnum > 0
         AND NOT a.attisdropped
         AND a.attrelid = (
@@ -80,7 +80,7 @@ def _exists_hash_query(table):
         );
     """.format(
         table=table,
-        hash_column=HASH_COLUMN
+        column=column
     )
 
 
@@ -311,7 +311,7 @@ class GeocodeAnalysis(object):
         temporary_table = False
 
         input_dataset = dataset
-        if input_dataset.is_saved_in_carto and input_dataset.table_name:
+        if input_dataset.is_remote() and input_dataset.table_name:
             # input dataset is a table
             if table_name:
                 # Copy input dataset into a new table
@@ -342,15 +342,12 @@ class GeocodeAnalysis(object):
             if temporary_table:
                 temporary_dataset = result_dataset
                 result_dataset = Dataset(temporary_dataset.download())
-                # TODO: we cannot temporary_dataset.delete() at the moment
-                # because download() alters the Dataset strategy;
-                # this should change shortly
-                # temporary_dataset.delete()
-                Dataset(input_table_name, credentials=self._credentials).delete()
+                temporary_dataset.delete()
 
         result = result_dataset
         if input_dataframe:
-            # TODO: only if not saved to table? (table_name is None?)
+            # Note that we return a dataframe whenever the input is dataframe,
+            # even if we have uploaded it to a table (table_name is not None).
             if dry_run:
                 result = input_dataframe
             else:
@@ -415,6 +412,14 @@ class GeocodeAnalysis(object):
                         .format(table=table_name, hash_column=HASH_COLUMN)
                     )
 
+                    if metadata:
+                        # Create column to store result metadata
+                        logging.info("Adding column {} if needed".format(metadata))
+                        self._context.execute_query(
+                            "ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {metadata_column} jsonb;"
+                            .format(table=table_name, metadata_column=metadata)
+                        )
+
                     sql = _geocode_query(table_name, street, city, state, country, metadata)
                     logging.debug("Executing query: %s" % sql)
                     result = None
@@ -456,7 +461,7 @@ class GeocodeAnalysis(object):
         return output  # TODO: GeocodeResult object
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
-        sql = _exists_hash_query(dataset_name)
+        sql = _exists_column_query(dataset_name, HASH_COLUMN)
         logging.debug("Executing check first time query: %s" % sql)
         result = self._context.execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:

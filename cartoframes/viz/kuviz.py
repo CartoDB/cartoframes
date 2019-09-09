@@ -32,7 +32,7 @@ class KuvizPublisher(object):
         return _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
 
     def is_sync(self):
-        return all(layer.source.dataset.is_saved_in_carto for layer in self._layers)
+        return all(layer.source.dataset.is_remote() for layer in self._layers)
 
     def is_public(self):
         return all(layer.source.dataset.is_public() for layer in self._layers)
@@ -58,7 +58,7 @@ class KuvizPublisher(object):
             self._sync_layer(layer, table_name, dataset_credentials)
 
     def _sync_layer(self, layer, table_name, credentials):
-        if not layer.source.dataset.is_saved_in_carto:
+        if layer.source.dataset.is_local():
             layer.source.dataset.upload(table_name=table_name, credentials=credentials)
             layer.source = Source(table_name, credentials=credentials)
             warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '

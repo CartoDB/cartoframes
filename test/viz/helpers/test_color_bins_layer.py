@@ -26,8 +26,8 @@ class TestColorBinsLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
-        self.assertEqual(layer.style._style['line']['color'], 'ramp(globalQuantiles($name, 5), purpor)')
+        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(globalQuantiles($name, 5), purpor),1)')
+        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(globalQuantiles($name, 5), purpor),1)')
         self.assertEqual(layer.style._style['polygon']['color'],
                          'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)')
         self.assertNotEqual(layer.popup, None)
@@ -56,7 +56,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(globalQuantiles($name, 3), prism)'
+            'opacity(ramp(globalQuantiles($name, 3), prism),1)'
         )
 
     def test_color_bins_layer_line(self):
@@ -73,7 +73,7 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalQuantiles($name, 3), [blue,#F00])'
+            'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]),1)'
         )
 
     def test_color_bins_layer_polygon(self):
@@ -103,11 +103,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(globalQuantiles($name, 5), purpor)'
+            'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalQuantiles($name, 5), purpor)'
+            'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['polygon']['color'],
@@ -122,11 +122,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(globalEqIntervals($name, 5), purpor)'
+            'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalEqIntervals($name, 5), purpor)'
+            'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['polygon']['color'],
@@ -141,11 +141,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(globalStandardDev($name, 5), temps)'
+            'opacity(ramp(globalStandardDev($name, 5), temps),1)'
         )
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(globalStandardDev($name, 5), temps)'
+            'opacity(ramp(globalStandardDev($name, 5), temps),1)'
         )
         self.assertEqual(
             layer.style._style['polygon']['color'],
@@ -170,11 +170,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(buckets($name, [0, 1, 2]), purpor)'
+            'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(buckets($name, [0, 1, 2]), purpor)'
+            'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
         )
         self.assertEqual(
             layer.style._style['polygon']['color'],

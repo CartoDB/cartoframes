@@ -8,18 +8,20 @@ class Widget():
     """Widget
 
     Args:
-        data (dict): The widget definition for a layer. It contains the information to render a widget:
-            `type`: 'default', 'formula', time-series', 'animation', 'category', 'histogram'
-            `value`: A constant value or a CARTO VL expression
+        type: The widget type. It can be 'default', 'formula', time-series', 'animation', 'category', 'histogram'.
+        value: A constant value or a CARTO VL expression.
+        title (optional): Widget title.
+        description (optional): Description shown below the title.
+        footer (optional): Footer of widget. This is often used to attribute data sources.
 
-            The widget also can display text information: `title`, `description` and `footer`.
     Example:
 
     .. code::
 
         from cartoframes.viz import Widget
 
-        Widget('formula', value='viewportSum($amount)', title='...')
+        Widget('formula', value='viewportSum($amount)', title='Widget Title',
+               'description': '[description]', 'footer': '[footer]')
     """
 
     def __init__(self, f_arg, **kwargs):
@@ -95,4 +97,6 @@ class Widget():
                 options[key] = value
 
         options['read_only'] = data.get('read_only', False)
+        options['buckets'] = data.get('buckets', 20)
+
         return options

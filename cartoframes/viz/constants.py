@@ -35,6 +35,7 @@ LEGEND_PROPERTIES = [
 ]
 
 LEGEND_TYPES = [
+    'default',
     'color-bins',
     'color-bins-line',
     'color-bins-point',
@@ -93,4 +94,4 @@ CLUSTER_OPERATIONS = {
 
 THEMES = ['dark', 'light']
 
-DEFAULT_GRID_M_SIZE = 1
+DEFAULT_LAYOUT_M_SIZE = 1

@@ -54,7 +54,6 @@ var init = (function () {
   function updateViewport(map) {
     function updateMapInfo() {
       const mapInfo$ = document.getElementById('map-info');
-    
       const center = map.getCenter();
       const lat = center.lat.toFixed(6);
       const lng = center.lng.toFixed(6);
@@ -122,22 +121,27 @@ var init = (function () {
   }
 
   function createLegend(layer, legendData, layerIndex, mapIndex=0) {
-    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
+    if (legendData.length) {
+      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+    } else {
+      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    }
+  }
 
-    if (legendData.prop) {
+  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
+
+    if (legend.prop) {
       const config = { othersLabel: 'Others' };  // TODO: i18n
-      const opts = { format, config };
+      const prop = legend.prop;
+      const dynamic = legend.dynamic;
+      const opts = { format, config, dynamic };
 
-      if (legendData.type.startsWith('size-continuous')) {
+      if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
-      AsBridge.VL.Legends.rampLegend(
-        element,
-        layer,
-        legendData.prop,
-        opts
-      );
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, opts);
     }
   }
 
@@ -362,18 +366,21 @@ var init = (function () {
 
   function renderWidget(widget, value) {
     widget.element = widget.element || document.querySelector(`#${widget.id}-value`);
-    
+
     if (value && widget.element) {
       widget.element.innerText = typeof value === 'number' ? format(value) : value;
     }
   }
 
-  function renderBridge(bridge, widget) {
+  function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
+    const type = _getWidgetType(mapLayer, widget.value, widget.prop);
 
     switch (widget.type) {
       case 'histogram':
-        bridge.histogram(widget.element, widget.value, widget.options);
+        const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
+        bridge[histogram](widget.element, widget.value, widget.options);
+
         break;
       case 'category':
         bridge.category(widget.element, widget.value, widget.options);
@@ -397,11 +404,25 @@ var init = (function () {
       map: map
     });
 
-    widgets
-      .filter((widget) => widget.has_bridge)
-      .forEach((widget) => renderBridge(bridge, widget));
+    mapLayer.on('loaded', () => {
+      widgets
+        .filter((widget) => widget.has_bridge)
+        .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-    bridge.build();
+      bridge.build();
+    });
+  }
+
+  function _getWidgetType(layer, property, value) {
+    return layer.metadata.properties[value] ?
+      layer.metadata.properties[value].type
+      : _getWidgetPropertyType(layer, property);
+  }
+
+  function _getWidgetPropertyType(layer, property) {
+    return layer.metadata.properties[property] ?
+      layer.metadata.properties[property].type
+      : null;
   }
 
   function SourceFactory() {
@@ -451,10 +472,10 @@ var init = (function () {
       throw e;
     }
 
-    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
-    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     mapLayer.addTo(map);
+    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
+    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     return mapLayer;
   }
