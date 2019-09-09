@@ -5,7 +5,7 @@ The ``GeocodeAnalysis`` class provides geocoding using CARTO LDS.
 This analysis requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incurr in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
-The ``geocode`` method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` object as the first argument to this method.
+The ``geocode`` method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
 A second mandatory argument, ``street`` defines the name of the input data column that contains the street (postal address).
 
 Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be used to either
@@ -15,7 +15,8 @@ Or a literal text within single quotes (useful if all rows of the dataset have t
 Another optional argument, ``metadata`` can define the name of a result column that will contain additional metadata about each gecododed row
 as a JSON string.
 
-The result of the ``geocode`` method is a tuple containing both a result Dataset and a dictionary with general information about the process.
+The result of the ``geocode`` method is a tuple containing both a result Dataset
+(or a Dataframe, in case the input was a Dataframe) and a dictionary with general information about the process.
 
 Dry run
 -------
@@ -59,18 +60,17 @@ A Dataframe can be geocoded like this:
     gc = GeocodeAnalysis()
 
     df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
-    dataset = Dataset(df)
 
-    geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
+    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country="'Spain'")
     print(info)
-    print(geocoded_dataset.dataframe)
+    print(geocoded_dataframe)
 
-To store the results permanently in a CARTO dataset the argument ``table_name`` can be used:
+To store the results permanently in a CARTO dataset the argument ``table_name`` can be used, i
 
 .. code:: python
 
     # ...
-    geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'", table_name='new_table')
+    geocoded_dataset, info = gc.geocode(df, street='address', city='city', country="'Spain'", table_name='new_table')
     print(info)
     print(geocoded_dataset.download())
 
