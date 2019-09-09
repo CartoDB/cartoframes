@@ -350,7 +350,8 @@ class GeocodeAnalysis(object):
 
         result = result_dataset
         if input_dataframe:
-            # TODO: only if not saved to table? (table_name is None?)
+            # Note that we return a dataframe whenever the input is dataframe,
+            # even if we have uploaded it to a table (table_name is not None).
             if dry_run:
                 result = input_dataframe
             else:
