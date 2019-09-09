@@ -311,7 +311,7 @@ class GeocodeAnalysis(object):
         temporary_table = False
 
         input_dataset = dataset
-        if input_dataset.is_saved_in_carto and input_dataset.table_name:
+        if input_dataset.is_remote() and input_dataset.table_name:
             # input dataset is a table
             if table_name:
                 # Copy input dataset into a new table
@@ -342,11 +342,7 @@ class GeocodeAnalysis(object):
             if temporary_table:
                 temporary_dataset = result_dataset
                 result_dataset = Dataset(temporary_dataset.download())
-                # TODO: we cannot temporary_dataset.delete() at the moment
-                # because download() alters the Dataset strategy;
-                # this should change shortly
-                # temporary_dataset.delete()
-                Dataset(input_table_name, credentials=self._credentials).delete()
+                temporary_dataset.delete()
 
         result = result_dataset
         if input_dataframe:
