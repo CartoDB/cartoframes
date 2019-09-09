@@ -194,6 +194,29 @@ def _generate_new_table_name(base):
     return _generate_temp_table_name(base)
 
 
+def _set_pre_summary_info(summary, output):
+    logging.debug(summary)
+    output['total_rows'] = sum(summary.values())
+    # TODO: either report new (ng+nn) and changed (cg+cn) records, or we could
+    # reduce the states by merging ng+cg, nn+nn
+    output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
+    output['previously_geocoded'] = summary.get('pg', 0)
+    output['previously_failed'] = summary.get('pn', 0)
+    output['records_with_geometry'] = sum([summary[s] for s in ['ng', 'cg', 'pg']])
+    # output['records_without_geometry'] = sum([summary[s] for s in ['nn', 'cn', 'pn']])
+
+
+def _set_post_summary_info(summary, result, output):
+    if result and result.get('total_rows', 0) == 1:
+        null_geom_count = result.get('rows')[0].get('count')
+        geom_count = output['total_rows'] - null_geom_count
+        output['final_records_with_geometry'] = geom_count
+        # output['final_records_without_geometry'] = null_geom_count
+        output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
+        output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['ng', 'cg']])
+        output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
+
+
 class GeocodeAnalysis(object):
     """Geocode using CARTO data services.
     This requires a CARTO account; master API Key credentials must be provided
@@ -220,11 +243,26 @@ class GeocodeAnalysis(object):
             from cartoframes.data import Dataset
             import pandas
 
-            df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            dataset = Dataset(df)
+            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            gc = GeocodeAnalysis()
+            geocoded_dataset, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
+            print(dataframe)
+
+        Geocode a table:
+
+        .. code::
+
+            from data.services import GeocodeAnalysis
+            from cartoframes.data import Dataset
+            import pandas
+
+            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            dataset = Dataset(dataframe)
+            dataset.upload(table_name='offices')
             gc = GeocodeAnalysis()
             geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
-            print(geocoded_dataset.dataframe)
+            print(geocoded_dataset.download())
+
     """
 
     def __init__(self, credentials=None):
@@ -360,15 +398,7 @@ class GeocodeAnalysis(object):
                 count = row.get('count')
                 summary[gc_state] = count
 
-        logging.debug(summary)
-        output['total_rows'] = sum(summary.values())
-        # TODO: either report new (ng+nn) and changed (cg+cn) records, or we could
-        # reduce the states by merging ng+cg, nn+nn
-        output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
-        output['previously_geocoded'] = summary.get('pg', 0)
-        output['previously_failed'] = summary.get('pn', 0)
-        output['records_with_geometry'] = sum([summary[s] for s in ['ng', 'cg', 'pg']])
-        # output['records_without_geometry'] = sum([summary[s] for s in ['nn', 'cn', 'pn']])
+        _set_pre_summary_info(summary, output)
 
         aborted = False
 
@@ -416,14 +446,7 @@ class GeocodeAnalysis(object):
                 sql = _posterior_summary_query(table_name, street, city, state, country)
                 logging.debug("Executing result summary query: %s" % sql)
                 result = self._context.execute_query(sql)
-                if result and result.get('total_rows', 0) == 1:
-                    null_geom_count = result.get('rows')[0].get('count')
-                    geom_count = output['total_rows'] - null_geom_count
-                    output['final_records_with_geometry'] = geom_count
-                    # output['final_records_without_geometry'] = null_geom_count
-                    output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
-                    output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['ng', 'cg']])
-                    output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
+                _set_post_summary_info(summary, result, output)
 
         if not aborted:
             # TODO
