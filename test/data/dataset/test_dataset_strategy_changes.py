@@ -5,15 +5,15 @@ import unittest
 import pandas as pd
 
 from cartoframes.auth import Credentials
-from cartoframes.utils import load_geojson
+from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
-from cartoframes.data.registry.table_dataset import TableDataset
-from cartoframes.data.registry.query_dataset import QueryDataset
-from cartoframes import context
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.lib import context
 
-from ..mocks.dataset_mock import DatasetMock
-from ..mocks.context_mock import ContextMock
+from test.mocks.dataset_mock import DatasetMock
+from test.mocks.context_mock import ContextMock
 
 
 class TestDatasetStrategyChanges(unittest.TestCase):
