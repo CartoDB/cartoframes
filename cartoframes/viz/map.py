@@ -428,6 +428,7 @@ def _get_layer_def(layer):
         'credentials': layer.credentials,
         'interactivity': layer.interactivity,
         'legend': layer.legend_info,
+        'has_legend_list': layer.has_legend_list,
         'widgets': layer.widgets_info,
         'query': layer.source.query,
         'type': layer.source.type,

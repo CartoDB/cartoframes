@@ -29,8 +29,8 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
         )
 
         self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'ramp(top($name, 11), bold)')
-        self.assertEqual(layer.style._style['line']['color'], 'ramp(top($name, 11), bold)')
+        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(top($name, 11), bold),1)')
+        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(top($name, 11), bold),1)')
         self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(top($name, 11), bold), 0.9)')
         self.assertNotEqual(layer.popup, None)
         self.assertEqual(layer.popup._hover, [{
@@ -58,7 +58,7 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            'ramp(top($name, 5), prism)'
+            'opacity(ramp(top($name, 5), prism),1)'
         )
 
         layer = helpers.color_category_layer(
@@ -71,7 +71,7 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['point']['color'],
-            "ramp(buckets($name, ['A', 'B']), [red,blue])"
+            "opacity(ramp(buckets($name, ['A', 'B']), [red,blue]),1)"
         )
 
     def test_color_category_layer_line(self):
@@ -88,7 +88,7 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            'ramp(top($name, 5), prism)'
+            'opacity(ramp(top($name, 5), prism),1)'
         )
 
         layer = helpers.color_category_layer(
@@ -101,7 +101,7 @@ class TestColorCategoryLayerHelper(unittest.TestCase):
 
         self.assertEqual(
             layer.style._style['line']['color'],
-            "ramp(buckets($name, ['A', 'B']), [red,blue])"
+            "opacity(ramp(buckets($name, ['A', 'B']), [red,blue]),1)"
         )
 
     def test_color_category_layer_polygon(self):
