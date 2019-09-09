@@ -415,6 +415,14 @@ class GeocodeAnalysis(object):
                         .format(table=table_name, hash_column=HASH_COLUMN)
                     )
 
+                    if metadata:
+                        # Create column to store result metadata
+                        logging.info("Adding column {} if needed".format(metadata))
+                        self._context.execute_query(
+                            "ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {metadata_column} jsonb;"
+                            .format(table=table_name, metadata_column=metadata)
+                        )
+
                     sql = _geocode_query(table_name, street, city, state, country, metadata)
                     logging.debug("Executing query: %s" % sql)
                     result = None
