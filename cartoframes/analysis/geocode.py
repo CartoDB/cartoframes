@@ -293,8 +293,6 @@ class GeocodeAnalysis(object):
         else:
             result_dataset = Dataset(input_table_name, credentials=self._credentials)
             if temporary_table:
-                print("TMP",input_table_name)
-                print("RES",result_dataset)
                 temporary_dataset = result_dataset
                 result_dataset = Dataset(temporary_dataset.download())
                 # TODO: we cannot temporary_dataset.delete() at the moment
