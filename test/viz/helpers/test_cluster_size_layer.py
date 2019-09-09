@@ -36,7 +36,7 @@ class TestClusterSizeLayerHelper(unittest.TestCase):
         self.assertEqual(layer.style._style['point']['color'],
                          'opacity(#FFB927, 0.8)')
         self.assertEqual(layer.style._style['point']['strokeColor'],
-                         'opacity(#222, ramp(linear(zoom(), 0, 18),[0, 0.6]))')
+                         'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))')
         self.assertEqual(layer.style._style['point']['filter'], '1')
         self.assertEqual(layer.style._style['point']['resolution'], '32')
         self.assertNotEqual(layer.popup, None)

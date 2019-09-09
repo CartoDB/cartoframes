@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 from .HTMLMap import HTMLMap
-from .HTMLMapGrid import HTMLMapGrid
+from .HTMLLayout import HTMLLayout
 
 __all__ = [
   'HTMLMap',
-  'HTMLMapGrid'
+  'HTMLLayout'
 ]

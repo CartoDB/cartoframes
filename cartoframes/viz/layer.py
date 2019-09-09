@@ -7,6 +7,7 @@ from .style import Style
 from .popup import Popup
 from .legend import Legend
 from .widget_list import WidgetList
+from .legend_list import LegendList
 from ..data import Dataset
 from ..utils import merge_dicts
 
@@ -143,6 +144,7 @@ class Layer(object):
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
+        self.has_legend_list = isinstance(self.legend, LegendList)
         self.widgets = _set_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
@@ -154,7 +156,7 @@ class Layer(object):
         self.orig_query = self.source.query
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(geom_type)
+        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
         self.widgets_info = self.widgets.get_widgets_info()
         self.viz = self.style.compute_viz(geom_type, variables)
 
@@ -193,16 +195,15 @@ def _set_popup(popup):
     else:
         return Popup()
 
-
 def _set_legend(legend):
-    """Set a Legend class from the input"""
+    if isinstance(legend, (Legend, LegendList)):
+        return legend
     if isinstance(legend, dict):
         return Legend(legend)
-    elif isinstance(legend, Legend):
-        return legend
+    if isinstance(legend, (list)):
+        return LegendList(legend)
     else:
-        return Legend()
-
+        return Legend('')
 
 def _set_widgets(widgets):
     if isinstance(widgets, (dict, list)):

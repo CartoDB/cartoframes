@@ -8,8 +8,8 @@ class TestLegend(unittest.TestCase):
         """Legend"""
         self.assertNotEqual(Legend, None)
 
-    def test_legend_init(self):
-        """Legend should be properly initialized"""
+    def test_legend_init_dict(self):
+        """Legend should be properly initialized when passing a dict"""
         legend = Legend({
             'type': 'color-category',
             'prop': 'strokeColor',
@@ -23,6 +23,23 @@ class TestLegend(unittest.TestCase):
         self.assertEqual(legend._title, '[TITLE]')
         self.assertEqual(legend._description, '[description]')
         self.assertEqual(legend._footer, '[footer]')
+        self.assertEqual(legend._dynamic, True)
+
+    def test_legend_init_properties(self):
+        """Legend should be properly initialized when passing properties"""
+        legend = Legend('color-category',
+                        prop='strokeColor',
+                        title='[TITLE]',
+                        description='[description]',
+                        footer='[footer]',
+                        dynamic=False)
+
+        self.assertEqual(legend._type, 'color-category')
+        self.assertEqual(legend._prop, 'strokeColor')
+        self.assertEqual(legend._title, '[TITLE]')
+        self.assertEqual(legend._description, '[description]')
+        self.assertEqual(legend._footer, '[footer]')
+        self.assertEqual(legend._dynamic, False)
 
     def test_legend_info(self):
         """Legend should return a proper information object"""
@@ -38,7 +55,8 @@ class TestLegend(unittest.TestCase):
             'prop': 'color',
             'title': '[TITLE]',
             'description': '[description]',
-            'footer': '[footer]'
+            'footer': '[footer]',
+            'dynamic': True
         })
 
         legend = Legend({
@@ -54,7 +72,8 @@ class TestLegend(unittest.TestCase):
             'prop': 'color',
             'title': '',
             'description': '',
-            'footer': ''
+            'footer': '',
+            'dynamic': True
         })
 
     def test_wrong_input(self):
@@ -65,7 +84,7 @@ class TestLegend(unittest.TestCase):
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
-        msg = 'Legend type is not valid. Valid legend types are: color-bins, '
+        msg = 'Legend type is not valid. Valid legend types are: default, color-bins, '
         'color-bins-line, color-bins-point, color-bins-polygon, color-category, '
         'color-category-line, color-category-point, color-category-polygon, '
         'color-continuous, color-continuous-line, color-continuous-point, '

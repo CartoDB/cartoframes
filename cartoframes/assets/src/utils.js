@@ -40,7 +40,6 @@ export function formatNumber(value) {
 export function updateViewport(map) {
   function updateMapInfo() {
     const mapInfo$ = document.getElementById('map-info');
-  
     const center = map.getCenter();
     const lat = center.lat.toFixed(6);
     const lng = center.lng.toFixed(6);
