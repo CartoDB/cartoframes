@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from . import constants, defaults
-from cartoframes.utils.utils import merge_dicts, text_match
+from ..utils.utils import merge_dicts, text_match
 
 
 class Style(object):

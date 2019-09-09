@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from cartoframes.utils.utils import gen_variable_name
+from ..utils.utils import gen_variable_name
 
 
 class Popup(object):

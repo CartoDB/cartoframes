@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from cartoframes.lib import context
-from cartoframes.auth import get_default_credentials
+from ...lib import context
+from ...auth import get_default_credentials
 
 
 class SQLClient(object):

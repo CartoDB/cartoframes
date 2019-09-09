@@ -4,8 +4,8 @@ from warnings import warn
 from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
-from cartoframes.utils.geom_utils import setting_value_exception
-from cartoframes.utils.columns import normalize_name
+from ...utils.geom_utils import setting_value_exception
+from ...utils.columns import normalize_name
 
 
 class DatasetInfo(object):

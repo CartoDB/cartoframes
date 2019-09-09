@@ -290,7 +290,7 @@ def is_geojson(data):
 
 def is_table_name(data):
     # avoid circular dependecies
-    from cartoframes.utils.columns import normalize_name
+    from .columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
 
 

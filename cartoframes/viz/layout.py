@@ -1,8 +1,9 @@
 from carto.exceptions import CartoException
+
 from .map import Map
 from .html.HTMLLayout import HTMLLayout
 from . import constants
-from cartoframes.utils.utils import get_center
+from ..utils.utils import get_center
 
 
 class Layout(object):

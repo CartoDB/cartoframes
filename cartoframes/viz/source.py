@@ -1,11 +1,8 @@
 from __future__ import absolute_import
 
-import pandas
-
 from . import defaults
-
-from cartoframes.data import Dataset
-from cartoframes.utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
+from ..data import Dataset
+from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
 
 try:
     import geopandas
