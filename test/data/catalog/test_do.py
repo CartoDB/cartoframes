@@ -3,6 +3,7 @@ import unittest
 from cartoframes.data.catalog.category import Categories
 from cartoframes.data.catalog.country import Countries
 from cartoframes.data.catalog.do import DO
+from data.catalog.examples import test_country2, test_country1, test_category1, test_category2
 
 try:
     from unittest.mock import Mock, patch
@@ -12,35 +13,28 @@ except ImportError:
 
 class TestDO(unittest.TestCase):
 
-    expected_countries = [{'iso_code3': 'esp'}, {'iso_code3': 'usa'}]
-    expected_categories = [{
-        'id': 'cat1',
-        'name': 'Financial'
-    }, {
-        'id': 'cat2',
-        'name': 'Demographics'
-    }]
-
     @patch.object(Countries, 'get_all')
     def test_countries(self, mocked_countries):
         # Given
-        mocked_countries.return_value = self.expected_countries
+        expected_countries = [test_country1, test_country2]
+        mocked_countries.return_value = expected_countries
         do = DO()
 
         # When
         countries = do.countries
 
         # Then
-        self.assertEqual(self.expected_countries, countries)
+        assert countries == expected_countries
 
     @patch.object(Categories, 'get_all')
     def test_categories(self, mocked_categories):
         # Given
-        mocked_categories.return_value = self.expected_categories
+        expected_categories = [test_category1, test_category2]
+        mocked_categories.return_value = expected_categories
         do = DO()
 
         # When
         categories = do.categories
 
         # Then
-        self.assertEqual(self.expected_categories, categories)
+        assert categories == expected_categories
