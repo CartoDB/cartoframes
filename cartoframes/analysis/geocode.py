@@ -4,10 +4,10 @@ import re
 import hashlib
 import logging
 import uuid
+import pandas as pd
 
 from .. import context
 from ..auth import get_default_credentials
-from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 
 HASH_COLUMN = 'carto_geocode_hash'
@@ -194,82 +194,178 @@ def _generate_new_table_name(base):
     return _generate_temp_table_name(base)
 
 
+def _set_pre_summary_info(summary, output):
+    logging.debug(summary)
+    output['total_rows'] = sum(summary.values())
+    # TODO: either report new (ng+nn) and changed (cg+cn) records, or we could
+    # reduce the states by merging ng+cg, nn+nn
+    output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
+    output['previously_geocoded'] = summary.get('pg', 0)
+    output['previously_failed'] = summary.get('pn', 0)
+    output['records_with_geometry'] = sum([summary[s] for s in ['ng', 'cg', 'pg']])
+    # output['records_without_geometry'] = sum([summary[s] for s in ['nn', 'cn', 'pn']])
+
+
+def _set_post_summary_info(summary, result, output):
+    if result and result.get('total_rows', 0) == 1:
+        null_geom_count = result.get('rows')[0].get('count')
+        geom_count = output['total_rows'] - null_geom_count
+        output['final_records_with_geometry'] = geom_count
+        # output['final_records_without_geometry'] = null_geom_count
+        output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
+        output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['ng', 'cg']])
+        output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
+
+
 class GeocodeAnalysis(object):
+    """Geocode using CARTO data services.
+    This requires a CARTO account; master API Key credentials must be provided
+    (throuch explicit argument in contructor or via the default credentials)
+    to access the service. Use of these methods will incurn in geocoding
+    credit consumption for the privided accout.
+
+    Examples:
+
+        Obtain the number of credits needed to geocode a dataset:
+
+        .. code::
+
+            from data.services import GeocodeAnalysis
+            gc = GeocodeAnalysis(credentials)
+            _, info = gc.geocode(dataset, street='address', dry_run=True)
+            print(info['required_quota'])
+
+        Geocode a dataframe:
+
+        .. code::
+
+            from data.services import GeocodeAnalysis
+            from cartoframes.data import Dataset
+            import pandas
+
+            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            gc = GeocodeAnalysis()
+            geocoded_dataset, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
+            print(dataframe)
+
+        Geocode a table:
+
+        .. code::
+
+            from data.services import GeocodeAnalysis
+            from cartoframes.data import Dataset
+            import pandas
+
+            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            dataset = Dataset(dataframe)
+            dataset.upload(table_name='offices')
+            gc = GeocodeAnalysis()
+            geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
+            print(geocoded_dataset.download())
+
+    """
 
     def __init__(self, credentials=None):
         self._credentials = credentials or get_default_credentials()
         self._context = context.create_context(self._credentials)
 
-    # Preview geocoding: dry result
-    def preview(self, dataset, street, city=None, state=None, country=None, metadata=None):
-        temp_table_name = None
-        if dataset.is_saved_in_carto and dataset.table_name:
-            table_name = dataset.table_name
+    def geocode(self, dataset, street,
+                city=None, state=None, country=None,
+                metadata=None,
+                table_name=None, if_exists=Dataset.FAIL,
+                dry_run=False):
+        """Geocode a dataset
+
+        Args:
+            dataset (Dataset): a Dataset object to be geocoded.
+            street (str): name of the column containing postal addresses
+            city (str, optional): either the name of a column containing the addresses'
+                city names or a quoted literal value, e.g. "'New York'".
+            state (str, optional): either the name of a column containing the addresses'
+                State names or a quoted literal value, e.g. "'Illinois'".
+            country (str, optional): either the name of a column containing the addresses'
+                Country names or a quoted literal value, e.g. "'USA'".
+            metadata (str, optional): name of a column where metadata (in JSON format)
+                will be stored
+            table_name (str, optional): the geocoding results will be placed in a new
+                CARTO table with this name.
+            if_exists (str, optional): Behavior for creating new datasets, only applicable
+                if table_name isn't None;
+                Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
+            dry_run (bool, optional): no actual geocoding will be performed (useful to
+                check the needed quota)
+
+        Returns:
+            tuple: (Dataset, info_dict)
+
+        """
+
+        input_dataframe = None
+        if isinstance(dataset, pd.DataFrame):
+            input_dataframe = dataset
+            dataset = Dataset(input_dataframe)
+
+        if dry_run:
+            table_name = None
+
+        temporary_table = False
+
+        input_dataset = dataset
+        if input_dataset.is_saved_in_carto and input_dataset.table_name:
+            # input dataset is a table
+            if table_name:
+                # Copy input dataset into a new table
+                # TODO: select only needed columns
+                query = 'SELECT * FROM {table}'.format(table=input_dataset.table_name)
+                input_table_name = table_name
+                input_dataset = Dataset(query)
+                input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
+            else:
+                input_table_name = input_dataset.table_name
         else:
-            temp_table_name = _generate_temp_table_name()
-            dataset.upload(table_name=temp_table_name, credentials=self._credentials)
-            table_name = temp_table_name
-        result = self._geocode(table_name, street, city, state, country, metadata, dry=True)
-        if temp_table_name:
-            Dataset(temp_table_name, credentials=self._credentials).delete()
-        return result
+            # input dataset is a query or a dataframe
+            if table_name:
+                input_table_name = table_name
+            else:
+                temporary_table = True
+                input_table_name = _generate_temp_table_name()
+            input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
 
-    # In-place geocoding (only for table datasets); result: modifies input table
-    def geocode(self, dataset, street, city=None, state=None, country=None, metadata=None):
-        if not dataset.is_saved_in_carto:
-            # TODO: handle this either by uploading the dataset,
-            # uploading to a temporary table or geocoding addresses per row
-            raise CartoException('Your data is not synchronized with CARTO. '
-                                 'First of all, you should call the Dataset.upload() method '
-                                 'to save your data in CARTO.'
-                                 'In-place geocoding is supported only for synchronized data.')
-        if dataset.table_name is None:
-            # For Query Datasets is_saved_in_carto is True, but we have not table_name
-            # TODO: how should we support this case?
-            raise CartoException('In-place geocoding is supported only for table datasets.')
-        return self._geocode(dataset.table_name, street, city=city, state=state, country=country, metadata=metadata)
+        result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
 
-    # Geocode into new dataframe
-    def geocoded_as_dataframe(self, dataset, street, city=None, state=None, country=None, metadata=None):
-        table_name = _generate_temp_table_name(dataset.table_name)
-        if dataset.is_saved_in_carto and dataset.table_name:
-            # TODO: select only needed columns
-            query = 'SELECT * FROM {table}'.format(table=dataset.table_name)
-            input_dataset = Dataset(query)
+        if dry_run:
+            result_dataset = dataset
+            if temporary_table:
+                Dataset(input_table_name, credentials=self._credentials).delete()
         else:
-            input_dataset = dataset
-        input_dataset.upload(table_name=table_name, credentials=self._credentials)
-        result = self._geocode(table_name, street, city, state, country, metadata)
-        result_dataset = Dataset(table_name, credentials=self._credentials)
-        result['result'] = result_dataset.download()
-        Dataset(table_name, credentials=self._credentials).delete()
-        return result
+            result_dataset = Dataset(input_table_name, credentials=self._credentials)
+            if temporary_table:
+                temporary_dataset = result_dataset
+                result_dataset = Dataset(temporary_dataset.download())
+                # TODO: we cannot temporary_dataset.delete() at the moment
+                # because download() alters the Dataset strategy;
+                # this should change shortly
+                # temporary_dataset.delete()
+                Dataset(input_table_name, credentials=self._credentials).delete()
 
-    # Geocode into new table dataset
-    def geocoded_as_table(self, table_name, dataset, street, city=None, state=None, country=None, metadata=None):
-        if dataset.is_saved_in_carto and dataset.table_name:
-            # TODO: select only needed columns
-            query = 'SELECT * FROM {table}'.format(table=dataset.table_name)
-            input_dataset = Dataset(query, credentials=self._credentials)
-        else:
-            input_dataset = dataset
-        input_dataset.upload(table_name=table_name, credentials=self._credentials)
-        result = self._geocode(table_name, street, city, state, country, metadata)
-        result_dataset = Dataset(table_name, credentials=self._credentials)
-        result['result'] = result_dataset
-        return result
+        result = result_dataset
+        if input_dataframe:
+            # TODO: only if not saved to table? (table_name is None?)
+            if dry_run:
+                result = input_dataframe
+            else:
+                result = result_dataset.download()
 
-    # Note that this can be optimized for non in-place cases, e.g.
+        return (result, result_info)
+
+    # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
     # injecting the input query in the geocoding expression,
     # receiving geocoding results instead of storing in a table, etc.
     # But that would make transition to using AFW harder.
 
-    def _geocode(self, table_name, street, city=None, state=None, country=None, metadata=None, dry=False):
-        # Geocode rows not already geocoded in a dataset'
-        # response = self._context.execute_query(query)
-        # self._context.execute_long_running_query(query)
-        # response.get('rows')
-        # rows[0].get('column')
+    def _geocode(self, table_name, street, city=None, state=None, country=None, metadata=None, dry_run=False):
+        # Internal Geocoding implementation.
+        # Geocode a table's rows not already geocoded in a dataset'
 
         logging.info('table_name = "%s"' % table_name)
         logging.info('street = "%s"' % street)
@@ -277,7 +373,7 @@ class GeocodeAnalysis(object):
         logging.info('state = "%s"' % state)
         logging.info('country = "%s"' % country)
         logging.info('metadata = "%s"' % metadata)
-        logging.info('dry = "%s"' % dry)
+        logging.info('dry_run = "%s"' % dry_run)
 
         output = {}
 
@@ -302,19 +398,11 @@ class GeocodeAnalysis(object):
                 count = row.get('count')
                 summary[gc_state] = count
 
-        logging.debug(summary)
-        output['total_rows'] = sum(summary.values())
-        # TODO: either report new (ng+nn) and changed (cg+cn) records, or we could
-        # reduce the states by merging ng+cg, nn+nn
-        output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
-        output['previously_geocoded'] = summary.get('pg', 0)
-        output['previously_failed'] = summary.get('pn', 0)
-        output['records_with_geometry'] = sum([summary[s] for s in ['ng', 'cg', 'pg']])
-        # output['records_without_geometry'] = sum([summary[s] for s in ['nn', 'cn', 'pn']])
+        _set_pre_summary_info(summary, output)
 
         aborted = False
 
-        if output['required_quota'] > 0 and not dry:
+        if output['required_quota'] > 0 and not dry_run:
             with table_geocoding_lock(self._context, table_name) as locked:
                 if not locked:
                     output['error'] = 'The table is already being geocoded'
@@ -358,14 +446,7 @@ class GeocodeAnalysis(object):
                 sql = _posterior_summary_query(table_name, street, city, state, country)
                 logging.debug("Executing result summary query: %s" % sql)
                 result = self._context.execute_query(sql)
-                if result and result.get('total_rows', 0) == 1:
-                    null_geom_count = result.get('rows')[0].get('count')
-                    geom_count = output['total_rows'] - null_geom_count
-                    output['final_records_with_geometry'] = geom_count
-                    # output['final_records_without_geometry'] = null_geom_count
-                    output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
-                    output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['ng', 'cg']])
-                    output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
+                _set_post_summary_info(summary, result, output)
 
         if not aborted:
             # TODO
