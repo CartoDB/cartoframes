@@ -9,7 +9,7 @@ from .legend import Legend
 from .widget_list import WidgetList
 from .legend_list import LegendList
 from ..data import Dataset
-from cartoframes.utils.utils import merge_dicts
+from ..utils.utils import merge_dicts
 
 try:
     import geopandas
