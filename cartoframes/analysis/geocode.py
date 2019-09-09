@@ -4,6 +4,7 @@ import re
 import hashlib
 import logging
 import uuid
+import pandas as pd
 
 from .. import context
 from ..auth import get_default_credentials
@@ -258,6 +259,11 @@ class GeocodeAnalysis(object):
 
         """
 
+        input_dataframe = None
+        if isinstance(dataset, pd.DataFrame):
+            input_dataframe = dataset
+            dataset = Dataset(input_dataframe)
+
         if dry_run:
             table_name = None
 
@@ -301,7 +307,15 @@ class GeocodeAnalysis(object):
                 # temporary_dataset.delete()
                 Dataset(input_table_name, credentials=self._credentials).delete()
 
-        return (result_dataset, result_info)
+        result = result_dataset
+        if input_dataframe:
+            # TODO: only if not saved to table? (table_name is None?)
+            if dry_run:
+                result = input_dataframe
+            else:
+                result = result_dataset.download()
+
+        return (result, result_info)
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
     # injecting the input query in the geocoding expression,
