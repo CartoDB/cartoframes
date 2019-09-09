@@ -234,7 +234,7 @@ class GeocodeAnalysis(object):
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
                 metadata=None,
-                table_name=None,
+                table_name=None, if_exists=Dataset.FAIL,
                 dry_run=False):
         """Geocode a dataset
 
@@ -251,6 +251,9 @@ class GeocodeAnalysis(object):
                 will be stored
             table_name (str, optional): the geocoding results will be placed in a new
                 CARTO table with this name.
+            if_exists (str, optional): Behavior for creating new datasets, only applicable
+                if table_name isn't None;
+                Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
 
@@ -278,7 +281,7 @@ class GeocodeAnalysis(object):
                 query = 'SELECT * FROM {table}'.format(table=input_dataset.table_name)
                 input_table_name = table_name
                 input_dataset = Dataset(query)
-                input_dataset.upload(table_name=input_table_name, credentials=self._credentials)
+                input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
             else:
                 input_table_name = input_dataset.table_name
         else:
@@ -288,7 +291,7 @@ class GeocodeAnalysis(object):
             else:
                 temporary_table = True
                 input_table_name = _generate_temp_table_name()
-            input_dataset.upload(table_name=input_table_name, credentials=self._credentials)
+            input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
 
         result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
 
