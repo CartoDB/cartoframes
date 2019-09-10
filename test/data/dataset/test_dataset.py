@@ -17,7 +17,7 @@ from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _normalize_column_names
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
@@ -704,6 +704,16 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
                      'to save your data in CARTO.')
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
+
+    def test__copyfrom_column_names_without_geom(self):
+        columns = ['address', 'city']
+        the_geom = None
+
+        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=columns)
+        dataset = DataFrameDataset(df)
+        columns_normalized, columns_origin = dataset._copyfrom_column_names(the_geom, _normalize_column_names(df))
+        self.assertEqual(columns, columns_origin)
+        self.assertEqual(columns, columns_normalized)
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):

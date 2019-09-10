@@ -72,13 +72,7 @@ class DataFrameDataset(BaseDataset):
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
-
-        columns_normalized = []
-        columns_origin = [geom_col]
-        for norm, orig in normalized_column_names:
-            columns_normalized.append(norm)
-            columns_origin.append(orig)
-        columns_normalized.append('the_geom')
+        columns_normalized, columns_origin = self._copyfrom_column_names(geom_col, normalized_column_names)
 
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
@@ -92,6 +86,20 @@ class DataFrameDataset(BaseDataset):
             enc_type)
 
         self._context.upload(query, data)
+
+    def _copyfrom_column_names(self, geom_col, normalized_column_names):
+        columns_normalized = []
+        columns_origin = []
+
+        for norm, orig in normalized_column_names:
+            columns_normalized.append(norm)
+            columns_origin.append(orig)
+
+        if geom_col:
+            columns_origin.insert(0, geom_col)
+            columns_normalized.append('the_geom')
+
+        return columns_normalized, columns_origin
 
     def _create_table(self, normalized_column_names, with_lnglat=None):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
