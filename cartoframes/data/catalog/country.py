@@ -1,9 +1,9 @@
 import pandas as pd
 
-from .repository.geography_repo import get_geography_repo
-from .repository.category_repo import get_category_repo
-from .repository.country_repo import get_country_repo
-from .repository.dataset_repo import get_dataset_repo
+from cartoframes.data.catalog.repository.geography_repo import get_geography_repo
+from cartoframes.data.catalog.repository.category_repo import get_category_repo
+from cartoframes.data.catalog.repository.country_repo import get_country_repo
+from cartoframes.data.catalog.repository.dataset_repo import get_dataset_repo
 
 _COUNTRY_ID_FIELD = 'iso_code3'
 

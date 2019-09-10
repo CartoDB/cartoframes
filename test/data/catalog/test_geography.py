@@ -7,7 +7,7 @@ from cartoframes.data.catalog.repository.geography_repo import GeographyReposito
 from cartoframes.data.catalog.dataset import Datasets
 from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
 
-from data.catalog.examples import test_geography1, test_geographies, test_datasets
+from .examples import test_geography1, test_geographies, test_datasets
 
 try:
     from unittest.mock import Mock, patch

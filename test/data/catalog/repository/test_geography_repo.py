@@ -4,7 +4,7 @@ from cartoframes.data.catalog.geography import Geographies
 
 from cartoframes.data.catalog.repository.geography_repo import GeographyRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
-from data.catalog.examples import test_geography1, test_geographies
+from ..examples import test_geography1, test_geographies
 
 try:
     from unittest.mock import Mock

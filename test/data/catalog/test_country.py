@@ -10,7 +10,7 @@ from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.catalog.repository.country_repo import CountryRepository
 
-from data.catalog.examples import test_country1, test_datasets, test_countries, test_categories, \
+from .examples import test_country1, test_datasets, test_countries, test_categories, \
     test_geographies
 
 try:

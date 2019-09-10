@@ -3,7 +3,7 @@ import unittest
 from cartoframes.data.catalog.category import Categories
 from cartoframes.data.catalog.country import Countries
 from cartoframes.data.catalog.do import DO
-from data.catalog.examples import test_country2, test_country1, test_category1, test_category2
+from .examples import test_country2, test_country1, test_category1, test_category2
 
 try:
     from unittest.mock import Mock, patch

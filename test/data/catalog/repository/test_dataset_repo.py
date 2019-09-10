@@ -4,7 +4,7 @@ from cartoframes.data.catalog.dataset import Datasets
 
 from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
-from data.catalog.examples import test_dataset1, test_datasets
+from ..examples import test_dataset1, test_datasets
 
 try:
     from unittest.mock import Mock

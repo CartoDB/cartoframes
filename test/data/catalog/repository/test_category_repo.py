@@ -4,7 +4,7 @@ from cartoframes.data.catalog.category import Categories
 
 from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
-from data.catalog.examples import test_category1, test_categories
+from ..examples import test_category1, test_categories
 
 try:
     from unittest.mock import Mock

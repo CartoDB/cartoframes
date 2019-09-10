@@ -4,7 +4,7 @@ from cartoframes.data.catalog.variable import Variables
 
 from cartoframes.data.catalog.repository.variable_repo import VariableRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
-from data.catalog.examples import test_variable1, test_variables
+from ..examples import test_variable1, test_variables
 
 try:
     from unittest.mock import Mock

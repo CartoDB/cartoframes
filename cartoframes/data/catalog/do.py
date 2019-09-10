@@ -1,5 +1,5 @@
-from .category import Categories
-from .country import Countries
+from cartoframes.data.catalog.category import Categories
+from cartoframes.data.catalog.country import Countries
 
 
 class DO(object):

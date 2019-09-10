@@ -7,7 +7,7 @@ from cartoframes.data.catalog.dataset import Datasets
 from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
 
-from data.catalog.examples import test_category1, test_datasets, test_categories
+from .examples import test_category1, test_datasets, test_categories
 
 try:
     from unittest.mock import Mock, patch

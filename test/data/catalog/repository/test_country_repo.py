@@ -4,7 +4,7 @@ from cartoframes.data.catalog.country import Countries
 
 from cartoframes.data.catalog.repository.country_repo import CountryRepository
 from cartoframes.data.catalog.repository.repo_client import RepoClient
-from data.catalog.examples import test_countries, test_country1
+from ..examples import test_countries, test_country1
 
 try:
     from unittest.mock import Mock

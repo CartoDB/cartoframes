@@ -1,4 +1,4 @@
-from .repo_client import RepoClient
+from cartoframes.data.catalog.repository.repo_client import RepoClient
 
 
 def get_category_repo():
