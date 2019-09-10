@@ -1,4 +1,4 @@
-from cartoframes.client import SQLClient
+from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
 from do_metadata_key import key
 
