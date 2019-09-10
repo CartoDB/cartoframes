@@ -1,22 +1,25 @@
 from __future__ import absolute_import
 
-from .. import context
-from ..auth import get_default_credentials
+from ... import context
+from ...auth import get_default_credentials
 from carto.exceptions import CartoException
 from cartoframes.data import Dataset
+import pandas as pd
 
 
 # TODO: add count (num_rows) method to Dataset
 def _count(context, dataset):
-    if hasattr(dataset, 'dataframe'):
+    if isinstance(dataset, pd.DataFrame):
+        return len(dataset.index)
+    elif hasattr(dataset, 'dataframe') and dataset.dataframe is not None:
         return len(dataset.dataframe.index)
-    elif dataset.table_name:
+    elif hasattr(dataset, 'table_name') and dataset.table_name:
         result = context.execute_query("SELECT COUNT(*) FROM {table}".format(table=dataset.table_name))
     else:
-        result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.query()))
+        result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.query))
     return result.get('rows')[0].get('count')
 
-class IsoAnalysis(object):
+class Isolines(object):
 
     def __init__(self, credentials=None):
         self._credentials = credentials or get_default_credentials()
