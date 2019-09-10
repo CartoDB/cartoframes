@@ -154,7 +154,7 @@ def _rows(df, cols, with_lnglat, geom_col, enc_type):
                     lng_val = row[col]
                 if col == with_lnglat[1]:
                     lat_val = row[col]
-            if col == geom_col:
+            if geom_col and col == geom_col:
                 the_geom_val = row[col]
             else:
                 row_data.append('{}'.format(val))
