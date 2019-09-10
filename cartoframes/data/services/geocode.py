@@ -6,8 +6,8 @@ import logging
 import uuid
 import pandas as pd
 
-from .. import context
-from ..auth import get_default_credentials
+from ... import context
+from ...auth import get_default_credentials
 from cartoframes.data import Dataset
 
 HASH_COLUMN = 'carto_geocode_hash'
@@ -217,7 +217,7 @@ def _set_post_summary_info(summary, result, output):
         output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
 
 
-class GeocodeAnalysis(object):
+class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account; master API Key credentials must be provided
     (throuch explicit argument in contructor or via the default credentials)
@@ -230,8 +230,8 @@ class GeocodeAnalysis(object):
 
         .. code::
 
-            from data.services import GeocodeAnalysis
-            gc = GeocodeAnalysis(credentials)
+            from data.services import Geocode
+            gc = Geocode(credentials)
             _, info = gc.geocode(dataset, street='address', dry_run=True)
             print(info['required_quota'])
 
@@ -239,12 +239,12 @@ class GeocodeAnalysis(object):
 
         .. code::
 
-            from data.services import GeocodeAnalysis
+            from data.services import Geocode
             from cartoframes.data import Dataset
             import pandas
 
             dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            gc = GeocodeAnalysis()
+            gc = Geocode()
             geocoded_dataset, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
             print(dataframe)
 
@@ -252,14 +252,14 @@ class GeocodeAnalysis(object):
 
         .. code::
 
-            from data.services import GeocodeAnalysis
+            from data.services import Geocode
             from cartoframes.data import Dataset
             import pandas
 
             dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             dataset = Dataset(dataframe)
             dataset.upload(table_name='offices')
-            gc = GeocodeAnalysis()
+            gc = Geocode()
             geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
             print(geocoded_dataset.download())
 
