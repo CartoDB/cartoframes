@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from ... import context
 from ...auth import get_default_credentials
-from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 import pandas as pd
 import uuid
@@ -51,8 +50,7 @@ class Isolines(object):
              quality=None,
              with_source_id=True,
              with_source_geom=False,
-             function=None
-    ):
+             function=None):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
 
