@@ -5,19 +5,23 @@ from ...auth import get_default_credentials
 from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 import pandas as pd
+import uuid
 
 
 # TODO: add count (num_rows) method to Dataset
 def _count(context, dataset):
-    if isinstance(dataset, pd.DataFrame):
-        return len(dataset.index)
-    elif hasattr(dataset, 'dataframe') and dataset.dataframe is not None:
+    if hasattr(dataset, 'dataframe') and dataset.dataframe is not None:
         return len(dataset.dataframe.index)
     elif hasattr(dataset, 'table_name') and dataset.table_name:
         result = context.execute_query("SELECT COUNT(*) FROM {table}".format(table=dataset.table_name))
     else:
         result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.query))
     return result.get('rows')[0].get('count')
+
+
+def _generate_temp_table_name(base=None):
+    return (base or 'table') + '_' + uuid.uuid4().hex[:10]
+
 
 class Isolines(object):
 
@@ -52,15 +56,26 @@ class Isolines(object):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
 
+        input_dataframe = None
+        if isinstance(source, pd.DataFrame):
+            input_dataframe = source
+            source = Dataset(input_dataframe)
+
         if dry_run:
             num_rows = _count(self._context, source)
             return {'required_quota': num_rows * len(range)}
 
-        # TODO: upload to temporary table if necessary
-        if not source.table_name and source.query:
-            source_query = source.query()
-        else:
+        temporary_table_name = False
+
+        if source.table_name:
             source_query = 'SELECT * FROM {table}'.format(table=source.table_name)
+        elif hasattr(source, 'query') and source.query:
+            source_query = source.query
+        else:  # source.is_local()
+            # upload to temporary table
+            temporary_table_name = _generate_temp_table_name()
+            source.upload(table_name=temporary_table_name, credentials=self._credentials)
+            source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
         # TODO: use **options argument?
@@ -111,12 +126,20 @@ class Isolines(object):
             )
 
         if table_name:
-            # TODO:
-            # result = self._context.execute_long_running_query("CREATE TABLE {table} AS {sql}".format(table=table_name, sql=sql))
-            # "SELECT cdb_cartodbfytable({table})".format(table=table_name)  # TODO: support for org users
-            result = {}
+            dataset = Dataset(sql)
+            dataset.upload(table_name=table_name, credentials=self._credentials, if_exists=if_exists)
+            result = Dataset(table_name)
+            # TODO: should we return a Dataframe if the input was a Dataframe
+            # if input_dataframe:
+            #     result = result.download()
         else:
             # It would be nice to use execute_long_running_query, but we need the results
             result = Dataset(sql).download()
+            # TODO: should we return a Dataset if the input was not a Dataframe?
+            # if not input_dataframe:
+            #     result = Dataset(result)
+
+        if temporary_table_name:
+            Dataset(temporary_table_name, credentials=self._credentials).delete()
 
         return result
