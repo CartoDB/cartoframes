@@ -1,11 +1,12 @@
 import pandas as pd
 
 from cartoframes.data.catalog.repository.geography_repo import get_geography_repo
-from cartoframes.data.catalog.repository.category_repo import get_category_repo
+from cartoframes.data.catalog.repository.category_repo import CategoryRepository
 from cartoframes.data.catalog.repository.country_repo import get_country_repo
 from cartoframes.data.catalog.repository.dataset_repo import get_dataset_repo
 
 _COUNTRY_ID_FIELD = 'iso_code3'
+_category_repo = CategoryRepository()
 
 
 class Country(pd.Series):
@@ -28,7 +29,7 @@ class Country(pd.Series):
 
     @property
     def categories(self):
-        return get_category_repo().get_by_country(self[_COUNTRY_ID_FIELD])
+        return _category_repo.get_by_country(self[_COUNTRY_ID_FIELD])
 
     @property
     def geographies(self):

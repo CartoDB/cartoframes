@@ -5,8 +5,7 @@ from do_metadata_key import key
 
 class RepoClient(object):
 
-    # TODO: Fix singleton
-    # __instance = None
+    __instance = None
 
     def __init__(self):
         self.client = SQLClient(Credentials('do-metadata', key))
@@ -37,7 +36,7 @@ class RepoClient(object):
 
         return self.client.query(query)
 
-    # def __new__(cls):
-    #     if RepoClient.__instance is None:
-    #         RepoClient.instance = object.__new__(cls)
-    #     return RepoClient.__instance
+    def __new__(cls):
+        if not RepoClient.__instance:
+            RepoClient.__instance = object.__new__(cls)
+        return RepoClient.__instance
