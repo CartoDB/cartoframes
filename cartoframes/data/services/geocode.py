@@ -190,10 +190,6 @@ def _generate_temp_table_name(base=None):
     return (base or 'table') + '_' + uuid.uuid4().hex[:10]
 
 
-def _generate_new_table_name(base):
-    return _generate_temp_table_name(base)
-
-
 def _set_pre_summary_info(summary, output):
     logging.debug(summary)
     output['total_rows'] = sum(summary.values())
