@@ -1,4 +1,4 @@
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
 def get_category_repo():
@@ -27,7 +27,7 @@ class CategoryRepository(object):
 
     @staticmethod
     def _to_category(result):
-        from cartoframes.data.catalog.category import Category
+        from cartoframes.data.observatory.category import Category
 
         return Category({
             'id': result['id'],
@@ -36,6 +36,6 @@ class CategoryRepository(object):
 
     @staticmethod
     def _to_categories(results):
-        from cartoframes.data.catalog.category import Categories
+        from cartoframes.data.observatory.category import Categories
 
         return Categories([CategoryRepository._to_category(result) for result in results])

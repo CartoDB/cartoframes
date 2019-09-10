@@ -1,11 +1,11 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.catalog.category import Category, Categories
-from cartoframes.data.catalog.dataset import Datasets
+from cartoframes.data.observatory.category import Category, Categories
+from cartoframes.data.observatory.dataset import Datasets
 
-from cartoframes.data.catalog.repository.category_repo import CategoryRepository
-from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
+from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
 from .examples import test_category1, test_datasets, test_categories
 

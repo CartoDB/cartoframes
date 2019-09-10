@@ -1,4 +1,4 @@
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
 def get_geography_repo():
@@ -27,7 +27,7 @@ class GeographyRepository(object):
 
     @staticmethod
     def _to_geography(result):
-        from cartoframes.data.catalog.geography import Geography
+        from cartoframes.data.observatory.geography import Geography
 
         return Geography({
             'id': result['id'],
@@ -40,6 +40,6 @@ class GeographyRepository(object):
 
     @staticmethod
     def _to_geographies(results):
-        from cartoframes.data.catalog.geography import Geographies
+        from cartoframes.data.observatory.geography import Geographies
 
         return Geographies(GeographyRepository._to_geography(result) for result in results)

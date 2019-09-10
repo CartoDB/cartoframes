@@ -1,9 +1,9 @@
 import unittest
 
-from cartoframes.data.catalog.geography import Geographies
+from cartoframes.data.observatory.geography import Geographies
 
-from cartoframes.data.catalog.repository.geography_repo import GeographyRepository
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies
 
 try:

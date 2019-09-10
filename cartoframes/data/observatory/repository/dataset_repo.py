@@ -1,4 +1,4 @@
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
 def get_dataset_repo():
@@ -35,7 +35,7 @@ class DatasetRepository(object):
 
     @staticmethod
     def _to_dataset(result):
-        from cartoframes.data.catalog.dataset import Dataset
+        from cartoframes.data.observatory.dataset import Dataset
 
         return Dataset({
             'id': result['id'],
@@ -53,6 +53,6 @@ class DatasetRepository(object):
 
     @staticmethod
     def _to_datasets(results):
-        from cartoframes.data.catalog.dataset import Datasets
+        from cartoframes.data.observatory.dataset import Datasets
 
         return Datasets(DatasetRepository._to_dataset(result) for result in results)

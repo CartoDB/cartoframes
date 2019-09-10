@@ -1,7 +1,7 @@
 import pandas as pd
 
-from cartoframes.data.catalog.repository.dataset_repo import get_dataset_repo
-from cartoframes.data.catalog.repository.variable_repo import get_variable_repo
+from cartoframes.data.observatory.repository.dataset_repo import get_dataset_repo
+from cartoframes.data.observatory.repository.variable_repo import get_variable_repo
 
 _VARIABLE_FIELD_ID = 'id'
 

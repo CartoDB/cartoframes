@@ -1,9 +1,9 @@
 import unittest
 
-from cartoframes.data.catalog.category import Categories
+from cartoframes.data.observatory.category import Categories
 
-from cartoframes.data.catalog.repository.category_repo import CategoryRepository
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_category1, test_categories
 
 try:

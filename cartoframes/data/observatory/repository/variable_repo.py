@@ -1,4 +1,4 @@
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
 def get_variable_repo():
@@ -26,7 +26,7 @@ class VariableRepository(object):
 
     @staticmethod
     def _to_variable(result):
-        from cartoframes.data.catalog.variable import Variable
+        from cartoframes.data.observatory.variable import Variable
 
         return Variable({
             'id': result['id'],
@@ -36,6 +36,6 @@ class VariableRepository(object):
 
     @staticmethod
     def _to_variables(results):
-        from cartoframes.data.catalog.variable import Variables
+        from cartoframes.data.observatory.variable import Variables
 
         return Variables([VariableRepository._to_variable(result) for result in results])

@@ -1,9 +1,9 @@
 import unittest
 
-from cartoframes.data.catalog.variable import Variables
+from cartoframes.data.observatory.variable import Variables
 
-from cartoframes.data.catalog.repository.variable_repo import VariableRepository
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_variable1, test_variables
 
 try:

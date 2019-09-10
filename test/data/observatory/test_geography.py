@@ -1,11 +1,11 @@
 import unittest
 import pandas as pd
-from cartoframes.data.catalog.geography import Geography, Geographies
+from cartoframes.data.observatory.geography import Geography, Geographies
 
-from cartoframes.data.catalog.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 
-from cartoframes.data.catalog.dataset import Datasets
-from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
 from .examples import test_geography1, test_geographies, test_datasets
 

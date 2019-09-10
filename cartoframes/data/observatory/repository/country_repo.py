@@ -1,4 +1,4 @@
-from cartoframes.data.catalog.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
 def get_country_repo():
@@ -23,7 +23,7 @@ class CountryRepository(object):
 
     @staticmethod
     def _to_country(result):
-        from cartoframes.data.catalog.country import Country
+        from cartoframes.data.observatory.country import Country
 
         return Country({
             'iso_code3': result['country_iso_code3']
@@ -31,6 +31,6 @@ class CountryRepository(object):
 
     @staticmethod
     def _to_countries(results):
-        from cartoframes.data.catalog.country import Countries
+        from cartoframes.data.observatory.country import Countries
 
         return Countries([CountryRepository._to_country(result) for result in results])

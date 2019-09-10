@@ -1,7 +1,7 @@
 import pandas as pd
 
-from cartoframes.data.catalog.repository.dataset_repo import get_dataset_repo
-from cartoframes.data.catalog.repository.geography_repo import get_geography_repo
+from cartoframes.data.observatory.repository.dataset_repo import get_dataset_repo
+from cartoframes.data.observatory.repository.geography_repo import get_geography_repo
 
 _GEOGRAPHY_FIELD_ID = 'id'
 

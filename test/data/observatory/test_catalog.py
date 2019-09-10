@@ -1,8 +1,8 @@
 import unittest
 
-from cartoframes.data.catalog.category import Categories
-from cartoframes.data.catalog.country import Countries
-from cartoframes.data.catalog.do import DO
+from cartoframes.data.observatory.category import Categories
+from cartoframes.data.observatory.country import Countries
+from cartoframes.data.observatory.catalog import Catalog
 from .examples import test_country2, test_country1, test_category1, test_category2
 
 try:
@@ -11,17 +11,17 @@ except ImportError:
     from mock import Mock, patch
 
 
-class TestDO(unittest.TestCase):
+class TestCatalog(unittest.TestCase):
 
     @patch.object(Countries, 'get_all')
     def test_countries(self, mocked_countries):
         # Given
         expected_countries = [test_country1, test_country2]
         mocked_countries.return_value = expected_countries
-        do = DO()
+        catalog = Catalog()
 
         # When
-        countries = do.countries
+        countries = catalog.countries
 
         # Then
         assert countries == expected_countries
@@ -31,10 +31,10 @@ class TestDO(unittest.TestCase):
         # Given
         expected_categories = [test_category1, test_category2]
         mocked_categories.return_value = expected_categories
-        do = DO()
+        catalog = Catalog()
 
         # When
-        categories = do.categories
+        categories = catalog.categories
 
         # Then
         assert categories == expected_categories

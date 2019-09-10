@@ -1,8 +1,8 @@
-from cartoframes.data.catalog.variable import Variable, Variables
-from cartoframes.data.catalog.dataset import Dataset, Datasets
-from cartoframes.data.catalog.category import Category, Categories
-from cartoframes.data.catalog.geography import Geography, Geographies
-from cartoframes.data.catalog.country import Country, Countries
+from cartoframes.data.observatory.variable import Variable, Variables
+from cartoframes.data.observatory.dataset import Dataset, Datasets
+from cartoframes.data.observatory.category import Category, Categories
+from cartoframes.data.observatory.geography import Geography, Geographies
+from cartoframes.data.observatory.country import Country, Countries
 
 test_country1 = Country({'iso_code3': 'esp'})
 test_country2 = Country({'iso_code3': 'usa'})

@@ -1,10 +1,10 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.catalog.variable import Variable, Variables
-from cartoframes.data.catalog.dataset import Datasets
-from cartoframes.data.catalog.repository.variable_repo import VariableRepository
-from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.variable import Variable, Variables
+from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
 from .examples import test_datasets, test_variable1, test_variables
 

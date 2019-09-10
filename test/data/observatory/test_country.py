@@ -1,14 +1,14 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.catalog.geography import Geographies
-from cartoframes.data.catalog.dataset import Datasets
-from cartoframes.data.catalog.category import Categories
-from cartoframes.data.catalog.country import Countries, Country
-from cartoframes.data.catalog.repository.geography_repo import GeographyRepository
-from cartoframes.data.catalog.repository.category_repo import CategoryRepository
-from cartoframes.data.catalog.repository.dataset_repo import DatasetRepository
-from cartoframes.data.catalog.repository.country_repo import CountryRepository
+from cartoframes.data.observatory.geography import Geographies
+from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.category import Categories
+from cartoframes.data.observatory.country import Countries, Country
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
+from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.repository.country_repo import CountryRepository
 
 from .examples import test_country1, test_datasets, test_countries, test_categories, \
     test_geographies

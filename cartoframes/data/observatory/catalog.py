@@ -1,8 +1,8 @@
-from cartoframes.data.catalog.category import Categories
-from cartoframes.data.catalog.country import Countries
+from cartoframes.data.observatory.category import Categories
+from cartoframes.data.observatory.country import Countries
 
 
-class DO(object):
+class Catalog(object):
 
     @property
     def countries(self):
