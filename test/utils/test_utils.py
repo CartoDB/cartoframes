@@ -5,7 +5,7 @@ import unittest
 import requests
 from collections import OrderedDict
 
-from cartoframes.utils import dict_items, cssify, importify_params, snake_to_camel, \
+from cartoframes.utils.utils import dict_items, cssify, importify_params, snake_to_camel, \
     camel_dictionary, debug_print
 
 
@@ -125,7 +125,7 @@ class TestUtils(unittest.TestCase):
 
     def test_dtypes2pg(self):
         """utils.dtypes2pg"""
-        from cartoframes.utils import dtypes2pg
+        from cartoframes.utils.utils import dtypes2pg
         results = {
             'float64': 'numeric',
             'int64': 'numeric',

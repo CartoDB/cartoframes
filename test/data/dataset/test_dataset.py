@@ -12,24 +12,24 @@ from carto.exceptions import CartoException
 
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
-from cartoframes.client import SQLClient
-from cartoframes.data.utils import setting_value_exception
-from cartoframes.data.columns import normalize_name
-from cartoframes.utils import load_geojson
+from cartoframes.data.clients import SQLClient
+from cartoframes.utils.geom_utils import setting_value_exception
+from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.registry.dataframe_dataset import DataFrameDataset, _rows
-from cartoframes.data.registry.table_dataset import TableDataset
-from cartoframes.data.registry.query_dataset import QueryDataset
-from cartoframes import context
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.lib import context
 
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
-from ..mocks.dataset_mock import DatasetMock, QueryDatasetMock
-from ..mocks.context_mock import ContextMock
+from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
+from test.mocks.context_mock import ContextMock
 
-from ..utils import _UserUrlLoader
+from test.helpers import _UserUrlLoader
 
 try:
     import geopandas

@@ -6,7 +6,7 @@ from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoRateLimitException
 
 from .base_context import BaseContext
-from ..__version__ import __version__
+from ...__version__ import __version__
 
 DEFAULT_RETRY_TIMES = 3
 

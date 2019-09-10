@@ -9,10 +9,10 @@ from warnings import warn
 
 from carto.exceptions import CartoException
 
-from .. import utils
-from .. import context
-from ..auth import get_default_credentials
-from ..data.dataset import Dataset
+from ...utils import utils
+from ...lib import context
+from ...auth import get_default_credentials
+from ..dataset.dataset import Dataset
 
 
 class DataObsClient(object):

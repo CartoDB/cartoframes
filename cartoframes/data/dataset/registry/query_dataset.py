@@ -1,7 +1,7 @@
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ...utils import is_sql_query
+from ....utils.utils import is_sql_query
 
 
 class QueryDataset(BaseDataset):

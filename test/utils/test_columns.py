@@ -3,7 +3,7 @@
 """Unit tests for cartoframes.data.columns"""
 import unittest
 
-from cartoframes.data.columns import Column, normalize_names, pg2dtypes
+from cartoframes.utils.columns import Column, normalize_names, pg2dtypes
 
 
 class TestColumns(unittest.TestCase):
