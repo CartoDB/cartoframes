@@ -8,6 +8,8 @@ Subpackages
 
    cartoframes.auth
    cartoframes.data
+   cartoframes.lib
+   cartoframes.utils
    cartoframes.viz
 
 Submodules
@@ -16,7 +18,6 @@ Submodules
 .. toctree::
 
    cartoframes.examples
-   cartoframes.utils
 
 Module contents
 ---------------
