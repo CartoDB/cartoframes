@@ -345,13 +345,16 @@ class Geocode(object):
                 temporary_dataset.delete()
 
         result = result_dataset
-        if input_dataframe:
+        if input_dataframe is not None:
             # Note that we return a dataframe whenever the input is dataframe,
             # even if we have uploaded it to a table (table_name is not None).
             if dry_run:
                 result = input_dataframe
             else:
-                result = result_dataset.download()
+                result = result_dataset.dataframe  # if temporary it should have been downloaded
+                if result is None:
+                    # but if not temporary we need to download it now
+                    result = result_dataset.download()
 
         return (result, result_info)
 
