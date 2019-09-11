@@ -1,0 +1,2419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.data.clients.data_obs_client API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.data.clients.data_obs_client</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
+
+import json
+import collections
+import pandas as pd
+from warnings import warn
+
+from carto.exceptions import CartoException
+
+from ...utils import utils
+from ...lib import context
+from ...auth import get_default_credentials
+from ..dataset.dataset import Dataset
+
+
+class DataObsClient(object):
+    &#34;&#34;&#34;
+    Data Observatory v1 class. `Data Observatory documentation
+    &lt;https://carto.com/developers/data-observatory/&gt;`__.
+
+    This class provides the following methods to interact with Data Observatory:
+      - boundary: returns a :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` with
+        the geographic boundaries (geometries) or their metadata.
+      - discovery: returns a pandas.DataFrame with the measures found.
+      - augment: returns a :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` with the augmented data.
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`):
+          A :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+    &#34;&#34;&#34;
+
+    def __init__(self, credentials=None):
+        self._verbose = 0
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
+
+    def boundaries(self, boundary=None, region=None, decode_geom=False,
+                   timespan=None, include_nonclipped=False):
+        &#34;&#34;&#34;
+        Find all boundaries available for the world or a `region`. If
+        `boundary` is specified, get all available boundary polygons for the
+        region specified (if any). This method is especially useful for getting
+        boundaries for a region and, with :py:meth:`DataObsClient.augment
+        &lt;cartoframes.client.DataObsClient.augment&gt;` and
+        :py:meth:`DataObsClient.discovery
+        &lt;cartoframes.client.DataObsClient.discovery&gt;`, getting tables of
+        geometries and the corresponding raw measures. For example, if you want
+        to analyze how median income has changed in a region (see examples
+        section for more).
+
+        Examples:
+
+            Find all boundaries available for Australia. The columns
+            `geom_name` gives us the name of the boundary and `geom_id`
+            is what we need for the `boundary` argument.
+
+            .. code:: python
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                do = DataObsClient(creds)
+                au_boundaries = do.boundaries(region=&#39;Australia&#39;)
+                au_boundaries.dataframe[[&#39;geom_name&#39;, &#39;geom_id&#39;]]
+
+            Get the boundaries for Australian Postal Areas and map them.
+
+            .. code:: python
+
+                from cartoframes.viz import Layer
+                au_postal_areas = do.boundaries(boundary=&#39;au.geo.POA&#39;)
+                Layer(au_postal_areas)
+
+            Get census tracts around Idaho Falls, Idaho, USA, and add median
+            income from the US census. Without limiting the metadata, we get
+            median income measures for each census in the Data Observatory.
+
+            .. code:: python
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                credentials = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                # Note: default credentials will be supported in a future release
+                do = DataObsClient(credentials)
+                # will return Dataset with columns `the_geom` and `geom_ref`
+                tracts = do.boundaries(
+                    boundary=&#39;us.census.tiger.census_tract&#39;,
+                    region=[-112.096642,43.429932,-111.974213,43.553539])
+                # write geometries to a CARTO table
+                tracts.upload(&#39;idaho_falls_tracts&#39;)
+                # gather metadata needed to look up median income
+                median_income_meta = do.discovery(
+                    &#39;idaho_falls_tracts&#39;,
+                    keywords=&#39;median income&#39;,
+                    boundaries=&#39;us.census.tiger.census_tract&#39;)
+                # get median income data and original table as new Dataset
+                idaho_falls_income = do.augment(
+                    &#39;idaho_falls_tracts&#39;,
+                    median_income_meta,
+                    how=&#39;geom_refs&#39;)
+                # overwrite existing table with newly-enriched Dataset
+                idaho_falls_income.upload(&#39;idaho_falls_tracts&#39;, if_exists=&#39;replace&#39;)
+
+        Args:
+            boundary (str, optional): Boundary identifier for the boundaries
+              that are of interest. For example, US census tracts have a
+              boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+              Municipios have an ID of ``br.geo.municipios``. Find IDs by
+              running :py:meth:`DataObsClient.boundaries
+              &lt;cartoframes.client.DataObsClient.boundaries&gt;`
+              without any arguments, or by looking in the `Data Observatory
+              catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+            region (str, optional): Region where boundary information or,
+              if `boundary` is specified, boundary polygons are of interest.
+              `region` can be one of the following:
+
+                - table name (str): Name of a table in user&#39;s CARTO account
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional): Specific timespan to get geometries from.
+              Defaults to use the most recent. See the Data Observatory catalog
+              for more information.
+            decode_geom (bool, optional): Whether to return the geometries as
+              Shapely objects or keep them encoded as EWKB strings. Defaults
+              to False.
+            include_nonclipped (bool, optional): Optionally include
+              non-shoreline-clipped boundaries. These boundaries are the raw
+              boundaries provided by, for example, US Census Tiger.
+
+        Returns:
+            :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+            If `boundary` is specified, then all available
+            boundaries and accompanying `geom_refs` in `region` (or the world
+            if `region` is ``None`` or not specified) are returned. If
+            `boundary` is not specified, then a Dataset of all available
+            boundaries in `region` (or the world if `region` is ``None``).
+        &#34;&#34;&#34;
+        # TODO: create a function out of this?
+        if isinstance(region, str):
+            # see if it&#39;s a table
+            try:
+                geom_type = self._geom_type(region)
+                if geom_type in (&#39;point&#39;, &#39;line&#39;, ):
+                    bounds = (&#39;(SELECT ST_ConvexHull(ST_Collect(the_geom)) &#39;
+                              &#39;FROM {table})&#39;).format(table=region)
+                else:
+                    bounds = (&#39;(SELECT ST_Union(the_geom) &#39;
+                              &#39;FROM {table})&#39;).format(table=region)
+            except CartoException:
+                # see if it&#39;s a Data Obs region tag
+                regionsearch = &#39;&#34;geom_tags&#34;::text ilike \&#39;%{}%\&#39;&#39;.format(
+                    get_countrytag(region))
+                bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    &#39;`region` should be a list of the geographic bounds of a &#39;
+                    &#39;region in the following order: western longitude, &#39;
+                    &#39;southern latitude, eastern longitude, and northern &#39;
+                    &#39;latitude. For example, Switerland fits in &#39;
+                    &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                    &#39;47.808380127]``.&#39;)
+            bounds = (&#39;ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)&#39;).format(
+                *region)
+        elif region is None:
+            bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+        else:
+            raise ValueError(&#39;`region` must be a str, a list of two lng/lat &#39;
+                             &#39;pairs, or ``None`` (which defaults to the &#39;
+                             &#39;world)&#39;)
+        if include_nonclipped:
+            clipped = None
+        else:
+            clipped = (r&#34;(geom_id ~ &#39;^us\.census\..*_clipped$&#39; OR &#34;
+                       r&#34;geom_id !~ &#39;^us\.census\..*&#39;)&#34;)
+
+        if boundary is None:
+            regionsearch = locals().get(&#39;regionsearch&#39;)
+            filters = &#39; AND &#39;.join(r for r in [regionsearch, clipped] if r)
+            query = utils.minify_sql((
+                &#39;SELECT *&#39;,
+                &#39;FROM OBS_GetAvailableGeometries(&#39;,
+                &#39;  {bounds}, null, null, null, {timespan})&#39;,
+                &#39;{filters}&#39;)).format(
+                    bounds=bounds,
+                    timespan=utils.pgquote(timespan),
+                    filters=&#39;WHERE {}&#39;.format(filters) if filters else &#39;&#39;)
+            return self._fetch(query, decode_geom=True)
+
+        query = utils.minify_sql((
+            &#39;SELECT the_geom, geom_refs&#39;,
+            &#39;FROM OBS_GetBoundariesByGeometry(&#39;,
+            &#39;    {bounds},&#39;,
+            &#39;    {boundary},&#39;,
+            &#39;    {time})&#39;, )).format(
+                bounds=bounds,
+                boundary=utils.pgquote(boundary),
+                time=utils.pgquote(timespan))
+        return self._fetch(query, decode_geom=decode_geom)
+
+    def discovery(self, region, keywords=None, regex=None, time=None,
+                  boundaries=None, include_quantiles=False):
+        &#34;&#34;&#34;Discover Data Observatory measures. This method returns the full
+        Data Observatory metadata model for each measure or measures that
+        match the conditions from the inputs. The full metadata in each row
+        uniquely defines a measure based on the timespan, geographic
+        resolution, and normalization (if any). Read more about the metadata
+        response in `Data Observatory
+        &lt;https://carto.com/developers/data-observatory/reference/#discovery-functions&gt;`__
+        documentation.
+
+        Internally, this method finds all measures in `region` that match the
+        conditions set in `keywords`, `regex`, `time`, and `boundaries` (if
+        any of them are specified). Then, if `boundaries` is not specified, a
+        geographical resolution for that measure will be chosen subject to the
+        type of region specified:
+
+          1. If `region` is a table name, then a geographical resolution that
+             is roughly equal to `region size / number of subunits`.
+          2. If `region` is a country name or bounding box, then a geographical
+             resolution will be chosen roughly equal to `region size / 500`.
+
+        Since different measures are in some geographic resolutions and not
+        others, different geographical resolutions for different measures are
+        oftentimes returned.
+
+        .. tip::
+
+            To remove the guesswork in how geographical resolutions are
+            selected, specify one or more boundaries in `boundaries`. See
+            the boundaries section for each region in the `Data Observatory
+            catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+
+        The metadata returned from this method can then be used to create raw
+        tables or for augmenting an existing table from these measures using
+        :py:meth:`DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`.
+        For the full Data Observatory catalog, visit
+        https://cartodb.github.io/bigmetadata/. When working with the metadata
+        DataFrame returned from this method, be careful to only remove rows not
+        columns as `DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`
+        generally needs the full metadata.
+
+        .. note::
+            Narrowing down a discovery query using the `keywords`, `regex`, and
+            `time` filters is important for getting a manageable metadata
+            set. Besides there being a large number of measures in the DO, a
+            metadata response has acceptable combinations of measures with
+            demonimators (normalization and density), and the same measure from
+            other years.
+
+            For example, setting the region to be United States counties with
+            no filter values set will result in many thousands of measures.
+
+        Examples:
+
+            Get all European Union measures that mention ``freight``.
+
+            .. code::
+
+                freight_meta = do.discovery(&#39;European Union&#39;,
+                                       keywords=&#39;freight&#39;,
+                                       time=&#39;2010&#39;)
+                freight_meta[&#39;numer_name&#39;].head()
+
+        Arguments:
+            region (str or list of float): Information about the region of
+              interest. `region` can be one of three types:
+
+                - region name (str): Name of region of interest. Acceptable
+                  values are limited to: &#39;Australia&#39;, &#39;Brazil&#39;, &#39;Canada&#39;,
+                  &#39;European Union&#39;, &#39;France&#39;, &#39;Mexico&#39;, &#39;Spain&#39;,
+                  &#39;United Kingdom&#39;, &#39;United States&#39;.
+                - table name (str): Name of a table in user&#39;s CARTO account
+                  with geometries. The region will be the bounding box of
+                  the table.
+
+                  .. Note:: If a table name is also a valid Data Observatory
+                      region name, the Data Observatory name will be chosen
+                      over the table.
+
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+
+                .. Note:: Geometry levels are generally chosen by subdividing
+                    the region into the next smallest administrative unit. To
+                    override this behavior, specify the `boundaries` flag. For
+                    example, set `boundaries` to
+                    ``&#39;us.census.tiger.census_tract&#39;`` to choose US census
+                    tracts.
+
+            keywords (str or list of str, optional): Keyword or list of
+              keywords in measure description or name. Response will be matched
+              on all keywords listed (boolean `or`).
+            regex (str, optional): A regular expression to search the measure
+              descriptions and names. Note that this relies on PostgreSQL&#39;s
+              case insensitive operator ``~*``. See `PostgreSQL docs
+              &lt;https://www.postgresql.org/docs/9.5/static/functions-matching.html&gt;`__
+              for more information.
+            boundaries (str or list of str, optional): Boundary or list of
+              boundaries that specify the measure resolution. See the
+              boundaries section for each region in the `Data Observatory
+              catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+            include_quantiles (bool, optional): Include quantiles calculations
+              which are a calculation of how a measure compares to all measures
+              in the full dataset. Defaults to ``False``. If ``True``,
+              quantiles columns will be returned for each column which has it
+              pre-calculated.
+
+        Returns:
+            pandas.DataFrame: A dataframe of the complete metadata model for
+            specific measures based on the search parameters.
+
+        Raises:
+            ValueError: If `region` is a :obj:`list` and does not consist of
+              four elements, or if `region` is not an acceptable region
+            CartoException: If `region` is not a table in user account
+        &#34;&#34;&#34;
+        if isinstance(region, str):
+            try:
+                # see if it&#39;s a DO region, nest in {}
+                countrytag = &#39;\&#39;{{{0}}}\&#39;&#39;.format(
+                    get_countrytag(region))
+                boundary = (&#39;SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, &#39;
+                            &#39;85.0, 4326) AS env, 500::int AS cnt&#39;)
+            except ValueError:
+                # TODO: make this work for general queries
+                # see if it&#39;s a table
+                self._context.execute_query(
+                    &#39;EXPLAIN SELECT * FROM {}&#39;.format(region))
+                boundary = (
+                    &#39;SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, &#39;
+                    &#39;count(*)::int AS cnt FROM {table_name}&#39;).format(
+                        table_name=region)
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    &#39;`region` should be a list of the geographic bounds of a &#39;
+                    &#39;region in the following order: western longitude, &#39;
+                    &#39;southern latitude, eastern longitude, and northern &#39;
+                    &#39;latitude. For example, Switerland fits in &#39;
+                    &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                    &#39;47.808380127]``.&#39;
+                )
+            boundary = (&#39;SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS &#39;
+                        &#39;env, 500::int AS cnt&#39;.format(*region))
+
+        if locals().get(&#39;countrytag&#39;) is None:
+            countrytag = &#39;null&#39;
+
+        if keywords:
+            if isinstance(keywords, str):
+                keywords = [keywords, ]
+            kwsearch = &#39; OR &#39;.join(
+                (&#39;numer_description ILIKE \&#39;%{kw}%\&#39; OR &#39;
+                 &#39;numer_name ILIKE \&#39;%{kw}%\&#39;&#39;).format(kw=kw)
+                for kw in keywords)
+            kwsearch = &#39;({})&#39;.format(kwsearch)
+
+        if regex:
+            regexsearch = (&#39;(numer_description ~* {regex} OR numer_name &#39;
+                           &#39;~* {regex})&#39;).format(regex=utils.pgquote(regex))
+
+        if keywords or regex:
+            subjectfilters = &#39;{kw} {op} {regex}&#39;.format(
+                kw=kwsearch if keywords else &#39;&#39;,
+                op=&#39;OR&#39; if (keywords and regex) else &#39;&#39;,
+                regex=regexsearch if regex else &#39;&#39;).strip()
+        else:
+            subjectfilters = &#39;&#39;
+
+        if isinstance(time, str) or time is None:
+            time = [time, ]
+        if isinstance(boundaries, str) or boundaries is None:
+            boundaries = [boundaries, ]
+
+        if all(time) and all(boundaries):
+            bt_filters = &#39;valid_geom AND valid_timespan&#39;
+        elif all(time) or all(boundaries):
+            bt_filters = &#39;valid_geom&#39; if all(boundaries) else &#39;valid_timespan&#39;
+        else:
+            bt_filters = &#39;&#39;
+
+        if bt_filters and subjectfilters:
+            filters = &#39;WHERE ({s}) AND ({bt})&#39;.format(
+                s=subjectfilters, bt=bt_filters)
+        elif bt_filters or subjectfilters:
+            filters = &#39;WHERE {f}&#39;.format(f=subjectfilters or bt_filters)
+        else:
+            filters = &#39;&#39;
+
+        quantiles = (&#39;WHERE numer_aggregate &lt;&gt; \&#39;quantile\&#39;&#39;
+                     if not include_quantiles else &#39;&#39;)
+
+        numer_query = utils.minify_sql((
+            &#39;SELECT&#39;,
+            &#39;    numer_id,&#39;,
+            &#39;    {geom_id} AS geom_id,&#39;,
+            &#39;    {timespan} AS numer_timespan,&#39;,
+            &#39;    {normalization} AS normalization&#39;,
+            &#39;  FROM&#39;,
+            &#39;    OBS_GetAvailableNumerators(&#39;,
+            &#39;        (SELECT env FROM envelope),&#39;,
+            &#39;        {countrytag},&#39;,
+            &#39;        null,&#39;,  # denom_id
+            &#39;        {geom_id},&#39;,
+            &#39;        {timespan})&#39;,
+            &#39;{filters}&#39;, )).strip()
+
+        # query all numerators for all `time`, `boundaries`, and raw/derived
+        numers = &#39;\nUNION\n&#39;.join(
+            numer_query.format(
+                timespan=utils.pgquote(t),
+                geom_id=utils.pgquote(b),
+                normalization=utils.pgquote(n),
+                countrytag=countrytag,
+                filters=filters)
+            for t in time
+            for b in boundaries
+            for n in (&#39;predenominated&#39;, None))
+
+        query = utils.minify_sql((
+            &#39;WITH envelope AS (&#39;,
+            &#39;    {boundary}&#39;,
+            &#39;), numers AS (&#39;,
+            &#39;  {numers}&#39;,
+            &#39;)&#39;,
+            &#39;SELECT *&#39;,
+            &#39;FROM json_to_recordset(&#39;,
+            &#39;    (SELECT OBS_GetMeta(&#39;,
+            &#39;        envelope.env,&#39;,
+            &#39;        json_agg(numers),&#39;,
+            &#39;        10, 10, envelope.cnt&#39;,
+            &#39;    ) AS meta&#39;,
+            &#39;FROM numers, envelope&#39;,
+            &#39;GROUP BY env, cnt)) as data(&#39;,
+            &#39;    denom_aggregate text, denom_colname text,&#39;,
+            &#39;    denom_description text, denom_geomref_colname text,&#39;,
+            &#39;    denom_id text, denom_name text, denom_reltype text,&#39;,
+            &#39;    denom_t_description text, denom_tablename text,&#39;,
+            &#39;    denom_type text, geom_colname text, geom_description text,&#39;,
+            &#39;    geom_geomref_colname text, geom_id text, geom_name text,&#39;,
+            &#39;    geom_t_description text, geom_tablename text,&#39;,
+            &#39;    geom_timespan text, geom_type text, id numeric,&#39;,
+            &#39;    max_score_rank text, max_timespan_rank text,&#39;,
+            &#39;    normalization text, num_geoms numeric, numer_aggregate text,&#39;,
+            &#39;    numer_colname text, numer_description text,&#39;,
+            &#39;    numer_geomref_colname text, numer_id text,&#39;,
+            &#39;    numer_name text, numer_t_description text,&#39;,
+            &#39;    numer_tablename text, numer_timespan text,&#39;,
+            &#39;    numer_type text, score numeric, score_rank numeric,&#39;,
+            &#39;    score_rownum numeric, suggested_name text,&#39;,
+            &#39;    target_area text, target_geoms text, timespan_rank numeric,&#39;,
+            &#39;    timespan_rownum numeric)&#39;,
+            &#39;{quantiles}&#39;, )).format(
+                boundary=boundary,
+                numers=numers,
+                quantiles=quantiles).strip()
+        utils.debug_print(self._verbose, query=query)
+        return self._fetch(query, decode_geom=True).dataframe
+
+    def augment(self, table_name, metadata, persist_as=None, how=&#39;the_geom&#39;):
+        &#34;&#34;&#34;Get an augmented CARTO dataset with `Data Observatory
+        &lt;https://carto.com/data-observatory&gt;`__ measures. Use
+        `DataObsClient.discovery
+        &lt;#DataObsClient.discovery&gt;`__ to search for available
+        measures, or see the full `Data Observatory catalog
+        &lt;https://cartodb.github.io/bigmetadata/index.html&gt;`__. Optionally
+        persist the data as a new table.
+
+        Example:
+            Get a DataFrame with Data Observatory measures based on the
+            geometries in a CARTO table.
+
+            .. code::
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                do = DataObsClient(creds)
+                median_income = do.discovery(
+                    &#39;transaction_events&#39;,
+                    regex=&#39;.*median income.*&#39;,
+                    time=&#39;2011 - 2015&#39;)
+                ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+            Pass in cherry-picked measures from the Data Observatory catalog.
+            The rest of the metadata will be filled in, but it&#39;s important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            .. code::
+
+                median_income = [{&#39;numer_id&#39;: &#39;us.census.acs.B19013001&#39;,
+                                  &#39;geom_id&#39;: &#39;us.census.tiger.block_group&#39;,
+                                  &#39;numer_timespan&#39;: &#39;2011 - 2015&#39;}]
+                ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+        Args:
+            table_name (str): Name of table on CARTO account that Data
+                Observatory measures are to be added to.
+            metadata (pandas.DataFrame): List of all measures to add to
+                `table_name`. See :py:meth:`DataObsClient.discovery
+                &lt;cartoframes.client.DataObsClient.discovery&gt;` outputs
+                for a full list of metadata columns.
+            persist_as (str, optional): Output the results of augmenting
+                `table_name` to `persist_as` as a persistent table on CARTO.
+                Defaults to ``None``, which will not create a table.
+            how (str, optional): Column name for
+                identifying the geometry from which to fetch the data. Defaults
+                to `the_geom`, which results in measures that are spatially
+                interpolated (e.g., a neighborhood boundary&#39;s population will
+                be calculated from underlying census tracts). Specifying a
+                column that has the geometry identifier (for example, GEOID for
+                US Census boundaries), results in measures directly from the
+                Census for that GEOID but normalized how it is specified in the
+                metadata.
+
+        Returns:
+            :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+            A Dataset representation of `table_name` which
+            has new columns for each measure in `metadata`.
+
+        Raises:
+            NameError: If the columns in `table_name` are in the
+              ``suggested_name`` column of `metadata`.
+            ValueError: If metadata object is invalid or empty, or if the
+              number of requested measures exceeds 50.
+            CartoException: If user account consumes all of Data Observatory
+              quota
+        &#34;&#34;&#34;
+        if isinstance(metadata, pd.DataFrame):
+            _meta = metadata.copy().reset_index()
+        elif isinstance(metadata, collections.Iterable):
+            query = utils.minify_sql((
+                &#39;WITH envelope AS (&#39;,
+                &#39;  SELECT&#39;,
+                &#39;    ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,&#39;,
+                &#39;    count(*)::int AS cnt&#39;,
+                &#39;  FROM {table_name}&#39;,
+                &#39;)&#39;,
+                &#39;SELECT *&#39;,
+                &#39;  FROM json_to_recordset(&#39;,
+                &#39;      (SELECT OBS_GetMeta(&#39;,
+                &#39;          envelope.env,&#39;,
+                &#39;          (\&#39;{meta}\&#39;)::json,&#39;,
+                &#39;          10, 1, envelope.cnt&#39;,
+                &#39;      ) AS meta&#39;,
+                &#39;  FROM envelope&#39;,
+                &#39;  GROUP BY env, cnt)) as data(&#39;,
+                &#39;      denom_aggregate text, denom_colname text,&#39;,
+                &#39;      denom_description text, denom_geomref_colname text,&#39;,
+                &#39;      denom_id text, denom_name text, denom_reltype text,&#39;,
+                &#39;      denom_t_description text, denom_tablename text,&#39;,
+                &#39;      denom_type text, geom_colname text,&#39;,
+                &#39;      geom_description text,geom_geomref_colname text,&#39;,
+                &#39;      geom_id text, geom_name text, geom_t_description text,&#39;,
+                &#39;      geom_tablename text, geom_timespan text,&#39;,
+                &#39;      geom_type text, id numeric, max_score_rank text,&#39;,
+                &#39;      max_timespan_rank text, normalization text, num_geoms&#39;,
+                &#39;      numeric,numer_aggregate text, numer_colname text,&#39;,
+                &#39;      numer_description text, numer_geomref_colname text,&#39;,
+                &#39;      numer_id text, numer_name text, numer_t_description&#39;,
+                &#39;      text, numer_tablename text, numer_timespan text,&#39;,
+                &#39;      numer_type text, score numeric, score_rank numeric,&#39;,
+                &#39;      score_rownum numeric, suggested_name text,&#39;,
+                &#39;      target_area text, target_geoms text, timespan_rank&#39;,
+                &#39;      numeric, timespan_rownum numeric)&#39;,
+            )).format(table_name=table_name,
+                      meta=json.dumps(metadata).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+            _meta = self._fetch(query).dataframe
+
+        if _meta.shape[0] == 0:
+            raise ValueError(&#39;There are no valid metadata entries. Check &#39;
+                             &#39;inputs.&#39;)
+        elif _meta.shape[0] &gt; 50:
+            raise ValueError(&#39;The number of metadata entries exceeds 50. Tip: &#39;
+                             &#39;If `metadata` is a pandas.DataFrame, iterate &#39;
+                             &#39;over this object using `metadata.groupby`. If &#39;
+                             &#39;it is a list, iterate over chunks of it. Then &#39;
+                             &#39;combine resulting DataFrames using &#39;
+                             &#39;`pandas.concat`&#39;)
+
+        # get column names except the_geom_webmercator
+        dataset = Dataset(table_name, credentials=self._credentials)
+        table_columns = dataset.get_table_column_names(exclude=[&#39;the_geom_webmercator&#39;])
+
+        names = {}
+        for suggested in _meta[&#39;suggested_name&#39;]:
+            if suggested in table_columns:
+                names[suggested] = utils.unique_colname(suggested, table_columns)
+                warn(
+                    &#39;{s0} was augmented as {s1} because of name &#39;
+                    &#39;collision&#39;.format(s0=suggested, s1=names[suggested])
+                )
+            else:
+                names[suggested] = suggested
+
+        # drop description columns to lighten the query
+        meta_columns = _meta.columns.values
+        drop_columns = []
+        for meta_column in meta_columns:
+            if meta_column.endswith(&#39;_description&#39;):
+                drop_columns.append(meta_column)
+
+        if len(drop_columns) &gt; 0:
+            _meta.drop(drop_columns, axis=1, inplace=True)
+
+        cols = &#39;, &#39;.join(
+            &#39;(data-&gt;{n}-&gt;&gt;\&#39;value\&#39;)::{pgtype} AS {col}&#39;.format(
+                n=row[0],
+                pgtype=row[1][&#39;numer_type&#39;],
+                col=names[row[1][&#39;suggested_name&#39;]])
+            for row in _meta.iterrows())
+        query = utils.minify_sql((
+            &#39;SELECT {table_cols}, {cols}&#39;,
+            &#39;  FROM OBS_GetData(&#39;,
+            &#39;       (SELECT array_agg({how})&#39;,
+            &#39;        FROM &#34;{tablename}&#34;),&#39;,
+            &#39;       (SELECT \&#39;{meta}\&#39;::json)) as m,&#39;,
+            &#39;       {tablename} as t&#39;,
+            &#39; WHERE t.&#34;{rowid}&#34; = m.id&#39;,)).format(
+                how=(&#39;(the_geom, cartodb_id)::geomval&#39;
+                     if how == &#39;the_geom&#39; else how),
+                tablename=table_name,
+                rowid=&#39;cartodb_id&#39; if how == &#39;the_geom&#39; else how,
+                cols=cols,
+                table_cols=&#39;,&#39;.join(&#39;t.{}&#39;.format(c) for c in table_columns),
+                meta=_meta.to_json(orient=&#39;records&#39;).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+
+        return self._fetch(query, decode_geom=False, table_name=persist_as)
+
+    def _fetch(self, query, decode_geom=False, table_name=None):
+        dataset = Dataset(query, credentials=self._credentials)
+        if table_name:
+            dataset.upload(table_name=table_name)
+        dataset.download(decode_geom=decode_geom)
+        return dataset
+
+    def _geom_type(self, table):
+        &#34;&#34;&#34;gets geometry type(s) of specified layer&#34;&#34;&#34;
+        query = &#39;SELECT * FROM &#34;{table}&#34;&#39;.format(table=table)
+        return utils.get_query_geom_type(self._context, query)
+
+
+# Country names are pegged to the following query:
+# SELECT
+#    count(*) num_measurements,
+#    tag.key region_id,
+#    tag.value region_name
+#  FROM (
+#    SELECT *
+#    FROM OBS_GetAvailableNumerators()
+#    WHERE jsonb_pretty(numer_tags) LIKE &#39;%subsection/%&#39;
+#  ) numers,
+#  Jsonb_Each(numers.numer_tags) tag
+#  WHERE tag.key like &#39;section%&#39;
+#  GROUP BY tag.key, tag.value
+#  ORDER BY region_name
+
+
+REGIONTAGS = {
+    &#39;Australia&#39;: &#39;section/tags.au&#39;,
+    &#39;Brazil&#39;: &#39;section/tags.br&#39;,
+    &#39;Canada&#39;: &#39;section/tags.ca&#39;,
+    &#39;European Union&#39;: &#39;section/tags.eu&#39;,
+    &#39;France&#39;: &#39;section/tags.fr&#39;,
+    &#39;Mexico&#39;: &#39;section/tags.mx&#39;,
+    &#39;Spain&#39;: &#39;section/tags.spain&#39;,
+    &#39;United Kingdom&#39;: &#39;section/tags.uk&#39;,
+    &#39;United States&#39;: &#39;section/tags.united_states&#39;
+}
+
+
+def get_countrytag(country):
+    &#34;&#34;&#34;normalize country name to match data obs&#34;&#34;&#34;
+    norm_name = {
+        &#39;australia&#39;: &#39;Australia&#39;,
+        &#39;brazil&#39;: &#39;Brazil&#39;,
+        &#39;brasil&#39;: &#39;Brazil&#39;,
+        &#39;canada&#39;: &#39;Canada&#39;,
+        &#39;european union&#39;: &#39;European Union&#39;,
+        &#39;eu&#39;: &#39;European Union&#39;,
+        &#39;e.u.&#39;: &#39;European Union&#39;,
+        &#39;france&#39;: &#39;France&#39;,
+        &#39;mexico&#39;: &#39;Mexico&#39;,
+        &#39;méxico&#39;: &#39;Mexico&#39;,
+        &#39;méjico&#39;: &#39;Mexico&#39;,
+        &#39;spain&#39;: &#39;Spain&#39;,
+        &#39;espana&#39;: &#39;Spain&#39;,
+        &#39;españa&#39;: &#39;Spain&#39;,
+        &#39;uk&#39;: &#39;United Kingdom&#39;,
+        &#39;u.k.&#39;: &#39;United Kingdom&#39;,
+        &#39;united kingdom&#39;: &#39;United Kingdom&#39;,
+        &#39;united states of america&#39;: &#39;United States&#39;,
+        &#39;united states&#39;: &#39;United States&#39;,
+        &#39;us&#39;: &#39;United States&#39;,
+        &#39;usa&#39;: &#39;United States&#39;,
+        &#39;u.s.&#39;: &#39;United States&#39;,
+        &#39;u.s.a.&#39;: &#39;United States&#39;
+    }
+    if country is not None and country.lower() in norm_name:
+        return REGIONTAGS.get(norm_name.get(country.lower()))
+    else:
+        raise ValueError(
+            &#39;The available regions are {0}.&#39;.format(
+                &#39;, &#39;.join(&#39;\&#39;{}\&#39;&#39;.format(k) for k in REGIONTAGS)))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.data.clients.data_obs_client.get_countrytag"><code class="name flex">
+<span>def <span class="ident">get_countrytag</span></span>(<span>country)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>normalize country name to match data obs</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_countrytag(country):
+    &#34;&#34;&#34;normalize country name to match data obs&#34;&#34;&#34;
+    norm_name = {
+        &#39;australia&#39;: &#39;Australia&#39;,
+        &#39;brazil&#39;: &#39;Brazil&#39;,
+        &#39;brasil&#39;: &#39;Brazil&#39;,
+        &#39;canada&#39;: &#39;Canada&#39;,
+        &#39;european union&#39;: &#39;European Union&#39;,
+        &#39;eu&#39;: &#39;European Union&#39;,
+        &#39;e.u.&#39;: &#39;European Union&#39;,
+        &#39;france&#39;: &#39;France&#39;,
+        &#39;mexico&#39;: &#39;Mexico&#39;,
+        &#39;méxico&#39;: &#39;Mexico&#39;,
+        &#39;méjico&#39;: &#39;Mexico&#39;,
+        &#39;spain&#39;: &#39;Spain&#39;,
+        &#39;espana&#39;: &#39;Spain&#39;,
+        &#39;españa&#39;: &#39;Spain&#39;,
+        &#39;uk&#39;: &#39;United Kingdom&#39;,
+        &#39;u.k.&#39;: &#39;United Kingdom&#39;,
+        &#39;united kingdom&#39;: &#39;United Kingdom&#39;,
+        &#39;united states of america&#39;: &#39;United States&#39;,
+        &#39;united states&#39;: &#39;United States&#39;,
+        &#39;us&#39;: &#39;United States&#39;,
+        &#39;usa&#39;: &#39;United States&#39;,
+        &#39;u.s.&#39;: &#39;United States&#39;,
+        &#39;u.s.a.&#39;: &#39;United States&#39;
+    }
+    if country is not None and country.lower() in norm_name:
+        return REGIONTAGS.get(norm_name.get(country.lower()))
+    else:
+        raise ValueError(
+            &#39;The available regions are {0}.&#39;.format(
+                &#39;, &#39;.join(&#39;\&#39;{}\&#39;&#39;.format(k) for k in REGIONTAGS)))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.data.clients.data_obs_client.DataObsClient"><code class="flex name class">
+<span>class <span class="ident">DataObsClient</span></span>
+<span>(</span><span>credentials=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Data Observatory v1 class. <code>Data Observatory documentation
+&lt;https://carto.com/developers/data-observatory/&gt;</code>__.</p>
+<p>This class provides the following methods to interact with Data Observatory:
+- boundary: returns a :py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> with
+the geographic boundaries (geometries) or their metadata.
+- discovery: returns a pandas.DataFrame with the measures found.
+- augment: returns a :py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> with the augmented data.</p>
+<h2 id="args">Args</h2>
+<p>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>):
+A :py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>
+instance can be used in place of a <code>username</code>|<code>base_url</code> / <code>api_key</code> combination.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class DataObsClient(object):
+    &#34;&#34;&#34;
+    Data Observatory v1 class. `Data Observatory documentation
+    &lt;https://carto.com/developers/data-observatory/&gt;`__.
+
+    This class provides the following methods to interact with Data Observatory:
+      - boundary: returns a :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` with
+        the geographic boundaries (geometries) or their metadata.
+      - discovery: returns a pandas.DataFrame with the measures found.
+      - augment: returns a :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` with the augmented data.
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`):
+          A :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+    &#34;&#34;&#34;
+
+    def __init__(self, credentials=None):
+        self._verbose = 0
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
+
+    def boundaries(self, boundary=None, region=None, decode_geom=False,
+                   timespan=None, include_nonclipped=False):
+        &#34;&#34;&#34;
+        Find all boundaries available for the world or a `region`. If
+        `boundary` is specified, get all available boundary polygons for the
+        region specified (if any). This method is especially useful for getting
+        boundaries for a region and, with :py:meth:`DataObsClient.augment
+        &lt;cartoframes.client.DataObsClient.augment&gt;` and
+        :py:meth:`DataObsClient.discovery
+        &lt;cartoframes.client.DataObsClient.discovery&gt;`, getting tables of
+        geometries and the corresponding raw measures. For example, if you want
+        to analyze how median income has changed in a region (see examples
+        section for more).
+
+        Examples:
+
+            Find all boundaries available for Australia. The columns
+            `geom_name` gives us the name of the boundary and `geom_id`
+            is what we need for the `boundary` argument.
+
+            .. code:: python
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                do = DataObsClient(creds)
+                au_boundaries = do.boundaries(region=&#39;Australia&#39;)
+                au_boundaries.dataframe[[&#39;geom_name&#39;, &#39;geom_id&#39;]]
+
+            Get the boundaries for Australian Postal Areas and map them.
+
+            .. code:: python
+
+                from cartoframes.viz import Layer
+                au_postal_areas = do.boundaries(boundary=&#39;au.geo.POA&#39;)
+                Layer(au_postal_areas)
+
+            Get census tracts around Idaho Falls, Idaho, USA, and add median
+            income from the US census. Without limiting the metadata, we get
+            median income measures for each census in the Data Observatory.
+
+            .. code:: python
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                credentials = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                # Note: default credentials will be supported in a future release
+                do = DataObsClient(credentials)
+                # will return Dataset with columns `the_geom` and `geom_ref`
+                tracts = do.boundaries(
+                    boundary=&#39;us.census.tiger.census_tract&#39;,
+                    region=[-112.096642,43.429932,-111.974213,43.553539])
+                # write geometries to a CARTO table
+                tracts.upload(&#39;idaho_falls_tracts&#39;)
+                # gather metadata needed to look up median income
+                median_income_meta = do.discovery(
+                    &#39;idaho_falls_tracts&#39;,
+                    keywords=&#39;median income&#39;,
+                    boundaries=&#39;us.census.tiger.census_tract&#39;)
+                # get median income data and original table as new Dataset
+                idaho_falls_income = do.augment(
+                    &#39;idaho_falls_tracts&#39;,
+                    median_income_meta,
+                    how=&#39;geom_refs&#39;)
+                # overwrite existing table with newly-enriched Dataset
+                idaho_falls_income.upload(&#39;idaho_falls_tracts&#39;, if_exists=&#39;replace&#39;)
+
+        Args:
+            boundary (str, optional): Boundary identifier for the boundaries
+              that are of interest. For example, US census tracts have a
+              boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+              Municipios have an ID of ``br.geo.municipios``. Find IDs by
+              running :py:meth:`DataObsClient.boundaries
+              &lt;cartoframes.client.DataObsClient.boundaries&gt;`
+              without any arguments, or by looking in the `Data Observatory
+              catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+            region (str, optional): Region where boundary information or,
+              if `boundary` is specified, boundary polygons are of interest.
+              `region` can be one of the following:
+
+                - table name (str): Name of a table in user&#39;s CARTO account
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional): Specific timespan to get geometries from.
+              Defaults to use the most recent. See the Data Observatory catalog
+              for more information.
+            decode_geom (bool, optional): Whether to return the geometries as
+              Shapely objects or keep them encoded as EWKB strings. Defaults
+              to False.
+            include_nonclipped (bool, optional): Optionally include
+              non-shoreline-clipped boundaries. These boundaries are the raw
+              boundaries provided by, for example, US Census Tiger.
+
+        Returns:
+            :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+            If `boundary` is specified, then all available
+            boundaries and accompanying `geom_refs` in `region` (or the world
+            if `region` is ``None`` or not specified) are returned. If
+            `boundary` is not specified, then a Dataset of all available
+            boundaries in `region` (or the world if `region` is ``None``).
+        &#34;&#34;&#34;
+        # TODO: create a function out of this?
+        if isinstance(region, str):
+            # see if it&#39;s a table
+            try:
+                geom_type = self._geom_type(region)
+                if geom_type in (&#39;point&#39;, &#39;line&#39;, ):
+                    bounds = (&#39;(SELECT ST_ConvexHull(ST_Collect(the_geom)) &#39;
+                              &#39;FROM {table})&#39;).format(table=region)
+                else:
+                    bounds = (&#39;(SELECT ST_Union(the_geom) &#39;
+                              &#39;FROM {table})&#39;).format(table=region)
+            except CartoException:
+                # see if it&#39;s a Data Obs region tag
+                regionsearch = &#39;&#34;geom_tags&#34;::text ilike \&#39;%{}%\&#39;&#39;.format(
+                    get_countrytag(region))
+                bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    &#39;`region` should be a list of the geographic bounds of a &#39;
+                    &#39;region in the following order: western longitude, &#39;
+                    &#39;southern latitude, eastern longitude, and northern &#39;
+                    &#39;latitude. For example, Switerland fits in &#39;
+                    &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                    &#39;47.808380127]``.&#39;)
+            bounds = (&#39;ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)&#39;).format(
+                *region)
+        elif region is None:
+            bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+        else:
+            raise ValueError(&#39;`region` must be a str, a list of two lng/lat &#39;
+                             &#39;pairs, or ``None`` (which defaults to the &#39;
+                             &#39;world)&#39;)
+        if include_nonclipped:
+            clipped = None
+        else:
+            clipped = (r&#34;(geom_id ~ &#39;^us\.census\..*_clipped$&#39; OR &#34;
+                       r&#34;geom_id !~ &#39;^us\.census\..*&#39;)&#34;)
+
+        if boundary is None:
+            regionsearch = locals().get(&#39;regionsearch&#39;)
+            filters = &#39; AND &#39;.join(r for r in [regionsearch, clipped] if r)
+            query = utils.minify_sql((
+                &#39;SELECT *&#39;,
+                &#39;FROM OBS_GetAvailableGeometries(&#39;,
+                &#39;  {bounds}, null, null, null, {timespan})&#39;,
+                &#39;{filters}&#39;)).format(
+                    bounds=bounds,
+                    timespan=utils.pgquote(timespan),
+                    filters=&#39;WHERE {}&#39;.format(filters) if filters else &#39;&#39;)
+            return self._fetch(query, decode_geom=True)
+
+        query = utils.minify_sql((
+            &#39;SELECT the_geom, geom_refs&#39;,
+            &#39;FROM OBS_GetBoundariesByGeometry(&#39;,
+            &#39;    {bounds},&#39;,
+            &#39;    {boundary},&#39;,
+            &#39;    {time})&#39;, )).format(
+                bounds=bounds,
+                boundary=utils.pgquote(boundary),
+                time=utils.pgquote(timespan))
+        return self._fetch(query, decode_geom=decode_geom)
+
+    def discovery(self, region, keywords=None, regex=None, time=None,
+                  boundaries=None, include_quantiles=False):
+        &#34;&#34;&#34;Discover Data Observatory measures. This method returns the full
+        Data Observatory metadata model for each measure or measures that
+        match the conditions from the inputs. The full metadata in each row
+        uniquely defines a measure based on the timespan, geographic
+        resolution, and normalization (if any). Read more about the metadata
+        response in `Data Observatory
+        &lt;https://carto.com/developers/data-observatory/reference/#discovery-functions&gt;`__
+        documentation.
+
+        Internally, this method finds all measures in `region` that match the
+        conditions set in `keywords`, `regex`, `time`, and `boundaries` (if
+        any of them are specified). Then, if `boundaries` is not specified, a
+        geographical resolution for that measure will be chosen subject to the
+        type of region specified:
+
+          1. If `region` is a table name, then a geographical resolution that
+             is roughly equal to `region size / number of subunits`.
+          2. If `region` is a country name or bounding box, then a geographical
+             resolution will be chosen roughly equal to `region size / 500`.
+
+        Since different measures are in some geographic resolutions and not
+        others, different geographical resolutions for different measures are
+        oftentimes returned.
+
+        .. tip::
+
+            To remove the guesswork in how geographical resolutions are
+            selected, specify one or more boundaries in `boundaries`. See
+            the boundaries section for each region in the `Data Observatory
+            catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+
+        The metadata returned from this method can then be used to create raw
+        tables or for augmenting an existing table from these measures using
+        :py:meth:`DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`.
+        For the full Data Observatory catalog, visit
+        https://cartodb.github.io/bigmetadata/. When working with the metadata
+        DataFrame returned from this method, be careful to only remove rows not
+        columns as `DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`
+        generally needs the full metadata.
+
+        .. note::
+            Narrowing down a discovery query using the `keywords`, `regex`, and
+            `time` filters is important for getting a manageable metadata
+            set. Besides there being a large number of measures in the DO, a
+            metadata response has acceptable combinations of measures with
+            demonimators (normalization and density), and the same measure from
+            other years.
+
+            For example, setting the region to be United States counties with
+            no filter values set will result in many thousands of measures.
+
+        Examples:
+
+            Get all European Union measures that mention ``freight``.
+
+            .. code::
+
+                freight_meta = do.discovery(&#39;European Union&#39;,
+                                       keywords=&#39;freight&#39;,
+                                       time=&#39;2010&#39;)
+                freight_meta[&#39;numer_name&#39;].head()
+
+        Arguments:
+            region (str or list of float): Information about the region of
+              interest. `region` can be one of three types:
+
+                - region name (str): Name of region of interest. Acceptable
+                  values are limited to: &#39;Australia&#39;, &#39;Brazil&#39;, &#39;Canada&#39;,
+                  &#39;European Union&#39;, &#39;France&#39;, &#39;Mexico&#39;, &#39;Spain&#39;,
+                  &#39;United Kingdom&#39;, &#39;United States&#39;.
+                - table name (str): Name of a table in user&#39;s CARTO account
+                  with geometries. The region will be the bounding box of
+                  the table.
+
+                  .. Note:: If a table name is also a valid Data Observatory
+                      region name, the Data Observatory name will be chosen
+                      over the table.
+
+                - bounding box (list of float): List of four values (two
+                  lng/lat pairs) in the following order: western longitude,
+                  southern latitude, eastern longitude, and northern latitude.
+                  For example, Switzerland fits in
+                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+
+                .. Note:: Geometry levels are generally chosen by subdividing
+                    the region into the next smallest administrative unit. To
+                    override this behavior, specify the `boundaries` flag. For
+                    example, set `boundaries` to
+                    ``&#39;us.census.tiger.census_tract&#39;`` to choose US census
+                    tracts.
+
+            keywords (str or list of str, optional): Keyword or list of
+              keywords in measure description or name. Response will be matched
+              on all keywords listed (boolean `or`).
+            regex (str, optional): A regular expression to search the measure
+              descriptions and names. Note that this relies on PostgreSQL&#39;s
+              case insensitive operator ``~*``. See `PostgreSQL docs
+              &lt;https://www.postgresql.org/docs/9.5/static/functions-matching.html&gt;`__
+              for more information.
+            boundaries (str or list of str, optional): Boundary or list of
+              boundaries that specify the measure resolution. See the
+              boundaries section for each region in the `Data Observatory
+              catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+            include_quantiles (bool, optional): Include quantiles calculations
+              which are a calculation of how a measure compares to all measures
+              in the full dataset. Defaults to ``False``. If ``True``,
+              quantiles columns will be returned for each column which has it
+              pre-calculated.
+
+        Returns:
+            pandas.DataFrame: A dataframe of the complete metadata model for
+            specific measures based on the search parameters.
+
+        Raises:
+            ValueError: If `region` is a :obj:`list` and does not consist of
+              four elements, or if `region` is not an acceptable region
+            CartoException: If `region` is not a table in user account
+        &#34;&#34;&#34;
+        if isinstance(region, str):
+            try:
+                # see if it&#39;s a DO region, nest in {}
+                countrytag = &#39;\&#39;{{{0}}}\&#39;&#39;.format(
+                    get_countrytag(region))
+                boundary = (&#39;SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, &#39;
+                            &#39;85.0, 4326) AS env, 500::int AS cnt&#39;)
+            except ValueError:
+                # TODO: make this work for general queries
+                # see if it&#39;s a table
+                self._context.execute_query(
+                    &#39;EXPLAIN SELECT * FROM {}&#39;.format(region))
+                boundary = (
+                    &#39;SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, &#39;
+                    &#39;count(*)::int AS cnt FROM {table_name}&#39;).format(
+                        table_name=region)
+        elif isinstance(region, collections.Iterable):
+            if len(region) != 4:
+                raise ValueError(
+                    &#39;`region` should be a list of the geographic bounds of a &#39;
+                    &#39;region in the following order: western longitude, &#39;
+                    &#39;southern latitude, eastern longitude, and northern &#39;
+                    &#39;latitude. For example, Switerland fits in &#39;
+                    &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                    &#39;47.808380127]``.&#39;
+                )
+            boundary = (&#39;SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS &#39;
+                        &#39;env, 500::int AS cnt&#39;.format(*region))
+
+        if locals().get(&#39;countrytag&#39;) is None:
+            countrytag = &#39;null&#39;
+
+        if keywords:
+            if isinstance(keywords, str):
+                keywords = [keywords, ]
+            kwsearch = &#39; OR &#39;.join(
+                (&#39;numer_description ILIKE \&#39;%{kw}%\&#39; OR &#39;
+                 &#39;numer_name ILIKE \&#39;%{kw}%\&#39;&#39;).format(kw=kw)
+                for kw in keywords)
+            kwsearch = &#39;({})&#39;.format(kwsearch)
+
+        if regex:
+            regexsearch = (&#39;(numer_description ~* {regex} OR numer_name &#39;
+                           &#39;~* {regex})&#39;).format(regex=utils.pgquote(regex))
+
+        if keywords or regex:
+            subjectfilters = &#39;{kw} {op} {regex}&#39;.format(
+                kw=kwsearch if keywords else &#39;&#39;,
+                op=&#39;OR&#39; if (keywords and regex) else &#39;&#39;,
+                regex=regexsearch if regex else &#39;&#39;).strip()
+        else:
+            subjectfilters = &#39;&#39;
+
+        if isinstance(time, str) or time is None:
+            time = [time, ]
+        if isinstance(boundaries, str) or boundaries is None:
+            boundaries = [boundaries, ]
+
+        if all(time) and all(boundaries):
+            bt_filters = &#39;valid_geom AND valid_timespan&#39;
+        elif all(time) or all(boundaries):
+            bt_filters = &#39;valid_geom&#39; if all(boundaries) else &#39;valid_timespan&#39;
+        else:
+            bt_filters = &#39;&#39;
+
+        if bt_filters and subjectfilters:
+            filters = &#39;WHERE ({s}) AND ({bt})&#39;.format(
+                s=subjectfilters, bt=bt_filters)
+        elif bt_filters or subjectfilters:
+            filters = &#39;WHERE {f}&#39;.format(f=subjectfilters or bt_filters)
+        else:
+            filters = &#39;&#39;
+
+        quantiles = (&#39;WHERE numer_aggregate &lt;&gt; \&#39;quantile\&#39;&#39;
+                     if not include_quantiles else &#39;&#39;)
+
+        numer_query = utils.minify_sql((
+            &#39;SELECT&#39;,
+            &#39;    numer_id,&#39;,
+            &#39;    {geom_id} AS geom_id,&#39;,
+            &#39;    {timespan} AS numer_timespan,&#39;,
+            &#39;    {normalization} AS normalization&#39;,
+            &#39;  FROM&#39;,
+            &#39;    OBS_GetAvailableNumerators(&#39;,
+            &#39;        (SELECT env FROM envelope),&#39;,
+            &#39;        {countrytag},&#39;,
+            &#39;        null,&#39;,  # denom_id
+            &#39;        {geom_id},&#39;,
+            &#39;        {timespan})&#39;,
+            &#39;{filters}&#39;, )).strip()
+
+        # query all numerators for all `time`, `boundaries`, and raw/derived
+        numers = &#39;\nUNION\n&#39;.join(
+            numer_query.format(
+                timespan=utils.pgquote(t),
+                geom_id=utils.pgquote(b),
+                normalization=utils.pgquote(n),
+                countrytag=countrytag,
+                filters=filters)
+            for t in time
+            for b in boundaries
+            for n in (&#39;predenominated&#39;, None))
+
+        query = utils.minify_sql((
+            &#39;WITH envelope AS (&#39;,
+            &#39;    {boundary}&#39;,
+            &#39;), numers AS (&#39;,
+            &#39;  {numers}&#39;,
+            &#39;)&#39;,
+            &#39;SELECT *&#39;,
+            &#39;FROM json_to_recordset(&#39;,
+            &#39;    (SELECT OBS_GetMeta(&#39;,
+            &#39;        envelope.env,&#39;,
+            &#39;        json_agg(numers),&#39;,
+            &#39;        10, 10, envelope.cnt&#39;,
+            &#39;    ) AS meta&#39;,
+            &#39;FROM numers, envelope&#39;,
+            &#39;GROUP BY env, cnt)) as data(&#39;,
+            &#39;    denom_aggregate text, denom_colname text,&#39;,
+            &#39;    denom_description text, denom_geomref_colname text,&#39;,
+            &#39;    denom_id text, denom_name text, denom_reltype text,&#39;,
+            &#39;    denom_t_description text, denom_tablename text,&#39;,
+            &#39;    denom_type text, geom_colname text, geom_description text,&#39;,
+            &#39;    geom_geomref_colname text, geom_id text, geom_name text,&#39;,
+            &#39;    geom_t_description text, geom_tablename text,&#39;,
+            &#39;    geom_timespan text, geom_type text, id numeric,&#39;,
+            &#39;    max_score_rank text, max_timespan_rank text,&#39;,
+            &#39;    normalization text, num_geoms numeric, numer_aggregate text,&#39;,
+            &#39;    numer_colname text, numer_description text,&#39;,
+            &#39;    numer_geomref_colname text, numer_id text,&#39;,
+            &#39;    numer_name text, numer_t_description text,&#39;,
+            &#39;    numer_tablename text, numer_timespan text,&#39;,
+            &#39;    numer_type text, score numeric, score_rank numeric,&#39;,
+            &#39;    score_rownum numeric, suggested_name text,&#39;,
+            &#39;    target_area text, target_geoms text, timespan_rank numeric,&#39;,
+            &#39;    timespan_rownum numeric)&#39;,
+            &#39;{quantiles}&#39;, )).format(
+                boundary=boundary,
+                numers=numers,
+                quantiles=quantiles).strip()
+        utils.debug_print(self._verbose, query=query)
+        return self._fetch(query, decode_geom=True).dataframe
+
+    def augment(self, table_name, metadata, persist_as=None, how=&#39;the_geom&#39;):
+        &#34;&#34;&#34;Get an augmented CARTO dataset with `Data Observatory
+        &lt;https://carto.com/data-observatory&gt;`__ measures. Use
+        `DataObsClient.discovery
+        &lt;#DataObsClient.discovery&gt;`__ to search for available
+        measures, or see the full `Data Observatory catalog
+        &lt;https://cartodb.github.io/bigmetadata/index.html&gt;`__. Optionally
+        persist the data as a new table.
+
+        Example:
+            Get a DataFrame with Data Observatory measures based on the
+            geometries in a CARTO table.
+
+            .. code::
+
+                from cartoframes.auth import Credentials
+                from cartoframes.client import DataObsClient
+                creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+                do = DataObsClient(creds)
+                median_income = do.discovery(
+                    &#39;transaction_events&#39;,
+                    regex=&#39;.*median income.*&#39;,
+                    time=&#39;2011 - 2015&#39;)
+                ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+            Pass in cherry-picked measures from the Data Observatory catalog.
+            The rest of the metadata will be filled in, but it&#39;s important to
+            specify the geographic level as this will not show up in the column
+            name.
+
+            .. code::
+
+                median_income = [{&#39;numer_id&#39;: &#39;us.census.acs.B19013001&#39;,
+                                  &#39;geom_id&#39;: &#39;us.census.tiger.block_group&#39;,
+                                  &#39;numer_timespan&#39;: &#39;2011 - 2015&#39;}]
+                ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+        Args:
+            table_name (str): Name of table on CARTO account that Data
+                Observatory measures are to be added to.
+            metadata (pandas.DataFrame): List of all measures to add to
+                `table_name`. See :py:meth:`DataObsClient.discovery
+                &lt;cartoframes.client.DataObsClient.discovery&gt;` outputs
+                for a full list of metadata columns.
+            persist_as (str, optional): Output the results of augmenting
+                `table_name` to `persist_as` as a persistent table on CARTO.
+                Defaults to ``None``, which will not create a table.
+            how (str, optional): Column name for
+                identifying the geometry from which to fetch the data. Defaults
+                to `the_geom`, which results in measures that are spatially
+                interpolated (e.g., a neighborhood boundary&#39;s population will
+                be calculated from underlying census tracts). Specifying a
+                column that has the geometry identifier (for example, GEOID for
+                US Census boundaries), results in measures directly from the
+                Census for that GEOID but normalized how it is specified in the
+                metadata.
+
+        Returns:
+            :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+            A Dataset representation of `table_name` which
+            has new columns for each measure in `metadata`.
+
+        Raises:
+            NameError: If the columns in `table_name` are in the
+              ``suggested_name`` column of `metadata`.
+            ValueError: If metadata object is invalid or empty, or if the
+              number of requested measures exceeds 50.
+            CartoException: If user account consumes all of Data Observatory
+              quota
+        &#34;&#34;&#34;
+        if isinstance(metadata, pd.DataFrame):
+            _meta = metadata.copy().reset_index()
+        elif isinstance(metadata, collections.Iterable):
+            query = utils.minify_sql((
+                &#39;WITH envelope AS (&#39;,
+                &#39;  SELECT&#39;,
+                &#39;    ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,&#39;,
+                &#39;    count(*)::int AS cnt&#39;,
+                &#39;  FROM {table_name}&#39;,
+                &#39;)&#39;,
+                &#39;SELECT *&#39;,
+                &#39;  FROM json_to_recordset(&#39;,
+                &#39;      (SELECT OBS_GetMeta(&#39;,
+                &#39;          envelope.env,&#39;,
+                &#39;          (\&#39;{meta}\&#39;)::json,&#39;,
+                &#39;          10, 1, envelope.cnt&#39;,
+                &#39;      ) AS meta&#39;,
+                &#39;  FROM envelope&#39;,
+                &#39;  GROUP BY env, cnt)) as data(&#39;,
+                &#39;      denom_aggregate text, denom_colname text,&#39;,
+                &#39;      denom_description text, denom_geomref_colname text,&#39;,
+                &#39;      denom_id text, denom_name text, denom_reltype text,&#39;,
+                &#39;      denom_t_description text, denom_tablename text,&#39;,
+                &#39;      denom_type text, geom_colname text,&#39;,
+                &#39;      geom_description text,geom_geomref_colname text,&#39;,
+                &#39;      geom_id text, geom_name text, geom_t_description text,&#39;,
+                &#39;      geom_tablename text, geom_timespan text,&#39;,
+                &#39;      geom_type text, id numeric, max_score_rank text,&#39;,
+                &#39;      max_timespan_rank text, normalization text, num_geoms&#39;,
+                &#39;      numeric,numer_aggregate text, numer_colname text,&#39;,
+                &#39;      numer_description text, numer_geomref_colname text,&#39;,
+                &#39;      numer_id text, numer_name text, numer_t_description&#39;,
+                &#39;      text, numer_tablename text, numer_timespan text,&#39;,
+                &#39;      numer_type text, score numeric, score_rank numeric,&#39;,
+                &#39;      score_rownum numeric, suggested_name text,&#39;,
+                &#39;      target_area text, target_geoms text, timespan_rank&#39;,
+                &#39;      numeric, timespan_rownum numeric)&#39;,
+            )).format(table_name=table_name,
+                      meta=json.dumps(metadata).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+            _meta = self._fetch(query).dataframe
+
+        if _meta.shape[0] == 0:
+            raise ValueError(&#39;There are no valid metadata entries. Check &#39;
+                             &#39;inputs.&#39;)
+        elif _meta.shape[0] &gt; 50:
+            raise ValueError(&#39;The number of metadata entries exceeds 50. Tip: &#39;
+                             &#39;If `metadata` is a pandas.DataFrame, iterate &#39;
+                             &#39;over this object using `metadata.groupby`. If &#39;
+                             &#39;it is a list, iterate over chunks of it. Then &#39;
+                             &#39;combine resulting DataFrames using &#39;
+                             &#39;`pandas.concat`&#39;)
+
+        # get column names except the_geom_webmercator
+        dataset = Dataset(table_name, credentials=self._credentials)
+        table_columns = dataset.get_table_column_names(exclude=[&#39;the_geom_webmercator&#39;])
+
+        names = {}
+        for suggested in _meta[&#39;suggested_name&#39;]:
+            if suggested in table_columns:
+                names[suggested] = utils.unique_colname(suggested, table_columns)
+                warn(
+                    &#39;{s0} was augmented as {s1} because of name &#39;
+                    &#39;collision&#39;.format(s0=suggested, s1=names[suggested])
+                )
+            else:
+                names[suggested] = suggested
+
+        # drop description columns to lighten the query
+        meta_columns = _meta.columns.values
+        drop_columns = []
+        for meta_column in meta_columns:
+            if meta_column.endswith(&#39;_description&#39;):
+                drop_columns.append(meta_column)
+
+        if len(drop_columns) &gt; 0:
+            _meta.drop(drop_columns, axis=1, inplace=True)
+
+        cols = &#39;, &#39;.join(
+            &#39;(data-&gt;{n}-&gt;&gt;\&#39;value\&#39;)::{pgtype} AS {col}&#39;.format(
+                n=row[0],
+                pgtype=row[1][&#39;numer_type&#39;],
+                col=names[row[1][&#39;suggested_name&#39;]])
+            for row in _meta.iterrows())
+        query = utils.minify_sql((
+            &#39;SELECT {table_cols}, {cols}&#39;,
+            &#39;  FROM OBS_GetData(&#39;,
+            &#39;       (SELECT array_agg({how})&#39;,
+            &#39;        FROM &#34;{tablename}&#34;),&#39;,
+            &#39;       (SELECT \&#39;{meta}\&#39;::json)) as m,&#39;,
+            &#39;       {tablename} as t&#39;,
+            &#39; WHERE t.&#34;{rowid}&#34; = m.id&#39;,)).format(
+                how=(&#39;(the_geom, cartodb_id)::geomval&#39;
+                     if how == &#39;the_geom&#39; else how),
+                tablename=table_name,
+                rowid=&#39;cartodb_id&#39; if how == &#39;the_geom&#39; else how,
+                cols=cols,
+                table_cols=&#39;,&#39;.join(&#39;t.{}&#39;.format(c) for c in table_columns),
+                meta=_meta.to_json(orient=&#39;records&#39;).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+
+        return self._fetch(query, decode_geom=False, table_name=persist_as)
+
+    def _fetch(self, query, decode_geom=False, table_name=None):
+        dataset = Dataset(query, credentials=self._credentials)
+        if table_name:
+            dataset.upload(table_name=table_name)
+        dataset.download(decode_geom=decode_geom)
+        return dataset
+
+    def _geom_type(self, table):
+        &#34;&#34;&#34;gets geometry type(s) of specified layer&#34;&#34;&#34;
+        query = &#39;SELECT * FROM &#34;{table}&#34;&#39;.format(table=table)
+        return utils.get_query_geom_type(self._context, query)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.data.clients.data_obs_client.DataObsClient.augment"><code class="name flex">
+<span>def <span class="ident">augment</span></span>(<span>self, table_name, metadata, persist_as=None, how='the_geom')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get an augmented CARTO dataset with <code>Data Observatory
+&lt;https://carto.com/data-observatory&gt;</code><strong> measures. Use
+<code>DataObsClient.discovery
+&lt;#DataObsClient.discovery&gt;</code></strong> to search for available
+measures, or see the full <code>Data Observatory catalog
+&lt;https://cartodb.github.io/bigmetadata/index.html&gt;</code>__. Optionally
+persist the data as a new table.</p>
+<h2 id="example">Example</h2>
+<p>Get a DataFrame with Data Observatory measures based on the
+geometries in a CARTO table.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials
+from cartoframes.client import DataObsClient
+creds = Credentials('user name', 'api key')
+do = DataObsClient(creds)
+median_income = do.discovery(
+'transaction_events',
+regex='.<em>median income.</em>',
+time='2011 - 2015')
+ds = do.augment('transaction_events', median_income)</p>
+</div>
+<p>Pass in cherry-picked measures from the Data Observatory catalog.
+The rest of the metadata will be filled in, but it's important to
+specify the geographic level as this will not show up in the column
+name.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>median_income = [{'numer_id': 'us.census.acs.B19013001',
+'geom_id': 'us.census.tiger.block_group',
+'numer_timespan': '2011 - 2015'}]
+ds = do.augment('transaction_events', median_income)</p>
+</div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of table on CARTO account that Data
+Observatory measures are to be added to.</dd>
+<dt><strong><code>metadata</code></strong> :&ensp;<code>pandas.DataFrame</code></dt>
+<dd>List of all measures to add to
+<code>table_name</code>. See :py:meth:<code>DataObsClient.discovery
+&lt;cartoframes.client.DataObsClient.discovery&gt;</code> outputs
+for a full list of metadata columns.</dd>
+<dt><strong><code>persist_as</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Output the results of augmenting
+<code>table_name</code> to <code>persist_as</code> as a persistent table on CARTO.
+Defaults to <code>None</code>, which will not create a table.</dd>
+<dt><strong><code>how</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Column name for
+identifying the geometry from which to fetch the data. Defaults
+to <code>the_geom</code>, which results in measures that are spatially
+interpolated (e.g., a neighborhood boundary's population will
+be calculated from underlying census tracts). Specifying a
+column that has the geometry identifier (for example, GEOID for
+US Census boundaries), results in measures directly from the
+Census for that GEOID but normalized how it is specified in the
+metadata.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code>:
+A Dataset representation of <code>table_name</code> which
+has new columns for each measure in <code>metadata</code>.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>NameError</code></strong></dt>
+<dd>If the columns in <code>table_name</code> are in the
+<code>suggested_name</code> column of <code>metadata</code>.</dd>
+<dt><strong><code>ValueError</code></strong></dt>
+<dd>If metadata object is invalid or empty, or if the
+number of requested measures exceeds 50.</dd>
+<dt><strong><code>CartoException</code></strong></dt>
+<dd>If user account consumes all of Data Observatory
+quota</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def augment(self, table_name, metadata, persist_as=None, how=&#39;the_geom&#39;):
+    &#34;&#34;&#34;Get an augmented CARTO dataset with `Data Observatory
+    &lt;https://carto.com/data-observatory&gt;`__ measures. Use
+    `DataObsClient.discovery
+    &lt;#DataObsClient.discovery&gt;`__ to search for available
+    measures, or see the full `Data Observatory catalog
+    &lt;https://cartodb.github.io/bigmetadata/index.html&gt;`__. Optionally
+    persist the data as a new table.
+
+    Example:
+        Get a DataFrame with Data Observatory measures based on the
+        geometries in a CARTO table.
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import DataObsClient
+            creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+            do = DataObsClient(creds)
+            median_income = do.discovery(
+                &#39;transaction_events&#39;,
+                regex=&#39;.*median income.*&#39;,
+                time=&#39;2011 - 2015&#39;)
+            ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+        Pass in cherry-picked measures from the Data Observatory catalog.
+        The rest of the metadata will be filled in, but it&#39;s important to
+        specify the geographic level as this will not show up in the column
+        name.
+
+        .. code::
+
+            median_income = [{&#39;numer_id&#39;: &#39;us.census.acs.B19013001&#39;,
+                              &#39;geom_id&#39;: &#39;us.census.tiger.block_group&#39;,
+                              &#39;numer_timespan&#39;: &#39;2011 - 2015&#39;}]
+            ds = do.augment(&#39;transaction_events&#39;, median_income)
+
+    Args:
+        table_name (str): Name of table on CARTO account that Data
+            Observatory measures are to be added to.
+        metadata (pandas.DataFrame): List of all measures to add to
+            `table_name`. See :py:meth:`DataObsClient.discovery
+            &lt;cartoframes.client.DataObsClient.discovery&gt;` outputs
+            for a full list of metadata columns.
+        persist_as (str, optional): Output the results of augmenting
+            `table_name` to `persist_as` as a persistent table on CARTO.
+            Defaults to ``None``, which will not create a table.
+        how (str, optional): Column name for
+            identifying the geometry from which to fetch the data. Defaults
+            to `the_geom`, which results in measures that are spatially
+            interpolated (e.g., a neighborhood boundary&#39;s population will
+            be calculated from underlying census tracts). Specifying a
+            column that has the geometry identifier (for example, GEOID for
+            US Census boundaries), results in measures directly from the
+            Census for that GEOID but normalized how it is specified in the
+            metadata.
+
+    Returns:
+        :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+        A Dataset representation of `table_name` which
+        has new columns for each measure in `metadata`.
+
+    Raises:
+        NameError: If the columns in `table_name` are in the
+          ``suggested_name`` column of `metadata`.
+        ValueError: If metadata object is invalid or empty, or if the
+          number of requested measures exceeds 50.
+        CartoException: If user account consumes all of Data Observatory
+          quota
+    &#34;&#34;&#34;
+    if isinstance(metadata, pd.DataFrame):
+        _meta = metadata.copy().reset_index()
+    elif isinstance(metadata, collections.Iterable):
+        query = utils.minify_sql((
+            &#39;WITH envelope AS (&#39;,
+            &#39;  SELECT&#39;,
+            &#39;    ST_SetSRID(ST_Extent(the_geom)::geometry, 4326) AS env,&#39;,
+            &#39;    count(*)::int AS cnt&#39;,
+            &#39;  FROM {table_name}&#39;,
+            &#39;)&#39;,
+            &#39;SELECT *&#39;,
+            &#39;  FROM json_to_recordset(&#39;,
+            &#39;      (SELECT OBS_GetMeta(&#39;,
+            &#39;          envelope.env,&#39;,
+            &#39;          (\&#39;{meta}\&#39;)::json,&#39;,
+            &#39;          10, 1, envelope.cnt&#39;,
+            &#39;      ) AS meta&#39;,
+            &#39;  FROM envelope&#39;,
+            &#39;  GROUP BY env, cnt)) as data(&#39;,
+            &#39;      denom_aggregate text, denom_colname text,&#39;,
+            &#39;      denom_description text, denom_geomref_colname text,&#39;,
+            &#39;      denom_id text, denom_name text, denom_reltype text,&#39;,
+            &#39;      denom_t_description text, denom_tablename text,&#39;,
+            &#39;      denom_type text, geom_colname text,&#39;,
+            &#39;      geom_description text,geom_geomref_colname text,&#39;,
+            &#39;      geom_id text, geom_name text, geom_t_description text,&#39;,
+            &#39;      geom_tablename text, geom_timespan text,&#39;,
+            &#39;      geom_type text, id numeric, max_score_rank text,&#39;,
+            &#39;      max_timespan_rank text, normalization text, num_geoms&#39;,
+            &#39;      numeric,numer_aggregate text, numer_colname text,&#39;,
+            &#39;      numer_description text, numer_geomref_colname text,&#39;,
+            &#39;      numer_id text, numer_name text, numer_t_description&#39;,
+            &#39;      text, numer_tablename text, numer_timespan text,&#39;,
+            &#39;      numer_type text, score numeric, score_rank numeric,&#39;,
+            &#39;      score_rownum numeric, suggested_name text,&#39;,
+            &#39;      target_area text, target_geoms text, timespan_rank&#39;,
+            &#39;      numeric, timespan_rownum numeric)&#39;,
+        )).format(table_name=table_name,
+                  meta=json.dumps(metadata).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+        _meta = self._fetch(query).dataframe
+
+    if _meta.shape[0] == 0:
+        raise ValueError(&#39;There are no valid metadata entries. Check &#39;
+                         &#39;inputs.&#39;)
+    elif _meta.shape[0] &gt; 50:
+        raise ValueError(&#39;The number of metadata entries exceeds 50. Tip: &#39;
+                         &#39;If `metadata` is a pandas.DataFrame, iterate &#39;
+                         &#39;over this object using `metadata.groupby`. If &#39;
+                         &#39;it is a list, iterate over chunks of it. Then &#39;
+                         &#39;combine resulting DataFrames using &#39;
+                         &#39;`pandas.concat`&#39;)
+
+    # get column names except the_geom_webmercator
+    dataset = Dataset(table_name, credentials=self._credentials)
+    table_columns = dataset.get_table_column_names(exclude=[&#39;the_geom_webmercator&#39;])
+
+    names = {}
+    for suggested in _meta[&#39;suggested_name&#39;]:
+        if suggested in table_columns:
+            names[suggested] = utils.unique_colname(suggested, table_columns)
+            warn(
+                &#39;{s0} was augmented as {s1} because of name &#39;
+                &#39;collision&#39;.format(s0=suggested, s1=names[suggested])
+            )
+        else:
+            names[suggested] = suggested
+
+    # drop description columns to lighten the query
+    meta_columns = _meta.columns.values
+    drop_columns = []
+    for meta_column in meta_columns:
+        if meta_column.endswith(&#39;_description&#39;):
+            drop_columns.append(meta_column)
+
+    if len(drop_columns) &gt; 0:
+        _meta.drop(drop_columns, axis=1, inplace=True)
+
+    cols = &#39;, &#39;.join(
+        &#39;(data-&gt;{n}-&gt;&gt;\&#39;value\&#39;)::{pgtype} AS {col}&#39;.format(
+            n=row[0],
+            pgtype=row[1][&#39;numer_type&#39;],
+            col=names[row[1][&#39;suggested_name&#39;]])
+        for row in _meta.iterrows())
+    query = utils.minify_sql((
+        &#39;SELECT {table_cols}, {cols}&#39;,
+        &#39;  FROM OBS_GetData(&#39;,
+        &#39;       (SELECT array_agg({how})&#39;,
+        &#39;        FROM &#34;{tablename}&#34;),&#39;,
+        &#39;       (SELECT \&#39;{meta}\&#39;::json)) as m,&#39;,
+        &#39;       {tablename} as t&#39;,
+        &#39; WHERE t.&#34;{rowid}&#34; = m.id&#39;,)).format(
+            how=(&#39;(the_geom, cartodb_id)::geomval&#39;
+                 if how == &#39;the_geom&#39; else how),
+            tablename=table_name,
+            rowid=&#39;cartodb_id&#39; if how == &#39;the_geom&#39; else how,
+            cols=cols,
+            table_cols=&#39;,&#39;.join(&#39;t.{}&#39;.format(c) for c in table_columns),
+            meta=_meta.to_json(orient=&#39;records&#39;).replace(&#39;\&#39;&#39;, &#39;\&#39;\&#39;&#39;))
+
+    return self._fetch(query, decode_geom=False, table_name=persist_as)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.data_obs_client.DataObsClient.boundaries"><code class="name flex">
+<span>def <span class="ident">boundaries</span></span>(<span>self, boundary=None, region=None, decode_geom=False, timespan=None, include_nonclipped=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Find all boundaries available for the world or a <code>region</code>. If
+<code>boundary</code> is specified, get all available boundary polygons for the
+region specified (if any). This method is especially useful for getting
+boundaries for a region and, with :py:meth:<code>DataObsClient.augment
+&lt;cartoframes.client.DataObsClient.augment&gt;</code> and
+:py:meth:<code>DataObsClient.discovery
+&lt;cartoframes.client.DataObsClient.discovery&gt;</code>, getting tables of
+geometries and the corresponding raw measures. For example, if you want
+to analyze how median income has changed in a region (see examples
+section for more).</p>
+<h2 id="examples">Examples</h2>
+<p>Find all boundaries available for Australia. The columns
+<code>geom_name</code> gives us the name of the boundary and <code>geom_id</code>
+is what we need for the <code>boundary</code> argument.</p>
+<div class="admonition code">
+<p class="admonition-title">Code:&ensp;python</p>
+<p>from cartoframes.auth import Credentials
+from cartoframes.client import DataObsClient
+creds = Credentials('user name', 'api key')
+do = DataObsClient(creds)
+au_boundaries = do.boundaries(region='Australia')
+au_boundaries.dataframe[['geom_name', 'geom_id']]</p>
+</div>
+<p>Get the boundaries for Australian Postal Areas and map them.</p>
+<div class="admonition code">
+<p class="admonition-title">Code:&ensp;python</p>
+<p>from cartoframes.viz import Layer
+au_postal_areas = do.boundaries(boundary='au.geo.POA')
+Layer(au_postal_areas)</p>
+</div>
+<p>Get census tracts around Idaho Falls, Idaho, USA, and add median
+income from the US census. Without limiting the metadata, we get
+median income measures for each census in the Data Observatory.</p>
+<div class="admonition code">
+<p class="admonition-title">Code:&ensp;python</p>
+<p>from cartoframes.auth import Credentials
+from cartoframes.client import DataObsClient
+credentials = Credentials('user name', 'api key')</p>
+<h1 id="note-default-credentials-will-be-supported-in-a-future-release">Note: default credentials will be supported in a future release</h1>
+<p>do = DataObsClient(credentials)</p>
+<h1 id="will-return-dataset-with-columns-the_geom-and-geom_ref">will return Dataset with columns <code>the_geom</code> and <code>geom_ref</code></h1>
+<p>tracts = do.boundaries(
+boundary='us.census.tiger.census_tract',
+region=[-112.096642,43.429932,-111.974213,43.553539])</p>
+<h1 id="write-geometries-to-a-carto-table">write geometries to a CARTO table</h1>
+<p>tracts.upload('idaho_falls_tracts')</p>
+<h1 id="gather-metadata-needed-to-look-up-median-income">gather metadata needed to look up median income</h1>
+<p>median_income_meta = do.discovery(
+'idaho_falls_tracts',
+keywords='median income',
+boundaries='us.census.tiger.census_tract')</p>
+<h1 id="get-median-income-data-and-original-table-as-new-dataset">get median income data and original table as new Dataset</h1>
+<p>idaho_falls_income = do.augment(
+'idaho_falls_tracts',
+median_income_meta,
+how='geom_refs')</p>
+<h1 id="overwrite-existing-table-with-newly-enriched-dataset">overwrite existing table with newly-enriched Dataset</h1>
+<p>idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')</p>
+</div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>boundary</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Boundary identifier for the boundaries
+that are of interest. For example, US census tracts have a
+boundary ID of <code>us.census.tiger.census_tract</code>, and Brazilian
+Municipios have an ID of <code>br.geo.municipios</code>. Find IDs by
+running :py:meth:<code>DataObsClient.boundaries
+&lt;cartoframes.client.DataObsClient.boundaries&gt;</code>
+without any arguments, or by looking in the <code>Data Observatory
+catalog &lt;http://cartodb.github.io/bigmetadata/&gt;</code>__.</dd>
+<dt><strong><code>region</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>
+<p>Region where boundary information or,
+if <code>boundary</code> is specified, boundary polygons are of interest.
+<code>region</code> can be one of the following:</p>
+<ul>
+<li>table name (str): Name of a table in user's CARTO account</li>
+<li>bounding box (list of float): List of four values (two
+lng/lat pairs) in the following order: western longitude,
+southern latitude, eastern longitude, and northern latitude.
+For example, Switzerland fits in
+<code>[5.9559111595,45.8179931641,10.4920501709,47.808380127]</code></li>
+</ul>
+</dd>
+<dt><strong><code>timespan</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Specific timespan to get geometries from.
+Defaults to use the most recent. See the Data Observatory catalog
+for more information.</dd>
+<dt><strong><code>decode_geom</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to return the geometries as
+Shapely objects or keep them encoded as EWKB strings. Defaults
+to False.</dd>
+<dt><strong><code>include_nonclipped</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Optionally include
+non-shoreline-clipped boundaries. These boundaries are the raw
+boundaries provided by, for example, US Census Tiger.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code>:
+If <code>boundary</code> is specified, then all available
+boundaries and accompanying <code>geom_refs</code> in <code>region</code> (or the world
+if <code>region</code> is <code>None</code> or not specified) are returned. If
+<code>boundary</code> is not specified, then a Dataset of all available
+boundaries in <code>region</code> (or the world if <code>region</code> is <code>None</code>).</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def boundaries(self, boundary=None, region=None, decode_geom=False,
+               timespan=None, include_nonclipped=False):
+    &#34;&#34;&#34;
+    Find all boundaries available for the world or a `region`. If
+    `boundary` is specified, get all available boundary polygons for the
+    region specified (if any). This method is especially useful for getting
+    boundaries for a region and, with :py:meth:`DataObsClient.augment
+    &lt;cartoframes.client.DataObsClient.augment&gt;` and
+    :py:meth:`DataObsClient.discovery
+    &lt;cartoframes.client.DataObsClient.discovery&gt;`, getting tables of
+    geometries and the corresponding raw measures. For example, if you want
+    to analyze how median income has changed in a region (see examples
+    section for more).
+
+    Examples:
+
+        Find all boundaries available for Australia. The columns
+        `geom_name` gives us the name of the boundary and `geom_id`
+        is what we need for the `boundary` argument.
+
+        .. code:: python
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import DataObsClient
+            creds = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+            do = DataObsClient(creds)
+            au_boundaries = do.boundaries(region=&#39;Australia&#39;)
+            au_boundaries.dataframe[[&#39;geom_name&#39;, &#39;geom_id&#39;]]
+
+        Get the boundaries for Australian Postal Areas and map them.
+
+        .. code:: python
+
+            from cartoframes.viz import Layer
+            au_postal_areas = do.boundaries(boundary=&#39;au.geo.POA&#39;)
+            Layer(au_postal_areas)
+
+        Get census tracts around Idaho Falls, Idaho, USA, and add median
+        income from the US census. Without limiting the metadata, we get
+        median income measures for each census in the Data Observatory.
+
+        .. code:: python
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import DataObsClient
+            credentials = Credentials(&#39;user name&#39;, &#39;api key&#39;)
+            # Note: default credentials will be supported in a future release
+            do = DataObsClient(credentials)
+            # will return Dataset with columns `the_geom` and `geom_ref`
+            tracts = do.boundaries(
+                boundary=&#39;us.census.tiger.census_tract&#39;,
+                region=[-112.096642,43.429932,-111.974213,43.553539])
+            # write geometries to a CARTO table
+            tracts.upload(&#39;idaho_falls_tracts&#39;)
+            # gather metadata needed to look up median income
+            median_income_meta = do.discovery(
+                &#39;idaho_falls_tracts&#39;,
+                keywords=&#39;median income&#39;,
+                boundaries=&#39;us.census.tiger.census_tract&#39;)
+            # get median income data and original table as new Dataset
+            idaho_falls_income = do.augment(
+                &#39;idaho_falls_tracts&#39;,
+                median_income_meta,
+                how=&#39;geom_refs&#39;)
+            # overwrite existing table with newly-enriched Dataset
+            idaho_falls_income.upload(&#39;idaho_falls_tracts&#39;, if_exists=&#39;replace&#39;)
+
+    Args:
+        boundary (str, optional): Boundary identifier for the boundaries
+          that are of interest. For example, US census tracts have a
+          boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+          Municipios have an ID of ``br.geo.municipios``. Find IDs by
+          running :py:meth:`DataObsClient.boundaries
+          &lt;cartoframes.client.DataObsClient.boundaries&gt;`
+          without any arguments, or by looking in the `Data Observatory
+          catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+        region (str, optional): Region where boundary information or,
+          if `boundary` is specified, boundary polygons are of interest.
+          `region` can be one of the following:
+
+            - table name (str): Name of a table in user&#39;s CARTO account
+            - bounding box (list of float): List of four values (two
+              lng/lat pairs) in the following order: western longitude,
+              southern latitude, eastern longitude, and northern latitude.
+              For example, Switzerland fits in
+              ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+        timespan (str, optional): Specific timespan to get geometries from.
+          Defaults to use the most recent. See the Data Observatory catalog
+          for more information.
+        decode_geom (bool, optional): Whether to return the geometries as
+          Shapely objects or keep them encoded as EWKB strings. Defaults
+          to False.
+        include_nonclipped (bool, optional): Optionally include
+          non-shoreline-clipped boundaries. These boundaries are the raw
+          boundaries provided by, for example, US Census Tiger.
+
+    Returns:
+        :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;`:
+        If `boundary` is specified, then all available
+        boundaries and accompanying `geom_refs` in `region` (or the world
+        if `region` is ``None`` or not specified) are returned. If
+        `boundary` is not specified, then a Dataset of all available
+        boundaries in `region` (or the world if `region` is ``None``).
+    &#34;&#34;&#34;
+    # TODO: create a function out of this?
+    if isinstance(region, str):
+        # see if it&#39;s a table
+        try:
+            geom_type = self._geom_type(region)
+            if geom_type in (&#39;point&#39;, &#39;line&#39;, ):
+                bounds = (&#39;(SELECT ST_ConvexHull(ST_Collect(the_geom)) &#39;
+                          &#39;FROM {table})&#39;).format(table=region)
+            else:
+                bounds = (&#39;(SELECT ST_Union(the_geom) &#39;
+                          &#39;FROM {table})&#39;).format(table=region)
+        except CartoException:
+            # see if it&#39;s a Data Obs region tag
+            regionsearch = &#39;&#34;geom_tags&#34;::text ilike \&#39;%{}%\&#39;&#39;.format(
+                get_countrytag(region))
+            bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+    elif isinstance(region, collections.Iterable):
+        if len(region) != 4:
+            raise ValueError(
+                &#39;`region` should be a list of the geographic bounds of a &#39;
+                &#39;region in the following order: western longitude, &#39;
+                &#39;southern latitude, eastern longitude, and northern &#39;
+                &#39;latitude. For example, Switerland fits in &#39;
+                &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                &#39;47.808380127]``.&#39;)
+        bounds = (&#39;ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326)&#39;).format(
+            *region)
+    elif region is None:
+        bounds = &#39;ST_MakeEnvelope(-180.0, -85.0, 180.0, 85.0, 4326)&#39;
+    else:
+        raise ValueError(&#39;`region` must be a str, a list of two lng/lat &#39;
+                         &#39;pairs, or ``None`` (which defaults to the &#39;
+                         &#39;world)&#39;)
+    if include_nonclipped:
+        clipped = None
+    else:
+        clipped = (r&#34;(geom_id ~ &#39;^us\.census\..*_clipped$&#39; OR &#34;
+                   r&#34;geom_id !~ &#39;^us\.census\..*&#39;)&#34;)
+
+    if boundary is None:
+        regionsearch = locals().get(&#39;regionsearch&#39;)
+        filters = &#39; AND &#39;.join(r for r in [regionsearch, clipped] if r)
+        query = utils.minify_sql((
+            &#39;SELECT *&#39;,
+            &#39;FROM OBS_GetAvailableGeometries(&#39;,
+            &#39;  {bounds}, null, null, null, {timespan})&#39;,
+            &#39;{filters}&#39;)).format(
+                bounds=bounds,
+                timespan=utils.pgquote(timespan),
+                filters=&#39;WHERE {}&#39;.format(filters) if filters else &#39;&#39;)
+        return self._fetch(query, decode_geom=True)
+
+    query = utils.minify_sql((
+        &#39;SELECT the_geom, geom_refs&#39;,
+        &#39;FROM OBS_GetBoundariesByGeometry(&#39;,
+        &#39;    {bounds},&#39;,
+        &#39;    {boundary},&#39;,
+        &#39;    {time})&#39;, )).format(
+            bounds=bounds,
+            boundary=utils.pgquote(boundary),
+            time=utils.pgquote(timespan))
+    return self._fetch(query, decode_geom=decode_geom)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.data_obs_client.DataObsClient.discovery"><code class="name flex">
+<span>def <span class="ident">discovery</span></span>(<span>self, region, keywords=None, regex=None, time=None, boundaries=None, include_quantiles=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Discover Data Observatory measures. This method returns the full
+Data Observatory metadata model for each measure or measures that
+match the conditions from the inputs. The full metadata in each row
+uniquely defines a measure based on the timespan, geographic
+resolution, and normalization (if any). Read more about the metadata
+response in <code>Data Observatory
+&lt;https://carto.com/developers/data-observatory/reference/#discovery-functions&gt;</code>__
+documentation.</p>
+<p>Internally, this method finds all measures in <code>region</code> that match the
+conditions set in <code>keywords</code>, <code>regex</code>, <code>time</code>, and <code>boundaries</code> (if
+any of them are specified). Then, if <code>boundaries</code> is not specified, a
+geographical resolution for that measure will be chosen subject to the
+type of region specified:</p>
+<ol>
+<li>If <code>region</code> is a table name, then a geographical resolution that
+is roughly equal to <code>region size / number of subunits</code>.</li>
+<li>If <code>region</code> is a country name or bounding box, then a geographical
+resolution will be chosen roughly equal to <code>region size / 500</code>.</li>
+</ol>
+<p>Since different measures are in some geographic resolutions and not
+others, different geographical resolutions for different measures are
+oftentimes returned.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To remove the guesswork in how geographical resolutions are
+selected, specify one or more boundaries in <code>boundaries</code>. See
+the boundaries section for each region in the <code>Data Observatory
+catalog &lt;http://cartodb.github.io/bigmetadata/&gt;</code>__.</p>
+</div>
+<p>The metadata returned from this method can then be used to create raw
+tables or for augmenting an existing table from these measures using
+:py:meth:<code>DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;</code>.
+For the full Data Observatory catalog, visit
+<a href="https://cartodb.github.io/bigmetadata/.">https://cartodb.github.io/bigmetadata/.</a> When working with the metadata
+DataFrame returned from this method, be careful to only remove rows not
+columns as <code>DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;</code>
+generally needs the full metadata.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Narrowing down a discovery query using the <code>keywords</code>, <code>regex</code>, and
+<code>time</code> filters is important for getting a manageable metadata
+set. Besides there being a large number of measures in the DO, a
+metadata response has acceptable combinations of measures with
+demonimators (normalization and density), and the same measure from
+other years.</p>
+<p>For example, setting the region to be United States counties with
+no filter values set will result in many thousands of measures.</p>
+</div>
+<h2 id="examples">Examples</h2>
+<p>Get all European Union measures that mention <code>freight</code>.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>freight_meta = do.discovery('European Union',
+keywords='freight',
+time='2010')
+freight_meta['numer_name'].head()</p>
+</div>
+<h2 id="arguments">Arguments</h2>
+<dl>
+<dt><strong><code>region</code></strong> :&ensp;<code>str</code> or <code>list</code> of <code>float</code></dt>
+<dd>
+<p>Information about the region of
+interest. <code>region</code> can be one of three types:</p>
+<ul>
+<li>region name (str): Name of region of interest. Acceptable
+values are limited to: 'Australia', 'Brazil', 'Canada',
+'European Union', 'France', 'Mexico', 'Spain',
+'United Kingdom', 'United States'.</li>
+<li>table name (str): Name of a table in user's CARTO account
+with geometries. The region will be the bounding box of
+the table.</li>
+</ul>
+<pre><code>!!! Note "Note:&amp;ensp;If a table name is also a valid Data Observatory"
+    region name, the Data Observatory name will be chosen
+    over the table.
+</code></pre>
+<ul>
+<li>bounding box (list of float): List of four values (two
+lng/lat pairs) in the following order: western longitude,
+southern latitude, eastern longitude, and northern latitude.
+For example, Switzerland fits in
+<code>[5.9559111595,45.8179931641,10.4920501709,47.808380127]</code></li>
+</ul>
+<p>!!! Note "Note:&ensp;Geometry levels are generally chosen by subdividing"
+the region into the next smallest administrative unit. To
+override this behavior, specify the <code>boundaries</code> flag. For
+example, set <code>boundaries</code> to
+<code>'us.census.tiger.census_tract'</code> to choose US census
+tracts.</p>
+</dd>
+<dt><strong><code>keywords</code></strong> :&ensp;<code>str</code> or <code>list</code> of <code>str</code>, optional</dt>
+<dd>Keyword or list of
+keywords in measure description or name. Response will be matched
+on all keywords listed (boolean <code>or</code>).</dd>
+<dt><strong><code>regex</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A regular expression to search the measure
+descriptions and names. Note that this relies on PostgreSQL's
+case insensitive operator <code>~*</code>. See <code>PostgreSQL docs
+&lt;https://www.postgresql.org/docs/9.5/static/functions-matching.html&gt;</code>__
+for more information.</dd>
+<dt><strong><code>boundaries</code></strong> :&ensp;<code>str</code> or <code>list</code> of <code>str</code>, optional</dt>
+<dd>Boundary or list of
+boundaries that specify the measure resolution. See the
+boundaries section for each region in the <code>Data Observatory
+catalog &lt;http://cartodb.github.io/bigmetadata/&gt;</code>__.</dd>
+<dt><strong><code>include_quantiles</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Include quantiles calculations
+which are a calculation of how a measure compares to all measures
+in the full dataset. Defaults to <code>False</code>. If <code>True</code>,
+quantiles columns will be returned for each column which has it
+pre-calculated.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>pandas.DataFrame</code>: <code>A</code> <code>dataframe</code> of <code>the</code> <code>complete</code> <code>metadata</code> <code>model</code> <code>for</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>specific measures based on the search parameters.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><strong><code>ValueError</code></strong></dt>
+<dd>If <code>region</code> is a :obj:<code>list</code> and does not consist of
+four elements, or if <code>region</code> is not an acceptable region</dd>
+<dt><strong><code>CartoException</code></strong></dt>
+<dd>If <code>region</code> is not a table in user account</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def discovery(self, region, keywords=None, regex=None, time=None,
+              boundaries=None, include_quantiles=False):
+    &#34;&#34;&#34;Discover Data Observatory measures. This method returns the full
+    Data Observatory metadata model for each measure or measures that
+    match the conditions from the inputs. The full metadata in each row
+    uniquely defines a measure based on the timespan, geographic
+    resolution, and normalization (if any). Read more about the metadata
+    response in `Data Observatory
+    &lt;https://carto.com/developers/data-observatory/reference/#discovery-functions&gt;`__
+    documentation.
+
+    Internally, this method finds all measures in `region` that match the
+    conditions set in `keywords`, `regex`, `time`, and `boundaries` (if
+    any of them are specified). Then, if `boundaries` is not specified, a
+    geographical resolution for that measure will be chosen subject to the
+    type of region specified:
+
+      1. If `region` is a table name, then a geographical resolution that
+         is roughly equal to `region size / number of subunits`.
+      2. If `region` is a country name or bounding box, then a geographical
+         resolution will be chosen roughly equal to `region size / 500`.
+
+    Since different measures are in some geographic resolutions and not
+    others, different geographical resolutions for different measures are
+    oftentimes returned.
+
+    .. tip::
+
+        To remove the guesswork in how geographical resolutions are
+        selected, specify one or more boundaries in `boundaries`. See
+        the boundaries section for each region in the `Data Observatory
+        catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+
+    The metadata returned from this method can then be used to create raw
+    tables or for augmenting an existing table from these measures using
+    :py:meth:`DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`.
+    For the full Data Observatory catalog, visit
+    https://cartodb.github.io/bigmetadata/. When working with the metadata
+    DataFrame returned from this method, be careful to only remove rows not
+    columns as `DataObsClient.augment &lt;cartoframes.client.DataObsClient.augment&gt;`
+    generally needs the full metadata.
+
+    .. note::
+        Narrowing down a discovery query using the `keywords`, `regex`, and
+        `time` filters is important for getting a manageable metadata
+        set. Besides there being a large number of measures in the DO, a
+        metadata response has acceptable combinations of measures with
+        demonimators (normalization and density), and the same measure from
+        other years.
+
+        For example, setting the region to be United States counties with
+        no filter values set will result in many thousands of measures.
+
+    Examples:
+
+        Get all European Union measures that mention ``freight``.
+
+        .. code::
+
+            freight_meta = do.discovery(&#39;European Union&#39;,
+                                   keywords=&#39;freight&#39;,
+                                   time=&#39;2010&#39;)
+            freight_meta[&#39;numer_name&#39;].head()
+
+    Arguments:
+        region (str or list of float): Information about the region of
+          interest. `region` can be one of three types:
+
+            - region name (str): Name of region of interest. Acceptable
+              values are limited to: &#39;Australia&#39;, &#39;Brazil&#39;, &#39;Canada&#39;,
+              &#39;European Union&#39;, &#39;France&#39;, &#39;Mexico&#39;, &#39;Spain&#39;,
+              &#39;United Kingdom&#39;, &#39;United States&#39;.
+            - table name (str): Name of a table in user&#39;s CARTO account
+              with geometries. The region will be the bounding box of
+              the table.
+
+              .. Note:: If a table name is also a valid Data Observatory
+                  region name, the Data Observatory name will be chosen
+                  over the table.
+
+            - bounding box (list of float): List of four values (two
+              lng/lat pairs) in the following order: western longitude,
+              southern latitude, eastern longitude, and northern latitude.
+              For example, Switzerland fits in
+              ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+
+            .. Note:: Geometry levels are generally chosen by subdividing
+                the region into the next smallest administrative unit. To
+                override this behavior, specify the `boundaries` flag. For
+                example, set `boundaries` to
+                ``&#39;us.census.tiger.census_tract&#39;`` to choose US census
+                tracts.
+
+        keywords (str or list of str, optional): Keyword or list of
+          keywords in measure description or name. Response will be matched
+          on all keywords listed (boolean `or`).
+        regex (str, optional): A regular expression to search the measure
+          descriptions and names. Note that this relies on PostgreSQL&#39;s
+          case insensitive operator ``~*``. See `PostgreSQL docs
+          &lt;https://www.postgresql.org/docs/9.5/static/functions-matching.html&gt;`__
+          for more information.
+        boundaries (str or list of str, optional): Boundary or list of
+          boundaries that specify the measure resolution. See the
+          boundaries section for each region in the `Data Observatory
+          catalog &lt;http://cartodb.github.io/bigmetadata/&gt;`__.
+        include_quantiles (bool, optional): Include quantiles calculations
+          which are a calculation of how a measure compares to all measures
+          in the full dataset. Defaults to ``False``. If ``True``,
+          quantiles columns will be returned for each column which has it
+          pre-calculated.
+
+    Returns:
+        pandas.DataFrame: A dataframe of the complete metadata model for
+        specific measures based on the search parameters.
+
+    Raises:
+        ValueError: If `region` is a :obj:`list` and does not consist of
+          four elements, or if `region` is not an acceptable region
+        CartoException: If `region` is not a table in user account
+    &#34;&#34;&#34;
+    if isinstance(region, str):
+        try:
+            # see if it&#39;s a DO region, nest in {}
+            countrytag = &#39;\&#39;{{{0}}}\&#39;&#39;.format(
+                get_countrytag(region))
+            boundary = (&#39;SELECT ST_MakeEnvelope(-180.0, -85.0, 180.0, &#39;
+                        &#39;85.0, 4326) AS env, 500::int AS cnt&#39;)
+        except ValueError:
+            # TODO: make this work for general queries
+            # see if it&#39;s a table
+            self._context.execute_query(
+                &#39;EXPLAIN SELECT * FROM {}&#39;.format(region))
+            boundary = (
+                &#39;SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, &#39;
+                &#39;count(*)::int AS cnt FROM {table_name}&#39;).format(
+                    table_name=region)
+    elif isinstance(region, collections.Iterable):
+        if len(region) != 4:
+            raise ValueError(
+                &#39;`region` should be a list of the geographic bounds of a &#39;
+                &#39;region in the following order: western longitude, &#39;
+                &#39;southern latitude, eastern longitude, and northern &#39;
+                &#39;latitude. For example, Switerland fits in &#39;
+                &#39;``[5.9559111595,45.8179931641,10.4920501709,&#39;
+                &#39;47.808380127]``.&#39;
+            )
+        boundary = (&#39;SELECT ST_MakeEnvelope({0}, {1}, {2}, {3}, 4326) AS &#39;
+                    &#39;env, 500::int AS cnt&#39;.format(*region))
+
+    if locals().get(&#39;countrytag&#39;) is None:
+        countrytag = &#39;null&#39;
+
+    if keywords:
+        if isinstance(keywords, str):
+            keywords = [keywords, ]
+        kwsearch = &#39; OR &#39;.join(
+            (&#39;numer_description ILIKE \&#39;%{kw}%\&#39; OR &#39;
+             &#39;numer_name ILIKE \&#39;%{kw}%\&#39;&#39;).format(kw=kw)
+            for kw in keywords)
+        kwsearch = &#39;({})&#39;.format(kwsearch)
+
+    if regex:
+        regexsearch = (&#39;(numer_description ~* {regex} OR numer_name &#39;
+                       &#39;~* {regex})&#39;).format(regex=utils.pgquote(regex))
+
+    if keywords or regex:
+        subjectfilters = &#39;{kw} {op} {regex}&#39;.format(
+            kw=kwsearch if keywords else &#39;&#39;,
+            op=&#39;OR&#39; if (keywords and regex) else &#39;&#39;,
+            regex=regexsearch if regex else &#39;&#39;).strip()
+    else:
+        subjectfilters = &#39;&#39;
+
+    if isinstance(time, str) or time is None:
+        time = [time, ]
+    if isinstance(boundaries, str) or boundaries is None:
+        boundaries = [boundaries, ]
+
+    if all(time) and all(boundaries):
+        bt_filters = &#39;valid_geom AND valid_timespan&#39;
+    elif all(time) or all(boundaries):
+        bt_filters = &#39;valid_geom&#39; if all(boundaries) else &#39;valid_timespan&#39;
+    else:
+        bt_filters = &#39;&#39;
+
+    if bt_filters and subjectfilters:
+        filters = &#39;WHERE ({s}) AND ({bt})&#39;.format(
+            s=subjectfilters, bt=bt_filters)
+    elif bt_filters or subjectfilters:
+        filters = &#39;WHERE {f}&#39;.format(f=subjectfilters or bt_filters)
+    else:
+        filters = &#39;&#39;
+
+    quantiles = (&#39;WHERE numer_aggregate &lt;&gt; \&#39;quantile\&#39;&#39;
+                 if not include_quantiles else &#39;&#39;)
+
+    numer_query = utils.minify_sql((
+        &#39;SELECT&#39;,
+        &#39;    numer_id,&#39;,
+        &#39;    {geom_id} AS geom_id,&#39;,
+        &#39;    {timespan} AS numer_timespan,&#39;,
+        &#39;    {normalization} AS normalization&#39;,
+        &#39;  FROM&#39;,
+        &#39;    OBS_GetAvailableNumerators(&#39;,
+        &#39;        (SELECT env FROM envelope),&#39;,
+        &#39;        {countrytag},&#39;,
+        &#39;        null,&#39;,  # denom_id
+        &#39;        {geom_id},&#39;,
+        &#39;        {timespan})&#39;,
+        &#39;{filters}&#39;, )).strip()
+
+    # query all numerators for all `time`, `boundaries`, and raw/derived
+    numers = &#39;\nUNION\n&#39;.join(
+        numer_query.format(
+            timespan=utils.pgquote(t),
+            geom_id=utils.pgquote(b),
+            normalization=utils.pgquote(n),
+            countrytag=countrytag,
+            filters=filters)
+        for t in time
+        for b in boundaries
+        for n in (&#39;predenominated&#39;, None))
+
+    query = utils.minify_sql((
+        &#39;WITH envelope AS (&#39;,
+        &#39;    {boundary}&#39;,
+        &#39;), numers AS (&#39;,
+        &#39;  {numers}&#39;,
+        &#39;)&#39;,
+        &#39;SELECT *&#39;,
+        &#39;FROM json_to_recordset(&#39;,
+        &#39;    (SELECT OBS_GetMeta(&#39;,
+        &#39;        envelope.env,&#39;,
+        &#39;        json_agg(numers),&#39;,
+        &#39;        10, 10, envelope.cnt&#39;,
+        &#39;    ) AS meta&#39;,
+        &#39;FROM numers, envelope&#39;,
+        &#39;GROUP BY env, cnt)) as data(&#39;,
+        &#39;    denom_aggregate text, denom_colname text,&#39;,
+        &#39;    denom_description text, denom_geomref_colname text,&#39;,
+        &#39;    denom_id text, denom_name text, denom_reltype text,&#39;,
+        &#39;    denom_t_description text, denom_tablename text,&#39;,
+        &#39;    denom_type text, geom_colname text, geom_description text,&#39;,
+        &#39;    geom_geomref_colname text, geom_id text, geom_name text,&#39;,
+        &#39;    geom_t_description text, geom_tablename text,&#39;,
+        &#39;    geom_timespan text, geom_type text, id numeric,&#39;,
+        &#39;    max_score_rank text, max_timespan_rank text,&#39;,
+        &#39;    normalization text, num_geoms numeric, numer_aggregate text,&#39;,
+        &#39;    numer_colname text, numer_description text,&#39;,
+        &#39;    numer_geomref_colname text, numer_id text,&#39;,
+        &#39;    numer_name text, numer_t_description text,&#39;,
+        &#39;    numer_tablename text, numer_timespan text,&#39;,
+        &#39;    numer_type text, score numeric, score_rank numeric,&#39;,
+        &#39;    score_rownum numeric, suggested_name text,&#39;,
+        &#39;    target_area text, target_geoms text, timespan_rank numeric,&#39;,
+        &#39;    timespan_rownum numeric)&#39;,
+        &#39;{quantiles}&#39;, )).format(
+            boundary=boundary,
+            numers=numers,
+            quantiles=quantiles).strip()
+    utils.debug_print(self._verbose, query=query)
+    return self._fetch(query, decode_geom=True).dataframe</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.data.clients" href="index.html">cartoframes.data.clients</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.data.clients.data_obs_client.get_countrytag" href="#cartoframes.data.clients.data_obs_client.get_countrytag">get_countrytag</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.data.clients.data_obs_client.DataObsClient" href="#cartoframes.data.clients.data_obs_client.DataObsClient">DataObsClient</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.data.clients.data_obs_client.DataObsClient.augment" href="#cartoframes.data.clients.data_obs_client.DataObsClient.augment">augment</a></code></li>
+<li><code><a title="cartoframes.data.clients.data_obs_client.DataObsClient.boundaries" href="#cartoframes.data.clients.data_obs_client.DataObsClient.boundaries">boundaries</a></code></li>
+<li><code><a title="cartoframes.data.clients.data_obs_client.DataObsClient.discovery" href="#cartoframes.data.clients.data_obs_client.DataObsClient.discovery">discovery</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

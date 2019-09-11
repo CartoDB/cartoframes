@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.viz.helpers API documentation</title>
+<meta name="description" content="Map helper functions bootstrap the process of creating common types of maps.
+These functions save time by giving great out-of-the-box cartography, …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.viz.helpers</code></h1>
+</header>
+<section id="section-intro">
+<p>Map helper functions bootstrap the process of creating common types of maps.
+These functions save time by giving great out-of-the-box cartography, legends,
+and popups. The layer can be further customized using optional overrides.</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;Map helper functions bootstrap the process of creating common types of maps.
+These functions save time by giving great out-of-the-box cartography, legends,
+and popups. The layer can be further customized using optional overrides.&#34;&#34;&#34;
+from __future__ import absolute_import
+
+from .color_bins_layer import color_bins_layer
+from .color_category_layer import color_category_layer
+from .color_continuous_layer import color_continuous_layer
+from .size_bins_layer import size_bins_layer
+from .size_category_layer import size_category_layer
+from .size_continuous_layer import size_continuous_layer
+from .cluster_size_layer import cluster_size_layer
+from .animation_layer import animation_layer
+
+
+def _inspect(helper):
+    import inspect
+    lines = inspect.getsource(helper)
+    print(lines)
+
+
+__all__ = [
+    &#39;color_bins_layer&#39;,
+    &#39;color_category_layer&#39;,
+    &#39;color_continuous_layer&#39;,
+    &#39;size_bins_layer&#39;,
+    &#39;size_category_layer&#39;,
+    &#39;size_continuous_layer&#39;,
+    &#39;cluster_size_layer&#39;,
+    &#39;animation_layer&#39;
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="cartoframes.viz.helpers.utils" href="utils.html">cartoframes.viz.helpers.utils</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.viz.helpers.animation_layer"><code class="name flex">
+<span>def <span class="ident">animation_layer</span></span>(<span>source, value, title='', color=None, widget_type='time-series', description='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating an animated map.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Hex value, rgb expression, or other valid
+CARTO VL color. Default is '#EE5D5A' for point geometries,
+'#4CC8A3' for lines and 'TODO' for polygons.</dd>
+<dt><strong><code>widget_type</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Type of animation widget: "animation" or "time-series".
+The default is "time-series".</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>. Includes Widget <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def animation_layer(
+        source, value, title=&#39;&#39;, color=None, widget_type=&#39;time-series&#39;, description=&#39;&#39;):
+    &#34;&#34;&#34;Helper function for quickly creating an animated map.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Default is &#39;#EE5D5A&#39; for point geometries,
+          &#39;#4CC8A3&#39; for lines and &#39;TODO&#39; for polygons.
+        widget_type (str, optional): Type of animation widget: &#34;animation&#34; or &#34;time-series&#34;.
+          The default is &#34;time-series&#34;.
+        description (str, optional): Description text legend placed under legend title.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`. Includes Widget `value`.
+    &#34;&#34;&#34;
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;color&#39;: &#39;opacity({0}, 0.8)&#39;.format(color or &#39;#EE4D5A&#39;),
+                &#39;filter&#39;: &#39;animation(linear(${0}), 20, fade(1,1))&#39;.format(value)
+            },
+            &#39;line&#39;: {
+                &#39;color&#39;: &#39;opacity({0}, 0.8)&#39;.format(color or &#39;#4CC8A3&#39;),
+                &#39;filter&#39;: &#39;animation(linear(${0}), 20, fade(1,1))&#39;.format(value)
+            },
+            &#39;polygon&#39;: {
+                &#39;color&#39;: &#39;opacity({0}, 0.8)&#39;.format(color or &#39;TODO&#39;),
+                &#39;filter&#39;: &#39;animation(linear(${0}), 20, fade(1,1))&#39;.format(value)
+            }
+        },
+        widgets=[{
+            &#39;type&#39;: widget_type,
+            &#39;value&#39;: value,
+            &#39;title&#39;: title,
+            &#39;description&#39;: description
+        }]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.cluster_size_layer"><code class="name flex">
+<span>def <span class="ident">cluster_size_layer</span></span>(<span>source, operation='count', value=None, resolution=32, title='', size=None, color=None, opacity=None, stroke_width=None, stroke_color=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a size symbol map with
+continuous size scaled by cluster.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>operation</code></strong> :&ensp;<code>str</code></dt>
+<dd>Cluster operation, defaults to 'count'. Other options
+available are 'avg', 'min', 'max', and 'sum'.</dd>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>str</code>, <code>optiona</code></dt>
+<dd>Min/max size array in CARTO VL syntax. Default is
+'[2, 40]' for point geometries and '[1, 10]' for lines.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Hex value, rgb expression, or other valid
+CARTO VL color. Defaults is '#FFB927' for point geometries and
+'#4CC8A3' for lines.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def cluster_size_layer(
+        source, operation=&#39;count&#39;, value=None, resolution=32,
+        title=&#39;&#39;, size=None, color=None, opacity=None,
+        stroke_width=None, stroke_color=None, description=&#39;&#39;,
+        footer=&#39;&#39;, legend=True, popup=True, widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a size symbol map with
+    continuous size scaled by cluster.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        operation (str): Cluster operation, defaults to &#39;count&#39;. Other options
+          available are &#39;avg&#39;, &#39;min&#39;, &#39;max&#39;, and &#39;sum&#39;.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+          &#39;[2, 40]&#39; for point geometries and &#39;[1, 10]&#39; for lines.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Defaults is &#39;#FFB927&#39; for point geometries and
+          &#39;#4CC8A3&#39; for lines.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+
+    cluster_operation = _get_cluster_operation(operation, value)
+    cluster_operation_title = _get_cluster_operation_title(operation, value)
+    breakpoints = _get_breakpoints(resolution)
+    animation_filter = _get_animation(animate, cluster_operation)
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;width&#39;: &#39;ramp(linear({0}, viewportMIN({1}), viewportMAX({2})), [{3}])&#39;.format(
+                    cluster_operation, cluster_operation, cluster_operation, breakpoints),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#FFB927&#39;, opacity or &#39;0.8&#39;),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;filter&#39;: animation_filter,
+                &#39;resolution&#39;: &#39;{0}&#39;.format(resolution)
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or cluster_operation_title,
+                &#39;value&#39;: cluster_operation
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;size-continuous-point&#39;
+            },
+            &#39;title&#39;: title or cluster_operation_title,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and value is not None and {
+                &#39;type&#39;: &#39;histogram&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Distribution&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.color_bins_layer"><code class="name flex">
+<span>def <span class="ident">color_bins_layer</span></span>(<span>source, value, title='', method='quantiles', bins=5, breaks=None, palette=None, size=None, opacity=None, stroke_color=None, stroke_width=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a classed color map.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>method</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Classification method of data: "quantiles", "equal", "stdev".
+Default is "quantiles".</dd>
+<dt><strong><code>bins</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of size classes (bins) for map. Default is 5.</dd>
+<dt><strong><code>breaks</code></strong> :&ensp;<code>int</code>[], optional</dt>
+<dd>Assign manual class break values.</dd>
+<dt><strong><code>palette</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Palette that can be a named cartocolor palette
+or other valid CARTO VL palette expression. Default is <code>purpor</code>.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of point or line features.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data: "True" or "False".
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def color_bins_layer(
+        source, value, title=&#39;&#39;, method=&#39;quantiles&#39;, bins=5,
+        breaks=None, palette=None, size=None, opacity=None,
+        stroke_color=None, stroke_width=None, description=&#39;&#39;,
+        footer=&#39;&#39;, legend=True, popup=True, widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a classed color map.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        method (str, optional): Classification method of data: &#34;quantiles&#34;, &#34;equal&#34;, &#34;stdev&#34;.
+          Default is &#34;quantiles&#34;.
+        bins (int, optional): Number of size classes (bins) for map. Default is 5.
+        breaks (int[], optional): Assign manual class break values.
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid CARTO VL palette expression. Default is `purpor`.
+        size (int, optional): Size of point or line features.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    if method not in (&#39;quantiles&#39;, &#39;equal&#39;, &#39;stdev&#39;):
+        raise ValueError(&#39;Available methods are: &#34;quantiles&#34;, &#34;equal&#34;, &#34;stdev&#34;.&#39;)
+
+    func = &#39;buckets&#39; if breaks else {
+        &#39;quantiles&#39;: &#39;globalQuantiles&#39;,
+        &#39;equal&#39;: &#39;globalEqIntervals&#39;,
+        &#39;stdev&#39;: &#39;globalStandardDev&#39;
+    }.get(method)
+
+    default_palette = &#39;purpor&#39; if breaks else {
+        &#39;quantiles&#39;: &#39;purpor&#39;,
+        &#39;equal&#39;: &#39;purpor&#39;,
+        &#39;stdev&#39;: &#39;temps&#39;
+    }.get(method)
+
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}),{4})&#39;.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;point&#39;][&#39;width&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;line&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}),{4})&#39;.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;line&#39;][&#39;width&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;polygon&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}), {4})&#39;.format(
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette, 
+                    opacity or &#39;0.9&#39;),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;polygon&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;polygon&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;color-bins-point&#39;,
+                &#39;line&#39;: &#39;color-bins-line&#39;,
+                &#39;polygon&#39;: &#39;color-bins-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;histogram&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Distribution&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.color_category_layer"><code class="name flex">
+<span>def <span class="ident">color_category_layer</span></span>(<span>source, value, title='', top=11, cat=None, palette=None, size=None, opacity=None, stroke_color=None, stroke_width=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a category color map.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>top</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of category for map. Default is 11. Values
+can range from 1 to 16.</dd>
+<dt><strong><code>cat</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Category list. Must be a valid CARTO VL category
+list.</dd>
+<dt><strong><code>palette</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Palette that can be a named CARTOColor palette
+or other valid CARTO VL palette expression. Default is <code>bold</code>.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of point or line features.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def color_category_layer(
+        source, value, title=&#39;&#39;, top=11, cat=None, palette=None,
+        size=None, opacity=None, stroke_color=None, stroke_width=None,
+        description=&#39;&#39;, footer=&#39;&#39;, legend=True, popup=True,
+        widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a category color map.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        top (int, optional): Number of category for map. Default is 11. Values
+          can range from 1 to 16.
+        cat (str, optional): Category list. Must be a valid CARTO VL category
+          list.
+        palette (str, optional): Palette that can be a named CARTOColor palette
+          or other valid CARTO VL palette expression. Default is `bold`.
+        size (int, optional): Size of point or line features.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    func = &#39;buckets&#39; if cat else &#39;top&#39;
+    default_palette = &#39;bold&#39;
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}),{4})&#39;.format(
+                    func, value, cat or top, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;point&#39;][&#39;width&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;line&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}),{4})&#39;.format(
+                    func, value, cat or top, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;line&#39;][&#39;width&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;polygon&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp({0}(${1}, {2}), {3}), {4})&#39;.format(
+                    func, value, cat or top, serialize_palette(palette) or default_palette,
+                    opacity or &#39;0.9&#39;),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;polygon&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;polygon&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;color-category-point&#39;,
+                &#39;line&#39;: &#39;color-category-line&#39;,
+                &#39;polygon&#39;: &#39;color-category-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;category&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Categories&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.color_continuous_layer"><code class="name flex">
+<span>def <span class="ident">color_continuous_layer</span></span>(<span>source, value, title='', palette=None, size=None, opacity=None, stroke_color=None, stroke_width=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a continuous color map.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend</dd>
+<dt><strong><code>palette</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Palette that can be a named cartocolor palette
+or other valid CARTO VL palette expression. Default is <code>bluyl</code>.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of point or line features.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def color_continuous_layer(
+        source, value, title=&#39;&#39;, palette=None, size=None,
+        opacity=None, stroke_color=None, stroke_width=None,
+        description=&#39;&#39;, footer=&#39;&#39;, legend=True, popup=True,
+        widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a continuous color map.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend
+        palette (str, optional): Palette that can be a named cartocolor palette
+          or other valid CARTO VL palette expression. Default is `bluyl`.
+        size (int, optional): Size of point or line features.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    default_palette = &#39;bluyl&#39;
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp(linear(${0}), {1}),{2})&#39;.format(
+                    value, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;point&#39;][&#39;width&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;line&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp(linear(${0}), {1}),{2})&#39;.format(
+                    value, serialize_palette(palette) or default_palette,
+                    opacity or &#39;1&#39;),
+                &#39;width&#39;: &#39;{0}&#39;.format(
+                    size or defaults.STYLE[&#39;line&#39;][&#39;width&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;polygon&#39;: {
+                &#39;color&#39;: &#39;opacity(ramp(linear(${0}), {1}), {2})&#39;.format(
+                    value, serialize_palette(palette) or default_palette,
+                    opacity or &#39;0.9&#39;),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;polygon&#39;][&#39;strokeColor&#39;]),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;polygon&#39;][&#39;strokeWidth&#39;]),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;color-continuous-point&#39;,
+                &#39;line&#39;: &#39;color-continuous-line&#39;,
+                &#39;polygon&#39;: &#39;color-continuous-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;histogram&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Distribution&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.size_bins_layer"><code class="name flex">
+<span>def <span class="ident">size_bins_layer</span></span>(<span>source, value, title='', method='quantiles', bins=5, breaks=None, size=None, color=None, opacity=None, stroke_width=None, stroke_color=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a size symbol map with
+classification method/buckets.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>method</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Classification method of data: "quantiles", "equal", "stdev".
+Default is "quantiles".</dd>
+<dt><strong><code>bins</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of size classes (bins) for map. Default is 5.</dd>
+<dt><strong><code>breaks</code></strong> :&ensp;<code>int</code>[], optional</dt>
+<dd>Assign manual class break values.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>int</code>, <code>optiona</code></dt>
+<dd>Min/max size array in CARTO VL syntax. Default is
+'[2, 14]' for point geometries and '[1, 10]' for lines.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Hex value, rgb expression, or other valid
+CARTO VL color. Default is '#EE5D5A' for point geometries and
+'#4CC8A3' for lines.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def size_bins_layer(
+        source, value, title=&#39;&#39;, method=&#39;quantiles&#39;, bins=5,
+        breaks=None, size=None, color=None, opacity=None,
+        stroke_width=None, stroke_color=None, description=&#39;&#39;,
+        footer=&#39;&#39;, legend=True, popup=True, widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a size symbol map with
+    classification method/buckets.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        method (str, optional): Classification method of data: &#34;quantiles&#34;, &#34;equal&#34;, &#34;stdev&#34;.
+          Default is &#34;quantiles&#34;.
+        bins (int, optional): Number of size classes (bins) for map. Default is 5.
+        breaks (int[], optional): Assign manual class break values.
+        size (int, optiona): Min/max size array in CARTO VL syntax. Default is
+          &#39;[2, 14]&#39; for point geometries and &#39;[1, 10]&#39; for lines.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Default is &#39;#EE5D5A&#39; for point geometries and
+          &#39;#4CC8A3&#39; for lines.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    if method not in (&#39;quantiles&#39;, &#39;equal&#39;, &#39;stdev&#39;):
+        raise ValueError(&#39;Available methods are: &#34;quantiles&#34;, &#34;equal&#34;, &#34;stdev&#34;.&#39;)
+
+    func = &#39;buckets&#39; if breaks else {
+        &#39;quantiles&#39;: &#39;globalQuantiles&#39;,
+        &#39;equal&#39;: &#39;globalEqIntervals&#39;,
+        &#39;stdev&#39;: &#39;globalStandardDev&#39;
+    }.get(method)
+
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;width&#39;: &#39;ramp({0}(${1}, {2}), {3})&#39;.format(
+                    func, value, breaks or bins, size or [2, 14]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#EE4D5A&#39;, opacity or &#39;0.8&#39;),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;line&#39;: {
+                &#39;width&#39;: &#39;ramp({0}(${1}, {2}), {3})&#39;.format(
+                    func, value, breaks or bins, size or [1, 10]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#4CC8A3&#39;, opacity or &#39;0.8&#39;),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;size-bins-point&#39;,
+                &#39;line&#39;: &#39;size-bins-line&#39;,
+                &#39;polygon&#39;: &#39;size-bins-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;histogram&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Distribution&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.size_category_layer"><code class="name flex">
+<span>def <span class="ident">size_category_layer</span></span>(<span>source, value, title='', top=5, cat=None, size=None, color=None, opacity=None, stroke_width=None, stroke_color=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a size category layer.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>top</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of size categories for layer. Default is
+5. Valid values range from 1 to 16.</dd>
+<dt><strong><code>cat</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Category list. Must be a valid CARTO VL category
+list.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>str</code>, <code>optiona</code></dt>
+<dd>Min/max size array in CARTO VL syntax. Default is
+'[2, 20]' for point geometries and '[1, 10]' for lines.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Hex value, rgb expression, or other valid
+CARTO VL color. Default is '#F46D43' for point geometries and
+'#4CC8A3' for lines.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def size_category_layer(
+        source, value, title=&#39;&#39;, top=5, cat=None,
+        size=None, color=None, opacity=None, stroke_width=None,
+        stroke_color=None, description=&#39;&#39;, footer=&#39;&#39;,
+        legend=True, popup=True, widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a size category layer.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        top (int, optional): Number of size categories for layer. Default is
+          5. Valid values range from 1 to 16.
+        cat (str, optional): Category list. Must be a valid CARTO VL category
+          list.
+        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+          &#39;[2, 20]&#39; for point geometries and &#39;[1, 10]&#39; for lines.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Default is &#39;#F46D43&#39; for point geometries and
+          &#39;#4CC8A3&#39; for lines.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    func = &#39;buckets&#39; if cat else &#39;top&#39;
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;width&#39;: &#39;ramp({0}(${1}, {2}), {3})&#39;.format(
+                    func, value, cat or top, size or [2, 20]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#F46D43&#39;, opacity or &#39;0.8&#39;),
+                &#39;filter&#39;: animation_filter,
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;])
+            },
+            &#39;line&#39;: {
+                &#39;width&#39;: &#39;ramp({0}(${1}, {2}), {3})&#39;.format(
+                    func, value, cat or top, size or [1, 10]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#4CC8A3&#39;, opacity or &#39;0.8&#39;),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;size-category-point&#39;,
+                &#39;line&#39;: &#39;size-category-line&#39;,
+                &#39;polygon&#39;: &#39;size-category-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;category&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Categories&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.helpers.size_continuous_layer"><code class="name flex">
+<span>def <span class="ident">size_continuous_layer</span></span>(<span>source, value, title='', size=None, color=None, opacity=None, stroke_width=None, stroke_color=None, description='', footer='', legend=True, popup=True, widget=False, animate=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper function for quickly creating a size symbol map with
+continuous size scaled by <code>value</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>source (:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> or str): Dataset</dt>
+<dt>or text representing a table or query associated with user account.</dt>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>Column to symbolize by.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Title of legend.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>str</code>, <code>optiona</code></dt>
+<dd>Min/max size array in CARTO VL syntax. Default is
+'[2, 40]' for point geometries and '[1, 10]' for lines.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Hex value, rgb expression, or other valid
+CARTO VL color. Defaults is '#FFB927' for point geometries and
+'#4CC8A3' for lines.</dd>
+<dt><strong><code>opacity</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Opacity value for point color and line features.
+Default is '0.8'.</dd>
+<dt><strong><code>stroke_width</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Size of the stroke on point features.</dd>
+<dt><strong><code>stroke_color</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Color of the stroke on point features.
+Default is '#222'.</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Description text legend placed under legend title.</dd>
+<dt><strong><code>footer</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Footer text placed under legend items.</dd>
+<dt><strong><code>legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display map legend: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>popup</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display popups on hover and click: "True" or "False".
+Set to "True" by default.</dd>
+<dt><strong><code>widget</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Display a widget for mapped data.
+Set to "False" by default.</dd>
+<dt><strong><code>animate</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Animate features by date/time or other numeric field.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>cartoframes.viz.Layer: Layer styled by <code>value</code>.
+Includes a legend, popup and widget on <code>value</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def size_continuous_layer(
+        source, value, title=&#39;&#39;, size=None, color=None, opacity=None,
+        stroke_width=None, stroke_color=None, description=&#39;&#39;, footer=&#39;&#39;,
+        legend=True, popup=True, widget=False, animate=None):
+    &#34;&#34;&#34;Helper function for quickly creating a size symbol map with
+    continuous size scaled by `value`.
+
+    Args:
+        source (:py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` or str): Dataset
+          or text representing a table or query associated with user account.
+        value (str): Column to symbolize by.
+        title (str, optional): Title of legend.
+        size (str, optiona): Min/max size array in CARTO VL syntax. Default is
+          &#39;[2, 40]&#39; for point geometries and &#39;[1, 10]&#39; for lines.
+        color (str, optional): Hex value, rgb expression, or other valid
+          CARTO VL color. Defaults is &#39;#FFB927&#39; for point geometries and
+          &#39;#4CC8A3&#39; for lines.
+        opacity (int, optional): Opacity value for point color and line features.
+          Default is &#39;0.8&#39;.
+        stroke_width (int, optional): Size of the stroke on point features.
+        stroke_color (str, optional): Color of the stroke on point features.
+          Default is &#39;#222&#39;.
+        description (str, optional): Description text legend placed under legend title.
+        footer (str, optional): Footer text placed under legend items.
+        legend (bool, optional): Display map legend: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        popup (bool, optional): Display popups on hover and click: &#34;True&#34; or &#34;False&#34;.
+          Set to &#34;True&#34; by default.
+        widget (bool, optional): Display a widget for mapped data.
+          Set to &#34;False&#34; by default.
+        animate (str, optional): Animate features by date/time or other numeric field.
+
+    Returns:
+        cartoframes.viz.Layer: Layer styled by `value`.
+        Includes a legend, popup and widget on `value`.
+    &#34;&#34;&#34;
+    animation_filter = &#39;animation(linear(${}), 20, fade(1,1))&#39;.format(animate) if animate else &#39;1&#39;
+
+    return Layer(
+        source,
+        style={
+            &#39;point&#39;: {
+                &#39;width&#39;: &#39;ramp(linear(sqrt(${0}), sqrt(globalMin(${0})), sqrt(globalMax(${0}))), {1})&#39;.format(
+                    value, size or [2, 40]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#FFB927&#39;, opacity or &#39;0.8&#39;),
+                &#39;strokeWidth&#39;: &#39;{0}&#39;.format(
+                    stroke_width or defaults.STYLE[&#39;point&#39;][&#39;strokeWidth&#39;]),
+                &#39;strokeColor&#39;: &#39;{0}&#39;.format(
+                    stroke_color or defaults.STYLE[&#39;point&#39;][&#39;strokeColor&#39;]),
+                &#39;filter&#39;: animation_filter
+            },
+            &#39;line&#39;: {
+                &#39;width&#39;: &#39;ramp(linear(${0}), {1})&#39;.format(
+                    value, size or [1, 10]),
+                &#39;color&#39;: &#39;opacity({0}, {1})&#39;.format(
+                    color or &#39;#4CC8A3&#39;, opacity or &#39;0.8&#39;),
+                &#39;filter&#39;: animation_filter
+            }
+        },
+        popup=popup and not animate and {
+            &#39;hover&#39;: {
+                &#39;title&#39;: title or value,
+                &#39;value&#39;: &#39;$&#39; + value
+            }
+        },
+        legend=legend and {
+            &#39;type&#39;: {
+                &#39;point&#39;: &#39;size-continuous-point&#39;,
+                &#39;line&#39;: &#39;size-continuous-line&#39;,
+                &#39;polygon&#39;: &#39;size-continuous-polygon&#39;
+            },
+            &#39;title&#39;: title or value,
+            &#39;description&#39;: description,
+            &#39;footer&#39;: footer
+        },
+        widgets=[
+            animate and {
+                &#39;type&#39;: &#39;time-series&#39;,
+                &#39;value&#39;: animate,
+                &#39;title&#39;: &#39;Animation&#39;
+            },
+            widget and {
+                &#39;type&#39;: &#39;histogram&#39;,
+                &#39;value&#39;: value,
+                &#39;title&#39;: &#39;Distribution&#39;
+            }
+        ]
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.viz" href="../index.html">cartoframes.viz</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="cartoframes.viz.helpers.utils" href="utils.html">cartoframes.viz.helpers.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.viz.helpers.animation_layer" href="#cartoframes.viz.helpers.animation_layer">animation_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.cluster_size_layer" href="#cartoframes.viz.helpers.cluster_size_layer">cluster_size_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.color_bins_layer" href="#cartoframes.viz.helpers.color_bins_layer">color_bins_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.color_category_layer" href="#cartoframes.viz.helpers.color_category_layer">color_category_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.color_continuous_layer" href="#cartoframes.viz.helpers.color_continuous_layer">color_continuous_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.size_bins_layer" href="#cartoframes.viz.helpers.size_bins_layer">size_bins_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.size_category_layer" href="#cartoframes.viz.helpers.size_category_layer">size_category_layer</a></code></li>
+<li><code><a title="cartoframes.viz.helpers.size_continuous_layer" href="#cartoframes.viz.helpers.size_continuous_layer">size_continuous_layer</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

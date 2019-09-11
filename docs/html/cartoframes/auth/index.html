@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.auth API documentation</title>
+<meta name="description" content="Auth namespace contains the class to manage authentication: Credentials.
+It also includes the utility method set_default_credentials." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.auth</code></h1>
+</header>
+<section id="section-intro">
+<p>Auth namespace contains the class to manage authentication: Credentials.
+It also includes the utility method set_default_credentials.</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;Auth namespace contains the class to manage authentication: Credentials.
+It also includes the utility method set_default_credentials.&#34;&#34;&#34;
+from __future__ import absolute_import
+import re
+
+from .credentials import Credentials
+
+_default_credentials = None
+
+
+def set_default_credentials(
+        first=None, second=None, credentials=None,
+        username=None, base_url=None, api_key=None, session=None):
+    &#34;&#34;&#34;set_default_credentials
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.credentials.Credentials&gt;`, optional):
+          A :py:class:`Credentials &lt;cartoframes.credentials.Credentials&gt;`
+          instance can be used in place of a `username | base_url`/`api_key` combination.
+        base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
+          should use the form ``https://{username}.carto.com`` (e.g.,
+          https://eschbacher.carto.com for user ``eschbacher``) whether on
+          a personal or multi-user account. On-premises installation users
+          should ask their admin.
+        api_key (str, optional): CARTO API key.
+        username (str, optional): CARTO user name of the account.
+        session (requests.Session, optional): requests session. See `requests
+          documentation
+          &lt;https://2.python-requests.org/en/master/user/advanced/#session-objects&gt;`__
+          for more information.
+
+    Example:
+
+        From a pair username, api_key
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                username=&#39;your_user_name&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            # or
+
+            set_default_credentials(
+                &#39;your_user_name&#39;,
+                &#39;your api key&#39;
+            )
+
+        From a username (for public datasets).
+        The API key `default_public` is used by default.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(&#39;your_user_name&#39;)
+
+        From a pair base_url, api_key.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            # or
+
+            set_default_credentials(
+                &#39;https://your_user_name.carto.com&#39;,
+                &#39;your api key&#39;
+            )
+
+        From a base_url (for public datasets).
+        The API key `default_public` is used by default.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(&#39;https://your_user_name.carto.com&#39;)
+
+        From a :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;` class.
+
+        .. code::
+
+            from cartoframes.auth import Credentials, set_default_credentials
+
+            credentials = Credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+            set_default_credentials(credentials)
+    &#34;&#34;&#34;
+    global _default_credentials
+
+    _base_url = base_url if first is None else first
+    _username = username if first is None else first
+    _api_key = (api_key if second is None else second) or &#39;default_public&#39;
+    _credentials = credentials if first is None else first
+
+    if isinstance(_credentials, Credentials):
+        _default_credentials = _credentials
+
+    elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
+        if _base_url and _is_url(_base_url):
+            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
+        else:
+            _default_credentials = Credentials(username=_username, api_key=_api_key)
+
+    else:
+        raise ValueError(
+            &#39;Invalid inputs. Pass a Credentials object, a username and api_key pair or a base_url and api_key pair.&#39;)
+
+    if session:
+        _default_credentials.session = session
+
+
+def get_default_credentials():
+    return _default_credentials
+
+
+def _is_url(text):
+    return re.match(r&#39;^https?://.*$&#39;, text)
+
+
+__all__ = [
+    &#39;Credentials&#39;,
+    &#39;set_default_credentials&#39;,
+    &#39;get_default_credentials&#39;
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="cartoframes.auth.credentials" href="credentials.html">cartoframes.auth.credentials</a></code></dt>
+<dd>
+<section class="desc"><p>Credentials management for cartoframes usage.</p></section>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.auth.get_default_credentials"><code class="name flex">
+<span>def <span class="ident">get_default_credentials</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_default_credentials():
+    return _default_credentials</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.set_default_credentials"><code class="name flex">
+<span>def <span class="ident">set_default_credentials</span></span>(<span>first=None, second=None, credentials=None, username=None, base_url=None, api_key=None, session=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>set_default_credentials</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>credentials (:py:class:<code>Credentials &lt;cartoframes.credentials.Credentials&gt;</code>, optional):</dt>
+<dt>A :py:class:<code>Credentials &lt;cartoframes.credentials.Credentials&gt;</code></dt>
+<dt>instance can be used in place of a <code>username | base_url</code>/<code>api_key</code> combination.</dt>
+<dt><strong><code>base_url</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Base URL of CARTO user account. Cloud-based accounts
+should use the form <code>&lt;https://{username}.carto.com</code>&gt; (e.g.,
+<a href="https://eschbacher.carto.com">https://eschbacher.carto.com</a> for user <code>eschbacher</code>) whether on
+a personal or multi-user account. On-premises installation users
+should ask their admin.</dd>
+<dt><strong><code>api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>CARTO API key.</dd>
+<dt><strong><code>username</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>CARTO user name of the account.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code>, optional</dt>
+<dd>requests session. See <code>requests
+documentation
+&lt;https://2.python-requests.org/en/master/user/advanced/#session-objects&gt;</code>__
+for more information.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<p>From a pair username, api_key</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials(
+username='your_user_name',
+api_key='your api key'
+)</p>
+<h1 id="or">or</h1>
+<p>set_default_credentials(
+'your_user_name',
+'your api key'
+)</p>
+</div>
+<p>From a username (for public datasets).
+The API key <code>default_public</code> is used by default.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials('your_user_name')</p>
+</div>
+<p>From a pair base_url, api_key.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<h1 id="or_1">or</h1>
+<p>set_default_credentials(
+'https://your_user_name.carto.com',
+'your api key'
+)</p>
+</div>
+<p>From a base_url (for public datasets).
+The API key <code>default_public</code> is used by default.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials('https://your_user_name.carto.com')</p>
+</div>
+<p>From a :py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code> class.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials, set_default_credentials</p>
+<p>credentials = Credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)
+set_default_credentials(credentials)</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def set_default_credentials(
+        first=None, second=None, credentials=None,
+        username=None, base_url=None, api_key=None, session=None):
+    &#34;&#34;&#34;set_default_credentials
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.credentials.Credentials&gt;`, optional):
+          A :py:class:`Credentials &lt;cartoframes.credentials.Credentials&gt;`
+          instance can be used in place of a `username | base_url`/`api_key` combination.
+        base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
+          should use the form ``https://{username}.carto.com`` (e.g.,
+          https://eschbacher.carto.com for user ``eschbacher``) whether on
+          a personal or multi-user account. On-premises installation users
+          should ask their admin.
+        api_key (str, optional): CARTO API key.
+        username (str, optional): CARTO user name of the account.
+        session (requests.Session, optional): requests session. See `requests
+          documentation
+          &lt;https://2.python-requests.org/en/master/user/advanced/#session-objects&gt;`__
+          for more information.
+
+    Example:
+
+        From a pair username, api_key
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                username=&#39;your_user_name&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            # or
+
+            set_default_credentials(
+                &#39;your_user_name&#39;,
+                &#39;your api key&#39;
+            )
+
+        From a username (for public datasets).
+        The API key `default_public` is used by default.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(&#39;your_user_name&#39;)
+
+        From a pair base_url, api_key.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            # or
+
+            set_default_credentials(
+                &#39;https://your_user_name.carto.com&#39;,
+                &#39;your api key&#39;
+            )
+
+        From a base_url (for public datasets).
+        The API key `default_public` is used by default.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(&#39;https://your_user_name.carto.com&#39;)
+
+        From a :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;` class.
+
+        .. code::
+
+            from cartoframes.auth import Credentials, set_default_credentials
+
+            credentials = Credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+            set_default_credentials(credentials)
+    &#34;&#34;&#34;
+    global _default_credentials
+
+    _base_url = base_url if first is None else first
+    _username = username if first is None else first
+    _api_key = (api_key if second is None else second) or &#39;default_public&#39;
+    _credentials = credentials if first is None else first
+
+    if isinstance(_credentials, Credentials):
+        _default_credentials = _credentials
+
+    elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
+        if _base_url and _is_url(_base_url):
+            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
+        else:
+            _default_credentials = Credentials(username=_username, api_key=_api_key)
+
+    else:
+        raise ValueError(
+            &#39;Invalid inputs. Pass a Credentials object, a username and api_key pair or a base_url and api_key pair.&#39;)
+
+    if session:
+        _default_credentials.session = session</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.auth.Credentials"><code class="flex name class">
+<span>class <span class="ident">Credentials</span></span>
+<span>(</span><span>username=None, api_key='default_public', base_url=None, session=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Credentials class for managing and storing user CARTO credentials. The
+arguments are listed in order of precedence: :obj:<a title="cartoframes.auth.Credentials" href="#cartoframes.auth.Credentials"><code>Credentials</code></a> instances
+are first, <code>key</code> and <code>base_url</code>/<code>username</code> are taken next, and
+<code>config_file</code> (if given) is taken last. If no arguments are passed, then
+there will be an attempt to retrieve credentials from a previously saved
+session. One of the above scenarios needs to be met to successfully
+instantiate a :obj:<a title="cartoframes.auth.Credentials" href="#cartoframes.auth.Credentials"><code>Credentials</code></a> object.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>API key of user's CARTO account</dd>
+<dt><strong><code>username</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Username of CARTO account</dd>
+<dt><strong><code>base_url</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Base URL used for API calls. This is usually
+of the form <code>&lt;https://eschbacher.carto.com/</code>&gt; for user <code>eschbacher</code>.
+On premises installations (and others) have a different URL
+pattern.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code>, optional</dt>
+<dd>requests session. See <code>requests
+documentation
+&lt;http://docs.python-requests.org/en/master/user/advanced/&gt;</code>__
+for more information.</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials
+credentials = Credentials(username='eschbacher', api_key='abcdefg')</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Credentials(object):
+    &#34;&#34;&#34;Credentials class for managing and storing user CARTO credentials. The
+    arguments are listed in order of precedence: :obj:`Credentials` instances
+    are first, `key` and `base_url`/`username` are taken next, and
+    `config_file` (if given) is taken last. If no arguments are passed, then
+    there will be an attempt to retrieve credentials from a previously saved
+    session. One of the above scenarios needs to be met to successfully
+    instantiate a :obj:`Credentials` object.
+
+    Args:
+        api_key (str, optional): API key of user&#39;s CARTO account
+        username (str, optional): Username of CARTO account
+        base_url (str, optional): Base URL used for API calls. This is usually
+            of the form `https://eschbacher.carto.com/` for user `eschbacher`.
+            On premises installations (and others) have a different URL
+            pattern.
+        session (requests.Session, optional): requests session. See `requests
+            documentation
+            &lt;http://docs.python-requests.org/en/master/user/advanced/&gt;`__
+            for more information.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            credentials = Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;)
+    &#34;&#34;&#34;
+
+    def __init__(self, username=None, api_key=&#39;default_public&#39;, base_url=None, session=None):
+        if username is None and base_url is None:
+            raise ValueError(&#39;You must set at least a `username` or a `base_url` parameters&#39;)
+
+        self._api_key = api_key
+        self._username = username
+        self.base_url = base_url or self._base_url_from_username()
+        self._session = session
+
+        self._norm_credentials()
+
+    @classmethod
+    def from_file(cls, config_file=None, session=None):
+        &#34;&#34;&#34;Retrives credentials from a file. Defaults to the user config directory&#34;&#34;&#34;
+        with open(config_file or _DEFAULT_PATH, &#39;r&#39;) as f:
+            credentials = json.load(f)
+
+        return cls(credentials.get(&#39;username&#39;), credentials.get(&#39;api_key&#39;), credentials.get(&#39;base_url&#39;), session)
+
+    @classmethod
+    def from_credentials(cls, credentials):
+        &#34;&#34;&#34;Retrives credentials from another Credentials object&#34;&#34;&#34;
+        if isinstance(credentials, Credentials):
+            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+
+        raise ValueError(&#39;`credentials` must be a Credentials class instance&#39;)
+
+    def __repr__(self):
+        return (&#34;Credentials(username=&#39;{username}&#39;, &#34;
+                &#34;api_key=&#39;{api_key}&#39;, &#34;
+                &#34;base_url=&#39;{base_url}&#39;)&#34;).format(username=self._username,
+                                                 api_key=self._api_key,
+                                                 base_url=self._base_url)
+
+    def __eq__(self, obj):
+        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
+
+    @property
+    def api_key(self):
+        &#34;&#34;&#34;Credentials api_key&#34;&#34;&#34;
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, api_key):
+        &#34;&#34;&#34;Set api_key&#34;&#34;&#34;
+        self._api_key = api_key
+
+    @property
+    def username(self):
+        &#34;&#34;&#34;Credentials username&#34;&#34;&#34;
+        return self._username
+
+    @username.setter
+    def username(self, username):
+        &#34;&#34;&#34;Set username&#34;&#34;&#34;
+        self._username = username
+
+        new_base_url = self._base_url_from_username()
+        if new_base_url != self.base_url:
+            self.base_url = self._base_url_from_username()
+            warnings.warn(&#39;`base_url` has been updated to {}&#39;.format(self.base_url))
+
+    @property
+    def base_url(self):
+        &#34;&#34;&#34;Credentials base_url&#34;&#34;&#34;
+        return self._base_url
+
+    @base_url.setter
+    def base_url(self, base_url):
+        &#34;&#34;&#34;Set base_url&#34;&#34;&#34;
+        if urlparse(base_url).scheme != &#39;https&#39;:
+            raise ValueError(&#39;`base_url`s need to be over `https`. Update your `base_url`.&#39;)
+
+        self._base_url = base_url
+        self._norm_credentials()
+
+    @property
+    def session(self):
+        &#34;&#34;&#34;Credentials session&#34;&#34;&#34;
+        return self._session
+
+    @session.setter
+    def session(self, session):
+        &#34;&#34;&#34;Set session&#34;&#34;&#34;
+        self._session = session
+
+    def _norm_credentials(self):
+        &#34;&#34;&#34;Standardize credentials&#34;&#34;&#34;
+        if self._base_url:
+            self._base_url = self._base_url.strip(&#39;/&#39;)
+
+    def _base_url_from_username(self):
+        return &#39;https://{}.carto.com/&#39;.format(self._username)
+
+    def save(self, config_file=None):
+        &#34;&#34;&#34;Saves current user credentials to user directory.
+
+        Args:
+            config_loc (str, optional): Location where credentials are to be
+                stored. If no argument is provided, it will be send to the
+                default location.
+
+        Example:
+
+            .. code::
+
+                from cartoframes import Credentials
+                credentials = Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;)
+                credentials.save()  # save to default location
+
+            .. code::
+
+                from cartoframes import Credentials
+                credentials = Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;)
+                credentials.save(&#39;path/to/credentials/file&#39;)
+        &#34;&#34;&#34;
+
+        if config_file is None:
+            config_file = _DEFAULT_PATH
+
+            &#34;&#34;&#34;create directory if not exists&#34;&#34;&#34;
+            if not os.path.exists(_USER_CONFIG_DIR):
+                os.makedirs(_USER_CONFIG_DIR)
+
+        with open(config_file, &#39;w&#39;) as f:
+            json.dump({&#39;username&#39;: self._username, &#39;api_key&#39;: self._api_key, &#39;base_url&#39;: self._base_url}, f)
+
+    def delete(self, config_file=None):
+        &#34;&#34;&#34;Deletes the credentials file specified in `config_file`. If no
+        file is specified, it deletes the default user credential file.
+
+        Args:
+            config_file (str): Path to configuration file. Defaults to delete
+                the user default location if `None`.
+
+        .. Tip::
+
+            To see if there is a default user credential file stored, do the
+            following::
+
+                &gt;&gt;&gt; credentials = Credentials.from_file()
+                &gt;&gt;&gt; print(credentials)
+                Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;,
+                    base_url=&#39;https://eschbacher.carto.com/&#39;)
+        &#34;&#34;&#34;
+        path_to_remove = config_file or _DEFAULT_PATH
+        try:
+            os.remove(path_to_remove)
+            warnings.warn(&#39;Credentials at {} successfully removed.&#39;.format(path_to_remove))
+        except OSError:
+            warnings.warn(&#39;No credential file found at {}.&#39;.format(path_to_remove))</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="cartoframes.auth.Credentials.from_credentials"><code class="name flex">
+<span>def <span class="ident">from_credentials</span></span>(<span>credentials)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Retrives credentials from another Credentials object</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@classmethod
+def from_credentials(cls, credentials):
+    &#34;&#34;&#34;Retrives credentials from another Credentials object&#34;&#34;&#34;
+    if isinstance(credentials, Credentials):
+        return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+
+    raise ValueError(&#39;`credentials` must be a Credentials class instance&#39;)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.Credentials.from_file"><code class="name flex">
+<span>def <span class="ident">from_file</span></span>(<span>config_file=None, session=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Retrives credentials from a file. Defaults to the user config directory</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@classmethod
+def from_file(cls, config_file=None, session=None):
+    &#34;&#34;&#34;Retrives credentials from a file. Defaults to the user config directory&#34;&#34;&#34;
+    with open(config_file or _DEFAULT_PATH, &#39;r&#39;) as f:
+        credentials = json.load(f)
+
+    return cls(credentials.get(&#39;username&#39;), credentials.get(&#39;api_key&#39;), credentials.get(&#39;base_url&#39;), session)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="cartoframes.auth.Credentials.api_key"><code class="name">var <span class="ident">api_key</span></code></dt>
+<dd>
+<section class="desc"><p>Credentials api_key</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def api_key(self):
+    &#34;&#34;&#34;Credentials api_key&#34;&#34;&#34;
+    return self._api_key</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.Credentials.base_url"><code class="name">var <span class="ident">base_url</span></code></dt>
+<dd>
+<section class="desc"><p>Credentials base_url</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def base_url(self):
+    &#34;&#34;&#34;Credentials base_url&#34;&#34;&#34;
+    return self._base_url</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.Credentials.session"><code class="name">var <span class="ident">session</span></code></dt>
+<dd>
+<section class="desc"><p>Credentials session</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def session(self):
+    &#34;&#34;&#34;Credentials session&#34;&#34;&#34;
+    return self._session</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.Credentials.username"><code class="name">var <span class="ident">username</span></code></dt>
+<dd>
+<section class="desc"><p>Credentials username</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def username(self):
+    &#34;&#34;&#34;Credentials username&#34;&#34;&#34;
+    return self._username</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.auth.Credentials.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, config_file=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Deletes the credentials file specified in <code>config_file</code>. If no
+file is specified, it deletes the default user credential file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_file</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to configuration file. Defaults to delete
+the user default location if <code>None</code>.</dd>
+</dl>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To see if there is a default user credential file stored, do the
+following::</p>
+<pre><code>&gt;&gt;&gt; credentials = Credentials.from_file()
+&gt;&gt;&gt; print(credentials)
+Credentials(username='eschbacher', api_key='abcdefg',
+    base_url='https://eschbacher.carto.com/')
+</code></pre>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def delete(self, config_file=None):
+    &#34;&#34;&#34;Deletes the credentials file specified in `config_file`. If no
+    file is specified, it deletes the default user credential file.
+
+    Args:
+        config_file (str): Path to configuration file. Defaults to delete
+            the user default location if `None`.
+
+    .. Tip::
+
+        To see if there is a default user credential file stored, do the
+        following::
+
+            &gt;&gt;&gt; credentials = Credentials.from_file()
+            &gt;&gt;&gt; print(credentials)
+            Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;,
+                base_url=&#39;https://eschbacher.carto.com/&#39;)
+    &#34;&#34;&#34;
+    path_to_remove = config_file or _DEFAULT_PATH
+    try:
+        os.remove(path_to_remove)
+        warnings.warn(&#39;Credentials at {} successfully removed.&#39;.format(path_to_remove))
+    except OSError:
+        warnings.warn(&#39;No credential file found at {}.&#39;.format(path_to_remove))</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.auth.Credentials.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, config_file=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Saves current user credentials to user directory.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config_loc</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Location where credentials are to be
+stored. If no argument is provided, it will be send to the
+default location.</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes import Credentials
+credentials = Credentials(username='eschbacher', api_key='abcdefg')
+credentials.save()
+# save to default location</p>
+</div>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes import Credentials
+credentials = Credentials(username='eschbacher', api_key='abcdefg')
+credentials.save('path/to/credentials/file')</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save(self, config_file=None):
+    &#34;&#34;&#34;Saves current user credentials to user directory.
+
+    Args:
+        config_loc (str, optional): Location where credentials are to be
+            stored. If no argument is provided, it will be send to the
+            default location.
+
+    Example:
+
+        .. code::
+
+            from cartoframes import Credentials
+            credentials = Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;)
+            credentials.save()  # save to default location
+
+        .. code::
+
+            from cartoframes import Credentials
+            credentials = Credentials(username=&#39;eschbacher&#39;, api_key=&#39;abcdefg&#39;)
+            credentials.save(&#39;path/to/credentials/file&#39;)
+    &#34;&#34;&#34;
+
+    if config_file is None:
+        config_file = _DEFAULT_PATH
+
+        &#34;&#34;&#34;create directory if not exists&#34;&#34;&#34;
+        if not os.path.exists(_USER_CONFIG_DIR):
+            os.makedirs(_USER_CONFIG_DIR)
+
+    with open(config_file, &#39;w&#39;) as f:
+        json.dump({&#39;username&#39;: self._username, &#39;api_key&#39;: self._api_key, &#39;base_url&#39;: self._base_url}, f)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes" href="../index.html">cartoframes</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="cartoframes.auth.credentials" href="credentials.html">cartoframes.auth.credentials</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.auth.get_default_credentials" href="#cartoframes.auth.get_default_credentials">get_default_credentials</a></code></li>
+<li><code><a title="cartoframes.auth.set_default_credentials" href="#cartoframes.auth.set_default_credentials">set_default_credentials</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.auth.Credentials" href="#cartoframes.auth.Credentials">Credentials</a></code></h4>
+<ul class="two-column">
+<li><code><a title="cartoframes.auth.Credentials.api_key" href="#cartoframes.auth.Credentials.api_key">api_key</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.base_url" href="#cartoframes.auth.Credentials.base_url">base_url</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.delete" href="#cartoframes.auth.Credentials.delete">delete</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.from_credentials" href="#cartoframes.auth.Credentials.from_credentials">from_credentials</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.from_file" href="#cartoframes.auth.Credentials.from_file">from_file</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.save" href="#cartoframes.auth.Credentials.save">save</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.session" href="#cartoframes.auth.Credentials.session">session</a></code></li>
+<li><code><a title="cartoframes.auth.Credentials.username" href="#cartoframes.auth.Credentials.username">username</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.data.clients.sql_client API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.data.clients.sql_client</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from __future__ import absolute_import
+
+from ...lib import context
+from ...auth import get_default_credentials
+
+
+class SQLClient(object):
+    &#34;&#34;&#34;SQLClient class is a client to run SQL queries in a CARTO account.
+    Note: for long running SELECT queries affected by database timeouts it&#39;s
+    recommended to use the :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` class.
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`):
+          A :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import SQLClient
+
+            credentials = Credentials(username=&#39;&lt;USER NAME&gt;&#39;, api_key=&#39;&lt;API KEY&gt;&#39;)
+            sql = SQLClient(credentials)
+
+            sql.query(&#39;SELECT * FROM table_name&#39;)
+            sql.execute(&#39;DROP TABLE table_name&#39;)
+
+            sql.distinct(&#39;table_name&#39;, &#39;column_name&#39;)
+            sql.count(&#39;table_name&#39;)
+            ...
+    &#34;&#34;&#34;
+
+    def __init__(self, credentials=None):
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
+
+    def query(self, query, verbose=False):
+        &#34;&#34;&#34;Run a SQL query. It returns a `list` with content of the response.
+        If the `verbose` param is True it returns the full SQL response in a `dict`.
+        For more information check the `SQL API
+        documentation
+        &lt;https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement&gt;`.&#34;&#34;&#34;
+        response = self._context.execute_query(query)
+        if not verbose:
+            return response.get(&#39;rows&#39;)
+        else:
+            return response
+
+    def execute(self, query):
+        &#34;&#34;&#34;Run a long running query. It returns an object with the
+        status and information of the job. For more information check the `Batch API
+        documentation
+        &lt;https://carto.com/developers/sql-api/reference/#tag/Batch-Queries&gt;`.&#34;&#34;&#34;
+        return self._context.execute_long_running_query(query)
+
+    def distinct(self, table_name, column_name):
+        &#34;&#34;&#34;Get the distict values and their count in a table
+        for a specific column.&#34;&#34;&#34;
+        query = &#39;&#39;&#39;
+            SELECT {0}, COUNT(*) FROM {1}
+            GROUP BY 1 ORDER BY 2 DESC
+        &#39;&#39;&#39;.format(column_name, table_name)
+        output = self.query(query)
+        return [(x.get(column_name), x.get(&#39;count&#39;)) for x in output]
+
+    def count(self, table_name):
+        &#34;&#34;&#34;Get the number of elements of a table.&#34;&#34;&#34;
+        query = &#39;SELECT COUNT(*) FROM {};&#39;.format(table_name)
+        output = self.query(query)
+        return output[0].get(&#39;count&#39;)
+
+    def bounds(self, query):
+        &#34;&#34;&#34;Get the bounds of the geometries in a table.&#34;&#34;&#34;
+        query = &#39;&#39;&#39;
+            SELECT ARRAY[
+                ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+                ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+            ] bounds FROM (
+                SELECT ST_Extent(the_geom) geom_env
+                FROM ({}) q
+            ) q;
+        &#39;&#39;&#39;.format(query)
+        output = self.query(query)
+        return output[0].get(&#39;bounds&#39;)
+
+    def schema(self, table_name, raw=False):
+        &#34;&#34;&#34;Show information about the schema of a table.
+        Setting raw=True is returns a Python dict with the data.&#34;&#34;&#34;
+        query = &#39;SELECT * FROM {0} LIMIT 0;&#39;.format(table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;fields&#39;)
+        if raw:
+            return {key: fields[key][&#39;type&#39;] for key in fields}
+        else:
+            columns = [&#39;Column name&#39;, &#39;Column type&#39;]
+            rows = [(key, fields[key][&#39;type&#39;]) for key in fields]
+            self._print_table(rows, columns=columns, padding=[10, 5])
+
+    def describe(self, table_name, column_name):
+        &#34;&#34;&#34;Show information about a column in a specific table.&#34;&#34;&#34;
+        column_type = self._get_column_type(table_name, column_name)
+        stats = [&#39;COUNT(*)&#39;]
+        if column_type == &#39;number&#39;:
+            stats.append(&#39;AVG({})&#39;.format(column_name))
+            stats.append(&#39;MIN({})&#39;.format(column_name))
+            stats.append(&#39;MAX({})&#39;.format(column_name))
+        query = &#39;&#39;&#39;
+            SELECT {0}
+            FROM {1};
+        &#39;&#39;&#39;.format(&#39;,&#39;.join(stats), table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;rows&#39;)[0]
+        rows = [(key, &#39;{:0.2e}&#39;.format(fields[key])) for key in fields]
+        self._print_table(rows, padding=[5, 10])
+        print(&#39;type: {}&#39;.format(column_type))
+
+    def create_table(self, table_name, columns, cartodbfy=True):
+        &#34;&#34;&#34;Create a table with a specific table name and columns.
+        By default, geometry columns are added to the table.
+        To disable this pass `cartodbfy=False`.
+        &#34;&#34;&#34;
+        columns = &#39;,&#39;.join(&#39; &#39;.join(x) for x in columns)
+        schema = self._context.get_schema()
+        query = &#39;&#39;&#39;
+            BEGIN;
+            {drop};
+            {create};
+            {cartodbfy};
+            COMMIT;
+        &#39;&#39;&#39;.format(
+            drop=&#39;DROP TABLE IF EXISTS {}&#39;.format(table_name),
+            create=&#39;CREATE TABLE {0} ({1})&#39;.format(table_name, columns),
+            cartodbfy=&#39;SELECT CDB_CartoDBFyTable(\&#39;{0}\&#39;, \&#39;{1}\&#39;)&#39;.format(
+                schema, table_name) if cartodbfy else &#39;&#39;
+        )
+        return self.execute(query)
+
+    def insert_table(self, table_name, columns, values):
+        sql_values = [self._sql_format(x) for x in values]
+        query = &#39;&#39;&#39;
+            INSERT INTO {0} ({1}) VALUES({2});
+        &#39;&#39;&#39;.format(table_name, &#39;,&#39;.join(columns), &#39;,&#39;.join(sql_values))
+        return self.execute(query)
+
+    def update_table(self, table_name, column_name, value, condition):
+        &#34;&#34;&#34;Update the column&#39;s value for the rows that match the condition.&#34;&#34;&#34;
+        value = self._sql_format(value)
+        query = &#39;&#39;&#39;
+            UPDATE {0} SET {1}={2} WHERE {3};
+        &#39;&#39;&#39;.format(table_name, column_name, value, condition)
+        return self.execute(query)
+
+    def rename_table(self, table_name, new_table_name):
+        &#34;&#34;&#34;Rename a table from its table name.&#34;&#34;&#34;
+        query = &#39;ALTER TABLE {0} RENAME TO {1};&#39;.format(table_name, new_table_name)
+        return self.execute(query)
+
+    def drop_table(self, table_name):
+        &#34;&#34;&#34;Remove a table from its table name.&#34;&#34;&#34;
+        query = &#39;DROP TABLE IF EXISTS {0};&#39;.format(table_name)
+        return self.execute(query)
+
+    def _get_column_type(self, table_name, column_name):
+        query = &#39;SELECT {0} FROM {1} LIMIT 0;&#39;.format(column_name, table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;fields&#39;)
+        field = fields.get(column_name)
+        return field.get(&#39;type&#39;)
+
+    def _sql_format(self, value):
+        if isinstance(value, str):
+            return &#39;\&#39;{}\&#39;&#39;.format(value)
+        if isinstance(value, bool):
+            return &#39;TRUE&#39; if value else &#39;FALSE&#39;
+        return str(value)
+
+    def _print_table(self, rows, columns=None, padding=None):
+        row_format = &#39;&#39;
+        index = 0
+        for column in columns or rows[0]:
+            length = str(len(str(column)) + (padding[index] if padding else 5))
+            row_format += &#39;{:&#39; + length + &#39;}&#39;
+            index += 1
+        if columns:
+            header = row_format.format(*columns)
+            print(header)
+            print(&#39;-&#39; * len(header))
+        for row in rows:
+            print(row_format.format(*row))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.data.clients.sql_client.SQLClient"><code class="flex name class">
+<span>class <span class="ident">SQLClient</span></span>
+<span>(</span><span>credentials=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>SQLClient class is a client to run SQL queries in a CARTO account.
+Note: for long running SELECT queries affected by database timeouts it's
+recommended to use the :py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> class.</p>
+<h2 id="args">Args</h2>
+<p>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>):
+A :py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>
+instance can be used in place of a <code>username</code>|<code>base_url</code> / <code>api_key</code> combination.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials
+from cartoframes.client import SQLClient</p>
+<p>credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
+sql = SQLClient(credentials)</p>
+<p>sql.query('SELECT * FROM table_name')
+sql.execute('DROP TABLE table_name')</p>
+<p>sql.distinct('table_name', 'column_name')
+sql.count('table_name')
+&hellip;</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SQLClient(object):
+    &#34;&#34;&#34;SQLClient class is a client to run SQL queries in a CARTO account.
+    Note: for long running SELECT queries affected by database timeouts it&#39;s
+    recommended to use the :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` class.
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`):
+          A :py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`
+          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.client import SQLClient
+
+            credentials = Credentials(username=&#39;&lt;USER NAME&gt;&#39;, api_key=&#39;&lt;API KEY&gt;&#39;)
+            sql = SQLClient(credentials)
+
+            sql.query(&#39;SELECT * FROM table_name&#39;)
+            sql.execute(&#39;DROP TABLE table_name&#39;)
+
+            sql.distinct(&#39;table_name&#39;, &#39;column_name&#39;)
+            sql.count(&#39;table_name&#39;)
+            ...
+    &#34;&#34;&#34;
+
+    def __init__(self, credentials=None):
+        self._credentials = credentials or get_default_credentials()
+        self._context = context.create_context(self._credentials)
+
+    def query(self, query, verbose=False):
+        &#34;&#34;&#34;Run a SQL query. It returns a `list` with content of the response.
+        If the `verbose` param is True it returns the full SQL response in a `dict`.
+        For more information check the `SQL API
+        documentation
+        &lt;https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement&gt;`.&#34;&#34;&#34;
+        response = self._context.execute_query(query)
+        if not verbose:
+            return response.get(&#39;rows&#39;)
+        else:
+            return response
+
+    def execute(self, query):
+        &#34;&#34;&#34;Run a long running query. It returns an object with the
+        status and information of the job. For more information check the `Batch API
+        documentation
+        &lt;https://carto.com/developers/sql-api/reference/#tag/Batch-Queries&gt;`.&#34;&#34;&#34;
+        return self._context.execute_long_running_query(query)
+
+    def distinct(self, table_name, column_name):
+        &#34;&#34;&#34;Get the distict values and their count in a table
+        for a specific column.&#34;&#34;&#34;
+        query = &#39;&#39;&#39;
+            SELECT {0}, COUNT(*) FROM {1}
+            GROUP BY 1 ORDER BY 2 DESC
+        &#39;&#39;&#39;.format(column_name, table_name)
+        output = self.query(query)
+        return [(x.get(column_name), x.get(&#39;count&#39;)) for x in output]
+
+    def count(self, table_name):
+        &#34;&#34;&#34;Get the number of elements of a table.&#34;&#34;&#34;
+        query = &#39;SELECT COUNT(*) FROM {};&#39;.format(table_name)
+        output = self.query(query)
+        return output[0].get(&#39;count&#39;)
+
+    def bounds(self, query):
+        &#34;&#34;&#34;Get the bounds of the geometries in a table.&#34;&#34;&#34;
+        query = &#39;&#39;&#39;
+            SELECT ARRAY[
+                ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+                ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+            ] bounds FROM (
+                SELECT ST_Extent(the_geom) geom_env
+                FROM ({}) q
+            ) q;
+        &#39;&#39;&#39;.format(query)
+        output = self.query(query)
+        return output[0].get(&#39;bounds&#39;)
+
+    def schema(self, table_name, raw=False):
+        &#34;&#34;&#34;Show information about the schema of a table.
+        Setting raw=True is returns a Python dict with the data.&#34;&#34;&#34;
+        query = &#39;SELECT * FROM {0} LIMIT 0;&#39;.format(table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;fields&#39;)
+        if raw:
+            return {key: fields[key][&#39;type&#39;] for key in fields}
+        else:
+            columns = [&#39;Column name&#39;, &#39;Column type&#39;]
+            rows = [(key, fields[key][&#39;type&#39;]) for key in fields]
+            self._print_table(rows, columns=columns, padding=[10, 5])
+
+    def describe(self, table_name, column_name):
+        &#34;&#34;&#34;Show information about a column in a specific table.&#34;&#34;&#34;
+        column_type = self._get_column_type(table_name, column_name)
+        stats = [&#39;COUNT(*)&#39;]
+        if column_type == &#39;number&#39;:
+            stats.append(&#39;AVG({})&#39;.format(column_name))
+            stats.append(&#39;MIN({})&#39;.format(column_name))
+            stats.append(&#39;MAX({})&#39;.format(column_name))
+        query = &#39;&#39;&#39;
+            SELECT {0}
+            FROM {1};
+        &#39;&#39;&#39;.format(&#39;,&#39;.join(stats), table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;rows&#39;)[0]
+        rows = [(key, &#39;{:0.2e}&#39;.format(fields[key])) for key in fields]
+        self._print_table(rows, padding=[5, 10])
+        print(&#39;type: {}&#39;.format(column_type))
+
+    def create_table(self, table_name, columns, cartodbfy=True):
+        &#34;&#34;&#34;Create a table with a specific table name and columns.
+        By default, geometry columns are added to the table.
+        To disable this pass `cartodbfy=False`.
+        &#34;&#34;&#34;
+        columns = &#39;,&#39;.join(&#39; &#39;.join(x) for x in columns)
+        schema = self._context.get_schema()
+        query = &#39;&#39;&#39;
+            BEGIN;
+            {drop};
+            {create};
+            {cartodbfy};
+            COMMIT;
+        &#39;&#39;&#39;.format(
+            drop=&#39;DROP TABLE IF EXISTS {}&#39;.format(table_name),
+            create=&#39;CREATE TABLE {0} ({1})&#39;.format(table_name, columns),
+            cartodbfy=&#39;SELECT CDB_CartoDBFyTable(\&#39;{0}\&#39;, \&#39;{1}\&#39;)&#39;.format(
+                schema, table_name) if cartodbfy else &#39;&#39;
+        )
+        return self.execute(query)
+
+    def insert_table(self, table_name, columns, values):
+        sql_values = [self._sql_format(x) for x in values]
+        query = &#39;&#39;&#39;
+            INSERT INTO {0} ({1}) VALUES({2});
+        &#39;&#39;&#39;.format(table_name, &#39;,&#39;.join(columns), &#39;,&#39;.join(sql_values))
+        return self.execute(query)
+
+    def update_table(self, table_name, column_name, value, condition):
+        &#34;&#34;&#34;Update the column&#39;s value for the rows that match the condition.&#34;&#34;&#34;
+        value = self._sql_format(value)
+        query = &#39;&#39;&#39;
+            UPDATE {0} SET {1}={2} WHERE {3};
+        &#39;&#39;&#39;.format(table_name, column_name, value, condition)
+        return self.execute(query)
+
+    def rename_table(self, table_name, new_table_name):
+        &#34;&#34;&#34;Rename a table from its table name.&#34;&#34;&#34;
+        query = &#39;ALTER TABLE {0} RENAME TO {1};&#39;.format(table_name, new_table_name)
+        return self.execute(query)
+
+    def drop_table(self, table_name):
+        &#34;&#34;&#34;Remove a table from its table name.&#34;&#34;&#34;
+        query = &#39;DROP TABLE IF EXISTS {0};&#39;.format(table_name)
+        return self.execute(query)
+
+    def _get_column_type(self, table_name, column_name):
+        query = &#39;SELECT {0} FROM {1} LIMIT 0;&#39;.format(column_name, table_name)
+        output = self.query(query, verbose=True)
+        fields = output.get(&#39;fields&#39;)
+        field = fields.get(column_name)
+        return field.get(&#39;type&#39;)
+
+    def _sql_format(self, value):
+        if isinstance(value, str):
+            return &#39;\&#39;{}\&#39;&#39;.format(value)
+        if isinstance(value, bool):
+            return &#39;TRUE&#39; if value else &#39;FALSE&#39;
+        return str(value)
+
+    def _print_table(self, rows, columns=None, padding=None):
+        row_format = &#39;&#39;
+        index = 0
+        for column in columns or rows[0]:
+            length = str(len(str(column)) + (padding[index] if padding else 5))
+            row_format += &#39;{:&#39; + length + &#39;}&#39;
+            index += 1
+        if columns:
+            header = row_format.format(*columns)
+            print(header)
+            print(&#39;-&#39; * len(header))
+        for row in rows:
+            print(row_format.format(*row))</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.bounds"><code class="name flex">
+<span>def <span class="ident">bounds</span></span>(<span>self, query)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the bounds of the geometries in a table.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def bounds(self, query):
+    &#34;&#34;&#34;Get the bounds of the geometries in a table.&#34;&#34;&#34;
+    query = &#39;&#39;&#39;
+        SELECT ARRAY[
+            ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+            ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+        ] bounds FROM (
+            SELECT ST_Extent(the_geom) geom_env
+            FROM ({}) q
+        ) q;
+    &#39;&#39;&#39;.format(query)
+    output = self.query(query)
+    return output[0].get(&#39;bounds&#39;)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.count"><code class="name flex">
+<span>def <span class="ident">count</span></span>(<span>self, table_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the number of elements of a table.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def count(self, table_name):
+    &#34;&#34;&#34;Get the number of elements of a table.&#34;&#34;&#34;
+    query = &#39;SELECT COUNT(*) FROM {};&#39;.format(table_name)
+    output = self.query(query)
+    return output[0].get(&#39;count&#39;)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.create_table"><code class="name flex">
+<span>def <span class="ident">create_table</span></span>(<span>self, table_name, columns, cartodbfy=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Create a table with a specific table name and columns.
+By default, geometry columns are added to the table.
+To disable this pass <code>cartodbfy=False</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def create_table(self, table_name, columns, cartodbfy=True):
+    &#34;&#34;&#34;Create a table with a specific table name and columns.
+    By default, geometry columns are added to the table.
+    To disable this pass `cartodbfy=False`.
+    &#34;&#34;&#34;
+    columns = &#39;,&#39;.join(&#39; &#39;.join(x) for x in columns)
+    schema = self._context.get_schema()
+    query = &#39;&#39;&#39;
+        BEGIN;
+        {drop};
+        {create};
+        {cartodbfy};
+        COMMIT;
+    &#39;&#39;&#39;.format(
+        drop=&#39;DROP TABLE IF EXISTS {}&#39;.format(table_name),
+        create=&#39;CREATE TABLE {0} ({1})&#39;.format(table_name, columns),
+        cartodbfy=&#39;SELECT CDB_CartoDBFyTable(\&#39;{0}\&#39;, \&#39;{1}\&#39;)&#39;.format(
+            schema, table_name) if cartodbfy else &#39;&#39;
+    )
+    return self.execute(query)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.describe"><code class="name flex">
+<span>def <span class="ident">describe</span></span>(<span>self, table_name, column_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Show information about a column in a specific table.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def describe(self, table_name, column_name):
+    &#34;&#34;&#34;Show information about a column in a specific table.&#34;&#34;&#34;
+    column_type = self._get_column_type(table_name, column_name)
+    stats = [&#39;COUNT(*)&#39;]
+    if column_type == &#39;number&#39;:
+        stats.append(&#39;AVG({})&#39;.format(column_name))
+        stats.append(&#39;MIN({})&#39;.format(column_name))
+        stats.append(&#39;MAX({})&#39;.format(column_name))
+    query = &#39;&#39;&#39;
+        SELECT {0}
+        FROM {1};
+    &#39;&#39;&#39;.format(&#39;,&#39;.join(stats), table_name)
+    output = self.query(query, verbose=True)
+    fields = output.get(&#39;rows&#39;)[0]
+    rows = [(key, &#39;{:0.2e}&#39;.format(fields[key])) for key in fields]
+    self._print_table(rows, padding=[5, 10])
+    print(&#39;type: {}&#39;.format(column_type))</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.distinct"><code class="name flex">
+<span>def <span class="ident">distinct</span></span>(<span>self, table_name, column_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the distict values and their count in a table
+for a specific column.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def distinct(self, table_name, column_name):
+    &#34;&#34;&#34;Get the distict values and their count in a table
+    for a specific column.&#34;&#34;&#34;
+    query = &#39;&#39;&#39;
+        SELECT {0}, COUNT(*) FROM {1}
+        GROUP BY 1 ORDER BY 2 DESC
+    &#39;&#39;&#39;.format(column_name, table_name)
+    output = self.query(query)
+    return [(x.get(column_name), x.get(&#39;count&#39;)) for x in output]</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.drop_table"><code class="name flex">
+<span>def <span class="ident">drop_table</span></span>(<span>self, table_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Remove a table from its table name.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def drop_table(self, table_name):
+    &#34;&#34;&#34;Remove a table from its table name.&#34;&#34;&#34;
+    query = &#39;DROP TABLE IF EXISTS {0};&#39;.format(table_name)
+    return self.execute(query)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.execute"><code class="name flex">
+<span>def <span class="ident">execute</span></span>(<span>self, query)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Run a long running query. It returns an object with the
+status and information of the job. For more information check the <code>Batch API
+documentation
+&lt;https://carto.com/developers/sql-api/reference/#tag/Batch-Queries&gt;</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def execute(self, query):
+    &#34;&#34;&#34;Run a long running query. It returns an object with the
+    status and information of the job. For more information check the `Batch API
+    documentation
+    &lt;https://carto.com/developers/sql-api/reference/#tag/Batch-Queries&gt;`.&#34;&#34;&#34;
+    return self._context.execute_long_running_query(query)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.insert_table"><code class="name flex">
+<span>def <span class="ident">insert_table</span></span>(<span>self, table_name, columns, values)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def insert_table(self, table_name, columns, values):
+    sql_values = [self._sql_format(x) for x in values]
+    query = &#39;&#39;&#39;
+        INSERT INTO {0} ({1}) VALUES({2});
+    &#39;&#39;&#39;.format(table_name, &#39;,&#39;.join(columns), &#39;,&#39;.join(sql_values))
+    return self.execute(query)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, query, verbose=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Run a SQL query. It returns a <code>list</code> with content of the response.
+If the <code>verbose</code> param is True it returns the full SQL response in a <code>dict</code>.
+For more information check the <code>SQL API
+documentation
+&lt;https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement&gt;</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def query(self, query, verbose=False):
+    &#34;&#34;&#34;Run a SQL query. It returns a `list` with content of the response.
+    If the `verbose` param is True it returns the full SQL response in a `dict`.
+    For more information check the `SQL API
+    documentation
+    &lt;https://carto.com/developers/sql-api/reference/#tag/Single-SQL-Statement&gt;`.&#34;&#34;&#34;
+    response = self._context.execute_query(query)
+    if not verbose:
+        return response.get(&#39;rows&#39;)
+    else:
+        return response</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.rename_table"><code class="name flex">
+<span>def <span class="ident">rename_table</span></span>(<span>self, table_name, new_table_name)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Rename a table from its table name.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def rename_table(self, table_name, new_table_name):
+    &#34;&#34;&#34;Rename a table from its table name.&#34;&#34;&#34;
+    query = &#39;ALTER TABLE {0} RENAME TO {1};&#39;.format(table_name, new_table_name)
+    return self.execute(query)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.schema"><code class="name flex">
+<span>def <span class="ident">schema</span></span>(<span>self, table_name, raw=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Show information about the schema of a table.
+Setting raw=True is returns a Python dict with the data.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def schema(self, table_name, raw=False):
+    &#34;&#34;&#34;Show information about the schema of a table.
+    Setting raw=True is returns a Python dict with the data.&#34;&#34;&#34;
+    query = &#39;SELECT * FROM {0} LIMIT 0;&#39;.format(table_name)
+    output = self.query(query, verbose=True)
+    fields = output.get(&#39;fields&#39;)
+    if raw:
+        return {key: fields[key][&#39;type&#39;] for key in fields}
+    else:
+        columns = [&#39;Column name&#39;, &#39;Column type&#39;]
+        rows = [(key, fields[key][&#39;type&#39;]) for key in fields]
+        self._print_table(rows, columns=columns, padding=[10, 5])</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.clients.sql_client.SQLClient.update_table"><code class="name flex">
+<span>def <span class="ident">update_table</span></span>(<span>self, table_name, column_name, value, condition)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Update the column's value for the rows that match the condition.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def update_table(self, table_name, column_name, value, condition):
+    &#34;&#34;&#34;Update the column&#39;s value for the rows that match the condition.&#34;&#34;&#34;
+    value = self._sql_format(value)
+    query = &#39;&#39;&#39;
+        UPDATE {0} SET {1}={2} WHERE {3};
+    &#39;&#39;&#39;.format(table_name, column_name, value, condition)
+    return self.execute(query)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.data.clients" href="index.html">cartoframes.data.clients</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.data.clients.sql_client.SQLClient" href="#cartoframes.data.clients.sql_client.SQLClient">SQLClient</a></code></h4>
+<ul class="two-column">
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.bounds" href="#cartoframes.data.clients.sql_client.SQLClient.bounds">bounds</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.count" href="#cartoframes.data.clients.sql_client.SQLClient.count">count</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.create_table" href="#cartoframes.data.clients.sql_client.SQLClient.create_table">create_table</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.describe" href="#cartoframes.data.clients.sql_client.SQLClient.describe">describe</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.distinct" href="#cartoframes.data.clients.sql_client.SQLClient.distinct">distinct</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.drop_table" href="#cartoframes.data.clients.sql_client.SQLClient.drop_table">drop_table</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.execute" href="#cartoframes.data.clients.sql_client.SQLClient.execute">execute</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.insert_table" href="#cartoframes.data.clients.sql_client.SQLClient.insert_table">insert_table</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.query" href="#cartoframes.data.clients.sql_client.SQLClient.query">query</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.rename_table" href="#cartoframes.data.clients.sql_client.SQLClient.rename_table">rename_table</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.schema" href="#cartoframes.data.clients.sql_client.SQLClient.schema">schema</a></code></li>
+<li><code><a title="cartoframes.data.clients.sql_client.SQLClient.update_table" href="#cartoframes.data.clients.sql_client.SQLClient.update_table">update_table</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

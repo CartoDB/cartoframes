@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.viz.source API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.viz.source</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from __future__ import absolute_import
+
+from . import defaults
+from ..data import Dataset
+from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
+
+
+class SourceType:
+    QUERY = &#39;Query&#39;
+    GEOJSON = &#39;GeoJSON&#39;
+
+
+class Source(object):
+    &#34;&#34;&#34;Source
+
+    Args:
+        data (str, geopandas.GeoDataFrame, pandas.DataFrame,
+          :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` ): a table name,
+          SQL query, GeoJSON file, GeoDataFrame, DataFrame, or Dataset object.
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+          A Credentials instance. If not provided, the credentials will be automatically
+          obtained from the default credentials if available.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
+
+    Example:
+
+        Table name.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;table_name&#39;)
+
+        SQL query.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;SELECT * FROM table_name&#39;)
+
+        GeoJSON file.
+
+        .. code::
+
+            from cartoframes.viz import Source
+
+            Source(&#39;path/to/file.geojson&#39;)
+
+        Dataset object.
+
+        .. code::
+
+            from cartoframes.viz import Source
+            from cartoframes.data import Dataset
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            ds = Dataset(&#39;table_name&#39;)
+
+            Source(ds)
+
+        Setting the credentials.
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.viz import Source
+
+            credentials = Credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;table_name&#39;, credentials)
+
+        Setting the bounds.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            bounds = {
+                &#39;west&#39;: -10,
+                &#39;east&#39;: 10,
+                &#39;north&#39;: -10,
+                &#39;south&#39;: 10
+            }
+
+            Source(&#39;table_name&#39;, bounds=bounds)
+    &#34;&#34;&#34;
+
+    def __init__(self, data, credentials=None, bounds=None, schema=None):
+        if isinstance(data, Dataset):
+            self.dataset = data
+        else:
+            self.dataset = Dataset(data, credentials, schema)
+
+        self._init_source_dataset(bounds)
+
+    def get_geom_type(self):
+        return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
+
+    def get_credentials(self):
+        credentials = self.dataset.credentials
+        if credentials:
+            return {
+                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                # That&#39;s why &#39;user&#39; is used by default if username is empty.
+                &#39;username&#39;: credentials.username or &#39;user&#39;,
+                &#39;api_key&#39;: credentials.api_key,
+                &#39;base_url&#39;: credentials.base_url
+            }
+        else:
+            return defaults.CREDENTIALS
+
+    def _init_source_dataset(self, bounds):
+        if self.dataset.is_local():
+            gdf = self.dataset.get_geodataframe()
+            self.type = SourceType.GEOJSON
+            self.query = encode_geodataframe(gdf)
+            self.bounds = bounds or self._compute_geojson_bounds(gdf)
+        else:
+            self.type = SourceType.QUERY
+            self.query = self.dataset.get_query()
+            self.bounds = bounds or self._compute_query_bounds()
+
+    def _compute_query_bounds(self):
+        context = self.dataset._strategy._context
+        return get_query_bounds(context, self.query)
+
+    def _compute_geojson_bounds(self, gdf):
+        return get_geodataframe_bounds(gdf)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.viz.source.Source"><code class="flex name class">
+<span>class <span class="ident">Source</span></span>
+<span>(</span><span>data, credentials=None, bounds=None, schema=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Source</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>data (str, geopandas.GeoDataFrame, pandas.DataFrame,</dt>
+<dt>:py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> ): a table name,</dt>
+<dt>SQL query, GeoJSON file, GeoDataFrame, DataFrame, or Dataset object.</dt>
+<dt>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>, optional):</dt>
+<dt>A Credentials instance. If not provided, the credentials will be automatically</dt>
+<dt>obtained from the default credentials if available.</dt>
+<dt><strong><code>bounds</code></strong> :&ensp;<code>dict</code> or <code>list</code>, optional</dt>
+<dd>a dict with <code>west</code>, <code>south</code>, <code>east</code>, <code>north</code>
+keys, or an array of floats in the following structure: [[west,
+south], [east, north]]. If not provided the bounds will be automatically
+calculated to fit all features.</dd>
+</dl>
+<h2 id="example">Example</h2>
+<p>Table name.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Source</p>
+<p>set_default_credentials('your_user_name', 'your api key')</p>
+<p>Source('table_name')</p>
+</div>
+<p>SQL query.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Source</p>
+<p>set_default_credentials('your_user_name', 'your api key')</p>
+<p>Source('SELECT * FROM table_name')</p>
+</div>
+<p>GeoJSON file.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.viz import Source</p>
+<p>Source('path/to/file.geojson')</p>
+</div>
+<p>Dataset object.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.viz import Source
+from cartoframes.data import Dataset</p>
+<p>set_default_credentials('your_user_name', 'your api key')</p>
+<p>ds = Dataset('table_name')</p>
+<p>Source(ds)</p>
+</div>
+<p>Setting the credentials.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials
+from cartoframes.viz import Source</p>
+<p>credentials = Credentials('your_user_name', 'your api key')</p>
+<p>Source('table_name', credentials)</p>
+</div>
+<p>Setting the bounds.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Source</p>
+<p>set_default_credentials('your_user_name', 'your api key')</p>
+<p>bounds = {
+'west': -10,
+'east': 10,
+'north': -10,
+'south': 10
+}</p>
+<p>Source('table_name', bounds=bounds)</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Source(object):
+    &#34;&#34;&#34;Source
+
+    Args:
+        data (str, geopandas.GeoDataFrame, pandas.DataFrame,
+          :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` ): a table name,
+          SQL query, GeoJSON file, GeoDataFrame, DataFrame, or Dataset object.
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+          A Credentials instance. If not provided, the credentials will be automatically
+          obtained from the default credentials if available.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
+
+    Example:
+
+        Table name.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;table_name&#39;)
+
+        SQL query.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;SELECT * FROM table_name&#39;)
+
+        GeoJSON file.
+
+        .. code::
+
+            from cartoframes.viz import Source
+
+            Source(&#39;path/to/file.geojson&#39;)
+
+        Dataset object.
+
+        .. code::
+
+            from cartoframes.viz import Source
+            from cartoframes.data import Dataset
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            ds = Dataset(&#39;table_name&#39;)
+
+            Source(ds)
+
+        Setting the credentials.
+
+        .. code::
+
+            from cartoframes.auth import Credentials
+            from cartoframes.viz import Source
+
+            credentials = Credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            Source(&#39;table_name&#39;, credentials)
+
+        Setting the bounds.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Source
+
+            set_default_credentials(&#39;your_user_name&#39;, &#39;your api key&#39;)
+
+            bounds = {
+                &#39;west&#39;: -10,
+                &#39;east&#39;: 10,
+                &#39;north&#39;: -10,
+                &#39;south&#39;: 10
+            }
+
+            Source(&#39;table_name&#39;, bounds=bounds)
+    &#34;&#34;&#34;
+
+    def __init__(self, data, credentials=None, bounds=None, schema=None):
+        if isinstance(data, Dataset):
+            self.dataset = data
+        else:
+            self.dataset = Dataset(data, credentials, schema)
+
+        self._init_source_dataset(bounds)
+
+    def get_geom_type(self):
+        return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
+
+    def get_credentials(self):
+        credentials = self.dataset.credentials
+        if credentials:
+            return {
+                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                # That&#39;s why &#39;user&#39; is used by default if username is empty.
+                &#39;username&#39;: credentials.username or &#39;user&#39;,
+                &#39;api_key&#39;: credentials.api_key,
+                &#39;base_url&#39;: credentials.base_url
+            }
+        else:
+            return defaults.CREDENTIALS
+
+    def _init_source_dataset(self, bounds):
+        if self.dataset.is_local():
+            gdf = self.dataset.get_geodataframe()
+            self.type = SourceType.GEOJSON
+            self.query = encode_geodataframe(gdf)
+            self.bounds = bounds or self._compute_geojson_bounds(gdf)
+        else:
+            self.type = SourceType.QUERY
+            self.query = self.dataset.get_query()
+            self.bounds = bounds or self._compute_query_bounds()
+
+    def _compute_query_bounds(self):
+        context = self.dataset._strategy._context
+        return get_query_bounds(context, self.query)
+
+    def _compute_geojson_bounds(self, gdf):
+        return get_geodataframe_bounds(gdf)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.viz.source.Source.get_credentials"><code class="name flex">
+<span>def <span class="ident">get_credentials</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_credentials(self):
+    credentials = self.dataset.credentials
+    if credentials:
+        return {
+            # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+            # That&#39;s why &#39;user&#39; is used by default if username is empty.
+            &#39;username&#39;: credentials.username or &#39;user&#39;,
+            &#39;api_key&#39;: credentials.api_key,
+            &#39;base_url&#39;: credentials.base_url
+        }
+    else:
+        return defaults.CREDENTIALS</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.source.Source.get_geom_type"><code class="name flex">
+<span>def <span class="ident">get_geom_type</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_geom_type(self):
+    return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="cartoframes.viz.source.SourceType"><code class="flex name class">
+<span>class <span class="ident">SourceType</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SourceType:
+    QUERY = &#39;Query&#39;
+    GEOJSON = &#39;GeoJSON&#39;</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="cartoframes.viz.source.SourceType.GEOJSON"><code class="name">var <span class="ident">GEOJSON</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.viz.source.SourceType.QUERY"><code class="name">var <span class="ident">QUERY</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.viz" href="index.html">cartoframes.viz</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.viz.source.Source" href="#cartoframes.viz.source.Source">Source</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.viz.source.Source.get_credentials" href="#cartoframes.viz.source.Source.get_credentials">get_credentials</a></code></li>
+<li><code><a title="cartoframes.viz.source.Source.get_geom_type" href="#cartoframes.viz.source.Source.get_geom_type">get_geom_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="cartoframes.viz.source.SourceType" href="#cartoframes.viz.source.SourceType">SourceType</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.viz.source.SourceType.GEOJSON" href="#cartoframes.viz.source.SourceType.GEOJSON">GEOJSON</a></code></li>
+<li><code><a title="cartoframes.viz.source.SourceType.QUERY" href="#cartoframes.viz.source.SourceType.QUERY">QUERY</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

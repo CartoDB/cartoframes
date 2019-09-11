@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.examples API documentation</title>
+<meta name="description" content="Download, preview, and query example datasets for use in cartoframes
+examples. Try examples by `running the notebooks in binder
+…" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.examples</code></h1>
+</header>
+<section id="section-intro">
+<p>Download, preview, and query example datasets for use in cartoframes
+examples. Try examples by <code>running the notebooks in binder
+&lt;https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples&gt;</code>__</p>
+<p>In addition to the functions listed below, this examples module is
+authenticated against all public datasets in the <a href="https://cartoframes.carto.com">https://cartoframes.carto.com</a>
+account. This means that besides reading the datasets from CARTO, users can
+also create maps from these datasets.</p>
+<p>For example, the following will produce an interactive map of poverty rates in
+census tracts in Brooklyn, New York (preview of static version below code).</p>
+<pre><code>!!! code "Code"
+    from cartoframes.examples import examples
+
+    examples.map('brooklyn_poverty')
+</code></pre>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&amp;anti_cache=0.2903456538919632&amp;bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158"></p>
+<p>To query datasets, use the :py:class:<code>Dataset &lt;cartoframes.data.Dataset&gt;</code> class.
+The following example finds the poverty rate in the census tract a McDonald's fast
+food joint is located (preview of static map below code).</p>
+<pre><code>!!! code "Code"
+    from cartoframes.examples import examples
+    from cartoframes.data import Dataset
+
+    # query to get poverty rates where mcdonald's are located in brooklyn
+    query = '''
+                SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
+                FROM mcdonalds_nyc as m, brooklyn_poverty as c WHERE ST_Intersects(m.the_geom, c.the_geom)
+            '''
+
+    credentials = examples.get_credentials()
+    ds = Dataset(query, credentials=credentials)
+
+    # download and show the data
+    ds.download()
+    ds.dataframe
+
+    # map
+    examples.map(ds)
+</code></pre>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&amp;anti_cache=0.040403611167980635&amp;bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001"></p>
+<p>To write datasets to your account from the examples account, the following is a
+good method:</p>
+<pre><code>!!! code "Code"
+    from cartoframes.auth import Credentials
+    from cartoframes.data import Dataset
+    from cartoframes.examples import read_taxi
+
+    USERNAME = 'your user name'
+    APIKEY = 'your API key'
+
+    credentials = Credentials(
+        username=USERNAME,
+        api_key=APIKEY
+    )
+
+    Dataset(read_taxi()).upload(
+      table_name='taxi_data_examples_acct',
+      lnglat=('pickup_latitude', 'pickup_longitude')
+      credentials=credentials)
+</code></pre>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">&#34;&#34;&#34;Download, preview, and query example datasets for use in cartoframes
+examples. Try examples by `running the notebooks in binder
+&lt;https://mybinder.org/v2/gh/CartoDB/cartoframes/master?filepath=examples&gt;`__
+
+In addition to the functions listed below, this examples module is
+authenticated against all public datasets in the https://cartoframes.carto.com
+account. This means that besides reading the datasets from CARTO, users can
+also create maps from these datasets.
+
+For example, the following will produce an interactive map of poverty rates in
+census tracts in Brooklyn, New York (preview of static version below code).
+
+    .. code::
+
+        from cartoframes.examples import examples
+
+        examples.map(&#39;brooklyn_poverty&#39;)
+
+.. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&amp;anti_cache=0.2903456538919632&amp;bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
+
+To query datasets, use the :py:class:`Dataset &lt;cartoframes.data.Dataset&gt;` class.
+The following example finds the poverty rate in the census tract a McDonald&#39;s fast
+food joint is located (preview of static map below code).
+
+    .. code::
+
+        from cartoframes.examples import examples
+        from cartoframes.data import Dataset
+
+        # query to get poverty rates where mcdonald&#39;s are located in brooklyn
+        query = &#39;&#39;&#39;
+                    SELECT m.the_geom, m.cartodb_id, m.the_geom_webmercator, c.poverty_per_pop
+                    FROM mcdonalds_nyc as m, brooklyn_poverty as c WHERE ST_Intersects(m.the_geom, c.the_geom)
+                &#39;&#39;&#39;
+
+        credentials = examples.get_credentials()
+        ds = Dataset(query, credentials=credentials)
+
+        # download and show the data
+        ds.download()
+        ds.dataframe
+
+        # map
+        examples.map(ds)
+
+.. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+ramp%28%5Bpoverty_per_pop%5D%2C+range%285%2C25%29%2C+quantiles%285%29%29%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22%5CnSELECT+m.the_geom%2C+m.cartodb_id%2C+m.the_geom_webmercator%2C+c.poverty_per_pop%5CnFROM+mcdonalds_nyc+as+m%2C+brooklyn_poverty+as+c%5CnWHERE+ST_Intersects%28m.the_geom%2C+c.the_geom%29%5Cn%22%7D&amp;anti_cache=0.040403611167980635&amp;bbox=-74.0277516749999%2C40.57955036%2C-73.8603420299999%2C40.7303652850001
+
+
+To write datasets to your account from the examples account, the following is a
+good method:
+
+    .. code::
+
+        from cartoframes.auth import Credentials
+        from cartoframes.data import Dataset
+        from cartoframes.examples import read_taxi
+
+        USERNAME = &#39;your user name&#39;
+        APIKEY = &#39;your API key&#39;
+
+        credentials = Credentials(
+            username=USERNAME,
+            api_key=APIKEY
+        )
+
+        Dataset(read_taxi()).upload(
+          table_name=&#39;taxi_data_examples_acct&#39;,
+          lnglat=(&#39;pickup_latitude&#39;, &#39;pickup_longitude&#39;)
+          credentials=credentials)
+&#34;&#34;&#34;  # noqa
+from .auth import Credentials
+from .data import Dataset
+from .utils.table import tables
+from .viz import Map, Layer
+
+EXAMPLE_BASE_URL = &#39;https://cartoframes.carto.com&#39;
+EXAMPLE_API_KEY = &#39;default_public&#39;
+
+
+class Examples():
+    &#34;&#34;&#34;This special class provides read access to all the datasets in the cartoframes CARTO account.
+
+    The recommended way to use this class is to import the `examples`
+    from the `cartoframes.examples` module:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_taxi()
+
+    The following tables are available:
+
+    - ``brooklyn_poverty`` - basic poverty information for Brooklyn, New York
+    - ``mcdonalds_nyc`` - McDonald&#39;s locations in New York City
+    - ``nat`` - historical USA-wide homicide rates at the county level
+    - ``nyc_census_tracts`` - Census tract boundaries for New York City
+    - ``taxi_50k`` - Taxi trip data, including pickup/drop-off locations. This
+      table does not have an explicit geometry, so one must be created from the
+      `pickup_latitude`/`pickup_longitude` columns, the
+      `dropoff_latitude`/`dropoff_longitude` columns, or through some other
+      process. When writing this table to your account, make sure to specify
+      the `lnglat` flag in :py:meth:`Dataset.upload
+      &lt;cartoframes.data.Dataset.upload&gt;`
+
+    This class includes a convenience method for each of the tables listed above.
+    See the full list below.
+
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self._credentials = Credentials(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+
+    # example dataset read methods
+    def read_brooklyn_poverty(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Poverty information for Brooklyn, New York, USA. See the function
+        :py:func:`read_brooklyn_poverty
+        &lt;cartoframes.examples.read_brooklyn_poverty&gt;` for more information.
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_brooklyn_poverty()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;brooklyn_poverty&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_ne_50m_graticules_15(self, limit=None, **kwargs):
+        &#34;&#34;&#34;50m world Mercator grid
+        &lt;cartoframes.examples.read_ne_50m_graticules_15&gt;` for more information.
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_ne_50m_graticules_15()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;ne_50m_graticules_15&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_mcdonalds_nyc(self, limit=None, **kwargs):
+        &#34;&#34;&#34;McDonald&#39;s locations for New York City, USA. See the function
+        :py:func:`read_mcdonalds_nyc
+        &lt;cartoframes.examples.read_mcdonalds_nyc&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_mcdonalds_nyc()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;mcdonalds_nyc&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_nyc_census_tracts(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Census tracts for New York City, USA. See the function
+        :py:func:`read_nyc_census_tracts
+        &lt;cartoframes.examples.read_nyc_census_tracts&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_nyc_census_tracts()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;nyc_census_tracts&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_taxi(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Taxi pickup and drop-off logs for New York City, USA. See the
+        function :py:func:`read_taxi
+        &lt;cartoframes.examples.read_taxi&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_taxi()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;taxi_50k&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_nat(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Historical homicide rates for the United States at the county level.
+        See the function :py:func:`read_nat
+        &lt;cartoframes.examples.read_nat&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_nat()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;nat&#39;, self._credentials).download(limit, **kwargs)
+
+    def tables(self):
+        return tables(self._credentials)
+
+    def map(self, source):
+        return Map(Layer(source, credentials=self._credentials))
+
+    def get_credentials(self):
+        return self._credentials
+
+
+examples = Examples()
+
+
+def read_ne_50m_graticules_15(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `ne_50m_graticules_15` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/ne_50m_graticules_15/public
+    This dataset contains a 50m world Mercator grid
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `ne_50m_graticules_15` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_ne_50m_graticules_15
+        df = read_ne_50m_graticules_15()
+
+    &#34;&#34;&#34;
+    return examples.read_ne_50m_graticules_15(limit=limit, **kwargs)
+
+
+def read_brooklyn_poverty(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `brooklyn_poverty` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/brooklyn_poverty/public
+    This dataset contains poverty rates for census tracts in Brooklyn, New York
+
+    The data looks as follows (styled on `poverty_per_pop`):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&amp;anti_cache=0.10952614318949128&amp;bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `brooklyn_poverty` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_brooklyn_poverty
+        df = read_brooklyn_poverty()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_brooklyn_poverty(limit=limit, **kwargs)
+
+
+def read_mcdonalds_nyc(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `mcdonalds_nyc` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/mcdonalds_nyc/public
+    This dataset contains the locations of McDonald&#39;s Fast Food within New York
+    City.
+
+    Visually the data looks as follows:
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+mcdonalds_nyc%22%7D&amp;anti_cache=0.5738692383372218&amp;bbox=-74.1691323509999%2C40.5594463460001%2C-73.7431178569999%2C40.892981078
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `mcdonalds_nyc` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_mcdonalds_nyc
+        df = read_mcdonalds_nyc()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_mcdonalds_nyc(limit=limit, **kwargs)
+
+
+def read_nyc_census_tracts(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `nyc_census_tracts` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/nyc_census_tracts/public
+    This dataset contains the US census boundaries for 2015 Tiger census
+    tracts and the corresponding GEOID in the `geom_refs` column.
+
+    Visually the data looks as follows:
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+%235D69B1%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nyc_census_tracts%22%7D&amp;anti_cache=0.05019415422872964&amp;bbox=-74.25909%2C40.477399%2C-73.70002%2C40.917577
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `nyc_census_tracts` on the
+      cartoframes example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_nyc_census_tracts
+        df = read_nyc_census_tracts()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_nyc_census_tracts(limit=limit, **kwargs)
+
+
+def read_taxi(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `taxi_50k` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/taxi_50k/public. This table
+    has a sample of 50,000 taxi trips taken in New York City. The dataset
+    includes fare amount, tolls, payment type, and pick up and drop off
+    locations.
+
+    .. note:: This dataset does not have geometries. The geometries have to be
+        created by using the pickup or drop-off lng/lat pairs. These can be
+        specified in `Dataset.upload`.
+
+        To create geometries with `examples.query`, write a query such
+        as this::
+
+            from cartoframes.client import SQLClient
+
+            sql = SQLClient(examples.get_credentials())
+
+            sql.query(&#39;&#39;&#39;
+                SELECT
+                  CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                  cartodb_id,
+                  fare_amount
+                FROM
+                  taxi_50
+            &#39;&#39;&#39;)
+
+    The data looks as follows (using the pickup location for the geometry and
+    styling by `fare_amount`):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+ramp%28%5Bfare_amount%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%23layer%5Bfare_amount+%3D+null%5D+%7B++marker-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22%5Cn++++WITH+cte+as+%28%5Cn++++SELECT+CDB_LatLng%28pickup_latitude%2C+pickup_longitude%29+as+the_geom%2C+cartodb_id%2C+fare_amount%5Cn++++FROM+taxi_50k%5Cn++++%29%5Cn++++SELECT+%2A%2C+ST_Transform%28the_geom%2C+3857%29+as+the_geom_webmercator%5Cn++++FROM+cte%5Cn%22%7D&amp;anti_cache=0.24523273064119488&amp;zoom=9&amp;lat=40.7743&amp;lon=-73.916
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `taxi_50k` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_taxi(limit=limit, **kwargs)
+
+
+def read_nat(limit=None, **kwargs):
+    &#34;&#34;&#34;Read `nat` dataset: US county homicides 1960-1990
+
+    This table is located at:
+    https://cartoframes.carto.com/tables/nat/public
+
+    Visually, the data looks as follows (styled by the `hr90` column):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bhr90+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&amp;anti_cache=0.9906959573885755&amp;bbox=-124.731422424316%2C24.9559669494629%2C-66.9698486328125%2C49.3717346191406
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `nat` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_nat
+        df = read_nat()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_nat(limit=limit, **kwargs)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.examples.read_brooklyn_poverty"><code class="name flex">
+<span>def <span class="ident">read_brooklyn_poverty</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read the dataset <code>brooklyn_poverty</code> into a pandas DataFrame from the
+cartoframes example account at
+<a href="https://cartoframes.carto.com/tables/brooklyn_poverty/public">https://cartoframes.carto.com/tables/brooklyn_poverty/public</a>
+This dataset contains poverty rates for census tracts in Brooklyn, New York</p>
+<p>The data looks as follows (styled on <code>poverty_per_pop</code>):</p>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&amp;anti_cache=0.10952614318949128&amp;bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158"></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>brooklyn_poverty</code> on the cartoframes</dt>
+<dt><code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_brooklyn_poverty
+df = read_brooklyn_poverty()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_brooklyn_poverty(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `brooklyn_poverty` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/brooklyn_poverty/public
+    This dataset contains poverty rates for census tracts in Brooklyn, New York
+
+    The data looks as follows (styled on `poverty_per_pop`):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bpoverty_per_pop%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bpoverty_per_pop+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+brooklyn_poverty%22%7D&amp;anti_cache=0.10952614318949128&amp;bbox=-74.041916%2C40.569596%2C-73.833422%2C40.739158
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `brooklyn_poverty` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_brooklyn_poverty
+        df = read_brooklyn_poverty()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_brooklyn_poverty(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.read_mcdonalds_nyc"><code class="name flex">
+<span>def <span class="ident">read_mcdonalds_nyc</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read the dataset <code>mcdonalds_nyc</code> into a pandas DataFrame from the
+cartoframes example account at
+<a href="https://cartoframes.carto.com/tables/mcdonalds_nyc/public">https://cartoframes.carto.com/tables/mcdonalds_nyc/public</a>
+This dataset contains the locations of McDonald's Fast Food within New York
+City.</p>
+<p>Visually the data looks as follows:</p>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+mcdonalds_nyc%22%7D&amp;anti_cache=0.5738692383372218&amp;bbox=-74.1691323509999%2C40.5594463460001%2C-73.7431178569999%2C40.892981078"></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>mcdonalds_nyc</code> on the cartoframes</dt>
+<dt><code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_mcdonalds_nyc
+df = read_mcdonalds_nyc()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_mcdonalds_nyc(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `mcdonalds_nyc` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/mcdonalds_nyc/public
+    This dataset contains the locations of McDonald&#39;s Fast Food within New York
+    City.
+
+    Visually the data looks as follows:
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+%235D69B1%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+mcdonalds_nyc%22%7D&amp;anti_cache=0.5738692383372218&amp;bbox=-74.1691323509999%2C40.5594463460001%2C-73.7431178569999%2C40.892981078
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `mcdonalds_nyc` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_mcdonalds_nyc
+        df = read_mcdonalds_nyc()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_mcdonalds_nyc(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.read_nat"><code class="name flex">
+<span>def <span class="ident">read_nat</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read <code>nat</code> dataset: US county homicides 1960-1990</p>
+<p>This table is located at:
+<a href="https://cartoframes.carto.com/tables/nat/public">https://cartoframes.carto.com/tables/nat/public</a></p>
+<p>Visually, the data looks as follows (styled by the <code>hr90</code> column):</p>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bhr90+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&amp;anti_cache=0.9906959573885755&amp;bbox=-124.731422424316%2C24.9559669494629%2C-66.9698486328125%2C49.3717346191406"></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>nat</code> on the cartoframes</dt>
+<dt><code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_nat
+df = read_nat()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_nat(limit=None, **kwargs):
+    &#34;&#34;&#34;Read `nat` dataset: US county homicides 1960-1990
+
+    This table is located at:
+    https://cartoframes.carto.com/tables/nat/public
+
+    Visually, the data looks as follows (styled by the `hr90` column):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+ramp%28%5Bhr90%5D%2C+cartocolor%28Sunset%29%2C+quantiles%287%29%2C+%3E%29%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%23layer%5Bhr90+%3D+null%5D+%7B++polygon-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nat%22%7D&amp;anti_cache=0.9906959573885755&amp;bbox=-124.731422424316%2C24.9559669494629%2C-66.9698486328125%2C49.3717346191406
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `nat` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_nat
+        df = read_nat()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_nat(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.read_ne_50m_graticules_15"><code class="name flex">
+<span>def <span class="ident">read_ne_50m_graticules_15</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read the dataset <code>ne_50m_graticules_15</code> into a pandas DataFrame from the
+cartoframes example account at
+<a href="https://cartoframes.carto.com/tables/ne_50m_graticules_15/public">https://cartoframes.carto.com/tables/ne_50m_graticules_15/public</a>
+This dataset contains a 50m world Mercator grid</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>ne_50m_graticules_15</code> on the cartoframes</dt>
+<dt><code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_ne_50m_graticules_15
+df = read_ne_50m_graticules_15()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_ne_50m_graticules_15(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `ne_50m_graticules_15` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/ne_50m_graticules_15/public
+    This dataset contains a 50m world Mercator grid
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `ne_50m_graticules_15` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_ne_50m_graticules_15
+        df = read_ne_50m_graticules_15()
+
+    &#34;&#34;&#34;
+    return examples.read_ne_50m_graticules_15(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.read_nyc_census_tracts"><code class="name flex">
+<span>def <span class="ident">read_nyc_census_tracts</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read the dataset <code>nyc_census_tracts</code> into a pandas DataFrame from the
+cartoframes example account at
+<a href="https://cartoframes.carto.com/tables/nyc_census_tracts/public">https://cartoframes.carto.com/tables/nyc_census_tracts/public</a>
+This dataset contains the US census boundaries for 2015 Tiger census
+tracts and the corresponding GEOID in the <code>geom_refs</code> column.</p>
+<p>Visually the data looks as follows:</p>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+%235D69B1%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nyc_census_tracts%22%7D&amp;anti_cache=0.05019415422872964&amp;bbox=-74.25909%2C40.477399%2C-73.70002%2C40.917577"></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>nyc_census_tracts</code> on the</dt>
+<dt><a title="cartoframes" href="index.html"><code>cartoframes</code></a> <code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_nyc_census_tracts
+df = read_nyc_census_tracts()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_nyc_census_tracts(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `nyc_census_tracts` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/nyc_census_tracts/public
+    This dataset contains the US census boundaries for 2015 Tiger census
+    tracts and the corresponding GEOID in the `geom_refs` column.
+
+    Visually the data looks as follows:
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels1_zoom0/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_nolabels%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++polygon-fill%3A+%235D69B1%3B+polygon-opacity%3A+0.9%3B+polygon-gamma%3A+0.5%3B+line-color%3A+%23FFF%3B+line-width%3A+0.5%3B+line-opacity%3A+0.25%3B+line-comp-op%3A+hard-light%3B%7D%22%2C+%22sql_0%22%3A+%22SELECT+%2A+FROM+nyc_census_tracts%22%7D&amp;anti_cache=0.05019415422872964&amp;bbox=-74.25909%2C40.477399%2C-73.70002%2C40.917577
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `nyc_census_tracts` on the
+      cartoframes example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_nyc_census_tracts
+        df = read_nyc_census_tracts()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_nyc_census_tracts(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.read_taxi"><code class="name flex">
+<span>def <span class="ident">read_taxi</span></span>(<span>limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Read the dataset <code>taxi_50k</code> into a pandas DataFrame from the
+cartoframes example account at
+<a href="https://cartoframes.carto.com/tables/taxi_50k/public.">https://cartoframes.carto.com/tables/taxi_50k/public.</a> This table
+has a sample of 50,000 taxi trips taken in New York City. The dataset
+includes fare amount, tolls, payment type, and pick up and drop off
+locations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note:&ensp;This dataset does not have geometries. The geometries have to be</p>
+<p>created by using the pickup or drop-off lng/lat pairs. These can be
+specified in <code>Dataset.upload</code>.</p>
+<p>To create geometries with <code>examples.query</code>, write a query such
+as this::</p>
+<pre><code>from cartoframes.client import SQLClient
+
+sql = SQLClient(examples.get_credentials())
+
+sql.query('''
+    SELECT
+      CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+      cartodb_id,
+      fare_amount
+    FROM
+      taxi_50
+''')
+</code></pre>
+</div>
+<p>The data looks as follows (using the pickup location for the geometry and
+styling by <code>fare_amount</code>):</p>
+<p><img alt="" src="https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+ramp%28%5Bfare_amount%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%23layer%5Bfare_amount+%3D+null%5D+%7B++marker-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22%5Cn++++WITH+cte+as+%28%5Cn++++SELECT+CDB_LatLng%28pickup_latitude%2C+pickup_longitude%29+as+the_geom%2C+cartodb_id%2C+fare_amount%5Cn++++FROM+taxi_50k%5Cn++++%29%5Cn++++SELECT+%2A%2C+ST_Transform%28the_geom%2C+3857%29+as+the_geom_webmercator%5Cn++++FROM+cte%5Cn%22%7D&amp;anti_cache=0.24523273064119488&amp;zoom=9&amp;lat=40.7743&amp;lon=-73.916"></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Limit results to <code>limit</code>. Defaults to return all
+rows of the original dataset</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Arguments accepted in :py:meth:<code>Dataset.download &lt;cartoframes.data.Dataset.download&gt;</code></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>pandas.DataFrame: Data in the table <code>taxi_50k</code> on the cartoframes</dt>
+<dt><code>example</code> <code>account</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Example</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import read_taxi
+df = read_taxi()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_taxi(limit=None, **kwargs):
+    &#34;&#34;&#34;Read the dataset `taxi_50k` into a pandas DataFrame from the
+    cartoframes example account at
+    https://cartoframes.carto.com/tables/taxi_50k/public. This table
+    has a sample of 50,000 taxi trips taken in New York City. The dataset
+    includes fare amount, tolls, payment type, and pick up and drop off
+    locations.
+
+    .. note:: This dataset does not have geometries. The geometries have to be
+        created by using the pickup or drop-off lng/lat pairs. These can be
+        specified in `Dataset.upload`.
+
+        To create geometries with `examples.query`, write a query such
+        as this::
+
+            from cartoframes.client import SQLClient
+
+            sql = SQLClient(examples.get_credentials())
+
+            sql.query(&#39;&#39;&#39;
+                SELECT
+                  CDB_LatLng(pickup_latitude, pickup_longitude) as the_geom,
+                  cartodb_id,
+                  fare_amount
+                FROM
+                  taxi_50
+            &#39;&#39;&#39;)
+
+    The data looks as follows (using the pickup location for the geometry and
+    styling by `fare_amount`):
+
+    .. image:: https://cartoframes.carto.com/api/v1/map/static/named/cartoframes_ver20170406_layers1_time0_baseid2_labels0_zoom1/800/400.png?config=%7B%22basemap_url%22%3A+%22https%3A%2F%2F%7Bs%7D.basemaps.cartocdn.com%2Frastertiles%2Fvoyager_labels_under%2F%7Bz%7D%2F%7Bx%7D%2F%7By%7D.png%22%2C+%22cartocss_0%22%3A+%22%23layer+%7B++marker-width%3A+10%3B+marker-fill%3A+ramp%28%5Bfare_amount%5D%2C+cartocolor%28Mint%29%2C+quantiles%285%29%2C+%3E%29%3B+marker-fill-opacity%3A+0.9%3B+marker-allow-overlap%3A+true%3B+marker-line-width%3A+0.5%3B+marker-line-color%3A+%23FFF%3B+marker-line-opacity%3A+1%3B%7D%23layer%5Bfare_amount+%3D+null%5D+%7B++marker-fill%3A+%23ccc%3B%7D%22%2C+%22sql_0%22%3A+%22%5Cn++++WITH+cte+as+%28%5Cn++++SELECT+CDB_LatLng%28pickup_latitude%2C+pickup_longitude%29+as+the_geom%2C+cartodb_id%2C+fare_amount%5Cn++++FROM+taxi_50k%5Cn++++%29%5Cn++++SELECT+%2A%2C+ST_Transform%28the_geom%2C+3857%29+as+the_geom_webmercator%5Cn++++FROM+cte%5Cn%22%7D&amp;anti_cache=0.24523273064119488&amp;zoom=9&amp;lat=40.7743&amp;lon=-73.916
+
+    Args:
+
+      limit (int, optional): Limit results to `limit`. Defaults to return all
+        rows of the original dataset
+      **kwargs: Arguments accepted in :py:meth:`Dataset.download &lt;cartoframes.data.Dataset.download&gt;`
+
+    Returns:
+
+      pandas.DataFrame: Data in the table `taxi_50k` on the cartoframes
+      example account
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi()
+
+    &#34;&#34;&#34;  # noqa
+    return examples.read_taxi(limit=limit, **kwargs)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.examples.Examples"><code class="flex name class">
+<span>class <span class="ident">Examples</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>This special class provides read access to all the datasets in the cartoframes CARTO account.</p>
+<p>The recommended way to use this class is to import the <code>examples</code>
+from the <a title="cartoframes.examples" href="#cartoframes.examples"><code>cartoframes.examples</code></a> module:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_taxi()</p>
+</div>
+<p>The following tables are available:</p>
+<ul>
+<li><code>brooklyn_poverty</code> - basic poverty information for Brooklyn, New York</li>
+<li><code>mcdonalds_nyc</code> - McDonald's locations in New York City</li>
+<li><code>nat</code> - historical USA-wide homicide rates at the county level</li>
+<li><code>nyc_census_tracts</code> - Census tract boundaries for New York City</li>
+<li><code>taxi_50k</code> - Taxi trip data, including pickup/drop-off locations. This
+table does not have an explicit geometry, so one must be created from the
+<code>pickup_latitude</code>/<code>pickup_longitude</code> columns, the
+<code>dropoff_latitude</code>/<code>dropoff_longitude</code> columns, or through some other
+process. When writing this table to your account, make sure to specify
+the <code>lnglat</code> flag in :py:meth:<code>Dataset.upload
+&lt;cartoframes.data.Dataset.upload&gt;</code></li>
+</ul>
+<p>This class includes a convenience method for each of the tables listed above.
+See the full list below.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Examples():
+    &#34;&#34;&#34;This special class provides read access to all the datasets in the cartoframes CARTO account.
+
+    The recommended way to use this class is to import the `examples`
+    from the `cartoframes.examples` module:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_taxi()
+
+    The following tables are available:
+
+    - ``brooklyn_poverty`` - basic poverty information for Brooklyn, New York
+    - ``mcdonalds_nyc`` - McDonald&#39;s locations in New York City
+    - ``nat`` - historical USA-wide homicide rates at the county level
+    - ``nyc_census_tracts`` - Census tract boundaries for New York City
+    - ``taxi_50k`` - Taxi trip data, including pickup/drop-off locations. This
+      table does not have an explicit geometry, so one must be created from the
+      `pickup_latitude`/`pickup_longitude` columns, the
+      `dropoff_latitude`/`dropoff_longitude` columns, or through some other
+      process. When writing this table to your account, make sure to specify
+      the `lnglat` flag in :py:meth:`Dataset.upload
+      &lt;cartoframes.data.Dataset.upload&gt;`
+
+    This class includes a convenience method for each of the tables listed above.
+    See the full list below.
+
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self._credentials = Credentials(base_url=EXAMPLE_BASE_URL, api_key=EXAMPLE_API_KEY)
+
+    # example dataset read methods
+    def read_brooklyn_poverty(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Poverty information for Brooklyn, New York, USA. See the function
+        :py:func:`read_brooklyn_poverty
+        &lt;cartoframes.examples.read_brooklyn_poverty&gt;` for more information.
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_brooklyn_poverty()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;brooklyn_poverty&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_ne_50m_graticules_15(self, limit=None, **kwargs):
+        &#34;&#34;&#34;50m world Mercator grid
+        &lt;cartoframes.examples.read_ne_50m_graticules_15&gt;` for more information.
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_ne_50m_graticules_15()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;ne_50m_graticules_15&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_mcdonalds_nyc(self, limit=None, **kwargs):
+        &#34;&#34;&#34;McDonald&#39;s locations for New York City, USA. See the function
+        :py:func:`read_mcdonalds_nyc
+        &lt;cartoframes.examples.read_mcdonalds_nyc&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_mcdonalds_nyc()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;mcdonalds_nyc&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_nyc_census_tracts(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Census tracts for New York City, USA. See the function
+        :py:func:`read_nyc_census_tracts
+        &lt;cartoframes.examples.read_nyc_census_tracts&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_nyc_census_tracts()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;nyc_census_tracts&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_taxi(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Taxi pickup and drop-off logs for New York City, USA. See the
+        function :py:func:`read_taxi
+        &lt;cartoframes.examples.read_taxi&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_taxi()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;taxi_50k&#39;, self._credentials).download(limit, **kwargs)
+
+    def read_nat(self, limit=None, **kwargs):
+        &#34;&#34;&#34;Historical homicide rates for the United States at the county level.
+        See the function :py:func:`read_nat
+        &lt;cartoframes.examples.read_nat&gt;` for more information
+
+        Example:
+
+        .. code::
+
+            from cartoframes.examples import examples
+            df = examples.read_nat()
+
+        &#34;&#34;&#34;
+        return Dataset(&#39;nat&#39;, self._credentials).download(limit, **kwargs)
+
+    def tables(self):
+        return tables(self._credentials)
+
+    def map(self, source):
+        return Map(Layer(source, credentials=self._credentials))
+
+    def get_credentials(self):
+        return self._credentials</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.examples.Examples.get_credentials"><code class="name flex">
+<span>def <span class="ident">get_credentials</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_credentials(self):
+    return self._credentials</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.map"><code class="name flex">
+<span>def <span class="ident">map</span></span>(<span>self, source)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def map(self, source):
+    return Map(Layer(source, credentials=self._credentials))</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_brooklyn_poverty"><code class="name flex">
+<span>def <span class="ident">read_brooklyn_poverty</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Poverty information for Brooklyn, New York, USA. See the function
+:py:func:<code>read_brooklyn_poverty
+&lt;cartoframes.examples.read_brooklyn_poverty&gt;</code> for more information.</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_brooklyn_poverty()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_brooklyn_poverty(self, limit=None, **kwargs):
+    &#34;&#34;&#34;Poverty information for Brooklyn, New York, USA. See the function
+    :py:func:`read_brooklyn_poverty
+    &lt;cartoframes.examples.read_brooklyn_poverty&gt;` for more information.
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_brooklyn_poverty()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;brooklyn_poverty&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_mcdonalds_nyc"><code class="name flex">
+<span>def <span class="ident">read_mcdonalds_nyc</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>McDonald's locations for New York City, USA. See the function
+:py:func:<code>read_mcdonalds_nyc
+&lt;cartoframes.examples.read_mcdonalds_nyc&gt;</code> for more information</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_mcdonalds_nyc()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_mcdonalds_nyc(self, limit=None, **kwargs):
+    &#34;&#34;&#34;McDonald&#39;s locations for New York City, USA. See the function
+    :py:func:`read_mcdonalds_nyc
+    &lt;cartoframes.examples.read_mcdonalds_nyc&gt;` for more information
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_mcdonalds_nyc()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;mcdonalds_nyc&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_nat"><code class="name flex">
+<span>def <span class="ident">read_nat</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Historical homicide rates for the United States at the county level.
+See the function :py:func:<code>read_nat
+&lt;cartoframes.examples.read_nat&gt;</code> for more information</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_nat()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_nat(self, limit=None, **kwargs):
+    &#34;&#34;&#34;Historical homicide rates for the United States at the county level.
+    See the function :py:func:`read_nat
+    &lt;cartoframes.examples.read_nat&gt;` for more information
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_nat()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;nat&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_ne_50m_graticules_15"><code class="name flex">
+<span>def <span class="ident">read_ne_50m_graticules_15</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>50m world Mercator grid
+<cartoframes.examples.read_ne_50m_graticules_15>` for more information.</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_ne_50m_graticules_15()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_ne_50m_graticules_15(self, limit=None, **kwargs):
+    &#34;&#34;&#34;50m world Mercator grid
+    &lt;cartoframes.examples.read_ne_50m_graticules_15&gt;` for more information.
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_ne_50m_graticules_15()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;ne_50m_graticules_15&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_nyc_census_tracts"><code class="name flex">
+<span>def <span class="ident">read_nyc_census_tracts</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Census tracts for New York City, USA. See the function
+:py:func:<code>read_nyc_census_tracts
+&lt;cartoframes.examples.read_nyc_census_tracts&gt;</code> for more information</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_nyc_census_tracts()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_nyc_census_tracts(self, limit=None, **kwargs):
+    &#34;&#34;&#34;Census tracts for New York City, USA. See the function
+    :py:func:`read_nyc_census_tracts
+    &lt;cartoframes.examples.read_nyc_census_tracts&gt;` for more information
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_nyc_census_tracts()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;nyc_census_tracts&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.read_taxi"><code class="name flex">
+<span>def <span class="ident">read_taxi</span></span>(<span>self, limit=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Taxi pickup and drop-off logs for New York City, USA. See the
+function :py:func:<code>read_taxi
+&lt;cartoframes.examples.read_taxi&gt;</code> for more information</p>
+<p>Example:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.examples import examples
+df = examples.read_taxi()</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def read_taxi(self, limit=None, **kwargs):
+    &#34;&#34;&#34;Taxi pickup and drop-off logs for New York City, USA. See the
+    function :py:func:`read_taxi
+    &lt;cartoframes.examples.read_taxi&gt;` for more information
+
+    Example:
+
+    .. code::
+
+        from cartoframes.examples import examples
+        df = examples.read_taxi()
+
+    &#34;&#34;&#34;
+    return Dataset(&#39;taxi_50k&#39;, self._credentials).download(limit, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.examples.Examples.tables"><code class="name flex">
+<span>def <span class="ident">tables</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def tables(self):
+    return tables(self._credentials)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes" href="index.html">cartoframes</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.examples.read_brooklyn_poverty" href="#cartoframes.examples.read_brooklyn_poverty">read_brooklyn_poverty</a></code></li>
+<li><code><a title="cartoframes.examples.read_mcdonalds_nyc" href="#cartoframes.examples.read_mcdonalds_nyc">read_mcdonalds_nyc</a></code></li>
+<li><code><a title="cartoframes.examples.read_nat" href="#cartoframes.examples.read_nat">read_nat</a></code></li>
+<li><code><a title="cartoframes.examples.read_ne_50m_graticules_15" href="#cartoframes.examples.read_ne_50m_graticules_15">read_ne_50m_graticules_15</a></code></li>
+<li><code><a title="cartoframes.examples.read_nyc_census_tracts" href="#cartoframes.examples.read_nyc_census_tracts">read_nyc_census_tracts</a></code></li>
+<li><code><a title="cartoframes.examples.read_taxi" href="#cartoframes.examples.read_taxi">read_taxi</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.examples.Examples" href="#cartoframes.examples.Examples">Examples</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.examples.Examples.get_credentials" href="#cartoframes.examples.Examples.get_credentials">get_credentials</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.map" href="#cartoframes.examples.Examples.map">map</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_brooklyn_poverty" href="#cartoframes.examples.Examples.read_brooklyn_poverty">read_brooklyn_poverty</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_mcdonalds_nyc" href="#cartoframes.examples.Examples.read_mcdonalds_nyc">read_mcdonalds_nyc</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_nat" href="#cartoframes.examples.Examples.read_nat">read_nat</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_ne_50m_graticules_15" href="#cartoframes.examples.Examples.read_ne_50m_graticules_15">read_ne_50m_graticules_15</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_nyc_census_tracts" href="#cartoframes.examples.Examples.read_nyc_census_tracts">read_nyc_census_tracts</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.read_taxi" href="#cartoframes.examples.Examples.read_taxi">read_taxi</a></code></li>
+<li><code><a title="cartoframes.examples.Examples.tables" href="#cartoframes.examples.Examples.tables">tables</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

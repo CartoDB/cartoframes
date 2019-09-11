@@ -1,0 +1,1452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.viz.map API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.viz.map</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from __future__ import absolute_import
+
+import collections
+import numpy as np
+from warnings import warn
+
+from carto.exceptions import CartoException
+
+from . import constants
+from .basemaps import Basemaps
+from .kuviz import KuvizPublisher, kuviz_to_dict
+from .html.HTMLMap import HTMLMap
+from ..utils.utils import get_center
+
+WORLD_BOUNDS = [[-180, -90], [180, 90]]
+
+
+class Map(object):
+    &#34;&#34;&#34;Map
+
+    Args:
+        layers (list of :py:class:`Layer &lt;cartoframes.viz.Layer&gt;`): List of
+          layers. Zero or more of :py:class:`Layer &lt;cartoframes.viz.Layer&gt;`.
+        basemap (str, optional):
+          - if a `str`, name of a CARTO vector basemap. One of `positron`,
+            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
+            hex value, rgb string, or other color expression from CARTO VL.
+          - if a `dict`, Mapbox or other style as the value of the `style` key.
+            If a Mapbox style, the access token is the value of the `token`
+            key.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
+        size (tuple, optional): a (width, height) pair for the size of the map.
+          Default is (1024, 632).
+        viewport (dict, optional): Properties for display of the map viewport.
+          Keys can be `bearing` or `pitch`.
+        default_legend (bool, optional): Default False. If True, it displays the map title.
+          Therefore, it needs the `title` value to be defined.
+        show_info (bool, optional): Whether to display center and zoom information in the
+          map or not. It is False by default.
+        is_static (bool, optional): Default False. If True, instead of showing and interactive
+          map, a png image will be displayed.
+        theme (string, optional): Use a different UI theme
+        title (string, optional): Title to label the map
+        description (string, optional): Text that describes the map and will be displayed in the
+          default legend after the title.
+
+    Examples:
+
+        Basic usage.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(Layer(&#39;table in your account&#39;))
+
+        Display more than one layer on a map.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(layers=[
+                Layer(&#39;table1&#39;),
+                Layer(&#39;table2&#39;)
+            ])
+
+        Change the CARTO basemap style.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, basemaps
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemaps.darkmatter
+            )
+
+        Choose a custom basemap style. Here we use the Mapbox streets style,
+        which requires an access token.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your CARTO API key&#39;
+            )
+
+            basemap = {
+                &#39;style&#39;: &#39;mapbox://styles/mapbox/streets-v9&#39;,
+                &#39;token&#39;: &#39;your Mapbox token&#39;
+            }
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemap
+            )
+
+        Remove basemap and show a custom color.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemap=&#39;yellow&#39;  # None, False, &#39;white&#39;, &#39;rgb(255, 255, 0)&#39;
+            )
+
+        Set custom bounds.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            bounds = {
+                &#39;west&#39;: -10,
+                &#39;east&#39;: 10,
+                &#39;north&#39;: -10,
+                &#39;south&#39;: 10
+            }
+
+            # or bounds = [[-10, 10], [10, -10]]
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                bounds=bounds
+            )
+
+        Show the map center and zoom value on the map (lower left-hand corner).
+
+        .. code::
+
+            from cartoframes.auth import Credentials, set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            credentials = Credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+            set_default_credentials(credentials)
+
+            Map(Layer(&#39;table in your account&#39;), show_info=True)
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 layers=None,
+                 basemap=Basemaps.positron,
+                 bounds=None,
+                 size=None,
+                 viewport=None,
+                 default_legend=False,
+                 show_info=None,
+                 theme=None,
+                 title=None,
+                 description=None,
+                 is_static=None,
+                 **kwargs):
+
+        self._validate_default_legend(default_legend, title)
+
+        self.layers = _init_layers(layers)
+        self.basemap = basemap
+        self.size = size
+        self.viewport = viewport
+        self.default_legend = default_legend
+        self.title = title
+        self.description = description
+        self.show_info = show_info
+        self.layer_defs = _get_layer_defs(self.layers)
+        self.bounds = _get_bounds(bounds, self.layers)
+        self.theme = _get_theme(theme, basemap)
+        self.is_static = is_static
+        self.token = get_token(basemap)
+        self.basecolor = get_basecolor(basemap)
+
+        self._carto_vl_path = kwargs.get(&#39;_carto_vl_path&#39;, None)
+        self._airship_path = kwargs.get(&#39;_airship_path&#39;, None)
+        self._publisher = self._get_publisher()
+        self._kuviz = None
+
+        self.camera = None
+        if viewport is not None:
+            self.camera = {
+                &#39;center&#39;: get_center(viewport),
+                &#39;zoom&#39;: viewport.get(&#39;zoom&#39;),
+                &#39;bearing&#39;: viewport.get(&#39;bearing&#39;),
+                &#39;pitch&#39;: viewport.get(&#39;pitch&#39;)
+            }
+
+    def _repr_html_(self):
+        self._htmlMap = HTMLMap()
+
+        self._htmlMap.set_content(
+            layers=self.layer_defs,
+            bounds=self.bounds,
+            size=self.size,
+            viewport=self.viewport,
+            camera=self.camera,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=self.show_info,
+            theme=self.theme,
+            title=self.title,
+            description=self.description,
+            is_static=self.is_static,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
+
+        return self._htmlMap.html
+
+    def get_content(self):
+        has_legends = any(layer[&#39;legend&#39;] for layer in self.layer_defs) or self.default_legend
+        has_widgets = any(len(layer[&#39;widgets&#39;]) != 0 for layer in self.layer_defs)
+
+        return {
+            &#39;layers&#39;: self.layer_defs,
+            &#39;bounds&#39;: self.bounds,
+            &#39;size&#39;: self.size,
+            &#39;viewport&#39;: self.viewport,
+            &#39;camera&#39;: self.camera,
+            &#39;basemap&#39;: self.basemap,
+            &#39;basecolor&#39;: self.basecolor,
+            &#39;token&#39;: self.token,
+            &#39;default_legend&#39;: self.default_legend,
+            &#39;show_info&#39;: self.show_info,
+            &#39;has_legends&#39;: has_legends,
+            &#39;has_widgets&#39;: has_widgets,
+            &#39;theme&#39;: self.theme,
+            &#39;title&#39;: self.title,
+            &#39;description&#39;: self.description,
+            &#39;is_static&#39;: self.is_static,
+            &#39;_carto_vl_path&#39;: self._carto_vl_path,
+            &#39;_airship_path&#39;: self._airship_path
+        }
+
+    def publish(self, name, maps_api_key=&#39;default_public&#39;, credentials=None, password=None):
+        &#34;&#34;&#34;Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+            password (str, optional): setting it your Kuviz will be protected by
+                password. When someone will try to show the Kuviz, the password
+                will be requested
+
+        Example:
+
+            Publishing the map visualization
+
+            .. code::
+
+                from cartoframes.viz import Map, Layer
+
+                tmap = Map(Layer(&#39;tablename&#39;))
+                tmap.publish(&#39;Custom Map Title&#39;)
+
+        &#34;&#34;&#34;
+        if not self._publisher.is_sync():
+            raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                                 &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+        if maps_api_key == &#39;default_public&#39;:
+            self._validate_public_publication()
+
+        self._publisher.set_credentials(credentials)
+        html = self._get_publication_html(name, maps_api_key)
+        self._kuviz = self._publisher.publish(html, name, password)
+        return kuviz_to_dict(self._kuviz)
+
+    def sync_data(self, table_name, credentials=None):
+        &#34;&#34;&#34;Synchronize datasets used by the map with CARTO.
+
+        Args:
+            table_name (str): Desired table name for the dataset on CARTO. If
+                name does not conform to SQL naming conventions, it will be
+                &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+                and other special characters.
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+        &#34;&#34;&#34;
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, credentials)
+
+    def delete_publication(self):
+        &#34;&#34;&#34;Delete the published map Kuviz.&#34;&#34;&#34;
+        if self._kuviz:
+            self._kuviz.delete()
+            print(&#34;Publication &#39;{n}&#39; ({id}) deleted&#34;.format(n=self._kuviz.name, id=self._kuviz.id))
+            self._kuviz = None
+
+    def update_publication(self, name, password, maps_api_key=&#39;default_public&#39;):
+        &#34;&#34;&#34;Update the published map Kuviz.
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            password (str): setting it your Kuviz will be protected by
+                password and using `None` the Kuviz will be public
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+        &#34;&#34;&#34;
+        if not self._kuviz:
+            raise CartoException(&#39;The map has not been published. Use the `publish` method.&#39;)
+
+        if not self._publisher.is_sync():
+            raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                                 &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+        if maps_api_key == &#39;default_public&#39;:
+            self._validate_public_publication()
+
+        self._kuviz.data = self._get_publication_html(name, maps_api_key)
+        self._kuviz.name = name
+        self._kuviz.password = password
+        self._kuviz.save()
+        return kuviz_to_dict(self._kuviz)
+
+    @staticmethod
+    def all_publications(credentials=None):
+        &#34;&#34;&#34;Get all map Kuviz published by the current user.
+
+        Args:
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+        &#34;&#34;&#34;
+        return KuvizPublisher.all(credentials)
+
+    def _get_publication_html(self, name, maps_api_key):
+        html_map = HTMLMap(&#39;templates/viz/main.html.j2&#39;)
+        html_map.set_content(
+            layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
+            bounds=self.bounds,
+            size=None,
+            viewport=self.viewport,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=False,
+            theme=self.theme,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path,
+            title=name,
+            description=self.description,
+            is_embed=True,
+            is_static=self.is_static)
+
+        return html_map.html
+
+    def _validate_default_legend(self, default_legend, title):
+        if default_legend and not title:
+            raise CartoException(&#39;The default legend needs a map title to be displayed&#39;)
+
+    def _get_publisher(self):
+        return KuvizPublisher(self.layers)
+
+    def _validate_public_publication(self):
+        if not self._publisher.is_public():
+            raise CartoException(&#39;The datasets used in your map are not public. &#39;
+                                 &#39;You need add new Regular API key with permissions to Maps API and the datasets. &#39;
+                                 &#39;You can do it from your CARTO dashboard or using the Auth API. You can get more &#39;
+                                 &#39;info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/&#39;)
+
+
+def _get_bounds(bounds, layers):
+    if bounds:
+        return _format_bounds(bounds)
+    else:
+        return _compute_bounds(layers)
+
+
+def _init_layers(layers):
+    if layers is None:
+        return []
+    if not isinstance(layers, collections.Iterable):
+        return [layers]
+    else:
+        return layers
+
+
+def _get_layer_defs(layers):
+    if layers is None:
+        return None
+    return list(map(_get_layer_def, layers))
+
+
+def _get_layer_def(layer):
+    return {
+        &#39;credentials&#39;: layer.credentials,
+        &#39;interactivity&#39;: layer.interactivity,
+        &#39;legend&#39;: layer.legend_info,
+        &#39;has_legend_list&#39;: layer.has_legend_list,
+        &#39;widgets&#39;: layer.widgets_info,
+        &#39;query&#39;: layer.source.query,
+        &#39;type&#39;: layer.source.type,
+        &#39;viz&#39;: layer.viz
+    }
+
+
+def _format_bounds(bounds):
+    if bounds is None:
+        return WORLD_BOUNDS
+    if isinstance(bounds, list):
+        return _format_list_bounds(bounds)
+    elif isinstance(bounds, dict):
+        return _format_dict_bounds(bounds)
+    else:
+        raise ValueError(&#39;Bounds must be a list or a dict&#39;)
+
+
+def _format_list_bounds(bounds):
+    if not (len(bounds) == 2 and len(bounds[0]) == 2 and len(bounds[1]) == 2):
+        raise ValueError(&#39;Bounds list must have exactly four values in the &#39;
+                         &#39;order: [[west, south], [east, north]]&#39;)
+
+    return _clamp_and_format_bounds(
+        bounds[0][0],
+        bounds[0][1],
+        bounds[1][0],
+        bounds[1][1])
+
+
+def _format_dict_bounds(bounds):
+    if &#39;west&#39; not in bounds or &#39;south&#39; not in bounds or \
+       &#39;east&#39; not in bounds or &#39;north&#39; not in bounds:
+        raise ValueError(&#39;Bounds must have &#34;west&#34;, &#34;south&#34;, &#34;east&#34; and &#39;
+                         &#39;&#34;north&#34; properties&#39;)
+
+    return _clamp_and_format_bounds(
+        bounds.get(&#39;west&#39;),
+        bounds.get(&#39;east&#39;),
+        bounds.get(&#39;south&#39;),
+        bounds.get(&#39;north&#39;))
+
+
+def _clamp_and_format_bounds(west, south, east, north):
+    west = _clamp(west, -180, 180)
+    east = _clamp(east, -180, 180)
+    south = _clamp(south, -90, 90)
+    north = _clamp(north, -90, 90)
+
+    return [[west, south], [east, north]]
+
+
+def _clamp(value, minimum, maximum):
+    return _conv2nan(max(minimum, min(value, maximum)))
+
+
+def _conv2nan(val):
+    &#34;&#34;&#34;convert Nones to np.nans&#34;&#34;&#34;
+    return np.nan if val is None else val
+
+
+def _compute_bounds(layers):
+    if layers is None or len(layers) == 0:
+        return None
+
+    bounds = _format_bounds(layers[0].bounds)
+
+    for layer in layers[1:]:
+        layer_bounds = _format_bounds(layer.bounds)
+
+        if layer_bounds[0][0] &lt; bounds[0][0]:
+            bounds[0][0] = layer_bounds[0][0]
+
+        if layer_bounds[0][1] &lt; bounds[0][1]:
+            bounds[0][1] = layer_bounds[0][1]
+
+        if layer_bounds[1][0] &gt; bounds[1][0]:
+            bounds[1][0] = layer_bounds[1][0]
+
+        if layer_bounds[1][1] &gt; bounds[1][1]:
+            bounds[1][1] = layer_bounds[1][1]
+
+    return bounds
+
+
+def _get_theme(theme, basemap):
+    if theme and theme not in constants.THEMES:
+        raise ValueError(
+            &#39;This theme is not valid. Valid themes types are: {}.&#39;.format(
+                &#39;, &#39;.join(constants.THEMES)
+            ))
+    if not theme and basemap == Basemaps.darkmatter:
+        return &#39;dark&#39;
+
+    return theme
+
+
+def get_token(basemap):
+    if isinstance(basemap, dict):
+        return get_token(basemap)
+    return &#39;&#39;
+
+
+def get_basecolor(basemap):
+    if basemap is None:
+        return &#39;white&#39;
+    elif isinstance(basemap, str):
+        if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+            return basemap  # Basemap is a color
+    return &#39;&#39;
+
+
+def get_basemap(basemap):
+    if isinstance(basemap, dict):
+        token = get_token(basemap)
+        if &#39;style&#39; in basemap:
+            if not token and basemap.get(&#39;style&#39;).startswith(&#39;mapbox://&#39;):
+                warn(&#39;A Mapbox style usually needs a token&#39;)
+            return basemap.get(&#39;style&#39;)
+        else:
+            raise ValueError(&#39;If basemap is a dict, it must have a `style` key&#39;)
+    return &#39;&#39;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.viz.map.get_basecolor"><code class="name flex">
+<span>def <span class="ident">get_basecolor</span></span>(<span>basemap)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_basecolor(basemap):
+    if basemap is None:
+        return &#39;white&#39;
+    elif isinstance(basemap, str):
+        if basemap not in [Basemaps.voyager, Basemaps.positron, Basemaps.darkmatter]:
+            return basemap  # Basemap is a color
+    return &#39;&#39;</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.get_basemap"><code class="name flex">
+<span>def <span class="ident">get_basemap</span></span>(<span>basemap)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_basemap(basemap):
+    if isinstance(basemap, dict):
+        token = get_token(basemap)
+        if &#39;style&#39; in basemap:
+            if not token and basemap.get(&#39;style&#39;).startswith(&#39;mapbox://&#39;):
+                warn(&#39;A Mapbox style usually needs a token&#39;)
+            return basemap.get(&#39;style&#39;)
+        else:
+            raise ValueError(&#39;If basemap is a dict, it must have a `style` key&#39;)
+    return &#39;&#39;</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.get_token"><code class="name flex">
+<span>def <span class="ident">get_token</span></span>(<span>basemap)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_token(basemap):
+    if isinstance(basemap, dict):
+        return get_token(basemap)
+    return &#39;&#39;</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.viz.map.Map"><code class="flex name class">
+<span>class <span class="ident">Map</span></span>
+<span>(</span><span>layers=None, basemap='Positron', bounds=None, size=None, viewport=None, default_legend=False, show_info=None, theme=None, title=None, description=None, is_static=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Map</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>layers (list of :py:class:<code>Layer &lt;cartoframes.viz.Layer&gt;</code>): List of</dt>
+<dt>layers. Zero or more of :py:class:<code>Layer &lt;cartoframes.viz.Layer&gt;</code>.</dt>
+<dt>basemap (str, optional):</dt>
+<dt>- if a <code>str</code>, name of a CARTO vector basemap. One of <code>positron</code>,</dt>
+<dt><code>voyager</code>, or <code>darkmatter</code> from the :obj:<code>BaseMaps</code> class, or a</dt>
+<dt>hex value, rgb string, or other color expression from CARTO VL.</dt>
+<dt>- if a <code>dict</code>, Mapbox or other style as the value of the <code>style</code> key.</dt>
+<dt>If a Mapbox style, the access token is the value of the <code>token</code></dt>
+<dt>key.</dt>
+<dt><strong><code>bounds</code></strong> :&ensp;<code>dict</code> or <code>list</code>, optional</dt>
+<dd>a dict with <code>west</code>, <code>south</code>, <code>east</code>, <code>north</code>
+keys, or an array of floats in the following structure: [[west,
+south], [east, north]]. If not provided the bounds will be automatically
+calculated to fit all features.</dd>
+<dt><strong><code>size</code></strong> :&ensp;<code>tuple</code>, optional</dt>
+<dd>a (width, height) pair for the size of the map.
+Default is (1024, 632).</dd>
+<dt><strong><code>viewport</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>Properties for display of the map viewport.
+Keys can be <code>bearing</code> or <code>pitch</code>.</dd>
+<dt><strong><code>default_legend</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Default False. If True, it displays the map title.
+Therefore, it needs the <code>title</code> value to be defined.</dd>
+<dt><strong><code>show_info</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Whether to display center and zoom information in the
+map or not. It is False by default.</dd>
+<dt><strong><code>is_static</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Default False. If True, instead of showing and interactive
+map, a png image will be displayed.</dd>
+<dt><strong><code>theme</code></strong> :&ensp;<code>string</code>, optional</dt>
+<dd>Use a different UI theme</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>string</code>, optional</dt>
+<dd>Title to label the map</dd>
+<dt><strong><code>description</code></strong> :&ensp;<code>string</code>, optional</dt>
+<dd>Text that describes the map and will be displayed in the
+default legend after the title.</dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<p>Basic usage.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Map(Layer('table in your account'))</p>
+</div>
+<p>Display more than one layer on a map.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Map(layers=[
+Layer('table1'),
+Layer('table2')
+])</p>
+</div>
+<p>Change the CARTO basemap style.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer, basemaps</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Map(
+Layer('table in your account'),
+basemaps.darkmatter
+)</p>
+</div>
+<p>Choose a custom basemap style. Here we use the Mapbox streets style,
+which requires an access token.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your CARTO API key'
+)</p>
+<p>basemap = {
+'style': 'mapbox://styles/mapbox/streets-v9',
+'token': 'your Mapbox token'
+}</p>
+<p>Map(
+Layer('table in your account'),
+basemap
+)</p>
+</div>
+<p>Remove basemap and show a custom color.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Map(
+Layer('table in your account'),
+basemap='yellow'
+# None, False, 'white', 'rgb(255, 255, 0)'
+)</p>
+</div>
+<p>Set custom bounds.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>bounds = {
+'west': -10,
+'east': 10,
+'north': -10,
+'south': 10
+}</p>
+<h1 id="or-bounds-10-10-10-10">or bounds = [[-10, 10], [10, -10]]</h1>
+<p>Map(
+Layer('table in your account'),
+bounds=bounds
+)</p>
+</div>
+<p>Show the map center and zoom value on the map (lower left-hand corner).</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import Credentials, set_default_credentials
+from cartoframes.viz import Map, Layer</p>
+<p>credentials = Credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)
+set_default_credentials(credentials)</p>
+<p>Map(Layer('table in your account'), show_info=True)</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Map(object):
+    &#34;&#34;&#34;Map
+
+    Args:
+        layers (list of :py:class:`Layer &lt;cartoframes.viz.Layer&gt;`): List of
+          layers. Zero or more of :py:class:`Layer &lt;cartoframes.viz.Layer&gt;`.
+        basemap (str, optional):
+          - if a `str`, name of a CARTO vector basemap. One of `positron`,
+            `voyager`, or `darkmatter` from the :obj:`BaseMaps` class, or a
+            hex value, rgb string, or other color expression from CARTO VL.
+          - if a `dict`, Mapbox or other style as the value of the `style` key.
+            If a Mapbox style, the access token is the value of the `token`
+            key.
+        bounds (dict or list, optional): a dict with `west`, `south`, `east`, `north`
+          keys, or an array of floats in the following structure: [[west,
+          south], [east, north]]. If not provided the bounds will be automatically
+          calculated to fit all features.
+        size (tuple, optional): a (width, height) pair for the size of the map.
+          Default is (1024, 632).
+        viewport (dict, optional): Properties for display of the map viewport.
+          Keys can be `bearing` or `pitch`.
+        default_legend (bool, optional): Default False. If True, it displays the map title.
+          Therefore, it needs the `title` value to be defined.
+        show_info (bool, optional): Whether to display center and zoom information in the
+          map or not. It is False by default.
+        is_static (bool, optional): Default False. If True, instead of showing and interactive
+          map, a png image will be displayed.
+        theme (string, optional): Use a different UI theme
+        title (string, optional): Title to label the map
+        description (string, optional): Text that describes the map and will be displayed in the
+          default legend after the title.
+
+    Examples:
+
+        Basic usage.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(Layer(&#39;table in your account&#39;))
+
+        Display more than one layer on a map.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(layers=[
+                Layer(&#39;table1&#39;),
+                Layer(&#39;table2&#39;)
+            ])
+
+        Change the CARTO basemap style.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer, basemaps
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemaps.darkmatter
+            )
+
+        Choose a custom basemap style. Here we use the Mapbox streets style,
+        which requires an access token.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your CARTO API key&#39;
+            )
+
+            basemap = {
+                &#39;style&#39;: &#39;mapbox://styles/mapbox/streets-v9&#39;,
+                &#39;token&#39;: &#39;your Mapbox token&#39;
+            }
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemap
+            )
+
+        Remove basemap and show a custom color.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                basemap=&#39;yellow&#39;  # None, False, &#39;white&#39;, &#39;rgb(255, 255, 0)&#39;
+            )
+
+        Set custom bounds.
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            bounds = {
+                &#39;west&#39;: -10,
+                &#39;east&#39;: 10,
+                &#39;north&#39;: -10,
+                &#39;south&#39;: 10
+            }
+
+            # or bounds = [[-10, 10], [10, -10]]
+
+            Map(
+                Layer(&#39;table in your account&#39;),
+                bounds=bounds
+            )
+
+        Show the map center and zoom value on the map (lower left-hand corner).
+
+        .. code::
+
+            from cartoframes.auth import Credentials, set_default_credentials
+            from cartoframes.viz import Map, Layer
+
+            credentials = Credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+            set_default_credentials(credentials)
+
+            Map(Layer(&#39;table in your account&#39;), show_info=True)
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 layers=None,
+                 basemap=Basemaps.positron,
+                 bounds=None,
+                 size=None,
+                 viewport=None,
+                 default_legend=False,
+                 show_info=None,
+                 theme=None,
+                 title=None,
+                 description=None,
+                 is_static=None,
+                 **kwargs):
+
+        self._validate_default_legend(default_legend, title)
+
+        self.layers = _init_layers(layers)
+        self.basemap = basemap
+        self.size = size
+        self.viewport = viewport
+        self.default_legend = default_legend
+        self.title = title
+        self.description = description
+        self.show_info = show_info
+        self.layer_defs = _get_layer_defs(self.layers)
+        self.bounds = _get_bounds(bounds, self.layers)
+        self.theme = _get_theme(theme, basemap)
+        self.is_static = is_static
+        self.token = get_token(basemap)
+        self.basecolor = get_basecolor(basemap)
+
+        self._carto_vl_path = kwargs.get(&#39;_carto_vl_path&#39;, None)
+        self._airship_path = kwargs.get(&#39;_airship_path&#39;, None)
+        self._publisher = self._get_publisher()
+        self._kuviz = None
+
+        self.camera = None
+        if viewport is not None:
+            self.camera = {
+                &#39;center&#39;: get_center(viewport),
+                &#39;zoom&#39;: viewport.get(&#39;zoom&#39;),
+                &#39;bearing&#39;: viewport.get(&#39;bearing&#39;),
+                &#39;pitch&#39;: viewport.get(&#39;pitch&#39;)
+            }
+
+    def _repr_html_(self):
+        self._htmlMap = HTMLMap()
+
+        self._htmlMap.set_content(
+            layers=self.layer_defs,
+            bounds=self.bounds,
+            size=self.size,
+            viewport=self.viewport,
+            camera=self.camera,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=self.show_info,
+            theme=self.theme,
+            title=self.title,
+            description=self.description,
+            is_static=self.is_static,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
+
+        return self._htmlMap.html
+
+    def get_content(self):
+        has_legends = any(layer[&#39;legend&#39;] for layer in self.layer_defs) or self.default_legend
+        has_widgets = any(len(layer[&#39;widgets&#39;]) != 0 for layer in self.layer_defs)
+
+        return {
+            &#39;layers&#39;: self.layer_defs,
+            &#39;bounds&#39;: self.bounds,
+            &#39;size&#39;: self.size,
+            &#39;viewport&#39;: self.viewport,
+            &#39;camera&#39;: self.camera,
+            &#39;basemap&#39;: self.basemap,
+            &#39;basecolor&#39;: self.basecolor,
+            &#39;token&#39;: self.token,
+            &#39;default_legend&#39;: self.default_legend,
+            &#39;show_info&#39;: self.show_info,
+            &#39;has_legends&#39;: has_legends,
+            &#39;has_widgets&#39;: has_widgets,
+            &#39;theme&#39;: self.theme,
+            &#39;title&#39;: self.title,
+            &#39;description&#39;: self.description,
+            &#39;is_static&#39;: self.is_static,
+            &#39;_carto_vl_path&#39;: self._carto_vl_path,
+            &#39;_airship_path&#39;: self._airship_path
+        }
+
+    def publish(self, name, maps_api_key=&#39;default_public&#39;, credentials=None, password=None):
+        &#34;&#34;&#34;Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+            password (str, optional): setting it your Kuviz will be protected by
+                password. When someone will try to show the Kuviz, the password
+                will be requested
+
+        Example:
+
+            Publishing the map visualization
+
+            .. code::
+
+                from cartoframes.viz import Map, Layer
+
+                tmap = Map(Layer(&#39;tablename&#39;))
+                tmap.publish(&#39;Custom Map Title&#39;)
+
+        &#34;&#34;&#34;
+        if not self._publisher.is_sync():
+            raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                                 &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+        if maps_api_key == &#39;default_public&#39;:
+            self._validate_public_publication()
+
+        self._publisher.set_credentials(credentials)
+        html = self._get_publication_html(name, maps_api_key)
+        self._kuviz = self._publisher.publish(html, name, password)
+        return kuviz_to_dict(self._kuviz)
+
+    def sync_data(self, table_name, credentials=None):
+        &#34;&#34;&#34;Synchronize datasets used by the map with CARTO.
+
+        Args:
+            table_name (str): Desired table name for the dataset on CARTO. If
+                name does not conform to SQL naming conventions, it will be
+                &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+                and other special characters.
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+        &#34;&#34;&#34;
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name, credentials)
+
+    def delete_publication(self):
+        &#34;&#34;&#34;Delete the published map Kuviz.&#34;&#34;&#34;
+        if self._kuviz:
+            self._kuviz.delete()
+            print(&#34;Publication &#39;{n}&#39; ({id}) deleted&#34;.format(n=self._kuviz.name, id=self._kuviz.id))
+            self._kuviz = None
+
+    def update_publication(self, name, password, maps_api_key=&#39;default_public&#39;):
+        &#34;&#34;&#34;Update the published map Kuviz.
+
+        Args:
+            name (str): The Kuviz name on CARTO
+            password (str): setting it your Kuviz will be protected by
+                password and using `None` the Kuviz will be public
+            maps_api_key (str, optional): A Regular API key with permissions
+                to Maps API and datasets used by the map
+        &#34;&#34;&#34;
+        if not self._kuviz:
+            raise CartoException(&#39;The map has not been published. Use the `publish` method.&#39;)
+
+        if not self._publisher.is_sync():
+            raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                                 &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+        if maps_api_key == &#39;default_public&#39;:
+            self._validate_public_publication()
+
+        self._kuviz.data = self._get_publication_html(name, maps_api_key)
+        self._kuviz.name = name
+        self._kuviz.password = password
+        self._kuviz.save()
+        return kuviz_to_dict(self._kuviz)
+
+    @staticmethod
+    def all_publications(credentials=None):
+        &#34;&#34;&#34;Get all map Kuviz published by the current user.
+
+        Args:
+            credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+                A Credentials instance. If not provided, the credentials will be automatically
+                obtained from the default credentials if available.
+        &#34;&#34;&#34;
+        return KuvizPublisher.all(credentials)
+
+    def _get_publication_html(self, name, maps_api_key):
+        html_map = HTMLMap(&#39;templates/viz/main.html.j2&#39;)
+        html_map.set_content(
+            layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
+            bounds=self.bounds,
+            size=None,
+            viewport=self.viewport,
+            basemap=self.basemap,
+            default_legend=self.default_legend,
+            show_info=False,
+            theme=self.theme,
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path,
+            title=name,
+            description=self.description,
+            is_embed=True,
+            is_static=self.is_static)
+
+        return html_map.html
+
+    def _validate_default_legend(self, default_legend, title):
+        if default_legend and not title:
+            raise CartoException(&#39;The default legend needs a map title to be displayed&#39;)
+
+    def _get_publisher(self):
+        return KuvizPublisher(self.layers)
+
+    def _validate_public_publication(self):
+        if not self._publisher.is_public():
+            raise CartoException(&#39;The datasets used in your map are not public. &#39;
+                                 &#39;You need add new Regular API key with permissions to Maps API and the datasets. &#39;
+                                 &#39;You can do it from your CARTO dashboard or using the Auth API. You can get more &#39;
+                                 &#39;info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/&#39;)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="cartoframes.viz.map.Map.all_publications"><code class="name flex">
+<span>def <span class="ident">all_publications</span></span>(<span>credentials=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get all map Kuviz published by the current user.</p>
+<h2 id="args">Args</h2>
+<p>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>, optional):
+A Credentials instance. If not provided, the credentials will be automatically
+obtained from the default credentials if available.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def all_publications(credentials=None):
+    &#34;&#34;&#34;Get all map Kuviz published by the current user.
+
+    Args:
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
+    &#34;&#34;&#34;
+    return KuvizPublisher.all(credentials)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.viz.map.Map.delete_publication"><code class="name flex">
+<span>def <span class="ident">delete_publication</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Delete the published map Kuviz.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def delete_publication(self):
+    &#34;&#34;&#34;Delete the published map Kuviz.&#34;&#34;&#34;
+    if self._kuviz:
+        self._kuviz.delete()
+        print(&#34;Publication &#39;{n}&#39; ({id}) deleted&#34;.format(n=self._kuviz.name, id=self._kuviz.id))
+        self._kuviz = None</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.Map.get_content"><code class="name flex">
+<span>def <span class="ident">get_content</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_content(self):
+    has_legends = any(layer[&#39;legend&#39;] for layer in self.layer_defs) or self.default_legend
+    has_widgets = any(len(layer[&#39;widgets&#39;]) != 0 for layer in self.layer_defs)
+
+    return {
+        &#39;layers&#39;: self.layer_defs,
+        &#39;bounds&#39;: self.bounds,
+        &#39;size&#39;: self.size,
+        &#39;viewport&#39;: self.viewport,
+        &#39;camera&#39;: self.camera,
+        &#39;basemap&#39;: self.basemap,
+        &#39;basecolor&#39;: self.basecolor,
+        &#39;token&#39;: self.token,
+        &#39;default_legend&#39;: self.default_legend,
+        &#39;show_info&#39;: self.show_info,
+        &#39;has_legends&#39;: has_legends,
+        &#39;has_widgets&#39;: has_widgets,
+        &#39;theme&#39;: self.theme,
+        &#39;title&#39;: self.title,
+        &#39;description&#39;: self.description,
+        &#39;is_static&#39;: self.is_static,
+        &#39;_carto_vl_path&#39;: self._carto_vl_path,
+        &#39;_airship_path&#39;: self._airship_path
+    }</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.Map.publish"><code class="name flex">
+<span>def <span class="ident">publish</span></span>(<span>self, name, maps_api_key='default_public', credentials=None, password=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Publish the map visualization as a CARTO custom visualization (aka Kuviz).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The Kuviz name on CARTO</dd>
+<dt><strong><code>maps_api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A Regular API key with permissions
+to Maps API and datasets used by the map</dd>
+<dt>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>, optional):</dt>
+<dt>A Credentials instance. If not provided, the credentials will be automatically</dt>
+<dt>obtained from the default credentials if available.</dt>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>setting it your Kuviz will be protected by
+password. When someone will try to show the Kuviz, the password
+will be requested</dd>
+</dl>
+<h2 id="example">Example</h2>
+<p>Publishing the map visualization</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.viz import Map, Layer</p>
+<p>tmap = Map(Layer('tablename'))
+tmap.publish('Custom Map Title')</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def publish(self, name, maps_api_key=&#39;default_public&#39;, credentials=None, password=None):
+    &#34;&#34;&#34;Publish the map visualization as a CARTO custom visualization (aka Kuviz).
+
+    Args:
+        name (str): The Kuviz name on CARTO
+        maps_api_key (str, optional): A Regular API key with permissions
+            to Maps API and datasets used by the map
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
+        password (str, optional): setting it your Kuviz will be protected by
+            password. When someone will try to show the Kuviz, the password
+            will be requested
+
+    Example:
+
+        Publishing the map visualization
+
+        .. code::
+
+            from cartoframes.viz import Map, Layer
+
+            tmap = Map(Layer(&#39;tablename&#39;))
+            tmap.publish(&#39;Custom Map Title&#39;)
+
+    &#34;&#34;&#34;
+    if not self._publisher.is_sync():
+        raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                             &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+    if maps_api_key == &#39;default_public&#39;:
+        self._validate_public_publication()
+
+    self._publisher.set_credentials(credentials)
+    html = self._get_publication_html(name, maps_api_key)
+    self._kuviz = self._publisher.publish(html, name, password)
+    return kuviz_to_dict(self._kuviz)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.Map.sync_data"><code class="name flex">
+<span>def <span class="ident">sync_data</span></span>(<span>self, table_name, credentials=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Synchronize datasets used by the map with CARTO.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Desired table name for the dataset on CARTO. If
+name does not conform to SQL naming conventions, it will be
+'normalized' (e.g., all lower case, adding <code>_</code> in place of spaces
+and other special characters.</dd>
+</dl>
+<p>credentials (:py:class:<code>Credentials &lt;cartoframes.auth.Credentials&gt;</code>, optional):
+A Credentials instance. If not provided, the credentials will be automatically
+obtained from the default credentials if available.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def sync_data(self, table_name, credentials=None):
+    &#34;&#34;&#34;Synchronize datasets used by the map with CARTO.
+
+    Args:
+        table_name (str): Desired table name for the dataset on CARTO. If
+            name does not conform to SQL naming conventions, it will be
+            &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+            and other special characters.
+        credentials (:py:class:`Credentials &lt;cartoframes.auth.Credentials&gt;`, optional):
+            A Credentials instance. If not provided, the credentials will be automatically
+            obtained from the default credentials if available.
+    &#34;&#34;&#34;
+    if not self._publisher.is_sync():
+        self._publisher.sync_layers(table_name, credentials)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.viz.map.Map.update_publication"><code class="name flex">
+<span>def <span class="ident">update_publication</span></span>(<span>self, name, password, maps_api_key='default_public')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Update the published map Kuviz.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The Kuviz name on CARTO</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>setting it your Kuviz will be protected by
+password and using <code>None</code> the Kuviz will be public</dd>
+<dt><strong><code>maps_api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A Regular API key with permissions
+to Maps API and datasets used by the map</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def update_publication(self, name, password, maps_api_key=&#39;default_public&#39;):
+    &#34;&#34;&#34;Update the published map Kuviz.
+
+    Args:
+        name (str): The Kuviz name on CARTO
+        password (str): setting it your Kuviz will be protected by
+            password and using `None` the Kuviz will be public
+        maps_api_key (str, optional): A Regular API key with permissions
+            to Maps API and datasets used by the map
+    &#34;&#34;&#34;
+    if not self._kuviz:
+        raise CartoException(&#39;The map has not been published. Use the `publish` method.&#39;)
+
+    if not self._publisher.is_sync():
+        raise CartoException(&#39;The map layers are not synchronized with CARTO. &#39;
+                             &#39;Please, use the `sync_data` method before publishing the map&#39;)
+
+    if maps_api_key == &#39;default_public&#39;:
+        self._validate_public_publication()
+
+    self._kuviz.data = self._get_publication_html(name, maps_api_key)
+    self._kuviz.name = name
+    self._kuviz.password = password
+    self._kuviz.save()
+    return kuviz_to_dict(self._kuviz)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.viz" href="index.html">cartoframes.viz</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.viz.map.get_basecolor" href="#cartoframes.viz.map.get_basecolor">get_basecolor</a></code></li>
+<li><code><a title="cartoframes.viz.map.get_basemap" href="#cartoframes.viz.map.get_basemap">get_basemap</a></code></li>
+<li><code><a title="cartoframes.viz.map.get_token" href="#cartoframes.viz.map.get_token">get_token</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.viz.map.Map" href="#cartoframes.viz.map.Map">Map</a></code></h4>
+<ul class="two-column">
+<li><code><a title="cartoframes.viz.map.Map.all_publications" href="#cartoframes.viz.map.Map.all_publications">all_publications</a></code></li>
+<li><code><a title="cartoframes.viz.map.Map.delete_publication" href="#cartoframes.viz.map.Map.delete_publication">delete_publication</a></code></li>
+<li><code><a title="cartoframes.viz.map.Map.get_content" href="#cartoframes.viz.map.Map.get_content">get_content</a></code></li>
+<li><code><a title="cartoframes.viz.map.Map.publish" href="#cartoframes.viz.map.Map.publish">publish</a></code></li>
+<li><code><a title="cartoframes.viz.map.Map.sync_data" href="#cartoframes.viz.map.Map.sync_data">sync_data</a></code></li>
+<li><code><a title="cartoframes.viz.map.Map.update_publication" href="#cartoframes.viz.map.Map.update_publication">update_publication</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

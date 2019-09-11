@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.utils.columns API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.utils.columns</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python"># coding=UTF-8
+
+import re
+import sys
+
+from unidecode import unidecode
+
+
+class Column(object):
+    DATETIME_DTYPES = [&#39;datetime64[D]&#39;, &#39;datetime64[ns]&#39;, &#39;datetime64[ns, UTC]&#39;]
+    SUPPORTED_GEOM_COL_NAMES = [&#39;geom&#39;, &#39;the_geom&#39;, &#39;geometry&#39;]
+    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + [&#39;the_geom_webmercator&#39;, &#39;cartodb_id&#39;]
+    MAX_LENGTH = 63
+    MAX_COLLISION_LENGTH = MAX_LENGTH - 4
+    RESERVED_WORDS = (&#39;ALL&#39;, &#39;ANALYSE&#39;, &#39;ANALYZE&#39;, &#39;AND&#39;, &#39;ANY&#39;, &#39;ARRAY&#39;, &#39;AS&#39;, &#39;ASC&#39;, &#39;ASYMMETRIC&#39;, &#39;AUTHORIZATION&#39;,
+                      &#39;BETWEEN&#39;, &#39;BINARY&#39;, &#39;BOTH&#39;, &#39;CASE&#39;, &#39;CAST&#39;, &#39;CHECK&#39;, &#39;COLLATE&#39;, &#39;COLUMN&#39;, &#39;CONSTRAINT&#39;,
+                      &#39;CREATE&#39;, &#39;CROSS&#39;, &#39;CURRENT_DATE&#39;, &#39;CURRENT_ROLE&#39;, &#39;CURRENT_TIME&#39;, &#39;CURRENT_TIMESTAMP&#39;,
+                      &#39;CURRENT_USER&#39;, &#39;DEFAULT&#39;, &#39;DEFERRABLE&#39;, &#39;DESC&#39;, &#39;DISTINCT&#39;, &#39;DO&#39;, &#39;ELSE&#39;, &#39;END&#39;, &#39;EXCEPT&#39;,
+                      &#39;FALSE&#39;, &#39;FOR&#39;, &#39;FOREIGN&#39;, &#39;FREEZE&#39;, &#39;FROM&#39;, &#39;FULL&#39;, &#39;GRANT&#39;, &#39;GROUP&#39;, &#39;HAVING&#39;, &#39;ILIKE&#39;, &#39;IN&#39;,
+                      &#39;INITIALLY&#39;, &#39;INNER&#39;, &#39;INTERSECT&#39;, &#39;INTO&#39;, &#39;IS&#39;, &#39;ISNULL&#39;, &#39;JOIN&#39;, &#39;LEADING&#39;, &#39;LEFT&#39;, &#39;LIKE&#39;,
+                      &#39;LIMIT&#39;, &#39;LOCALTIME&#39;, &#39;LOCALTIMESTAMP&#39;, &#39;NATURAL&#39;, &#39;NEW&#39;, &#39;NOT&#39;, &#39;NOTNULL&#39;, &#39;NULL&#39;, &#39;OFF&#39;,
+                      &#39;OFFSET&#39;, &#39;OLD&#39;, &#39;ON&#39;, &#39;ONLY&#39;, &#39;OR&#39;, &#39;ORDER&#39;, &#39;OUTER&#39;, &#39;OVERLAPS&#39;, &#39;PLACING&#39;, &#39;PRIMARY&#39;,
+                      &#39;REFERENCES&#39;, &#39;RIGHT&#39;, &#39;SELECT&#39;, &#39;SESSION_USER&#39;, &#39;SIMILAR&#39;, &#39;SOME&#39;, &#39;SYMMETRIC&#39;, &#39;TABLE&#39;, &#39;THEN&#39;,
+                      &#39;TO&#39;, &#39;TRAILING&#39;, &#39;TRUE&#39;, &#39;UNION&#39;, &#39;UNIQUE&#39;, &#39;USER&#39;, &#39;USING&#39;, &#39;VERBOSE&#39;, &#39;WHEN&#39;, &#39;WHERE&#39;,
+                      &#39;XMIN&#39;, &#39;XMAX&#39;, &#39;FORMAT&#39;, &#39;CONTROLLER&#39;, &#39;ACTION&#39;, )
+
+    @staticmethod
+    def from_sql_api_fields(sql_api_fields):
+        return [Column(column, normalize=False, pgtype=sql_api_fields[column][&#39;type&#39;]) for column in sql_api_fields]
+
+    def __init__(self, name, normalize=True, pgtype=None):
+        if not name:
+            raise ValueError(&#39;Column name cannot be null or empty&#39;)
+
+        self.name = str(name)
+        self.pgtype = pgtype
+        self.dtype = pg2dtypes(pgtype)
+        if normalize:
+            self.normalize()
+
+    def normalize(self, forbidden_column_names=None):
+        self._sanitize()
+        self.name = self._truncate()
+
+        if forbidden_column_names:
+            i = 1
+            while self.name in forbidden_column_names:
+                self.name = &#39;{}_{}&#39;.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
+                i += 1
+
+        return self
+
+    def _sanitize(self):
+        self.name = self._slugify(self.name)
+
+        if self._is_reserved() or self._is_unsupported():
+            self.name = &#39;_{}&#39;.format(self.name)
+
+    def _is_reserved(self):
+        return self.name.upper() in Column.RESERVED_WORDS
+
+    def _is_unsupported(self):
+        return not re.match(r&#39;^[a-z_]+[a-z_0-9]*$&#39;, self.name)
+
+    def _truncate(self, length=MAX_LENGTH):
+        return self.name[:length]
+
+    def _slugify(self, value):
+        value = str(value).lower()
+
+        if sys.version_info[0] &lt; 3:
+            value = unidecode(value.decode(&#39;utf-8&#39;))
+        else:
+            value = unidecode(value)
+
+        value = re.sub(r&#39;&lt;[^&gt;]+&gt;&#39;, &#39;&#39;, value)
+        value = re.sub(r&#39;&amp;.+?;&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;[^a-z0-9 _-]&#39;, &#39;-&#39;, value).strip().lower()
+        value = re.sub(r&#39;\s+&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39; &#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;-+&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;-&#39;, &#39;_&#39;, value)
+
+        return value
+
+
+def normalize_names(column_names):
+    &#34;&#34;&#34;Given an arbitrary column name, translate to a SQL-normalized column
+        name a la CARTO&#39;s Import API will translate to
+
+        Examples
+            * &#39;Field: 2&#39; -&gt; &#39;field_2&#39;
+            * &#39;2 Items&#39; -&gt; &#39;_2_items&#39;
+            * &#39;Unnamed: 0&#39; -&gt; &#39;unnamed_0&#39;,
+            * &#39;201moore&#39; -&gt; &#39;_201moore&#39;,
+            * &#39;201moore&#39; -&gt; &#39;_201moore_1&#39;,
+            * &#39;Acadia 1.2.3&#39; -&gt; &#39;acadia_1_2_3&#39;,
+            * &#39;old_soaker&#39; -&gt; &#39;old_soaker&#39;,
+            * &#39;_testingTesting&#39; -&gt; &#39;_testingtesting&#39;,
+            * 1 -&gt; &#39;_1&#39;,
+            * 1.0 -&gt; &#39;_1_0&#39;,
+            * &#39;public&#39; -&gt; &#39;public&#39;,
+            * &#39;SELECT&#39; -&gt; &#39;_select&#39;,
+            * &#39;à&#39; -&gt; &#39;a&#39;,
+            * &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow&#39; -&gt; \
+             &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli&#39;,
+            * &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow&#39; -&gt; \
+             &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabe_1&#39;,
+            * &#39;all&#39; -&gt; &#39;_all&#39;
+
+        Args:
+            column_names (list): List of column names that will be SQL normalized
+        Returns:
+            list: List of SQL-normalized column names
+    &#34;&#34;&#34;
+    result = []
+    for column_name in column_names:
+        column = Column(column_name).normalize(forbidden_column_names=result)
+        result.append(column.name)
+
+    return result
+
+
+def normalize_name(column_name):
+    if column_name is None:
+        return None
+
+    return normalize_names([column_name])[0]
+
+
+def dtypes(columns, exclude_dates=False, exclude_the_geom=False, exclude_bools=False):
+    return {x.name: x.dtype if not x.name == &#39;cartodb_id&#39; else &#39;int64&#39;
+            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
+            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)
+            and not(exclude_bools is True and x.dtype == &#39;bool&#39;)}
+
+
+def date_columns_names(columns):
+    return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
+
+
+def bool_columns_names(columns):
+    return [x.name for x in columns if x.dtype == &#39;bool&#39;]
+
+
+def pg2dtypes(pgtype):
+    &#34;&#34;&#34;Returns equivalent dtype for input `pgtype`.&#34;&#34;&#34;
+    mapping = {
+        &#39;bigint&#39;: &#39;float64&#39;,
+        &#39;boolean&#39;: &#39;bool&#39;,
+        &#39;date&#39;: &#39;datetime64[D]&#39;,
+        &#39;double precision&#39;: &#39;float64&#39;,
+        &#39;geometry&#39;: &#39;object&#39;,
+        &#39;int&#39;: &#39;int64&#39;,
+        &#39;integer&#39;: &#39;float64&#39;,
+        &#39;number&#39;: &#39;float64&#39;,
+        &#39;numeric&#39;: &#39;float64&#39;,
+        &#39;real&#39;: &#39;float64&#39;,
+        &#39;smallint&#39;: &#39;float64&#39;,
+        &#39;string&#39;: &#39;object&#39;,
+        &#39;timestamp&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestampz&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestamp with time zone&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestamp without time zone&#39;: &#39;datetime64[ns]&#39;,
+        &#39;USER-DEFINED&#39;: &#39;object&#39;,
+    }
+    return mapping.get(str(pgtype), &#39;object&#39;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.utils.columns.bool_columns_names"><code class="name flex">
+<span>def <span class="ident">bool_columns_names</span></span>(<span>columns)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def bool_columns_names(columns):
+    return [x.name for x in columns if x.dtype == &#39;bool&#39;]</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.columns.date_columns_names"><code class="name flex">
+<span>def <span class="ident">date_columns_names</span></span>(<span>columns)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def date_columns_names(columns):
+    return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.columns.dtypes"><code class="name flex">
+<span>def <span class="ident">dtypes</span></span>(<span>columns, exclude_dates=False, exclude_the_geom=False, exclude_bools=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def dtypes(columns, exclude_dates=False, exclude_the_geom=False, exclude_bools=False):
+    return {x.name: x.dtype if not x.name == &#39;cartodb_id&#39; else &#39;int64&#39;
+            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
+            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)
+            and not(exclude_bools is True and x.dtype == &#39;bool&#39;)}</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.columns.normalize_name"><code class="name flex">
+<span>def <span class="ident">normalize_name</span></span>(<span>column_name)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def normalize_name(column_name):
+    if column_name is None:
+        return None
+
+    return normalize_names([column_name])[0]</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.columns.normalize_names"><code class="name flex">
+<span>def <span class="ident">normalize_names</span></span>(<span>column_names)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Given an arbitrary column name, translate to a SQL-normalized column
+name a la CARTO's Import API will translate to</p>
+<p>Examples
+* 'Field: 2' -&gt; 'field_2'
+* '2 Items' -&gt; '_2_items'
+* 'Unnamed: 0' -&gt; 'unnamed_0',
+* '201moore' -&gt; '_201moore',
+* '201moore' -&gt; '_201moore_1',
+* 'Acadia 1.2.3' -&gt; 'acadia_1_2_3',
+* 'old_soaker' -&gt; 'old_soaker',
+* '_testingTesting' -&gt; '_testingtesting',
+* 1 -&gt; '_1',
+* 1.0 -&gt; '_1_0',
+* 'public' -&gt; 'public',
+* 'SELECT' -&gt; '_select',
+* 'à' -&gt; 'a',
+* 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -&gt;
+'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli',
+* 'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow' -&gt;
+'longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabe_1',
+* 'all' -&gt; '_all'</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>column_names</code></strong> :&ensp;<code>list</code></dt>
+<dd>List of column names that will be SQL normalized</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>list</code></strong></dt>
+<dd>List of SQL-normalized column names</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def normalize_names(column_names):
+    &#34;&#34;&#34;Given an arbitrary column name, translate to a SQL-normalized column
+        name a la CARTO&#39;s Import API will translate to
+
+        Examples
+            * &#39;Field: 2&#39; -&gt; &#39;field_2&#39;
+            * &#39;2 Items&#39; -&gt; &#39;_2_items&#39;
+            * &#39;Unnamed: 0&#39; -&gt; &#39;unnamed_0&#39;,
+            * &#39;201moore&#39; -&gt; &#39;_201moore&#39;,
+            * &#39;201moore&#39; -&gt; &#39;_201moore_1&#39;,
+            * &#39;Acadia 1.2.3&#39; -&gt; &#39;acadia_1_2_3&#39;,
+            * &#39;old_soaker&#39; -&gt; &#39;old_soaker&#39;,
+            * &#39;_testingTesting&#39; -&gt; &#39;_testingtesting&#39;,
+            * 1 -&gt; &#39;_1&#39;,
+            * 1.0 -&gt; &#39;_1_0&#39;,
+            * &#39;public&#39; -&gt; &#39;public&#39;,
+            * &#39;SELECT&#39; -&gt; &#39;_select&#39;,
+            * &#39;à&#39; -&gt; &#39;a&#39;,
+            * &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow&#39; -&gt; \
+             &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabespli&#39;,
+            * &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabesplittedrightnow&#39; -&gt; \
+             &#39;longcolumnshouldbesplittedsomehowanditellyouwhereitsgonnabe_1&#39;,
+            * &#39;all&#39; -&gt; &#39;_all&#39;
+
+        Args:
+            column_names (list): List of column names that will be SQL normalized
+        Returns:
+            list: List of SQL-normalized column names
+    &#34;&#34;&#34;
+    result = []
+    for column_name in column_names:
+        column = Column(column_name).normalize(forbidden_column_names=result)
+        result.append(column.name)
+
+    return result</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.columns.pg2dtypes"><code class="name flex">
+<span>def <span class="ident">pg2dtypes</span></span>(<span>pgtype)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns equivalent dtype for input <code>pgtype</code>.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def pg2dtypes(pgtype):
+    &#34;&#34;&#34;Returns equivalent dtype for input `pgtype`.&#34;&#34;&#34;
+    mapping = {
+        &#39;bigint&#39;: &#39;float64&#39;,
+        &#39;boolean&#39;: &#39;bool&#39;,
+        &#39;date&#39;: &#39;datetime64[D]&#39;,
+        &#39;double precision&#39;: &#39;float64&#39;,
+        &#39;geometry&#39;: &#39;object&#39;,
+        &#39;int&#39;: &#39;int64&#39;,
+        &#39;integer&#39;: &#39;float64&#39;,
+        &#39;number&#39;: &#39;float64&#39;,
+        &#39;numeric&#39;: &#39;float64&#39;,
+        &#39;real&#39;: &#39;float64&#39;,
+        &#39;smallint&#39;: &#39;float64&#39;,
+        &#39;string&#39;: &#39;object&#39;,
+        &#39;timestamp&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestampz&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestamp with time zone&#39;: &#39;datetime64[ns]&#39;,
+        &#39;timestamp without time zone&#39;: &#39;datetime64[ns]&#39;,
+        &#39;USER-DEFINED&#39;: &#39;object&#39;,
+    }
+    return mapping.get(str(pgtype), &#39;object&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.utils.columns.Column"><code class="flex name class">
+<span>class <span class="ident">Column</span></span>
+<span>(</span><span>name, normalize=True, pgtype=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Column(object):
+    DATETIME_DTYPES = [&#39;datetime64[D]&#39;, &#39;datetime64[ns]&#39;, &#39;datetime64[ns, UTC]&#39;]
+    SUPPORTED_GEOM_COL_NAMES = [&#39;geom&#39;, &#39;the_geom&#39;, &#39;geometry&#39;]
+    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + [&#39;the_geom_webmercator&#39;, &#39;cartodb_id&#39;]
+    MAX_LENGTH = 63
+    MAX_COLLISION_LENGTH = MAX_LENGTH - 4
+    RESERVED_WORDS = (&#39;ALL&#39;, &#39;ANALYSE&#39;, &#39;ANALYZE&#39;, &#39;AND&#39;, &#39;ANY&#39;, &#39;ARRAY&#39;, &#39;AS&#39;, &#39;ASC&#39;, &#39;ASYMMETRIC&#39;, &#39;AUTHORIZATION&#39;,
+                      &#39;BETWEEN&#39;, &#39;BINARY&#39;, &#39;BOTH&#39;, &#39;CASE&#39;, &#39;CAST&#39;, &#39;CHECK&#39;, &#39;COLLATE&#39;, &#39;COLUMN&#39;, &#39;CONSTRAINT&#39;,
+                      &#39;CREATE&#39;, &#39;CROSS&#39;, &#39;CURRENT_DATE&#39;, &#39;CURRENT_ROLE&#39;, &#39;CURRENT_TIME&#39;, &#39;CURRENT_TIMESTAMP&#39;,
+                      &#39;CURRENT_USER&#39;, &#39;DEFAULT&#39;, &#39;DEFERRABLE&#39;, &#39;DESC&#39;, &#39;DISTINCT&#39;, &#39;DO&#39;, &#39;ELSE&#39;, &#39;END&#39;, &#39;EXCEPT&#39;,
+                      &#39;FALSE&#39;, &#39;FOR&#39;, &#39;FOREIGN&#39;, &#39;FREEZE&#39;, &#39;FROM&#39;, &#39;FULL&#39;, &#39;GRANT&#39;, &#39;GROUP&#39;, &#39;HAVING&#39;, &#39;ILIKE&#39;, &#39;IN&#39;,
+                      &#39;INITIALLY&#39;, &#39;INNER&#39;, &#39;INTERSECT&#39;, &#39;INTO&#39;, &#39;IS&#39;, &#39;ISNULL&#39;, &#39;JOIN&#39;, &#39;LEADING&#39;, &#39;LEFT&#39;, &#39;LIKE&#39;,
+                      &#39;LIMIT&#39;, &#39;LOCALTIME&#39;, &#39;LOCALTIMESTAMP&#39;, &#39;NATURAL&#39;, &#39;NEW&#39;, &#39;NOT&#39;, &#39;NOTNULL&#39;, &#39;NULL&#39;, &#39;OFF&#39;,
+                      &#39;OFFSET&#39;, &#39;OLD&#39;, &#39;ON&#39;, &#39;ONLY&#39;, &#39;OR&#39;, &#39;ORDER&#39;, &#39;OUTER&#39;, &#39;OVERLAPS&#39;, &#39;PLACING&#39;, &#39;PRIMARY&#39;,
+                      &#39;REFERENCES&#39;, &#39;RIGHT&#39;, &#39;SELECT&#39;, &#39;SESSION_USER&#39;, &#39;SIMILAR&#39;, &#39;SOME&#39;, &#39;SYMMETRIC&#39;, &#39;TABLE&#39;, &#39;THEN&#39;,
+                      &#39;TO&#39;, &#39;TRAILING&#39;, &#39;TRUE&#39;, &#39;UNION&#39;, &#39;UNIQUE&#39;, &#39;USER&#39;, &#39;USING&#39;, &#39;VERBOSE&#39;, &#39;WHEN&#39;, &#39;WHERE&#39;,
+                      &#39;XMIN&#39;, &#39;XMAX&#39;, &#39;FORMAT&#39;, &#39;CONTROLLER&#39;, &#39;ACTION&#39;, )
+
+    @staticmethod
+    def from_sql_api_fields(sql_api_fields):
+        return [Column(column, normalize=False, pgtype=sql_api_fields[column][&#39;type&#39;]) for column in sql_api_fields]
+
+    def __init__(self, name, normalize=True, pgtype=None):
+        if not name:
+            raise ValueError(&#39;Column name cannot be null or empty&#39;)
+
+        self.name = str(name)
+        self.pgtype = pgtype
+        self.dtype = pg2dtypes(pgtype)
+        if normalize:
+            self.normalize()
+
+    def normalize(self, forbidden_column_names=None):
+        self._sanitize()
+        self.name = self._truncate()
+
+        if forbidden_column_names:
+            i = 1
+            while self.name in forbidden_column_names:
+                self.name = &#39;{}_{}&#39;.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
+                i += 1
+
+        return self
+
+    def _sanitize(self):
+        self.name = self._slugify(self.name)
+
+        if self._is_reserved() or self._is_unsupported():
+            self.name = &#39;_{}&#39;.format(self.name)
+
+    def _is_reserved(self):
+        return self.name.upper() in Column.RESERVED_WORDS
+
+    def _is_unsupported(self):
+        return not re.match(r&#39;^[a-z_]+[a-z_0-9]*$&#39;, self.name)
+
+    def _truncate(self, length=MAX_LENGTH):
+        return self.name[:length]
+
+    def _slugify(self, value):
+        value = str(value).lower()
+
+        if sys.version_info[0] &lt; 3:
+            value = unidecode(value.decode(&#39;utf-8&#39;))
+        else:
+            value = unidecode(value)
+
+        value = re.sub(r&#39;&lt;[^&gt;]+&gt;&#39;, &#39;&#39;, value)
+        value = re.sub(r&#39;&amp;.+?;&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;[^a-z0-9 _-]&#39;, &#39;-&#39;, value).strip().lower()
+        value = re.sub(r&#39;\s+&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39; &#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;-+&#39;, &#39;-&#39;, value)
+        value = re.sub(r&#39;-&#39;, &#39;_&#39;, value)
+
+        return value</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="cartoframes.utils.columns.Column.DATETIME_DTYPES"><code class="name">var <span class="ident">DATETIME_DTYPES</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.utils.columns.Column.MAX_COLLISION_LENGTH"><code class="name">var <span class="ident">MAX_COLLISION_LENGTH</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.utils.columns.Column.MAX_LENGTH"><code class="name">var <span class="ident">MAX_LENGTH</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.utils.columns.Column.RESERVED_COLUMN_NAMES"><code class="name">var <span class="ident">RESERVED_COLUMN_NAMES</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.utils.columns.Column.RESERVED_WORDS"><code class="name">var <span class="ident">RESERVED_WORDS</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.utils.columns.Column.SUPPORTED_GEOM_COL_NAMES"><code class="name">var <span class="ident">SUPPORTED_GEOM_COL_NAMES</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="cartoframes.utils.columns.Column.from_sql_api_fields"><code class="name flex">
+<span>def <span class="ident">from_sql_api_fields</span></span>(<span>sql_api_fields)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@staticmethod
+def from_sql_api_fields(sql_api_fields):
+    return [Column(column, normalize=False, pgtype=sql_api_fields[column][&#39;type&#39;]) for column in sql_api_fields]</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.utils.columns.Column.normalize"><code class="name flex">
+<span>def <span class="ident">normalize</span></span>(<span>self, forbidden_column_names=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def normalize(self, forbidden_column_names=None):
+    self._sanitize()
+    self.name = self._truncate()
+
+    if forbidden_column_names:
+        i = 1
+        while self.name in forbidden_column_names:
+            self.name = &#39;{}_{}&#39;.format(self._truncate(length=Column.MAX_COLLISION_LENGTH), str(i))
+            i += 1
+
+    return self</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.utils" href="index.html">cartoframes.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="cartoframes.utils.columns.bool_columns_names" href="#cartoframes.utils.columns.bool_columns_names">bool_columns_names</a></code></li>
+<li><code><a title="cartoframes.utils.columns.date_columns_names" href="#cartoframes.utils.columns.date_columns_names">date_columns_names</a></code></li>
+<li><code><a title="cartoframes.utils.columns.dtypes" href="#cartoframes.utils.columns.dtypes">dtypes</a></code></li>
+<li><code><a title="cartoframes.utils.columns.normalize_name" href="#cartoframes.utils.columns.normalize_name">normalize_name</a></code></li>
+<li><code><a title="cartoframes.utils.columns.normalize_names" href="#cartoframes.utils.columns.normalize_names">normalize_names</a></code></li>
+<li><code><a title="cartoframes.utils.columns.pg2dtypes" href="#cartoframes.utils.columns.pg2dtypes">pg2dtypes</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.utils.columns.Column" href="#cartoframes.utils.columns.Column">Column</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.utils.columns.Column.DATETIME_DTYPES" href="#cartoframes.utils.columns.Column.DATETIME_DTYPES">DATETIME_DTYPES</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.MAX_COLLISION_LENGTH" href="#cartoframes.utils.columns.Column.MAX_COLLISION_LENGTH">MAX_COLLISION_LENGTH</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.MAX_LENGTH" href="#cartoframes.utils.columns.Column.MAX_LENGTH">MAX_LENGTH</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.RESERVED_COLUMN_NAMES" href="#cartoframes.utils.columns.Column.RESERVED_COLUMN_NAMES">RESERVED_COLUMN_NAMES</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.RESERVED_WORDS" href="#cartoframes.utils.columns.Column.RESERVED_WORDS">RESERVED_WORDS</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.SUPPORTED_GEOM_COL_NAMES" href="#cartoframes.utils.columns.Column.SUPPORTED_GEOM_COL_NAMES">SUPPORTED_GEOM_COL_NAMES</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.from_sql_api_fields" href="#cartoframes.utils.columns.Column.from_sql_api_fields">from_sql_api_fields</a></code></li>
+<li><code><a title="cartoframes.utils.columns.Column.normalize" href="#cartoframes.utils.columns.Column.normalize">normalize</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.utils.geom_utils API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.utils.geom_utils</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">import re
+import sys
+import binascii as ba
+from warnings import warn
+from copy import deepcopy
+
+from carto.exceptions import CartoException
+
+from ..lib import context
+
+try:
+    import geopandas
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
+
+
+GEOM_COLUMN_NAMES = [
+    &#39;geometry&#39;,
+    &#39;the_geom&#39;,
+    &#39;wkt_geometry&#39;,
+    &#39;wkb_geometry&#39;,
+    &#39;geom&#39;,
+    &#39;wkt&#39;,
+    &#39;wkb&#39;
+]
+
+LAT_COLUMN_NAMES = [
+    &#39;latitude&#39;,
+    &#39;lat&#39;
+]
+
+LNG_COLUMN_NAMES = [
+    &#39;longitude&#39;,
+    &#39;lng&#39;,
+    &#39;lon&#39;,
+    &#39;long&#39;
+]
+
+ENC_SHAPELY = &#39;shapely&#39;
+ENC_WKB = &#39;wkb&#39;
+ENC_WKB_HEX = &#39;wkb-hex&#39;
+ENC_WKB_BHEX = &#39;wkb-bhex&#39;
+ENC_WKT = &#39;wkt&#39;
+ENC_EWKT = &#39;ewkt&#39;
+
+if (sys.version_info &lt; (3, 0)):
+    ENC_WKB_BHEX = ENC_WKB_HEX
+
+
+def compute_query(dataset):
+    if dataset.table_name:
+        return &#39;SELECT * FROM &#34;{schema}&#34;.&#34;{table}&#34;&#39;.format(
+            schema=dataset.schema or dataset._get_schema() or &#39;public&#39;,
+            table=dataset.table_name
+        )
+
+
+def compute_geodataframe(dataset):
+    if HAS_GEOPANDAS and dataset.dataframe is not None:
+        if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
+            return dataset.dataframe
+
+        df = dataset.dataframe
+        geom_column = _get_column(df, GEOM_COLUMN_NAMES)
+        if geom_column is not None:
+            df[&#39;geometry&#39;] = _compute_geometry_from_geom(geom_column)
+            _warn_new_geometry_column(df)
+        else:
+            lat_column = _get_column(df, LAT_COLUMN_NAMES)
+            lng_column = _get_column(df, LNG_COLUMN_NAMES)
+            if lat_column is not None and lng_column is not None:
+                df[&#39;geometry&#39;] = _compute_geometry_from_latlng(lat_column, lng_column)
+                _warn_new_geometry_column(df)
+            else:
+                raise ValueError(&#39;&#39;&#39;No geographic data found. &#39;&#39;&#39;
+                                 &#39;&#39;&#39;If a geometry exists, change the column name ({0}) or &#39;&#39;&#39;
+                                 &#39;&#39;&#39;ensure it is a DataFrame with a valid geometry. &#39;&#39;&#39;
+                                 &#39;&#39;&#39;If there are latitude/longitude columns, rename to ({1}), ({2}).&#39;&#39;&#39;.format(
+                                     &#39;, &#39;.join(GEOM_COLUMN_NAMES),
+                                     &#39;, &#39;.join(LAT_COLUMN_NAMES),
+                                     &#39;, &#39;.join(LNG_COLUMN_NAMES)
+                                 ))
+        return geopandas.GeoDataFrame(df)
+
+
+def _get_column(df, options):
+    for name in options:
+        if name in df:
+            return df[name]
+
+
+def _warn_new_geometry_column(df):
+    if &#39;geometry&#39; not in df:
+        warn(&#39;A new &#34;geometry&#34; column has been added to the original dataframe.&#39;)
+
+
+def _compute_geometry_from_geom(geom_column):
+    first_geom = next(item for item in geom_column if item is not None)
+    enc_type = detect_encoding_type(first_geom)
+    return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+
+
+def _compute_geometry_from_latlng(lat, lng):
+    from shapely import geometry
+    return [geometry.Point(xy) for xy in zip(lng, lat)]
+
+
+def _encode_decode_decorator(func):
+    &#34;&#34;&#34;decorator for encoding and decoding geoms&#34;&#34;&#34;
+    def wrapper(*args):
+        &#34;&#34;&#34;error catching&#34;&#34;&#34;
+        try:
+            processed_geom = func(*args)
+            return processed_geom
+        except ImportError as err:
+            raise ImportError(&#39;The Python package `shapely` needs to be &#39;
+                              &#39;installed to encode or decode geometries. &#39;
+                              &#39;({})&#39;.format(err))
+    return wrapper
+
+
+@_encode_decode_decorator
+def decode_geometry(geom, enc_type):
+    &#34;&#34;&#34;Decode any geometry into a shapely geometry.&#34;&#34;&#34;
+    if geom:
+        func = {
+            ENC_SHAPELY: lambda: geom,
+            ENC_WKB: lambda: _load_wkb(geom),
+            ENC_WKB_HEX: lambda: _load_wkb_hex(geom),
+            ENC_WKB_BHEX: lambda: _load_wkb_bhex(geom),
+            ENC_WKT: lambda: _load_wkt(geom),
+            ENC_EWKT: lambda: _load_ewkt(geom)
+        }.get(enc_type)
+        return func() if func else geom
+    return &#39;&#39;
+
+
+def detect_encoding_type(input_geom):
+    &#34;&#34;&#34;
+    Detect geometry encoding type:
+    - ENC_WKB: b&#39;\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@&#39;
+    - ENC_EWKB: b&#39;\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@&#39;
+    - ENC_WKB_HEX: &#39;0101000000000000000048934000000000009DB640&#39;
+    - ENC_EWKB_HEX: &#39;0101000020E6100000000000000048934000000000009DB640&#39;
+    - ENC_WKB_BHEX: b&#39;0101000000000000000048934000000000009DB640&#39;
+    - ENC_EWKB_BHEX: b&#39;0101000020E6100000000000000048934000000000009DB640&#39;
+    - ENC_WKT: &#39;POINT (1234 5789)&#39;
+    - ENC_EWKT: &#39;SRID=4326;POINT (1234 5789)&#39;
+    &#34;&#34;&#34;
+    from shapely import wkb
+    from shapely.geometry.base import BaseGeometry
+
+    if isinstance(input_geom, BaseGeometry):
+        return ENC_SHAPELY
+
+    if isinstance(input_geom, str):
+        if _is_hex(input_geom):
+            return ENC_WKB_HEX
+        else:
+            srid, geom = _extract_srid(input_geom)
+            if not geom:
+                return
+            if srid:
+                return ENC_EWKT
+            else:
+                try:
+                    # This is required because in P27 bytes = str
+                    wkb.loads(geom)
+                    return ENC_WKB
+                except Exception:
+                    return ENC_WKT
+
+    if isinstance(input_geom, bytes):
+        try:
+            ba.unhexlify(input_geom)
+            return ENC_WKB_BHEX
+        except Exception:
+            return ENC_WKB
+
+
+def _load_wkb(geom):
+    &#34;&#34;&#34;Load WKB or EWKB geometry.&#34;&#34;&#34;
+    from shapely.wkb import loads
+    return loads(geom)
+
+
+def _load_wkb_hex(geom):
+    &#34;&#34;&#34;Load WKB_HEX or EWKB_HEX geometry.&#34;&#34;&#34;
+    from shapely.wkb import loads
+    return loads(geom, hex=True)
+
+
+def _load_wkb_bhex(geom):
+    &#34;&#34;&#34;Load WKB_BHEX or EWKB_BHEX geometry.
+    The geom must be converted to WKB/EWKB before loading.
+    &#34;&#34;&#34;
+    from shapely.wkb import loads
+    return loads(ba.unhexlify(geom))
+
+
+def _load_wkt(geom):
+    &#34;&#34;&#34;Load WKT geometry.&#34;&#34;&#34;
+    from shapely.wkt import loads
+    return loads(geom)
+
+
+def _load_ewkt(egeom):
+    &#34;&#34;&#34;Load EWKT geometry.
+    The SRID must be removed before loading and added after loading.
+    &#34;&#34;&#34;
+    from shapely.wkt import loads
+    srid, geom = _extract_srid(egeom)
+    ogeom = loads(geom)
+    if srid:
+        from shapely.geos import lgeos
+        lgeos.GEOSSetSRID(ogeom._geom, int(srid))
+    return ogeom
+
+
+def _is_hex(input_geom):
+    return re.match(r&#39;^[0-9a-fA-F]+$&#39;, input_geom)
+
+
+def _extract_srid(egeom):
+    result = re.match(r&#39;^SRID=(\d+);(.*)$&#39;, egeom)
+    if result:
+        return (result.group(1), result.group(2))
+    else:
+        return (0, egeom)
+
+
+def setting_value_exception(prop, value):
+    return CartoException((&#34;Error setting {prop}. You must use the `update` method: &#34;
+                           &#34;dataset_info.update({prop}=&#39;{value}&#39;)&#34;).format(prop=prop, value=value))
+
+
+def get_context_with_public_creds(credentials):
+    public_creds = deepcopy(credentials)
+    public_creds.api_key = &#39;default_public&#39;
+    return context.create_context(public_creds)
+
+
+def convert_bool(x):
+    if x:
+        if x == &#39;t&#39;:
+            return True
+        if x == &#39;f&#39;:
+            return False
+        return bool(x)
+    else:
+        return None
+
+
+def save_index_as_column(df):
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cartoframes.utils.geom_utils.compute_geodataframe"><code class="name flex">
+<span>def <span class="ident">compute_geodataframe</span></span>(<span>dataset)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_geodataframe(dataset):
+    if HAS_GEOPANDAS and dataset.dataframe is not None:
+        if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
+            return dataset.dataframe
+
+        df = dataset.dataframe
+        geom_column = _get_column(df, GEOM_COLUMN_NAMES)
+        if geom_column is not None:
+            df[&#39;geometry&#39;] = _compute_geometry_from_geom(geom_column)
+            _warn_new_geometry_column(df)
+        else:
+            lat_column = _get_column(df, LAT_COLUMN_NAMES)
+            lng_column = _get_column(df, LNG_COLUMN_NAMES)
+            if lat_column is not None and lng_column is not None:
+                df[&#39;geometry&#39;] = _compute_geometry_from_latlng(lat_column, lng_column)
+                _warn_new_geometry_column(df)
+            else:
+                raise ValueError(&#39;&#39;&#39;No geographic data found. &#39;&#39;&#39;
+                                 &#39;&#39;&#39;If a geometry exists, change the column name ({0}) or &#39;&#39;&#39;
+                                 &#39;&#39;&#39;ensure it is a DataFrame with a valid geometry. &#39;&#39;&#39;
+                                 &#39;&#39;&#39;If there are latitude/longitude columns, rename to ({1}), ({2}).&#39;&#39;&#39;.format(
+                                     &#39;, &#39;.join(GEOM_COLUMN_NAMES),
+                                     &#39;, &#39;.join(LAT_COLUMN_NAMES),
+                                     &#39;, &#39;.join(LNG_COLUMN_NAMES)
+                                 ))
+        return geopandas.GeoDataFrame(df)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.compute_query"><code class="name flex">
+<span>def <span class="ident">compute_query</span></span>(<span>dataset)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_query(dataset):
+    if dataset.table_name:
+        return &#39;SELECT * FROM &#34;{schema}&#34;.&#34;{table}&#34;&#39;.format(
+            schema=dataset.schema or dataset._get_schema() or &#39;public&#39;,
+            table=dataset.table_name
+        )</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.convert_bool"><code class="name flex">
+<span>def <span class="ident">convert_bool</span></span>(<span>x)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def convert_bool(x):
+    if x:
+        if x == &#39;t&#39;:
+            return True
+        if x == &#39;f&#39;:
+            return False
+        return bool(x)
+    else:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.decode_geometry"><code class="name flex">
+<span>def <span class="ident">decode_geometry</span></span>(<span>*args)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>error catching</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wrapper(*args):
+    &#34;&#34;&#34;error catching&#34;&#34;&#34;
+    try:
+        processed_geom = func(*args)
+        return processed_geom
+    except ImportError as err:
+        raise ImportError(&#39;The Python package `shapely` needs to be &#39;
+                          &#39;installed to encode or decode geometries. &#39;
+                          &#39;({})&#39;.format(err))</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.detect_encoding_type"><code class="name flex">
+<span>def <span class="ident">detect_encoding_type</span></span>(<span>input_geom)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Detect geometry encoding type:
+- ENC_WKB: b'        H@     ¶@'
+- ENC_EWKB: b'   æ       H@     ¶@'
+- ENC_WKB_HEX: '0101000000000000000048934000000000009DB640'
+- ENC_EWKB_HEX: '0101000020E6100000000000000048934000000000009DB640'
+- ENC_WKB_BHEX: b'0101000000000000000048934000000000009DB640'
+- ENC_EWKB_BHEX: b'0101000020E6100000000000000048934000000000009DB640'
+- ENC_WKT: 'POINT (1234 5789)'
+- ENC_EWKT: 'SRID=4326;POINT (1234 5789)'</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def detect_encoding_type(input_geom):
+    &#34;&#34;&#34;
+    Detect geometry encoding type:
+    - ENC_WKB: b&#39;\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@&#39;
+    - ENC_EWKB: b&#39;\x01\x01\x00\x00 \xe6\x10\x00\x00\x00\x00\x00\x00\x00H\x93@\x00\x00\x00\x00\x00\x9d\xb6@&#39;
+    - ENC_WKB_HEX: &#39;0101000000000000000048934000000000009DB640&#39;
+    - ENC_EWKB_HEX: &#39;0101000020E6100000000000000048934000000000009DB640&#39;
+    - ENC_WKB_BHEX: b&#39;0101000000000000000048934000000000009DB640&#39;
+    - ENC_EWKB_BHEX: b&#39;0101000020E6100000000000000048934000000000009DB640&#39;
+    - ENC_WKT: &#39;POINT (1234 5789)&#39;
+    - ENC_EWKT: &#39;SRID=4326;POINT (1234 5789)&#39;
+    &#34;&#34;&#34;
+    from shapely import wkb
+    from shapely.geometry.base import BaseGeometry
+
+    if isinstance(input_geom, BaseGeometry):
+        return ENC_SHAPELY
+
+    if isinstance(input_geom, str):
+        if _is_hex(input_geom):
+            return ENC_WKB_HEX
+        else:
+            srid, geom = _extract_srid(input_geom)
+            if not geom:
+                return
+            if srid:
+                return ENC_EWKT
+            else:
+                try:
+                    # This is required because in P27 bytes = str
+                    wkb.loads(geom)
+                    return ENC_WKB
+                except Exception:
+                    return ENC_WKT
+
+    if isinstance(input_geom, bytes):
+        try:
+            ba.unhexlify(input_geom)
+            return ENC_WKB_BHEX
+        except Exception:
+            return ENC_WKB</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.get_context_with_public_creds"><code class="name flex">
+<span>def <span class="ident">get_context_with_public_creds</span></span>(<span>credentials)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_context_with_public_creds(credentials):
+    public_creds = deepcopy(credentials)
+    public_creds.api_key = &#39;default_public&#39;
+    return context.create_context(public_creds)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.save_index_as_column"><code class="name flex">
+<span>def <span class="ident">save_index_as_column</span></span>(<span>df)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def save_index_as_column(df):
+    index_name = df.index.name
+    if index_name is not None:
+        if index_name not in df.columns:
+            df.reset_index(inplace=True)
+            df.set_index(index_name, drop=False, inplace=True)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.utils.geom_utils.setting_value_exception"><code class="name flex">
+<span>def <span class="ident">setting_value_exception</span></span>(<span>prop, value)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def setting_value_exception(prop, value):
+    return CartoException((&#34;Error setting {prop}. You must use the `update` method: &#34;
+                           &#34;dataset_info.update({prop}=&#39;{value}&#39;)&#34;).format(prop=prop, value=value))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.utils" href="index.html">cartoframes.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cartoframes.utils.geom_utils.compute_geodataframe" href="#cartoframes.utils.geom_utils.compute_geodataframe">compute_geodataframe</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.compute_query" href="#cartoframes.utils.geom_utils.compute_query">compute_query</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.convert_bool" href="#cartoframes.utils.geom_utils.convert_bool">convert_bool</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.decode_geometry" href="#cartoframes.utils.geom_utils.decode_geometry">decode_geometry</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.detect_encoding_type" href="#cartoframes.utils.geom_utils.detect_encoding_type">detect_encoding_type</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.get_context_with_public_creds" href="#cartoframes.utils.geom_utils.get_context_with_public_creds">get_context_with_public_creds</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.save_index_as_column" href="#cartoframes.utils.geom_utils.save_index_as_column">save_index_as_column</a></code></li>
+<li><code><a title="cartoframes.utils.geom_utils.setting_value_exception" href="#cartoframes.utils.geom_utils.setting_value_exception">setting_value_exception</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,1323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.3" />
+<title>cartoframes.data.dataset.dataset API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>cartoframes.data.dataset.dataset</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">from __future__ import absolute_import
+
+from carto.exceptions import CartoException
+
+from ...auth import get_default_credentials
+from .registry.strategies_registry import StrategiesRegistry
+from .registry.dataframe_dataset import DataFrameDataset
+from .registry.table_dataset import TableDataset
+from .dataset_info import DatasetInfo
+from ...utils.utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
+
+DOWNLOAD_RETRY_TIMES = 3
+
+
+class Dataset(object):
+    &#34;&#34;&#34;Generic data class for cartoframes data operations. A `Dataset` instance
+    can be created from a dataframe, geodataframe, a table hosted on a CARTO
+    account, an arbitrary query against a CARTO account, or a local or hosted
+    GeoJSON source. If hosted, the data can be retrieved as a pandas DataFrame.
+    If local or as a query, a new table can be created in a CARTO account off
+    of the Dataset instance.
+
+    Examples:
+        Dataframe:
+
+        .. code::
+
+            from pandas
+            from cartoframes.data import Dataset
+
+            df = pandas.DataFrame(...)
+            Dataset(df)
+
+        GeoDataframe:
+
+        .. code::
+
+            from geopandas
+            from cartoframes.data import Dataset
+
+            gdf = geopandas.DataFrame(...)
+            Dataset(gdf)
+
+        GeoJSON file:
+
+        .. code::
+
+            from cartoframes.data import Dataset
+
+            Dataset(&#39;path/to/geojsonfile&#39;)
+
+        Table from CARTO
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Dataset(&#39;table_name&#39;)
+
+        Query usign CARTO stuff
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Dataset(&#39;select * from table_name WHERE ...&#39;)
+    &#34;&#34;&#34;
+
+    FAIL = TableDataset.FAIL
+    REPLACE = TableDataset.REPLACE
+    APPEND = TableDataset.APPEND
+
+    PRIVATE = DatasetInfo.PRIVATE
+    PUBLIC = DatasetInfo.PUBLIC
+    LINK = DatasetInfo.LINK
+
+    GEOM_TYPE_POINT = GEOM_TYPE_POINT
+    GEOM_TYPE_LINE = GEOM_TYPE_LINE
+    GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
+
+    def __init__(self, data, credentials=None, schema=None):
+        self._registry = self._get_strategies_registry()
+        self._strategy = self._init_strategy(data, credentials, schema)
+
+    def _init_strategy(self, data, credentials=None, schema=None):
+        credentials = credentials or get_default_credentials()
+        for strategy in self._registry.get_strategies():
+            if strategy.can_work_with(data):
+                return strategy.create(data, credentials, schema)
+
+        raise ValueError(&#39;We can not detect the Dataset type&#39;)
+
+    def _get_strategies_registry(self):
+        return StrategiesRegistry()
+
+    @property
+    def credentials(self):
+        &#34;&#34;&#34;Dataset :py:class:`Context &lt;cartoframes.auth.Context&gt;`&#34;&#34;&#34;
+        return self._strategy.credentials
+
+    @credentials.setter
+    def credentials(self, credentials):
+        &#34;&#34;&#34;Set a new :py:class:`Context &lt;cartoframes.auth.Context&gt;` for a Dataset instance.&#34;&#34;&#34;
+        self._strategy.credentials = credentials
+
+    @property
+    def table_name(self):
+        &#34;&#34;&#34;Dataset table name&#34;&#34;&#34;
+        return self._strategy.table_name
+
+    @property
+    def schema(self):
+        &#34;&#34;&#34;Dataset schema&#34;&#34;&#34;
+        return self._strategy.schema
+
+    @property
+    def query(self):
+        &#34;&#34;&#34;Dataset query&#34;&#34;&#34;
+        return self._strategy.query
+
+    def get_query(self):
+        return self._strategy.get_query()
+
+    @property
+    def dataframe(self):
+        &#34;&#34;&#34;Dataset DataFrame&#34;&#34;&#34;
+        return self._strategy.dataframe
+
+    def get_geodataframe(self):
+        &#34;&#34;&#34;Converts DataFrame into GeoDataFrame if possible&#34;&#34;&#34;
+        return self._strategy.get_geodataframe()
+
+    @property
+    def dataset_info(self):
+        &#34;&#34;&#34;:py:class:`DatasetInfo &lt;cartoframes.data.DatasetInfo&gt;` associated with Dataset instance
+
+
+        .. note::
+            This method only works for Datasets created from tables.
+
+        Example:
+
+            .. code::
+
+               from cartoframes.auth import set_default_credentials
+               from cartoframes.data import Dataset
+
+               set_default_credentials(
+                   base_url=&#39;https://your_user_name.carto.com/&#39;,
+                   api_key=&#39;your api key&#39;
+               )
+
+               d = Dataset(&#39;tablename&#39;)
+               d.dataset_info
+
+        &#34;&#34;&#34;
+        if self.is_local():
+            raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                                 &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                                 &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+        return self._strategy.dataset_info
+
+    def update_dataset_info(self, privacy=None, table_name=None):
+        &#34;&#34;&#34;Update/change Dataset privacy and name
+
+        Args:
+          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
+            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
+          table_name (str, optional): Name of the dataset on CARTO. After updating it,
+            the table_name will be changed too.
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset, DatasetInfo
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com/&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+
+                d = Dataset(&#39;tablename&#39;)
+                d.update_dataset_info(privacy=DatasetInfo.LINK)
+
+        &#34;&#34;&#34;
+        return self._strategy.update_dataset_info(privacy, table_name)
+
+    def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
+        &#34;&#34;&#34;Download / read a Dataset (table or query) from CARTO account
+        associated with the Dataset&#39;s instance of :py:class:`Context
+        &lt;cartoframes.auth.Context&gt;`.
+        Args:
+            limit (int, optional): The number of rows of the Dataset to
+              download. Default is to download all rows. This value must be
+              &gt;= 0.
+            decode_geom (bool, optional): Decode Dataset geometries into
+              Shapely geometries from EWKB encoding.
+            retry_times (int, optional): Number of time to retry the download
+              in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
+        Example:
+            .. code::
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_credentials
+                # use cartoframes example account
+                set_default_credentials(&#39;https://cartoframes.carto.com&#39;)
+                d = Dataset(&#39;brooklyn_poverty&#39;)
+                df = d.download(decode_geom=True)
+        &#34;&#34;&#34;
+        return self._strategy.download(limit, decode_geom, retry_times)
+
+    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
+        &#34;&#34;&#34;Upload Dataset to CARTO account associated with `credentials`.
+        Args:
+            with_lnglat (tuple, optional): Two columns that have the longitude
+              and latitude information. If used, a point geometry will be
+              created upon upload to CARTO. Example input: `(&#39;long&#39;, &#39;lat&#39;)`.
+              Defaults to `None`.
+            if_exists (str, optional): Behavior for adding data from Dataset.
+              Options are &#39;fail&#39;, &#39;replace&#39;, or &#39;append&#39;. Defaults to &#39;fail&#39;,
+              which means that the Dataset instance will not overwrite a
+              table of the same name if it exists. If the table does not exist,
+              it will be created.
+            table_name (str): Desired table name for the dataset on CARTO. If
+              name does not conform to SQL naming conventions, it will be
+              &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+              and other special characters.
+            credentials (:py:class:`Context &lt;cartoframes.auth.Context&gt;`, optional):
+              credentials of user account to send Dataset to. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              &lt;cartoframes.auth.set_default_credentials&gt;`) will attempted to be
+              used.
+        Example:
+            Send a pandas DataFrame to CARTO.
+            .. code::
+                from cartoframes.auth import set_default_credentials
+                from cartoframes.data import Dataset
+                import pandas as pd
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+                df = pd.DataFrame({
+                    &#39;lat&#39;: [40, 45, 50],
+                    &#39;lng&#39;: [-80, -85, -90]
+                })
+                d = Dataset(df)
+                d.upload(with_lnglat=(&#39;lng&#39;, &#39;lat&#39;), table_name=&#39;sample_table&#39;)
+        &#34;&#34;&#34;
+        if table_name:
+            self._strategy.table_name = table_name
+        if credentials:
+            self._strategy.credentials = credentials
+        if schema:
+            self._strategy.schema = schema
+
+        self._strategy.upload(if_exists, with_lnglat)
+
+        return Dataset(self._strategy.table_name, self._strategy.credentials, self._strategy.schema)
+
+    def delete(self):
+        &#34;&#34;&#34;Delete table on CARTO account associated with a Dataset instance
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+
+                d = Dataset(&#39;table_name&#39;)
+                d.delete()
+
+        Returns:
+            bool: True if deletion is successful, False otherwise.
+
+        &#34;&#34;&#34;
+        return self._strategy.delete()
+
+    def exists(self):
+        &#34;&#34;&#34;Checks to see if table exists&#34;&#34;&#34;
+        return self._strategy.exists()
+
+    def is_public(self):
+        &#34;&#34;&#34;Checks to see if table or table used by query has public privacy&#34;&#34;&#34;
+        return self._strategy.is_public()
+
+    def is_local(self):
+        &#34;&#34;&#34;Checks if the Dataset is local (DataFrameDataset)&#34;&#34;&#34;
+        return isinstance(self._strategy, DataFrameDataset)
+
+    def is_remote(self):
+        &#34;&#34;&#34;Checks if the Dataset is local (TableDataset or QueryDataset)&#34;&#34;&#34;
+        return not self.is_local()
+
+    def compute_geom_type(self):
+        &#34;&#34;&#34;Compute the geometry type from the data&#34;&#34;&#34;
+        return self._strategy.compute_geom_type()
+
+    def get_table_column_names(self, exclude=None):
+        &#34;&#34;&#34;Get column names and types from a table&#34;&#34;&#34;
+        return self._strategy.get_table_column_names(exclude)
+
+    def get_table_names(self):
+        &#34;&#34;&#34;Get table names used by Dataset instance&#34;&#34;&#34;
+        if self.is_local():
+            raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                                 &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                                 &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+        return self._strategy.get_table_names()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="cartoframes.data.dataset.dataset.Dataset"><code class="flex name class">
+<span>class <span class="ident">Dataset</span></span>
+<span>(</span><span>data, credentials=None, schema=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Generic data class for cartoframes data operations. A <a title="cartoframes.data.dataset.dataset.Dataset" href="#cartoframes.data.dataset.dataset.Dataset"><code>Dataset</code></a> instance
+can be created from a dataframe, geodataframe, a table hosted on a CARTO
+account, an arbitrary query against a CARTO account, or a local or hosted
+GeoJSON source. If hosted, the data can be retrieved as a pandas DataFrame.
+If local or as a query, a new table can be created in a CARTO account off
+of the Dataset instance.</p>
+<h2 id="examples">Examples</h2>
+<p>Dataframe:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from pandas
+from cartoframes.data import Dataset</p>
+<p>df = pandas.DataFrame(&hellip;)
+Dataset(df)</p>
+</div>
+<p>GeoDataframe:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from geopandas
+from cartoframes.data import Dataset</p>
+<p>gdf = geopandas.DataFrame(&hellip;)
+Dataset(gdf)</p>
+</div>
+<p>GeoJSON file:</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.data import Dataset</p>
+<p>Dataset('path/to/geojsonfile')</p>
+</div>
+<p>Table from CARTO</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.data import Dataset</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Dataset('table_name')</p>
+</div>
+<p>Query usign CARTO stuff</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.data import Dataset</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>Dataset('select * from table_name WHERE &hellip;')</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class Dataset(object):
+    &#34;&#34;&#34;Generic data class for cartoframes data operations. A `Dataset` instance
+    can be created from a dataframe, geodataframe, a table hosted on a CARTO
+    account, an arbitrary query against a CARTO account, or a local or hosted
+    GeoJSON source. If hosted, the data can be retrieved as a pandas DataFrame.
+    If local or as a query, a new table can be created in a CARTO account off
+    of the Dataset instance.
+
+    Examples:
+        Dataframe:
+
+        .. code::
+
+            from pandas
+            from cartoframes.data import Dataset
+
+            df = pandas.DataFrame(...)
+            Dataset(df)
+
+        GeoDataframe:
+
+        .. code::
+
+            from geopandas
+            from cartoframes.data import Dataset
+
+            gdf = geopandas.DataFrame(...)
+            Dataset(gdf)
+
+        GeoJSON file:
+
+        .. code::
+
+            from cartoframes.data import Dataset
+
+            Dataset(&#39;path/to/geojsonfile&#39;)
+
+        Table from CARTO
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Dataset(&#39;table_name&#39;)
+
+        Query usign CARTO stuff
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            Dataset(&#39;select * from table_name WHERE ...&#39;)
+    &#34;&#34;&#34;
+
+    FAIL = TableDataset.FAIL
+    REPLACE = TableDataset.REPLACE
+    APPEND = TableDataset.APPEND
+
+    PRIVATE = DatasetInfo.PRIVATE
+    PUBLIC = DatasetInfo.PUBLIC
+    LINK = DatasetInfo.LINK
+
+    GEOM_TYPE_POINT = GEOM_TYPE_POINT
+    GEOM_TYPE_LINE = GEOM_TYPE_LINE
+    GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
+
+    def __init__(self, data, credentials=None, schema=None):
+        self._registry = self._get_strategies_registry()
+        self._strategy = self._init_strategy(data, credentials, schema)
+
+    def _init_strategy(self, data, credentials=None, schema=None):
+        credentials = credentials or get_default_credentials()
+        for strategy in self._registry.get_strategies():
+            if strategy.can_work_with(data):
+                return strategy.create(data, credentials, schema)
+
+        raise ValueError(&#39;We can not detect the Dataset type&#39;)
+
+    def _get_strategies_registry(self):
+        return StrategiesRegistry()
+
+    @property
+    def credentials(self):
+        &#34;&#34;&#34;Dataset :py:class:`Context &lt;cartoframes.auth.Context&gt;`&#34;&#34;&#34;
+        return self._strategy.credentials
+
+    @credentials.setter
+    def credentials(self, credentials):
+        &#34;&#34;&#34;Set a new :py:class:`Context &lt;cartoframes.auth.Context&gt;` for a Dataset instance.&#34;&#34;&#34;
+        self._strategy.credentials = credentials
+
+    @property
+    def table_name(self):
+        &#34;&#34;&#34;Dataset table name&#34;&#34;&#34;
+        return self._strategy.table_name
+
+    @property
+    def schema(self):
+        &#34;&#34;&#34;Dataset schema&#34;&#34;&#34;
+        return self._strategy.schema
+
+    @property
+    def query(self):
+        &#34;&#34;&#34;Dataset query&#34;&#34;&#34;
+        return self._strategy.query
+
+    def get_query(self):
+        return self._strategy.get_query()
+
+    @property
+    def dataframe(self):
+        &#34;&#34;&#34;Dataset DataFrame&#34;&#34;&#34;
+        return self._strategy.dataframe
+
+    def get_geodataframe(self):
+        &#34;&#34;&#34;Converts DataFrame into GeoDataFrame if possible&#34;&#34;&#34;
+        return self._strategy.get_geodataframe()
+
+    @property
+    def dataset_info(self):
+        &#34;&#34;&#34;:py:class:`DatasetInfo &lt;cartoframes.data.DatasetInfo&gt;` associated with Dataset instance
+
+
+        .. note::
+            This method only works for Datasets created from tables.
+
+        Example:
+
+            .. code::
+
+               from cartoframes.auth import set_default_credentials
+               from cartoframes.data import Dataset
+
+               set_default_credentials(
+                   base_url=&#39;https://your_user_name.carto.com/&#39;,
+                   api_key=&#39;your api key&#39;
+               )
+
+               d = Dataset(&#39;tablename&#39;)
+               d.dataset_info
+
+        &#34;&#34;&#34;
+        if self.is_local():
+            raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                                 &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                                 &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+        return self._strategy.dataset_info
+
+    def update_dataset_info(self, privacy=None, table_name=None):
+        &#34;&#34;&#34;Update/change Dataset privacy and name
+
+        Args:
+          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
+            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
+          table_name (str, optional): Name of the dataset on CARTO. After updating it,
+            the table_name will be changed too.
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset, DatasetInfo
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com/&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+
+                d = Dataset(&#39;tablename&#39;)
+                d.update_dataset_info(privacy=DatasetInfo.LINK)
+
+        &#34;&#34;&#34;
+        return self._strategy.update_dataset_info(privacy, table_name)
+
+    def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
+        &#34;&#34;&#34;Download / read a Dataset (table or query) from CARTO account
+        associated with the Dataset&#39;s instance of :py:class:`Context
+        &lt;cartoframes.auth.Context&gt;`.
+        Args:
+            limit (int, optional): The number of rows of the Dataset to
+              download. Default is to download all rows. This value must be
+              &gt;= 0.
+            decode_geom (bool, optional): Decode Dataset geometries into
+              Shapely geometries from EWKB encoding.
+            retry_times (int, optional): Number of time to retry the download
+              in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
+        Example:
+            .. code::
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_credentials
+                # use cartoframes example account
+                set_default_credentials(&#39;https://cartoframes.carto.com&#39;)
+                d = Dataset(&#39;brooklyn_poverty&#39;)
+                df = d.download(decode_geom=True)
+        &#34;&#34;&#34;
+        return self._strategy.download(limit, decode_geom, retry_times)
+
+    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
+        &#34;&#34;&#34;Upload Dataset to CARTO account associated with `credentials`.
+        Args:
+            with_lnglat (tuple, optional): Two columns that have the longitude
+              and latitude information. If used, a point geometry will be
+              created upon upload to CARTO. Example input: `(&#39;long&#39;, &#39;lat&#39;)`.
+              Defaults to `None`.
+            if_exists (str, optional): Behavior for adding data from Dataset.
+              Options are &#39;fail&#39;, &#39;replace&#39;, or &#39;append&#39;. Defaults to &#39;fail&#39;,
+              which means that the Dataset instance will not overwrite a
+              table of the same name if it exists. If the table does not exist,
+              it will be created.
+            table_name (str): Desired table name for the dataset on CARTO. If
+              name does not conform to SQL naming conventions, it will be
+              &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+              and other special characters.
+            credentials (:py:class:`Context &lt;cartoframes.auth.Context&gt;`, optional):
+              credentials of user account to send Dataset to. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              &lt;cartoframes.auth.set_default_credentials&gt;`) will attempted to be
+              used.
+        Example:
+            Send a pandas DataFrame to CARTO.
+            .. code::
+                from cartoframes.auth import set_default_credentials
+                from cartoframes.data import Dataset
+                import pandas as pd
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+                df = pd.DataFrame({
+                    &#39;lat&#39;: [40, 45, 50],
+                    &#39;lng&#39;: [-80, -85, -90]
+                })
+                d = Dataset(df)
+                d.upload(with_lnglat=(&#39;lng&#39;, &#39;lat&#39;), table_name=&#39;sample_table&#39;)
+        &#34;&#34;&#34;
+        if table_name:
+            self._strategy.table_name = table_name
+        if credentials:
+            self._strategy.credentials = credentials
+        if schema:
+            self._strategy.schema = schema
+
+        self._strategy.upload(if_exists, with_lnglat)
+
+        return Dataset(self._strategy.table_name, self._strategy.credentials, self._strategy.schema)
+
+    def delete(self):
+        &#34;&#34;&#34;Delete table on CARTO account associated with a Dataset instance
+
+        Example:
+
+            .. code::
+
+                from cartoframes.data import Dataset
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials(
+                    base_url=&#39;https://your_user_name.carto.com&#39;,
+                    api_key=&#39;your api key&#39;
+                )
+
+                d = Dataset(&#39;table_name&#39;)
+                d.delete()
+
+        Returns:
+            bool: True if deletion is successful, False otherwise.
+
+        &#34;&#34;&#34;
+        return self._strategy.delete()
+
+    def exists(self):
+        &#34;&#34;&#34;Checks to see if table exists&#34;&#34;&#34;
+        return self._strategy.exists()
+
+    def is_public(self):
+        &#34;&#34;&#34;Checks to see if table or table used by query has public privacy&#34;&#34;&#34;
+        return self._strategy.is_public()
+
+    def is_local(self):
+        &#34;&#34;&#34;Checks if the Dataset is local (DataFrameDataset)&#34;&#34;&#34;
+        return isinstance(self._strategy, DataFrameDataset)
+
+    def is_remote(self):
+        &#34;&#34;&#34;Checks if the Dataset is local (TableDataset or QueryDataset)&#34;&#34;&#34;
+        return not self.is_local()
+
+    def compute_geom_type(self):
+        &#34;&#34;&#34;Compute the geometry type from the data&#34;&#34;&#34;
+        return self._strategy.compute_geom_type()
+
+    def get_table_column_names(self, exclude=None):
+        &#34;&#34;&#34;Get column names and types from a table&#34;&#34;&#34;
+        return self._strategy.get_table_column_names(exclude)
+
+    def get_table_names(self):
+        &#34;&#34;&#34;Get table names used by Dataset instance&#34;&#34;&#34;
+        if self.is_local():
+            raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                                 &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                                 &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+        return self._strategy.get_table_names()</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="cartoframes.data.dataset.dataset.Dataset.APPEND"><code class="name">var <span class="ident">APPEND</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.FAIL"><code class="name">var <span class="ident">FAIL</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_LINE"><code class="name">var <span class="ident">GEOM_TYPE_LINE</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POINT"><code class="name">var <span class="ident">GEOM_TYPE_POINT</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POLYGON"><code class="name">var <span class="ident">GEOM_TYPE_POLYGON</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.LINK"><code class="name">var <span class="ident">LINK</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.PRIVATE"><code class="name">var <span class="ident">PRIVATE</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.PUBLIC"><code class="name">var <span class="ident">PUBLIC</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.REPLACE"><code class="name">var <span class="ident">REPLACE</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="cartoframes.data.dataset.dataset.Dataset.credentials"><code class="name">var <span class="ident">credentials</span></code></dt>
+<dd>
+<section class="desc"><p>Dataset :py:class:<code>Context &lt;cartoframes.auth.Context&gt;</code></p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def credentials(self):
+    &#34;&#34;&#34;Dataset :py:class:`Context &lt;cartoframes.auth.Context&gt;`&#34;&#34;&#34;
+    return self._strategy.credentials</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.dataframe"><code class="name">var <span class="ident">dataframe</span></code></dt>
+<dd>
+<section class="desc"><p>Dataset DataFrame</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def dataframe(self):
+    &#34;&#34;&#34;Dataset DataFrame&#34;&#34;&#34;
+    return self._strategy.dataframe</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.dataset_info"><code class="name">var <span class="ident">dataset_info</span></code></dt>
+<dd>
+<section class="desc"><p>:py:class:<code>DatasetInfo &lt;cartoframes.data.DatasetInfo&gt;</code> associated with Dataset instance</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method only works for Datasets created from tables.</p>
+</div>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.data import Dataset</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com/',
+api_key='your api key'
+)</p>
+<p>d = Dataset('tablename')
+d.dataset_info</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def dataset_info(self):
+    &#34;&#34;&#34;:py:class:`DatasetInfo &lt;cartoframes.data.DatasetInfo&gt;` associated with Dataset instance
+
+
+    .. note::
+        This method only works for Datasets created from tables.
+
+    Example:
+
+        .. code::
+
+           from cartoframes.auth import set_default_credentials
+           from cartoframes.data import Dataset
+
+           set_default_credentials(
+               base_url=&#39;https://your_user_name.carto.com/&#39;,
+               api_key=&#39;your api key&#39;
+           )
+
+           d = Dataset(&#39;tablename&#39;)
+           d.dataset_info
+
+    &#34;&#34;&#34;
+    if self.is_local():
+        raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                             &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                             &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+    return self._strategy.dataset_info</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.query"><code class="name">var <span class="ident">query</span></code></dt>
+<dd>
+<section class="desc"><p>Dataset query</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def query(self):
+    &#34;&#34;&#34;Dataset query&#34;&#34;&#34;
+    return self._strategy.query</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.schema"><code class="name">var <span class="ident">schema</span></code></dt>
+<dd>
+<section class="desc"><p>Dataset schema</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def schema(self):
+    &#34;&#34;&#34;Dataset schema&#34;&#34;&#34;
+    return self._strategy.schema</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.table_name"><code class="name">var <span class="ident">table_name</span></code></dt>
+<dd>
+<section class="desc"><p>Dataset table name</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">@property
+def table_name(self):
+    &#34;&#34;&#34;Dataset table name&#34;&#34;&#34;
+    return self._strategy.table_name</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="cartoframes.data.dataset.dataset.Dataset.compute_geom_type"><code class="name flex">
+<span>def <span class="ident">compute_geom_type</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Compute the geometry type from the data</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def compute_geom_type(self):
+    &#34;&#34;&#34;Compute the geometry type from the data&#34;&#34;&#34;
+    return self._strategy.compute_geom_type()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Delete table on CARTO account associated with a Dataset instance</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.data import Dataset
+from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)</p>
+<p>d = Dataset('table_name')
+d.delete()</p>
+</div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>bool</code></strong></dt>
+<dd>True if deletion is successful, False otherwise.</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def delete(self):
+    &#34;&#34;&#34;Delete table on CARTO account associated with a Dataset instance
+
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            d = Dataset(&#39;table_name&#39;)
+            d.delete()
+
+    Returns:
+        bool: True if deletion is successful, False otherwise.
+
+    &#34;&#34;&#34;
+    return self._strategy.delete()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.download"><code class="name flex">
+<span>def <span class="ident">download</span></span>(<span>self, limit=None, decode_geom=False, retry_times=3)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Download / read a Dataset (table or query) from CARTO account
+associated with the Dataset's instance of :py:class:<code>Context
+&lt;cartoframes.auth.Context&gt;</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The number of rows of the Dataset to
+download. Default is to download all rows. This value must be<blockquote>
+<p>= 0.</p>
+</blockquote>
+</dd>
+<dt><strong><code>decode_geom</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Decode Dataset geometries into
+Shapely geometries from EWKB encoding.</dd>
+<dt><strong><code>retry_times</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of time to retry the download
+in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.data import Dataset
+from cartoframes.auth import set_default_credentials</p>
+<h1 id="use-cartoframes-example-account">use cartoframes example account</h1>
+<p>set_default_credentials('https://cartoframes.carto.com')
+d = Dataset('brooklyn_poverty')
+df = d.download(decode_geom=True)</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
+    &#34;&#34;&#34;Download / read a Dataset (table or query) from CARTO account
+    associated with the Dataset&#39;s instance of :py:class:`Context
+    &lt;cartoframes.auth.Context&gt;`.
+    Args:
+        limit (int, optional): The number of rows of the Dataset to
+          download. Default is to download all rows. This value must be
+          &gt;= 0.
+        decode_geom (bool, optional): Decode Dataset geometries into
+          Shapely geometries from EWKB encoding.
+        retry_times (int, optional): Number of time to retry the download
+          in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
+    Example:
+        .. code::
+            from cartoframes.data import Dataset
+            from cartoframes.auth import set_default_credentials
+            # use cartoframes example account
+            set_default_credentials(&#39;https://cartoframes.carto.com&#39;)
+            d = Dataset(&#39;brooklyn_poverty&#39;)
+            df = d.download(decode_geom=True)
+    &#34;&#34;&#34;
+    return self._strategy.download(limit, decode_geom, retry_times)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.exists"><code class="name flex">
+<span>def <span class="ident">exists</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Checks to see if table exists</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def exists(self):
+    &#34;&#34;&#34;Checks to see if table exists&#34;&#34;&#34;
+    return self._strategy.exists()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.get_geodataframe"><code class="name flex">
+<span>def <span class="ident">get_geodataframe</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Converts DataFrame into GeoDataFrame if possible</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_geodataframe(self):
+    &#34;&#34;&#34;Converts DataFrame into GeoDataFrame if possible&#34;&#34;&#34;
+    return self._strategy.get_geodataframe()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.get_query"><code class="name flex">
+<span>def <span class="ident">get_query</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_query(self):
+    return self._strategy.get_query()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.get_table_column_names"><code class="name flex">
+<span>def <span class="ident">get_table_column_names</span></span>(<span>self, exclude=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get column names and types from a table</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_table_column_names(self, exclude=None):
+    &#34;&#34;&#34;Get column names and types from a table&#34;&#34;&#34;
+    return self._strategy.get_table_column_names(exclude)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.get_table_names"><code class="name flex">
+<span>def <span class="ident">get_table_names</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get table names used by Dataset instance</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def get_table_names(self):
+    &#34;&#34;&#34;Get table names used by Dataset instance&#34;&#34;&#34;
+    if self.is_local():
+        raise CartoException(&#39;Your data is not synchronized with CARTO. If you want to upload it to CARTO, &#39;
+                             &#39;you should use: `Dataset.upload(table_name=&#34;new_table&#34;)` &#39;
+                             &#39;Then, if you want to work with the remote data, use `Dataset(&#34;new_table&#34;)`&#39;)
+
+    return self._strategy.get_table_names()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.is_local"><code class="name flex">
+<span>def <span class="ident">is_local</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Checks if the Dataset is local (DataFrameDataset)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_local(self):
+    &#34;&#34;&#34;Checks if the Dataset is local (DataFrameDataset)&#34;&#34;&#34;
+    return isinstance(self._strategy, DataFrameDataset)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.is_public"><code class="name flex">
+<span>def <span class="ident">is_public</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Checks to see if table or table used by query has public privacy</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_public(self):
+    &#34;&#34;&#34;Checks to see if table or table used by query has public privacy&#34;&#34;&#34;
+    return self._strategy.is_public()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.is_remote"><code class="name flex">
+<span>def <span class="ident">is_remote</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Checks if the Dataset is local (TableDataset or QueryDataset)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def is_remote(self):
+    &#34;&#34;&#34;Checks if the Dataset is local (TableDataset or QueryDataset)&#34;&#34;&#34;
+    return not self.is_local()</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.update_dataset_info"><code class="name flex">
+<span>def <span class="ident">update_dataset_info</span></span>(<span>self, privacy=None, table_name=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Update/change Dataset privacy and name</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>privacy</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>One of :py:attr:<code>DatasetInfo.PRIVATE</code>,
+:py:attr:<code>DatasetInfo.PUBLIC</code> or :py:attr:<code>DatasetInfo.LINK</code></dd>
+<dt><strong><code>table_name</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Name of the dataset on CARTO. After updating it,
+the table_name will be changed too.</dd>
+</dl>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.data import Dataset, DatasetInfo
+from cartoframes.auth import set_default_credentials</p>
+<p>set_default_credentials(
+base_url='https://your_user_name.carto.com/',
+api_key='your api key'
+)</p>
+<p>d = Dataset('tablename')
+d.update_dataset_info(privacy=DatasetInfo.LINK)</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def update_dataset_info(self, privacy=None, table_name=None):
+    &#34;&#34;&#34;Update/change Dataset privacy and name
+
+    Args:
+      privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
+        :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
+      table_name (str, optional): Name of the dataset on CARTO. After updating it,
+        the table_name will be changed too.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com/&#39;,
+                api_key=&#39;your api key&#39;
+            )
+
+            d = Dataset(&#39;tablename&#39;)
+            d.update_dataset_info(privacy=DatasetInfo.LINK)
+
+    &#34;&#34;&#34;
+    return self._strategy.update_dataset_info(privacy, table_name)</code></pre>
+</details>
+</dd>
+<dt id="cartoframes.data.dataset.dataset.Dataset.upload"><code class="name flex">
+<span>def <span class="ident">upload</span></span>(<span>self, with_lnglat=None, if_exists='fail', table_name=None, schema=None, credentials=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Upload Dataset to CARTO account associated with <code>credentials</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>with_lnglat</code></strong> :&ensp;<code>tuple</code>, optional</dt>
+<dd>Two columns that have the longitude
+and latitude information. If used, a point geometry will be
+created upon upload to CARTO. Example input: <code>('long', 'lat')</code>.
+Defaults to <code>None</code>.</dd>
+<dt><strong><code>if_exists</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Behavior for adding data from Dataset.
+Options are 'fail', 'replace', or 'append'. Defaults to 'fail',
+which means that the Dataset instance will not overwrite a
+table of the same name if it exists. If the table does not exist,
+it will be created.</dd>
+<dt><strong><code>table_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Desired table name for the dataset on CARTO. If
+name does not conform to SQL naming conventions, it will be
+'normalized' (e.g., all lower case, adding <code>_</code> in place of spaces
+and other special characters.</dd>
+</dl>
+<p>credentials (:py:class:<code>Context &lt;cartoframes.auth.Context&gt;</code>, optional):
+credentials of user account to send Dataset to. If not provided,
+a default credentials (if set with :py:meth:<code>set_default_credentials
+&lt;cartoframes.auth.set_default_credentials&gt;</code>) will attempted to be
+used.</p>
+<div class="admonition code">
+<p class="admonition-title">Code</p>
+<p>from cartoframes.auth import set_default_credentials
+from cartoframes.data import Dataset
+import pandas as pd
+set_default_credentials(
+base_url='https://your_user_name.carto.com',
+api_key='your api key'
+)
+df = pd.DataFrame({
+'lat': [40, 45, 50],
+'lng': [-80, -85, -90]
+})
+d = Dataset(df)
+d.upload(with_lnglat=('lng', 'lat'), table_name='sample_table')</p>
+</div></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
+    &#34;&#34;&#34;Upload Dataset to CARTO account associated with `credentials`.
+    Args:
+        with_lnglat (tuple, optional): Two columns that have the longitude
+          and latitude information. If used, a point geometry will be
+          created upon upload to CARTO. Example input: `(&#39;long&#39;, &#39;lat&#39;)`.
+          Defaults to `None`.
+        if_exists (str, optional): Behavior for adding data from Dataset.
+          Options are &#39;fail&#39;, &#39;replace&#39;, or &#39;append&#39;. Defaults to &#39;fail&#39;,
+          which means that the Dataset instance will not overwrite a
+          table of the same name if it exists. If the table does not exist,
+          it will be created.
+        table_name (str): Desired table name for the dataset on CARTO. If
+          name does not conform to SQL naming conventions, it will be
+          &#39;normalized&#39; (e.g., all lower case, adding `_` in place of spaces
+          and other special characters.
+        credentials (:py:class:`Context &lt;cartoframes.auth.Context&gt;`, optional):
+          credentials of user account to send Dataset to. If not provided,
+          a default credentials (if set with :py:meth:`set_default_credentials
+          &lt;cartoframes.auth.set_default_credentials&gt;`) will attempted to be
+          used.
+    Example:
+        Send a pandas DataFrame to CARTO.
+        .. code::
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+            import pandas as pd
+            set_default_credentials(
+                base_url=&#39;https://your_user_name.carto.com&#39;,
+                api_key=&#39;your api key&#39;
+            )
+            df = pd.DataFrame({
+                &#39;lat&#39;: [40, 45, 50],
+                &#39;lng&#39;: [-80, -85, -90]
+            })
+            d = Dataset(df)
+            d.upload(with_lnglat=(&#39;lng&#39;, &#39;lat&#39;), table_name=&#39;sample_table&#39;)
+    &#34;&#34;&#34;
+    if table_name:
+        self._strategy.table_name = table_name
+    if credentials:
+        self._strategy.credentials = credentials
+    if schema:
+        self._strategy.schema = schema
+
+    self._strategy.upload(if_exists, with_lnglat)
+
+    return Dataset(self._strategy.table_name, self._strategy.credentials, self._strategy.schema)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="cartoframes.data.dataset" href="index.html">cartoframes.data.dataset</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="cartoframes.data.dataset.dataset.Dataset" href="#cartoframes.data.dataset.dataset.Dataset">Dataset</a></code></h4>
+<ul class="">
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.APPEND" href="#cartoframes.data.dataset.dataset.Dataset.APPEND">APPEND</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.FAIL" href="#cartoframes.data.dataset.dataset.Dataset.FAIL">FAIL</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_LINE" href="#cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_LINE">GEOM_TYPE_LINE</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POINT" href="#cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POINT">GEOM_TYPE_POINT</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POLYGON" href="#cartoframes.data.dataset.dataset.Dataset.GEOM_TYPE_POLYGON">GEOM_TYPE_POLYGON</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.LINK" href="#cartoframes.data.dataset.dataset.Dataset.LINK">LINK</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.PRIVATE" href="#cartoframes.data.dataset.dataset.Dataset.PRIVATE">PRIVATE</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.PUBLIC" href="#cartoframes.data.dataset.dataset.Dataset.PUBLIC">PUBLIC</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.REPLACE" href="#cartoframes.data.dataset.dataset.Dataset.REPLACE">REPLACE</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.compute_geom_type" href="#cartoframes.data.dataset.dataset.Dataset.compute_geom_type">compute_geom_type</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.credentials" href="#cartoframes.data.dataset.dataset.Dataset.credentials">credentials</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.dataframe" href="#cartoframes.data.dataset.dataset.Dataset.dataframe">dataframe</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.dataset_info" href="#cartoframes.data.dataset.dataset.Dataset.dataset_info">dataset_info</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.delete" href="#cartoframes.data.dataset.dataset.Dataset.delete">delete</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.download" href="#cartoframes.data.dataset.dataset.Dataset.download">download</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.exists" href="#cartoframes.data.dataset.dataset.Dataset.exists">exists</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.get_geodataframe" href="#cartoframes.data.dataset.dataset.Dataset.get_geodataframe">get_geodataframe</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.get_query" href="#cartoframes.data.dataset.dataset.Dataset.get_query">get_query</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.get_table_column_names" href="#cartoframes.data.dataset.dataset.Dataset.get_table_column_names">get_table_column_names</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.get_table_names" href="#cartoframes.data.dataset.dataset.Dataset.get_table_names">get_table_names</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.is_local" href="#cartoframes.data.dataset.dataset.Dataset.is_local">is_local</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.is_public" href="#cartoframes.data.dataset.dataset.Dataset.is_public">is_public</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.is_remote" href="#cartoframes.data.dataset.dataset.Dataset.is_remote">is_remote</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.query" href="#cartoframes.data.dataset.dataset.Dataset.query">query</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.schema" href="#cartoframes.data.dataset.dataset.Dataset.schema">schema</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.table_name" href="#cartoframes.data.dataset.dataset.Dataset.table_name">table_name</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.update_dataset_info" href="#cartoframes.data.dataset.dataset.Dataset.update_dataset_info">update_dataset_info</a></code></li>
+<li><code><a title="cartoframes.data.dataset.dataset.Dataset.upload" href="#cartoframes.data.dataset.dataset.Dataset.upload">upload</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.3</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
