@@ -72,7 +72,10 @@ class DataFrameDataset(BaseDataset):
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
-        columns_normalized, columns_origin = self._copyfrom_column_names(geom_col, normalized_column_names)
+        columns_normalized, columns_origin = self._copyfrom_column_names(
+            geom_col,
+            normalized_column_names,
+            with_lnglat)
 
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
@@ -83,20 +86,23 @@ class DataFrameDataset(BaseDataset):
             columns_origin,
             with_lnglat,
             geom_col,
-            enc_type)
+            enc_type,
+            len(columns_normalized))
 
         self._context.upload(query, data)
 
-    def _copyfrom_column_names(self, geom_col, normalized_column_names):
+    def _copyfrom_column_names(self, geom_col, normalized_column_names, with_lnglat=None):
         columns_normalized = []
         columns_origin = []
+
+        if geom_col:
+            columns_origin.append(geom_col)
 
         for norm, orig in normalized_column_names:
             columns_normalized.append(norm)
             columns_origin.append(orig)
 
-        if geom_col:
-            columns_origin.insert(0, geom_col)
+        if geom_col or with_lnglat:
             columns_normalized.append('the_geom')
 
         return columns_normalized, columns_origin
@@ -139,7 +145,9 @@ class DataFrameDataset(BaseDataset):
                 return map_geom_type(geometry.geom_type)
 
 
-def _rows(df, cols, with_lnglat, geom_col, enc_type):
+def _rows(df, cols, with_lnglat, geom_col, enc_type, columns_number=None):
+    columns_number = columns_number or len(cols)
+
     for i, row in df.iterrows():
         row_data = []
         the_geom_val = None
@@ -164,10 +172,10 @@ def _rows(df, cols, with_lnglat, geom_col, enc_type):
             if geom:
                 row_data.append('SRID=4326;{geom}'.format(geom=geom.wkt))
 
-        if len(row_data) < len(cols) and with_lnglat is not None and lng_val is not None and lat_val is not None:
+        if len(row_data) < columns_number and with_lnglat is not None and lng_val is not None and lat_val is not None:
             row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
 
-        if len(row_data) < len(cols):
+        if len(row_data) < columns_number:
             row_data.append('')
 
         csv_row = '|'.join(row_data)
