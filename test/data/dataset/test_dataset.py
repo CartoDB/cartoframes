@@ -724,7 +724,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(expected_columns_origin, columns_origin)
         self.assertEqual(expected_columns_normalized, columns_normalized)
 
-
     def test_copyfrom_column_names_with_lnglat(self):
         the_geom = None
         with_lnglat = ('lng', 'lat')
@@ -741,7 +740,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         self.assertEqual(expected_columns_origin, columns_origin)
         self.assertEqual(expected_columns_normalized, columns_normalized)
-
 
     def test_copyfrom_column_names_without_geom(self):
         columns = ['address', 'city']
