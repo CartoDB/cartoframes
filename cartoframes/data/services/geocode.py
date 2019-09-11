@@ -213,6 +213,17 @@ def _set_post_summary_info(summary, result, output):
         output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
 
 
+def _dup_dataset(dataset):
+    # When uploading datasets to temporary tables we don't want to leave the dataset
+    # with a `table_name` attribute (of the temporary table, that will be deleted),
+    # so we'll use duplicates of the datasets for temporary uploads`
+    if hasattr(dataset, 'query'):
+        return Dataset(dataset.query)
+    elif dataset.table_name:
+        return Dataset(dataset.table_name)
+    return Dataset(dataset.dataframe)
+
+
 class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account; master API Key credentials must be provided
@@ -307,7 +318,7 @@ class Geocode(object):
         temporary_table = False
 
         input_dataset = dataset
-        if input_dataset.is_remote() and input_dataset.table_name:
+        if input_dataset.is_remote() and input_dataset.table_name:  # FIXME: more robust to check first for query (hasattr(input_dataset, 'query'))
             # input dataset is a table
             if table_name:
                 # Copy input dataset into a new table
@@ -325,6 +336,7 @@ class Geocode(object):
             else:
                 temporary_table = True
                 input_table_name = _generate_temp_table_name()
+                input_dataset = _dup_dataset(input_dataset)
             input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
 
         result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
