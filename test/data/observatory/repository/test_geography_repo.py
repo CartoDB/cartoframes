@@ -4,7 +4,7 @@ from cartoframes.data.observatory.geography import Geographies
 
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_geography1, test_geographies
+from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 try:
     from unittest.mock import Mock
@@ -15,23 +15,7 @@ except ImportError:
 class TestGeographyRepo(unittest.TestCase):
 
     def setUp(self):
-        mocked_sql_result = [{
-            'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
-            'name': 'ESP - Census',
-            'provider_id': 'bbva',
-            'country_iso_code3': 'esp',
-            'version': '20190203',
-            'is_public_data': True
-        }, {
-            'id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
-            'name': 'ESP - Municipalities',
-            'provider_id': 'bbva',
-            'country_iso_code3': 'esp',
-            'version': '20190203',
-            'is_public_data': False
-        }]
-
-        RepoClient.get_geographies = Mock(return_value=mocked_sql_result)
+        RepoClient.get_geographies = Mock(return_value=[db_geography1, db_geography2])
 
     def test_get_all(self):
         # Given

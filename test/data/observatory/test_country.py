@@ -3,15 +3,12 @@ import pandas as pd
 
 from cartoframes.data.observatory.geography import Geographies
 from cartoframes.data.observatory.dataset import Datasets
-from cartoframes.data.observatory.category import Categories
 from cartoframes.data.observatory.country import Countries, Country
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 
-from .examples import test_country1, test_datasets, test_countries, test_categories, \
-    test_geographies
+from .examples import test_country1, test_datasets, test_countries, test_geographies
 
 try:
     from unittest.mock import Mock, patch
@@ -46,19 +43,6 @@ class TestCountry(unittest.TestCase):
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
-
-    @patch.object(CategoryRepository, 'get_by_country')
-    def test_get_categories(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_categories
-
-        # When
-        categories = test_country1.categories
-
-        # Then
-        assert isinstance(categories, pd.DataFrame)
-        assert isinstance(categories, Categories)
-        assert categories == test_categories
 
     @patch.object(GeographyRepository, 'get_by_country')
     def test_get_geographies(self, mocked_repo):

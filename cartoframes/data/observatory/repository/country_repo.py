@@ -25,9 +25,7 @@ class CountryRepository(object):
     def _to_country(result):
         from cartoframes.data.observatory.country import Country
 
-        return Country({
-            'iso_code3': result['country_iso_code3']
-        })
+        return Country(result)
 
     @staticmethod
     def _to_countries(results):

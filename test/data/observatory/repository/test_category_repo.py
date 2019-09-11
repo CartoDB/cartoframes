@@ -4,7 +4,7 @@ from cartoframes.data.observatory.category import Categories
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_category1, test_categories
+from ..examples import test_category1, test_categories, db_category1, db_category2
 
 try:
     from unittest.mock import Mock
@@ -15,15 +15,7 @@ except ImportError:
 class TestCategoryRepo(unittest.TestCase):
 
     def setUp(self):
-        mocked_sql_result = [{
-            'id': 'cat1',
-            'name': 'Financial'
-        }, {
-            'id': 'cat2',
-            'name': 'Demographics'
-        }]
-
-        RepoClient.get_categories = Mock(return_value=mocked_sql_result)
+         RepoClient.get_categories = Mock(return_value=[db_category1, db_category2])
 
     def test_get_all(self):
         # Given

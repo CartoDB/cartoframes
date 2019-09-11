@@ -21,18 +21,11 @@ class CategoryRepository(object):
 
         return self._to_category(result[0])
 
-    def get_by_country(self, iso_code):
-        # TODO
-        pass
-
     @staticmethod
     def _to_category(result):
         from cartoframes.data.observatory.category import Category
 
-        return Category({
-            'id': result['id'],
-            'name': result['name']
-        })
+        return Category(result)
 
     @staticmethod
     def _to_categories(results):

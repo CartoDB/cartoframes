@@ -4,7 +4,7 @@ from cartoframes.data.observatory.variable import Variables
 
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_variable1, test_variables
+from ..examples import test_variable1, test_variables, db_variable1, db_variable2
 
 try:
     from unittest.mock import Mock
@@ -15,17 +15,7 @@ except ImportError:
 class TestVariableRepo(unittest.TestCase):
 
     def setUp(self):
-        mocked_sql_result = [{
-            'id': 'var1',
-            'name': 'Population',
-            'variable_group_id': 'vargroup1'
-        }, {
-            'id': 'var2',
-            'name': 'Date',
-            'variable_group_id': 'vargroup1'
-        }]
-
-        RepoClient.get_variables = Mock(return_value=mocked_sql_result)
+        RepoClient.get_variables = Mock(return_value=[db_variable1, db_variable2])
 
     def test_get_all(self):
         # Given

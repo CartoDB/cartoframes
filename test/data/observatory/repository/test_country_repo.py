@@ -4,7 +4,7 @@ from cartoframes.data.observatory.country import Countries
 
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_countries, test_country1
+from ..examples import test_countries, test_country1, db_country1, db_country2
 
 try:
     from unittest.mock import Mock
@@ -15,13 +15,7 @@ except ImportError:
 class TestCountryRepo(unittest.TestCase):
 
     def setUp(self):
-        mocked_sql_result = [{
-            'country_iso_code3': 'esp'
-        }, {
-            'country_iso_code3': 'usa'
-        }]
-
-        RepoClient.get_countries = Mock(return_value=mocked_sql_result)
+        RepoClient.get_countries = Mock(return_value=[db_country1, db_country2])
 
     def test_get_all(self):
         # Given
@@ -46,7 +40,7 @@ class TestCountryRepo(unittest.TestCase):
 
     def test_get_by_id(self):
         # Given
-        requested_iso_code = test_country1['iso_code3']
+        requested_iso_code = test_country1['country_iso_code3']
         repo = CountryRepository()
 
         # When

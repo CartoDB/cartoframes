@@ -28,11 +28,7 @@ class VariableRepository(object):
     def _to_variable(result):
         from cartoframes.data.observatory.variable import Variable
 
-        return Variable({
-            'id': result['id'],
-            'name': result['name'],
-            'group_id': result['variable_group_id']
-        })
+        return Variable(result)
 
     @staticmethod
     def _to_variables(results):

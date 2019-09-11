@@ -21,8 +21,8 @@ class DatasetRepository(object):
 
         return self._to_dataset(result[0])
 
-    def get_by_country(self, iso3):
-        return self._to_datasets(self.client.get_datasets('country_iso_code3', iso3))
+    def get_by_country(self, iso_code3):
+        return self._to_datasets(self.client.get_datasets('country_iso_code3', iso_code3))
 
     def get_by_category(self, category_id):
         return self._to_datasets(self.client.get_datasets('category_id', category_id))
@@ -37,19 +37,7 @@ class DatasetRepository(object):
     def _to_dataset(result):
         from cartoframes.data.observatory.dataset import Dataset
 
-        return Dataset({
-            'id': result['id'],
-            'name': result['name'],
-            'provider_id': result['provider_id'],
-            'category_id': result['category_id'],
-            'country_iso_code3': result['country_iso_code3'],
-            'geography_id': result['geography_id'],
-            'temporal_aggregations': result['temporalaggregations'],
-            'time_coverage': result['time_coverage'],
-            'group_id': result['datasets_groups_id'],
-            'version': result['version'],
-            'is_public': result['is_public_data']
-        })
+        return Dataset(result)
 
     @staticmethod
     def _to_datasets(results):

@@ -21,22 +21,14 @@ class GeographyRepository(object):
 
         return self._to_geography(result[0])
 
-    def get_by_country(self, iso_code):
-        # TODO
-        pass
+    def get_by_country(self, iso_code3):
+        return self._to_geographies(self.client.get_geographies('country_iso_code3', iso_code3))
 
     @staticmethod
     def _to_geography(result):
         from cartoframes.data.observatory.geography import Geography
 
-        return Geography({
-            'id': result['id'],
-            'name': result['name'],
-            'provider_id': result['provider_id'],
-            'country_iso_code3': result['country_iso_code3'],
-            'version': result['version'],
-            'is_public': result['is_public_data']
-        })
+        return Geography(result)
 
     @staticmethod
     def _to_geographies(results):
