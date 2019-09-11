@@ -265,6 +265,8 @@ class Dataset(object):
             self._strategy.table_name = table_name
         if credentials:
             self._strategy.credentials = credentials
+        elif self._strategy.credentials is None:
+            self._strategy.credentials = get_default_credentials()
         if schema:
             self._strategy.schema = schema
 
