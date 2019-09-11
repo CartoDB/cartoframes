@@ -416,13 +416,13 @@ var init = (function () {
   }
 
   function _getWidgetType(layer, property, value) {
-    return layer.metadata.properties[value] ?
+    return layer.metadata && layer.metadata.properties[value] ?
       layer.metadata.properties[value].type
       : _getWidgetPropertyType(layer, property);
   }
 
   function _getWidgetPropertyType(layer, property) {
-    return layer.metadata.properties[property] ?
+    return layer.metadata && layer.metadata.properties[property] ?
       layer.metadata.properties[property].type
       : null;
   }
