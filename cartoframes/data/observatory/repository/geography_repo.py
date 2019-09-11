@@ -1,4 +1,4 @@
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from .repo_client import RepoClient
 
 
 def get_geography_repo():

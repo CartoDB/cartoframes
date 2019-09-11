@@ -1,5 +1,5 @@
-from cartoframes.data.observatory.category import Categories
-from cartoframes.data.observatory.country import Countries
+from .category import Categories
+from .country import Countries
 
 
 class Catalog(object):
