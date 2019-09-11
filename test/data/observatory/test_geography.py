@@ -36,7 +36,7 @@ class TestGeography(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = test_geography1.datasets
+        datasets = test_geography1.datasets()
 
         # Then
         assert isinstance(datasets, pd.DataFrame)
@@ -52,7 +52,7 @@ class TestGeographies(unittest.TestCase):
         mocked_repo.return_value = test_geographies
 
         # When
-        geographies = Geographies.get_all()
+        geographies = Geographies.all()
 
         # Then
         assert isinstance(geographies, pd.DataFrame)

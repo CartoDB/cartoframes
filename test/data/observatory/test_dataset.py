@@ -35,7 +35,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_variables
 
         # When
-        variables = test_dataset1.variables
+        variables = test_dataset1.variables()
 
         # Then
         assert isinstance(variables, pd.DataFrame)
@@ -51,7 +51,7 @@ class TestDatasets(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = Datasets.get_all()
+        datasets = Datasets.all()
 
         # Then
         assert isinstance(datasets, pd.DataFrame)

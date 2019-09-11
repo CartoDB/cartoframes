@@ -20,7 +20,6 @@ class Dataset(pd.Series):
     def get_by_id(dataset_id):
         return get_dataset_repo().get_by_id(dataset_id)
 
-    @property
     def variables(self):
         return get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD])
 
@@ -42,7 +41,7 @@ class Datasets(pd.DataFrame):
         return Dataset
 
     @staticmethod
-    def get_all():
+    def all():
         return get_dataset_repo().get_all()
 
     @staticmethod

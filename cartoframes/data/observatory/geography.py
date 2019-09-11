@@ -20,7 +20,6 @@ class Geography(pd.Series):
     def get_by_id(geography_id):
         return get_geography_repo().get_by_id(geography_id)
 
-    @property
     def datasets(self):
         return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
 
@@ -42,7 +41,7 @@ class Geographies(pd.DataFrame):
         return Geography
 
     @staticmethod
-    def get_all():
+    def all():
         return get_geography_repo().get_all()
 
     @staticmethod

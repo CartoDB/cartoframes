@@ -21,7 +21,6 @@ class Category(pd.Series):
     def get_by_id(category_id):
         return get_category_repo().get_by_id(category_id)
 
-    @property
     def datasets(self):
         return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
 
@@ -43,7 +42,7 @@ class Categories(pd.DataFrame):
         return Category
 
     @staticmethod
-    def get_all():
+    def all():
         return get_category_repo().get_all()
 
     @staticmethod

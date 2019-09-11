@@ -33,6 +33,9 @@ class DatasetRepository(object):
     def get_by_geography(self, geography_id):
         return self._to_datasets(self.client.get_datasets('geography_id', geography_id))
 
+    def get_by_provider(self, provider_id):
+        return self._to_datasets(self.client.get_datasets('provider_id', provider_id))
+
     @staticmethod
     def _to_dataset(result):
         from cartoframes.data.observatory.dataset import Dataset

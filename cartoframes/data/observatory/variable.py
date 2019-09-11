@@ -20,7 +20,6 @@ class Variable(pd.Series):
     def get_by_id(variable_id):
         return get_variable_repo().get_by_id(variable_id)
 
-    @property
     def datasets(self):
         return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
 
@@ -42,7 +41,7 @@ class Variables(pd.DataFrame):
         return Variable
 
     @staticmethod
-    def get_all():
+    def all():
         return get_variable_repo().get_all()
 
     @staticmethod

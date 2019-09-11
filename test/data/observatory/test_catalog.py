@@ -13,7 +13,7 @@ except ImportError:
 
 class TestCatalog(unittest.TestCase):
 
-    @patch.object(Countries, 'get_all')
+    @patch.object(Countries, 'all')
     def test_countries(self, mocked_countries):
         # Given
         expected_countries = [test_country1, test_country2]
@@ -21,12 +21,12 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        countries = catalog.countries
+        countries = catalog.countries()
 
         # Then
         assert countries == expected_countries
 
-    @patch.object(Categories, 'get_all')
+    @patch.object(Categories, 'all')
     def test_categories(self, mocked_categories):
         # Given
         expected_categories = [test_category1, test_category2]
@@ -34,7 +34,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        categories = catalog.categories
+        categories = catalog.categories()
 
         # Then
         assert categories == expected_categories

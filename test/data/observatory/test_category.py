@@ -36,7 +36,7 @@ class TestCategory(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = test_category1.datasets
+        datasets = test_category1.datasets()
 
         # Then
         assert isinstance(datasets, pd.DataFrame)
@@ -52,7 +52,7 @@ class TestCategories(unittest.TestCase):
         mocked_repo.return_value = test_categories
 
         # When
-        categories = Categories.get_all()
+        categories = Categories.all()
 
         # Then
         assert isinstance(categories, pd.DataFrame)

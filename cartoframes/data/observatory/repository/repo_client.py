@@ -18,6 +18,10 @@ class RepoClient(object):
         query = 'select * from categories'
         return self._run_query(query, field, value)
 
+    def get_providers(self, field=None, value=None):
+        query = 'select * from providers'
+        return self._run_query(query, field, value)
+
     def get_variables(self, field=None, value=None):
         query = 'select * from variables'
         return self._run_query(query, field, value)
