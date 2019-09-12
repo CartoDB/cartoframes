@@ -1,12 +1,12 @@
 Geocode
 =======
 
-The ``Geocode`` class provides geocoding using CARTO LDS.
-This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incurr in the expense of geocoding credits.
+The ``Geocode`` class provides geocoding using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
+This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
-The ``geocode`` method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
-A second mandatory argument, ``street`` defines the name of the input data column that contains the street (postal address).
+The `<cartoframes.data.services.Geocode.geocode>`_ instance method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
+A second mandatory argument, ``street`` defines the name of the data column that contains the street address.
 
 Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be used to either
 pass the name of a column that contains the corresponding attribute; e.g. ``city='column_name_of_the_city'``.
@@ -62,9 +62,9 @@ A Dataframe can be geocoded like this:
 
 .. code:: python
 
+    import pandas
     from cartoframes.data.services import Geocode
     from cartoframes.data import Dataset
-    import pandas
     from cartoframes.auth import set_default_credentials
 
     set_default_credentials(
@@ -81,7 +81,7 @@ A Dataframe can be geocoded like this:
     # Filtering by relevance
     print(geocoded_dataframe[geocoded_dataframe.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
 
-To store the results permanently in a CARTO dataset the argument ``table_name`` can be used, i
+To store the results permanently in a CARTO dataset the argument ``table_name`` can be used:
 
 .. code:: python
 
@@ -97,9 +97,9 @@ When the Dataset to be geocoded corresponds to a CARTO table, it will by default
 
 .. code:: python
 
+    import pandas
     from cartoframes.data.services import Geocode
     from cartoframes.data import Dataset
-    import pandas
     from cartoframes.auth import set_default_credentials
 
     set_default_credentials(
@@ -130,9 +130,9 @@ When the Dataset to be geocoded corresponds to a query, it will by default be ge
 
 .. code:: python
 
+    import pandas
     from cartoframes.data.services import Geocode
     from cartoframes.data import Dataset
-    import pandas
     from cartoframes.auth import set_default_credentials
 
     set_default_credentials(
