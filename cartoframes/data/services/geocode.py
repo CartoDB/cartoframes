@@ -222,7 +222,7 @@ class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
     (through explicit argument in constructor or via the default credentials).
-    Use of these methods will incur in geocoding credit consumption for the privided accout.
+    Use of these methods will incur in geocoding credit consumption for the provided account.
 
     Examples:
 
