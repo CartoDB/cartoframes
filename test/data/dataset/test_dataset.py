@@ -17,7 +17,7 @@ from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _normalize_column_names
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
@@ -704,6 +704,60 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
                      'to save your data in CARTO.')
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
+
+    def test_copyfrom_column_names_with_geom(self):
+        the_geom = 'geometry'
+        with_lnglat = None
+
+        expected_columns_origin = [the_geom, 'address', 'city']
+        expected_columns_normalized = ['address', 'city', 'the_geom']
+
+        df = pd.DataFrame(
+            [['Gran Vía 46', 'Madrid', 'fake_geom'], ['Ebro 1', 'Sevilla', 'fake_geom']],
+            columns=['address', 'city', 'geometry'])
+        dataset = DataFrameDataset(df)
+        columns_normalized, columns_origin = dataset._copyfrom_column_names(
+            the_geom,
+            _normalize_column_names(df),
+            with_lnglat)
+
+        self.assertEqual(expected_columns_origin, columns_origin)
+        self.assertEqual(expected_columns_normalized, columns_normalized)
+
+    def test_copyfrom_column_names_with_lnglat(self):
+        the_geom = None
+        with_lnglat = ('lng', 'lat')
+
+        expected_columns_origin = ['lng', 'lat']
+        expected_columns_normalized = ['lng', 'lat', 'the_geom']
+
+        df = pd.DataFrame([['0', '0'], ['1', '1']], columns=['lng', 'lat'])
+        dataset = DataFrameDataset(df)
+        columns_normalized, columns_origin = dataset._copyfrom_column_names(
+            the_geom,
+            _normalize_column_names(df),
+            with_lnglat)
+
+        self.assertEqual(expected_columns_origin, columns_origin)
+        self.assertEqual(expected_columns_normalized, columns_normalized)
+
+    def test_copyfrom_column_names_without_geom(self):
+        columns = ['address', 'city']
+        the_geom = None
+        with_lnglat = None
+
+        expected_columns_origin = columns
+        expected_columns_normalized = columns
+
+        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=columns)
+        dataset = DataFrameDataset(df)
+        columns_normalized, columns_origin = dataset._copyfrom_column_names(
+            the_geom,
+            _normalize_column_names(df),
+            with_lnglat)
+
+        self.assertEqual(expected_columns_origin, columns_origin)
+        self.assertEqual(expected_columns_normalized, columns_normalized)
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
