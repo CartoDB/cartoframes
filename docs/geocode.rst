@@ -13,7 +13,21 @@ pass the name of a column that contains the corresponding attribute; e.g. ``city
 Or a literal text within single quotes (useful if all rows of the dataset have the same attribute value), e.g. ``city="'London'"``.
 
 Another optional argument, ``metadata`` can define the name of a result column that will contain additional metadata about each gecododed row
-as a JSON string.
+as a JSON structure. The entries in this structure, as described in https://carto.com/developers/data-services-api/reference/ are:
+
+
++-------------+--------+------------------------------------------------------------+
+| Name        | Type   | Description                                                |
++=============+========+============================================================+
+| precision   | text   | precise or interpolated                                    |
++-------------+--------+------------------------------------------------------------+
+| relevance   | number | 0 to 1, higher being more relevant                         |
++-------------+--------+------------------------------------------------------------+
+| match_types | array  | list of match type strings                                 |
+|             |        | point_of_interest, country, state, county, locality,       |
+|             |        | district, street, intersection, street_number, postal_code |
++-------------+--------+------------------------------------------------------------+
+
 
 The result of the ``geocode`` method is a tuple containing both a result Dataset
 (or a Dataframe, in case the input was a Dataframe) and a dictionary with general information about the process.
@@ -61,9 +75,11 @@ A Dataframe can be geocoded like this:
 
     df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
-    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country="'Spain'")
+    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta')
     print(info)
     print(geocoded_dataframe)
+    # Filtering by relevance
+    print(geocoded_dataframe[geocoded_dataframe.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
 
 To store the results permanently in a CARTO dataset the argument ``table_name`` can be used, i
 

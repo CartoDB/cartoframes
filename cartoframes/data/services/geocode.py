@@ -231,7 +231,9 @@ class Geocode(object):
         .. code::
 
             from data.services import Geocode
-            gc = Geocode(credentials)
+            from cartoframes.auth import set_default_credentials
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+            gc = Geocode()
             _, info = gc.geocode(dataset, street='address', dry_run=True)
             print(info['required_quota'])
 
@@ -239,29 +241,47 @@ class Geocode(object):
 
         .. code::
 
+            import pandas
             from data.services import Geocode
             from cartoframes.data import Dataset
-            import pandas
+            from cartoframes.auth import set_default_credentials
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
             dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             gc = Geocode()
-            geocoded_dataset, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
-            print(dataframe)
+            geocoded_dataframe, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
+            print(geocoded_dataframe)
 
         Geocode a table:
 
         .. code::
 
+            import pandas
             from data.services import Geocode
             from cartoframes.data import Dataset
-            import pandas
+            from cartoframes.auth import set_default_credentials
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
-            dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            dataset = Dataset(dataframe)
-            dataset.upload(table_name='offices')
+            dataset = Dataset('YOUR_TABLE_NAME')
             gc = Geocode()
             geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
             print(geocoded_dataset.download())
+
+        Filter results by relevance:
+
+        .. code::
+
+            import pandas
+            from data.services import Geocode
+            from cartoframes.data import Dataset
+            from cartoframes.auth import set_default_credentials
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
+            gc = Geocode()
+            df, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta')
+            # show rows with relevance greater than 0.7:
+            print(df[df.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
 
     """
 
@@ -286,7 +306,7 @@ class Geocode(object):
             country (str, optional): either the name of a column containing the addresses'
                 Country names or a quoted literal value, e.g. "'USA'".
             metadata (str, optional): name of a column where metadata (in JSON format)
-                will be stored
+                will be stored (see https://carto.com/developers/data-services-api/reference/)
             table_name (str, optional): the geocoding results will be placed in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
