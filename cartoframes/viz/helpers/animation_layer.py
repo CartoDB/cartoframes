@@ -37,8 +37,8 @@ def animation_layer(
             'point': {
                 'width': '{0}'.format(
                     size or defaults.STYLE['point']['width']),
-                'color': 'opacity({0}, {1})'.format(color or '#EE4D5A',
-                    opacity or '0.8'),
+                'color': 'opacity({0}, {1})'.format(
+                    color or '#EE4D5A', opacity or '0.8'),
                 'strokeWidth': '{0}'.format(
                     stroke_width or defaults.STYLE['point']['strokeWidth']),
                 'strokeColor': '{0}'.format(
