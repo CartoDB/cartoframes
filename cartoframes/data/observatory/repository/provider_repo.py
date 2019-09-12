@@ -14,7 +14,7 @@ class ProviderRepository(object):
         return self._to_providers(self.client.get_providers())
 
     def by_id(self, provider_id):
-        result = self.client.get_categories('id', provider_id)
+        result = self.client.get_providers('id', provider_id)
 
         if len(result) == 0:
             return None

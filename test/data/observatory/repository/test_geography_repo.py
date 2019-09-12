@@ -7,39 +7,43 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 try:
-    from unittest.mock import Mock
+    from unittest.mock import Mock, patch
 except ImportError:
-    from mock import Mock
+    from mock import Mock, patch
 
 
 class TestGeographyRepo(unittest.TestCase):
 
-    def setUp(self):
-        RepoClient.get_geographies = Mock(return_value=[db_geography1, db_geography2])
-
-    def test_get_all(self):
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_all(self, mocked_repo):
         # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
         repo = GeographyRepository()
 
         # When
         geographies = repo.all()
 
         # Then
+        mocked_repo.assert_called_once_with()
         assert geographies == test_geographies
 
-    def test_get_all_when_empty(self):
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_all_when_empty(self, mocked_repo):
         # Given
-        RepoClient.get_geographies = Mock(return_value=[])
+        mocked_repo.return_value = []
         repo = GeographyRepository()
 
         # When
         geographies = repo.all()
 
         # Then
+        mocked_repo.assert_called_once_with()
         assert geographies == Geographies([])
 
-    def test_get_by_id(self):
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_id(self, mocked_repo):
         # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
         requested_id = test_geography1['id']
         repo = GeographyRepository()
 
@@ -47,11 +51,13 @@ class TestGeographyRepo(unittest.TestCase):
         geography = repo.by_id(requested_id)
 
         # Then
+        mocked_repo.assert_called_once_with('id', requested_id)
         assert geography == test_geography1
 
-    def test_get_by_id_unknown(self):
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_id_unknown(self, mocked_repo):
         # Given
-        RepoClient.get_geographies = Mock(return_value=[])
+        mocked_repo.return_value = []
         requested_id = 'unknown_id'
 
         # When
@@ -59,4 +65,19 @@ class TestGeographyRepo(unittest.TestCase):
         geography = repo.by_id(requested_id)
 
         # Then
+        mocked_repo.assert_called_once_with('id', requested_id)
         assert geography is None
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_country(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        country_code = 'esp'
+        repo = GeographyRepository()
+
+        # When
+        geography = repo.by_country(country_code)
+
+        # Then
+        mocked_repo.assert_called_once_with('country_iso_code3', country_code)
+        assert geography == test_geographies

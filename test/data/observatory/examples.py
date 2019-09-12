@@ -105,12 +105,14 @@ test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
 test_variables = Variables([test_variable1, test_variable2])
 
-test_provider1 = Provider({
+db_provider1 = {
     'id': 'bbva',
     'name': 'BBVA'
-})
-test_provider2 = Provider({
+}
+db_provider2 = {
     'id': 'open_data',
     'name': 'Open Data'
-})
+}
+test_provider1 = Provider(db_provider1)
+test_provider2 = Provider(db_provider2)
 test_providers = Providers([test_provider1, test_provider2])
