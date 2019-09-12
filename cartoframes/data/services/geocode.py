@@ -211,7 +211,7 @@ def _dup_dataset(dataset):
     # When uploading datasets to temporary tables we don't want to leave the dataset
     # with a `table_name` attribute (of the temporary table, that will be deleted),
     # so we'll use duplicates of the datasets for temporary uploads`
-    if dataset.get_query()
+    if dataset.get_query():
         return Dataset(dataset.get_query())
     elif dataset.table_name:
         return Dataset(dataset.table_name)
