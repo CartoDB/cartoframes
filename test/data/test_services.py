@@ -384,3 +384,29 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('final_records_with_geometry'), 1)
         quota += 1
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_geocode_dataframe_with_metadata(self):
+        gc = Geocode(credentials=self.credentials)
+
+        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+
+        quota = self.used_quota('hires_geocoder')
+
+        # Preview
+        _, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta', dry_run=True)
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
+
+        # Geocode
+        gc_df, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta')
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(info.get('successfully_geocoded'), 2)
+        self.assertEqual(info.get('final_records_with_geometry'), 2)
+        quota += 2
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertIsNotNone(gc_df.the_geom)
+        self.assertIsNotNone(gc_df.meta)
+        self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
+
