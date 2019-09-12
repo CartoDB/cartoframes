@@ -120,7 +120,7 @@ def _first_time_summary_query(table, street, city, state, country):
     )
 
 
-def _posterior_summary_query(table, street, city, state, country):
+def _posterior_summary_query(table):
     return """
     SELECT COUNT(*) AS count
     FROM {table}
