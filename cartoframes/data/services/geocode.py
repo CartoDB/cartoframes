@@ -189,8 +189,6 @@ def _generate_temp_table_name(base=None):
 def _set_pre_summary_info(summary, output):
     logging.debug(summary)
     output['total_rows'] = sum(summary.values())
-    # TODO: either report new (ng+nn) and changed (cg+cn) records, or we could
-    # reduce the states by merging ng+cg, nn+nn
     output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
     output['previously_geocoded'] = summary.get('pg', 0)
     output['previously_failed'] = summary.get('pn', 0)
