@@ -5,7 +5,7 @@ from tqdm import tqdm
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ....utils.columns import Column, normalize_names
+from ....utils.columns import Column, normalize_names, normalize_name
 from ....utils.geom_utils import decode_geometry, compute_geodataframe, \
     detect_encoding_type, save_index_as_column
 from ....utils.utils import map_geom_type, load_geojson, is_geojson
@@ -187,6 +187,28 @@ def _is_null(val):
         return vnull
     else:
         return vnull.all()
+
+
+def _process_columns(df):
+    geom_column = _get_geom_col_name(df)
+    columns = [{
+        'dataframe': c,
+        'database': _database_column_name(c, geom_column),
+        'dbtype': _dtypes2pg(c, geom_column)
+    } for c in df.columns]
+
+    return columns, geom_column
+
+
+def _database_column_name(column, geom_column):
+    if column == geom_column:
+        normalized_name = 'the_geom'
+    else:
+        normalized_name = normalize_name(column)
+        if normalized_name in Column.RESERVED_COLUMN_NAMES:
+            normalized_name = normalized_name + '_1'
+
+    return normalized_name
 
 
 def _normalize_column_names(df):
