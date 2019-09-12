@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 
 
@@ -17,7 +19,7 @@ class ProviderRepository(object):
         result = self.client.get_providers('id', provider_id)
 
         if len(result) == 0:
-            return None
+            raise CartoException('The id does not correspond with any existing provider in Data Observatory.')
 
         return self._to_provider(result[0])
 

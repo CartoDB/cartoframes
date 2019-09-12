@@ -1,5 +1,7 @@
 import unittest
 
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.geography import Geographies
 
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
@@ -55,18 +57,15 @@ class TestGeographyRepo(unittest.TestCase):
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')
-    def test_get_by_id_unknown(self, mocked_repo):
+    def test_get_by_id_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
         requested_id = 'unknown_id'
-
-        # When
         repo = GeographyRepository()
-        geography = repo.by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
-        assert geography is None
+        with self.assertRaises(CartoException):
+            repo.by_id(requested_id)
 
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_country(self, mocked_repo):

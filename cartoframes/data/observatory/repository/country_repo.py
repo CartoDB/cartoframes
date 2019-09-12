@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .repo_client import RepoClient
 
 
@@ -17,7 +19,7 @@ class CountryRepository(object):
         result = self.client.get_countries('country_iso_code3', iso_code3)
 
         if len(result) == 0:
-            return None
+            raise CartoException('The id does not correspond with any existing country in Data Observatory.')
 
         return self._to_country(result[0])
 

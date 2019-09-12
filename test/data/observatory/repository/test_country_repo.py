@@ -1,5 +1,7 @@
 import unittest
 
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.country import Countries
 
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
@@ -52,14 +54,12 @@ class TestCountryRepo(unittest.TestCase):
         assert country == test_country1
 
     @patch.object(RepoClient, 'get_countries')
-    def test_get_by_iso_code_unknown(self, mocked_repo):
+    def test_get_by_iso_code_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
         requested_iso_code = 'fra'
         repo = CountryRepository()
 
-        # When
-        country = repo.by_id(requested_iso_code)
-
         # Then
-        assert country is None
+        with self.assertRaises(CartoException):
+            repo.by_id(requested_iso_code)

@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .repo_client import RepoClient
 
 
@@ -17,7 +19,7 @@ class GeographyRepository(object):
         result = self.client.get_geographies('id', geography_id)
 
         if len(result) == 0:
-            return None
+            raise CartoException('The id does not correspond with any existing geography in Data Observatory.')
 
         return self._to_geography(result[0])
 

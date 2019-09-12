@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .repo_client import RepoClient
 
 
@@ -17,7 +19,7 @@ class DatasetRepository(object):
         result = self.client.get_datasets('id', dataset_id)
 
         if len(result) == 0:
-            return None
+            raise CartoException('The id does not correspond with any existing dataset in Data Observatory.')
 
         return self._to_dataset(result[0])
 

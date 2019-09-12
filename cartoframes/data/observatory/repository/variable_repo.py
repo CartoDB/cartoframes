@@ -1,3 +1,5 @@
+from carto.exceptions import CartoException
+
 from .repo_client import RepoClient
 
 
@@ -17,7 +19,7 @@ class VariableRepository(object):
         result = self.client.get_variables('id', variable_id)
 
         if len(result) == 0:
-            return None
+            raise CartoException('The id does not correspond with any existing variable in Data Observatory.')
 
         return self._to_variable(result[0])
 

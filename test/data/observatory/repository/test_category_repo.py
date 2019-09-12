@@ -1,5 +1,7 @@
 import unittest
 
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.category import Categories
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
@@ -55,15 +57,12 @@ class TestCategoryRepo(unittest.TestCase):
         assert category == test_category1
 
     @patch.object(RepoClient, 'get_categories')
-    def test_get_by_id_unknown(self, mocked_repo):
+    def test_get_by_id_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
         requested_id = 'unknown_id'
         repo = CategoryRepository()
 
-        # When
-        category = repo.by_id(requested_id)
-
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
-        assert category is None
+        with self.assertRaises(CartoException):
+            repo.by_id(requested_id)

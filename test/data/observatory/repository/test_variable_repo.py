@@ -1,5 +1,7 @@
 import unittest
 
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.variable import Variables
 
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
@@ -55,15 +57,12 @@ class TestVariableRepo(unittest.TestCase):
         assert variable == test_variable1
 
     @patch.object(RepoClient, 'get_variables')
-    def test_get_by_id_unknown(self, mocked_repo):
+    def test_get_by_id_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
         requested_id = 'unknown_id'
-
-        # When
         repo = VariableRepository()
-        variable = repo.by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
-        assert variable is None
+        with self.assertRaises(CartoException):
+            repo.by_id(requested_id)
