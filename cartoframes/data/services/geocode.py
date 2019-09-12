@@ -472,7 +472,7 @@ class Geocode(object):
                         pass
 
             if not aborted:
-                sql = _posterior_summary_query(table_name, street, city, state, country)
+                sql = _posterior_summary_query(table_name)
                 logging.debug("Executing result summary query: %s" % sql)
                 result = self._context.execute_query(sql)
                 _set_post_summary_info(summary, result, output)
