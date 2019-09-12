@@ -17,7 +17,7 @@ except ImportError:
 
 class TestProvider(unittest.TestCase):
 
-    @patch.object(ProviderRepository, 'get_by_id')
+    @patch.object(ProviderRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_provider1
@@ -30,7 +30,7 @@ class TestProvider(unittest.TestCase):
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    @patch.object(DatasetRepository, 'get_by_provider')
+    @patch.object(DatasetRepository, 'by_provider')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,7 +46,7 @@ class TestProvider(unittest.TestCase):
 
 class TestProviders(unittest.TestCase):
 
-    @patch.object(ProviderRepository, 'get_all')
+    @patch.object(ProviderRepository, 'all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_providers
@@ -59,7 +59,7 @@ class TestProviders(unittest.TestCase):
         assert isinstance(providers, Providers)
         assert providers == test_providers
 
-    @patch.object(ProviderRepository, 'get_by_id')
+    @patch.object(ProviderRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_provider1

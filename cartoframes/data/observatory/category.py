@@ -19,10 +19,10 @@ class Category(pd.Series):
 
     @staticmethod
     def get_by_id(category_id):
-        return get_category_repo().get_by_id(category_id)
+        return get_category_repo().by_id(category_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
+        return get_dataset_repo().by_category(self[_CATEGORY_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -43,7 +43,7 @@ class Categories(pd.DataFrame):
 
     @staticmethod
     def all():
-        return get_category_repo().get_all()
+        return get_category_repo().all()
 
     @staticmethod
     def get_by_id(category_id):

@@ -19,10 +19,10 @@ class Provider(pd.Series):
 
     @staticmethod
     def get_by_id(provider_id):
-        return get_provider_repo().get_by_id(provider_id)
+        return get_provider_repo().by_id(provider_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_provider(self[_PROVIDER_ID_FIELD])
+        return get_dataset_repo().by_provider(self[_PROVIDER_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -43,7 +43,7 @@ class Providers(pd.DataFrame):
 
     @staticmethod
     def all():
-        return get_provider_repo().get_all()
+        return get_provider_repo().all()
 
     @staticmethod
     def get_by_id(category_id):

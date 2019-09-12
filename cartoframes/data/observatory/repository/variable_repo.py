@@ -2,7 +2,7 @@ from .repo_client import RepoClient
 
 
 def get_variable_repo():
-    return VariableRepository()
+    return _REPO
 
 
 class VariableRepository(object):
@@ -10,10 +10,10 @@ class VariableRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def get_all(self):
+    def all(self):
         return self._to_variables(self.client.get_variables())
 
-    def get_by_id(self, variable_id):
+    def by_id(self, variable_id):
         result = self.client.get_variables('id', variable_id)
 
         if len(result) == 0:
@@ -21,7 +21,7 @@ class VariableRepository(object):
 
         return self._to_variable(result[0])
 
-    def get_by_dataset(self, dataset_id):
+    def by_dataset(self, dataset_id):
         return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
 
     @staticmethod
@@ -35,3 +35,6 @@ class VariableRepository(object):
         from cartoframes.data.observatory.variable import Variables
 
         return Variables([VariableRepository._to_variable(result) for result in results])
+
+
+_REPO = VariableRepository()

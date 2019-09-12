@@ -17,7 +17,7 @@ except ImportError:
 
 class TestGeography(unittest.TestCase):
 
-    @patch.object(GeographyRepository, 'get_by_id')
+    @patch.object(GeographyRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1
@@ -30,7 +30,7 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    @patch.object(DatasetRepository, 'get_by_geography')
+    @patch.object(DatasetRepository, 'by_geography')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,7 +46,7 @@ class TestGeography(unittest.TestCase):
 
 class TestGeographies(unittest.TestCase):
 
-    @patch.object(GeographyRepository, 'get_all')
+    @patch.object(GeographyRepository, 'all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
@@ -59,7 +59,7 @@ class TestGeographies(unittest.TestCase):
         assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
 
-    @patch.object(GeographyRepository, 'get_by_id')
+    @patch.object(GeographyRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1

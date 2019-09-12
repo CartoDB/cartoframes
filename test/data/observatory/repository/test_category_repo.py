@@ -22,7 +22,7 @@ class TestCategoryRepo(unittest.TestCase):
         repo = CategoryRepository()
 
         # When
-        categories = repo.get_all()
+        categories = repo.all()
 
         # Then
         assert categories == test_categories
@@ -33,7 +33,7 @@ class TestCategoryRepo(unittest.TestCase):
         repo = CategoryRepository()
 
         # When
-        categories = repo.get_all()
+        categories = repo.all()
 
         # Then
         assert categories == Categories([])
@@ -44,7 +44,7 @@ class TestCategoryRepo(unittest.TestCase):
         repo = CategoryRepository()
 
         # When
-        category = repo.get_by_id(requested_id)
+        category = repo.by_id(requested_id)
 
         # Then
         assert category == test_category1
@@ -56,7 +56,7 @@ class TestCategoryRepo(unittest.TestCase):
         repo = CategoryRepository()
 
         # When
-        category = repo.get_by_id(requested_id)
+        category = repo.by_id(requested_id)
 
         # Then
         assert category is None

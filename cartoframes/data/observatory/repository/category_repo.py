@@ -2,7 +2,7 @@ from .repo_client import RepoClient
 
 
 def get_category_repo():
-    return CategoryRepository()
+    return _REPO
 
 
 class CategoryRepository(object):
@@ -10,10 +10,10 @@ class CategoryRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def get_all(self):
+    def all(self):
         return self._to_categories(self.client.get_categories())
 
-    def get_by_id(self, category_id):
+    def by_id(self, category_id):
         result = self.client.get_categories('id', category_id)
 
         if len(result) == 0:
@@ -32,3 +32,6 @@ class CategoryRepository(object):
         from cartoframes.data.observatory.category import Categories
 
         return Categories([CategoryRepository._to_category(result) for result in results])
+
+
+_REPO = CategoryRepository()

@@ -16,7 +16,7 @@ except ImportError:
 
 class TestVariable(unittest.TestCase):
 
-    @patch.object(VariableRepository, 'get_by_id')
+    @patch.object(VariableRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variable1
@@ -29,7 +29,7 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
-    @patch.object(DatasetRepository, 'get_by_variable')
+    @patch.object(DatasetRepository, 'by_variable')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -45,7 +45,7 @@ class TestVariable(unittest.TestCase):
 
 class TestVariables(unittest.TestCase):
 
-    @patch.object(VariableRepository, 'get_all')
+    @patch.object(VariableRepository, 'all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
@@ -58,7 +58,7 @@ class TestVariables(unittest.TestCase):
         assert isinstance(countries, Variables)
         assert countries == test_variables
 
-    @patch.object(VariableRepository, 'get_by_id')
+    @patch.object(VariableRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variable1

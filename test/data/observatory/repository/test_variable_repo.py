@@ -22,7 +22,7 @@ class TestVariableRepo(unittest.TestCase):
         repo = VariableRepository()
 
         # When
-        variables = repo.get_all()
+        variables = repo.all()
 
         # Then
         assert variables == test_variables
@@ -33,7 +33,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # When
         repo = VariableRepository()
-        variables = repo.get_all()
+        variables = repo.all()
 
         # Then
         assert variables == Variables([])
@@ -44,7 +44,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # When
         repo = VariableRepository()
-        variable = repo.get_by_id(requested_id)
+        variable = repo.by_id(requested_id)
 
         # Then
         assert variable == test_variable1
@@ -56,7 +56,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # When
         repo = VariableRepository()
-        variable = repo.get_by_id(requested_id)
+        variable = repo.by_id(requested_id)
 
         # Then
         assert variable is None

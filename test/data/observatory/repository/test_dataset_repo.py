@@ -22,7 +22,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.get_all()
+        datasets = repo.all()
 
         # Then
         assert datasets == test_datasets
@@ -33,7 +33,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.get_all()
+        datasets = repo.all()
 
         # Then
         assert datasets == Datasets([])
@@ -44,7 +44,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.get_by_id(requested_id)
+        dataset = repo.by_id(requested_id)
 
         # Then
         assert dataset == test_dataset1
@@ -56,7 +56,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.get_by_id(requested_id)
+        dataset = repo.by_id(requested_id)
 
         # Then
         assert dataset is None

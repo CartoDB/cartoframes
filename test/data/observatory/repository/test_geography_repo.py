@@ -22,7 +22,7 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geographies = repo.get_all()
+        geographies = repo.all()
 
         # Then
         assert geographies == test_geographies
@@ -33,7 +33,7 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geographies = repo.get_all()
+        geographies = repo.all()
 
         # Then
         assert geographies == Geographies([])
@@ -44,7 +44,7 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geography = repo.get_by_id(requested_id)
+        geography = repo.by_id(requested_id)
 
         # Then
         assert geography == test_geography1
@@ -56,7 +56,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # When
         repo = GeographyRepository()
-        geography = repo.get_by_id(requested_id)
+        geography = repo.by_id(requested_id)
 
         # Then
         assert geography is None

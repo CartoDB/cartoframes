@@ -17,7 +17,7 @@ except ImportError:
 
 class TestCategory(unittest.TestCase):
 
-    @patch.object(CategoryRepository, 'get_by_id')
+    @patch.object(CategoryRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_category1
@@ -30,7 +30,7 @@ class TestCategory(unittest.TestCase):
         assert isinstance(category, Category)
         assert category == test_category1
 
-    @patch.object(DatasetRepository, 'get_by_category')
+    @patch.object(DatasetRepository, 'by_category')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,7 +46,7 @@ class TestCategory(unittest.TestCase):
 
 class TestCategories(unittest.TestCase):
 
-    @patch.object(CategoryRepository, 'get_all')
+    @patch.object(CategoryRepository, 'all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_categories
@@ -59,7 +59,7 @@ class TestCategories(unittest.TestCase):
         assert isinstance(categories, Categories)
         assert categories == test_categories
 
-    @patch.object(CategoryRepository, 'get_by_id')
+    @patch.object(CategoryRepository, 'by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_category1

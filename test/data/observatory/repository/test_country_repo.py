@@ -22,7 +22,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        countries = repo.get_all()
+        countries = repo.all()
 
         # Then
         assert countries == test_countries
@@ -33,7 +33,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        countries = repo.get_all()
+        countries = repo.all()
 
         # Then
         assert countries == Countries([])
@@ -44,7 +44,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        country = repo.get_by_id(requested_iso_code)
+        country = repo.by_id(requested_iso_code)
 
         # Then
         assert country == test_country1
@@ -56,7 +56,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        country = repo.get_by_id(requested_iso_code)
+        country = repo.by_id(requested_iso_code)
 
         # Then
         assert country is None
