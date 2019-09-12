@@ -39,29 +39,23 @@ def animation_layer(
                     size or defaults.STYLE['point']['width']),
                 'color': 'opacity({0}, {1})'.format(color or '#EE4D5A',
                     opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                'strokeWidth': '{0}'.format(stroke_width or defaults.STYLE['point']['strokeWidth']),
+                'strokeColor': '{0}'.format(stroke_color or defaults.STYLE['point']['strokeColor']),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(value,
                     duration or 20, fade or (1,1))
             },
             'line': {
                 'width': '{0}'.format(
                     size or defaults.STYLE['line']['width']),
-                'color': 'opacity({0}, {1})'.format(color or '#4CC8A3',
-                    opacity or '0.8'),
+                'color': 'opacity({0}, {1})'.format(color or '#4CC8A3', opacity or '0.8'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(value,
                     duration or 20, fade or (1,1))
             },
             'polygon': {
-                'color': 'opacity({0}, {1})'.format(
-                    color or defaults.STYLE['polygon']['color'],
+                'color': 'opacity({0}, {1})'.format(color or defaults.STYLE['polygon']['color'],
                     opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                'strokeColor': '{0}'.format(stroke_color or defaults.STYLE['polygon']['strokeColor']),
+                'strokeWidth': '{0}'.format(stroke_width or defaults.STYLE['polygon']['strokeWidth']),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(value,
                     duration or 20, fade or (1,1))
             }
