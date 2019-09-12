@@ -437,19 +437,17 @@ class Geocode(object):
                     output['aborted'] = aborted = True
                 else:
                     # Create column to store input search hash
-                    logging.info("Adding column {} if needed".format(HASH_COLUMN))
-                    self._context.execute_query(
-                        "ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {hash_column} text;"
-                        .format(table=table_name, hash_column=HASH_COLUMN)
-                    )
+                    add_columns = [(HASH_COLUMN, 'text')]
 
                     if metadata:
                         # Create column to store result metadata
-                        logging.info("Adding column {} if needed".format(metadata))
-                        self._context.execute_query(
-                            "ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {metadata_column} jsonb;"
-                            .format(table=table_name, metadata_column=metadata)
-                        )
+                        add_columns.append((metadata, 'jsonb'))
+
+                    logging.info("Adding columns {} if needed".format(', '.join([c[0] for c in add_columns])))
+                    alter_sql = "ALTER TABLE {table} {add_columns};".format(
+                        table=table_name,
+                        add_columns=','.join(['ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
+                    self._context.execute_query(alter_sql)
 
                     sql = _geocode_query(table_name, street, city, state, country, metadata)
                     logging.debug("Executing query: %s" % sql)
