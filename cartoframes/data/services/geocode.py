@@ -89,11 +89,11 @@ def _prior_summary_query(table, street, city, state, country):
     return """
       SELECT
         CASE WHEN {hash_column} IS NULL THEN
-          CASE WHEN the_geom IS NULL THEN 'nn' ELSE 'ng' END
+          CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END
         WHEN {hash_column} <> {hash_expression} THEN
-          CASE WHEN the_geom IS NULL THEN 'cn' ELSE 'cg' END
+          CASE WHEN the_geom IS NULL THEN 'changed_nongeocoded' ELSE 'changed_geocoded' END
         ELSE
-          CASE WHEN the_geom IS NULL THEN 'pn' ELSE 'pg' END
+          CASE WHEN the_geom IS NULL THEN 'previously_nongeocoded' ELSE 'previously_geocoded' END
         END AS gc_state,
         COUNT(*) AS count
       FROM {table}
@@ -109,7 +109,7 @@ def _first_time_summary_query(table, street, city, state, country):
     hash_expression = _hash_expr(street, city, state, country)
     return """
       SELECT
-        CASE WHEN the_geom IS NULL THEN 'nn' ELSE 'ng' END AS gc_state,
+        CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END AS gc_state,
         COUNT(*) AS count
       FROM {table}
       GROUP BY gc_state
@@ -189,11 +189,11 @@ def _generate_temp_table_name(base=None):
 def _set_pre_summary_info(summary, output):
     logging.debug(summary)
     output['total_rows'] = sum(summary.values())
-    output['required_quota'] = sum([summary[s] for s in ['ng', 'nn', 'cg', 'cn']])
-    output['previously_geocoded'] = summary.get('pg', 0)
-    output['previously_failed'] = summary.get('pn', 0)
-    output['records_with_geometry'] = sum([summary[s] for s in ['ng', 'cg', 'pg']])
-    # output['records_without_geometry'] = sum([summary[s] for s in ['nn', 'cn', 'pn']])
+    output['required_quota'] = sum([summary[s] for s in ['new_geocoded', 'new_nongeocoded', 'changed_geocoded', 'changed_nongeocoded']])
+    output['previously_geocoded'] = summary.get('previously_geocoded', 0)
+    output['previously_failed'] = summary.get('previously_nongeocoded', 0)
+    output['records_with_geometry'] = sum([summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded']])
+    # output['records_without_geometry'] = sum([summary[s] for s in ['new_nongeocoded', 'changed_nongeocoded', 'previously_nongeocoded']])
 
 
 def _set_post_summary_info(summary, result, output):
@@ -203,7 +203,7 @@ def _set_post_summary_info(summary, result, output):
         output['final_records_with_geometry'] = geom_count
         # output['final_records_without_geometry'] = null_geom_count
         output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
-        output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['ng', 'cg']])
+        output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['new_geocoded', 'changed_geocoded']])
         output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
 
 
@@ -407,12 +407,10 @@ class Geocode(object):
 
         output = {}
 
-        summary = {s: 0 for s in ['ng', 'nn', 'cg', 'cn', 'pg', 'pn']}
-        # Summary keys:
-        # ng (new-geocoded), nn (new-non-geocoded)
-        # cg (changed-geocoded), cn (changed-non-geocoded)
-        # ng (new-geocoded), nn (new-non-geocoded)
-        # pg (previously-geocoded), pn (previously-non-geocoded)
+        summary = {s: 0 for s in [
+            'new_geocoded', 'new_nongeocoded',
+            'changed_geocoded', 'changed_nongeocoded',
+            'previously_geocoded', 'previously_nongeocoded']}
 
         # TODO: Use a single transaction so that reported changes (posterior - prior queries)
         # are only caused by the geocoding process. Note that no rollback should be
