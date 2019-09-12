@@ -29,7 +29,7 @@ def _unlock(context, lock_id):
     return result and result.get('rows', [])[0].get('pg_advisory_unlock')
 
 
-class table_geocoding_lock:
+class TableGeocodingLock:
     def __init__(self, context, table_name):
         self._context = context
         text_id = 'carto-geocoder-{table_name}'.format(table_name=table_name)
@@ -411,7 +411,7 @@ class Geocode(object):
         aborted = False
 
         if output['required_quota'] > 0 and not dry_run:
-            with table_geocoding_lock(self._context, table_name) as locked:
+            with TableGeocodingLock(self._context, table_name) as locked:
                 if not locked:
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
