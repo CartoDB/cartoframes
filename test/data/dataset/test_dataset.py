@@ -759,6 +759,28 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(expected_columns_origin, columns_origin)
         self.assertEqual(expected_columns_normalized, columns_normalized)
 
+    def test_create_table_query(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
+        normalized_column_names = []  # both column names will be filtered as reserved words
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (the_geom geometry(Point, 4326))'.format(table_name)
+
+        dataset = DataFrameDataset(df)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(normalized_column_names)
+        self.assertEqual(result, expected_result)
+
+    def test_create_table_query_without_geom(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['']})
+        normalized_column_names = []  # both column names will be filtered as reserved words
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} ()'.format(table_name)
+
+        dataset = DataFrameDataset(df)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(normalized_column_names)
+        self.assertEqual(result, expected_result)
+
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
