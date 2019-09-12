@@ -40,23 +40,25 @@ QUOTAS = {}
 
 def update_quotas(service, quota):
     if not service in QUOTAS:
-        QUOTAS['service'] = {
+        QUOTAS[service] = {
             'initial': None,
             'final': None
         }
-    QUOTAS['service']['final'] = quota
-    if QUOTAS['service']['initial'] is None:
-        QUOTAS['service']['initial'] = quota
+    QUOTAS[service]['final'] = quota
+    if QUOTAS[service]['initial'] is None:
+        QUOTAS[service]['initial'] = quota
     return quota
 
 
 @pytest.fixture(autouse=True, scope='module')
 def module_setup_teardown():
+    """Run pytest with options --log-level=info --log-cli-level=info
+       to see this message about quota used during the tests
+    """
     yield
     for service in QUOTAS:
         used_quota = QUOTAS[service]['final'] - QUOTAS[service]['initial']
-        # FIXME: this message is not being shown
-        logging.warning("TOTAL USED QUOTA for %s:  %d", service, used_quota)
+        logging.info("TOTAL USED QUOTA for %s:  %d", service, used_quota)
 
 
 class TestGeocode(unittest.TestCase, _UserUrlLoader):
