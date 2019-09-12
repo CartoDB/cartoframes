@@ -8,7 +8,7 @@ import pandas as pd
 
 from ... import context
 from ...auth import get_default_credentials
-from cartoframes.data import Dataset
+from ...data import Dataset
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
