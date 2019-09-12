@@ -328,8 +328,33 @@ class Geocode(object):
         if dry_run:
             table_name = None
 
-        temporary_table = False
+        input_table_name, is_temporary = self._table_for_geocoding(dataset, table_name, if_exists)
 
+        result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
+
+        if dry_run:
+            result_dataset = dataset
+        else:
+            result_dataset = self._fetch_geocoded_table_dataset(input_table_name, is_temporary)
+
+        self._cleanup_geocoded_table(input_table_name, is_temporary)
+
+        result = result_dataset
+        if input_dataframe is not None:
+            # Note that we return a dataframe whenever the input is dataframe,
+            # even if we have uploaded it to a table (table_name is not None).
+            if dry_run:
+                result = input_dataframe
+            else:
+                result = result_dataset.dataframe  # if temporary it should have been downloaded
+                if result is None:
+                    # but if not temporary we need to download it now
+                    result = result_dataset.download()
+
+        return (result, result_info)
+
+    def _table_for_geocoding(self, dataset, table_name, if_exists):
+        temporary_table = False
         input_dataset = dataset
         if input_dataset.is_remote() and input_dataset.table_name:  # FIXME: more robust to check first for query (hasattr(input_dataset, 'query'))
             # input dataset is a table
@@ -351,33 +376,17 @@ class Geocode(object):
                 input_table_name = _generate_temp_table_name()
                 input_dataset = _dup_dataset(input_dataset)
             input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
+        return (input_table_name, temporary_table)
 
-        result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
+    def _fetch_geocoded_table_dataset(self, input_table_name, is_temporary):
+        dataset = Dataset(input_table_name, credentials=self._credentials)
+        if is_temporary:
+            dataset = Dataset(dataset.download())
+        return dataset
 
-        if dry_run:
-            result_dataset = dataset
-            if temporary_table:
-                Dataset(input_table_name, credentials=self._credentials).delete()
-        else:
-            result_dataset = Dataset(input_table_name, credentials=self._credentials)
-            if temporary_table:
-                temporary_dataset = result_dataset
-                result_dataset = Dataset(temporary_dataset.download())
-                temporary_dataset.delete()
-
-        result = result_dataset
-        if input_dataframe is not None:
-            # Note that we return a dataframe whenever the input is dataframe,
-            # even if we have uploaded it to a table (table_name is not None).
-            if dry_run:
-                result = input_dataframe
-            else:
-                result = result_dataset.dataframe  # if temporary it should have been downloaded
-                if result is None:
-                    # but if not temporary we need to download it now
-                    result = result_dataset.download()
-
-        return (result, result_info)
+    def _cleanup_geocoded_table(self, input_table_name, is_temporary):
+        if is_temporary:
+            Dataset(input_table_name, credentials=self._credentials).delete()
 
     # Note that this can be optimized for non in-place cases (table_name is not None), e.g.
     # injecting the input query in the geocoding expression,
