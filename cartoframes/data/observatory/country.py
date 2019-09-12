@@ -18,7 +18,7 @@ class Country(pd.Series):
         return Countries
 
     @staticmethod
-    def get_by_id(iso_code3):
+    def by_id(iso_code3):
         return get_country_repo().by_id(iso_code3)
 
     def datasets(self):
@@ -49,8 +49,8 @@ class Countries(pd.DataFrame):
         return get_country_repo().all()
 
     @staticmethod
-    def get_by_id(iso_code3):
-        return Country.get_by_id(iso_code3)
+    def by_id(iso_code3):
+        return Country.by_id(iso_code3)
 
     def __eq__(self, other):
         return self.equals(other)

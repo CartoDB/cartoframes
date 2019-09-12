@@ -22,7 +22,7 @@ class TestVariable(unittest.TestCase):
         mocked_repo.return_value = test_variable1
 
         # When
-        variable = Variable.get_by_id(test_variable1['id'])
+        variable = Variable.by_id(test_variable1['id'])
 
         # Then
         assert isinstance(variable, pd.Series)
@@ -64,7 +64,7 @@ class TestVariables(unittest.TestCase):
         mocked_repo.return_value = test_variable1
 
         # When
-        variable = Variables.get_by_id(test_variable1['id'])
+        variable = Variables.by_id(test_variable1['id'])
 
         # Then
         assert isinstance(variable, pd.Series)

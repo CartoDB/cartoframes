@@ -23,7 +23,7 @@ class TestProvider(unittest.TestCase):
         mocked_repo.return_value = test_provider1
 
         # When
-        provider = Provider.get_by_id('cat1')
+        provider = Provider.by_id('cat1')
 
         # Then
         assert isinstance(provider, pd.Series)
@@ -65,7 +65,7 @@ class TestProviders(unittest.TestCase):
         mocked_repo.return_value = test_provider1
 
         # When
-        provider = Providers.get_by_id('bbva')
+        provider = Providers.by_id('bbva')
 
         # Then
         assert isinstance(provider, pd.Series)

@@ -22,7 +22,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Dataset.get_by_id(test_dataset1['id'])
+        dataset = Dataset.by_id(test_dataset1['id'])
 
         # Then
         assert isinstance(dataset, pd.Series)
@@ -63,7 +63,7 @@ class TestDatasets(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Datasets.get_by_id(test_dataset1['id'])
+        dataset = Datasets.by_id(test_dataset1['id'])
 
         # Then
         assert isinstance(dataset, pd.Series)

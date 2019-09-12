@@ -24,7 +24,7 @@ class TestCountry(unittest.TestCase):
         mocked_repo.return_value = test_country1
 
         # When
-        country = Country.get_by_id('esp')
+        country = Country.by_id('esp')
 
         # Then
         assert isinstance(country, pd.Series)
@@ -79,7 +79,7 @@ class TestCountries(unittest.TestCase):
         mocked_repo.return_value = test_country1
 
         # When
-        country = Countries.get_by_id('esp')
+        country = Countries.by_id('esp')
 
         # Then
         assert isinstance(country, pd.Series)

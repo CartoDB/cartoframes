@@ -18,7 +18,7 @@ class Category(pd.Series):
         return Categories
 
     @staticmethod
-    def get_by_id(category_id):
+    def by_id(category_id):
         return get_category_repo().by_id(category_id)
 
     def datasets(self):
@@ -46,8 +46,8 @@ class Categories(pd.DataFrame):
         return get_category_repo().all()
 
     @staticmethod
-    def get_by_id(category_id):
-        return Category.get_by_id(category_id)
+    def by_id(category_id):
+        return Category.by_id(category_id)
 
     def __eq__(self, other):
         return self.equals(other)

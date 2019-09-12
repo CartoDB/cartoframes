@@ -17,7 +17,7 @@ class Geography(pd.Series):
         return Geographies
 
     @staticmethod
-    def get_by_id(geography_id):
+    def by_id(geography_id):
         return get_geography_repo().by_id(geography_id)
 
     def datasets(self):
@@ -45,8 +45,8 @@ class Geographies(pd.DataFrame):
         return get_geography_repo().all()
 
     @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
+    def by_id(geography_id):
+        return Geography.by_id(geography_id)
 
     def __eq__(self, other):
         return self.equals(other)

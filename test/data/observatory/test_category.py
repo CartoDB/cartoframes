@@ -23,7 +23,7 @@ class TestCategory(unittest.TestCase):
         mocked_repo.return_value = test_category1
 
         # When
-        category = Category.get_by_id('cat1')
+        category = Category.by_id('cat1')
 
         # Then
         assert isinstance(category, pd.Series)
@@ -65,7 +65,7 @@ class TestCategories(unittest.TestCase):
         mocked_repo.return_value = test_category1
 
         # When
-        category = Categories.get_by_id('cat1')
+        category = Categories.by_id('cat1')
 
         # Then
         assert isinstance(category, pd.Series)

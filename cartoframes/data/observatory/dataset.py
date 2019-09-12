@@ -17,7 +17,7 @@ class Dataset(pd.Series):
         return Datasets
 
     @staticmethod
-    def get_by_id(dataset_id):
+    def by_id(dataset_id):
         return get_dataset_repo().by_id(dataset_id)
 
     def variables(self):
@@ -45,8 +45,8 @@ class Datasets(pd.DataFrame):
         return get_dataset_repo().all()
 
     @staticmethod
-    def get_by_id(dataset_id):
-        return Dataset.get_by_id(dataset_id)
+    def by_id(dataset_id):
+        return Dataset.by_id(dataset_id)
 
     def __eq__(self, other):
         return self.equals(other)

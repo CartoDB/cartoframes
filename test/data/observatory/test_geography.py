@@ -23,7 +23,7 @@ class TestGeography(unittest.TestCase):
         mocked_repo.return_value = test_geography1
 
         # When
-        geography = Geography.get_by_id(test_geography1['id'])
+        geography = Geography.by_id(test_geography1['id'])
 
         # Then
         assert isinstance(geography, pd.Series)
@@ -65,7 +65,7 @@ class TestGeographies(unittest.TestCase):
         mocked_repo.return_value = test_geography1
 
         # When
-        geography = Geographies.get_by_id(test_geography1['id'])
+        geography = Geographies.by_id(test_geography1['id'])
 
         # Then
         assert isinstance(geography, pd.Series)
