@@ -121,21 +121,18 @@ class DataFrameDataset(BaseDataset):
             raise CartoException('Cannot create table: {}.'.format(err))
 
     def _create_table_query(self, normalized_column_names, with_lnglat=None):
-        if with_lnglat is None:
-            geom_type = _get_geom_col_type(self._df)
-        else:
+        col = ('{col} {ctype}')
+        cols = [col.format(col=norm, ctype=_dtypes2pg(self._df.dtypes[orig]))
+                for norm, orig in normalized_column_names]
+
+        geom_type = _get_geom_col_type(self._df)
+        if with_lnglat and geom_type is None:
             geom_type = 'Point'
 
-        col = ('{col} {ctype}')
-        cols = ', '.join(col.format(col=norm,
-                                    ctype=_dtypes2pg(self._df.dtypes[orig]))
-                         for norm, orig in normalized_column_names)
-
         if geom_type:
-            cols += ', {geom_colname} geometry({geom_type}, 4326)'.format(geom_colname='the_geom', geom_type=geom_type)
+            cols.append('the_geom geometry({geom_type}, 4326)'.format(geom_type=geom_type))
 
-        create_query = '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self._table_name, cols=cols)
-        return create_query
+        return '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self._table_name, cols=', '.join(cols))
 
     def _get_geom_type(self):
         """Compute geom type of the local dataframe"""
