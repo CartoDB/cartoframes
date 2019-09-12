@@ -221,7 +221,7 @@ def _dup_dataset(dataset):
 class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account; master API Key credentials must be provided
-    (throuch explicit argument in contructor or via the default credentials)
+    (through explicit argument in contructor or via the default credentials)
     to access the service. Use of these methods will incurn in geocoding
     credit consumption for the privided accout.
 
