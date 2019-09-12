@@ -164,10 +164,6 @@ def _geocode_query(table, street, city, state, country, metadata):
         UPDATE {table}
         SET
             the_geom = _g.the_geom,
-            the_geom_webmercator = CASE
-              WHEN _g.the_geom IS NULL THEN NULL
-              ELSE ST_Transform(_g.the_geom, 3857)
-            END,
             {metadata_assignment}
             {hash_column} = {hash_expression}
         FROM (SELECT * FROM {geocode_expression}) _g
