@@ -8,7 +8,7 @@ from unidecode import unidecode
 
 class Column(object):
     DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
-    SUPPORTED_GEOM_COL_NAMES = ['geom', 'the_geom', 'geometry']
+    SUPPORTED_GEOM_COL_NAMES = ['the_geom', 'geom', 'geometry']
     RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
     MAX_LENGTH = 63
     MAX_COLLISION_LENGTH = MAX_LENGTH - 4
