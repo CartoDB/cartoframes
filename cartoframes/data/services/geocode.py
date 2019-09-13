@@ -458,6 +458,8 @@ class Geocode(object):
                         logging.error(err)
                         msg = str(err)
                         output['error'] = msg
+                        # FIXME: Python SDK should return proper exceptions
+                        # see: https://github.com/CartoDB/cartoframes/issues/751
                         match = re.search(
                             r'Remaining quota:\s+(\d+)\.\s+Estimated cost:\s+(\d+)',
                             msg, re.MULTILINE | re.IGNORECASE
