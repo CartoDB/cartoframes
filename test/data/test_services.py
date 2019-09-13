@@ -92,6 +92,11 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         pyver = sys.version[0:3].replace('.', '_')
         buildnum = os.environ.get('TRAVIS_BUILD_NUMBER') or 'none'
 
+        # Skip tests checking quotas when running in TRAVIS
+        # since usually multiple tests will be running concurrently
+        # in that case
+        WILL_SKIP = WILL_SKIP or buildnum != 'none'
+
         self.test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
             ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
         )
