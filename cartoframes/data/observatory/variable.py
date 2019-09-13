@@ -17,11 +17,11 @@ class Variable(pd.Series):
         return Variables
 
     @staticmethod
-    def by_id(variable_id):
-        return get_variable_repo().by_id(variable_id)
+    def get_by_id(variable_id):
+        return get_variable_repo().get_by_id(variable_id)
 
     def datasets(self):
-        return get_dataset_repo().by_variable(self[_VARIABLE_FIELD_ID])
+        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -41,12 +41,12 @@ class Variables(pd.DataFrame):
         return Variable
 
     @staticmethod
-    def all():
-        return get_variable_repo().all()
+    def get_all():
+        return get_variable_repo().get_all()
 
     @staticmethod
-    def by_id(variable_id):
-        return Variable.by_id(variable_id)
+    def get_by_id(variable_id):
+        return Variable.get_by_id(variable_id)
 
     def __eq__(self, other):
         return self.equals(other)

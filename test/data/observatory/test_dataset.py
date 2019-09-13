@@ -16,20 +16,20 @@ except ImportError:
 
 class TestDataset(unittest.TestCase):
 
-    @patch.object(DatasetRepository, 'by_id')
+    @patch.object(DatasetRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Dataset.by_id(test_dataset1['id'])
+        dataset = Dataset.get_by_id(test_dataset1['id'])
 
         # Then
         assert isinstance(dataset, pd.Series)
         assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
-    @patch.object(VariableRepository, 'by_dataset')
+    @patch.object(VariableRepository, 'get_by_dataset')
     def test_get_variables(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
@@ -45,25 +45,25 @@ class TestDataset(unittest.TestCase):
 
 class TestDatasets(unittest.TestCase):
 
-    @patch.object(DatasetRepository, 'all')
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = Datasets.all()
+        datasets = Datasets.get_all()
 
         # Then
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
 
-    @patch.object(DatasetRepository, 'by_id')
+    @patch.object(DatasetRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Datasets.by_id(test_dataset1['id'])
+        dataset = Datasets.get_by_id(test_dataset1['id'])
 
         # Then
         assert isinstance(dataset, pd.Series)

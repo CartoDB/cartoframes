@@ -23,7 +23,7 @@ class TestVariableRepo(unittest.TestCase):
         repo = VariableRepository()
 
         # When
-        variables = repo.all()
+        variables = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -36,7 +36,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # When
         repo = VariableRepository()
-        variables = repo.all()
+        variables = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -50,7 +50,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # When
         repo = VariableRepository()
-        variable = repo.by_id(requested_id)
+        variable = repo.get_by_id(requested_id)
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
@@ -65,4 +65,4 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         with self.assertRaises(CartoException):
-            repo.by_id(requested_id)
+            repo.get_by_id(requested_id)

@@ -12,14 +12,15 @@ class CategoryRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def all(self):
+    def get_all(self):
         return self._to_categories(self.client.get_categories())
 
-    def by_id(self, category_id):
+    def get_by_id(self, category_id):
         result = self.client.get_categories('id', category_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing category in Data Observatory.')
+            raise CartoException('The id does not correspond with any existing category in the catalog. '
+                                 'You can check the full list of available categories with Categories.get_all()')
 
         return self._to_category(result[0])
 

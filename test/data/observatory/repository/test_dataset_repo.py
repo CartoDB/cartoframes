@@ -23,7 +23,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.all()
+        datasets = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -36,7 +36,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.all()
+        datasets = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -50,7 +50,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.by_id(requested_id)
+        dataset = repo.get_by_id(requested_id)
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
@@ -65,7 +65,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         with self.assertRaises(CartoException):
-            repo.by_id(requested_id)
+            repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_datasets')
     def test_get_by_country(self, mocked_repo):
@@ -75,7 +75,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.by_country(country_code)
+        dataset = repo.get_by_country(country_code)
 
         # Then
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
@@ -89,7 +89,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.by_category(category_id)
+        dataset = repo.get_by_category(category_id)
 
         # Then
         mocked_repo.assert_called_once_with('category_id', category_id)
@@ -103,7 +103,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.by_variable(variable_id)
+        dataset = repo.get_by_variable(variable_id)
 
         # Then
         mocked_repo.assert_called_once_with('variable_id', variable_id)
@@ -117,7 +117,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        dataset = repo.by_geography(geography_id)
+        dataset = repo.get_by_geography(geography_id)
 
         # Then
         mocked_repo.assert_called_once_with('geography_id', geography_id)

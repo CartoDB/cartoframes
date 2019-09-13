@@ -17,20 +17,20 @@ except ImportError:
 
 class TestGeography(unittest.TestCase):
 
-    @patch.object(GeographyRepository, 'by_id')
+    @patch.object(GeographyRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1
 
         # When
-        geography = Geography.by_id(test_geography1['id'])
+        geography = Geography.get_by_id(test_geography1['id'])
 
         # Then
         assert isinstance(geography, pd.Series)
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    @patch.object(DatasetRepository, 'by_geography')
+    @patch.object(DatasetRepository, 'get_by_geography')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,26 +46,26 @@ class TestGeography(unittest.TestCase):
 
 class TestGeographies(unittest.TestCase):
 
-    @patch.object(GeographyRepository, 'all')
+    @patch.object(GeographyRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
 
         # When
-        geographies = Geographies.all()
+        geographies = Geographies.get_all()
 
         # Then
         assert isinstance(geographies, pd.DataFrame)
         assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
 
-    @patch.object(GeographyRepository, 'by_id')
+    @patch.object(GeographyRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1
 
         # When
-        geography = Geographies.by_id(test_geography1['id'])
+        geography = Geographies.get_by_id(test_geography1['id'])
 
         # Then
         assert isinstance(geography, pd.Series)

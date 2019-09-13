@@ -18,14 +18,14 @@ class Country(pd.Series):
         return Countries
 
     @staticmethod
-    def by_id(iso_code3):
-        return get_country_repo().by_id(iso_code3)
+    def get_by_id(iso_code3):
+        return get_country_repo().get_by_id(iso_code3)
 
     def datasets(self):
-        return get_dataset_repo().by_country(self[_COUNTRY_ID_FIELD])
+        return get_dataset_repo().get_by_country(self[_COUNTRY_ID_FIELD])
 
     def geographies(self):
-        return get_geography_repo().by_country(self[_COUNTRY_ID_FIELD])
+        return get_geography_repo().get_by_country(self[_COUNTRY_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -45,12 +45,12 @@ class Countries(pd.DataFrame):
         return Country
 
     @staticmethod
-    def all():
-        return get_country_repo().all()
+    def get_all():
+        return get_country_repo().get_all()
 
     @staticmethod
-    def by_id(iso_code3):
-        return Country.by_id(iso_code3)
+    def get_by_id(iso_code3):
+        return Country.get_by_id(iso_code3)
 
     def __eq__(self, other):
         return self.equals(other)

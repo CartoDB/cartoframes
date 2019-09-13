@@ -12,18 +12,19 @@ class VariableRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def all(self):
+    def get_all(self):
         return self._to_variables(self.client.get_variables())
 
-    def by_id(self, variable_id):
+    def get_by_id(self, variable_id):
         result = self.client.get_variables('id', variable_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing variable in Data Observatory.')
+            raise CartoException('The id does not correspond with any existing variable in the catalog. '
+                                 'You can check the full list of available variables with Variables.get_all()')
 
         return self._to_variable(result[0])
 
-    def by_dataset(self, dataset_id):
+    def get_by_dataset(self, dataset_id):
         return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
 
     @staticmethod

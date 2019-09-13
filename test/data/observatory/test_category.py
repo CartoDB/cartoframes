@@ -17,20 +17,20 @@ except ImportError:
 
 class TestCategory(unittest.TestCase):
 
-    @patch.object(CategoryRepository, 'by_id')
+    @patch.object(CategoryRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_category1
 
         # When
-        category = Category.by_id('cat1')
+        category = Category.get_by_id('cat1')
 
         # Then
         assert isinstance(category, pd.Series)
         assert isinstance(category, Category)
         assert category == test_category1
 
-    @patch.object(DatasetRepository, 'by_category')
+    @patch.object(DatasetRepository, 'get_by_category')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,26 +46,26 @@ class TestCategory(unittest.TestCase):
 
 class TestCategories(unittest.TestCase):
 
-    @patch.object(CategoryRepository, 'all')
+    @patch.object(CategoryRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_categories
 
         # When
-        categories = Categories.all()
+        categories = Categories.get_all()
 
         # Then
         assert isinstance(categories, pd.DataFrame)
         assert isinstance(categories, Categories)
         assert categories == test_categories
 
-    @patch.object(CategoryRepository, 'by_id')
+    @patch.object(CategoryRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_category1
 
         # When
-        category = Categories.by_id('cat1')
+        category = Categories.get_by_id('cat1')
 
         # Then
         assert isinstance(category, pd.Series)

@@ -6,8 +6,8 @@ class Catalog(object):
 
     @staticmethod
     def countries():
-        return Countries.all()
+        return Countries.get_all()
 
     @staticmethod
     def categories():
-        return Categories.all()
+        return Categories.get_all()

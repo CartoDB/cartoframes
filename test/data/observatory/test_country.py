@@ -18,20 +18,20 @@ except ImportError:
 
 class TestCountry(unittest.TestCase):
 
-    @patch.object(CountryRepository, 'by_id')
+    @patch.object(CountryRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_country1
 
         # When
-        country = Country.by_id('esp')
+        country = Country.get_by_id('esp')
 
         # Then
         assert isinstance(country, pd.Series)
         assert isinstance(country, Country)
         assert country == test_country1
 
-    @patch.object(DatasetRepository, 'by_country')
+    @patch.object(DatasetRepository, 'get_by_country')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -44,7 +44,7 @@ class TestCountry(unittest.TestCase):
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
 
-    @patch.object(GeographyRepository, 'by_country')
+    @patch.object(GeographyRepository, 'get_by_country')
     def test_get_geographies(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
@@ -60,26 +60,26 @@ class TestCountry(unittest.TestCase):
 
 class TestCountries(unittest.TestCase):
 
-    @patch.object(CountryRepository, 'all')
+    @patch.object(CountryRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_countries
 
         # When
-        countries = Countries.all()
+        countries = Countries.get_all()
 
         # Then
         assert isinstance(countries, pd.DataFrame)
         assert isinstance(countries, Countries)
         assert countries == test_countries
 
-    @patch.object(CountryRepository, 'by_id')
+    @patch.object(CountryRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_country1
 
         # When
-        country = Countries.by_id('esp')
+        country = Countries.get_by_id('esp')
 
         # Then
         assert isinstance(country, pd.Series)

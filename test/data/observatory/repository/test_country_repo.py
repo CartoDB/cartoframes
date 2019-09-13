@@ -23,7 +23,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        countries = repo.all()
+        countries = repo.get_all()
 
         # Then
         assert countries == test_countries
@@ -35,7 +35,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        countries = repo.all()
+        countries = repo.get_all()
 
         # Then
         assert countries == Countries([])
@@ -48,7 +48,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # When
-        country = repo.by_id(requested_iso_code)
+        country = repo.get_by_id(requested_iso_code)
 
         # Then
         assert country == test_country1
@@ -62,4 +62,4 @@ class TestCountryRepo(unittest.TestCase):
 
         # Then
         with self.assertRaises(CartoException):
-            repo.by_id(requested_iso_code)
+            repo.get_by_id(requested_iso_code)

@@ -12,18 +12,19 @@ class GeographyRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def all(self):
+    def get_all(self):
         return self._to_geographies(self.client.get_geographies())
 
-    def by_id(self, geography_id):
+    def get_by_id(self, geography_id):
         result = self.client.get_geographies('id', geography_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing geography in Data Observatory.')
+            raise CartoException('The id does not correspond with any existing geography in the catalog. '
+                                 'You can check the full list of available geographies with Geographies.get_all()')
 
         return self._to_geography(result[0])
 
-    def by_country(self, iso_code3):
+    def get_by_country(self, iso_code3):
         return self._to_geographies(self.client.get_geographies('country_iso_code3', iso_code3))
 
     @staticmethod

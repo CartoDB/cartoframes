@@ -17,20 +17,20 @@ except ImportError:
 
 class TestProvider(unittest.TestCase):
 
-    @patch.object(ProviderRepository, 'by_id')
+    @patch.object(ProviderRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_provider1
 
         # When
-        provider = Provider.by_id('cat1')
+        provider = Provider.get_by_id('cat1')
 
         # Then
         assert isinstance(provider, pd.Series)
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    @patch.object(DatasetRepository, 'by_provider')
+    @patch.object(DatasetRepository, 'get_by_provider')
     def test_get_datasets(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -46,26 +46,26 @@ class TestProvider(unittest.TestCase):
 
 class TestProviders(unittest.TestCase):
 
-    @patch.object(ProviderRepository, 'all')
+    @patch.object(ProviderRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_providers
 
         # When
-        providers = Providers.all()
+        providers = Providers.get_all()
 
         # Then
         assert isinstance(providers, pd.DataFrame)
         assert isinstance(providers, Providers)
         assert providers == test_providers
 
-    @patch.object(ProviderRepository, 'by_id')
+    @patch.object(ProviderRepository, 'get_by_id')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_provider1
 
         # When
-        provider = Providers.by_id('bbva')
+        provider = Providers.get_by_id('bbva')
 
         # Then
         assert isinstance(provider, pd.Series)

@@ -17,11 +17,11 @@ class Geography(pd.Series):
         return Geographies
 
     @staticmethod
-    def by_id(geography_id):
-        return get_geography_repo().by_id(geography_id)
+    def get_by_id(geography_id):
+        return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
-        return get_dataset_repo().by_geography(self[_GEOGRAPHY_FIELD_ID])
+        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -41,12 +41,12 @@ class Geographies(pd.DataFrame):
         return Geography
 
     @staticmethod
-    def all():
-        return get_geography_repo().all()
+    def get_all():
+        return get_geography_repo().get_all()
 
     @staticmethod
-    def by_id(geography_id):
-        return Geography.by_id(geography_id)
+    def get_by_id(geography_id):
+        return Geography.get_by_id(geography_id)
 
     def __eq__(self, other):
         return self.equals(other)

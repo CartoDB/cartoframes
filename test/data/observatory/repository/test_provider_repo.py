@@ -23,7 +23,7 @@ class TestProviderRepo(unittest.TestCase):
         repo = ProviderRepository()
 
         # When
-        providers = repo.all()
+        providers = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -36,7 +36,7 @@ class TestProviderRepo(unittest.TestCase):
         repo = ProviderRepository()
 
         # When
-        providers = repo.all()
+        providers = repo.get_all()
 
         # Then
         mocked_repo.assert_called_once_with()
@@ -50,7 +50,7 @@ class TestProviderRepo(unittest.TestCase):
         repo = ProviderRepository()
 
         # When
-        provider = repo.by_id(requested_id)
+        provider = repo.get_by_id(requested_id)
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
@@ -65,4 +65,4 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         with self.assertRaises(CartoException):
-            repo.by_id(requested_id)
+            repo.get_by_id(requested_id)

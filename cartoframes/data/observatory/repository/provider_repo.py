@@ -12,14 +12,15 @@ class ProviderRepository(object):
     def __init__(self):
         self.client = RepoClient()
 
-    def all(self):
+    def get_all(self):
         return self._to_providers(self.client.get_providers())
 
-    def by_id(self, provider_id):
+    def get_by_id(self, provider_id):
         result = self.client.get_providers('id', provider_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing provider in Data Observatory.')
+            raise CartoException('The id does not correspond with any existing provider in the catalog. '
+                                 'You can check the full list of available providers with Providers.get_all()')
 
         return self._to_provider(result[0])
 
