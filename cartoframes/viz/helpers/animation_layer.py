@@ -43,16 +43,16 @@ def animation_layer(
                     stroke_width or defaults.STYLE['point']['strokeWidth']),
                 'strokeColor': '{0}'.format(
                     stroke_color or defaults.STYLE['point']['strokeColor']),
-                'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
-                    value, duration or 20, fade or (1, 1))
+                'filter': 'animation(linear(${0}), {1}, fade({2}))'.format(
+                    value, duration or 20, fade or '1, 1')
             },
             'line': {
                 'width': '{0}'.format(
                     size or defaults.STYLE['line']['width']),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#4CC8A3', opacity or '0.8'),
-                'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
-                    value, duration or 20, fade or (1, 1))
+                'filter': 'animation(linear(${0}), {1}, fade({2}))'.format(
+                    value, duration or 20, fade or '1, 1')
             },
             'polygon': {
                 'color': 'opacity({0}, {1})'.format(
@@ -61,8 +61,8 @@ def animation_layer(
                     stroke_color or defaults.STYLE['polygon']['strokeColor']),
                 'strokeWidth': '{0}'.format(
                     stroke_width or defaults.STYLE['polygon']['strokeWidth']),
-                'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
-                    value, duration or 20, fade or (1, 1))
+                'filter': 'animation(linear(${0}), {1}, fade({2}))'.format(
+                    value, duration or 20, fade or '1, 1')
             }
         },
         widgets=[{
