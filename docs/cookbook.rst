@@ -1,12 +1,12 @@
 Cheat Sheet
 ===========
 
-For most operations below, you need to create a :py:class:`DataObsClient <cartoframes.auth.DataObsClient>` object. For example, here's how user `cyclingfan` with API key `abc123` creates one:
+For most operations below, you need to create a :py:class:`DataObsClient <cartoframes.data.clients.DataObsClient>` object. For example, here's how user `cyclingfan` with API key `abc123` creates one:
 
 .. code::
 
     from cartoframes.auth import Credentials
-    from cartoframes.client import DataObsClient
+    from cartoframes.data.clients import DataObsClient
 
     credentials = Credentials(username='cyclingfan', api_key='abc123')
     do = DataObsClient(credentials)
@@ -184,7 +184,7 @@ Below is a sample workflow for how to perform a long running query that would ot
 .. code::
 
     from cartoframes.auth import Credentials
-    from cartoframes.client import SQLClient
+    from cartoframes.data.clients import SQLClient
 
     credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
     sql = SQLClient(credentials)
