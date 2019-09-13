@@ -14,10 +14,10 @@ from carto.exceptions import CartoException
 
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
-from cartoframes.data.columns import normalize_name
+from cartoframes.utils.columns import normalize_name
 
 
-from cartoframes.client import SQLClient
+from cartoframes.data.clients import SQLClient
 
 
 from cartoframes.data.services import Geocode
@@ -29,7 +29,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-from ..utils import _UserUrlLoader
+from test.helpers import _UserUrlLoader
 
 WILL_SKIP = False
 warnings.filterwarnings('ignore')

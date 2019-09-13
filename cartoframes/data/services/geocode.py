@@ -6,7 +6,7 @@ import logging
 import uuid
 import pandas as pd
 
-from ... import context
+from ...lib import context
 from ...auth import get_default_credentials
 from ...data import Dataset
 
