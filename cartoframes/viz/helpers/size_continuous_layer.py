@@ -59,6 +59,8 @@ def size_continuous_layer(
                 'filter': animation_filter
             },
             'line': {
+                '@width_value': 'ramp(linear(${0}), {1})'.format(
+                    value, size or [1, 10]),
                 'width': 'ramp(linear(${0}), {1})'.format(
                     value, size or [1, 10]),
                 'color': 'opacity({0}, {1})'.format(
