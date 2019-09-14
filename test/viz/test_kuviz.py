@@ -2,7 +2,7 @@
 
 import unittest
 
-from cartoframes import context
+from cartoframes.lib import context
 from cartoframes.viz import Map, Layer, Source
 from cartoframes.data import StrategiesRegistry
 from cartoframes.auth import Credentials
