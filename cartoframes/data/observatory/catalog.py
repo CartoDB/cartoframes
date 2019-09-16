@@ -4,10 +4,10 @@ from .country import Countries
 
 class Catalog(object):
 
-    @property
-    def countries(self):
+    @staticmethod
+    def countries():
         return Countries.get_all()
 
-    @property
-    def categories(self):
+    @staticmethod
+    def categories():
         return Categories.get_all()

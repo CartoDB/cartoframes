@@ -21,11 +21,9 @@ class Country(pd.Series):
     def get_by_id(iso_code3):
         return get_country_repo().get_by_id(iso_code3)
 
-    @property
     def datasets(self):
         return get_dataset_repo().get_by_country(self[_COUNTRY_ID_FIELD])
 
-    @property
     def geographies(self):
         return get_geography_repo().get_by_country(self[_COUNTRY_ID_FIELD])
 

@@ -1,8 +1,9 @@
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
 def get_geography_repo():
-    return GeographyRepository()
+    return _REPO
 
 
 class GeographyRepository(object):
@@ -17,7 +18,8 @@ class GeographyRepository(object):
         result = self.client.get_geographies('id', geography_id)
 
         if len(result) == 0:
-            return None
+            raise DiscoveryException('The id does not correspond with any existing geography in the catalog. '
+                                     'You can check the full list of available geographies with Geographies.get_all()')
 
         return self._to_geography(result[0])
 
@@ -35,3 +37,6 @@ class GeographyRepository(object):
         from cartoframes.data.observatory.geography import Geographies
 
         return Geographies(GeographyRepository._to_geography(result) for result in results)
+
+
+_REPO = GeographyRepository()

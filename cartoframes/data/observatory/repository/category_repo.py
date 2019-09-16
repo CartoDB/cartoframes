@@ -1,8 +1,9 @@
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
 def get_category_repo():
-    return CategoryRepository()
+    return _REPO
 
 
 class CategoryRepository(object):
@@ -17,7 +18,8 @@ class CategoryRepository(object):
         result = self.client.get_categories('id', category_id)
 
         if len(result) == 0:
-            return None
+            raise DiscoveryException('The id does not correspond with any existing category in the catalog. '
+                                     'You can check the full list of available categories with Categories.get_all()')
 
         return self._to_category(result[0])
 
@@ -32,3 +34,6 @@ class CategoryRepository(object):
         from cartoframes.data.observatory.category import Categories
 
         return Categories([CategoryRepository._to_category(result) for result in results])
+
+
+_REPO = CategoryRepository()

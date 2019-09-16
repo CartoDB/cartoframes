@@ -37,7 +37,7 @@ class TestCountry(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = test_country1.datasets
+        datasets = test_country1.datasets()
 
         # Then
         assert isinstance(datasets, pd.DataFrame)
@@ -50,7 +50,7 @@ class TestCountry(unittest.TestCase):
         mocked_repo.return_value = test_geographies
 
         # When
-        geographies = test_country1.geographies
+        geographies = test_country1.geographies()
 
         # Then
         assert isinstance(geographies, pd.DataFrame)

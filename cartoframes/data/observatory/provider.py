@@ -1,27 +1,28 @@
 import pandas as pd
 
+from .repository.provider_repo import get_provider_repo
 from .repository.dataset_repo import get_dataset_repo
-from .repository.geography_repo import get_geography_repo
-
-_GEOGRAPHY_FIELD_ID = 'id'
 
 
-class Geography(pd.Series):
+_PROVIDER_ID_FIELD = 'id'
+
+
+class Provider(pd.Series):
 
     @property
     def _constructor(self):
-        return Geography
+        return Provider
 
     @property
     def _constructor_expanddim(self):
-        return Geographies
+        return Providers
 
     @staticmethod
-    def get_by_id(geography_id):
-        return get_geography_repo().get_by_id(geography_id)
+    def get_by_id(provider_id):
+        return get_provider_repo().get_by_id(provider_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
+        return get_dataset_repo().get_by_provider(self[_PROVIDER_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -30,23 +31,23 @@ class Geography(pd.Series):
         return not self == other
 
 
-class Geographies(pd.DataFrame):
+class Providers(pd.DataFrame):
 
     @property
     def _constructor(self):
-        return Geographies
+        return Providers
 
     @property
     def _constructor_sliced(self):
-        return Geography
+        return Provider
 
     @staticmethod
     def get_all():
-        return get_geography_repo().get_all()
+        return get_provider_repo().get_all()
 
     @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
+    def get_by_id(category_id):
+        return Provider.get_by_id(category_id)
 
     def __eq__(self, other):
         return self.equals(other)
