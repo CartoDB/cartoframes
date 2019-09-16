@@ -125,33 +125,29 @@ class DataFrameDataset(BaseDataset):
 def _rows(df, columns, geom_column, enc_type, with_lnglat):
     for i, row in df.iterrows():
         row_data = []
-        the_geom_val = None
-        lng_val = None
-        lat_val = None
         for c in columns:
             col = c['dataframe']
             val = row[col]
+
             if _is_null(val):
                 val = ''
-            if with_lnglat:
-                if col == with_lnglat[0]:
-                    lng_val = val
-                if col == with_lnglat[1]:
-                    lat_val = val
+
             if geom_column and col == geom_column:
-                the_geom_val = val
+                geom = decode_geometry(val, enc_type)
+                if geom:
+                    row_data.append('SRID=4326;{}'.format(geom.wkt))
+                else:
+                    row_data.append('')
             else:
                 row_data.append('{}'.format(val))
 
-        if the_geom_val:
-            geom = decode_geometry(the_geom_val, enc_type)
-            if geom:
-                row_data.append('SRID=4326;{}'.format(geom.wkt))
-        elif with_lnglat and lng_val and lat_val:
-            row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
-
-        while len(row_data) < len(columns):
-            row_data.append('')
+        if geom_column is None and with_lnglat:
+            lng_val = row[with_lnglat[0]]
+            lat_val = row[with_lnglat[1]]
+            if lng_val and lat_val:
+                row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+            else:
+                row_data.append('')
 
         csv_row = '|'.join(row_data)
         csv_row += '\n'
