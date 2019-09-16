@@ -17,7 +17,7 @@ tqdm(disable=True, total=0)  # initialise internal lock
 
 class DataFrameDataset(BaseDataset):
     def __init__(self, data, credentials=None, schema=None):
-        super(DataFrameDataset, self).__init__()
+        super(DataFrameDataset, self).__init__(credentials)
 
         self._df = data
 
@@ -32,7 +32,7 @@ class DataFrameDataset(BaseDataset):
 
         save_index_as_column(data)
 
-        return cls(data)
+        return cls(data, credentials, schema)
 
     @property
     def dataframe(self):
