@@ -1,2 +1,4 @@
 -e git+https://github.com/CartoDB/carto-python.git#egg=carto
 .
+google-cloud-bigquery
+pyarrow
