@@ -71,7 +71,7 @@ class DataFrameDataset(BaseDataset):
 
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
-        enc_type = _detect_encoding_type(self._df, geom_col)
+        enc_type = _detect_geometry_encoding_type(self._df, geom_col)
         columns_normalized, columns_origin = self._copyfrom_column_names(
             geom_col,
             normalized_column_names,
@@ -194,7 +194,7 @@ def _process_columns(df):
     columns = [{
         'dataframe': c,
         'database': _database_column_name(c, geom_column),
-        'dbtype': _dtypes2pg(c, geom_column)
+        'database_type': _db_column_type(df, c, geom_column)
     } for c in df.columns]
 
     return columns, geom_column
@@ -209,6 +209,32 @@ def _database_column_name(column, geom_column):
             normalized_name = normalized_name + '_1'
 
     return normalized_name
+
+
+def _db_column_type(df, current_column, geom_column): # TODO: detect geometries
+def _db_column_type(df, current_column, geom_column): # TODO: detect geometries
+    if geom_column is not None and current_column == geom_column:
+        geom_type = _get_geom_col_type(df, geom_column)
+        db_type = 'geometry({}, 4326)'.format(geom_type)
+    else:
+        db_type = _dtypes2pg(df.dtypes[current_column])
+
+    return db_type
+
+
+def _dtypes2pg(dtype):
+    """Returns equivalent PostgreSQL type for input `dtype`"""
+    mapping = {
+        'float64': 'numeric',
+        'int64': 'bigint',
+        'float32': 'numeric',
+        'int32': 'integer',
+        'object': 'text',
+        'bool': 'boolean',
+        'datetime64[ns]': 'timestamp',
+        'datetime64[ns, UTC]': 'timestamp',
+    }
+    return mapping.get(str(dtype), 'text')
 
 
 def _normalize_column_names(df):
@@ -241,7 +267,7 @@ def _get_geom_col_name(df):
     return geom_col
 
 
-def _detect_encoding_type(df, geom_col):
+def _detect_geometry_encoding_type(df, geom_col):
     if geom_col is not None:
         first_geom = _first_value(df[geom_col])
         if first_geom:
@@ -249,23 +275,7 @@ def _detect_encoding_type(df, geom_col):
     return ''
 
 
-def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'bigint',
-        'float32': 'numeric',
-        'int32': 'integer',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'timestamp',
-        'datetime64[ns, UTC]': 'timestamp',
-    }
-    return mapping.get(str(dtype), 'text')
-
-
-def _get_geom_col_type(df):
-    geom_col = _get_geom_col_name(df)
+def _get_geom_col_type(df, geom_col):
     if geom_col is not None:
         first_geom = _first_value(df[geom_col])
         if first_geom:
@@ -273,8 +283,8 @@ def _get_geom_col_type(df):
             geom = decode_geometry(first_geom, enc_type)
             if geom is not None:
                 return geom.geom_type
-        else:
-            warn('Dataset with null geometries')
+
+    warn('Dataset with null geometries')
 
 
 def _first_value(array):
