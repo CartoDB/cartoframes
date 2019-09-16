@@ -189,19 +189,27 @@ def _is_null(val):
         return vnull.all()
 
 
-def _process_columns(df):
+def _process_columns(df, with_lnglat=None):
     geom_column = _get_geom_col_name(df)
+
     columns = [{
         'dataframe': c,
         'database': _database_column_name(c, geom_column),
         'database_type': _db_column_type(df, c, geom_column)
     } for c in df.columns]
 
+    if geom_column is None and with_lnglat:
+        columns.append({
+            'dataframe': None,
+            'database': 'the_geom',
+            'database_type': 'geometry(Point, 4326)'
+        })
+
     return columns, geom_column
 
 
 def _database_column_name(column, geom_column):
-    if column == geom_column:
+    if geom_column is not None and column == geom_column:
         normalized_name = 'the_geom'
     else:
         normalized_name = normalize_name(column)
@@ -211,13 +219,12 @@ def _database_column_name(column, geom_column):
     return normalized_name
 
 
-def _db_column_type(df, current_column, geom_column): # TODO: detect geometries
-def _db_column_type(df, current_column, geom_column): # TODO: detect geometries
-    if geom_column is not None and current_column == geom_column:
+def _db_column_type(df, column, geom_column): # TODO: detect geometries
+    if geom_column is not None and column == geom_column:
         geom_type = _get_geom_col_type(df, geom_column)
         db_type = 'geometry({}, 4326)'.format(geom_type)
     else:
-        db_type = _dtypes2pg(df.dtypes[current_column])
+        db_type = _dtypes2pg(df.dtypes[column])
 
     return db_type
 
