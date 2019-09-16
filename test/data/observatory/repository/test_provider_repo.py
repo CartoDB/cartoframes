@@ -1,7 +1,6 @@
 import unittest
 
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.provider import Providers
 
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
@@ -64,5 +63,5 @@ class TestProviderRepo(unittest.TestCase):
         repo = ProviderRepository()
 
         # Then
-        with self.assertRaises(CartoException):
+        with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)

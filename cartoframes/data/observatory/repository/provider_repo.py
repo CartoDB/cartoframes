@@ -1,6 +1,5 @@
-from carto.exceptions import CartoException
-
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.exceptions import DiscoveryException
+from .repo_client import RepoClient
 
 
 def get_provider_repo():
@@ -19,8 +18,8 @@ class ProviderRepository(object):
         result = self.client.get_providers('id', provider_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing provider in the catalog. '
-                                 'You can check the full list of available providers with Providers.get_all()')
+            raise DiscoveryException('The id does not correspond with any existing provider in the catalog. '
+                                     'You can check the full list of available providers with Providers.get_all()')
 
         return self._to_provider(result[0])
 

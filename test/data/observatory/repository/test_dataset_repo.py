@@ -1,7 +1,6 @@
 import unittest
 
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.dataset import Datasets
 
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
@@ -64,7 +63,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # Then
-        with self.assertRaises(CartoException):
+        with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_datasets')

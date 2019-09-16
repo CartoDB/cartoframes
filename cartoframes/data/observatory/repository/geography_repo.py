@@ -1,5 +1,4 @@
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
@@ -19,8 +18,8 @@ class GeographyRepository(object):
         result = self.client.get_geographies('id', geography_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing geography in the catalog. '
-                                 'You can check the full list of available geographies with Geographies.get_all()')
+            raise DiscoveryException('The id does not correspond with any existing geography in the catalog. '
+                                     'You can check the full list of available geographies with Geographies.get_all()')
 
         return self._to_geography(result[0])
 

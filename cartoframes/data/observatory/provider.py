@@ -1,7 +1,7 @@
 import pandas as pd
 
-from cartoframes.data.observatory.repository.provider_repo import get_provider_repo
-from cartoframes.data.observatory.repository.dataset_repo import get_dataset_repo
+from .repository.provider_repo import get_provider_repo
+from .repository.dataset_repo import get_dataset_repo
 
 
 _PROVIDER_ID_FIELD = 'id'

@@ -1,7 +1,6 @@
 import unittest
 
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.country import Countries
 
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
@@ -61,5 +60,5 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         # Then
-        with self.assertRaises(CartoException):
+        with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_iso_code)

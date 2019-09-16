@@ -1,5 +1,4 @@
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
@@ -19,8 +18,8 @@ class CategoryRepository(object):
         result = self.client.get_categories('id', category_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing category in the catalog. '
-                                 'You can check the full list of available categories with Categories.get_all()')
+            raise DiscoveryException('The id does not correspond with any existing category in the catalog. '
+                                     'You can check the full list of available categories with Categories.get_all()')
 
         return self._to_category(result[0])
 

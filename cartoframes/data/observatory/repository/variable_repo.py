@@ -1,5 +1,4 @@
-from carto.exceptions import CartoException
-
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
@@ -19,8 +18,8 @@ class VariableRepository(object):
         result = self.client.get_variables('id', variable_id)
 
         if len(result) == 0:
-            raise CartoException('The id does not correspond with any existing variable in the catalog. '
-                                 'You can check the full list of available variables with Variables.get_all()')
+            raise DiscoveryException('The id does not correspond with any existing variable in the catalog. '
+                                     'You can check the full list of available variables with Variables.get_all()')
 
         return self._to_variable(result[0])
 
