@@ -8,6 +8,12 @@ In the case of accounts with soft geocoding limits, additional charges may apply
 The `<cartoframes.data.services.Geocode.geocode>`_ instance method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
 A second mandatory argument, ``street`` defines the name of the data column that contains the street address.
 
+Test: :func:`geocode <cartoframes.data.services.Geocode.geocode>`
+
+Test: `geocode <cartoframes.data.services.Geocode.geocode>`_
+
+Test: `geocode <cartoframes.data.services.Geocode.geocode>`_
+
 Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be used to either
 pass the name of a column that contains the corresponding attribute; e.g. ``city='column_name_of_the_city'``.
 Or a literal text within single quotes (useful if all rows of the dataset have the same attribute value), e.g. ``city="'London'"``.

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 """Unit tests for cartoframes.data.services"""
 import unittest
@@ -141,7 +140,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_dataframe(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
         quota = self.used_quota('hires_geocoder')
 
@@ -182,7 +181,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_dataframe_as_new_table(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
         quota = self.used_quota('hires_geocoder')
 
@@ -214,7 +213,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_table(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         table_name = self.get_test_table_name('gctb')
         Dataset(df).upload(table_name=table_name, credentials=self.credentials)
         ds = Dataset(table_name, credentials=self.credentials)
@@ -258,7 +257,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_table_as_new_table(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         table_name = self.get_test_table_name('gctb')
         Dataset(df).upload(table_name=table_name, credentials=self.credentials)
         ds = Dataset(table_name, credentials=self.credentials)
@@ -299,7 +298,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_dataframe_dataset(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         ds = Dataset(df)
 
         quota = self.used_quota('hires_geocoder')
@@ -323,7 +322,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_dataframe_dataset_as_new_table(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         ds = Dataset(df)
 
         quota = self.used_quota('hires_geocoder')
@@ -395,7 +394,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
     def test_geocode_dataframe_with_metadata(self):
         gc = Geocode(credentials=self.credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
         quota = self.used_quota('hires_geocoder')
 
