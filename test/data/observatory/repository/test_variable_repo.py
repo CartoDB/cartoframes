@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.variable import Variables
 
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -39,7 +38,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
-        assert variables == Variables([])
+        assert variables is None
 
     @patch.object(RepoClient, 'get_variables')
     def test_get_by_id(self, mocked_repo):

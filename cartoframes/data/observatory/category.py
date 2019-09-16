@@ -41,6 +41,10 @@ class Categories(pd.DataFrame):
     def _constructor_sliced(self):
         return Category
 
+    # def __init__(self, data):
+    #     super(Categories, self).__init__(data)
+    #     self = self.set_index(_CATEGORY_ID_FIELD, inplace=True)
+
     @staticmethod
     def get_all():
         return get_category_repo().get_all()
