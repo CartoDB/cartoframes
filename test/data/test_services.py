@@ -92,10 +92,10 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         pyver = sys.version[0:3].replace('.', '_')
         buildnum = os.environ.get('TRAVIS_BUILD_NUMBER') or 'none'
 
-        # Skip checking quotas when running in TRAVIS
+        # Skip tests checking quotas when running in TRAVIS
         # since usually multiple tests will be running concurrently
         # in that case
-        self.quota_checking = buildnum == 'none'
+        WILL_SKIP = WILL_SKIP or buildnum != 'none'
 
         self.test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
             ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
@@ -147,8 +147,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(df, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_df, info = gc.geocode(df, street='address', city='city', country="'Spain'")
@@ -157,31 +156,26 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_df.the_geom)
 
         # Preview, Geocode again (should do nothing)
         _, info = gc.geocode(gc_df, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         _, info = gc.geocode(gc_df, street='address', city='city', country="'Spain'")
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Incremental geocoding: modify one row
         gc_df.set_value(1, 'address', 'Gran Via 48')
         _, info = gc.geocode(gc_df, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 1)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         _, info = gc.geocode(gc_df, street='address', city='city', country="'Spain'")
         self.assertEqual(info.get('required_quota'), 1)
         quota += 1
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_as_new_table(self):
@@ -196,8 +190,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(df, street='address', city='city', country="'Spain'", table_name=table_name, dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_df, info = gc.geocode(df, street='address', city='city', country="'Spain'", table_name=table_name)
@@ -206,8 +199,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         # This could change with provider:
         # self.assertEqual(gc_df.the_geom[1], '0101000020E61000002F34D769A4A50DC0C425C79DD2354440')
         # self.assertEqual(gc_df.the_geom[2], '0101000020E6100000912C6002B7EE17C0C45A7C0A80AD4240')
@@ -231,8 +223,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'")
@@ -241,31 +232,26 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertEqual(gc_ds.table_name, table_name)
 
         # Preview, Geocode again (should do nothing)
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'")
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Incremental geocoding: modify one row
         self.sql_client.query("UPDATE {table} SET address='Gran Via 48' WHERE cartodb_id=1".format(table=table_name))
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 1)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'")
         self.assertEqual(info.get('required_quota'), 1)
         quota += 1
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_table_as_new_table(self):
@@ -283,8 +269,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=new_table_name, dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=new_table_name)
@@ -293,25 +278,21 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertEqual(gc_ds.table_name, new_table_name)
 
         # Original table should not have been geocoded
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Preview, Geocode again (should do nothing)
         _, info = gc.geocode(gc_ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         _, info = gc.geocode(gc_ds, street='address', city='city', country="'Spain'")
         self.assertEqual(info.get('required_quota'), 0)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_dataset(self):
@@ -325,8 +306,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'")
@@ -335,8 +315,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -353,8 +332,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=table_name, dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=table_name)
@@ -363,8 +341,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_query(self):
@@ -377,8 +354,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", dry_run=True)
         self.assertEqual(info.get('required_quota'), 1)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'")
@@ -387,8 +363,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 1)
         self.assertEqual(info.get('final_records_with_geometry'), 1)
         quota += 1
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -404,8 +379,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=table_name, dry_run=True)
         self.assertEqual(info.get('required_quota'), 1)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_ds, info = gc.geocode(ds, street='address', city='city', country="'Spain'", table_name=table_name)
@@ -414,8 +388,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 1)
         self.assertEqual(info.get('final_records_with_geometry'), 1)
         quota += 1
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_with_metadata(self):
@@ -428,8 +401,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Preview
         _, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta', dry_run=True)
         self.assertEqual(info.get('required_quota'), 2)
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
         # Geocode
         gc_df, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta')
@@ -438,8 +410,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('successfully_geocoded'), 2)
         self.assertEqual(info.get('final_records_with_geometry'), 2)
         quota += 2
-        if self.quota_checking:
-            self.assertEqual(self.used_quota('hires_geocoder'), quota)
+        self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
+
