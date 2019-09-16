@@ -105,12 +105,6 @@ class Style(object):
         for prop in properties:
             if prop == 'vars':
                 continue
-            if prop not in constants.STYLE_PROPERTIES:
-                raise ValueError(
-                    'Style property "{0}" is not valid. Valid style properties are: {1}'.format(
-                        prop,
-                        ', '.join(constants.STYLE_PROPERTIES)
-                    ))
             output += '{name}: {value}\n'.format(
                 name=prop,
                 value=properties.get(prop)

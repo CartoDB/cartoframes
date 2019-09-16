@@ -10,10 +10,10 @@ export function renderWidget(widget, value) {
 
 export function renderBridge(bridge, widget, mapLayer) {
   widget.element = widget.element || document.querySelector(`#${widget.id}`);
-  const type = _getWidgetType(mapLayer, widget.value, widget.prop);
 
   switch (widget.type) {
     case 'histogram':
+      const type = _getWidgetType(mapLayer, widget.value, widget.prop);
       const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
       bridge[histogram](widget.element, widget.value, widget.options);
 
@@ -40,23 +40,21 @@ export function bridgeLayerWidgets(map, mapLayer, mapSource, widgets) {
     map: map
   });
 
-  mapLayer.on('loaded', () => {
-    widgets
-      .filter((widget) => widget.has_bridge)
-      .forEach((widget) => renderBridge(bridge, widget, mapLayer));
+  widgets
+    .filter((widget) => widget.has_bridge)
+    .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-    bridge.build();
-  });
+  bridge.build();
 }
 
 function _getWidgetType(layer, property, value) {
-  return layer.metadata.properties[value] ?
+  return layer.metadata && layer.metadata.properties[value] ?
     layer.metadata.properties[value].type
     : _getWidgetPropertyType(layer, property);
 }
 
 function _getWidgetPropertyType(layer, property) {
-  return layer.metadata.properties[property] ?
+  return layer.metadata && layer.metadata.properties[property] ?
     layer.metadata.properties[property].type
     : null;
 }
