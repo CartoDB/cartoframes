@@ -1,6 +1,6 @@
 import unittest
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions.do import DiscoveryException
 from cartoframes.data.observatory.category import Categories
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository

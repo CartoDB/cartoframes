@@ -1,6 +1,6 @@
 import unittest
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions.do import DiscoveryException
 from cartoframes.data.observatory.variable import Variables
 
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository

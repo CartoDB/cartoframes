@@ -1,6 +1,6 @@
 import unittest
 
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions.do import DiscoveryException
 from cartoframes.data.observatory.geography import Geographies
 
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository

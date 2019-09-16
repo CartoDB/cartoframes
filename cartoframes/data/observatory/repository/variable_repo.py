@@ -1,4 +1,4 @@
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.exceptions.do import DiscoveryException
 from .repo_client import RepoClient
 
 
