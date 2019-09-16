@@ -143,12 +143,12 @@ def _rows(df, columns, geom_column, geometry, with_lnglat):
             else:
                 row_data.append('{}'.format(val))
 
-        if the_geom_val is not None:
+        if the_geom_val:
             row_data.append('SRID=4326;{}'.format(geometry.wkt))
-        elif with_lnglat is not None and lng_val is not None and lat_val is not None:
+        elif with_lnglat and lng_val and lat_val:
             row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
 
-        if len(row_data) < len(columns):
+        while len(row_data) < len(columns):
             row_data.append('')
 
         csv_row = '|'.join(row_data)
@@ -218,25 +218,6 @@ def _dtypes2pg(dtype):
         'datetime64[ns, UTC]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
-
-
-def _normalize_column_names(df):
-    column_names = [c for c in df.columns if c not in Column.RESERVED_COLUMN_NAMES]
-    normalized_columns = normalize_names(column_names)
-
-    column_tuples = [(norm, orig) for orig, norm in zip(column_names, normalized_columns)]
-
-    changed_cols = '\n'.join([
-        '\033[1m{orig}\033[0m -> \033[1m{new}\033[0m'.format(
-            orig=orig,
-            new=norm)
-        for norm, orig in column_tuples if norm != orig])
-
-    if changed_cols != '':
-        tqdm.write('The following columns were changed in the CARTO '
-                   'copy of this dataframe:\n{0}'.format(changed_cols))
-
-    return column_tuples
 
 
 def _get_geom_col_name(df):
