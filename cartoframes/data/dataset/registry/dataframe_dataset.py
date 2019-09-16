@@ -53,14 +53,14 @@ class DataFrameDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
-        normalized_column_names = _normalize_column_names(self._df)
+        columns, geom_column, geometry = _process_columns(self._df, with_lnglat)
 
         if if_exists == BaseDataset.REPLACE or not self.exists():
-            self._create_table(normalized_column_names, with_lnglat)
+            self._create_table(columns)
         elif if_exists == BaseDataset.FAIL:
             raise self._already_exists_error()
 
-        self._copyfrom(normalized_column_names, with_lnglat)
+        self._copyfrom(columns, geom_column, geometry, with_lnglat)
 
     def delete(self):
         raise ValueError('Method not allowed in DataFrameDataset. You should use a TableDataset: `Dataset(my_table)`')
@@ -69,25 +69,12 @@ class DataFrameDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
-    def _copyfrom(self, normalized_column_names, with_lnglat):
-        geom_col = _get_geom_col_name(self._df)
-        enc_type = _detect_geometry_encoding_type(self._df, geom_col)
-        columns_normalized, columns_origin = self._copyfrom_column_names(
-            geom_col,
-            normalized_column_names,
-            with_lnglat)
-
+    def _copyfrom(self, columns, geom_column, geometry, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
-            columns=','.join(columns_normalized))
+            columns=','.join(c['database'] for c in columns))
 
-        data = _rows(
-            self._df,
-            columns_origin,
-            with_lnglat,
-            geom_col,
-            enc_type,
-            len(columns_normalized))
+        data = _rows(self._df, columns, geom_column, geometry, with_lnglat)
 
         self._context.upload(query, data)
 
@@ -107,10 +94,10 @@ class DataFrameDataset(BaseDataset):
 
         return columns_normalized, columns_origin
 
-    def _create_table(self, normalized_column_names, with_lnglat=None):
+    def _create_table(self, columns):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=self._drop_table_query(),
-            create=self._create_table_query(normalized_column_names, with_lnglat),
+            create=self._create_table_query(columns),
             cartodbfy=self._cartodbfy_query())
 
         try:
@@ -120,19 +107,12 @@ class DataFrameDataset(BaseDataset):
         except CartoException as err:
             raise CartoException('Cannot create table: {}.'.format(err))
 
-    def _create_table_query(self, normalized_column_names, with_lnglat=None):
-        col = ('{col} {ctype}')
-        cols = [col.format(col=norm, ctype=_dtypes2pg(self._df.dtypes[orig]))
-                for norm, orig in normalized_column_names]
+    def _create_table_query(self, columns):
+        cols = ['{column} {type}'.format(column=c['database'], type=c['database_type']) for c in columns]
 
-        geom_type = _get_geom_col_type(self._df)
-        if with_lnglat and geom_type is None:
-            geom_type = 'Point'
-
-        if geom_type:
-            cols.append('the_geom geometry({geom_type}, 4326)'.format(geom_type=geom_type))
-
-        return '''CREATE TABLE {table_name} ({cols})'''.format(table_name=self._table_name, cols=', '.join(cols))
+        return '''CREATE TABLE {table_name} ({cols})'''.format(
+            table_name=self._table_name,
+            cols=', '.join(cols))
 
     def _get_geom_type(self):
         """Compute geom type of the local dataframe"""
@@ -142,37 +122,33 @@ class DataFrameDataset(BaseDataset):
                 return map_geom_type(geometry.geom_type)
 
 
-def _rows(df, cols, with_lnglat, geom_col, enc_type, columns_number=None):
-    columns_number = columns_number or len(cols)
-
+def _rows(df, columns, geom_column, geometry, with_lnglat):
     for i, row in df.iterrows():
         row_data = []
         the_geom_val = None
         lng_val = None
         lat_val = None
-        for col in cols:
+        for c in columns:
+            col = c['dataframe']
             val = row[col]
             if _is_null(val):
                 val = ''
             if with_lnglat:
                 if col == with_lnglat[0]:
-                    lng_val = row[col]
+                    lng_val = val
                 if col == with_lnglat[1]:
-                    lat_val = row[col]
-            if geom_col and col == geom_col:
-                the_geom_val = row[col]
+                    lat_val = val
+            if geom_column and col == geom_column:
+                the_geom_val = val
             else:
                 row_data.append('{}'.format(val))
 
         if the_geom_val is not None:
-            geom = decode_geometry(the_geom_val, enc_type)
-            if geom:
-                row_data.append('SRID=4326;{geom}'.format(geom=geom.wkt))
-
-        if len(row_data) < columns_number and with_lnglat is not None and lng_val is not None and lat_val is not None:
+            row_data.append('SRID=4326;{}'.format(geometry.wkt))
+        elif with_lnglat is not None and lng_val is not None and lat_val is not None:
             row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
 
-        if len(row_data) < columns_number:
+        if len(row_data) < len(columns):
             row_data.append('')
 
         csv_row = '|'.join(row_data)
@@ -191,11 +167,12 @@ def _is_null(val):
 
 def _process_columns(df, with_lnglat=None):
     geom_column = _get_geom_col_name(df)
+    geometry = _get_geometry(df, geom_column)
 
     columns = [{
         'dataframe': c,
         'database': _database_column_name(c, geom_column),
-        'database_type': _db_column_type(df, c, geom_column)
+        'database_type': _db_column_type(df, c, geom_column, geometry)
     } for c in df.columns]
 
     if geom_column is None and with_lnglat:
@@ -205,11 +182,11 @@ def _process_columns(df, with_lnglat=None):
             'database_type': 'geometry(Point, 4326)'
         })
 
-    return columns, geom_column
+    return columns, geom_column, geometry
 
 
 def _database_column_name(column, geom_column):
-    if geom_column is not None and column == geom_column:
+    if geom_column and column == geom_column:
         normalized_name = 'the_geom'
     else:
         normalized_name = normalize_name(column)
@@ -219,10 +196,9 @@ def _database_column_name(column, geom_column):
     return normalized_name
 
 
-def _db_column_type(df, column, geom_column): # TODO: detect geometries
-    if geom_column is not None and column == geom_column:
-        geom_type = _get_geom_col_type(df, geom_column)
-        db_type = 'geometry({}, 4326)'.format(geom_type)
+def _db_column_type(df, column, geom_column, geometry):  # TODO: detect geometries
+    if geom_column and column == geom_column:
+        db_type = 'geometry({}, 4326)'.format(geometry.geom_type)
     else:
         db_type = _dtypes2pg(df.dtypes[column])
 
@@ -282,19 +258,15 @@ def _detect_geometry_encoding_type(df, geom_col):
     return ''
 
 
-def _get_geom_col_type(df, geom_col):
+def _get_geometry(df, geom_col):
     if geom_col is not None:
         first_geom = _first_value(df[geom_col])
         if first_geom:
             enc_type = detect_encoding_type(first_geom)
-            geom = decode_geometry(first_geom, enc_type)
-            if geom is not None:
-                return geom.geom_type
-
-    warn('Dataset with null geometries')
+            return decode_geometry(first_geom, enc_type)
 
 
-def _first_value(array):
-    array = array.loc[~array.isnull()]  # Remove null values
-    if len(array) > 0:
-        return array.iloc[0]
+def _first_value(series):
+    series = series.loc[~series.isnull()]  # Remove null values
+    if len(series) > 0:
+        return series.iloc[0]
