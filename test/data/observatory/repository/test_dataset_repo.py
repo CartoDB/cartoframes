@@ -1,6 +1,6 @@
 import unittest
 
-from cartoframes.exceptions.do import DiscoveryException
+from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.dataset import Datasets
 
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
