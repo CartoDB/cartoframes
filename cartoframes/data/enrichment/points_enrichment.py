@@ -7,7 +7,7 @@ from collections import defaultdict
 
 _ENRICHMENT_ID = 'enrichment_id'
 
-# TODO: process column name in metadata, remove spaces and points 
+# TODO: process column name in metadata, remove spaces and points
 
 
 def enrich_points(data, variables, data_geom_column='geometry', filters=dict()):
@@ -82,7 +82,7 @@ def __get_name_geotable_from_datatable(datatable):
 
 def __process_filters(filters_dict):
     filters = ''
-    # TODO: Add data table ref in fields of filters 
+    # TODO: Add data table ref in fields of filters
     if filters_dict:
         filters_list = list()
 
