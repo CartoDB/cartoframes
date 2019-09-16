@@ -5,9 +5,8 @@ from tqdm import tqdm
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ....utils.columns import Column, normalize_names, normalize_name
-from ....utils.geom_utils import decode_geometry, compute_geodataframe, \
-    detect_encoding_type, save_index_as_column
+from ....utils.columns import Column, normalize_name
+from ....utils.geom_utils import decode_geometry, compute_geodataframe, detect_encoding_type, save_index_as_column
 from ....utils.utils import map_geom_type, load_geojson, is_geojson
 
 
