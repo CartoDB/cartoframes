@@ -784,3 +784,13 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         rows = _rows(df, ['test'], None, '', '')
 
         self.assertEqual(list(rows), [b'\n', b'\n'])
+
+    def test_rows_non_ascii(self):
+        attribute = 'áéí'
+        unicode_attribute = u'áéí'
+        encoded_attribute = unicode_attribute.encode('utf-8')
+        encoded_line = encoded_attribute + '\n'.encode()
+
+        df = pd.DataFrame.from_dict({'test': [attribute, unicode_attribute, encoded_attribute, 'xyz']})
+        rows = _rows(df, ['test'], None, '', '')
+        self.assertEqual(list(rows), [encoded_line, encoded_line, encoded_line, b'xyz\n'])
