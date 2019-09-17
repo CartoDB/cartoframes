@@ -1,0 +1,3 @@
+# documentation requirements	
+sphinx>=1.6.5
+sphinx-apidoc>=1.8.3
