@@ -183,11 +183,12 @@ def _rows(df, cols, with_lnglat, geom_col, enc_type, columns_number=None):
 
         yield csv_row
 
+
 def _append_encoded(row_data, val):
     row_data.append(_encoded(val))
 
+
 def _encoded(val):
-    t = type(val)
     if isinstance(val, type(u'')):
         return val.encode('utf-8')
     elif isinstance(val, type(b'')):
