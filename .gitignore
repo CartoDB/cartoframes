@@ -53,3 +53,9 @@ node_modules
 # Tests
 .coverage
 test_*.json
+
+# Sphinx documentation
+docs/build/
+docs/_static/
+docs/_templates/
+docs/cartoframes.*
