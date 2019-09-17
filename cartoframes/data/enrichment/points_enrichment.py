@@ -1,37 +1,57 @@
 import uuid
 
-from . import bigquery_client
+from ..clients import bigquery_client
 from ...auth import get_default_credentials
 from collections import defaultdict
 
 
 _ENRICHMENT_ID = 'enrichment_id'
+_WORKING_PROJECT = 'cartodb-on-gcp-datascience'
+_TEMP_DATASET_ENRICHMENT = 'enrichment_temp'
 
 # TODO: process column name in metadata, remove spaces and points
 
 
-def enrich_points(data, variables, data_geom_column='geometry', filters=dict()):
+def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), credentials=None):
 
-    credentials = get_default_credentials()
-
+    credentials = credentials or get_default_credentials()
     bq_client = bigquery_client.BigQueryClient(credentials)
 
-    # Copy dataframe and generate id to join to original data later
-    data_copy = data.copy()
-    data_copy[_ENRICHMENT_ID] = range(data_copy.shape[0])
-    data_geometry_id_copy = data_copy[[_ENRICHMENT_ID, data_geom_column]]
+    data_copy = __copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID)
 
+    # Select only geometry and id and build schema
+    data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
+    schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
+
+    # Data table is a universal unique identifier
     data_tablename = uuid.uuid4().hex
 
-    bq_client.upload_dataframe(data_geometry_id_copy, _ENRICHMENT_ID, data_geom_column, data_tablename)
+    bq_client.upload_dataframe(data_geometry_id_copy, schema, data_tablename,
+                               project=_WORKING_PROJECT, dataset=_TEMP_DATASET_ENRICHMENT)
 
-    variables_id = variables['id'].tolist()
-    table_to_variables = __process_enrichment_variables(variables_id)
-    table_data_enrichment = list(table_to_variables.keys()).pop()
-    table_geo_enrichment = __get_name_geotable_from_datatable(table_data_enrichment)
-    variables_list = list(table_to_variables.values()).pop()
+    table_data_enrichment, table_geo_enrichment, variables_list = __get_tables_and_variables(variables)
 
     filters_str = __process_filters(filters)
+
+    sql = __prepare_sql(_ENRICHMENT_ID, variables_list, table_data_enrichment, table_geo_enrichment,
+                        credentials.username, _WORKING_PROJECT, _TEMP_DATASET_ENRICHMENT,
+                        data_tablename, data_geom_column, filters_str)
+
+    # Execute query to enrich
+    data_geometry_id_enriched = bq_client.query(sql).to_dataframe()
+
+    # Merge with original data
+    data_copy = data_copy.merge(data_geometry_id_enriched, on=_ENRICHMENT_ID, how='left')\
+        .drop(_ENRICHMENT_ID, axis=1)
+
+    # Remove temporal data
+    bq_client.delete_table(data_tablename, project=_WORKING_PROJECT, dataset=_TEMP_DATASET_ENRICHMENT)
+
+    return data_copy
+
+
+def __prepare_sql(enrichment_id, variables, enrichment_table, enrichment_geo_table, user_workspace,
+                  working_project, working_dataset, data_table, data_geom_column, filters):
 
     sql = '''
         SELECT data_table.{enrichment_id},
@@ -44,20 +64,30 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict()):
         JOIN `{working_project}.{working_dataset}.{data_table}` data_table
           ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
         {filters};
-    '''.format(enrichment_id=_ENRICHMENT_ID, variables=', '.join(variables_list),
-               enrichment_table=table_data_enrichment, enrichment_geo_table=table_geo_enrichment,
-               user_workspace=credentials.username.replace('-', '_'), working_project=bigquery_client._WORKING_PROJECT,
-               working_dataset=bigquery_client._TEMP_DATASET_ENRICHMENT, data_table=data_tablename,
-               data_geom_column=data_geom_column, filters=filters_str)
+    '''.format(enrichment_id=enrichment_id, variables=', '.join(variables),
+               enrichment_table=enrichment_table, enrichment_geo_table=enrichment_geo_table,
+               user_workspace=user_workspace.replace('-', '_'), working_project=working_project,
+               working_dataset=working_dataset, data_table=data_table,
+               data_geom_column=data_geom_column, filters=filters)
 
-    data_geometry_id_augmentated = bq_client.query(sql).to_dataframe()
+    return sql
 
-    data_augmentated = data_copy.merge(data_geometry_id_augmentated, on=_ENRICHMENT_ID, how='left')\
-        .drop(_ENRICHMENT_ID, axis=1)
 
-    bq_client.delete_table(data_tablename)
+def __copy_data_and_generate_enrichment_id(data, enrichment_id_column):
+    data_copy = data.copy()
+    data_copy[_ENRICHMENT_ID] = range(data_copy.shape[0])
 
-    return data_augmentated
+    return data_copy
+
+
+def __get_tables_and_variables(variables):
+    variables_id = variables['id'].tolist()
+    table_to_variables = __process_enrichment_variables(variables_id)
+    table_data_enrichment = list(table_to_variables.keys()).pop()
+    table_geo_enrichment = __get_name_geotable_from_datatable(table_data_enrichment)
+    variables_list = list(table_to_variables.values()).pop()
+
+    return table_data_enrichment, table_geo_enrichment, variables_list
 
 
 def __process_enrichment_variables(variables):
