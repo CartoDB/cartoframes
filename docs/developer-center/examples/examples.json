@@ -1,0 +1,15 @@
+{
+  "main": {
+    "file": "introduction.md"
+  },
+  "categories": [
+    {
+        "title": "Examples",
+        "samples": [{
+          "title": "Jupyter Notebooks",
+          "desc": "Run all the CARTOframes examples in your notebooks",
+          "file": "notebooks.md"
+        }]
+    }
+  ]
+}
