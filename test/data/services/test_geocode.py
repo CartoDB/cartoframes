@@ -31,7 +31,6 @@ except ImportError:
 
 from test.helpers import _UserUrlLoader
 
-WILL_SKIP = False
 warnings.filterwarnings('ignore')
 
 
@@ -84,7 +83,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
             self.username = os.environ['USERNAME']
 
         # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
+        self.no_credentials = self.apikey is None or self.username is None
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
@@ -95,7 +94,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         # Skip tests checking quotas when running in TRAVIS
         # since usually multiple tests will be running concurrently
         # in that case
-        WILL_SKIP = WILL_SKIP or buildnum != 'none'
+        self.no_credits = self.no_credentials or buildnum != 'none'
 
         self.test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
             ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
@@ -108,6 +107,12 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.sql_client = SQLClient(self.credentials)
 
         self.tearDown()
+
+    def skip(self, if_no_credits=False, if_no_credentials=False):
+        if self.no_credits and if_no_credits:
+            raise unittest.SkipTest("skipping this test to avoid consuming credits")
+        if self.no_credentials and if_no_credentials:
+            raise unittest.SkipTest("no carto credentials, skipping this test")
 
     def get_test_table_name(self, name):
         n = len(self.test_tables) + 1
@@ -136,8 +141,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
                 return update_quotas(service, row['used_quota'])
         return None
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -177,8 +182,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 1
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -209,8 +214,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dl_df.the_geom)
         self.assertTrue(dl_df.equals(gc_df))
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -253,8 +258,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 1
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_table_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -294,8 +299,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(info.get('required_quota'), 0)
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_dataset(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -318,8 +323,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_dataset_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
@@ -343,8 +348,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 2
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_query(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         ds = Dataset("SELECT 'Gran Via 46' AS address, 'Madrid' AS city")
@@ -366,8 +371,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_query_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         ds = Dataset("SELECT 'Gran Via 46' AS address, 'Madrid' AS city")
@@ -390,8 +395,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 1
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_geocode_dataframe_with_metadata(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
