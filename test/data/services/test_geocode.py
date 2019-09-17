@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.data.services"""
+"""Unit tests for cartoframes.data.services.Geocode"""
 import unittest
 import os
 import sys
