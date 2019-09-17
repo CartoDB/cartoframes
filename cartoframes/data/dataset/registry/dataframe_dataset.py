@@ -165,24 +165,35 @@ def _rows(df, cols, with_lnglat, geom_col, enc_type, columns_number=None):
             if geom_col and col == geom_col:
                 the_geom_val = row[col]
             else:
-                row_data.append('{}'.format(val))
+                row_data.append(_encoded(val))
 
         if the_geom_val is not None:
             geom = decode_geometry(the_geom_val, enc_type)
             if geom:
-                row_data.append('SRID=4326;{geom}'.format(geom=geom.wkt))
+                _append_encoded(row_data, 'SRID=4326;{geom}'.format(geom=geom.wkt))
 
         if len(row_data) < columns_number and with_lnglat is not None and lng_val is not None and lat_val is not None:
-            row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+            _append_encoded(row_data, 'SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
 
         if len(row_data) < columns_number:
-            row_data.append('')
+            _append_encoded(row_data, '')
 
-        csv_row = '|'.join(row_data)
-        csv_row += '\n'
+        csv_row = _encoded('|').join(row_data)
+        csv_row += _encoded('\n')
 
-        yield csv_row.encode()
+        yield csv_row
 
+def _append_encoded(row_data, val):
+    row_data.append(_encoded(val))
+
+def _encoded(val):
+    t = type(val)
+    if isinstance(val, type(u'')):
+        return val.encode('utf-8')
+    elif isinstance(val, type(b'')):
+        return val
+    else:
+        return u'{}'.format(val).encode('utf-8')
 
 def _is_null(val):
     vnull = pd.isnull(val)
