@@ -17,7 +17,8 @@ from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _process_columns
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _process_columns, \
+    _database_column_name
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
@@ -422,6 +423,26 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         pass
         # dataset = DatasetMock('fake_table', credentials=self.credentials)
         # self.assertEqual(dataset.schema, 'fake_username')
+
+    def test_database_column_name_the_geom(self):
+        geom_column = 'the_geom'
+
+        result = _database_column_name('other', geom_column, None)
+        self.assertEqual(result, 'other')
+        result = _database_column_name('the_geom', geom_column, None)
+        self.assertEqual(result, 'the_geom')
+        result = _database_column_name('the_geom', geom_column, True)
+        self.assertEqual(result, 'the_geom_')
+
+        geom_column = 'other_geom'
+
+        result = _database_column_name('other2', geom_column, None)
+        self.assertEqual(result, 'other2')
+        result = _database_column_name('the_geom', geom_column, None)
+        self.assertEqual(result, 'the_geom')
+        result = _database_column_name('the_geom', geom_column, True)
+        self.assertEqual(result, 'the_geom')
+
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
     # https://github.com/CartoDB/CartoDB-SQL-API/issues/579 is fixed)

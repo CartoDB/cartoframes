@@ -152,7 +152,7 @@ def _process_columns(df, with_lnglat=None):
 
     columns = [{
         'dataframe': c,
-        'database': _database_column_name(c, geom_column),
+        'database': _database_column_name(c, geom_column, with_lnglat),
         'database_type': _db_column_type(df, c, geom_column, geom_type)
     } for c in df.columns if c.lower() not in Column.FORBIDDEN_COLUMN_NAMES]
 
@@ -166,9 +166,14 @@ def _process_columns(df, with_lnglat=None):
     return columns, geom_column, enc_type
 
 
-def _database_column_name(column, geom_column):
+def _database_column_name(column, geom_column, with_lnglat):
     if geom_column and column == geom_column:
-        normalized_name = 'the_geom'
+        if not with_lnglat:
+            normalized_name = 'the_geom'
+        elif geom_column is 'the_geom':
+            normalized_name = 'the_geom_'
+        else:
+            normalized_name = normalize_name(column)
     else:
         normalized_name = normalize_name(column)
 
