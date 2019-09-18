@@ -17,7 +17,7 @@ from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _normalize_column_names
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _process_columns
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
@@ -705,59 +705,90 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
 
-    def test_copyfrom_column_names_with_geom(self):
-        the_geom = 'geometry'
-        with_lnglat = None
-
-        expected_columns_origin = [the_geom, 'address', 'city']
-        expected_columns_normalized = ['address', 'city', 'the_geom']
-
+    def test_process_columns_with_geom(self):
         df = pd.DataFrame(
-            [['Gran Vía 46', 'Madrid', 'fake_geom'], ['Ebro 1', 'Sevilla', 'fake_geom']],
+            [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
             columns=['address', 'city', 'geometry'])
-        dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+        expected_columns = [
+            {
+                'dataframe': 'address',
+                'database': 'address',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': 'city',
+                'database': 'city',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': 'geometry',
+                'database': 'the_geom',
+                'database_type': 'geometry(Point, 4326)'
+            }
+        ]
+        expected_geom_column = 'geometry'
+        expected_enc_type = 'wkt'
 
-    def test_copyfrom_column_names_with_lnglat(self):
-        the_geom = None
-        with_lnglat = ('lng', 'lat')
+        columns, geom_column, enc_type = _process_columns(df, None)
 
-        expected_columns_origin = ['lng', 'lat']
-        expected_columns_normalized = ['lng', 'lat', 'the_geom']
+        self.assertEqual(expected_columns, columns)
+        self.assertEqual(expected_geom_column, geom_column)
+        self.assertEqual(expected_enc_type, enc_type)
 
-        df = pd.DataFrame([['0', '0'], ['1', '1']], columns=['lng', 'lat'])
-        dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+    def test_process_columns_with_lnglat(self):
+        df = pd.DataFrame([['0', '1'], ['0', '1']], columns=['lng', 'lat'])
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+        expected_columns = [
+            {
+                'dataframe': 'lng',
+                'database': 'lng',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': 'lat',
+                'database': 'lat',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': None,
+                'database': 'the_geom',
+                'database_type': 'geometry(Point, 4326)'
+            }
+        ]
+        expected_geom_column = None
+        expected_enc_type = None
+
+        columns, geom_column, enc_type = _process_columns(df, ('lng', 'lat'))
+
+        self.assertEqual(expected_columns, columns)
+        self.assertEqual(expected_geom_column, geom_column)
+        self.assertEqual(expected_enc_type, enc_type)
 
     def test_copyfrom_column_names_without_geom(self):
-        columns = ['address', 'city']
-        the_geom = None
-        with_lnglat = None
+        df = pd.DataFrame(
+            [['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
-        expected_columns_origin = columns
-        expected_columns_normalized = columns
+        expected_columns = [
+            {
+                'dataframe': 'address',
+                'database': 'address',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': 'city',
+                'database': 'city',
+                'database_type': 'text'
+            }
+        ]
+        expected_geom_column = None
+        expected_enc_type = None
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=columns)
-        dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        columns, geom_column, enc_type = _process_columns(df, None)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+        self.assertEqual(expected_columns, columns)
+        self.assertEqual(expected_geom_column, geom_column)
+        self.assertEqual(expected_enc_type, enc_type)
 
     def test_create_table_query(self):
         df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})

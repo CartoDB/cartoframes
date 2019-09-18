@@ -244,6 +244,8 @@ def _get_geometry_type(df, geom_col):
             geom = decode_geometry(first_geom, enc_type)
             return geom.geom_type, enc_type
 
+    return None, None
+
 
 def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
