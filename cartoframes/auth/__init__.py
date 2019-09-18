@@ -1,5 +1,3 @@
-"""Auth namespace contains the class to manage authentication: Credentials.
-It also includes the utility method set_default_credentials."""
 from __future__ import absolute_import
 import re
 
@@ -15,19 +13,22 @@ def set_default_credentials(
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
-          A :py:class:`Credentials <cartoframes.credentials.Credentials>`
-          instance can be used in place of a `username | base_url`/`api_key` combination.
-        base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
-          should use the form ``https://{username}.carto.com`` (e.g.,
-          https://eschbacher.carto.com for user ``eschbacher``) whether on
-          a personal or multi-user account. On-premises installation users
-          should ask their admin.
-        api_key (str, optional): CARTO API key.
-        username (str, optional): CARTO user name of the account.
-        session (requests.Session, optional): requests session. See `requests
-          documentation
-          <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
-          for more information.
+            A :py:class:`Credentials <cartoframes.credentials.Credentials>`
+            instance can be used in place of a `username | base_url`/`api_key` combination.
+        base_url (str, optional):
+            Base URL of CARTO user account. Cloud-based accounts
+            should use the form ``https://{username}.carto.com`` (e.g.,
+            https://eschbacher.carto.com for user ``eschbacher``) whether on
+            a personal or multi-user account. On-premises installation users
+            should ask their admin.
+        api_key (str, optional):
+            CARTO API key.
+        username (str, optional):
+            CARTO user name of the account.
+        session (requests.Session, optional):
+            requests session. See `requests documentation 
+            <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
+            for more information.
 
     Example:
 

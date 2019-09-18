@@ -24,14 +24,17 @@ class Credentials(object):
     instantiate a :obj:`Credentials` object.
 
     Args:
-        api_key (str, optional): API key of user's CARTO account
-        username (str, optional): Username of CARTO account
-        base_url (str, optional): Base URL used for API calls. This is usually
-            of the form `https://eschbacher.carto.com/` for user `eschbacher`.
+        api_key (str, optional):
+            API key of user's CARTO account
+        username (str, optional):
+            Username of CARTO account
+        base_url (str, optional):
+            Base URL used for API calls. This is usually of the form
+            `https://eschbacher.carto.com/` for user `eschbacher`.
             On premises installations (and others) have a different URL
             pattern.
-        session (requests.Session, optional): requests session. See `requests
-            documentation
+        session (requests.Session, optional):
+            requests session. See `requests documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information.
 
@@ -141,8 +144,9 @@ class Credentials(object):
         """Saves current user credentials to user directory.
 
         Args:
-            config_loc (str, optional): Location where credentials are to be
-                stored. If no argument is provided, it will be send to the
+            config_loc (str, optional):
+                Location where credentials are to be stored.
+                If no argument is provided, it will be send to the
                 default location.
 
         Example:
@@ -175,7 +179,8 @@ class Credentials(object):
         file is specified, it deletes the default user credential file.
 
         Args:
-            config_file (str): Path to configuration file. Defaults to delete
+            config_file (str):
+                Path to configuration file. Defaults to delete
                 the user default location if `None`.
 
         .. Tip::
