@@ -170,7 +170,7 @@ def _process_columns(df, with_lnglat=None):
         'dataframe': c,
         'database': _database_column_name(c, geom_column),
         'database_type': _db_column_type(df, c, geom_column, geom_type)
-    } for c in df.columns]
+    } for c in df.columns if c.lower() not in Column.FORBIDDEN_COLUMN_NAMES]
 
     if geom_column is None and with_lnglat:
         columns.append({
@@ -187,8 +187,6 @@ def _database_column_name(column, geom_column):
         normalized_name = 'the_geom'
     else:
         normalized_name = normalize_name(column)
-        if normalized_name in Column.RESERVED_COLUMN_NAMES:
-            normalized_name = normalized_name + '_1'
 
     return normalized_name
 
@@ -221,7 +219,8 @@ def _get_geom_col_name(df):
     geom_col = getattr(df, '_geometry_column_name', None)
     if geom_col is None:
         try:
-            geom_col = next(x for x in df.columns if x.lower() in Column.SUPPORTED_GEOM_COL_NAMES)
+            df_columns = [x.lower() for x in df.columns]
+            geom_col = next(x for x in Column.SUPPORTED_GEOM_COL_NAMES if x in df_columns)
         except StopIteration:
             pass
 

@@ -9,7 +9,7 @@ from unidecode import unidecode
 class Column(object):
     DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
     SUPPORTED_GEOM_COL_NAMES = ['the_geom', 'geom', 'geometry']
-    RESERVED_COLUMN_NAMES = SUPPORTED_GEOM_COL_NAMES + ['the_geom_webmercator', 'cartodb_id']
+    FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
     MAX_LENGTH = 63
     MAX_COLLISION_LENGTH = MAX_LENGTH - 4
     RESERVED_WORDS = ('ALL', 'ANALYSE', 'ANALYZE', 'AND', 'ANY', 'ARRAY', 'AS', 'ASC', 'ASYMMETRIC', 'AUTHORIZATION',
