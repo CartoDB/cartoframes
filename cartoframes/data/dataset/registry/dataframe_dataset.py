@@ -77,22 +77,6 @@ class DataFrameDataset(BaseDataset):
 
         self._context.upload(query, data)
 
-    def _copyfrom_column_names(self, geom_col, normalized_column_names, with_lnglat=None):
-        columns_normalized = []
-        columns_origin = []
-
-        if geom_col:
-            columns_origin.append(geom_col)
-
-        for norm, orig in normalized_column_names:
-            columns_normalized.append(norm)
-            columns_origin.append(orig)
-
-        if geom_col or with_lnglat:
-            columns_normalized.append('the_geom')
-
-        return columns_normalized, columns_origin
-
     def _create_table(self, columns):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=self._drop_table_query(),
@@ -193,7 +177,7 @@ def _database_column_name(column, geom_column):
 
 def _db_column_type(df, column, geom_column, geom_type):  # TODO: detect geometries
     if geom_column and column == geom_column:
-        db_type = 'geometry({}, 4326)'.format(geom_type)
+        db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
     else:
         db_type = _dtypes2pg(df.dtypes[column])
 
