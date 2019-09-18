@@ -34,10 +34,10 @@ class DataFrameDatasetMock(DataFrameDataset):
     def _get_dataset_info(self, table_name=None):
         return DatasetInfoMock(self._credentials, table_name or self._table_name)
 
-    def _create_table(self, _, _2):
+    def _create_table(self, _):
         return True
 
-    def _copyfrom(self, _, _2):
+    def _copyfrom(self, _, _2, _3, _4):
         return True
 
     def compute_geom_type(self):
