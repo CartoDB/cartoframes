@@ -48,7 +48,7 @@ class TableDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
-    def get_table_column_names(self, exclude=None):
+    def get_column_names(self, exclude=None):
         """Get column names from a table"""
         columns = [c.name for c in self._get_table_columns()]
 
@@ -56,10 +56,6 @@ class TableDataset(BaseDataset):
             columns = list(set(columns) - set(exclude))
 
         return columns
-
-    def get_column_names(self):
-        """Get column names"""
-        return self.get_table_column_names()
 
     def _unsync(self):
         self._dataset_info = None

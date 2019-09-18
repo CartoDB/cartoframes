@@ -318,13 +318,9 @@ class Dataset(object):
         """Compute the geometry type from the data"""
         return self._strategy.compute_geom_type()
 
-    def get_table_column_names(self, exclude=None):
-        """Get column names from a table"""
-        return self._strategy.get_table_column_names(exclude)
-
-    def get_column_names(self):
-        """Get column names"""
-        return self._strategy.get_column_names()
+    def get_column_names(self, exclude=None):
+        """Get column names from a dataset"""
+        return self._strategy.get_column_names(exclude)
 
     def get_table_names(self):
         """Get table names used by Dataset instance"""
