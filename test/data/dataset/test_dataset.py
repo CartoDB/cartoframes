@@ -260,10 +260,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         from cartoframes.examples import read_taxi
         df = read_taxi(limit=100)
         lnglat = ('dropoff_longitude', 'dropoff_latitude')
-        dataset = Dataset(df).upload(
-            with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
-
+        Dataset(df).upload(with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
         self.assertExistsTable(self.test_write_table)
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
@@ -383,17 +380,18 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
+        Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        dataset = Dataset(df).upload(
-            if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
+        truncate_query = 'TRUNCATE TABLE {}'.format(self.test_write_table)
+        self.sql_client.query(truncate_query)
+
+        Dataset(df).upload(if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049 * 2)
+        self.assertEqual(result['total_rows'], 2049)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_replace(self):
@@ -888,24 +886,46 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        rows = _rows(df, ['test'], None, '', '')
+        columns = [{
+            'dataframe': 'test'
+        }]
+        rows = _rows(df, columns, None, '', None)
 
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
-        rows = _rows(df, ['test'], None, '', '')
+        columns = [{
+            'dataframe': 'test'
+        }]
+        rows = _rows(df, columns, None, '', None)
 
         self.assertEqual(list(rows), [b'\n', b'\n'])
 
     def test_rows_with_geom(self):
-        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
+        columns = [
+            {
+                'dataframe': 'test'
+            },
+            {
+                'dataframe': 'the_geom'
+            }
+        ]
+        rows = _rows(df, columns, 'the_geom', 'wkt', None)
 
-        self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
+        self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        columns = [
+            {
+                'dataframe': 'test'
+            },
+            {
+                'dataframe': 'the_geom'
+            }
+        ]
+        rows = _rows(df, columns, 'the_geom', 'wkt', None)
 
-        self.assertEqual(list(rows), [b'\n', b'\n'])
+        self.assertEqual(list(rows), [b'|\n', b'|\n'])
