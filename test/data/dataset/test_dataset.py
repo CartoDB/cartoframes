@@ -790,6 +790,61 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(expected_geom_column, geom_column)
         self.assertEqual(expected_enc_type, enc_type)
 
+    def test_copyfrom_column_names_basic_troubled_names(self):
+        df = pd.DataFrame(
+            [[1, 'POINT (1 1)', 'fake_geom']], columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
+
+        expected_columns = [
+            {
+                'dataframe': 'cartodb_id',
+                'database': 'cartodb_id',
+                'database_type': 'bigint'
+            },
+            {
+                'dataframe': 'the_geom',
+                'database': 'the_geom',
+                'database_type': 'geometry(Point, 4326)'
+            }
+        ]
+        expected_geom_column = 'the_geom'
+        expected_enc_type = 'wkt'
+
+        columns, geom_column, enc_type = _process_columns(df, None)
+
+        self.assertEqual(expected_columns, columns)
+        self.assertEqual(expected_geom_column, geom_column)
+        self.assertEqual(expected_enc_type, enc_type)
+
+    def test_copyfrom_column_names_geometry_troubled_names(self):
+        df = pd.DataFrame(
+            [['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+
+        expected_columns = [
+            {
+                'dataframe': 'geom',
+                'database': 'geom',
+                'database_type': 'text'
+            },
+            {
+                'dataframe': 'the_geom',
+                'database': 'the_geom',
+                'database_type': 'geometry(Point, 4326)'
+            },
+            {
+                'dataframe': 'geometry',
+                'database': 'geometry',
+                'database_type': 'text'
+            },
+        ]
+        expected_geom_column = 'the_geom'
+        expected_enc_type = 'wkt'
+
+        columns, geom_column, enc_type = _process_columns(df, None)
+
+        self.assertEqual(expected_columns, columns)
+        self.assertEqual(expected_geom_column, geom_column)
+        self.assertEqual(expected_enc_type, enc_type)
+
     def test_create_table_query(self):
         df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
         normalized_column_names = []  # both column names will be filtered as reserved words
