@@ -847,9 +847,20 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
     def test_create_table_query(self):
         df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
-        normalized_column_names = []  # both column names will be filtered as reserved words
+        normalized_column_names = [
+            {
+                'dataframe': 'cartodb_id',
+                'database': 'cartodb_id',
+                'database_type': 'bigint'
+            },
+            {
+                'dataframe': 'the_geom',
+                'database': 'the_geom',
+                'database_type': 'geometry(Point, 4326)'
+            }
+        ]
         table_name = 'fake_table'
-        expected_result = 'CREATE TABLE {} (the_geom geometry(Point, 4326))'.format(table_name)
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint, the_geom geometry(Point, 4326))'.format(table_name)
 
         dataset = DataFrameDataset(df)
         dataset.table_name = table_name
@@ -857,10 +868,16 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result, expected_result)
 
     def test_create_table_query_without_geom(self):
-        df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['']})
-        normalized_column_names = []  # both column names will be filtered as reserved words
+        df = pd.DataFrame.from_dict({'cartodb_id': [1]})
+        normalized_column_names = [
+            {
+                'dataframe': 'cartodb_id',
+                'database': 'cartodb_id',
+                'database_type': 'bigint'
+            }
+        ]
         table_name = 'fake_table'
-        expected_result = 'CREATE TABLE {} ()'.format(table_name)
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint)'.format(table_name)
 
         dataset = DataFrameDataset(df)
         dataset.table_name = table_name
