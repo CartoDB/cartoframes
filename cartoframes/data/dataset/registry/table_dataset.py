@@ -49,13 +49,17 @@ class TableDataset(BaseDataset):
         return self._get_geom_type()
 
     def get_table_column_names(self, exclude=None):
-        """Get column names and types from a table"""
+        """Get column names from a table"""
         columns = [c.name for c in self._get_table_columns()]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_column_names(self):
+        """Get column names"""
+        return self.get_table_column_names()
 
     def _unsync(self):
         self._dataset_info = None

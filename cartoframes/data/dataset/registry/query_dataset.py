@@ -70,6 +70,10 @@ class QueryDataset(BaseDataset):
 
         return tables
 
+    def get_column_names(self):
+        """Get column names"""
+        return [c.name for c in self._get_query_columns()]
+
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=self._drop_table_query(),
