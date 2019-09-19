@@ -38,7 +38,7 @@ QUOTAS = {}
 
 
 def update_quotas(service, quota):
-    if not service in QUOTAS:
+    if service not in QUOTAS:
         QUOTAS[service] = {
             'initial': None,
             'final': None
@@ -445,4 +445,3 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
-
