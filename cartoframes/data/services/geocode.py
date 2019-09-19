@@ -225,12 +225,18 @@ GEOCODE_VALUE_KEY = 'value'
 VALID_GEOCODE_KEYS = [GEOCODE_COLUMN_KEY, GEOCODE_VALUE_KEY]
 
 
+def _list_difference(l1, l2):
+    """list substraction compatible with Python2"""
+    # return l1 - l2
+    return list(set(l1) - set(l2))
+
+
 def _column_or_value_arg(arg, valid_columns=None):
     if arg is None:
         return None
     is_column = False
     if isinstance(arg, dict):
-        invalid_keys = arg.keys() - VALID_GEOCODE_KEYS
+        invalid_keys = _list_difference(arg.keys(), VALID_GEOCODE_KEYS)
         if any(invalid_keys):
             invalid_keys_list = ', '.join(list(invalid_keys))
             valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
