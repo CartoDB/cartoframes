@@ -110,7 +110,7 @@ def _rows(df, columns, geom_column, enc_type, with_lnglat):
         row_data = []
         for c in columns:
             col = c['dataframe']
-            if col not in df.columns:  # in with_lnglat c['dataframe'] is None
+            if col not in df.columns:  # we could have filtered columns in the df. See _process_columns
                 continue
             val = row[col]
 
@@ -152,11 +152,16 @@ def _process_columns(df, with_lnglat=None):
     geom_column = _get_geom_col_name(df)
     geom_type, enc_type = _get_geometry_type(df, geom_column)
 
-    columns = [{
-        'dataframe': c,
-        'database': _database_column_name(c, geom_column, with_lnglat),
-        'database_type': _db_column_type(df, c, geom_column, geom_type)
-    } for c in df.columns if c.lower() not in Column.FORBIDDEN_COLUMN_NAMES]
+    columns = []
+    for c in df.columns:
+        if c.lower() in Column.FORBIDDEN_COLUMN_NAMES or (with_lnglat and c == geom_column):
+            continue
+
+        columns.append({
+            'dataframe': c,
+            'database': _database_column_name(c, geom_column),
+            'database_type': _db_column_type(df, c, geom_column, geom_type)
+        })
 
     if with_lnglat:
         columns.append({
@@ -168,21 +173,16 @@ def _process_columns(df, with_lnglat=None):
     return columns, geom_column, enc_type
 
 
-def _database_column_name(column, geom_column, with_lnglat):
-    if geom_column and column == geom_column:
-        if not with_lnglat:
-            normalized_name = 'the_geom'
-        elif geom_column is 'the_geom':
-            normalized_name = 'the_geom_'
-        else:
-            normalized_name = normalize_name(column)
+def _database_column_name(column, geom_column):
+    if column == geom_column:
+        normalized_name = 'the_geom'
     else:
         normalized_name = normalize_name(column)
 
     return normalized_name
 
 
-def _db_column_type(df, column, geom_column, geom_type):  # TODO: detect geometries
+def _db_column_type(df, column, geom_column, geom_type):
     if geom_column and column == geom_column:
         db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
     else:
