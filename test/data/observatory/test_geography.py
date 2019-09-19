@@ -7,7 +7,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_geography1, test_geographies, test_datasets
+from .examples import test_geography1, test_geographies, test_datasets, db_geography1
 
 try:
     from unittest.mock import Mock, patch
@@ -18,7 +18,7 @@ except ImportError:
 class TestGeography(unittest.TestCase):
 
     @patch.object(GeographyRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_geography_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1
 
@@ -31,7 +31,7 @@ class TestGeography(unittest.TestCase):
         assert geography == test_geography1
 
     @patch.object(DatasetRepository, 'get_by_geography')
-    def test_get_datasets(self, mocked_repo):
+    def test_get_datasets_by_geography(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
 
@@ -47,7 +47,7 @@ class TestGeography(unittest.TestCase):
 class TestGeographies(unittest.TestCase):
 
     @patch.object(GeographyRepository, 'get_all')
-    def test_get_all(self, mocked_repo):
+    def test_get_all_geographies(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
 
@@ -60,7 +60,7 @@ class TestGeographies(unittest.TestCase):
         assert geographies == test_geographies
 
     @patch.object(GeographyRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_geography_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geography1
 
@@ -71,3 +71,29 @@ class TestGeographies(unittest.TestCase):
         assert isinstance(geography, pd.Series)
         assert isinstance(geography, Geography)
         assert geography == test_geography1
+
+    @patch.object(GeographyRepository, 'get_all')
+    def test_geographies_are_indexed_with_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_geographies
+        geography_id = db_geography1['id']
+
+        # When
+        geographies = Geographies.get_all()
+        geography = geographies.loc[geography_id]
+
+        # Then
+        assert geography == test_geography1
+
+    @patch.object(GeographyRepository, 'get_all')
+    def test_geographies_slice_is_geography_and_series(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_geographies
+
+        # When
+        geographies = Geographies.get_all()
+        geography = geographies.iloc[0]
+
+        # Then
+        assert isinstance(geography, Geography)
+        assert isinstance(geography, pd.Series)

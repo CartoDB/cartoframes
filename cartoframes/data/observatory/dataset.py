@@ -40,6 +40,10 @@ class Datasets(pd.DataFrame):
     def _constructor_sliced(self):
         return Dataset
 
+    def __init__(self, data):
+        super(Datasets, self).__init__(data)
+        self.set_index(_DATASET_ID_FIELD, inplace=True, drop=False)
+
     @staticmethod
     def get_all():
         return get_dataset_repo().get_all()

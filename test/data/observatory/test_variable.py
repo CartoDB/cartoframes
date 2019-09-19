@@ -6,7 +6,7 @@ from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_datasets, test_variable1, test_variables
+from .examples import test_datasets, test_variable1, test_variables, db_variable1
 
 try:
     from unittest.mock import Mock, patch
@@ -17,7 +17,7 @@ except ImportError:
 class TestVariable(unittest.TestCase):
 
     @patch.object(VariableRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_variable_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variable1
 
@@ -30,7 +30,7 @@ class TestVariable(unittest.TestCase):
         assert variable == test_variable1
 
     @patch.object(DatasetRepository, 'get_by_variable')
-    def test_get_datasets(self, mocked_repo):
+    def test_get_datasets_by_variable(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
 
@@ -46,7 +46,7 @@ class TestVariable(unittest.TestCase):
 class TestVariables(unittest.TestCase):
 
     @patch.object(VariableRepository, 'get_all')
-    def test_get_all(self, mocked_repo):
+    def test_get_all_variables(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
 
@@ -59,7 +59,7 @@ class TestVariables(unittest.TestCase):
         assert countries == test_variables
 
     @patch.object(VariableRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_variable_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variable1
 
@@ -70,3 +70,29 @@ class TestVariables(unittest.TestCase):
         assert isinstance(variable, pd.Series)
         assert isinstance(variable, Variable)
         assert variable == test_variable1
+
+    @patch.object(VariableRepository, 'get_all')
+    def test_variables_are_indexed_with_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_variables
+        variable_id = db_variable1['id']
+
+        # When
+        variables = Variables.get_all()
+        variable = variables.loc[variable_id]
+
+        # Then
+        assert variable == test_variable1
+
+    @patch.object(VariableRepository, 'get_all')
+    def test_variables_slice_is_variable_and_series(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_variables
+
+        # When
+        variables = Variables.get_all()
+        variable = variables.iloc[0]
+
+        # Then
+        assert isinstance(variable, Variable)
+        assert isinstance(variable, pd.Series)

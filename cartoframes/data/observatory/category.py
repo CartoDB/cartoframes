@@ -41,9 +41,9 @@ class Categories(pd.DataFrame):
     def _constructor_sliced(self):
         return Category
 
-    # def __init__(self, data):
-    #     super(Categories, self).__init__(data)
-    #     self = self.set_index(_CATEGORY_ID_FIELD, inplace=True)
+    def __init__(self, data):
+        super(Categories, self).__init__(data)
+        self.set_index(_CATEGORY_ID_FIELD, inplace=True, drop=False)
 
     @staticmethod
     def get_all():

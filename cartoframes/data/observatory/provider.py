@@ -41,6 +41,10 @@ class Providers(pd.DataFrame):
     def _constructor_sliced(self):
         return Provider
 
+    def __init__(self, data):
+        super(Providers, self).__init__(data)
+        self.set_index(_PROVIDER_ID_FIELD, inplace=True, drop=False)
+
     @staticmethod
     def get_all():
         return get_provider_repo().get_all()

@@ -8,7 +8,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 
-from .examples import test_country1, test_datasets, test_countries, test_geographies
+from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1
 
 try:
     from unittest.mock import Mock, patch
@@ -19,7 +19,7 @@ except ImportError:
 class TestCountry(unittest.TestCase):
 
     @patch.object(CountryRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_country_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_country1
 
@@ -32,7 +32,7 @@ class TestCountry(unittest.TestCase):
         assert country == test_country1
 
     @patch.object(DatasetRepository, 'get_by_country')
-    def test_get_datasets(self, mocked_repo):
+    def test_get_datasets_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
 
@@ -45,7 +45,7 @@ class TestCountry(unittest.TestCase):
         assert datasets == test_datasets
 
     @patch.object(GeographyRepository, 'get_by_country')
-    def test_get_geographies(self, mocked_repo):
+    def test_get_geographies_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
 
@@ -61,7 +61,7 @@ class TestCountry(unittest.TestCase):
 class TestCountries(unittest.TestCase):
 
     @patch.object(CountryRepository, 'get_all')
-    def test_get_all(self, mocked_repo):
+    def test_get_all_countries(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_countries
 
@@ -74,7 +74,7 @@ class TestCountries(unittest.TestCase):
         assert countries == test_countries
 
     @patch.object(CountryRepository, 'get_by_id')
-    def test_get_by_id(self, mocked_repo):
+    def test_get_country_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_country1
 
@@ -85,3 +85,29 @@ class TestCountries(unittest.TestCase):
         assert isinstance(country, pd.Series)
         assert isinstance(country, Country)
         assert country == test_country1
+
+    @patch.object(CountryRepository, 'get_all')
+    def test_countries_are_indexed_with_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_countries
+        country_id = db_country1['country_iso_code3']
+
+        # When
+        countries = Countries.get_all()
+        country = countries.loc[country_id]
+
+        # Then
+        assert country == test_country1
+
+    @patch.object(CountryRepository, 'get_all')
+    def test_countries_slice_is_country_and_series(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_countries
+
+        # When
+        countries = Countries.get_all()
+        country = countries.iloc[0]
+
+        # Then
+        assert isinstance(country, Country)
+        assert isinstance(country, pd.Series)

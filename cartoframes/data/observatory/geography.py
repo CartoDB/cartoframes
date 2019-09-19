@@ -3,7 +3,7 @@ import pandas as pd
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
-_GEOGRAPHY_FIELD_ID = 'id'
+_GEOGRAPHY_ID_FIELD = 'id'
 
 
 class Geography(pd.Series):
@@ -21,7 +21,7 @@ class Geography(pd.Series):
         return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
+        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -39,6 +39,10 @@ class Geographies(pd.DataFrame):
     @property
     def _constructor_sliced(self):
         return Geography
+
+    def __init__(self, data):
+        super(Geographies, self).__init__(data)
+        self.set_index(_GEOGRAPHY_ID_FIELD, inplace=True, drop=False)
 
     @staticmethod
     def get_all():

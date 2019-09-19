@@ -1,5 +1,7 @@
 import unittest
 
+import pandas as pd
+
 from cartoframes.exceptions import DiscoveryException
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
@@ -26,6 +28,9 @@ class TestCategoryRepo(unittest.TestCase):
         # Then
         mocked_repo.assert_called_once_with()
         assert categories == test_categories
+
+        id1 = db_category1['id']
+        assert categories.loc[id1] == test_category1
 
     @patch.object(RepoClient, 'get_categories')
     def test_get_all_when_empty(self, mocked_repo):

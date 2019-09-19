@@ -3,7 +3,7 @@ import pandas as pd
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
-_VARIABLE_FIELD_ID = 'id'
+_VARIABLE_ID_FIELD = 'id'
 
 
 class Variable(pd.Series):
@@ -21,7 +21,7 @@ class Variable(pd.Series):
         return get_variable_repo().get_by_id(variable_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
+        return get_dataset_repo().get_by_variable(self[_VARIABLE_ID_FIELD])
 
     def __eq__(self, other):
         return self.equals(other)
@@ -39,6 +39,10 @@ class Variables(pd.DataFrame):
     @property
     def _constructor_sliced(self):
         return Variable
+
+    def __init__(self, data):
+        super(Variables, self).__init__(data)
+        self.set_index(_VARIABLE_ID_FIELD, inplace=True, drop=False)
 
     @staticmethod
     def get_all():

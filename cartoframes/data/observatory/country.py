@@ -44,6 +44,10 @@ class Countries(pd.DataFrame):
     def _constructor_sliced(self):
         return Country
 
+    def __init__(self, data):
+        super(Countries, self).__init__(data)
+        self.set_index(_COUNTRY_ID_FIELD, inplace=True, drop=False)
+
     @staticmethod
     def get_all():
         return get_country_repo().get_all()
