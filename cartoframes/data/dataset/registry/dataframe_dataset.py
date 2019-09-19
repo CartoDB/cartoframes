@@ -110,6 +110,8 @@ def _rows(df, columns, geom_column, enc_type, with_lnglat):
         row_data = []
         for c in columns:
             col = c['dataframe']
+            if col not in df.columns:  # in with_lnglat c['dataframe'] is None
+                continue
             val = row[col]
 
             if _is_null(val):
@@ -124,11 +126,11 @@ def _rows(df, columns, geom_column, enc_type, with_lnglat):
             else:
                 row_data.append('{}'.format(val))
 
-        if geom_column is None and with_lnglat:
+        if with_lnglat:
             lng_val = row[with_lnglat[0]]
             lat_val = row[with_lnglat[1]]
             if lng_val and lat_val:
-                row_data.append('SRID=4326;POINT({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+                row_data.append('SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val))
             else:
                 row_data.append('')
 
@@ -156,7 +158,7 @@ def _process_columns(df, with_lnglat=None):
         'database_type': _db_column_type(df, c, geom_column, geom_type)
     } for c in df.columns if c.lower() not in Column.FORBIDDEN_COLUMN_NAMES]
 
-    if geom_column is None and with_lnglat:
+    if with_lnglat:
         columns.append({
             'dataframe': None,
             'database': 'the_geom',
