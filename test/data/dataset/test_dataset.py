@@ -165,22 +165,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
 
-    def test_dataset_upload_with_several_geometry_columns(self):
-        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
-        ds = Dataset(df)
-
-        BaseDataset._create_context = Mock(return_value=ContextMock())
-        BaseDataset.exists = Mock(return_value=False)
-
-        ds.upload(table_name=self.test_write_table, credentials=self.credentials)
-
-        expected_query = "COPY {}(geom,the_geom,geometry) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
-            self.test_write_table)
-        expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)\n']
-
-        self.assertEqual(ds._strategy._context.query, expected_query)
-        self.assertEqual(list(ds._strategy._context.response), expected_data)
-
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_download_validations(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -459,6 +443,120 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result, 'the_geom')
         result = _database_column_name('the_geom', geom_column, True)
         self.assertEqual(result, 'the_geom')
+
+    def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['geom'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials)
+
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_one_geometry_that_is_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials)
+
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_several_geometry_columns_prioritize_the_geom(self):
+        table = 'fake_table'
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials)
+
+        expected_query = "COPY {}(geom,the_geom,geometry) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_the_geom_webmercator_column_is_removed(self):
+        table = 'fake_table'
+        df = pd.DataFrame([[1, 'POINT (1 1)', 'fake']], columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials)
+
+        expected_query = "COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_lng_lat(self):
+        table = 'fake_table'
+        df = pd.DataFrame([[1, 1]], columns=['lng', 'lat'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_the_geom(self):
+        table = 'fake_table'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom_,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (2 2)|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_other_geom_names(self):
+        table = 'fake_table'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=self.credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,geometry,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (2 2)|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
 
 
     # FIXME does not work in python 2.7 (COPY stucks and blocks the table, fix after
@@ -919,8 +1017,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         dataset.table_name = table_name
         result = dataset._create_table_query(normalized_column_names)
         self.assertEqual(result, expected_result)
-
-
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
