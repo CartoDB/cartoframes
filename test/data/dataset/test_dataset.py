@@ -909,7 +909,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame([['POINT (1 1)']], columns=['geom'])
         ds = Dataset(df)
 
-        BaseDataset._create_context = Mock(return_value=ContextMock())
         BaseDataset.exists = Mock(return_value=False)
 
         ds.upload(table_name=table, credentials=credentials)
@@ -1014,6 +1013,22 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         expected_query = "COPY {}(lng,lat,geometry,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
             table)
         expected_data = [b'1|1|SRID=4326;POINT (2 2)|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_null_values(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(test) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'\n', b'\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
