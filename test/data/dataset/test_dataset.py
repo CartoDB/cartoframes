@@ -887,20 +887,16 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_database_column_name_the_geom(self):
         geom_column = 'the_geom'
 
-        result = _database_column_name('other', geom_column, None)
+        result = _database_column_name('other', geom_column)
         self.assertEqual(result, 'other')
-        result = _database_column_name('the_geom', geom_column, None)
+        result = _database_column_name('the_geom', geom_column)
         self.assertEqual(result, 'the_geom')
-        result = _database_column_name('the_geom', geom_column, True)
-        self.assertEqual(result, 'the_geom_')
 
         geom_column = 'other_geom'
 
-        result = _database_column_name('other2', geom_column, None)
+        result = _database_column_name('other2', geom_column)
         self.assertEqual(result, 'other2')
-        result = _database_column_name('the_geom', geom_column, None)
-        self.assertEqual(result, 'the_geom')
-        result = _database_column_name('the_geom', geom_column, True)
+        result = _database_column_name('the_geom', geom_column)
         self.assertEqual(result, 'the_geom')
 
     def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
@@ -993,9 +989,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,the_geom_,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
             table)
-        expected_data = [b'1|1|SRID=4326;POINT (2 2)|SRID=4326;POINT (1 1)\n']
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
@@ -1010,9 +1006,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,geometry,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
             table)
-        expected_data = [b'1|1|SRID=4326;POINT (2 2)|SRID=4326;POINT (1 1)\n']
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
