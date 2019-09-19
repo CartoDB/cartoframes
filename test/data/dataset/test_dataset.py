@@ -21,6 +21,7 @@ from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset
     _database_column_name
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
 
 try:
@@ -163,6 +164,22 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         err_msg = 'Error using append with a query Dataset. It is not possible to append data to a query'
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
+
+    def test_dataset_upload_with_several_geometry_columns(self):
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset._create_context = Mock(return_value=ContextMock())
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=self.test_write_table, credentials=self.credentials)
+
+        expected_query = "COPY {}(geom,the_geom,geometry) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            self.test_write_table)
+        expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_download_validations(self):
@@ -902,6 +919,8 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         dataset.table_name = table_name
         result = dataset._create_table_query(normalized_column_names)
         self.assertEqual(result, expected_result)
+
+
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
