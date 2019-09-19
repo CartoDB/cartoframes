@@ -220,6 +220,38 @@ def _dup_dataset(dataset):
     return Dataset(dataset.dataframe)
 
 
+GEOCODE_COLUMN_KEY = 'column'
+GEOCODE_VALUE_KEY = 'value'
+VALID_GEOCODE_KEYS = [GEOCODE_COLUMN_KEY, GEOCODE_VALUE_KEY]
+
+
+def _column_or_value_arg(arg, valid_columns=None):
+    if arg is None:
+        return None
+    is_column = False
+    if isinstance(arg, dict):
+        invalid_keys = arg.keys() - VALID_GEOCODE_KEYS
+        if any(invalid_keys):
+            invalid_keys_list = ', '.join(list(invalid_keys))
+            valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
+            raise ValueError("Invalid key for argument {} valid keys are: {}".format(invalid_keys_list, valid_keys_list))
+        if len(arg.keys()) != 1:
+            valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
+            raise ValueError("Exactly one key of {} must be present in argument".format(valid_keys_list))
+        key = list(arg.keys())[0]
+        if key == GEOCODE_COLUMN_KEY:
+            arg = arg[GEOCODE_COLUMN_KEY]
+            is_column = True
+        else:
+            arg = "'{}'".format(arg[GEOCODE_VALUE_KEY])
+    else:
+        is_column = True
+    if is_column and valid_columns:
+        if arg not in valid_columns:
+            raise ValueError("Argument is not a valid column name: {}".format(arg))
+    return arg
+
+
 class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
@@ -251,7 +283,7 @@ class Geocode(object):
 
             dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             gc = Geocode()
-            geocoded_dataframe, info = gc.geocode(dataframe, street='address', city='city', country="'Spain'")
+            geocoded_dataframe, info = gc.geocode(dataframe, street='address', city='city', country={'value': 'Spain'})
             print(geocoded_dataframe)
 
         Geocode a table:
@@ -266,7 +298,7 @@ class Geocode(object):
 
             dataset = Dataset('YOUR_TABLE_NAME')
             gc = Geocode()
-            geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country="'Spain'")
+            geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'})
             print(geocoded_dataset.download())
 
         Filter results by relevance:
@@ -281,7 +313,7 @@ class Geocode(object):
 
             df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             gc = Geocode()
-            df, info = gc.geocode(df, street='address', city='city', country="'Spain'", metadata='meta')
+            df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, metadata='meta')
             # show rows with relevance greater than 0.7:
             print(df[df.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
 
@@ -301,12 +333,18 @@ class Geocode(object):
         Args:
             dataset (Dataset): a Dataset object to be geocoded.
             street (str): name of the column containing postal addresses
-            city (str, optional): either the name of a column containing the addresses'
-                city names or a quoted literal value, e.g. "'New York'".
-            state (str, optional): either the name of a column containing the addresses'
-                State names or a quoted literal value, e.g. "'Illinois'".
-            country (str, optional): either the name of a column containing the addresses'
-                Country names or a quoted literal value, e.g. "'USA'".
+            city (dict, optional): dictionary with either a `column` key
+                with the name of a column containing the addresses' city names or
+                a `value` key with a literal city value value, e.g. 'New York'.
+                It also accepts a string, in which case `column` is implied.
+            state (dict, optional): dictionary with either a `column` key
+                with the name of a column containing the addresses' state names or
+                a `value` key with a literal state value value, e.g. 'WA'.
+                It also accepts a string, in which case `column` is implied.
+            country (dict, optional): dictionary with either a `column` key
+                with the name of a column containing the addresses' country names or
+                a `value` key with a literal country value value, e.g. 'US'.
+                It also accepts a string, in which case `column` is implied.
             metadata (str, optional): name of a column where metadata (in JSON format)
                 will be stored (see https://carto.com/developers/data-services-api/reference/)
             table_name (str, optional): the geocoding results will be placed in a new
@@ -326,6 +364,10 @@ class Geocode(object):
         if isinstance(dataset, pd.DataFrame):
             input_dataframe = dataset
             dataset = Dataset(input_dataframe)
+
+        self.columns = dataset.get_column_names()
+
+        city, state, country = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
 
         if dry_run:
             table_name = None
