@@ -1013,6 +1013,22 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
 
+    def test_dataset_upload_without_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, True, 'text']], columns=['col1', 'col2', 'col3'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(col1,col2,col3) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|True|text\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
     def test_dataset_upload_null_values(self):
         table = 'fake_table'
         credentials = 'fake'
