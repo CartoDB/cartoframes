@@ -164,6 +164,8 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
             gc.geocode(df, street='address', country='ciudad')
         with self.assertRaises(ValueError):
             gc.geocode(df, street='address', city="'city'")
+        with self.assertRaises(ValueError):
+            gc.geocode(df, street='address', city={'column': 'city', 'value': 'London'})
 
     def test_geocode_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
