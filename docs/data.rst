@@ -1,6 +1,6 @@
 Data Workflows
 ===============
-.. autoclass:: cartoframes.data.Dataset
+.. autoclass:: cartoframes.data.dataset.Dataset
     :noindex:
     :members:
     :member-order: bysource

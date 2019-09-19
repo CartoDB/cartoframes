@@ -2,11 +2,12 @@
 
 import pandas as pd
 
-from cartoframes.data.registry.strategies_registry import StrategiesRegistry
-from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
-from cartoframes.data.registry.query_dataset import QueryDataset
-from cartoframes.data.registry.table_dataset import TableDataset
-from cartoframes.data import Dataset, DatasetInfo
+from cartoframes.data import StrategiesRegistry
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data import Dataset
+from cartoframes.data.dataset.dataset_info import DatasetInfo
 
 
 class MetadataMock():
