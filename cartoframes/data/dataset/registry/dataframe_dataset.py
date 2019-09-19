@@ -72,6 +72,8 @@ class DataFrameDataset(BaseDataset):
     def get_column_names(self, exclude=None):
         """Get column names"""
         columns = list(self.dataframe.columns)
+        if self.dataframe.index.name is not None and self.dataframe.index.name not in columns:
+            columns.append(self.dataframe.index.name)
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
