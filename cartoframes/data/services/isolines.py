@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from ... import context
+from ...lib import context
 from ...auth import get_default_credentials
-from cartoframes.data import Dataset
+from ...data import Dataset
 import pandas as pd
 import uuid
 
@@ -14,7 +14,7 @@ def _count(context, dataset):
     elif hasattr(dataset, 'table_name') and dataset.table_name:
         result = context.execute_query("SELECT COUNT(*) FROM {table}".format(table=dataset.table_name))
     else:
-        result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.query))
+        result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.get_query()))
     return result.get('rows')[0].get('count')
 
 
@@ -67,8 +67,8 @@ class Isolines(object):
 
         if source.table_name:
             source_query = 'SELECT * FROM {table}'.format(table=source.table_name)
-        elif hasattr(source, 'query') and source.query:
-            source_query = source.query
+        elif source.get_query():
+            source_query = source.get_query()
         else:  # source.is_local()
             # upload to temporary table
             temporary_table_name = _generate_temp_table_name()
@@ -124,15 +124,15 @@ class Isolines(object):
             )
 
         if table_name:
-            dataset = Dataset(sql)
+            dataset = Dataset(sql, credentials=self._credentials)
             dataset.upload(table_name=table_name, credentials=self._credentials, if_exists=if_exists)
-            result = Dataset(table_name)
-            # TODO: should we return a Dataframe if the input was a Dataframe
+            result = Dataset(table_name, credentials=self.credential)
+            # TODO: return a Dataframe if the input was a Dataframe
             # if input_dataframe:
             #     result = result.download()
         else:
             # It would be nice to use execute_long_running_query, but we need the results
-            result = Dataset(sql).download()
+            result = Dataset(sql, credentials=self._credentials).download()
             # TODO: should we return a Dataset if the input was not a Dataframe?
             # if not input_dataframe:
             #     result = Dataset(result)
