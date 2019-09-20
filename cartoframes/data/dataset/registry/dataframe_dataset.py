@@ -52,14 +52,14 @@ class DataFrameDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
-        dataframeColumnsInfo = DataframeColumnsInfo(self._df, with_lnglat)
+        dataframe_columns_info = DataframeColumnsInfo(self._df, with_lnglat)
 
         if if_exists == BaseDataset.REPLACE or not self.exists():
-            self._create_table(columns)
+            self._create_table(dataframe_columns_info.columns)
         elif if_exists == BaseDataset.FAIL:
             raise self._already_exists_error()
 
-        self._copyfrom(columns, geom_column, enc_type, with_lnglat)
+        self._copyfrom(dataframe_columns_info, with_lnglat)
 
     def delete(self):
         raise ValueError('Method not allowed in DataFrameDataset. You should use a TableDataset: `Dataset(my_table)`')
@@ -68,12 +68,12 @@ class DataFrameDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
-    def _copyfrom(self, columns, geom_column, enc_type, with_lnglat):
+    def _copyfrom(self, dataframe_columns_info, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
-            columns=','.join(c['database'] for c in columns))
+            columns=','.join(c.database for c in dataframe_columns_info.columns))
 
-        data = _rows(self._df, columns, geom_column, enc_type, with_lnglat)
+        data = _rows(self._df, dataframe_columns_info, with_lnglat)
 
         self._context.upload(query, data)
 
@@ -91,7 +91,7 @@ class DataFrameDataset(BaseDataset):
             raise CartoException('Cannot create table: {}.'.format(err))
 
     def _create_table_query(self, columns):
-        cols = ['{column} {type}'.format(column=c['database'], type=c['database_type']) for c in columns]
+        cols = ['{column} {type}'.format(column=c.database, type=c.database_type) for c in columns]
 
         return '''CREATE TABLE {table_name} ({cols})'''.format(
             table_name=self._table_name,
@@ -105,11 +105,11 @@ class DataFrameDataset(BaseDataset):
                 return map_geom_type(geometry.geom_type)
 
 
-def _rows(df, columns, geom_column, enc_type, with_lnglat):
+def _rows(df, dataframe_columns_info, with_lnglat):
     for i, row in df.iterrows():
         row_data = []
-        for c in columns:
-            col = c['dataframe']
+        for c in dataframe_columns_info.columns:
+            col = c.dataframe
             if col not in df.columns:  # we could have filtered columns in the df. See _process_columns
                 continue
             val = row[col]
@@ -117,8 +117,8 @@ def _rows(df, columns, geom_column, enc_type, with_lnglat):
             if _is_null(val):
                 val = ''
 
-            if geom_column and col == geom_column:
-                geom = decode_geometry(val, enc_type)
+            if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
+                geom = decode_geometry(val, dataframe_columns_info.enc_type)
                 if geom:
                     row_data.append('SRID=4326;{}'.format(geom.wkt))
                 else:

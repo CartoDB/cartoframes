@@ -17,12 +17,12 @@ from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _process_columns, \
-    _database_column_name
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
+from cartoframes.utils.columns import DataframeColumnsInfo
 
 try:
     from unittest.mock import Mock
@@ -705,199 +705,27 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
 
-    def test_process_columns_with_geom(self):
-        df = pd.DataFrame(
-            [['Gran Vía 46', 'Madrid', 'POINT (0 0)'], ['Ebro 1', 'Sevilla', 'POINT (1 1)']],
-            columns=['address', 'city', 'geometry'])
-
-        expected_columns = [
-            {
-                'dataframe': 'address',
-                'database': 'address',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': 'city',
-                'database': 'city',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': 'geometry',
-                'database': 'the_geom',
-                'database_type': 'geometry(Point, 4326)'
-            }
-        ]
-        expected_geom_column = 'geometry'
-        expected_enc_type = 'wkt'
-
-        columns, geom_column, enc_type = _process_columns(df, None)
-
-        self.assertEqual(expected_columns, columns)
-        self.assertEqual(expected_geom_column, geom_column)
-        self.assertEqual(expected_enc_type, enc_type)
-
-    def test_process_columns_with_lnglat(self):
-        df = pd.DataFrame([['0', '1'], ['0', '1']], columns=['lng', 'lat'])
-
-        expected_columns = [
-            {
-                'dataframe': 'lng',
-                'database': 'lng',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': 'lat',
-                'database': 'lat',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': None,
-                'database': 'the_geom',
-                'database_type': 'geometry(Point, 4326)'
-            }
-        ]
-        expected_geom_column = None
-        expected_enc_type = None
-
-        columns, geom_column, enc_type = _process_columns(df, ('lng', 'lat'))
-
-        self.assertEqual(expected_columns, columns)
-        self.assertEqual(expected_geom_column, geom_column)
-        self.assertEqual(expected_enc_type, enc_type)
-
-    def test_copyfrom_column_names_without_geom(self):
-        df = pd.DataFrame(
-            [['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
-
-        expected_columns = [
-            {
-                'dataframe': 'address',
-                'database': 'address',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': 'city',
-                'database': 'city',
-                'database_type': 'text'
-            }
-        ]
-        expected_geom_column = None
-        expected_enc_type = None
-
-        columns, geom_column, enc_type = _process_columns(df, None)
-
-        self.assertEqual(expected_columns, columns)
-        self.assertEqual(expected_geom_column, geom_column)
-        self.assertEqual(expected_enc_type, enc_type)
-
-    def test_copyfrom_column_names_basic_troubled_names(self):
-        df = pd.DataFrame(
-            [[1, 'POINT (1 1)', 'fake_geom']], columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
-
-        expected_columns = [
-            {
-                'dataframe': 'cartodb_id',
-                'database': 'cartodb_id',
-                'database_type': 'bigint'
-            },
-            {
-                'dataframe': 'the_geom',
-                'database': 'the_geom',
-                'database_type': 'geometry(Point, 4326)'
-            }
-        ]
-        expected_geom_column = 'the_geom'
-        expected_enc_type = 'wkt'
-
-        columns, geom_column, enc_type = _process_columns(df, None)
-
-        self.assertEqual(expected_columns, columns)
-        self.assertEqual(expected_geom_column, geom_column)
-        self.assertEqual(expected_enc_type, enc_type)
-
-    def test_copyfrom_column_names_geometry_troubled_names(self):
-        df = pd.DataFrame(
-            [['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
-
-        expected_columns = [
-            {
-                'dataframe': 'geom',
-                'database': 'geom',
-                'database_type': 'text'
-            },
-            {
-                'dataframe': 'the_geom',
-                'database': 'the_geom',
-                'database_type': 'geometry(Point, 4326)'
-            },
-            {
-                'dataframe': 'geometry',
-                'database': 'geometry',
-                'database_type': 'text'
-            },
-        ]
-        expected_geom_column = 'the_geom'
-        expected_enc_type = 'wkt'
-
-        columns, geom_column, enc_type = _process_columns(df, None)
-
-        self.assertEqual(expected_columns, columns)
-        self.assertEqual(expected_geom_column, geom_column)
-        self.assertEqual(expected_enc_type, enc_type)
-
     def test_create_table_query(self):
         df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
-        normalized_column_names = [
-            {
-                'dataframe': 'cartodb_id',
-                'database': 'cartodb_id',
-                'database_type': 'bigint'
-            },
-            {
-                'dataframe': 'the_geom',
-                'database': 'the_geom',
-                'database_type': 'geometry(Point, 4326)'
-            }
-        ]
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
         table_name = 'fake_table'
         expected_result = 'CREATE TABLE {} (cartodb_id bigint, the_geom geometry(Point, 4326))'.format(table_name)
 
         dataset = DataFrameDataset(df)
         dataset.table_name = table_name
-        result = dataset._create_table_query(normalized_column_names)
+        result = dataset._create_table_query(dataframe_columns_info.columns)
         self.assertEqual(result, expected_result)
 
     def test_create_table_query_without_geom(self):
         df = pd.DataFrame.from_dict({'cartodb_id': [1]})
-        normalized_column_names = [
-            {
-                'dataframe': 'cartodb_id',
-                'database': 'cartodb_id',
-                'database_type': 'bigint'
-            }
-        ]
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
         table_name = 'fake_table'
         expected_result = 'CREATE TABLE {} (cartodb_id bigint)'.format(table_name)
 
         dataset = DataFrameDataset(df)
         dataset.table_name = table_name
-        result = dataset._create_table_query(normalized_column_names)
+        result = dataset._create_table_query(dataframe_columns_info.columns)
         self.assertEqual(result, expected_result)
-
-    def test_database_column_name_the_geom(self):
-        geom_column = 'the_geom'
-
-        result = _database_column_name('other', geom_column)
-        self.assertEqual(result, 'other')
-        result = _database_column_name('the_geom', geom_column)
-        self.assertEqual(result, 'the_geom')
-
-        geom_column = 'other_geom'
-
-        result = _database_column_name('other2', geom_column)
-        self.assertEqual(result, 'other2')
-        result = _database_column_name('the_geom', geom_column)
-        self.assertEqual(result, 'the_geom')
 
     def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
         table = 'fake_table'
