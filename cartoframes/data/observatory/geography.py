@@ -1,5 +1,6 @@
 import pandas as pd
 
+from cartoframes.exceptions import DiscoveryException
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
@@ -21,7 +22,13 @@ class Geography(pd.Series):
         return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_ID_FIELD])
+        return get_dataset_repo().get_by_geography(self.get_id())
+
+    def get_id(self):
+        try:
+            return self[_GEOGRAPHY_ID_FIELD]
+        except KeyError:
+            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
 
     def __eq__(self, other):
         return self.equals(other)

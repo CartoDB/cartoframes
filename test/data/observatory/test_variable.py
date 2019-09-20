@@ -5,6 +5,7 @@ from cartoframes.data.observatory.variable import Variable, Variables
 from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_datasets, test_variable1, test_variables, db_variable1
 
@@ -41,6 +42,14 @@ class TestVariable(unittest.TestCase):
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_get_datasets_by_variable_fails_if_column_Series(self):
+        # Given
+        variable = test_variables.id
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            variable.datasets()
 
 
 class TestVariables(unittest.TestCase):

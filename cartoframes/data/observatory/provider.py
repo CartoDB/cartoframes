@@ -1,5 +1,6 @@
 import pandas as pd
 
+from cartoframes.exceptions import DiscoveryException
 from .repository.provider_repo import get_provider_repo
 from .repository.dataset_repo import get_dataset_repo
 
@@ -22,7 +23,13 @@ class Provider(pd.Series):
         return get_provider_repo().get_by_id(provider_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_provider(self[_PROVIDER_ID_FIELD])
+        return get_dataset_repo().get_by_provider(self.get_id())
+
+    def get_id(self):
+        try:
+            return self[_PROVIDER_ID_FIELD]
+        except KeyError:
+            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
 
     def __eq__(self, other):
         return self.equals(other)

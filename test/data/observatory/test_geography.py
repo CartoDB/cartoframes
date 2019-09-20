@@ -1,11 +1,11 @@
 import unittest
 import pandas as pd
+
 from cartoframes.data.observatory.geography import Geography, Geographies
-
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-
 from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1
 
@@ -42,6 +42,14 @@ class TestGeography(unittest.TestCase):
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_get_datasets_by_geography_fails_if_column_Series(self):
+        # Given
+        geography = test_geographies.id
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            geography.datasets()
 
 
 class TestGeographies(unittest.TestCase):

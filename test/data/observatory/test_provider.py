@@ -6,6 +6,7 @@ from cartoframes.data.observatory.provider import Provider, Providers
 
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_datasets, test_provider1, test_providers, db_provider1
 
@@ -42,6 +43,14 @@ class TestProvider(unittest.TestCase):
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_get_datasets_by_provider_fails_if_column_Series(self):
+        # Given
+        provider = test_providers.id
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            provider.datasets()
 
 
 class TestProviders(unittest.TestCase):

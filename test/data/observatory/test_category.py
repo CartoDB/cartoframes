@@ -6,6 +6,7 @@ from cartoframes.data.observatory.dataset import Datasets
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_category1, test_datasets, test_categories, db_category1
 
@@ -42,6 +43,14 @@ class TestCategory(unittest.TestCase):
         assert isinstance(datasets, pd.DataFrame)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_get_datasets_by_category_fails_if_column_Series(self):
+        # Given
+        category = test_categories.id
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            category.datasets()
 
 
 class TestCategories(unittest.TestCase):

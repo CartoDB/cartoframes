@@ -7,6 +7,7 @@ from cartoframes.data.observatory.country import Countries, Country
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
+from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1
 
@@ -44,6 +45,14 @@ class TestCountry(unittest.TestCase):
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
 
+    def test_get_datasets_by_country_fails_if_column_Series(self):
+        # Given
+        country = test_countries.country_iso_code3
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            country.datasets()
+
     @patch.object(GeographyRepository, 'get_by_country')
     def test_get_geographies_by_country(self, mocked_repo):
         # Given
@@ -56,6 +65,14 @@ class TestCountry(unittest.TestCase):
         assert isinstance(geographies, pd.DataFrame)
         assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
+
+    def test_get_geographies_by_country_fails_if_column_Series(self):
+        # Given
+        country = test_countries.country_iso_code3
+
+        # Then
+        with self.assertRaises(DiscoveryException):
+            country.geographies()
 
 
 class TestCountries(unittest.TestCase):
