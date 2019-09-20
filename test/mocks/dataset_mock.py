@@ -37,7 +37,7 @@ class DataFrameDatasetMock(DataFrameDataset):
     def _create_table(self, _):
         return True
 
-    def _copyfrom(self, _, _2, _3, _4):
+    def _copyfrom(self, _, _2):
         return True
 
     def compute_geom_type(self):

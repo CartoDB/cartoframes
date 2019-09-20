@@ -877,46 +877,32 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        columns = [{
-            'dataframe': 'test'
-        }]
-        rows = _rows(df, columns, None, '', None)
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
-        columns = [{
-            'dataframe': 'test'
-        }]
-        rows = _rows(df, columns, None, '', None)
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'\n', b'\n'])
 
     def test_rows_with_geom(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
-        columns = [
-            {
-                'dataframe': 'test'
-            },
-            {
-                'dataframe': 'the_geom'
-            }
-        ]
-        rows = _rows(df, columns, 'the_geom', 'wkt', None)
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
-        columns = [
-            {
-                'dataframe': 'test'
-            },
-            {
-                'dataframe': 'the_geom'
-            }
-        ]
-        rows = _rows(df, columns, 'the_geom', 'wkt', None)
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'|\n', b'|\n'])
