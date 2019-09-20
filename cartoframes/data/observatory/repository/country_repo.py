@@ -1,8 +1,9 @@
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
 def get_country_repo():
-    return CountryRepository()
+    return _REPO
 
 
 class CountryRepository(object):
@@ -17,7 +18,8 @@ class CountryRepository(object):
         result = self.client.get_countries('country_iso_code3', iso_code3)
 
         if len(result) == 0:
-            return None
+            raise DiscoveryException('The id does not correspond with any existing country in the catalog. '
+                                     'You can check the full list of available countries with Countries.get_all()')
 
         return self._to_country(result[0])
 
@@ -32,3 +34,6 @@ class CountryRepository(object):
         from cartoframes.data.observatory.country import Countries
 
         return Countries([CountryRepository._to_country(result) for result in results])
+
+
+_REPO = CountryRepository()

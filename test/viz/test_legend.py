@@ -56,7 +56,8 @@ class TestLegend(unittest.TestCase):
             'title': '[TITLE]',
             'description': '[description]',
             'footer': '[footer]',
-            'dynamic': True
+            'dynamic': True,
+            'variable': ''
         })
 
         legend = Legend({
@@ -73,7 +74,8 @@ class TestLegend(unittest.TestCase):
             'title': '',
             'description': '',
             'footer': '',
-            'dynamic': True
+            'dynamic': True,
+            'variable': ''
         })
 
     def test_wrong_input(self):

@@ -100,8 +100,3 @@ class TestStyle(unittest.TestCase):
         self.assertIn('@var: 1', viz)
         self.assertIn('@mimi: $pop', viz)
         self.assertIn('@momo: 123', viz)
-
-    def test_wrong_attribute(self):
-        """Style should raise an error if style property is not valid"""
-        with self.assertRaises(ValueError):
-            Style({'wrong': 'red'}).compute_viz('point')

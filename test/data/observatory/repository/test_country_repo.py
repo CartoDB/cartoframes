@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.country import Countries
 
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
@@ -7,18 +8,17 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_countries, test_country1, db_country1, db_country2
 
 try:
-    from unittest.mock import Mock
+    from unittest.mock import Mock, patch
 except ImportError:
-    from mock import Mock
+    from mock import Mock, patch
 
 
 class TestCountryRepo(unittest.TestCase):
 
-    def setUp(self):
-        RepoClient.get_countries = Mock(return_value=[db_country1, db_country2])
-
-    def test_get_all(self):
+    @patch.object(RepoClient, 'get_countries')
+    def test_get_all(self, mocked_repo):
         # Given
+        mocked_repo.return_value = [db_country1, db_country2]
         repo = CountryRepository()
 
         # When
@@ -27,9 +27,10 @@ class TestCountryRepo(unittest.TestCase):
         # Then
         assert countries == test_countries
 
-    def test_get_all_when_empty(self):
+    @patch.object(RepoClient, 'get_countries')
+    def test_get_all_when_empty(self, mocked_repo):
         # Given
-        RepoClient.get_countries = Mock(return_value=[])
+        mocked_repo.return_value = []
         repo = CountryRepository()
 
         # When
@@ -38,8 +39,10 @@ class TestCountryRepo(unittest.TestCase):
         # Then
         assert countries == Countries([])
 
-    def test_get_by_id(self):
+    @patch.object(RepoClient, 'get_countries')
+    def test_get_by_id(self, mocked_repo):
         # Given
+        mocked_repo.return_value = [db_country1, db_country2]
         requested_iso_code = test_country1['country_iso_code3']
         repo = CountryRepository()
 
@@ -49,14 +52,13 @@ class TestCountryRepo(unittest.TestCase):
         # Then
         assert country == test_country1
 
-    def test_get_by_iso_code_unknown(self):
+    @patch.object(RepoClient, 'get_countries')
+    def test_get_by_iso_code_unknown_fails(self, mocked_repo):
         # Given
-        RepoClient.get_countries = Mock(return_value=[])
+        mocked_repo.return_value = []
         requested_iso_code = 'fra'
         repo = CountryRepository()
 
-        # When
-        country = repo.get_by_id(requested_iso_code)
-
         # Then
-        assert country is None
+        with self.assertRaises(DiscoveryException):
+            repo.get_by_id(requested_iso_code)

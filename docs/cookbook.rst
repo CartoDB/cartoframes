@@ -171,7 +171,10 @@ Some `on premises installations of CARTO <https://carto.com/developers/on-premis
     session = Session()
     session.verify = False
 
-    credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
+    credentials = Credentials(
+        username='<USER NAME>',
+        api_key='<API KEY>',
+        session=session)
 
 
 Perform long running query if a timeout occurs

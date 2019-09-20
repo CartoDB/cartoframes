@@ -258,6 +258,15 @@ def _column_or_value_arg(arg, valid_columns=None):
     return arg
 
 
+def _remove_column_or_index(dataframe, name):
+    # Note: we must support the case that name if both a column and the index
+    if name in dataframe.columns:
+        del dataframe[name]
+    if dataframe.index.name == name:
+        dataframe.reset_index(inplace=True)
+        del dataframe[name]
+
+
 class Geocode(object):
     """Geocode using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
@@ -388,6 +397,11 @@ class Geocode(object):
             result_dataset = self._fetch_geocoded_table_dataset(input_table_name, is_temporary)
 
         self._cleanup_geocoded_table(input_table_name, is_temporary)
+
+        if result_dataset.dataframe is not None and not table_name and not dry_run:
+            # The result is a permanent table; remove cartodb_id if it wasn't present in the input
+            if 'cartodb_id' not in self.columns and 'cartodb_id' in result_dataset.get_column_names():
+                _remove_column_or_index(result_dataset.dataframe, 'cartodb_id')
 
         result = result_dataset
         if input_dataframe is not None:

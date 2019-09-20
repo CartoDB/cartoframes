@@ -20,7 +20,6 @@ class Variable(pd.Series):
     def get_by_id(variable_id):
         return get_variable_repo().get_by_id(variable_id)
 
-    @property
     def datasets(self):
         return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
 

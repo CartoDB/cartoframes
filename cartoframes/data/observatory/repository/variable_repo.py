@@ -1,8 +1,9 @@
+from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
 
 def get_variable_repo():
-    return VariableRepository()
+    return _REPO
 
 
 class VariableRepository(object):
@@ -17,7 +18,8 @@ class VariableRepository(object):
         result = self.client.get_variables('id', variable_id)
 
         if len(result) == 0:
-            return None
+            raise DiscoveryException('The id does not correspond with any existing variable in the catalog. '
+                                     'You can check the full list of available variables with Variables.get_all()')
 
         return self._to_variable(result[0])
 
@@ -35,3 +37,6 @@ class VariableRepository(object):
         from cartoframes.data.observatory.variable import Variables
 
         return Variables([VariableRepository._to_variable(result) for result in results])
+
+
+_REPO = VariableRepository()

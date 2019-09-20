@@ -21,7 +21,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        countries = catalog.countries
+        countries = catalog.countries()
 
         # Then
         assert countries == expected_countries
@@ -34,7 +34,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        categories = catalog.categories
+        categories = catalog.categories()
 
         # Then
         assert categories == expected_categories
