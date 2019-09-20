@@ -28,7 +28,9 @@ class Variable(pd.Series):
         try:
             return self[_VARIABLE_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Variables '
+                                     'class. You should use `Variables.get_by_id("variable_id")` to obtain a valid '
+                                     'instance of the Variable class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)

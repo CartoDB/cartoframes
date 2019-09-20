@@ -29,7 +29,9 @@ class Provider(pd.Series):
         try:
             return self[_PROVIDER_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Providers '
+                                     'class. You should use `Providers.get_by_id("category_id")` to obtain a valid '
+                                     'instance of the Provider class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)

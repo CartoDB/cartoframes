@@ -29,7 +29,9 @@ class Category(pd.Series):
         try:
             return self[_CATEGORY_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Categories '
+                                     'class. You should use `Categories.get_by_id("category_id")` to obtain a valid '
+                                     'instance of the Category class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)

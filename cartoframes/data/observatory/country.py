@@ -32,7 +32,9 @@ class Country(pd.Series):
         try:
             return self[_COUNTRY_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Countries '
+                                     'class. You should use `Countries.get_by_id("country_id")` to obtain a valid '
+                                     'instance of the Country class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)

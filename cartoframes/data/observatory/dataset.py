@@ -28,7 +28,9 @@ class Dataset(pd.Series):
         try:
             return self[_DATASET_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Datasets '
+                                     'class. You should use `Datasets.get_by_id("dataset_id")` to obtain a valid '
+                                     'instance of the Dataset class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)

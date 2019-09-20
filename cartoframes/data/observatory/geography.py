@@ -28,7 +28,9 @@ class Geography(pd.Series):
         try:
             return self[_GEOGRAPHY_ID_FIELD]
         except KeyError:
-            raise DiscoveryException('Unsupported function: this Series represents a column, not a row')
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Geographies '
+                                     'class. You should use `Geographies.get_by_id("geography_id")` to obtain a valid '
+                                     'instance of the Geography class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)
