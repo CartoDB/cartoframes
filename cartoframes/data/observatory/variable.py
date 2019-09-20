@@ -22,9 +22,9 @@ class Variable(pd.Series):
         return get_variable_repo().get_by_id(variable_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self.get_id())
+        return get_dataset_repo().get_by_variable(self._get_id())
 
-    def get_id(self):
+    def _get_id(self):
         try:
             return self[_VARIABLE_ID_FIELD]
         except KeyError:

@@ -23,12 +23,12 @@ class Country(pd.Series):
         return get_country_repo().get_by_id(iso_code3)
 
     def datasets(self):
-        return get_dataset_repo().get_by_country(self.get_id())
+        return get_dataset_repo().get_by_country(self._get_id())
 
     def geographies(self):
-        return get_geography_repo().get_by_country(self.get_id())
+        return get_geography_repo().get_by_country(self._get_id())
 
-    def get_id(self):
+    def _get_id(self):
         try:
             return self[_COUNTRY_ID_FIELD]
         except KeyError:

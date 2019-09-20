@@ -23,9 +23,9 @@ class Provider(pd.Series):
         return get_provider_repo().get_by_id(provider_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_provider(self.get_id())
+        return get_dataset_repo().get_by_provider(self._get_id())
 
-    def get_id(self):
+    def _get_id(self):
         try:
             return self[_PROVIDER_ID_FIELD]
         except KeyError:

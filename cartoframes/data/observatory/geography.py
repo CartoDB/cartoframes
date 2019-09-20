@@ -22,9 +22,9 @@ class Geography(pd.Series):
         return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self.get_id())
+        return get_dataset_repo().get_by_geography(self._get_id())
 
-    def get_id(self):
+    def _get_id(self):
         try:
             return self[_GEOGRAPHY_ID_FIELD]
         except KeyError:

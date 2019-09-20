@@ -23,9 +23,9 @@ class Category(pd.Series):
         return get_category_repo().get_by_id(category_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_category(self.get_id())
+        return get_dataset_repo().get_by_category(self._get_id())
 
-    def get_id(self):
+    def _get_id(self):
         try:
             return self[_CATEGORY_ID_FIELD]
         except KeyError:
