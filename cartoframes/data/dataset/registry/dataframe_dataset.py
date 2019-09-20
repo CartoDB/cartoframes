@@ -69,6 +69,17 @@ class DataFrameDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
+    def get_column_names(self, exclude=None):
+        """Get column names"""
+        columns = list(self.dataframe.columns)
+        if self.dataframe.index.name is not None and self.dataframe.index.name not in columns:
+            columns.append(self.dataframe.index.name)
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
