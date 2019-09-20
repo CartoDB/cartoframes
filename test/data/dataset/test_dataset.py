@@ -384,8 +384,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
         Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        truncate_query = 'TRUNCATE TABLE {}'.format(self.test_write_table)
-        self.sql_client.query(truncate_query)
+        # avoid uploading the same cartodb_id
+        df['cartodb_id'] += df['cartodb_id'].max() + 1
 
         Dataset(df).upload(if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
 
@@ -393,7 +393,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2049 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_replace(self):
