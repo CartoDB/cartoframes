@@ -5,5 +5,3 @@ cartoframes
    :maxdepth: 4
 
    cartoframes
-   setup
-   test

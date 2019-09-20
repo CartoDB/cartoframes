@@ -16,6 +16,7 @@ class Basemaps(object):  # pylint: disable=too-few-public-methods
 
             Map(basemap=basemaps.positron)
     """
+
     positron = 'Positron'
     darkmatter = 'DarkMatter'
     voyager = 'Voyager'
