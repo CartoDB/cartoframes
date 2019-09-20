@@ -5,8 +5,8 @@ from tqdm import tqdm
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
-from ....utils.columns import Column, normalize_name
-from ....utils.geom_utils import decode_geometry, compute_geodataframe, detect_encoding_type, save_index_as_column
+from ....utils.columns import DataframeColumnsInfo, _first_value
+from ....utils.geom_utils import decode_geometry, compute_geodataframe, save_index_as_column
 from ....utils.utils import map_geom_type, load_geojson, is_geojson
 
 
@@ -52,7 +52,7 @@ class DataFrameDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
-        columns, geom_column, enc_type = _process_columns(self._df, with_lnglat)
+        dataframeColumnsInfo = DataframeColumnsInfo(self._df, with_lnglat)
 
         if if_exists == BaseDataset.REPLACE or not self.exists():
             self._create_table(columns)
@@ -146,98 +146,3 @@ def _is_null(val):
         return vnull
     else:
         return vnull.all()
-
-
-def _process_columns(df, with_lnglat=None):
-    geom_column = _get_geom_col_name(df)
-    geom_type, enc_type = _get_geometry_type(df, geom_column)
-
-    columns = []
-    for c in df.columns:
-        if c.lower() in Column.FORBIDDEN_COLUMN_NAMES or (with_lnglat and c == geom_column):
-            continue
-
-        columns.append({
-            'dataframe': c,
-            'database': _database_column_name(c, geom_column),
-            'database_type': _db_column_type(df, c, geom_column, geom_type)
-        })
-
-    if with_lnglat:
-        columns.append({
-            'dataframe': None,
-            'database': 'the_geom',
-            'database_type': 'geometry(Point, 4326)'
-        })
-
-    return columns, geom_column, enc_type
-
-
-def _database_column_name(column, geom_column):
-    if column == geom_column:
-        normalized_name = 'the_geom'
-    else:
-        normalized_name = normalize_name(column)
-
-    return normalized_name
-
-
-def _db_column_type(df, column, geom_column, geom_type):
-    if geom_column and column == geom_column:
-        db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
-    else:
-        db_type = _dtypes2pg(df.dtypes[column])
-
-    return db_type
-
-
-def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'bigint',
-        'float32': 'numeric',
-        'int32': 'integer',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'timestamp',
-        'datetime64[ns, UTC]': 'timestamp',
-    }
-    return mapping.get(str(dtype), 'text')
-
-
-def _get_geom_col_name(df):
-    geom_col = getattr(df, '_geometry_column_name', None)
-    if geom_col is None:
-        try:
-            df_columns = [x.lower() for x in df.columns]
-            geom_col = next(x for x in Column.SUPPORTED_GEOM_COL_NAMES if x in df_columns)
-        except StopIteration:
-            pass
-
-    return geom_col
-
-
-def _detect_geometry_encoding_type(df, geom_col):
-    if geom_col is not None:
-        first_geom = _first_value(df[geom_col])
-        if first_geom:
-            return detect_encoding_type(first_geom)
-    return ''
-
-
-def _get_geometry_type(df, geom_col):
-    if geom_col is not None:
-        first_geom = _first_value(df[geom_col])
-        if first_geom:
-            enc_type = detect_encoding_type(first_geom)
-            geom = decode_geometry(first_geom, enc_type)
-            return geom.geom_type, enc_type
-
-    return None, None
-
-
-def _first_value(series):
-    series = series.loc[~series.isnull()]  # Remove null values
-    if len(series) > 0:
-        return series.iloc[0]
