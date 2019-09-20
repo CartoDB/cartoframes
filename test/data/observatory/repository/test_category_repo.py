@@ -1,7 +1,5 @@
 import unittest
 
-import pandas as pd
-
 from cartoframes.exceptions import DiscoveryException
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
