@@ -265,6 +265,8 @@ class Dataset(object):
             self._strategy.table_name = table_name
         if credentials:
             self._strategy.credentials = credentials
+        elif self._strategy.credentials is None:
+            self._strategy.credentials = get_default_credentials()
         if schema:
             self._strategy.schema = schema
 
@@ -316,9 +318,9 @@ class Dataset(object):
         """Compute the geometry type from the data"""
         return self._strategy.compute_geom_type()
 
-    def get_table_column_names(self, exclude=None):
-        """Get column names and types from a table"""
-        return self._strategy.get_table_column_names(exclude)
+    def get_column_names(self, exclude=None):
+        """Get column names from a dataset"""
+        return self._strategy.get_column_names(exclude)
 
     def get_table_names(self):
         """Get table names used by Dataset instance"""

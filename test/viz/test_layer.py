@@ -95,13 +95,3 @@ class TestLayerStyle(unittest.TestCase):
         self.assertTrue('width: 10' in layer.viz)
         self.assertTrue('strokeColor: black' in layer.viz)
         self.assertTrue('strokeWidth: 1' in layer.viz)
-
-    def test_style_dict_valid_properties(self):
-        """Layer style should set only the valid properties"""
-        with self.assertRaises(ValueError):
-            Layer(
-                'layer_source',
-                {
-                    'invalid': 1
-                }
-            )

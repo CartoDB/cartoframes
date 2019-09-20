@@ -68,6 +68,17 @@ class DataFrameDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
+    def get_column_names(self, exclude=None):
+        """Get column names"""
+        columns = list(self.dataframe.columns)
+        if self.dataframe.index.name is not None and self.dataframe.index.name not in columns:
+            columns.append(self.dataframe.index.name)
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,
@@ -110,7 +121,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe
-            if col not in df.columns:  # we could have filtered columns in the df. See _process_columns
+            if col not in df.columns:  # we could have filtered columns in the df. See DataframeColumnsInfo
                 continue
             val = row[col]
 

@@ -19,6 +19,7 @@ export function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapI
 
 
   mapLayer.addTo(map);
+
   setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
   setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
