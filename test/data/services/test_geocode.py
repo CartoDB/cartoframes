@@ -211,7 +211,6 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 1
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
 
-
     def test_geocode_dataframe_preserves_input_cartodb(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocode(credentials=self.credentials)
@@ -225,7 +224,6 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         quota += 2
         self.assertEqual(self.used_quota('hires_geocoder'), quota)
         self.assertTrue('cartodb_id' in gc_df)
-
 
     def test_geocode_dataframe_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -374,7 +372,6 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
         self.assertFalse('cartodb_id' in gc_ds.get_column_names())
         self.assertFalse('cartodb_id' in gc_ds.dataframe)
         self.assertNotEqual(gc_ds.dataframe.index.name, 'cartodb_id')
-
 
     def test_geocode_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
