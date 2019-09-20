@@ -86,6 +86,94 @@ class Column(object):
         return value
 
 
+class DataframeColumnInfo(object):
+    def __init__(self, column, geom_column=None, geom_type=None, dtype=None):
+        if column:
+            self.dataframe = column
+            self.database = self._database_column_name(geom_column)
+            self.database_type = self._db_column_type(geom_column, geom_type, dtype)
+        else:
+            self.dataframe = None
+            self.database = 'the_geom'
+            self.database_type = 'geometry(Point, 4326)'
+
+    def _database_column_name(self, geom_column):
+        if geom_column and self.dataframe == geom_column:
+            normalized_name = 'the_geom'
+        else:
+            normalized_name = normalize_name(self.dataframe)
+
+        return normalized_name
+
+    def _db_column_type(self, geom_column, geom_type, dtype):
+        if geom_column and self.dataframe == geom_column:
+            db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
+        else:
+            db_type = _dtypes2pg(dtype)
+
+        return db_type
+
+    def __eq__(self, obj):
+        if isinstance(obj, dict):
+            return self.dataframe == obj['dataframe'] and \
+                   self.database == obj['database'] and \
+                   self.database_type == obj['database_type']
+        else:
+            return self.dataframe == obj.dataframe and \
+                   self.database == obj.database and \
+                   self.database_type == obj.database_type
+
+
+class DataframeColumnsInfo(object):
+    def __init__(self, df, with_lnglat=None):
+        self.df = df
+        self.with_lnglat = with_lnglat
+
+        self.geom_column = self._get_geom_col_name()
+        geom_type, enc_type = self._get_geometry_type()
+        self.geom_type = geom_type
+        self.enc_type = enc_type
+
+        self.columns = self._get_columns_info()
+
+    def _get_columns_info(self):
+        columns = []
+        for c in self.df.columns:
+            if self._filter_column(c):
+                continue
+
+            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, self.df.dtypes[c]))
+
+        if self.with_lnglat:
+            columns.append(DataframeColumnInfo(None))
+
+        return columns
+
+    def _filter_column(self, column):
+        return column.lower() in Column.FORBIDDEN_COLUMN_NAMES or (self.with_lnglat and column == self.geom_column)
+
+    def _get_geom_col_name(self):
+        geom_col = getattr(self.df, '_geometry_column_name', None)
+        if geom_col is None:
+            try:
+                df_columns = [x.lower() for x in self.df.columns]
+                geom_col = next(x for x in Column.SUPPORTED_GEOM_COL_NAMES if x in df_columns)
+            except StopIteration:
+                pass
+
+        return geom_col
+
+    def _get_geometry_type(self):
+        if self.geom_column is not None:
+            first_geom = _first_value(self.df[self.geom_column])
+            if first_geom:
+                enc_type = detect_encoding_type(first_geom)
+                geom = decode_geometry(first_geom, enc_type)
+                return geom.geom_type, enc_type
+
+        return None, None
+
+
 def normalize_names(column_names):
     """Given an arbitrary column name, translate to a SQL-normalized column
         name a la CARTO's Import API will translate to
@@ -167,84 +255,6 @@ def pg2dtypes(pgtype):
         'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')
-
-
-class DataframeColumnInfo(object):
-    def __init__(self, column, geom_column=None, geom_type=None, dtype=None):
-        if column:
-            self.dataframe = column
-            self.database = self._database_column_name(geom_column)
-            self.database_type = self._db_column_type(geom_column, geom_type, dtype)
-        else:
-            self.dataframe = None
-            self.database = 'the_geom'
-            self.database_type = 'geometry(Point, 4326)'
-
-    def _database_column_name(self, geom_column):
-        if self.dataframe == geom_column:
-            normalized_name = 'the_geom'
-        else:
-            normalized_name = normalize_name(self.dataframe)
-
-        return normalized_name
-
-    def _db_column_type(self, geom_column, geom_type, dtype):
-        if geom_column and self.dataframe == geom_column:
-            db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
-        else:
-            db_type = _dtypes2pg(dtype)
-
-        return db_type
-
-
-class DataframeColumnsInfo(object):
-    def __init__(self, df, with_lnglat=None):
-        self.df = df
-        self.with_lnglat = with_lnglat
-
-        self.geom_column = self._get_geom_col_name()
-        geom_type, enc_type = self._get_geometry_type()
-        self.geom_type = geom_type
-        self.enc_type = enc_type
-
-        self.columns = self._get_columns_info()
-
-    def _get_columns_info(self):
-        columns = []
-        for c in self.df.columns:
-            if self._filter_column():
-                continue
-
-            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, self.df.dtypes[c]))
-
-        if self.with_lnglat:
-            columns.append(DataframeColumnInfo(None))
-
-        return columns
-
-    def _filter_column(self, column):
-        return column.lower() in Column.FORBIDDEN_COLUMN_NAMES or (self.with_lnglat and column == self.geom_column)
-
-    def _get_geom_col_name(self):
-        geom_col = getattr(self.df, '_geometry_column_name', None)
-        if geom_col is None:
-            try:
-                df_columns = [x.lower() for x in self.df.columns]
-                geom_col = next(x for x in Column.SUPPORTED_GEOM_COL_NAMES if x in df_columns)
-            except StopIteration:
-                pass
-
-        return geom_col
-
-    def _get_geometry_type(self):
-        if self.geom_column is not None:
-            first_geom = _first_value(self.df[self.geom_column])
-            if first_geom:
-                enc_type = detect_encoding_type(first_geom)
-                geom = decode_geometry(first_geom, enc_type)
-                return geom.geom_type, enc_type
-
-        return None, None
 
 
 def _dtypes2pg(dtype):
