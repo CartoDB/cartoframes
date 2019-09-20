@@ -1,1 +1,1 @@
-key = 'default_public'
+DO_METADATA_KEY = 'default_public'
