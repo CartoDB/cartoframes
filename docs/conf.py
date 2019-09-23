@@ -39,8 +39,11 @@ release = u''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary'
 ]
+
+modindex_common_prefix = ['test']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
