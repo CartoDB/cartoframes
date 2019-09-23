@@ -34,6 +34,9 @@ class VariableRepository(object):
 
     @staticmethod
     def _to_variables(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.variable import Variables
 
         return Variables([VariableRepository._to_variable(result) for result in results])

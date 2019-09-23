@@ -1,5 +1,6 @@
 import pandas as pd
 
+from cartoframes.exceptions import DiscoveryException
 from .repository.provider_repo import get_provider_repo
 from .repository.dataset_repo import get_dataset_repo
 
@@ -22,7 +23,15 @@ class Provider(pd.Series):
         return get_provider_repo().get_by_id(provider_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_provider(self[_PROVIDER_ID_FIELD])
+        return get_dataset_repo().get_by_provider(self._get_id())
+
+    def _get_id(self):
+        try:
+            return self[_PROVIDER_ID_FIELD]
+        except KeyError:
+            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Providers '
+                                     'class. You should use `Providers.get_by_id("category_id")` to obtain a valid '
+                                     'instance of the Provider class and then attempt this function on it.')
 
     def __eq__(self, other):
         return self.equals(other)
@@ -40,6 +49,10 @@ class Providers(pd.DataFrame):
     @property
     def _constructor_sliced(self):
         return Provider
+
+    def __init__(self, data):
+        super(Providers, self).__init__(data)
+        self.set_index(_PROVIDER_ID_FIELD, inplace=True, drop=False)
 
     @staticmethod
     def get_all():

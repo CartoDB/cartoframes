@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.dataset import Datasets
 
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -39,7 +38,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
-        assert datasets == Datasets([])
+        assert datasets is None
 
     @patch.object(RepoClient, 'get_datasets')
     def test_get_by_id(self, mocked_repo):
