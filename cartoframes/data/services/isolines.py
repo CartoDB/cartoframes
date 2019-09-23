@@ -29,10 +29,10 @@ class Isolines(object):
         self._context = context.create_context(self._credentials)
 
     def isochrones(self, source, range, **args):
-        return self._iso(source, range, **args, function='isochrone')
+        return self._iso(source, range, function='isochrone', **args)
 
     def isodistances(self, source, range, **args):
-        return self._iso(source, range, **args, function='isodistance')
+        return self._iso(source, range, function='isodistance', **args)
 
     def _iso(self,
              source,
