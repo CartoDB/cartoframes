@@ -39,8 +39,7 @@ release = u''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.napoleon'
 ]
 
 modindex_common_prefix = ['test']
