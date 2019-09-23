@@ -134,6 +134,11 @@ def set_default_credentials(
 
 
 def get_default_credentials():
+    """get_default_credentials
+    
+    This method returns the credentials that have been set by default to authenticate with a CARTO account.
+    """
+
     return _default_credentials
 
 

@@ -42,4 +42,5 @@ def animation_widget(**kwargs):
 
     data = kwargs
     data['type'] = 'animation'
+
     return Widget(data)
