@@ -8,7 +8,6 @@ import json
 import warnings
 import pandas as pd
 import logging
-import pytest
 
 from carto.exceptions import CartoException
 
@@ -29,38 +28,12 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-from test.helpers import _UserUrlLoader
+from test.helpers import _UserUrlLoader, _ReportQuotas
 
 warnings.filterwarnings('ignore')
 
 
-QUOTAS = {}
-
-
-def update_quotas(service, quota):
-    if service not in QUOTAS:
-        QUOTAS[service] = {
-            'initial': None,
-            'final': None
-        }
-    QUOTAS[service]['final'] = quota
-    if QUOTAS[service]['initial'] is None:
-        QUOTAS[service]['initial'] = quota
-    return quota
-
-
-@pytest.fixture(autouse=True, scope='module')
-def module_setup_teardown():
-    """Run pytest with options --log-level=info --log-cli-level=info
-       to see this message about quota used during the tests
-    """
-    yield
-    for service in QUOTAS:
-        used_quota = QUOTAS[service]['final'] - QUOTAS[service]['initial']
-        logging.info("TOTAL USED QUOTA for %s:  %d", service, used_quota)
-
-
-class TestIsochrones(unittest.TestCase, _UserUrlLoader):
+class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 
     def setUp(self):
@@ -145,12 +118,8 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader):
                 warnings.warn('Error deleting tables')
 
     # service: isolines, hires_geocoder
-    def used_quota(self, service):
-        rows = self.sql_client.query('SELECT * FROM cdb_service_quota_info()')
-        for row in rows:
-            if row['service'] == service:
-                return update_quotas(service, row['used_quota'])
-        return None
+    def used_quota(self, iso):
+        return TestIsochrones.update_quotas('isolines', iso.used_quota())
 
     def test_isolines_from_dataframe_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -159,18 +128,41 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         ds = Dataset(df)
 
-        quota = self.used_quota('isolines')
+        quota = self.used_quota(iso)
 
         # Preview
         result = iso.isochrones(ds, [100,1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
-        self.assertEqual(self.used_quota('isolines'), quota)
+        self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
         result = iso.isochrones(ds, [100,1000], mode='car')
-        self.assertTrue(isinstance(result, pd.DataFrame))
+        self.assertTrue(isinstance(result, pd.DataFrame))   # <-- TODO: change to Dataset
         # self.assertEqual(result.get('required_quota'), 6)
         quota += 6
-        self.assertEqual(self.used_quota('isolines'), quota)
+        self.assertEqual(self.used_quota(iso), quota)
+        self.assertIsNotNone(result.the_geom)
+        # etc.
+
+    def test_isolines_from_dataframe_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Isolines(credentials=self.credentials)
+
+        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
+        ds = Dataset(df)
+
+        quota = self.used_quota(iso)
+
+        # Preview
+        result = iso.isochrones(ds, [100,1000], mode='car', dry_run=True)
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isochrones
+        result = iso.isochrones(ds, [100,1000], mode='car')
+        self.assertTrue(isinstance(result, Dataset))
+        # self.assertEqual(result.get('required_quota'), 6)
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
         self.assertIsNotNone(result.the_geom)
         # etc.

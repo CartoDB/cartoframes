@@ -3,30 +3,18 @@ from __future__ import absolute_import
 from ...lib import context
 from ...auth import get_default_credentials
 from ...data import Dataset
+from .service import Service
 import pandas as pd
 import uuid
 
 
-# TODO: add count (num_rows) method to Dataset
-def _count(context, dataset):
-    if hasattr(dataset, 'dataframe') and dataset.dataframe is not None:
-        return len(dataset.dataframe.index)
-    elif hasattr(dataset, 'table_name') and dataset.table_name:
-        result = context.execute_query("SELECT COUNT(*) FROM {table}".format(table=dataset.table_name))
-    else:
-        result = context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.get_query()))
-    return result.get('rows')[0].get('count')
+QUOTA_SERVICE = 'isolines'
 
 
-def _generate_temp_table_name(base=None):
-    return (base or 'table') + '_' + uuid.uuid4().hex[:10]
-
-
-class Isolines(object):
+class Isolines(Service):
 
     def __init__(self, credentials=None):
-        self._credentials = credentials or get_default_credentials()
-        self._context = context.create_context(self._credentials)
+        super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
     def isochrones(self, source, range, **args):
         return self._iso(source, range, function='isochrone', **args)
@@ -60,7 +48,7 @@ class Isolines(object):
             source = Dataset(input_dataframe)
 
         if dry_run:
-            num_rows = _count(self._context, source)
+            num_rows = self._dataset_num_rows(source)
             return {'required_quota': num_rows * len(range)}
 
         temporary_table_name = False
@@ -71,7 +59,7 @@ class Isolines(object):
             source_query = source.get_query()
         else:  # source.is_local()
             # upload to temporary table
-            temporary_table_name = _generate_temp_table_name()
+            temporary_table_name = self._new_temporary_table_name()
             source.upload(table_name=temporary_table_name, credentials=self._credentials)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
 
