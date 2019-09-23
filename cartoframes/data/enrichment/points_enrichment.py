@@ -6,8 +6,7 @@ from collections import defaultdict
 
 
 _ENRICHMENT_ID = 'enrichment_id'
-_WORKING_PROJECT = 'cartodb-on-gcp-datascience'
-_TEMP_DATASET_ENRICHMENT = 'enrichment_temp'
+_WORKING_PROJECT = 'carto-do-customers'
 
 # TODO: process column name in metadata, remove spaces and points
 
@@ -17,35 +16,33 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
     credentials = credentials or get_default_credentials()
     bq_client = bigquery_client.BigQueryClient(credentials)
 
+    user_workspace = credentials.username.replace('-', '_')
+
     data_copy = __copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID)
 
-    # Select only geometry and id and build schema
     data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
     schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
 
-    # Data table is a universal unique identifier
-    data_tablename = uuid.uuid4().hex
+    id_tablename = uuid.uuid4().hex
+    data_tablename = 'temp_{id}'.format(id=id_tablename)
 
     bq_client.upload_dataframe(data_geometry_id_copy, schema, data_tablename,
-                               project=_WORKING_PROJECT, dataset=_TEMP_DATASET_ENRICHMENT)
+                               project=_WORKING_PROJECT, dataset=user_workspace)
 
     table_data_enrichment, table_geo_enrichment, variables_list = __get_tables_and_variables(variables)
 
     filters_str = __process_filters(filters)
 
     sql = __prepare_sql(_ENRICHMENT_ID, variables_list, table_data_enrichment, table_geo_enrichment,
-                        credentials.username, _WORKING_PROJECT, _TEMP_DATASET_ENRICHMENT,
+                        credentials.username, _WORKING_PROJECT, user_workspace,
                         data_tablename, data_geom_column, filters_str)
 
-    # Execute query to enrich
     data_geometry_id_enriched = bq_client.query(sql).to_dataframe()
 
-    # Merge with original data
     data_copy = data_copy.merge(data_geometry_id_enriched, on=_ENRICHMENT_ID, how='left')\
         .drop(_ENRICHMENT_ID, axis=1)
 
-    # Remove temporal data
-    bq_client.delete_table(data_tablename, project=_WORKING_PROJECT, dataset=_TEMP_DATASET_ENRICHMENT)
+    bq_client.delete_table(data_tablename, project=_WORKING_PROJECT, dataset=user_workspace)
 
     return data_copy
 
