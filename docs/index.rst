@@ -1,20 +1,32 @@
-.. cartoframes documentation master file, created by
-   sphinx-quickstart on Tue Sep 17 12:15:13 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
+===========
 CARTOframes
-=======================================
+===========
+
+API Reference
+
+The CARTOframes API is organized in three parts: `auth`, `data`, and `viz`.
+
+Authentication
+--------------
+
+It is possible to use CARTOframes without having a CARTO account. However, to have access to data enritchment or to discover
+useful datasets, being a CARTO user offers many advantages.
+This module is the responsible for connecting the user with its CARTO account through given user credentials.
+
+Data Management
+---------------
+
+From discovering and enritching data to applying data analyisis and geocoding methods, 
+CARTOframes API is built with the purpose of managing data without leaving the context of your notebook.
+
+Data Visualization
+------------------
+
+The viz API is designed to create useful, beautiful and straight forward visualizations.
+It is at the same time predefined and flexible, in order to give advanced users the possibility of building specific visualizations, 
+but also to offer multiple built-in methods to work faster with a few lines of code.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   modules
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+  modules

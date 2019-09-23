@@ -1,5 +1,3 @@
-"""Credentials management for cartoframes usage."""
-
 import os
 import sys
 import json

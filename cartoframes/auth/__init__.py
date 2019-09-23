@@ -5,11 +5,21 @@ from .credentials import Credentials
 
 _default_credentials = None
 
+"""Auth namespace contains the necessary tools to manage authentication by allowing the user to set its CARTO credentials."""
 
 def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
     """set_default_credentials
+
+    This method is responsible for user authentication. Once the credentials have been set,
+    the user can perform the different operations that require a CARTO account. There're three
+    different ways to set up the user credentials:
+    
+    - Passing a :py:class:`credentials <cartoframes.credentials.Credentials>` instance
+    - Passing a pair of username and API key
+    - Passing a pair of url and API key
+    - Passing a `user session <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
@@ -98,6 +108,7 @@ def set_default_credentials(
             )
             set_default_credentials(credentials)
     """
+
     global _default_credentials
 
     _base_url = base_url if first is None else first

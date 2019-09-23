@@ -1,4 +1,4 @@
-cartoframes
+CARTOframes
 ===========
 
 .. toctree::
