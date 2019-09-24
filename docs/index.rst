@@ -27,6 +27,6 @@ It is at the same time predefined and flexible, in order to give advanced users 
 but also to offer multiple built-in methods to work faster with a few lines of code.
 
 .. toctree::
-  :maxdepth: 4
+   :maxdepth: 8
 
-  cartoframes
+   modules
