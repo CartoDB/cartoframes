@@ -10,6 +10,7 @@ if sys.version_info >= (3, 0):
 else:
     from urlparse import urlparse
 
+from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
@@ -56,6 +57,7 @@ class Credentials(object):
         self._username = username
         self.base_url = base_url or self._base_url_from_username()
         self._session = session
+        self._api_key_auth_client = None
 
         self._norm_credentials()
 
@@ -201,14 +203,21 @@ class Credentials(object):
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
 
     def get_do_token(self):
-        do_token_manager = DoTokenManager(self.create_auth_client())
-        return do_token_manager.get()
+        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        token = do_token_manager.get()
+        if not token:
+            raise CartoException('Authentication error: do you have permissions to access Data Observatory data?')
 
-    def create_auth_client(self):
-        return APIKeyAuthClient(
-            base_url=self.base_url,
-            api_key=self.api_key,
-            session=self.session,
-            client_id='cartoframes_{}'.format(__version__),
-            user_agent='cartoframes_{}'.format(__version__)
-        )
+        return token.access_token
+
+    def get_api_key_auth_client(self):
+        if not self._api_key_auth_client:
+            self._api_key_auth_client = APIKeyAuthClient(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                session=self.session,
+                client_id='cartoframes_{}'.format(__version__),
+                user_agent='cartoframes_{}'.format(__version__)
+            )
+
+        return self._api_key_auth_client
