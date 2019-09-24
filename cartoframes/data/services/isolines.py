@@ -13,13 +13,13 @@ class Isolines(Service):
     def __init__(self, credentials=None):
         super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
-    def isochrones(self, source, range, **args):
-        return self._iso(source, range, function='isochrone', **args)
+    def isochrone_areas(self, source, range, **args):
+        return self._iso_areas(source, range, function='isochrone', **args)
 
-    def isodistances(self, source, range, **args):
-        return self._iso(source, range, function='isodistance', **args)
+    def isodistance_areas(self, source, range, **args):
+        return self._iso_areas(source, range, function='isodistance', **args)
 
-    def _iso(self,
+    def _iso_areas(self,
              source,
              range,
              dry_run=False,
