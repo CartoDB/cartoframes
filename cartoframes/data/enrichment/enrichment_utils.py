@@ -1,11 +1,16 @@
 import pandas as pd
 import geopandas as gpd
 
+from ..dataset.dataset import Dataset
 from collections import defaultdict
 from ...exceptions import EnrichmentException
 
 
 def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
+
+    if isinstance(data, Dataset):
+        data = data.dataframe
+
     data_copy = data.copy()
     data_copy[enrichment_id_column] = range(data_copy.shape[0])
 
