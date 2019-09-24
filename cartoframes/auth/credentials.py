@@ -10,6 +10,11 @@ if sys.version_info >= (3, 0):
 else:
     from urlparse import urlparse
 
+from carto.auth import APIKeyAuthClient
+# from carto.do_token import DoTokenManager
+
+from ..__version__ import __version__
+
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
 
@@ -194,3 +199,16 @@ class Credentials(object):
             warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
+
+    # def get_do_token(self):
+    #     api_key_auth_client = 1
+    #     DoTokenManager(api_key_auth_client)
+
+    def create_auth_client(self):
+        return APIKeyAuthClient(
+            base_url=self.base_url,
+            api_key=self.api_key,
+            session=self.session,
+            client_id='cartoframes_{}'.format(__version__),
+            user_agent='cartoframes_{}'.format(__version__)
+        )

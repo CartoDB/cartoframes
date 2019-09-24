@@ -2,12 +2,10 @@ from copy import deepcopy
 from warnings import warn
 
 from carto.kuvizs import KuvizManager
-from carto.auth import APIKeyAuthClient
 
 from ..auth import get_default_credentials
 from .source import Source
 from ..utils.columns import normalize_name
-from ..__version__ import __version__
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
@@ -73,13 +71,7 @@ def _create_kuviz(html, name, auth_client, password=None):
 
 
 def _create_auth_client(credentials):
-    return APIKeyAuthClient(
-        base_url=credentials.base_url,
-        api_key=credentials.api_key,
-        session=credentials.session,
-        client_id='cartoframes_{}'.format(__version__),
-        user_agent='cartoframes_{}'.format(__version__)
-    )
+    return credentials.create_auth_client()
 
 
 def _get_kuviz_manager(auth_client):
