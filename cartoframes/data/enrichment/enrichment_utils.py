@@ -1,4 +1,7 @@
+import pandas as pd
+
 from collections import defaultdict
+from ...exceptions import EnrichmentException
 
 
 def copy_data_and_generate_enrichment_id(data, enrichment_id_column):
@@ -24,7 +27,14 @@ def process_filters(filters_dict):
 
 
 def get_tables_and_variables(variables):
-    variables_id = variables['id'].tolist()
+
+    if isinstance(variables, pd.Series):
+        variables_id = [variables['id']]
+    elif isinstance(variables, pd.DataFrame):
+        variables_id = variables['id'].tolist()
+    else:
+        raise EnrichmentException('Variable(s) to enrich should be an instance of Series or DataFrame')
+
     table_to_variables = __process_enrichment_variables(variables_id)
     table_data_enrichment = list(table_to_variables.keys()).pop()
     table_geo_enrichment = __get_name_geotable_from_datatable(table_data_enrichment)
