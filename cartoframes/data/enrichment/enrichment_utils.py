@@ -1,12 +1,16 @@
 import pandas as pd
+import geopandas as gpd
 
 from collections import defaultdict
 from ...exceptions import EnrichmentException
 
 
-def copy_data_and_generate_enrichment_id(data, enrichment_id_column):
+def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
     data_copy = data.copy()
     data_copy[enrichment_id_column] = range(data_copy.shape[0])
+
+    if isinstance(data_copy, gpd.GeoDataFrame):
+        data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
 

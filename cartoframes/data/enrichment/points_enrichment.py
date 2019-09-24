@@ -17,7 +17,7 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
     user_dataset = credentials.username.replace('-', '_')
 
-    data_copy = copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID)
+    data_copy = copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
 
     data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
     schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
