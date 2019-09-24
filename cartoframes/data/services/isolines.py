@@ -1,11 +1,8 @@
 from __future__ import absolute_import
 
-from ...lib import context
-from ...auth import get_default_credentials
 from ...data import Dataset
 from .service import Service
 import pandas as pd
-import uuid
 
 
 QUOTA_SERVICE = 'isolines'

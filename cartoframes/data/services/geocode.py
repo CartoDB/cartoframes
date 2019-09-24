@@ -5,10 +5,8 @@ from __future__ import absolute_import
 import re
 import hashlib
 import logging
-import uuid
 import pandas as pd
 
-from ...auth import get_default_credentials
 from ...data import Dataset
 from .service import Service
 
