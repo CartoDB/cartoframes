@@ -71,7 +71,7 @@ def _create_kuviz(html, name, auth_client, password=None):
 
 
 def _create_auth_client(credentials):
-    return credentials.create_auth_client()
+    return credentials.get_api_key_auth_client()
 
 
 def _get_kuviz_manager(auth_client):
