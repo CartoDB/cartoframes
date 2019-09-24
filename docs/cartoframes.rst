@@ -1,10 +1,10 @@
 API Reference
 =============
 
-The CARTOframes API is organized in three parts: `auth`, `data`, and `viz`.
+Introduction
+------------
 
-Modules
--------
+The CARTOframes API is organized in three parts: `auth`, `data`, and `viz`.
 
 `Authentication <#auth>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -31,38 +31,45 @@ Auth
 
 .. automodule:: cartoframes.auth
     :members:
-    :inherited-members:
-    :show-inheritance:
 
-Data
-----
+Data Management
+---------------
 
 .. automodule:: cartoframes.data
     :members:
-    :inherited-members:
-    :show-inheritance:
 
+Data Observatory
+----------------
+
+  .. automodule:: cartoframes.data.observatory
+    :members:
+
+
+Data Services
+-------------
+
+Geocode
+^^^^^^^
+
+.. include:: geocode.rst
+
+.. automodule:: cartoframes.data.services
+    :members:
 
 Viz
 ---
 
 .. automodule:: cartoframes.viz
     :members:
-    :inherited-members:
-    :show-inheritance:
 
 Widgets
 ^^^^^^^
 
 .. automodule:: cartoframes.viz.widgets
     :members:
-    :inherited-members:
-    :show-inheritance:
 
 Helpers
 ^^^^^^^
 
 .. automodule:: cartoframes.viz.helpers
     :members:
-    :inherited-members:
-    :show-inheritance:
