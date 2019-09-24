@@ -11,7 +11,7 @@ else:
     from urlparse import urlparse
 
 from carto.auth import APIKeyAuthClient
-# from carto.do_token import DoTokenManager
+from carto.do_token import DoTokenManager
 
 from ..__version__ import __version__
 
@@ -200,9 +200,9 @@ class Credentials(object):
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
 
-    # def get_do_token(self):
-    #     api_key_auth_client = 1
-    #     DoTokenManager(api_key_auth_client)
+    def get_do_token(self):
+        do_token_manager = DoTokenManager(self.create_auth_client())
+        return do_token_manager.get()
 
     def create_auth_client(self):
         return APIKeyAuthClient(
