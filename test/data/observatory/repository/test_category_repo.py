@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.category import Categories
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -28,6 +27,9 @@ class TestCategoryRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with()
         assert categories == test_categories
 
+        id1 = db_category1['id']
+        assert categories.loc[id1] == test_category1
+
     @patch.object(RepoClient, 'get_categories')
     def test_get_all_when_empty(self, mocked_repo):
         # Given
@@ -39,7 +41,7 @@ class TestCategoryRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
-        assert categories == Categories([])
+        assert categories is None
 
     @patch.object(RepoClient, 'get_categories')
     def test_get_by_id(self, mocked_repo):
