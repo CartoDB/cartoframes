@@ -5,16 +5,17 @@ import sys
 import json
 import appdirs
 import warnings
-if sys.version_info >= (3, 0):
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
 from ..__version__ import __version__
+
+if sys.version_info >= (3, 0):
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
