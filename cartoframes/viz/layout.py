@@ -97,21 +97,24 @@ class Layout(object):
                  N_SIZE=None,
                  M_SIZE=None,
                  viewport=None,
+                 map_height=250,
                  is_static=True):
         self._layout = _init_layout(maps, is_static, viewport)
         self._N_SIZE = N_SIZE if N_SIZE is not None else len(self._layout)
         self._M_SIZE = M_SIZE if M_SIZE is not None else constants.DEFAULT_LAYOUT_M_SIZE
         self._viewport = viewport
         self._is_static = is_static
+        self._map_height = map_height
 
     def _repr_html_(self):
         self._htmlLayout = HTMLLayout()
         self._htmlLayout.set_content(
             maps=self._layout,
-            size=['100%', 250 * self._M_SIZE],
+            size=['100%', self._map_height * self._M_SIZE],
             n=self._N_SIZE,
             m=self._M_SIZE,
-            is_static=self._is_static
+            is_static=self._is_static,
+            map_height=self._map_height
         )
 
         return self._htmlLayout.html
