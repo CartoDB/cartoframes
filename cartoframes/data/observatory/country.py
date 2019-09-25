@@ -1,6 +1,4 @@
-import pandas as pd
-
-from cartoframes.exceptions import DiscoveryException
+from .entity import EntitiesList, SingleEntity
 from .repository.geography_repo import get_geography_repo
 from .repository.country_repo import get_country_repo
 from .repository.dataset_repo import get_dataset_repo
@@ -8,19 +6,7 @@ from .repository.dataset_repo import get_dataset_repo
 _COUNTRY_ID_FIELD = 'country_iso_code3'
 
 
-class Country(pd.Series):
-
-    @property
-    def _constructor(self):
-        return Country
-
-    @property
-    def _constructor_expanddim(self):
-        return Countries
-
-    @staticmethod
-    def get_by_id(iso_code3):
-        return get_country_repo().get_by_id(iso_code3)
+class Country(SingleEntity):
 
     def datasets(self):
         return get_dataset_repo().get_by_country(self._get_id())
@@ -28,45 +14,41 @@ class Country(pd.Series):
     def geographies(self):
         return get_geography_repo().get_by_country(self._get_id())
 
-    def _get_id(self):
-        try:
-            return self[_COUNTRY_ID_FIELD]
-        except KeyError:
-            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Countries '
-                                     'class. You should use `Countries.get_by_id("country_id")` to obtain a valid '
-                                     'instance of the Country class and then attempt this function on it.')
+    @classmethod
+    def _get_id_field(cls):
+        return _COUNTRY_ID_FIELD
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @classmethod
+    def _get_single_entity_class(cls):
+        return Country
 
-    def __ne__(self, other):
-        return not self == other
-
-
-class Countries(pd.DataFrame):
-
-    @property
-    def _constructor(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Countries
 
-    @property
-    def _constructor_sliced(self):
-        return Country
+    @classmethod
+    def _get_entity_repo(cls):
+        return get_country_repo()
+
+
+class Countries(EntitiesList):
 
     def __init__(self, data):
         super(Countries, self).__init__(data)
-        self.set_index(_COUNTRY_ID_FIELD, inplace=True, drop=False)
+        self._set_index()
 
-    @staticmethod
-    def get_all():
-        return get_country_repo().get_all()
+    @classmethod
+    def _get_id_field(cls):
+        return _COUNTRY_ID_FIELD
 
-    @staticmethod
-    def get_by_id(iso_code3):
-        return Country.get_by_id(iso_code3)
+    @classmethod
+    def _get_single_entity_class(cls):
+        return Country
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @classmethod
+    def _get_entities_list_class(cls):
+        return Countries
 
-    def __ne__(self, other):
-        return not self == other
+    @classmethod
+    def _get_entity_repo(cls):
+        return get_country_repo()
