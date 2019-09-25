@@ -130,19 +130,19 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
                 geom = decode_geometry(val, dataframe_columns_info.enc_type)
                 if geom:
-                    _append_encoded(row_data, 'SRID=4326;{}'.format(geom.wkt))
+                    val = 'SRID=4326;{}'.format(geom.wkt)
                 else:
-                    _append_encoded(row_data, '')
-            else:
-                _append_encoded(row_data, val)
+                    val = ''
+            _append_encoded(row_data, val)
 
         if with_lnglat:
             lng_val = row[with_lnglat[0]]
             lat_val = row[with_lnglat[1]]
             if lng_val and lat_val:
-                _append_encoded(row_data, 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+                val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
-                _append_encoded(row_data, '')
+                val = ''
+            _append_encoded(row_data, val)
 
         csv_row = _encoded('|').join(row_data)
         csv_row += _encoded('\n')
