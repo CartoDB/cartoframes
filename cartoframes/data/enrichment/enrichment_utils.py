@@ -1,6 +1,9 @@
 import pandas as pd
 import geopandas as gpd
+import geojson
 
+from shapely.geometry import shape
+from shapely.wkt import loads
 from ..dataset.dataset import Dataset
 from collections import defaultdict
 from ...exceptions import EnrichmentException
@@ -18,6 +21,20 @@ def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_co
         data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
+
+
+def wkt_to_geojson(wkt):
+    geometry = loads(wkt)
+    geojson_geometry = geojson.Feature(geometry=geometry, properties={})
+
+    return str(geojson_geometry.geometry)
+
+
+def geojson_to_wkt(geojson_str):
+    geojson_loaded = geojson.loads(geojson_str)
+    wkt_geometry = shape(geojson_loaded)
+
+    return wkt_geometry.wkt
 
 
 def process_filters(filters_dict):

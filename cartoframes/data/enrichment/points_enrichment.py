@@ -2,7 +2,9 @@ import uuid
 
 from ..clients import bigquery_client
 from ...auth import get_default_credentials
-from .enrichment_utils import copy_data_and_generate_enrichment_id, process_filters, get_tables_and_variables
+from .enrichment_utils import copy_data_and_generate_enrichment_id, process_filters, \
+    get_tables_and_variables, wkt_to_geojson, geojson_to_wkt
+
 
 _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'
@@ -18,6 +20,8 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
     user_dataset = credentials.username.replace('-', '_')
 
     data_copy = copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
+
+    data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
 
     data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
     schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
@@ -40,6 +44,8 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
     data_copy = data_copy.merge(data_geometry_id_enriched, on=_ENRICHMENT_ID, how='left')\
         .drop(_ENRICHMENT_ID, axis=1)
+
+    data_copy[data_geom_column] = data_copy[data_geom_column].apply(geojson_to_wkt)
 
     return data_copy
 
