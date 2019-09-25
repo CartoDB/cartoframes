@@ -12,6 +12,18 @@ _WORKING_PROJECT = 'carto-do-customers'
 
 
 def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry', filters=dict(), credentials=None):
+    """enrich_polygons
+
+    This method is responsible for # TODO
+
+    Args:
+        data: # TODO
+        variables: # TODO
+        agg_operators: # TODO
+        data_geom_column: # TODO
+        filters: # TODO
+        credentials: # TODO
+    """
 
     credentials = credentials or get_default_credentials()
     bq_client = bigquery_client.BigQueryClient(credentials)

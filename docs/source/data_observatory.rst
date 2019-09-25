@@ -1,5 +1,7 @@
 Data Observatory
 ----------------
 
-  .. automodule:: cartoframes.data.observatory
+Introduction to Data Observatory.
+
+.. automodule:: cartoframes.data.observatory
     :members:
