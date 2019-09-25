@@ -6,14 +6,14 @@ The CARTOframes API is organized in three parts: `auth`, `data`, and `viz`.
 `Authentication <#auth>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is possible to use CARTOframes without having a CARTO account. However, to have access to data enritchment or to discover
+It is possible to use CARTOframes without having a CARTO account. However, to have access to data enrichment or to discover
 useful datasets, being a CARTO user offers many advantages.
 This module is the responsible for connecting the user with its CARTO account through given user credentials.
 
 `Data Management <#data>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-From discovering and enritching data to applying data analyisis and geocoding methods, 
+From discovering and enriching data to applying data analyisis and geocoding methods, 
 CARTOframes API is built with the purpose of managing data without leaving the context of your notebook.
 
 `Data Visualization <#viz>`__
