@@ -133,7 +133,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                     val = 'SRID=4326;{}'.format(geom.wkt)
                 else:
                     val = ''
-            _append_encoded(row_data, val)
+            row_data.append(_encoded(val))
 
         if with_lnglat:
             lng_val = row[with_lnglat[0]]
@@ -142,16 +142,12 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
                 val = ''
-            _append_encoded(row_data, val)
+            row_data.append(_encoded(val))
 
         csv_row = _encoded('|').join(row_data)
         csv_row += _encoded('\n')
 
         yield csv_row
-
-
-def _append_encoded(row_data, val):
-    row_data.append(_encoded(val))
 
 
 def _encoded(val):
