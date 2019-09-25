@@ -24,17 +24,19 @@ def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_co
 
 
 def wkt_to_geojson(wkt):
-    geometry = loads(wkt)
-    geojson_geometry = geojson.Feature(geometry=geometry, properties={})
+    shapely_geom = loads(wkt)
+    geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
 
     return str(geojson_geometry.geometry)
 
 
 def geojson_to_wkt(geojson_str):
-    geojson_loaded = geojson.loads(geojson_str)
-    wkt_geometry = shape(geojson_loaded)
+    geojson_geom = geojson.loads(geojson_str)
+    wkt_geometry = shape(geojson_geom)
 
-    return wkt_geometry.wkt
+    shapely_geom = loads(wkt_geometry.wkt)
+
+    return shapely_geom
 
 
 def process_filters(filters_dict):
