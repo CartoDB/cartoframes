@@ -207,7 +207,7 @@ class Credentials(object):
         do_token_manager = DoTokenManager(self.get_api_key_auth_client())
         token = do_token_manager.get()
         if not token:
-            raise CartoException('Authentication error: do you have permissions to access Data Observatory data?')
+            raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
 
         return token.access_token
 
