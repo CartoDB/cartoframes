@@ -1,6 +1,6 @@
 import pandas as pd
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from cartoframes.exceptions import DiscoveryException
 
 
@@ -10,12 +10,14 @@ class CatalogEntity(ABC):
     entity_repo = None
 
     @classmethod
+    @abstractmethod
     def _get_single_entity_class(cls):
-        return cls
+        raise NotImplementedError
 
     @classmethod
+    @abstractmethod
     def _get_entities_list_class(cls):
-        return cls
+        raise NotImplementedError
 
     @classmethod
     def get_by_id(cls, id_):
@@ -34,6 +36,10 @@ class SingleEntity(CatalogEntity, pd.Series, ABC):
     def _constructor_expanddim(self):
         return self._get_entities_list_class()
 
+    @classmethod
+    def _get_single_entity_class(cls):
+        return cls
+
     def _get_id(self):
         try:
             return self[self.id_field]
@@ -47,7 +53,7 @@ class EntitiesList(CatalogEntity, pd.DataFrame, ABC):
 
     def __init__(self, data):
         super(EntitiesList, self).__init__(data)
-        self._use_id_as_index()
+        self.set_index(self.id_field, inplace=True, drop=False)
 
     @property
     def _constructor(self):
@@ -62,8 +68,9 @@ class EntitiesList(CatalogEntity, pd.DataFrame, ABC):
         return self.__class__
 
     @classmethod
+    def _get_entities_list_class(cls):
+        return cls
+
+    @classmethod
     def get_all(cls):
         return cls.entity_repo.get_all()
-
-    def _use_id_as_index(self):
-        self.set_index(self.id_field, inplace=True, drop=False)
