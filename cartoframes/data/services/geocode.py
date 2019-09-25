@@ -367,7 +367,7 @@ class Geocode(Service):
                 check the needed quota)
 
         Returns:
-            tuple: (Dataset, info_dict)
+            Result: (Dataset, info_dict)
 
         """
 
@@ -411,7 +411,7 @@ class Geocode(Service):
                     # but if not temporary we need to download it now
                     result = result_dataset.download()
 
-        return (result, result_info)
+        return self.result(result, metadata=result_info)
 
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False

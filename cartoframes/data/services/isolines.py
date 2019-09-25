@@ -39,6 +39,8 @@ class Isolines(Service):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
 
+        metadata = {}
+
         input_dataframe = None
         if isinstance(source, pd.DataFrame):
             input_dataframe = source
@@ -46,7 +48,8 @@ class Isolines(Service):
 
         if dry_run:
             num_rows = self._dataset_num_rows(source)
-            return {'required_quota': num_rows * len(range)}
+            metadata['required_quota'] = num_rows * len(range)
+            return self.result(source, metadata=metadata)
 
         temporary_table_name = False
 
@@ -125,4 +128,4 @@ class Isolines(Service):
         if temporary_table_name:
             Dataset(temporary_table_name, credentials=self._credentials).delete()
 
-        return result
+        return self.result(result)

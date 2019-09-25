@@ -136,7 +136,7 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100,1000], mode='car')
+        result = iso.isochrone_areas(ds, [100,1000], mode='car').data
         self.assertTrue(isinstance(result, pd.DataFrame))   # <-- TODO: change to Dataset
         # self.assertEqual(result.get('required_quota'), 6)
         quota += 6
@@ -159,7 +159,7 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100,1000], mode='car')
+        result = iso.isochrone_areas(ds, [100,1000], mode='car').data
         self.assertTrue(isinstance(result, pd.DataFrame))  # <-- TODO: change to Dataset
         # self.assertEqual(result.get('required_quota'), 6)
         quota += 6
