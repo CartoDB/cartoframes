@@ -4,4 +4,4 @@ CARTOframes
 
 .. toctree::
 
-   modules
+  cartoframes
