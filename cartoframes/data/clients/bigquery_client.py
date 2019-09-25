@@ -2,13 +2,22 @@ import datetime
 import pytz
 
 from google.cloud import bigquery
+from google.oauth2.credentials import Credentials as GoogleCredentials
 
 
 class BigQueryClient(object):
 
-    def __init__(self, credentials):
-        self.credentials = credentials
-        self.client = bigquery.Client().from_service_account_json(self.credentials.get_do_token())
+    def __init__(self, project, credentials):
+        self._project = project
+        self._credentials = credentials
+        self.client = self._init_client()
+
+    def _init_client(self):
+        google_credentials = GoogleCredentials(self._credentials.get_do_token())
+
+        return bigquery.Client(
+            project=self._project,
+            credentials=google_credentials)
 
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
         dataset_ref = self.client.dataset(dataset, project=project)
