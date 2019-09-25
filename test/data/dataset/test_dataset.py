@@ -14,7 +14,7 @@ from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
 from cartoframes.utils.geom_utils import setting_value_exception
-from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
 from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
@@ -906,3 +906,14 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'|\n', b'|\n'])
+
+    def test_rows_non_ascii(self):
+        attribute = 'áéí'
+        unicode_attribute = u'áéí'
+        encoded_attribute = unicode_attribute.encode('utf-8')
+        encoded_line = encoded_attribute + '\n'.encode()
+
+        df = pd.DataFrame.from_dict({'test': [attribute, unicode_attribute, encoded_attribute, 'xyz']})
+        columns_info = DataframeColumnsInfo(df)
+        rows = _rows(df, columns_info, None)
+        self.assertEqual(list(rows), [encoded_line, encoded_line, encoded_line, b'xyz\n'])

@@ -1,5 +1,4 @@
 import pandas as pd
-from warnings import warn
 from tqdm import tqdm
 
 from carto.exceptions import CartoException, CartoRateLimitException
@@ -131,24 +130,33 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
                 geom = decode_geometry(val, dataframe_columns_info.enc_type)
                 if geom:
-                    row_data.append('SRID=4326;{}'.format(geom.wkt))
+                    val = 'SRID=4326;{}'.format(geom.wkt)
                 else:
-                    row_data.append('')
-            else:
-                row_data.append('{}'.format(val))
+                    val = ''
+            row_data.append(_encoded(val))
 
         if with_lnglat:
             lng_val = row[with_lnglat[0]]
             lat_val = row[with_lnglat[1]]
             if lng_val and lat_val:
-                row_data.append('SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val))
+                val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
-                row_data.append('')
+                val = ''
+            row_data.append(_encoded(val))
 
-        csv_row = '|'.join(row_data)
-        csv_row += '\n'
+        csv_row = _encoded('|').join(row_data)
+        csv_row += _encoded('\n')
 
-        yield csv_row.encode()
+        yield csv_row
+
+
+def _encoded(val):
+    if isinstance(val, type(u'')):
+        return val.encode('utf-8')
+    elif isinstance(val, type(b'')):
+        return val
+    else:
+        return u'{}'.format(val).encode('utf-8')
 
 
 def _is_null(val):
