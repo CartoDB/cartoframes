@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from .category import Categories
 from .country import Countries
 

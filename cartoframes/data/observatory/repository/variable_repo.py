@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 

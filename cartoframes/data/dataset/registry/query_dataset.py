@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset

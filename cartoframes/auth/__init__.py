@@ -16,7 +16,7 @@ def set_default_credentials(
     This method is responsible for user authentication. Once the credentials have been set,
     the user can perform the different operations that require a CARTO account. There're three
     different ways to set up the user credentials:
-    
+
     - Passing a :py:class:`credentials <cartoframes.credentials.Credentials>` instance
     - Passing a pair of username and API key
     - Passing a pair of url and API key
