@@ -45,6 +45,10 @@ class SingleEntity(CatalogEntity, pd.Series, ABC):
 
 class EntitiesList(CatalogEntity, pd.DataFrame, ABC):
 
+    def __init__(self, data):
+        super(EntitiesList, self).__init__(data)
+        self._use_id_as_index()
+
     @property
     def _constructor(self):
         return self.__class__

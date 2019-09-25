@@ -1,68 +1,28 @@
-import pandas as pd
-
-from cartoframes.exceptions import DiscoveryException
+from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
 _GEOGRAPHY_ID_FIELD = 'id'
 
 
-class Geography(pd.Series):
+class Geography(SingleEntity):
 
-    @property
-    def _constructor(self):
-        return Geography
+    id_field = _GEOGRAPHY_ID_FIELD
+    entity_repo = get_geography_repo()
 
-    @property
-    def _constructor_expanddim(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Geographies
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
         return get_dataset_repo().get_by_geography(self._get_id())
 
-    def _get_id(self):
-        try:
-            return self[_GEOGRAPHY_ID_FIELD]
-        except KeyError:
-            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Geographies '
-                                     'class. You should use `Geographies.get_by_id("geography_id")` to obtain a valid '
-                                     'instance of the Geography class and then attempt this function on it.')
 
-    def __eq__(self, other):
-        return self.equals(other)
+class Geographies(EntitiesList):
 
-    def __ne__(self, other):
-        return not self == other
+    id_field = _GEOGRAPHY_ID_FIELD
+    entity_repo = get_geography_repo()
 
-
-class Geographies(pd.DataFrame):
-
-    @property
-    def _constructor(self):
-        return Geographies
-
-    @property
-    def _constructor_sliced(self):
+    @classmethod
+    def _get_single_entity_class(cls):
         return Geography
-
-    def __init__(self, data):
-        super(Geographies, self).__init__(data)
-        self.set_index(_GEOGRAPHY_ID_FIELD, inplace=True, drop=False)
-
-    @staticmethod
-    def get_all():
-        return get_geography_repo().get_all()
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
