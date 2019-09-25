@@ -1,19 +1,14 @@
 import datetime
 import pytz
 
-from ..enrichment import fake_auth
 from google.cloud import bigquery
-
-# TODO: decorator to authenticate
 
 
 class BigQueryClient(object):
 
     def __init__(self, credentials):
-        token = fake_auth.auth(credentials)
-
         self.credentials = credentials
-        self.client = bigquery.Client().from_service_account_json(token)  # Change auth method when token received
+        self.client = bigquery.Client().from_service_account_json(self.credentials.get_do_token())
 
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
         dataset_ref = self.client.dataset(dataset, project=project)
