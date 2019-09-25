@@ -5,10 +5,10 @@ from ..widget import Widget
 
 def animation_widget(**kwargs):
     """Helper function for quickly creating an animated widget.
-
     The animation widget includes an animation status bar as well as controls to play or pause animated data.
     The `filter` property of your map's style, applied to either a date or numeric field, drives both
     the animation and the widget. Only **one** animation can be controlled per layer.
+
     To learn more about creating animations visit:
       - https://carto.com/developers/carto-vl/guides/animated-visualizations.
 
@@ -38,6 +38,7 @@ def animation_widget(**kwargs):
                         )]
                 )
             )
+
     """
 
     data = kwargs
