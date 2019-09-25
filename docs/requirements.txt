@@ -1,3 +1,4 @@
 # documentation requirements	
 sphinx>=1.6.5
-sphinx-apidoc>=1.8.3
+sphinxcontrib-apidoc>=0.3.0
+sphinxcontrib-napoleon>=0.7.0
