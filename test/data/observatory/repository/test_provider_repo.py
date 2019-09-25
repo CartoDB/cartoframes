@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.provider import Providers
 
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -39,7 +38,7 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
-        assert providers == Providers([])
+        assert providers is None
 
     @patch.object(RepoClient, 'get_providers')
     def test_get_by_id(self, mocked_repo):

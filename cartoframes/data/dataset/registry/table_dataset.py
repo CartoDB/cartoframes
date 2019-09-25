@@ -48,8 +48,8 @@ class TableDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
-    def get_table_column_names(self, exclude=None):
-        """Get column names and types from a table"""
+    def get_column_names(self, exclude=None):
+        """Get column names from a table"""
         columns = [c.name for c in self._get_table_columns()]
 
         if exclude and isinstance(exclude, list):

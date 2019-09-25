@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.country import Countries
 
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -37,7 +36,7 @@ class TestCountryRepo(unittest.TestCase):
         countries = repo.get_all()
 
         # Then
-        assert countries == Countries([])
+        assert countries is None
 
     @patch.object(RepoClient, 'get_countries')
     def test_get_by_id(self, mocked_repo):

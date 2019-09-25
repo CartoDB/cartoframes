@@ -610,7 +610,7 @@ class DataObsClient(object):
 
         # get column names except the_geom_webmercator
         dataset = Dataset(table_name, credentials=self._credentials)
-        table_columns = dataset.get_table_column_names(exclude=['the_geom_webmercator'])
+        table_columns = dataset.get_column_names(exclude=['the_geom_webmercator'])
 
         names = {}
         for suggested in _meta['suggested_name']:
