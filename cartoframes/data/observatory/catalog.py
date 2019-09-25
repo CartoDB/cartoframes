@@ -8,7 +8,7 @@ class Catalog(object):
     @staticmethod
     def countries():
         """Get all the countries in the Catalog
-        
+
         Returns:
             :py:class:`Categories <cartoframes.data.observatory.Countries>`
 
@@ -19,10 +19,10 @@ class Catalog(object):
     @staticmethod
     def categories():
         """Get all the categories in the Catalog
-        
+
         Returns:
             :py:class:`Categories <cartoframes.data.observatory.Categories>`
 
         """
-        
+
         return Categories.get_all()

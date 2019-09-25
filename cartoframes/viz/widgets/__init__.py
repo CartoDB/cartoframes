@@ -20,6 +20,7 @@ __all__ = [
     'time_series_widget',
 ]
 
+
 def _inspect(widget):
     import inspect
     lines = inspect.getsource(widget)

@@ -5,7 +5,8 @@ from .credentials import Credentials
 
 _default_credentials = None
 
-"""Auth namespace contains the necessary tools to manage authentication by allowing the user to set its CARTO credentials."""
+"""Auth namespace contains the necessary tools to manage authentication by allowing
+the user to set its CARTO credentials."""
 
 def set_default_credentials(
         first=None, second=None, credentials=None,
@@ -135,7 +136,7 @@ def set_default_credentials(
 
 def get_default_credentials():
     """get_default_credentials
-    
+
     This method returns the credentials that have been set by default to authenticate with a CARTO account.
     """
 
