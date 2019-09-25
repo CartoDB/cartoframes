@@ -1,7 +1,6 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.geography import Geographies
 
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -39,7 +38,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
-        assert geographies == Geographies([])
+        assert geographies is None
 
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_id(self, mocked_repo):

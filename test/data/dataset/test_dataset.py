@@ -14,13 +14,15 @@ from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
 from cartoframes.utils.geom_utils import setting_value_exception
-from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _normalize_column_names
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
+from cartoframes.utils.columns import DataframeColumnsInfo
 
 try:
     from unittest.mock import Mock
@@ -258,17 +260,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
-        df = read_taxi(limit=100)
+        df = read_taxi(limit=50)
         lnglat = ('dropoff_longitude', 'dropoff_latitude')
-        dataset = Dataset(df).upload(
-            with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
-
+        Dataset(df).upload(with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
         self.assertExistsTable(self.test_write_table)
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 100)
+        self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_null_geometry_column(self):
@@ -383,11 +382,12 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
+        Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        dataset = Dataset(df).upload(
-            if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
+        # avoid uploading the same cartodb_id
+        df['cartodb_id'] += df['cartodb_id'].max() + 1
+
+        Dataset(df).upload(if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -705,85 +705,207 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
 
-    def test_copyfrom_column_names_with_geom(self):
-        the_geom = 'geometry'
-        with_lnglat = None
+    def test_create_table_query(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint, the_geom geometry(Point, 4326))'.format(table_name)
 
-        expected_columns_origin = [the_geom, 'address', 'city']
-        expected_columns_normalized = ['address', 'city', 'the_geom']
-
-        df = pd.DataFrame(
-            [['Gran Vía 46', 'Madrid', 'fake_geom'], ['Ebro 1', 'Sevilla', 'fake_geom']],
-            columns=['address', 'city', 'geometry'])
         dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        self.assertEqual(result, expected_result)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+    def test_create_table_query_without_geom(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1]})
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint)'.format(table_name)
 
-    def test_copyfrom_column_names_with_lnglat(self):
-        the_geom = None
-        with_lnglat = ('lng', 'lat')
-
-        expected_columns_origin = ['lng', 'lat']
-        expected_columns_normalized = ['lng', 'lat', 'the_geom']
-
-        df = pd.DataFrame([['0', '0'], ['1', '1']], columns=['lng', 'lat'])
         dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        self.assertEqual(result, expected_result)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+    def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['geom'])
+        ds = Dataset(df)
 
-    def test_copyfrom_column_names_without_geom(self):
-        columns = ['address', 'city']
-        the_geom = None
-        with_lnglat = None
+        BaseDataset.exists = Mock(return_value=False)
 
-        expected_columns_origin = columns
-        expected_columns_normalized = columns
+        ds.upload(table_name=table, credentials=credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=columns)
-        dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_one_geometry_that_is_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_several_geometry_columns_prioritize_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(geom,the_geom,geometry) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_the_geom_webmercator_column_is_removed(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 'POINT (1 1)', 'fake']], columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_lng_lat(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1]], columns=['lng', 'lat'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_other_geom_names(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_without_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, True, 'text']], columns=['col1', 'col2', 'col3'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(col1,col2,col3) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|True|text\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_null_values(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(test) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'\n', b'\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'\n', b'\n'])
 
     def test_rows_with_geom(self):
-        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
+        self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'\n', b'\n'])
+        self.assertEqual(list(rows), [b'|\n', b'|\n'])
 
     def test_rows_non_ascii(self):
         attribute = 'áéí'
@@ -792,5 +914,6 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         encoded_line = encoded_attribute + '\n'.encode()
 
         df = pd.DataFrame.from_dict({'test': [attribute, unicode_attribute, encoded_attribute, 'xyz']})
-        rows = _rows(df, ['test'], None, '', '')
+        columns_info = DataframeColumnsInfo(df)
+        rows = _rows(df, columns_info, None)
         self.assertEqual(list(rows), [encoded_line, encoded_line, encoded_line, b'xyz\n'])
