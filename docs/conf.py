@@ -71,7 +71,8 @@ exclude_patterns = [
     'Thumbs.db',
     '.DS_Store',
     'source',
-    'developers'
+    'developers',
+    'guides'
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
