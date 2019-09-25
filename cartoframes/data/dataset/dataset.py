@@ -25,21 +25,21 @@ class Dataset(object):
 
         .. code::
 
-            from pandas
+            import pandas
             from cartoframes.data import Dataset
 
-            df = pandas.DataFrame(...)
-            Dataset(df)
+            df = pandas.read_csv('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.csv')
+            ds = Dataset(df)
 
         GeoDataframe:
 
         .. code::
 
-            from geopandas
+            import geopandas as gpd
             from cartoframes.data import Dataset
 
-            gdf = geopandas.DataFrame(...)
-            Dataset(gdf)
+            gdf = gpd.read_file('https://opendata.arcgis.com/datasets/9485c26e98c6450e9611a2360ece965d_0.geojson')
+            ds = Dataset(gdf)
 
         GeoJSON file:
 
@@ -47,23 +47,9 @@ class Dataset(object):
 
             from cartoframes.data import Dataset
 
-            Dataset('path/to/geojsonfile')
+            ds = Dataset('path/to/geojson/file.geojson')
 
-        Table from CARTO
-
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.data import Dataset
-
-            set_default_credentials(
-                base_url='https://your_user_name.carto.com',
-                api_key='your api key'
-            )
-
-            Dataset('table_name')
-
-        Query usign CARTO stuff
+        Table from CARTO:
 
         .. code::
 
@@ -75,7 +61,21 @@ class Dataset(object):
                 api_key='your api key'
             )
 
-            Dataset('select * from table_name WHERE ...')
+            ds = Dataset('table_name')
+
+        Query against tables in user CARTO account:
+
+        .. code::
+
+            from cartoframes.auth import set_default_credentials
+            from cartoframes.data import Dataset
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com',
+                api_key='your api key'
+            )
+
+            ds = Dataset('SELECT * FROM table_name JOIN table2 ON ...')
     """
 
     FAIL = TableDataset.FAIL
@@ -100,24 +100,32 @@ class Dataset(object):
             if strategy.can_work_with(data):
                 return strategy.create(data, credentials, schema)
 
-        raise ValueError('We can not detect the Dataset type')
+        raise ValueError('Cannot detect Dataset type.')
 
     def _get_strategies_registry(self):
         return StrategiesRegistry()
 
     @property
     def credentials(self):
-        """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
+        """Dataset's :py:class:`Credentials <cartoframes.auth.Credentials>`
+
+        Returns:
+            :py:class:`Credentials <cartoframes.auth.Credentials>`: Credentials, if any, for data associated with Dataset instance."""
         return self._strategy.credentials
 
     @credentials.setter
     def credentials(self, credentials):
-        """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
+        """Set a new :py:class:`Credentials <cartoframes.auth.Credentials>`
+        for a Dataset instance.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`): Credentials instance to associated with Datset instance
+        """
         self._strategy.credentials = credentials
 
     @property
     def table_name(self):
-        """Dataset table name"""
+        """Dataset table name. If `None`, then the data is a query or DataFrame"""
         return self._strategy.table_name
 
     @property
