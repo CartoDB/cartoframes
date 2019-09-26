@@ -14,7 +14,6 @@ from .legend import Legend
 from .widget import Widget
 from .widget_list import WidgetList
 
-
 __all__ = [
     'basemaps',
     'themes',

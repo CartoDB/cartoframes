@@ -1,6 +1,3 @@
-Geocode
-=======
-
 The ``cartoframes.data.dataservices.Geocode`` class provides geocoding using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
@@ -34,7 +31,7 @@ The result of the ``geocode`` method is a tuple containing both a result Dataset
 (or a Dataframe, in case the input was a Dataframe) and a dictionary with general information about the process.
 
 Dry run
--------
+"""""""
 
 To find out the number of quota credits that will be spent when geocoding a dataset pass a ``dry_run=True`` argument:
 
@@ -57,7 +54,7 @@ To find out the number of quota credits that will be spent when geocoding a data
 When ``dry_run`` is True no changes will be made to the data and no quota will be consumed.
 
 Geocoding Dataframes
---------------------
+""""""""""""""""""""
 
 A Dataframe can be geocoded like this:
 
@@ -92,7 +89,7 @@ To store the results permanently in a CARTO dataset the argument ``table_name`` 
     print(geocoded_dataset.download())
 
 Geocoding Tables
-----------------
+""""""""""""""""
 
 When the Dataset to be geocoded corresponds to a CARTO table, it will by default be modified in place:
 
@@ -125,7 +122,7 @@ To leave the existing table unmodified and place the results in a new table the 
     print(new_dataset.download())
 
 Geocoding Queries
------------------
+"""""""""""""""""
 
 When the Dataset to be geocoded corresponds to a query, it will by default be geocoded into a new dataframe dataset:
 

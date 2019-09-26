@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset

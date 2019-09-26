@@ -42,6 +42,8 @@ extensions = [
     'sphinx.ext.napoleon'
 ]
 
+modindex_common_prefix = ['test']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -67,7 +69,10 @@ language = None
 exclude_patterns = [
     u'build',
     'Thumbs.db',
-    '.DS_Store'
+    '.DS_Store',
+    'includes',
+    'developers',
+    'guides'
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
