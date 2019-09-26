@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0b3] - 2019-08-?
 ### Added
 - Add cluster_size_legend helper method (#654)
-- Add Layout class to support multiple maps (#892, #953)
+- Add Layout class to support multiple maps (#892, #953, #919)
 - Add dynamic Legend: react to map changes (#935)
 - Add LegendList class to allow multiple legends per layer (#925)
 - Add more style params to the helper methods (#948)
