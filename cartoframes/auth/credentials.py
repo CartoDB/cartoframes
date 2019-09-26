@@ -201,6 +201,7 @@ class Credentials(object):
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
 
+
 def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
@@ -230,7 +231,7 @@ def set_default_credentials(
         username (str, optional):
             CARTO user name of the account.
         session (requests.Session, optional):
-            requests session. See `requests documentation 
+            requests session. See `requests documentation
             <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
             for more information.
 
