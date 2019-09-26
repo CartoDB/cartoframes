@@ -1,11 +1,11 @@
 API Reference
 =============
 
-.. include:: source/introduction.rst
-.. include:: source/auth.rst
-.. include:: source/data_management.rst
-.. include:: source/data_observatory.rst
-.. include:: source/data_enrichment.rst
-.. include:: source/data_services.rst
-.. include:: source/viz.rst
-.. include:: source/exceptions.rst
+.. include:: includes/introduction.rst
+.. include:: includes/auth.rst
+.. include:: includes/data_management.rst
+.. include:: includes/data_observatory.rst
+.. include:: includes/data_enrichment.rst
+.. include:: includes/data_services.rst
+.. include:: includes/viz.rst
+.. include:: includes/exceptions.rst

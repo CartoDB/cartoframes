@@ -70,7 +70,7 @@ exclude_patterns = [
     u'build',
     'Thumbs.db',
     '.DS_Store',
-    'source',
+    'includes',
     'developers',
     'guides'
 ]
