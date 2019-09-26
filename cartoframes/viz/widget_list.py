@@ -5,25 +5,26 @@ from .widget import Widget
 
 class WidgetList(object):
     """WidgetList
-     Args:
+    
+    Args:
         widgets (dict, list, Widget): The list of widgets for a layer.
 
     Example:
 
-        .. code::python
+    .. code::python
 
-            from cartoframes.viz import Widget
+        from cartoframes.viz import Widget
 
-            WidgetList([{
-                type: 'formula',
-                value: 'viewportSum($amount)'
-                title: '...',
-                description: '...',
-                footer: '...'
-            }, {
-                'type': 'default',
-                'value': '"Custom Info"',
-            }])
+        WidgetList([{
+            type: 'formula',
+            value: 'viewportSum($amount)'
+            title: '...',
+            description: '...',
+            footer: '...'
+        }, {
+            'type': 'default',
+            'value': '"Custom Info"',
+        }])
     """
 
     def __init__(self, widgets=None):
