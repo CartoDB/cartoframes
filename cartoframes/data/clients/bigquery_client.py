@@ -17,7 +17,7 @@ def refresh_client(func):
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
-                raise CartoException('Something goes wrong accessing data. '
+                raise CartoException('Something went wrong accessing data. '
                                      'Please, try again in a few seconds or contact support for help.')
     return wrapper
 
