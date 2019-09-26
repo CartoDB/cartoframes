@@ -4,16 +4,20 @@
   },
   "categories": [
     {
-        "title": "Quickstart",
-        "samples": [{
-          "title": "Basic usage",
-          "desc": "Basic methods",
-          "file": "01_basic_usage.html"
-        }, {
-          "title": "Credentials Setup",
-          "desc": "How to setup your CARTO credentials",
-          "file": "02_credentials_setup.html"
-        }]
+      "title": "Quickstart",
+      "samples": [{
+        "title": "Basic usage",
+        "desc": "Basic methods",
+        "file": "01_basic_usage.html"
+      }, {
+        "title": "Credentials Setup",
+        "desc": "How to setup your CARTO credentials",
+        "file": "02_credentials_setup.html"
+      }, {
+        "title": "Basemap and viewport",
+        "desc": "Basemap and viewport",
+        "file": "03_basemap_and_viewport.html"
+      }]
     }, {
       "title": "Sources",
       "samples": [{
@@ -23,7 +27,45 @@
       }, {
         "title": "Dataframe",
         "desc": "Use a Dataframe",
-        "file": "03_dataframe.html"
+        "file": "03_dataframes.html"
+      }]
+    }, {
+      "title": "Visualization",
+      "samples": [{
+        "title": "Legends",
+        "desc": "",
+        "file": "01_legends.html"
+      }, {
+        "title": "Popups",
+        "desc": "",
+        "file": "02_popups.html"
+      }, {
+        "title": "Widgets part 1",
+        "desc": "",
+        "file": "03_widgets_part_1.html"
+      }, {
+        "title": "Widgets part 2",
+        "desc": "",
+        "file": "04_widgets_part_2.html"
+      }, {
+        "title": "Layout",
+        "desc": "",
+        "file": "05_layout.html"
+      }, {
+        "title": "Helper methods",
+        "samples": [{
+          "title": "Part 1",
+          "desc": "",
+          "file": "01_helper_methods_part_1.html"
+        }, {
+          "title": "Part 2",
+          "desc": "",
+          "file": "02_helper_methods_part_2.html"
+        }, {
+          "title": "Part 3",
+          "desc": "",
+          "file": "03_helper_methods_part_3.html"
+        }]
       }]
     }
   ]
