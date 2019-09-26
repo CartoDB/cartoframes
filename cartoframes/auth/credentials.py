@@ -13,7 +13,7 @@ else:
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
-
+_default_credentials = None
 
 class Credentials(object):
     """Credentials class for managing and storing user CARTO credentials. The
