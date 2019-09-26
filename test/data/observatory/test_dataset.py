@@ -1,13 +1,15 @@
 import unittest
 import pandas as pd
+from cartoframes.data.observatory.variable_group import VariablesGroups
 
 from cartoframes.data.observatory.variable import Variables
 from cartoframes.data.observatory.dataset import Datasets, Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.exceptions import DiscoveryException
 
-from .examples import test_dataset1, test_datasets, test_variables, db_dataset1
+from .examples import test_dataset1, test_datasets, test_variables, db_dataset1, test_variables_groups
 
 try:
     from unittest.mock import Mock, patch
@@ -50,6 +52,19 @@ class TestDataset(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             dataset.variables()
+
+    @patch.object(VariableGroupRepository, 'get_by_dataset')
+    def test_get_variables_groups_by_dataset(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_variables_groups
+
+        # When
+        variables_groups = test_dataset1.variables_groups()
+
+        # Then
+        assert isinstance(variables_groups, pd.DataFrame)
+        assert isinstance(variables_groups, VariablesGroups)
+        assert variables_groups == test_variables_groups
 
 
 class TestDatasets(unittest.TestCase):

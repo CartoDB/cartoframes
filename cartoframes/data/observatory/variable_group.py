@@ -1,6 +1,6 @@
 from .entity import SingleEntity, EntitiesList
-from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
+from .repository.variable_repo import get_variable_repo
 
 _VARIABLE_GROUP_ID_FIELD = 'id'
 
