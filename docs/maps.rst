@@ -37,8 +37,8 @@ Widget Functions
    :noindex:
    :members:
 
-Vector Layers
-^^^^^^^^^^^^^
+Layers
+^^^^^^
 
 .. autoclass:: cartoframes.viz.Layer
    :noindex:

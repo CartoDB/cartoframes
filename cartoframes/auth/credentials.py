@@ -157,13 +157,13 @@ class Credentials(object):
 
             .. code::
 
-                from cartoframes import Credentials
+                from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save()  # save to default location
 
             .. code::
 
-                from cartoframes import Credentials
+                from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save('path/to/credentials/file')
         """

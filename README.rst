@@ -231,7 +231,7 @@ Example: Get census tracts around Idaho Falls, Idaho, USA, and add median income
 .. code:: python
 
     from cartoframes.auth import set_default_credentials
-    from cartoframes.client import DataObsClient
+    from cartoframes.data.clients import DataObsClient
 
     set_default_credentials(
         base_url='https://your_user_name.carto.com',
