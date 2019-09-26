@@ -7,17 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0b3] - ?
+## [1.0b3] - 2019-08-?
 ### Added
+- Add cluster_size_legend helper method (#654)
+- Add Layout class to support multiple maps (#892, #953)
+- Add dynamic Legend: react to map changes (#935)
+- Add LegendList class to allow multiple legends per layer (#925)
+- Add more style params to the helper methods (#948)
+- Add Discovery API to return DataFrames instances (#960)
+- Add Data Discovery properties (#961)
+- Add Geocoder Analysis (#888)
+- Better integration of the catalog with pandas (#962)
+- First stage enrichment polygons (#1016)
+- Add DO token (#1019)
 
 ### Changed
-
-### Deprecated
-
-### Removed
+- Change default_legend behaviour (#775, #774)
+- Update namespaces (#911)
 
 ### Fixed
-- SQLClient & DataObsClient support for set_default_credentials (#876)
+- Fix SQLClient & DataObsClient support for set_default_credentials (#876)
+- Fix request-URI Too Large for url error (#778)
+- Fix sidebar footer overlap (#906)
+- Fix histogram widget filter (#929, #940)
+- Fix legend title overflow (#928)
+- Fix show_info in settings (#918)
+- Fix internal state of Dataset (#861)
+- Fix retrieving widget type (#954)
+- Fix Dataset.upload() with default credentials (#913)
+- Fix Dataset.upload() column names using DataFrame (#947, #914, #922)
+- Fix min/max Legend values (#939)
+- Support uploading DataFrames with non-ascii texts in Python 2 (#1001)
 
 ## [1.0b2] - 2019-08-07
 ### Added
@@ -34,7 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactoring Auth API
   - Refactor auth namespace (#789)
   - Deprecate _auth_send (#624)
-  - Refactor Context API: Credentials (#661)
   - Tables used by a query (#730)
 - New SQLClient API (#808)
 - New Data Observatory API (#806)
@@ -56,6 +75,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add more params in the existing helpers (#830)
   - Helper methods palette expressions as python lists (#825)
 - Documentation and examples (#859, #879, #790, #873)
+
+### Changed
+- Refactor Context API: Credentials (#661)
 
 ### Removed
 - Clean old API! (#807)
