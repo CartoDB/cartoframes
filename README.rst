@@ -27,6 +27,10 @@ Try it Out
 .. |beta| image:: https://mybinder.org/badge_logo.svg
     :target: https://mybinder.org/v2/gh/cartodb/cartoframes/v1.0b3?filepath=examples
 
+If you do not have an API key, you can still use cartoframes for creating maps locally.
+
+    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 14 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
+
 Features
 ========
 
@@ -36,7 +40,7 @@ Features
 - Create customizable, interactive CARTO maps in a Jupyter notebook using DataFrames or hosted data
 - Augment your data with CARTO's Data Observatory
 - Use CARTO for cloud-based analysis
-- Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/example_context.html>`__
+- Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/examples.html>`__
 
 Common Uses
 ===========
@@ -46,16 +50,6 @@ Common Uses
 - Extract, transform, and Load (ETL) data using the Python ecosystem for getting data into and out of CARTO
 - Data Services integrations using CARTO's `Location Data Streams <https://carto.com/platform/location-data-streams/>`__
 
-Try it out
-==========
-
-The easiest way to try out cartoframes is to use the cartoframes example notebooks running in binder: https://mybinder.org/v2/gh/CartoDB/cartoframes/v0.10.1?filepath=examples If you already have an API key, you can follow along and complete all of the example notebooks.
-
-If you do not have an API key, you can still use cartoframes for creating maps locally.
-
-.. note::
-    The example context only provides read access, so not all cartoframes features are available. For full access, `Start a free 14 day trial <https://carto.com/signup>`__ or get free access with a `GitHub Student Developer Pack <https://education.github.com/pack>`__.
-
 More info
 =========
 
@@ -63,7 +57,6 @@ More info
 - Source code: https://github.com/CartoDB/cartoframes
 - bug tracker / feature requests: https://github.com/CartoDB/cartoframes/issues
 
-.. note::
     `cartoframes` users must have a CARTO API key for most `cartoframes` functionality. For example, writing DataFrames to an account, reading from private tables, and visualizing data on maps all require an API key. CARTO provides API keys for education and nonprofit uses, among others. Request access at support@carto.com. API key access is also given through `GitHub's Student Developer Pack <https://carto.com/blog/carto-is-part-of-the-github-student-pack>`__.
 
 Install Instructions
@@ -184,7 +177,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
         if_exists='replace'
     )
 
-.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/master/docs/img/data-workflow.gif
+.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/develop/docs/img/data-workflow.gif
 
 
 Map workflow
@@ -209,6 +202,7 @@ Interactive vector maps can be created programmatically in CARTOframes. In addit
     Map(color_continuous_layer('brooklyn_poverty', 'poverty_per_pop'))
 
 Publish map to CARTO
+^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
