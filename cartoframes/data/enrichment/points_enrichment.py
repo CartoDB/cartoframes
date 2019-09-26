@@ -13,7 +13,7 @@ _WORKING_PROJECT = 'carto-do-customers'
 def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), credentials=None):
 
     credentials = credentials or get_default_credentials()
-    bq_client = bigquery_client.BigQueryClient(credentials)
+    bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
 
     user_dataset = credentials.username.replace('-', '_')
 
