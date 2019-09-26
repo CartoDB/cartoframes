@@ -1,7 +1,12 @@
 import pandas as pd
 
-from abc import ABC, abstractmethod
 from cartoframes.exceptions import DiscoveryException
+
+try:
+    from abc import ABC, abstractmethod
+except ImportError:
+    from abc import ABCMeta, abstractmethod
+    ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 
 class CatalogEntity(ABC):
