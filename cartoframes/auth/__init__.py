@@ -1,5 +1,7 @@
 """Auth namespace contains the class to manage authentication: Credentials.
-It also includes the utility method set_default_credentials."""
+It also includes the utility functions
+:func:`cartoframes.auth.set_default_credentials` and 
+:func:`cartoframes.auth.get_default_credentials`."""
 from __future__ import absolute_import
 import re
 
@@ -11,7 +13,11 @@ _default_credentials = None
 def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
-    """set_default_credentials
+    """Set default credentials for all operations that require authentication
+    against a CARTO account. CARTOframes methods :py:class:`cartoframes.viz.Layer`
+    (and helper layers in :py:module:`cartoframes.viz.helpers`),
+    :py:class:`cartoframes.data.Dataset`,
+    :py:class:`cartoframes.data.clients.SQLClient`, and others.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
@@ -34,7 +40,7 @@ def set_default_credentials(
         The recommended way to authenticate in CARTOframes is to read user
         credentials from a JSON file that is structured like this:
 
-        .. code::json
+        .. code:: JSON
 
             {
                 "username": "your user name",
@@ -43,7 +49,7 @@ def set_default_credentials(
             }
 
 
-        *Note that the `base_url` will be different for on premises
+        *Note that the ``base_url`` will be different for on premises
         installations.*
 
         By using the :func:`cartoframes.auth.Credentials.save` method, this
@@ -69,7 +75,7 @@ def set_default_credentials(
 
     Example:
 
-        Create Credentials from a username, api_key pair.
+        Create Credentials from a ``username``, ``api_key`` pair.
 
         .. code::
 
@@ -87,9 +93,9 @@ def set_default_credentials(
                 'your api key'
             )
 
-        Create credentials from only a username (only works with public
+        Create credentials from only a ``username`` (only works with public
         datasets and those marked public with link). If the API key is not
-        provided, the public API key `default_public` is used by default.
+        provided, the public API key `default_public` is used.
 
         .. code::
 
@@ -97,7 +103,7 @@ def set_default_credentials(
 
             set_default_credentials('your_user_name')
 
-        From a pair base_url, api_key.
+        From a ``base_url``, ``api_key`` pair.
 
         .. code::
 
@@ -115,8 +121,8 @@ def set_default_credentials(
                 'your api key'
             )
 
-        From a base_url (for public datasets).
-        The API key `default_public` is used by default.
+        From a ``base_url`` (for public datasets). The API key `default_public`
+        is used by default.
 
         .. code::
 
