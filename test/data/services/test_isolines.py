@@ -7,7 +7,6 @@ import sys
 import json
 import warnings
 import pandas as pd
-import logging
 
 from carto.exceptions import CartoException
 
@@ -86,9 +85,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         # ]
 
         self.points = [
-            ['a','0101000020E610000028B85851837F52C025404D2D5B5F4440'],
-            ['b','0101000020E610000036B05582C5A10DC0A032FE7DC6354440'],
-            ['c','0101000020E6100000912C6002B7EE17C0C45A7C0A80AD4240']
+            ['a', '0101000020E610000028B85851837F52C025404D2D5B5F4440'],
+            ['b', '0101000020E610000036B05582C5A10DC0A032FE7DC6354440'],
+            ['c', '0101000020E6100000912C6002B7EE17C0C45A7C0A80AD4240']
         ]
         self.tearDown()
 
@@ -126,17 +125,17 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
-        ds = Dataset(df)
+        ds = Dataset(df, credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100,1000], mode='car', dry_run=True)
+        result = iso.isochrone_areas(ds, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100,1000], mode='car').data
+        result = iso.isochrone_areas(ds, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, Dataset))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -150,17 +149,19 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
-        ds = Dataset(df)
+        ds = Dataset(df, credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
+        table_name = self.get_test_table_name('isodf')
+
         # Preview
-        result = iso.isochrone_areas(ds, [100,1000], mode='car', dry_run=True)
+        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=table_name, dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100,1000], mode='car').data
+        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=table_name).data
         self.assertTrue(isinstance(result, Dataset))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -168,3 +169,55 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+
+    def test_isolines_from_dataframe(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Isolines(credentials=self.credentials)
+
+        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
+
+        quota = self.used_quota(iso)
+
+        # Preview
+        result = iso.isochrone_areas(df, [100, 1000], mode='car', dry_run=True)
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isochrones
+        result = iso.isochrone_areas(df, [100, 1000], mode='car').data
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
+        self.assertTrue('the_geom' in result)
+        self.assertTrue('data_range' in result)
+        self.assertEqual(len(result.index), 6)
+
+    def test_isolines_from_dataframe_as_new_table(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Isolines(credentials=self.credentials)
+
+        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
+
+        quota = self.used_quota(iso)
+
+        table_name = self.get_test_table_name('isodfds')
+
+        # Preview
+        result = iso.isochrone_areas(df, [100, 1000], mode='car', table_name=table_name, dry_run=True)
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isochrones
+        result = iso.isochrone_areas(df, [100, 1000], mode='car', table_name=table_name) .data
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
+        self.assertTrue('the_geom' in result)
+        self.assertTrue('data_range' in result)
+        self.assertEqual(len(result.index), 6)
+
+        ds = Dataset(table_name, credentials=self.credentials)
+        result_columns = ds.get_column_names()
+        self.assertTrue('the_geom' in result_columns)
+        self.assertTrue('data_range' in result_columns)
+        self.assertEqual(ds.get_num_rows(), 6)
