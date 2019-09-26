@@ -5,7 +5,6 @@ from .. import constants
 
 class HTMLLayout(object):
     def __init__(self, template_path='templates/viz/layout.html.j2'):
-        self.width = None
         self.srcdoc = None
         self._env = Environment(
             loader=PackageLoader('cartoframes', 'assets'),
