@@ -68,4 +68,4 @@ Add documentation to the API reference:
     .. automodule:: cartoframes.module.other_module
     :members:
 
-- Include the module you want to import in the `__init__.py` file properly
+- Include the file you want to import in the `__init__.py` file properly

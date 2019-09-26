@@ -13,14 +13,10 @@ from .popup import Popup
 from .legend import Legend
 from .widget import Widget
 from .widget_list import WidgetList
-from .helpers import __all__ as helpers
-from .widgets import __all__ as widgets
 
 __all__ = [
     'basemaps',
     'themes',
-    'helpers',
-    'widgets',
     'Map',
     'Layout',
     'Layer',
