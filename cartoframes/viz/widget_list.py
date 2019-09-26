@@ -5,7 +5,7 @@ from .widget import Widget
 
 class WidgetList(object):
     """WidgetList
-    
+
     Args:
         widgets (dict, list, Widget): The list of widgets for a layer.
 
