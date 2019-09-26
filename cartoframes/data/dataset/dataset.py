@@ -110,7 +110,10 @@ class Dataset(object):
         """Dataset's :py:class:`Credentials <cartoframes.auth.Credentials>`
 
         Returns:
-            :py:class:`Credentials <cartoframes.auth.Credentials>`: Credentials, if any, for data associated with Dataset instance."""
+            :py:class:`Credentials <cartoframes.auth.Credentials>`: Credentials,
+            if any, for data associated with Dataset instance.
+
+        """
         return self._strategy.credentials
 
     @credentials.setter
@@ -119,7 +122,8 @@ class Dataset(object):
         for a Dataset instance.
 
         Args:
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`): Credentials instance to associated with Datset instance
+            credentials (:py:class:`cartoframes.auth.Credentials`): Credentials
+              instance to associated with Datset instance
         """
         self._strategy.credentials = credentials
 
