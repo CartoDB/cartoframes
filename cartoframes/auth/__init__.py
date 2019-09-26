@@ -1,6 +1,6 @@
 """Auth namespace contains the class to manage authentication: Credentials.
 It also includes the utility functions
-:func:`cartoframes.auth.set_default_credentials` and 
+:func:`cartoframes.auth.set_default_credentials` and
 :func:`cartoframes.auth.get_default_credentials`."""
 from __future__ import absolute_import
 import re
@@ -14,8 +14,9 @@ def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
     """Set default credentials for all operations that require authentication
-    against a CARTO account. CARTOframes methods :py:class:`cartoframes.viz.Layer`
-    (and helper layers in :py:module:`cartoframes.viz.helpers`),
+    against a CARTO account. CARTOframes methods
+    :py:class:`cartoframes.viz.Layer` (and helper layers in
+    :py:mod:`cartoframes.viz.helpers`),
     :py:class:`cartoframes.data.Dataset`,
     :py:class:`cartoframes.data.clients.SQLClient`, and others.
 
