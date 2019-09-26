@@ -3,6 +3,17 @@ import pytz
 
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
+from google.auth.exceptions import RefreshError
+
+
+def refresh_client(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except RefreshError:
+            self._init_client()
+            func(*args, **kwargs)
+    return wrapper
 
 
 class BigQueryClient(object):
@@ -19,6 +30,7 @@ class BigQueryClient(object):
             project=self._project,
             credentials=google_credentials)
 
+    @refresh_client
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
@@ -37,11 +49,13 @@ class BigQueryClient(object):
             table.expires = expiration
             self.client.update_table(table, ["expires"])
 
+    @refresh_client
     def query(self, query, **kwargs):
         response = self.client.query(query, **kwargs)
 
         return response
 
+    @refresh_client
     def delete_table(self, tablename, project, dataset):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
