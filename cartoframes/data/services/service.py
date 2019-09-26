@@ -125,16 +125,6 @@ class Service(object):
     def _execute_long_running_query(self, query):
         return self._context.execute_long_running_query(query)
 
-    def _dataset_num_rows(self, dataset):
-        # TODO: add count (num_rows) method to Dataset
-        if hasattr(dataset, 'dataframe') and dataset.dataframe is not None:
-            return len(dataset.dataframe.index)
-        elif hasattr(dataset, 'table_name') and dataset.table_name:
-            result = self._execute_query("SELECT COUNT(*) FROM {table}".format(table=dataset.table_name))
-        else:
-            result = self._execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=dataset.get_query()))
-        return result.get('rows')[0].get('count')
-
     def result(self, data, metadata=None):
         if isinstance(data, DataFrame):
             return DataFrameResult(data, metadata)

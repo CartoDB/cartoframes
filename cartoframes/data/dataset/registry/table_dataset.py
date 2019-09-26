@@ -57,6 +57,11 @@ class TableDataset(BaseDataset):
 
         return columns
 
+    def get_num_rows(self):
+        """Get the number of rows in the table"""
+        result = self._execute_query("SELECT COUNT(*) FROM {table}".format(table=self.table_name))
+        return result.get('rows')[0].get('count')
+
     def _unsync(self):
         self._dataset_info = None
 

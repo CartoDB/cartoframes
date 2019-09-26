@@ -47,7 +47,7 @@ class Isolines(Service):
             source = Dataset(input_dataframe)
 
         if dry_run:
-            num_rows = self._dataset_num_rows(source)
+            num_rows = source.get_num_rows()
             metadata['required_quota'] = num_rows * len(range)
             return self.result(source, metadata=metadata)
 

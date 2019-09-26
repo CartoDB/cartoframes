@@ -80,6 +80,10 @@ class DataFrameDataset(BaseDataset):
 
         return columns
 
+    def get_num_rows(self):
+        """Get the number of rows in the dataframe"""
+        return len(self._df.index)
+
     def _copyfrom(self, normalized_column_names, with_lnglat):
         geom_col = _get_geom_col_name(self._df)
         enc_type = _detect_encoding_type(self._df, geom_col)
