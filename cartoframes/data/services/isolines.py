@@ -111,19 +111,17 @@ class Isolines(Service):
               iso_options=iso_options
             )
 
+        dataset = Dataset(sql, credentials=self._credentials)
         if table_name:
-            dataset = Dataset(sql, credentials=self._credentials)
             dataset.upload(table_name=table_name, credentials=self._credentials, if_exists=if_exists)
             result = Dataset(table_name, credentials=self.credential)
-            # TODO: return a Dataframe if the input was a Dataframe
-            # if input_dataframe:
-            #     result = result.download()
+            if input_dataframe:
+                result = result.download()
         else:
             # It would be nice to use execute_long_running_query, but we need the results
-            result = Dataset(sql, credentials=self._credentials).download()
-            # TODO: should we return a Dataset if the input was not a Dataframe?
-            # if not input_dataframe:
-            #     result = Dataset(result)
+            result = dataset.download()
+            if not input_dataframe:
+                result = Dataset(result)
 
         if temporary_table_name:
             Dataset(temporary_table_name, credentials=self._credentials).delete()
