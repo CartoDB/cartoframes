@@ -5,14 +5,20 @@ from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
 from google.auth.exceptions import RefreshError
 
+from carto.exceptions import CartoException
+
 
 def refresh_client(func):
     def wrapper(self, *args, **kwargs):
         try:
-            func(*args, **kwargs)
+            return func(self, *args, **kwargs)
         except RefreshError:
             self._init_client()
-            func(*args, **kwargs)
+            try:
+                return func(self, *args, **kwargs)
+            except RefreshError:
+                raise CartoException('Something goes wrong accessing data. '
+                                     'Please, try again in a few seconds or contact support for help.')
     return wrapper
 
 
