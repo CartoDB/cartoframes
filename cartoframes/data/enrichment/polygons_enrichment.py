@@ -43,7 +43,8 @@ def __prepare_sql(enrichment_id, filters_processed, variables_processed, enrichm
         {grouper};
     '''.format(enrichment_id=enrichment_id, variables=', '.join(variables_sql),
                enrichment_table=enrichment_table, enrichment_geo_table=enrichment_geo_table,
-               user_dataset=user_dataset, working_project=working_project, data_table=data_table,
-               data_geom_column=kwargs['data_geom_column'], filters=filters_processed, grouper=grouper)
+               user_dataset=user_dataset, working_project=working_project,
+               data_table=data_table, data_geom_column=kwargs['data_geom_column'],
+               filters=filters_processed, grouper=grouper)
 
     return sql
