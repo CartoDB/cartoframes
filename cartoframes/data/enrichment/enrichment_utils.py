@@ -1,12 +1,10 @@
 import pandas as pd
 import geopandas as gpd
-import geojson
 import uuid
-
-from shapely.geometry import shape
-from shapely.wkt import loads
-from ..dataset.dataset import Dataset
 from collections import defaultdict
+
+from ..dataset.dataset import Dataset
+from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
 from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
 from ..clients import bigquery_client
@@ -85,22 +83,6 @@ def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_
         data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
-
-
-def wkt_to_geojson(wkt):
-    shapely_geom = loads(wkt)
-    geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
-
-    return str(geojson_geometry.geometry)
-
-
-def geojson_to_wkt(geojson_str):
-    geojson_geom = geojson.loads(geojson_str)
-    wkt_geometry = shape(geojson_geom)
-
-    shapely_geom = loads(wkt_geometry.wkt)
-
-    return shapely_geom
 
 
 def __process_filters(filters_dict):
