@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0b3] - 2019-08-?
+## [1.0b3] - 2019-08-27
 ### Added
 - Add cluster_size_legend helper method (#654)
 - Add Layout class to support multiple maps (#892, #953, #919)
