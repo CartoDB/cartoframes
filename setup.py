@@ -20,7 +20,7 @@ def walk_subpkg(name):
 
 REQUIRES = [
     'appdirs>=1.4.3,<2.0',
-    'carto>=1.6.0,<2.0',
+    'carto>=1.7.0,<2.0',
     'jinja2>=2.10.1,<3.0',
     'pandas>=0.24.2<1.0',
     'shapely>=1.6.4,<2.0',

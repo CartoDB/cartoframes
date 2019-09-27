@@ -19,7 +19,7 @@ class SQLClient(object):
         .. code::
 
             from cartoframes.auth import Credentials
-            from cartoframes.client import SQLClient
+            from cartoframes.data.clients import SQLClient
 
             credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
             sql = SQLClient(credentials)
