@@ -62,9 +62,3 @@ class BigQueryClient(object):
         response = self.client.query(query, **kwargs)
 
         return response
-
-    @refresh_client
-    def delete_table(self, tablename, project, dataset):
-        dataset_ref = self.client.dataset(dataset, project=project)
-        table_ref = dataset_ref.table(tablename)
-        self.client.delete_table(table_ref)
