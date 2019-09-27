@@ -8,63 +8,76 @@
       "samples": [{
         "title": "Basic usage",
         "desc": "Basic methods",
-        "file": "01_basic_usage.html"
+        "file": "01_basic_usage.html",
+        "path": "01_quickstart"
       }, {
         "title": "Credentials Setup",
         "desc": "How to setup your CARTO credentials",
-        "file": "02_credentials_setup.html"
+        "file": "02_credentials_setup.html",
+        "path": "01_quickstart"
       }, {
         "title": "Basemap and viewport",
         "desc": "Basemap and viewport",
-        "file": "03_basemap_and_viewport.html"
+        "file": "03_basemap_and_viewport.html",
+        "path": "01_quickstart"
       }]
     }, {
       "title": "Sources",
       "samples": [{
         "title": "GeoJSON",
         "desc": "Use a GeoJSON",
-        "file": "02_geojson.html"
+        "file": "02_geojson.html",
+        "path": "02_sources"
       }, {
         "title": "Dataframe",
         "desc": "Use a Dataframe",
-        "file": "03_dataframes.html"
+        "file": "03_dataframes.html",
+        "path": "02_sources"
       }]
     }, {
       "title": "Visualization",
       "samples": [{
         "title": "Legends",
         "desc": "",
-        "file": "01_legends.html"
+        "file": "01_legends.html",
+        "path": "03_visualizations"
       }, {
         "title": "Popups",
         "desc": "",
-        "file": "02_popups.html"
+        "file": "02_popups.html",
+        "path": "03_visualizations"
       }, {
         "title": "Widgets part 1",
         "desc": "",
-        "file": "03_widgets_part_1.html"
+        "file": "03_widgets_part_1.html",
+        "path": "03_visualizations"
       }, {
         "title": "Widgets part 2",
         "desc": "",
-        "file": "04_widgets_part_2.html"
+        "file": "04_widgets_part_2.html",
+        "path": "03_visualizations"
       }, {
         "title": "Layout",
         "desc": "",
-        "file": "05_layout.html"
+        "file": "05_layout.html",
+        "path": "03_visualizations"
       }, {
         "title": "Helper methods",
         "samples": [{
           "title": "Part 1",
           "desc": "",
-          "file": "01_helper_methods_part_1.html"
+          "file": "01_helper_methods_part_1.html",
+          "path": "04_helper_methods"
         }, {
           "title": "Part 2",
           "desc": "",
-          "file": "02_helper_methods_part_2.html"
+          "file": "02_helper_methods_part_2.html",
+          "path": "04_helper_methods"
         }, {
           "title": "Part 3",
           "desc": "",
-          "file": "03_helper_methods_part_3.html"
+          "file": "03_helper_methods_part_3.html",
+          "path": "04_helper_methods"
         }]
       }]
     }
