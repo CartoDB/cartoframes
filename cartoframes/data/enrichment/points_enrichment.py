@@ -1,4 +1,4 @@
-from .enrichment_utils import enrich
+from .enrichment_service import enrich
 
 # TODO: process column name in metadata, remove spaces and points
 
