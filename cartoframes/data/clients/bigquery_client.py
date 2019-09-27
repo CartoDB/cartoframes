@@ -7,6 +7,8 @@ from google.auth.exceptions import RefreshError
 
 from carto.exceptions import CartoException
 
+from ...auth import get_default_credentials
+
 
 def refresh_client(func):
     def wrapper(self, *args, **kwargs):
@@ -26,7 +28,7 @@ class BigQueryClient(object):
 
     def __init__(self, project, credentials):
         self._project = project
-        self._credentials = credentials
+        self._credentials = credentials or get_default_credentials()
         self.client = self._init_client()
 
     def _init_client(self):
