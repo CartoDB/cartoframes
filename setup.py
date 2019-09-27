@@ -28,7 +28,8 @@ REQUIRES = [
     'unidecode>=1.1.0,<2.0',
     'webcolors>=1.9.1,<2.0',
     'pyarrow>=0.14.1,<1.0',
-    'google-cloud-bigquery>=1.19.0,<2.0'
+    'google-cloud-bigquery>=1.19.0,<2.0',
+    'geojson>=2.5.0,<3.0'
 ]
 
 PACKAGE_DATA = {
