@@ -15,19 +15,37 @@ _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'
 
 
-def enrich(preparation_sql_function, **kwargs):
-
-    credentials = kwargs['credentials'] or get_default_credentials()
-    bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
-
+def enrich(query_function, **kwargs):
+    credentials = __get_credentials(kwargs['credentials'])
     user_dataset = credentials.username.replace('-', '_')
+    bq_client = __get_bigquery_client(_WORKING_PROJECT, credentials)
 
-    data_copy = copy_data_and_generate_enrichment_id(kwargs['data'], _ENRICHMENT_ID, kwargs['data_geom_column'])
+    data_copy = __prepare_data(kwargs['data'], kwargs['data_geom_column'])
+    tablename = __upload_dataframe(bq_client, user_dataset, data_copy, kwargs['data_geom_column'])
 
-    data_copy[kwargs['data_geom_column']] = data_copy[kwargs['data_geom_column']].apply(wkt_to_geojson)
+    query = __enrichment_query(user_dataset, tablename, query_function,
+                               kwargs['variables'], kwargs['filters'], **kwargs)
 
-    data_geometry_id_copy = data_copy[[kwargs['data_geom_column'], _ENRICHMENT_ID]]
-    schema = {kwargs['data_geom_column']: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
+    return __execute_enrichment(bq_client, query, data_copy, kwargs['data_geom_column'])
+
+
+def __get_credentials(credentials=None):
+    return credentials or get_default_credentials()
+
+
+def __get_bigquery_client(project, credentials):
+    return bigquery_client.BigQueryClient(project, credentials)
+
+
+def __prepare_data(data, data_geom_column):
+    data_copy = copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
+    data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
+    return data_copy
+
+
+def __upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
+    data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
+    schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
 
     id_tablename = uuid.uuid4().hex
     data_tablename = 'temp_{id}'.format(id=id_tablename)
@@ -35,20 +53,22 @@ def enrich(preparation_sql_function, **kwargs):
     bq_client.upload_dataframe(data_geometry_id_copy, schema, data_tablename,
                                project=_WORKING_PROJECT, dataset=user_dataset, ttl_days=1)
 
-    table_data_enrichment, table_geo_enrichment, variables_list = get_tables_and_variables(kwargs['variables'])
+    return data_tablename
 
-    filters_str = process_filters(kwargs['filters'])
 
-    sql = preparation_sql_function(_ENRICHMENT_ID, filters_str, variables_list, table_data_enrichment,
-                                   table_geo_enrichment, user_dataset, _WORKING_PROJECT, data_tablename,
-                                   **kwargs)
+def __enrichment_query(user_dataset, tablename, query_function, variables, filters, **kwargs):
+    table_data_enrichment, table_geo_enrichment, variables_list = get_tables_and_variables(variables)
+    filters_str = process_filters(filters)
 
-    data_geometry_id_enriched = bq_client.query(sql).to_dataframe()
+    return query_function(_ENRICHMENT_ID, filters_str, variables_list, table_data_enrichment,
+                          table_geo_enrichment, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
 
-    data_copy = data_copy.merge(data_geometry_id_enriched, on=_ENRICHMENT_ID, how='left')\
-        .drop(_ENRICHMENT_ID, axis=1)
 
-    data_copy[kwargs['data_geom_column']] = data_copy[kwargs['data_geom_column']].apply(geojson_to_wkt)
+def __execute_enrichment(bq_client, query, data_copy, data_geom_column):
+    df_enriched = bq_client.query(query).to_dataframe()
+
+    data_copy = data_copy.merge(df_enriched, on=_ENRICHMENT_ID, how='left').drop(_ENRICHMENT_ID, axis=1)
+    data_copy[data_geom_column] = data_copy[data_geom_column].apply(geojson_to_wkt)
 
     return data_copy
 
