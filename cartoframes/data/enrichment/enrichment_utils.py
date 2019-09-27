@@ -38,7 +38,7 @@ def __get_bigquery_client(project, credentials):
 
 
 def __prepare_data(data, data_geom_column):
-    data_copy = copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
+    data_copy = __copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
     data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
     return data_copy
 
@@ -57,8 +57,8 @@ def __upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
 
 
 def __enrichment_query(user_dataset, tablename, query_function, variables, filters, **kwargs):
-    table_data_enrichment, table_geo_enrichment, variables_list = get_tables_and_variables(variables)
-    filters_str = process_filters(filters)
+    table_data_enrichment, table_geo_enrichment, variables_list = __get_tables_and_variables(variables)
+    filters_str = __process_filters(filters)
 
     return query_function(_ENRICHMENT_ID, filters_str, variables_list, table_data_enrichment,
                           table_geo_enrichment, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
@@ -73,7 +73,7 @@ def __execute_enrichment(bq_client, query, data_copy, data_geom_column):
     return data_copy
 
 
-def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
+def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
 
     if isinstance(data, Dataset):
         data = data.dataframe
@@ -103,7 +103,7 @@ def geojson_to_wkt(geojson_str):
     return shapely_geom
 
 
-def process_filters(filters_dict):
+def __process_filters(filters_dict):
     filters = ''
     # TODO: Add data table ref in fields of filters
     if filters_dict:
@@ -118,7 +118,7 @@ def process_filters(filters_dict):
     return filters
 
 
-def get_tables_and_variables(variables):
+def __get_tables_and_variables(variables):
 
     if isinstance(variables, pd.Series):
         variables_id = [variables['id']]
