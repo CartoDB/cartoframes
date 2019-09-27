@@ -18,7 +18,7 @@ _WORKING_PROJECT = 'carto-do-customers'
 def enrich(preparation_sql_function, **kwargs):
 
     credentials = kwargs['credentials'] or get_default_credentials()
-    bq_client = bigquery_client.BigQueryClient(credentials)
+    bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
 
     user_dataset = credentials.username.replace('-', '_')
 

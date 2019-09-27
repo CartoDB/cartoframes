@@ -1,20 +1,44 @@
 import datetime
 import pytz
 
-from ..enrichment import fake_auth
 from google.cloud import bigquery
+from google.oauth2.credentials import Credentials as GoogleCredentials
+from google.auth.exceptions import RefreshError
 
-# TODO: decorator to authenticate
+from carto.exceptions import CartoException
+
+from ...auth import get_default_credentials
+
+
+def refresh_client(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except RefreshError:
+            self._init_client()
+            try:
+                return func(self, *args, **kwargs)
+            except RefreshError:
+                raise CartoException('Something went wrong accessing data. '
+                                     'Please, try again in a few seconds or contact support for help.')
+    return wrapper
 
 
 class BigQueryClient(object):
 
-    def __init__(self, credentials):
-        token = fake_auth.auth(credentials)
+    def __init__(self, project, credentials):
+        self._project = project
+        self._credentials = credentials or get_default_credentials()
+        self.client = self._init_client()
 
-        self.credentials = credentials
-        self.client = bigquery.Client().from_service_account_json(token)  # Change auth method when token received
+    def _init_client(self):
+        google_credentials = GoogleCredentials(self._credentials.get_do_token())
 
+        return bigquery.Client(
+            project=self._project,
+            credentials=google_credentials)
+
+    @refresh_client
     def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
@@ -33,11 +57,13 @@ class BigQueryClient(object):
             table.expires = expiration
             self.client.update_table(table, ["expires"])
 
+    @refresh_client
     def query(self, query, **kwargs):
         response = self.client.query(query, **kwargs)
 
         return response
 
+    @refresh_client
     def delete_table(self, tablename, project, dataset):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
