@@ -15,7 +15,7 @@ def refresh_client(func):
         try:
             return func(self, *args, **kwargs)
         except RefreshError:
-            self._init_client()
+            self.client = self._init_client()
             try:
                 return func(self, *args, **kwargs)
             except RefreshError:
