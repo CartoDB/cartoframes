@@ -8,3 +8,5 @@ Geocode
 
 .. automodule:: cartoframes.data.services
     :members:
+    :undoc-members:
+    :show-inheritance:
