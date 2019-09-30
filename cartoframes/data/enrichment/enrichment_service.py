@@ -21,8 +21,7 @@ def enrich(query_function, **kwargs):
     data_copy = _prepare_data(kwargs['data'], kwargs['data_geom_column'])
     tablename = _upload_dataframe(bq_client, user_dataset, data_copy, kwargs['data_geom_column'])
 
-    query = _enrichment_query(user_dataset, tablename, query_function,
-                              kwargs['variables'], kwargs['filters'], **kwargs)
+    query = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
 
     return _execute_enrichment(bq_client, query, data_copy, kwargs['data_geom_column'])
 
@@ -54,9 +53,9 @@ def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
     return data_tablename
 
 
-def _enrichment_query(user_dataset, tablename, query_function, variables, filters, **kwargs):
-    table_data_enrichment, table_geo_enrichment, variables_list = __get_tables_and_variables(variables)
-    filters_str = __process_filters(filters)
+def _enrichment_query(user_dataset, tablename, query_function, **kwargs):
+    table_data_enrichment, table_geo_enrichment, variables_list = __get_tables_and_variables(kwargs['variables'])
+    filters_str = __process_filters(kwargs['filters'])
 
     return query_function(_ENRICHMENT_ID, filters_str, variables_list, table_data_enrichment,
                           table_geo_enrichment, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
