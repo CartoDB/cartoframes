@@ -34,7 +34,7 @@ class Isolines(Service):
                    quality=None,
                    with_source_id=True,
                    with_source_geom=False,
-                   rings=False,
+                   exclusive=False,
                    function=None):
         # we could default source_id=True for table source and
         # source_geom=True for dataframe source
@@ -86,8 +86,8 @@ class Isolines(Service):
             raise ValueError('The with_source_geom option is not supported')
 
         sql = _areas_query(
-            source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id or rings)
-        if rings:
+            source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id or exclusive)
+        if exclusive:
             sql = _rings_query(sql, with_source_id)
 
         dataset = Dataset(sql, credentials=self._credentials)
