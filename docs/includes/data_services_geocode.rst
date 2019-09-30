@@ -1,3 +1,6 @@
+Geocode
+^^^^^^^
+
 The ``cartoframes.data.dataservices.Geocode`` class provides geocoding using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.

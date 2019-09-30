@@ -1,9 +1,6 @@
 Data Services
 -------------
 
-Geocode
-^^^^^^^
-
 .. include:: includes/data_services_geocode.rst
 
 .. automodule:: cartoframes.data.services
