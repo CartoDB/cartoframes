@@ -49,7 +49,7 @@ class Isolines(Service):
         if dry_run:
             num_rows = source.get_num_rows()
             metadata['required_quota'] = num_rows * len(range)
-            return self.result(source, metadata=metadata)
+            return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
 
