@@ -27,7 +27,8 @@ class TestEnrichmentService(unittest.TestCase):
         df = pd.DataFrame([[1, 'POINT (1 1)']], columns=['cartodb_id', geom_column])
         ds = Dataset(df)
 
-        expected_df = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]], columns=['cartodb_id', geom_column, 'enrichment_id'])
+        expected_df = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
+                                   columns=['cartodb_id', geom_column, 'enrichment_id'])
 
         result = _prepare_data(ds, geom_column)
         self.assertTrue(result.equals(expected_df))
@@ -40,9 +41,11 @@ class TestEnrichmentService(unittest.TestCase):
         user_dataset = 'test_dataset'
         ttl = 1
         geom_column = 'the_geom'
-        data_copy = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]], columns=['cartodb_id', geom_column, 'enrichment_id'])
+        data_copy = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
+                                 columns=['cartodb_id', geom_column, 'enrichment_id'])
         expected_schema = {'enrichment_id': 'INTEGER', 'the_geom': 'GEOGRAPHY'}
-        expected_data_copy = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]], columns=[geom_column, 'enrichment_id'])
+        expected_data_copy = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
+                                          columns=[geom_column, 'enrichment_id'])
 
         # mock
         def assert_upload_dataframe(_, dataframe, schema, tablename, project, dataset, ttl_days=None):
@@ -121,7 +124,8 @@ class TestEnrichmentService(unittest.TestCase):
         geom_column = 'the_geom'
         bq_client = _get_bigquery_client(expected_project, credentails)
 
-        df = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]], columns=[geom_column, 'enrichment_id'])
+        df = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
+                          columns=[geom_column, 'enrichment_id'])
         df_final = pd.DataFrame([['POINT (1 1)', 'new_data']], columns=[geom_column, 'var1'])
 
         class EnrichMock():
