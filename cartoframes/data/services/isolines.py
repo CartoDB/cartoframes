@@ -115,13 +115,13 @@ def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, i
         if 'cartodb_id' in source_columns:
             source_id = '_source.cartodb_id AS source_id,'
         else:
-            source_id = 'row_number() over () AS source_id'
+            source_id = 'row_number() over () AS source_id,'
 
     return """
         WITH _source AS ({source_query}),
         _iso_areas AS (
             SELECT
-              _source.cartodb_id AS source_id,
+              {source_id}
               _source.the_geom AS source_geom,
               {iso_function}(
                   _source.the_geom,
