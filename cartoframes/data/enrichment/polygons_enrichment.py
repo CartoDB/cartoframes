@@ -5,18 +5,19 @@ from .enrichment_service import enrich
 
 def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry', filters=dict(), credentials=None):
 
-    data_enriched = enrich(__prepare_sql, data=data, variables=variables, agg_operators=agg_operators,
+    data_enriched = enrich(_prepare_sql, data=data, variables=variables, agg_operators=agg_operators,
                            data_geom_column=data_geom_column, filters=filters, credentials=credentials)
 
     return data_enriched
 
 
-def __prepare_sql(enrichment_id, filters_processed, variables_processed, enrichment_table,
-                  enrichment_geo_table, user_dataset, working_project, data_table, **kwargs):
+def _prepare_sql(enrichment_id, filters_processed, variables_processed, enrichment_table,
+                 enrichment_geo_table, user_dataset, working_project, data_table, **kwargs):
 
     grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=enrichment_id)
+    agg_operators = None
 
-    if kwargs['agg_operators']:
+    if 'agg_operators' in kwargs:
         variables_sql = ['{operator}({variable} * \
                          (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                          / ST_area(data_table.{data_geom_column}))) as {variable}'.format(variable=variable,

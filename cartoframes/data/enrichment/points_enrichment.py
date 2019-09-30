@@ -5,14 +5,14 @@ from .enrichment_service import enrich
 
 def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), credentials=None):
 
-    data_enriched = enrich(__prepare_sql, data=data, variables=variables, data_geom_column=data_geom_column,
+    data_enriched = enrich(_prepare_sql, data=data, variables=variables, data_geom_column=data_geom_column,
                            filters=filters, credentials=credentials)
 
     return data_enriched
 
 
-def __prepare_sql(enrichment_id, filters_processed, variables_processed, enrichment_table,
-                  enrichment_geo_table, user_dataset, working_project, data_table, **kwargs):
+def _prepare_sql(enrichment_id, filters_processed, variables_processed, enrichment_table,
+                 enrichment_geo_table, user_dataset, working_project, data_table, **kwargs):
 
     sql = '''
         SELECT data_table.{enrichment_id},
