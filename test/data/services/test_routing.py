@@ -18,7 +18,7 @@ from cartoframes.utils.columns import normalize_name
 from cartoframes.data.clients import SQLClient
 
 
-from cartoframes.data.services import Isolines
+from cartoframes.data.services import Routing
 
 
 try:
@@ -32,7 +32,7 @@ from test.helpers import _UserUrlLoader, _ReportQuotas
 warnings.filterwarnings('ignore')
 
 
-class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
+class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 
     def setUp(self):
@@ -116,17 +116,16 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
             except CartoException:
                 warnings.warn('Error deleting tables')
 
-    # service: isolines, hires_geocoder
     def used_quota(self, iso):
-        return TestIsochrones.update_quotas('isolines', iso.used_quota())
+        return TestRouting.update_quotas('isolines', iso.used_quota())
 
     def points_query(self):
         point_query = "SELECT '{name}' AS name, '{geom}'::geometry AS the_geom"
         return ' UNION '.join([point_query.format(name=name, geom=geom) for name, geom in self.points])
 
-    def test_isolines_from_dataframe_dataset(self):
+    def test_isochrones_from_dataframe_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         ds = Dataset(df, credentials=self.credentials)
@@ -134,12 +133,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car').data
+        result = iso.isochrones(ds, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_local())
         quota += 6
@@ -149,9 +148,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_dataframe_dataset_as_new_table(self):
+    def test_isochrones_from_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         ds = Dataset(df, credentials=self.credentials)
@@ -161,12 +160,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodf')
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=table_name, dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=table_name).data
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=table_name).data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -176,21 +175,21 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_dataframe(self):
+    def test_isochrones_from_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
 
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(df, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(df, [100, 1000], mode='car').data
+        result = iso.isochrones(df, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, pd.DataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -198,9 +197,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result)
         self.assertEqual(len(result.index), 6)
 
-    def test_isolines_from_dataframe_as_new_table(self):
+    def test_isochrones_from_dataframe_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
 
@@ -209,12 +208,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodfds')
 
         # Preview
-        result = iso.isochrone_areas(df, [100, 1000], mode='car', table_name=table_name, dry_run=True)
+        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(df, [100, 1000], mode='car', table_name=table_name) .data
+        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name) .data
         self.assertTrue(isinstance(result, pd.DataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
@@ -228,9 +227,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(ds.get_num_rows(), 6)
 
-    def test_isolines_from_table_dataset(self):
+    def test_isochrones_from_table_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
@@ -240,12 +239,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car').data
+        result = iso.isochrones(ds, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_local())
         quota += 6
@@ -255,9 +254,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_table_dataset_as_new_table(self):
+    def test_isochrones_from_table_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
@@ -269,12 +268,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=result_table_name).data
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name).data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -284,21 +283,21 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_query_dataset(self):
+    def test_isochrones_from_query_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         ds = Dataset(self.points_query(), credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car').data
+        result = iso.isochrones(ds, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_local())
         quota += 6
@@ -308,9 +307,9 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_table_query_as_new_table(self):
+    def test_isochrones_from_table_query_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         ds = Dataset(self.points_query(), credentials=self.credentials)
 
@@ -319,12 +318,12 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', table_name=result_table_name).data
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name).data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_remote())
         quota += 6
@@ -334,21 +333,21 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
 
-    def test_isolines_from_query_dataset(self):
+    def test_isochrones_from_query_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Isolines(credentials=self.credentials)
+        iso = Routing(credentials=self.credentials)
 
         ds = Dataset(self.points_query(), credentials=self.credentials)
 
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrone_areas(ds, [100, 1000], mode='car').data
+        result = iso.isochrones(ds, [100, 1000], mode='car').data
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_local())
         quota += 6
@@ -357,3 +356,25 @@ class TestIsochrones(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+
+    def test_isodistances_from_dataframe(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Routing(credentials=self.credentials)
+
+        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
+
+        quota = self.used_quota(iso)
+
+        # Preview
+        result = iso.isodistances(df, [100, 1000], mode='car', dry_run=True)
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isodistances
+        result = iso.isodistances(df, [100, 1000], mode='car').data
+        self.assertTrue(isinstance(result, pd.DataFrame))
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
+        self.assertTrue('the_geom' in result)
+        self.assertTrue('data_range' in result)
+        self.assertEqual(len(result.index), 6)

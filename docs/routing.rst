@@ -89,7 +89,7 @@ areas,  pass a ``dry_run=True`` argument:
     travel = Routing()
 
     dataset = Dataset('YOUR_DATA')
-    _, info = travel.isochrone_areas(dataset, ranges=[1800, 3600], dry_run=True)
+    _, info = travel.isochrones(dataset, ranges=[1800, 3600], dry_run=True)
     print(info.get('required_quota'))
 
 When ``dry_run`` is True no areas will be computed and no quota will be consumed.
