@@ -1,5 +1,6 @@
 import unittest
 import pandas as pd
+from shapely.geometry.point import Point
 
 from cartoframes.data.enrichment.enrichment_service import _prepare_data, _upload_dataframe, _enrichment_query, \
     _execute_enrichment, _get_bigquery_client
@@ -71,9 +72,9 @@ class TestEnrichmentService(unittest.TestCase):
         query_function = _prepare_sql_by_points
         variables = pd.DataFrame([['table1.var1'], ['table1.var2']], columns=['id'])
         filters = {'a': 'b'}
-        kwargs = {'data_geom_column': 'the_geom'}
+        kwargs = {'data_geom_column': 'the_geom', 'variables': variables, 'filters': filters}
 
-        query = _enrichment_query(user_dataset, tablename, query_function, variables, filters, **kwargs)
+        query = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
         expected_query = '''
             SELECT data_table.{enrichment_id},
                 {variables},
@@ -91,7 +92,7 @@ class TestEnrichmentService(unittest.TestCase):
                    data_table=tablename, data_geom_column='the_geom',
                    filters="WHERE a='b'")
 
-        self.assertEqual(set(query.split(' ')), set(expected_query.split(' ')))
+        self.assertEqual(query.replace("\n", "").replace(" ", ""), expected_query.replace("\n", "").replace(" ", ""))
 
     def test_enrichment_query_by_polygons(self):
         user_dataset = 'test_dataset'
@@ -99,11 +100,13 @@ class TestEnrichmentService(unittest.TestCase):
         query_function = _prepare_sql_by_polygons
         variables = pd.DataFrame([['table1.var1'], ['table1.var2']], columns=['id'])
         filters = {'a': 'b'}
-        kwargs = {'data_geom_column': 'the_geom'}
+        kwargs = {'data_geom_column': 'the_geom', 'variables': variables, 'filters': filters}
 
-        query = _enrichment_query(user_dataset, tablename, query_function, variables, filters, **kwargs)
+        query = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
         expected_query = '''
             SELECT data_table.{enrichment_id}, {variables},
+            ST_Area(ST_Intersection(geo_table.geom, data_table.{data_geom_column})) /
+            ST_area(data_table.{data_geom_column}) AS measures_proportion
             FROM `{working_project}.{user_dataset}.{enrichment_table}` enrichment_table
             JOIN `{working_project}.{user_dataset}.{enrichment_geo_table}` enrichment_geo_table
               ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -116,7 +119,7 @@ class TestEnrichmentService(unittest.TestCase):
                    data_table=tablename, data_geom_column='the_geom',
                    filters="WHERE a='b'")
 
-        self.assertEqual(set(query.split(' ')), set(expected_query.split(' ')))
+        self.assertEqual(query.replace("\n", "").replace(" ", ""), expected_query.replace("\n", "").replace(" ", ""))
 
     def test_execute_enrichment(self):
         expected_project = 'carto-do-customers'
@@ -126,7 +129,7 @@ class TestEnrichmentService(unittest.TestCase):
 
         df = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
                           columns=[geom_column, 'enrichment_id'])
-        df_final = pd.DataFrame([['POINT (1 1)', 'new_data']], columns=[geom_column, 'var1'])
+        df_final = pd.DataFrame([[Point(1, 1), 'new data']], columns=[geom_column, 'var1'])
 
         class EnrichMock():
             def to_dataframe(self):
