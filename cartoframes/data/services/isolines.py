@@ -25,7 +25,6 @@ class Isolines(Service):
                    dry_run=False,
                    table_name=None,
                    if_exists=None,
-                   dataframe=False,
                    is_destination=None,
                    mode='car',
                    mode_type=None,
