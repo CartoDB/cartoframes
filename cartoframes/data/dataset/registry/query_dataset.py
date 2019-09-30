@@ -81,7 +81,7 @@ class QueryDataset(BaseDataset):
 
     def get_num_rows(self):
         """Get the number of rows in the query"""
-        result = self._execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=self.get_query()))
+        result = self._context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=self.get_query()))
         return result.get('rows')[0].get('count')
 
     def _create_table_from_query(self):
