@@ -107,6 +107,9 @@ html_theme = 'alabaster'
 #
 # html_sidebars = {}
 
+html_add_permalinks = None
+html_use_index = False
+
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
