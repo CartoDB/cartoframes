@@ -30,21 +30,21 @@ class DatasetRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'id': row[cls.id_field],
-            'name': row['name'],
-            'description': row['description'],
-            'provider_id': row['provider_id'],
-            'category_id': row['category_id'],
-            'data_source_id': row['data_source_id'],
-            'country_iso_code3': row['country_iso_code3'],
-            'language_iso_code3': row['language_iso_code3'],
-            'geography_id': row['geography_id'],
-            'temporal_aggregation': row['temporal_aggregation'],
-            'time_coverage': row['time_coverage'],
-            'update_frequency': row['update_frequency'],
-            'version': row['version'],
-            'is_public_data': row['is_public_data'],
-            'summary_jsonb': row['summary_jsonb']
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'description': cls._normalize_field(row, 'description'),
+            'provider_id': cls._normalize_field(row, 'provider_id'),
+            'category_id': cls._normalize_field(row, 'category_id'),
+            'data_source_id': cls._normalize_field(row, 'data_source_id'),
+            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
+            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
+            'geography_id': cls._normalize_field(row, 'geography_id'),
+            'temporal_aggregation': cls._normalize_field(row, 'temporal_aggregation'),
+            'time_coverage': cls._normalize_field(row, 'time_coverage'),
+            'update_frequency': cls._normalize_field(row, 'update_frequency'),
+            'version': cls._normalize_field(row, 'version'),
+            'is_public_data': cls._normalize_field(row, 'is_public_data'),
+            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
         }
 
     @classmethod

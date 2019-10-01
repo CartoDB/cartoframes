@@ -68,3 +68,20 @@ class TestProviderRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_providers')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'provider1'}]
+        repo = ProviderRepository()
+
+        expected_providers = [{
+            'id': 'provider1',
+            'name': None
+        }]
+
+        # When
+        providers = repo.get_all()
+
+        # Then
+        assert providers == expected_providers

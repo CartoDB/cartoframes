@@ -18,17 +18,17 @@ class GeographyRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'id': row[cls.id_field],
-            'name': row['name'],
-            'description': row['description'],
-            'provider_id': row['provider_id'],
-            'country_iso_code3': row['country_iso_code3'],
-            'language_iso_code3': row['language_iso_code3'],
-            'geom_coverage': row['geom_coverage'],
-            'update_frequency': row['update_frequency'],
-            'version': row['version'],
-            'is_public_data': row['is_public_data'],
-            'summary_jsonb': row['summary_jsonb']
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'description': cls._normalize_field(row, 'description'),
+            'provider_id': cls._normalize_field(row, 'provider_id'),
+            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
+            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
+            'geom_coverage': cls._normalize_field(row, 'geom_coverage'),
+            'update_frequency': cls._normalize_field(row, 'update_frequency'),
+            'version': cls._normalize_field(row, 'version'),
+            'is_public_data': cls._normalize_field(row, 'is_public_data'),
+            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
         }
 
     @classmethod

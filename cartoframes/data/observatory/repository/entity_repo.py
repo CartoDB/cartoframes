@@ -29,7 +29,8 @@ class EntityRepository(ABC):
         return self._to_single_entity(data)
 
     def _get_filtered_entities(self, field=None, value=None):
-        return self._to_entity_list(self._get_rows(field, value))
+        rows = self._get_rows(field, value)
+        return self._to_entity_list(rows)
 
     @classmethod
     @abstractmethod
@@ -60,3 +61,10 @@ class EntityRepository(ABC):
             return None
 
         return cls._get_entity_list_class()([cls._map_row(result) for result in results])
+
+    @classmethod
+    def _normalize_field(cls, row, field):
+        if field in row:
+            return row[field]
+
+        return None

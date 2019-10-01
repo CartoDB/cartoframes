@@ -14,7 +14,7 @@ class CountryRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'country_iso_code3': row[cls.id_field],
+            'country_iso_code3': cls._normalize_field(row, cls.id_field),
         }
 
     @classmethod

@@ -67,3 +67,20 @@ class TestCategoryRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_categories')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'cat1'}]
+        repo = CategoryRepository()
+
+        expected_categories = [{
+            'id': 'cat1',
+            'name': None
+        }]
+
+        # When
+        categories = repo.get_all()
+
+        # Then
+        assert categories == expected_categories

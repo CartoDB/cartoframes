@@ -18,10 +18,10 @@ class VariableGroupRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'id': row[cls.id_field],
-            'name': row['name'],
-            'dataset_id': row['dataset_id'],
-            'starred': row['starred']
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'dataset_id': cls._normalize_field(row, 'dataset_id'),
+            'starred': cls._normalize_field(row, 'starred')
         }
 
     @classmethod

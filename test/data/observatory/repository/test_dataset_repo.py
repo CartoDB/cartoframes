@@ -127,3 +127,33 @@ class TestDatasetRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with('geography_id', geography_id)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'dataset1'}]
+        repo = DatasetRepository()
+
+        expected_datasets = [{
+            'id': 'dataset1',
+            'name': None,
+            'description': None,
+            'provider_id': None,
+            'category_id': None,
+            'data_source_id': None,
+            'country_iso_code3': None,
+            'language_iso_code3': None,
+            'geography_id': None,
+            'temporal_aggregation': None,
+            'time_coverage': None,
+            'update_frequency': None,
+            'version': None,
+            'is_public_data': None,
+            'summary_jsonb': None
+        }]
+
+        # When
+        datasets = repo.get_all()
+
+        # Then
+        assert datasets == expected_datasets

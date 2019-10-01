@@ -83,3 +83,29 @@ class TestGeographyRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
         assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'geography1'}]
+        repo = GeographyRepository()
+
+        expected_geographies = [{
+            'id': 'geography1',
+            'name': None,
+            'description': None,
+            'provider_id': None,
+            'country_iso_code3': None,
+            'language_iso_code3': None,
+            'geom_coverage': None,
+            'update_frequency': None,
+            'version': None,
+            'is_public_data': None,
+            'summary_jsonb': None
+        }]
+
+        # When
+        geographies = repo.get_all()
+
+        # Then
+        assert geographies == expected_geographies

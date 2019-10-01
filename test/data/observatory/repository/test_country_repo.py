@@ -65,3 +65,19 @@ class TestCountryRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_iso_code)
+
+    @patch.object(RepoClient, 'get_countries')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{}]
+        repo = CountryRepository()
+
+        expected_countries = [{
+            'country_iso_code3': None
+        }]
+
+        # When
+        countries = repo.get_all()
+
+        # Then
+        assert countries == expected_countries

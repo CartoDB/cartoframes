@@ -14,8 +14,8 @@ class CategoryRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'id': row[cls.id_field],
-            'name': row['name']
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name')
         }
 
     @classmethod

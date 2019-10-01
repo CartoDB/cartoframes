@@ -21,16 +21,16 @@ class VariableRepository(EntityRepository):
     @classmethod
     def _map_row(cls, row):
         return {
-            'id': row[cls.id_field],
-            'name': row['name'],
-            'description': row['description'],
-            'column_name': row['column_name'],
-            'db_type': row['db_type'],
-            'dataset_id': row['dataset_id'],
-            'agg_method': row['agg_method'],
-            'variable_group_id': row['variable_group_id'],
-            'starred': row['starred'],
-            'summary_jsonb': row['summary_jsonb']
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'description': cls._normalize_field(row, 'description'),
+            'column_name': cls._normalize_field(row, 'column_name'),
+            'db_type': cls._normalize_field(row, 'db_type'),
+            'dataset_id': cls._normalize_field(row, 'dataset_id'),
+            'agg_method': cls._normalize_field(row, 'agg_method'),
+            'variable_group_id': cls._normalize_field(row, 'variable_group_id'),
+            'starred': cls._normalize_field(row, 'starred'),
+            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
         }
 
     @classmethod

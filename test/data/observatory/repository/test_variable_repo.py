@@ -98,3 +98,28 @@ class TestVariableRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
         assert isinstance(variables, Variables)
         assert variables == test_variables
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'variable1'}]
+        repo = VariableRepository()
+
+        expected_variables = [{
+            'id': 'variable1',
+            'name': None,
+            'description': None,
+            'column_name': None,
+            'db_type': None,
+            'dataset_id': None,
+            'agg_method': None,
+            'variable_group_id': None,
+            'starred': None,
+            'summary_jsonb': None
+        }]
+
+        # When
+        variables = repo.get_all()
+
+        # Then
+        assert variables == expected_variables
