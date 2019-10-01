@@ -32,7 +32,6 @@ from test.helpers import _UserUrlLoader, _ReportQuotas
 warnings.filterwarnings('ignore')
 
 
-
 class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 
