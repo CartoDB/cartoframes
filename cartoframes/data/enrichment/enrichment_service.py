@@ -74,20 +74,25 @@ def _execute_enrichment(bq_client, query, data_copy, data_geom_column):
 
 def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
 
+    has_to_decode_geom = True
+
     if isinstance(data, Dataset):
-        if data.dataframe is not None:
-            data = data.dataframe
-        else:
-            data = data.download(decode_geom=True)
+        if data.dataframe is None:
+            has_to_decode_geom = False
+            geometry_column = 'the_geom'
+            data.download(decode_geom=True)
+
+        data = data.dataframe
+    elif isinstance(data, gpd.GeoDataFrame):
+        has_to_decode_geom = False
 
     data_copy = data.copy()
     data_copy[enrichment_id_column] = range(data_copy.shape[0])
 
-    geometry_sample = data_copy.iloc[0]['geometry']
-
-    if isinstance(data_copy, gpd.GeoDataFrame) or isinstance(geometry_sample, BaseGeometry):
+    if has_to_decode_geom:
         data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
-        data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
+
+    data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
 
