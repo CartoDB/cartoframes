@@ -62,7 +62,7 @@ the behaviour when the table name already exists in the CARTO account. Possible 
 Additional parameters
 _____________________
 
-* ``mode`` with possible valus ``'car'`` and ``'walk'`` defines the travel mode.
+* ``mode`` with possible values ``'car'`` and ``'walk'`` defines the travel mode.
 * ``is_destination`` (False/True) indicates that the input points are to be consider destinations for
   the routes used to compute the area, rather than origins.
 * ``mode_type`` type of routes computed: ``'shortest'`` (default) or ``'fastests'``.
