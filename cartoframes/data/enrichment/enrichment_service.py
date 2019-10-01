@@ -3,7 +3,6 @@ import geopandas as gpd
 import uuid
 
 from collections import defaultdict
-from shapely.geometry.base import BaseGeometry
 from ..dataset.dataset import Dataset
 from ..clients import bigquery_client
 from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
