@@ -42,6 +42,7 @@ In this manner, the produced areas for a given sorce point do not overlap, each 
 an exclusive interval of times or distances. In this case an additional ``lower_data_range`` column
 will represent the minimun range value in the area. This will be zero in the case of the areas corresponding to the
 smaller range value.
+Note that computing exclusive areas will require longer processing.
 
 Return value
 ____________
@@ -94,4 +95,49 @@ areas,  pass a ``dry_run=True`` argument:
 
 When ``dry_run`` is True no areas will be computed and no quota will be consumed.
 The returned dataset (the ``data`` field of the result named tuple) will be ``None``.
+
+
+Converting between the exclusive and inclusive range representation
+-------------------------------------------------------------------
+
+These methods are handy to convert a table from one of the representations to the other,
+so you can use both in your analyses and visualizations without spendit credits for the two of them.
+
+The assume the areas are saved in a table with a ``cartodb_id``, a ``source_id`` referencing
+the source points, a ``data_range`` columns for the range values and ``the_geom``, i.e. the
+format created by the ``isochrones`` and ``isodistances`` methods with the
+default value of `True` for the `with_source_id` parameter and saved to a table (``table_name``).
+
+.. code:: python
+
+    def inclusive_to_exclusive(inclusive_table_name, exclusive_table_name, if_exists='fail', credentials=None):
+        sql = """
+            SELECT
+                cartodb_id,
+                source_id,
+                data_range,
+                COALESCE(
+                    LAG(data_range, 1) OVER (PARTITION BY source_id ORDER BY data_range),
+                    0
+                ) AS lower_data_range,
+                COALESCE(
+                    ST_DIFFERENCE(the_geom, LAG(the_geom, 1) OVER (PARTITION BY source_id ORDER BY data_range)),
+                    the_geom
+                ) AS the_geom
+            FROM {table_name}
+        """.format(table_name=inclusive_table_name)
+        Dataset(sql, credentials=credentials).upload(table_name=exclusive_table_name, if_exists=if_exists)
+
+    def exclusive_to_inclusive(exclusive_table_name, inclusive_table_name, if_exists='fail', credentials=None):
+        sql = """
+            SELECT
+                cartodb_id,
+                source_id,
+                data_range,
+                ST_UNION(the_geom) OVER (PARTITION BY source_id ORDER BY data_range) AS the_geom
+            FROM {table_name}
+        """.format(table_name=exclusive_table_name)
+        Dataset(sql, credentials=credentials).upload(table_name=inclusive_table_name, if_exists=if_exists)
+
+
 
