@@ -1,6 +1,3 @@
-import datetime
-import pytz
-
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
 from google.auth.exceptions import RefreshError
@@ -50,12 +47,6 @@ class BigQueryClient(object):
 
         job = self.client.load_table_from_dataframe(dataframe, table_ref, job_config=job_config)
         job.result()
-
-        if ttl_days:
-            table = self.client.get_table(table_ref)
-            expiration = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=ttl_days)
-            table.expires = expiration
-            self.client.update_table(table, ["expires"])
 
     @refresh_client
     def query(self, query, **kwargs):
