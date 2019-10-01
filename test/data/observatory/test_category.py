@@ -7,7 +7,7 @@ from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_category1, test_datasets, test_categories
+from .examples import test_category1, test_datasets, test_categories, db_category1
 
 try:
     from unittest.mock import Mock, patch
@@ -42,6 +42,18 @@ class TestCategory(unittest.TestCase):
         assert isinstance(datasets, list)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_category_properties(self):
+        # Given
+        category = Category(db_category1)
+
+        # When
+        cat_id = category.id
+        name = category.name
+
+        # Then
+        assert cat_id == db_category1['id']
+        assert name == db_category1['name']
 
     def test_category_is_exported_as_series(self):
         # Given

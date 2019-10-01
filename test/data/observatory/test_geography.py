@@ -6,7 +6,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_geography1, test_geographies, test_datasets
+from .examples import test_geography1, test_geographies, test_datasets, db_geography1
 
 try:
     from unittest.mock import Mock, patch
@@ -41,6 +41,26 @@ class TestGeography(unittest.TestCase):
         assert isinstance(datasets, list)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_geography_properties(self):
+        # Given
+        geography = Geography(db_geography1)
+
+        # When
+        geography_id = geography.id
+        name = geography.name
+        description = geography.description
+        country = geography.country
+        provider = geography.provider
+        version = geography.version
+
+        # Then
+        assert geography_id == db_geography1['id']
+        assert name == db_geography1['name']
+        assert description == db_geography1['description']
+        assert country == db_geography1['country_iso_code3']
+        assert provider == db_geography1['provider_id']
+        assert version == db_geography1['version']
 
     def test_geography_is_exported_as_series(self):
         # Given

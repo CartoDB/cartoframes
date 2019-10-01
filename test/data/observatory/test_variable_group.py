@@ -43,6 +43,22 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variables, Variables)
         assert variables == test_variables
 
+    def test_variable_group_properties(self):
+        # Given
+        variable_group = VariableGroup(db_variable_group1)
+
+        # When
+        variable_group_id = variable_group.id
+        name = variable_group.name
+        dataset = variable_group.dataset
+        starred = variable_group.starred
+
+        # Then
+        assert variable_group_id == db_variable_group1['id']
+        assert name == db_variable_group1['name']
+        assert dataset == db_variable_group1['dataset_id']
+        assert starred == db_variable_group1['starred']
+
     def test_variable_group_is_exported_as_series(self):
         # Given
         variable_group = test_variable_group1

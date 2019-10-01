@@ -13,6 +13,22 @@ class Variable(SingleEntity):
     def datasets(self):
         return get_dataset_repo().get_by_variable(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
+    @property
+    def description(self):
+        return self.data['description']
+
+    @property
+    def starred(self):
+        return self.data['starred']
+
 
 class Variables(EntitiesList):
 

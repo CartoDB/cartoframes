@@ -8,7 +8,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 
-from .examples import test_country1, test_datasets, test_countries, test_geographies
+from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1
 
 try:
     from unittest.mock import Mock, patch
@@ -57,9 +57,19 @@ class TestCountry(unittest.TestCase):
         assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
 
+    def test_country_properties(self):
+        # Given
+        country = Country(db_country1)
+
+        # When
+        iso_code3 = country.country_iso_code3
+
+        # Then
+        assert iso_code3 == db_country1['country_iso_code3']
+
     def test_country_is_exported_as_series(self):
         # Given
-        country = test_country1
+        country = Country(db_country1)
 
         # When
         country_series = country.to_series()

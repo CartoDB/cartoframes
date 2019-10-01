@@ -17,6 +17,26 @@ class Dataset(SingleEntity):
     def variables_groups(self):
         return get_variable_group_repo().get_by_dataset(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
+    @property
+    def description(self):
+        return self.data['description']
+
+    @property
+    def country(self):
+        return self.data['country_iso_code3']
+
+    @property
+    def category(self):
+        return self.data['category_id']
+
 
 class Datasets(EntitiesList):
 

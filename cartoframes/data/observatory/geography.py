@@ -13,6 +13,30 @@ class Geography(SingleEntity):
     def datasets(self):
         return get_dataset_repo().get_by_geography(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
+    @property
+    def description(self):
+        return self.data['description']
+
+    @property
+    def country(self):
+        return self.data['country_iso_code3']
+
+    @property
+    def provider(self):
+        return self.data['provider_id']
+
+    @property
+    def version(self):
+        return self.data['version']
+
 
 class Geographies(EntitiesList):
 

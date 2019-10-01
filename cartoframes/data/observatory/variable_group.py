@@ -13,6 +13,22 @@ class VariableGroup(SingleEntity):
     def variables(self):
         return get_variable_repo().get_by_variable_group(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
+    @property
+    def dataset(self):
+        return self.data['dataset_id']
+
+    @property
+    def starred(self):
+        return self.data['starred']
+
 
 class VariablesGroups(EntitiesList):
 

@@ -17,6 +17,10 @@ class Country(SingleEntity):
     def geographies(self):
         return get_geography_repo().get_by_country(self.id)
 
+    @property
+    def country_iso_code3(self):
+        return self.data['country_iso_code3']
+
 
 class Countries(EntitiesList):
 

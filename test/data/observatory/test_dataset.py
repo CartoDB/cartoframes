@@ -8,7 +8,7 @@ from cartoframes.data.observatory.repository.variable_repo import VariableReposi
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups
+from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1
 
 try:
     from unittest.mock import Mock, patch
@@ -56,6 +56,24 @@ class TestDataset(unittest.TestCase):
         assert isinstance(variables_groups, list)
         assert isinstance(variables_groups, VariablesGroups)
         assert variables_groups == test_variables_groups
+
+    def test_dataset_properties(self):
+        # Given
+        dataset = Dataset(db_dataset1)
+
+        # When
+        dataset_id = dataset.id
+        name = dataset.name
+        description = dataset.description
+        country = dataset.country
+        category = dataset.category
+
+        # Then
+        assert dataset_id == db_dataset1['id']
+        assert name == db_dataset1['name']
+        assert description == db_dataset1['description']
+        assert country == db_dataset1['country_iso_code3']
+        assert category == db_dataset1['category_id']
 
     def test_dataset_is_exported_as_series(self):
         # Given

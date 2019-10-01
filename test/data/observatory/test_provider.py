@@ -7,7 +7,7 @@ from cartoframes.data.observatory.provider import Provider, Providers
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
-from .examples import test_datasets, test_provider1, test_providers
+from .examples import test_datasets, test_provider1, test_providers, db_provider1
 
 try:
     from unittest.mock import Mock, patch
@@ -42,6 +42,18 @@ class TestProvider(unittest.TestCase):
         assert isinstance(datasets, list)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
+
+    def test_provider_properties(self):
+        # Given
+        provider = Provider(db_provider1)
+
+        # When
+        provider_id = provider.id
+        name = provider.name
+
+        # Then
+        assert provider_id == db_provider1['id']
+        assert name == db_provider1['name']
 
     def test_provider_is_exported_as_series(self):
         # Given

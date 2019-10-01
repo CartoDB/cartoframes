@@ -14,6 +14,14 @@ class Category(SingleEntity):
     def datasets(self):
         return get_dataset_repo().get_by_category(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
 
 class Categories(EntitiesList):
 

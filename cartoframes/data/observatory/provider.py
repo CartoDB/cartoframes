@@ -14,6 +14,14 @@ class Provider(SingleEntity):
     def datasets(self):
         return get_dataset_repo().get_by_provider(self.id)
 
+    @property
+    def id(self):
+        return self.data[self.id_field]
+
+    @property
+    def name(self):
+        return self.data['name']
+
 
 class Providers(EntitiesList):
 
