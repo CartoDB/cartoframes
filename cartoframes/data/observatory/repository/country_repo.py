@@ -31,6 +31,9 @@ class CountryRepository(object):
 
     @staticmethod
     def _to_countries(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.country import Countries
 
         return Countries([CountryRepository._to_country(result) for result in results])

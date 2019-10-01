@@ -5,6 +5,13 @@ import sys
 import json
 import appdirs
 import warnings
+
+from carto.exceptions import CartoException
+from carto.auth import APIKeyAuthClient
+from carto.do_token import DoTokenManager
+
+from ..__version__ import __version__
+
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
 else:
@@ -51,6 +58,7 @@ class Credentials(object):
         self._username = username
         self.base_url = base_url or self._base_url_from_username()
         self._session = session
+        self._api_key_auth_client = None
 
         self._norm_credentials()
 
@@ -149,13 +157,13 @@ class Credentials(object):
 
             .. code::
 
-                from cartoframes import Credentials
+                from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save()  # save to default location
 
             .. code::
 
-                from cartoframes import Credentials
+                from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save('path/to/credentials/file')
         """
@@ -194,3 +202,23 @@ class Credentials(object):
             warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
+
+    def get_do_token(self):
+        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        token = do_token_manager.get()
+        if not token:
+            raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
+
+        return token.access_token
+
+    def get_api_key_auth_client(self):
+        if not self._api_key_auth_client:
+            self._api_key_auth_client = APIKeyAuthClient(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                session=self.session,
+                client_id='cartoframes_{}'.format(__version__),
+                user_agent='cartoframes_{}'.format(__version__)
+            )
+
+        return self._api_key_auth_client

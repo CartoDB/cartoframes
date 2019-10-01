@@ -1,8 +1,16 @@
 """Unit tests for cartoframes.keys"""
 import unittest
 import os
+
+from carto.do_token import DoTokenManager
+
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
+
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 # FIXME python 2.7 compatibility
 try:
@@ -127,6 +135,25 @@ class TestCredentials(unittest.TestCase):
         self.assertEqual(credentials1, credentials2)
         credentials2.api_key = 'another_apy_key'
         self.assertNotEqual(credentials1, credentials2)
+
+    def test_get_api_key_auth_client(self):
+        credentials = Credentials(self.username, self.api_key)
+        self.assertIsNone(credentials._api_key_auth_client)
+        credentials.get_api_key_auth_client()
+        self.assertIsNotNone(credentials._api_key_auth_client)
+
+    def test_get_do_token(self):
+        access_token = '1234'
+
+        class Token:
+            def __init__(self):
+                self.access_token = access_token
+
+        DoTokenManager.get = Mock(return_value=Token())
+
+        credentials = Credentials(self.username, self.api_key)
+        token = credentials.get_do_token()
+        self.assertEqual(token, access_token)
 
 
 class TestCredentialsFromFile(unittest.TestCase):

@@ -34,6 +34,9 @@ class ProviderRepository(object):
 
     @staticmethod
     def _to_providers(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.provider import Providers
 
         return Providers([ProviderRepository._to_provider(result) for result in results])

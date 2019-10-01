@@ -26,6 +26,10 @@ class VariableRepository(object):
     def get_by_dataset(self, dataset_id):
         return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
 
+    def get_by_variable_group(self, variable_group_id):
+        return self._to_variables(self.client.get_variables('variable_group_id', variable_group_id))
+
+
     @staticmethod
     def _to_variable(result):
         from cartoframes.data.observatory.variable import Variable
@@ -34,6 +38,9 @@ class VariableRepository(object):
 
     @staticmethod
     def _to_variables(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.variable import Variables
 
         return Variables([VariableRepository._to_variable(result) for result in results])

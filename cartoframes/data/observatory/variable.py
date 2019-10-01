@@ -1,55 +1,28 @@
-import pandas as pd
-
+from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
-_VARIABLE_FIELD_ID = 'id'
+_VARIABLE_ID_FIELD = 'id'
 
 
-class Variable(pd.Series):
+class Variable(SingleEntity):
 
-    @property
-    def _constructor(self):
-        return Variable
+    id_field = _VARIABLE_ID_FIELD
+    entity_repo = get_variable_repo()
 
-    @property
-    def _constructor_expanddim(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Variables
-
-    @staticmethod
-    def get_by_id(variable_id):
-        return get_variable_repo().get_by_id(variable_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
+        return get_dataset_repo().get_by_variable(self._get_id())
 
 
-class Variables(pd.DataFrame):
+class Variables(EntitiesList):
 
-    @property
-    def _constructor(self):
-        return Variables
+    id_field = _VARIABLE_ID_FIELD
+    entity_repo = get_variable_repo()
 
-    @property
-    def _constructor_sliced(self):
+    @classmethod
+    def _get_single_entity_class(cls):
         return Variable
-
-    @staticmethod
-    def get_all():
-        return get_variable_repo().get_all()
-
-    @staticmethod
-    def get_by_id(variable_id):
-        return Variable.get_by_id(variable_id)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
