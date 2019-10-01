@@ -26,7 +26,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert isinstance(datasets, Datasets)
         assert datasets == test_datasets
 
@@ -40,7 +40,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert datasets is None
 
     @patch.object(RepoClient, 'get_datasets')

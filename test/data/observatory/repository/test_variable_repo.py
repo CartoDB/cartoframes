@@ -26,7 +26,7 @@ class TestVariableRepo(unittest.TestCase):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert isinstance(variables, Variables)
         assert variables == test_variables
 
@@ -40,7 +40,7 @@ class TestVariableRepo(unittest.TestCase):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert variables is None
 
     @patch.object(RepoClient, 'get_variables')

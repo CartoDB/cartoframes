@@ -26,7 +26,7 @@ class TestProviderRepo(unittest.TestCase):
         providers = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert isinstance(providers, Providers)
         assert providers == test_providers
 
@@ -40,7 +40,7 @@ class TestProviderRepo(unittest.TestCase):
         providers = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert providers is None
 
     @patch.object(RepoClient, 'get_providers')
