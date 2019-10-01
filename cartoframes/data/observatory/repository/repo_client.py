@@ -26,6 +26,10 @@ class RepoClient(object):
         query = 'select * from variables'
         return self._run_query(query, field, value)
 
+    def get_variables_groups(self, field=None, value=None):
+        query = 'select * from variables_groups'
+        return self._run_query(query, field, value)
+
     def get_geographies(self, field=None, value=None):
         query = 'select * from geographies'
         return self._run_query(query, field, value)

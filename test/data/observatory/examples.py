@@ -4,6 +4,7 @@ from cartoframes.data.observatory.category import Category, Categories
 from cartoframes.data.observatory.geography import Geography, Geographies
 from cartoframes.data.observatory.country import Country, Countries
 from cartoframes.data.observatory.provider import Provider, Providers
+from cartoframes.data.observatory.variable_group import VariableGroup, VariablesGroups
 
 db_country1 = {'country_iso_code3': 'esp'}
 db_country2 = {'country_iso_code3': 'usa'}
@@ -116,3 +117,17 @@ db_provider2 = {
 test_provider1 = Provider(db_provider1)
 test_provider2 = Provider(db_provider2)
 test_providers = Providers([test_provider1, test_provider2])
+
+db_variable_group1 = {
+    'id': 'vargroup1',
+    'name': 'Population',
+    'starred': True
+}
+db_variable_group2 = {
+    'id': 'vargroup2',
+    'name': 'Date',
+    'starred': False
+}
+test_variable_group1 = VariableGroup(db_variable_group1)
+test_variable_group2 = VariableGroup(db_variable_group2)
+test_variables_groups = VariablesGroups([test_variable_group1, test_variable_group2])

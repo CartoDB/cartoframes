@@ -1,6 +1,7 @@
 from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.variable_group_repo import get_variable_group_repo
 
 _DATASET_ID_FIELD = 'id'
 
@@ -16,6 +17,9 @@ class Dataset(SingleEntity):
 
     def variables(self):
         return get_variable_repo().get_by_dataset(self._get_id())
+
+    def variables_groups(self):
+        return get_variable_group_repo().get_by_dataset(self._get_id())
 
 
 class Datasets(EntitiesList):

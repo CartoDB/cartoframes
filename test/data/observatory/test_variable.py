@@ -60,12 +60,12 @@ class TestVariables(unittest.TestCase):
         mocked_repo.return_value = test_variables
 
         # When
-        countries = Variables.get_all()
+        variables = Variables.get_all()
 
         # Then
-        assert isinstance(countries, pd.DataFrame)
-        assert isinstance(countries, Variables)
-        assert countries == test_variables
+        assert isinstance(variables, pd.DataFrame)
+        assert isinstance(variables, Variables)
+        assert variables == test_variables
 
     @patch.object(VariableRepository, 'get_by_id')
     def test_get_variable_by_id(self, mocked_repo):
