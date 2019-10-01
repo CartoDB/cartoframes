@@ -51,16 +51,26 @@ class TestGeography(unittest.TestCase):
         name = geography.name
         description = geography.description
         country = geography.country
+        language = geography.language
         provider = geography.provider
+        geom_coverage = geography.geom_coverage
+        update_frequency = geography.update_frequency
         version = geography.version
+        is_public_data = geography.is_public_data
+        summary = geography.summary
 
         # Then
         assert geography_id == db_geography1['id']
         assert name == db_geography1['name']
         assert description == db_geography1['description']
         assert country == db_geography1['country_iso_code3']
+        assert language == db_geography1['language_iso_code3']
         assert provider == db_geography1['provider_id']
+        assert geom_coverage == db_geography1['geom_coverage']
+        assert update_frequency == db_geography1['update_frequency']
         assert version == db_geography1['version']
+        assert is_public_data == db_geography1['is_public_data']
+        assert summary == db_geography1['summary_jsonb']
 
     def test_geography_is_exported_as_series(self):
         # Given

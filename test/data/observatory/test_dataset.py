@@ -65,15 +65,35 @@ class TestDataset(unittest.TestCase):
         dataset_id = dataset.id
         name = dataset.name
         description = dataset.description
-        country = dataset.country
+        provider = dataset.provider
         category = dataset.category
+        data_source = dataset.data_source
+        country = dataset.country
+        language = dataset.language
+        geography = dataset.geography
+        temporal_aggregation = dataset.temporal_aggregation
+        time_coverage = dataset.time_coverage
+        update_frequency = dataset.update_frequency
+        version = dataset.version
+        is_public_data = dataset.is_public_data
+        summary = dataset.summary
 
         # Then
         assert dataset_id == db_dataset1['id']
         assert name == db_dataset1['name']
         assert description == db_dataset1['description']
-        assert country == db_dataset1['country_iso_code3']
+        assert provider == db_dataset1['provider_id']
         assert category == db_dataset1['category_id']
+        assert data_source == db_dataset1['data_source_id']
+        assert country == db_dataset1['country_iso_code3']
+        assert language == db_dataset1['language_iso_code3']
+        assert geography == db_dataset1['geography_id']
+        assert temporal_aggregation == db_dataset1['temporalaggregations']
+        assert time_coverage == db_dataset1['time_coverage']
+        assert update_frequency == db_dataset1['update_frequency']
+        assert version == db_dataset1['version']
+        assert is_public_data == db_dataset1['is_public_data']
+        assert summary == db_dataset1['summary_jsonb']
 
     def test_dataset_is_exported_as_series(self):
         # Given

@@ -50,13 +50,25 @@ class TestVariable(unittest.TestCase):
         variable_id = variable.id
         name = variable.name
         description = variable.description
+        column_name = variable.column_name
+        db_type = variable.db_type
+        dataset = variable.dataset
+        agg_method = variable.agg_method
+        variable_group = variable.variable_group
         starred = variable.starred
+        summary = variable.summary
 
         # Then
         assert variable_id == db_variable1['id']
         assert name == db_variable1['name']
         assert description == db_variable1['description']
+        assert column_name == db_variable1['column_name']
+        assert db_type == db_variable1['db_type']
+        assert dataset == db_variable1['dataset_id']
+        assert agg_method == db_variable1['agg_method']
+        assert variable_group == db_variable1['variable_group_id']
         assert starred == db_variable1['starred']
+        assert summary == db_variable1['summary_jsonb']
 
     def test_variable_is_exported_as_series(self):
         # Given

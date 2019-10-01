@@ -1,5 +1,6 @@
 from .category import Categories
 from .country import Countries
+from .dataset import Datasets
 
 
 class Catalog(object):
@@ -11,3 +12,7 @@ class Catalog(object):
     @staticmethod
     def categories():
         return Categories.get_all()
+
+    @staticmethod
+    def datasets():
+        return Datasets.get_all()

@@ -144,7 +144,7 @@ class TestDatasetRepo(unittest.TestCase):
             'country_iso_code3': None,
             'language_iso_code3': None,
             'geography_id': None,
-            'temporal_aggregation': None,
+            'temporalaggregations': None,
             'time_coverage': None,
             'update_frequency': None,
             'version': None,

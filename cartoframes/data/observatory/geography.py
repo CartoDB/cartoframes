@@ -30,12 +30,32 @@ class Geography(SingleEntity):
         return self.data['country_iso_code3']
 
     @property
+    def language(self):
+        return self.data['language_iso_code3']
+
+    @property
     def provider(self):
         return self.data['provider_id']
 
     @property
+    def geom_coverage(self):
+        return self.data['geom_coverage']
+
+    @property
+    def update_frequency(self):
+        return self.data['update_frequency']
+
+    @property
     def version(self):
         return self.data['version']
+
+    @property
+    def is_public_data(self):
+        return self.data['is_public_data']
+
+    @property
+    def summary(self):
+        return self.data['summary_jsonb']
 
 
 class Geographies(EntitiesList):

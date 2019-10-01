@@ -1,9 +1,10 @@
 import unittest
 
-from cartoframes.data.observatory.category import Categories
 from cartoframes.data.observatory.country import Countries
+from cartoframes.data.observatory.category import Categories
+from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.catalog import Catalog
-from .examples import test_country2, test_country1, test_category1, test_category2
+from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2
 
 try:
     from unittest.mock import Mock, patch
@@ -38,3 +39,16 @@ class TestCatalog(unittest.TestCase):
 
         # Then
         assert categories == expected_categories
+
+    @patch.object(Datasets, 'get_all')
+    def test_datasets(self, mocked_datasets):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        mocked_datasets.return_value = expected_datasets
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.datasets()
+
+        # Then
+        assert datasets == expected_datasets
