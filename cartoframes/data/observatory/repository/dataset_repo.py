@@ -39,7 +39,7 @@ class DatasetRepository(EntityRepository):
             'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
             'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
             'geography_id': cls._normalize_field(row, 'geography_id'),
-            'temporalaggregations': cls._normalize_field(row, 'temporalaggregations'),
+            'temporal_aggregation': cls._normalize_field(row, 'temporal_aggregation'),
             'time_coverage': cls._normalize_field(row, 'time_coverage'),
             'update_frequency': cls._normalize_field(row, 'update_frequency'),
             'version': cls._normalize_field(row, 'version'),

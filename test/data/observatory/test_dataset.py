@@ -88,7 +88,7 @@ class TestDataset(unittest.TestCase):
         assert country == db_dataset1['country_iso_code3']
         assert language == db_dataset1['language_iso_code3']
         assert geography == db_dataset1['geography_id']
-        assert temporal_aggregation == db_dataset1['temporalaggregations']
+        assert temporal_aggregation == db_dataset1['temporal_aggregation']
         assert time_coverage == db_dataset1['time_coverage']
         assert update_frequency == db_dataset1['update_frequency']
         assert version == db_dataset1['version']

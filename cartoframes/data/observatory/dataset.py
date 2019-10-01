@@ -55,7 +55,7 @@ class Dataset(SingleEntity):
 
     @property
     def temporal_aggregation(self):
-        return self.data['temporalaggregations']
+        return self.data['temporal_aggregation']
 
     @property
     def time_coverage(self):
