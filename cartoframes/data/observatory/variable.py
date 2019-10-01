@@ -10,12 +10,8 @@ class Variable(SingleEntity):
     id_field = _VARIABLE_ID_FIELD
     entity_repo = get_variable_repo()
 
-    @classmethod
-    def _get_entities_list_class(cls):
-        return Variables
-
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self._get_id())
+        return get_dataset_repo().get_by_variable(self.id)
 
 
 class Variables(EntitiesList):

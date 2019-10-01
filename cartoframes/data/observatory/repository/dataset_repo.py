@@ -21,7 +21,8 @@ class DatasetRepository(object):
             raise DiscoveryException('The id does not correspond with any existing dataset in the catalog. '
                                      'You can check the full list of available datasets with Datasets.get_all()')
 
-        return self._to_dataset(result[0])
+        data = self._from_repo(result[0])
+        return self._to_dataset(data)
 
     def get_by_country(self, iso_code3):
         return self._to_datasets(self.client.get_datasets('country_iso_code3', iso_code3))
@@ -39,6 +40,11 @@ class DatasetRepository(object):
         return self._to_datasets(self.client.get_datasets('provider_id', provider_id))
 
     @staticmethod
+    def _from_repo(row):
+        # TODO: Map properties
+        return row
+
+    @staticmethod
     def _to_dataset(result):
         from cartoframes.data.observatory.dataset import Dataset
 
@@ -51,7 +57,7 @@ class DatasetRepository(object):
 
         from cartoframes.data.observatory.dataset import Datasets
 
-        return Datasets(DatasetRepository._to_dataset(result) for result in results)
+        return Datasets(DatasetRepository._from_repo(result) for result in results)
 
 
 _REPO = DatasetRepository()

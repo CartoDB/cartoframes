@@ -21,7 +21,13 @@ class CategoryRepository(object):
             raise DiscoveryException('The id does not correspond with any existing category in the catalog. '
                                      'You can check the full list of available categories with Categories.get_all()')
 
-        return self._to_category(result[0])
+        data = self._from_repo(result[0])
+        return self._to_category(data)
+
+    @staticmethod
+    def _from_repo(row):
+        # TODO: Map properties
+        return row
 
     @staticmethod
     def _to_category(result):
@@ -36,7 +42,7 @@ class CategoryRepository(object):
 
         from cartoframes.data.observatory.category import Categories
 
-        return Categories([CategoryRepository._to_category(result) for result in results])
+        return Categories([CategoryRepository._from_repo(result) for result in results])
 
 
 _REPO = CategoryRepository()

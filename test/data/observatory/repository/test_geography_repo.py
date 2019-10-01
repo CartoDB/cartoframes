@@ -1,5 +1,7 @@
 import unittest
 
+from cartoframes.data.observatory.geography import Geographies, Geography
+
 from cartoframes.exceptions import DiscoveryException
 
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
@@ -25,6 +27,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
+        assert isinstance(geographies, Geographies)
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
@@ -44,7 +47,7 @@ class TestGeographyRepo(unittest.TestCase):
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
-        requested_id = test_geography1['id']
+        requested_id = db_geography1['id']
         repo = GeographyRepository()
 
         # When
@@ -52,6 +55,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(geography, Geography)
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')
@@ -73,8 +77,9 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geography = repo.get_by_country(country_code)
+        geographies = repo.get_by_country(country_code)
 
         # Then
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
-        assert geography == test_geographies
+        assert isinstance(geographies, Geographies)
+        assert geographies == test_geographies

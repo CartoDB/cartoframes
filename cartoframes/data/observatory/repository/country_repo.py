@@ -21,7 +21,13 @@ class CountryRepository(object):
             raise DiscoveryException('The id does not correspond with any existing country in the catalog. '
                                      'You can check the full list of available countries with Countries.get_all()')
 
-        return self._to_country(result[0])
+        data = self._from_repo(result[0])
+        return self._to_country(data)
+
+    @staticmethod
+    def _from_repo(row):
+        # TODO: Map properties
+        return row
 
     @staticmethod
     def _to_country(result):
@@ -36,7 +42,7 @@ class CountryRepository(object):
 
         from cartoframes.data.observatory.country import Countries
 
-        return Countries([CountryRepository._to_country(result) for result in results])
+        return Countries([CountryRepository._from_repo(result) for result in results])
 
 
 _REPO = CountryRepository()

@@ -10,7 +10,7 @@ db_country1 = {'country_iso_code3': 'esp'}
 db_country2 = {'country_iso_code3': 'usa'}
 test_country1 = Country(db_country1)
 test_country2 = Country(db_country2)
-test_countries = Countries([test_country1, test_country2])
+test_countries = Countries([db_country1, db_country2])
 
 db_category1 = {
     'id': 'cat1',
@@ -22,7 +22,7 @@ db_category2 = {
 }
 test_category1 = Category(db_category1)
 test_category2 = Category(db_category2)
-test_categories = Categories([test_category1, test_category2])
+test_categories = Categories([db_category1, db_category2])
 
 db_geography1 = {
     'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
@@ -42,7 +42,7 @@ db_geography2 = {
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
-test_geographies = Geographies([test_geography1, test_geography2])
+test_geographies = Geographies([db_geography1, db_geography2])
 
 db_dataset1 = {
     'id': 'basicstats-census',
@@ -78,7 +78,7 @@ db_dataset2 = {
 }
 test_dataset1 = Dataset(db_dataset1)
 test_dataset2 = Dataset(db_dataset2)
-test_datasets = Datasets([test_dataset1, test_dataset2])
+test_datasets = Datasets([db_dataset1, db_dataset2])
 
 db_variable1 = {
     'id': 'var1',
@@ -104,7 +104,7 @@ db_variable2 = {
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
-test_variables = Variables([test_variable1, test_variable2])
+test_variables = Variables([db_variable1, db_variable2])
 
 db_provider1 = {
     'id': 'bbva',
@@ -116,7 +116,7 @@ db_provider2 = {
 }
 test_provider1 = Provider(db_provider1)
 test_provider2 = Provider(db_provider2)
-test_providers = Providers([test_provider1, test_provider2])
+test_providers = Providers([db_provider1, db_provider2])
 
 db_variable_group1 = {
     'id': 'vargroup1',
@@ -130,4 +130,4 @@ db_variable_group2 = {
 }
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)
-test_variables_groups = VariablesGroups([test_variable_group1, test_variable_group2])
+test_variables_groups = VariablesGroups([db_variable_group1, db_variable_group2])

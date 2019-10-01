@@ -11,12 +11,8 @@ class Category(SingleEntity):
     id_field = _CATEGORY_ID_FIELD
     entity_repo = get_category_repo()
 
-    @classmethod
-    def _get_entities_list_class(cls):
-        return Categories
-
     def datasets(self):
-        return get_dataset_repo().get_by_category(self._get_id())
+        return get_dataset_repo().get_by_category(self.id)
 
 
 class Categories(EntitiesList):

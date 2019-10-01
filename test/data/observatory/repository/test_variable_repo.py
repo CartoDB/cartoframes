@@ -1,5 +1,7 @@
 import unittest
 
+from cartoframes.data.observatory.variable import Variables, Variable
+
 from cartoframes.exceptions import DiscoveryException
 
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
@@ -25,6 +27,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
+        assert isinstance(variables, Variables)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -44,7 +47,7 @@ class TestVariableRepo(unittest.TestCase):
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable1, db_variable2]
-        requested_id = test_variable1['id']
+        requested_id = db_variable1['id']
 
         # When
         repo = VariableRepository()
@@ -52,6 +55,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(variable, Variable)
         assert variable == test_variable1
 
     @patch.object(RepoClient, 'get_variables')
@@ -77,6 +81,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        assert isinstance(variables, Variables)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -91,4 +96,5 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
+        assert isinstance(variables, Variables)
         assert variables == test_variables

@@ -11,12 +11,8 @@ class Provider(SingleEntity):
     id_field = _PROVIDER_ID_FIELD
     entity_repo = get_provider_repo()
 
-    @classmethod
-    def _get_entities_list_class(cls):
-        return Providers
-
     def datasets(self):
-        return get_dataset_repo().get_by_provider(self._get_id())
+        return get_dataset_repo().get_by_provider(self.id)
 
 
 class Providers(EntitiesList):

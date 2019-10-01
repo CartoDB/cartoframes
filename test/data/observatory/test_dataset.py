@@ -7,9 +7,8 @@ from cartoframes.data.observatory.dataset import Datasets, Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.exceptions import DiscoveryException
 
-from .examples import test_dataset1, test_datasets, test_variables, db_dataset1, test_variables_groups
+from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups
 
 try:
     from unittest.mock import Mock, patch
@@ -25,10 +24,10 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Dataset.get_by_id(test_dataset1['id'])
+        dataset = Dataset.get(test_dataset1.id)
 
         # Then
-        assert isinstance(dataset, pd.Series)
+        assert isinstance(dataset, object)
         assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
@@ -41,17 +40,9 @@ class TestDataset(unittest.TestCase):
         variables = test_dataset1.variables()
 
         # Then
-        assert isinstance(variables, pd.DataFrame)
+        assert isinstance(variables, list)
         assert isinstance(variables, Variables)
         assert variables == test_variables
-
-    def test_get_variables_by_dataset_fails_if_column_Series(self):
-        # Given
-        dataset = test_datasets.id
-
-        # Then
-        with self.assertRaises(DiscoveryException):
-            dataset.variables()
 
     @patch.object(VariableGroupRepository, 'get_by_dataset')
     def test_get_variables_groups_by_dataset(self, mocked_repo):
@@ -62,9 +53,20 @@ class TestDataset(unittest.TestCase):
         variables_groups = test_dataset1.variables_groups()
 
         # Then
-        assert isinstance(variables_groups, pd.DataFrame)
+        assert isinstance(variables_groups, list)
         assert isinstance(variables_groups, VariablesGroups)
         assert variables_groups == test_variables_groups
+
+    def test_dataset_is_exported_as_series(self):
+        # Given
+        dataset = test_dataset1
+
+        # When
+        dataset_series = dataset.to_series()
+
+        # Then
+        assert isinstance(dataset_series, pd.Series)
+        assert dataset_series['id'] == dataset.id
 
 
 class TestDatasets(unittest.TestCase):
@@ -78,7 +80,7 @@ class TestDatasets(unittest.TestCase):
         datasets = Datasets.get_all()
 
         # Then
-        assert isinstance(datasets, pd.DataFrame)
+        assert isinstance(datasets, list)
         assert isinstance(datasets, Datasets)
 
     @patch.object(DatasetRepository, 'get_by_id')
@@ -87,35 +89,47 @@ class TestDatasets(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Datasets.get_by_id(test_dataset1['id'])
+        dataset = Datasets.get(test_dataset1.id)
 
         # Then
-        assert isinstance(dataset, pd.Series)
+        assert isinstance(dataset, object)
         assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
-    @patch.object(DatasetRepository, 'get_all')
-    def test_datasets_are_indexed_with_id(self, mocked_repo):
+    # @patch.object(DatasetRepository, 'get_all')
+    # def test_datasets_are_indexed_with_id(self, mocked_repo):
+    #     # Given
+    #     mocked_repo.return_value = test_datasets
+    #     dataset_id = db_dataset1['id']
+    #
+    #     # When
+    #     datasets = Datasets.get_all()
+    #     dataset = datasets.loc[dataset_id]
+    #
+    #     # Then
+    #     assert dataset == test_dataset1
+
+    def test_datasets_items_are_obtained_as_dataset(self):
         # Given
-        mocked_repo.return_value = test_datasets
-        dataset_id = db_dataset1['id']
+        datasets = test_datasets
 
         # When
-        datasets = Datasets.get_all()
-        dataset = datasets.loc[dataset_id]
-
-        # Then
-        assert dataset == test_dataset1
-
-    @patch.object(DatasetRepository, 'get_all')
-    def test_datasets_slice_is_dataset_and_series(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_datasets
-
-        # When
-        datasets = Datasets.get_all()
-        dataset = datasets.iloc[0]
+        dataset = datasets[0]
 
         # Then
         assert isinstance(dataset, Dataset)
-        assert isinstance(dataset, pd.Series)
+        assert dataset == test_dataset1
+
+    def test_datasets_are_exported_as_dataframe(self):
+        # Given
+        datasets = test_datasets
+        dataset = datasets[0]
+
+        # When
+        dataset_df = datasets.to_dataframe()
+        sliced_dataset = dataset_df.iloc[0]
+
+        # Then
+        assert isinstance(dataset_df, pd.DataFrame)
+        assert isinstance(sliced_dataset, pd.Series)
+        assert sliced_dataset.equals(dataset.to_series())

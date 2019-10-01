@@ -21,10 +21,16 @@ class GeographyRepository(object):
             raise DiscoveryException('The id does not correspond with any existing geography in the catalog. '
                                      'You can check the full list of available geographies with Geographies.get_all()')
 
-        return self._to_geography(result[0])
+        data = self._from_repo(result[0])
+        return self._to_geography(data)
 
     def get_by_country(self, iso_code3):
         return self._to_geographies(self.client.get_geographies('country_iso_code3', iso_code3))
+
+    @staticmethod
+    def _from_repo(row):
+        # TODO: Map properties
+        return row
 
     @staticmethod
     def _to_geography(result):
@@ -39,7 +45,7 @@ class GeographyRepository(object):
 
         from cartoframes.data.observatory.geography import Geographies
 
-        return Geographies(GeographyRepository._to_geography(result) for result in results)
+        return Geographies(GeographyRepository._from_repo(result) for result in results)
 
 
 _REPO = GeographyRepository()

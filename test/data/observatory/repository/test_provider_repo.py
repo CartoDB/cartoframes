@@ -1,5 +1,7 @@
 import unittest
 
+from cartoframes.data.observatory.provider import Providers, Provider
+
 from cartoframes.exceptions import DiscoveryException
 
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
@@ -25,6 +27,7 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with()
+        assert isinstance(providers, Providers)
         assert providers == test_providers
 
     @patch.object(RepoClient, 'get_providers')
@@ -44,7 +47,7 @@ class TestProviderRepo(unittest.TestCase):
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_provider1, db_provider2]
-        requested_id = test_provider1['id']
+        requested_id = db_provider1['id']
         repo = ProviderRepository()
 
         # When
@@ -52,6 +55,7 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(provider, Provider)
         assert provider == test_provider1
 
     @patch.object(RepoClient, 'get_providers')

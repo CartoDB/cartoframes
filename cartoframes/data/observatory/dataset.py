@@ -11,15 +11,11 @@ class Dataset(SingleEntity):
     id_field = _DATASET_ID_FIELD
     entity_repo = get_dataset_repo()
 
-    @classmethod
-    def _get_entities_list_class(cls):
-        return Datasets
-
     def variables(self):
-        return get_variable_repo().get_by_dataset(self._get_id())
+        return get_variable_repo().get_by_dataset(self.id)
 
     def variables_groups(self):
-        return get_variable_group_repo().get_by_dataset(self._get_id())
+        return get_variable_group_repo().get_by_dataset(self.id)
 
 
 class Datasets(EntitiesList):

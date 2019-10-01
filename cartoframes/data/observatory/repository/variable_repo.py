@@ -21,7 +21,8 @@ class VariableRepository(object):
             raise DiscoveryException('The id does not correspond with any existing variable in the catalog. '
                                      'You can check the full list of available variables with Variables.get_all()')
 
-        return self._to_variable(result[0])
+        data = self._from_repo(result[0])
+        return self._to_variable(data)
 
     def get_by_dataset(self, dataset_id):
         return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
@@ -29,6 +30,10 @@ class VariableRepository(object):
     def get_by_variable_group(self, variable_group_id):
         return self._to_variables(self.client.get_variables('variable_group_id', variable_group_id))
 
+    @staticmethod
+    def _from_repo(row):
+        # TODO: Map properties
+        return row
 
     @staticmethod
     def _to_variable(result):
@@ -43,7 +48,7 @@ class VariableRepository(object):
 
         from cartoframes.data.observatory.variable import Variables
 
-        return Variables([VariableRepository._to_variable(result) for result in results])
+        return Variables([VariableRepository._from_repo(result) for result in results])
 
 
 _REPO = VariableRepository()

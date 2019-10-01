@@ -1,6 +1,6 @@
 from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
-from do_metadata_key import key
+from .key import key
 
 
 class RepoClient(object):
