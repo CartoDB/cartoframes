@@ -16,9 +16,20 @@ class GeographyRepository(EntityRepository):
         return self._get_filtered_entities('country_iso_code3', iso_code3)
 
     @classmethod
-    def _from_client(cls, row):
-        # TODO: Map properties
-        return row
+    def _map_row(cls, row):
+        return {
+            'id': row[cls.id_field],
+            'name': row['name'],
+            'description': row['description'],
+            'provider_id': row['provider_id'],
+            'country_iso_code3': row['country_iso_code3'],
+            'language_iso_code3': row['language_iso_code3'],
+            'geom_coverage': row['geom_coverage'],
+            'update_frequency': row['update_frequency'],
+            'version': row['version'],
+            'is_public_data': row['is_public_data'],
+            'summary_jsonb': row['summary_jsonb']
+        }
 
     @classmethod
     def _get_single_entity_class(cls):

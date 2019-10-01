@@ -12,9 +12,10 @@ class CountryRepository(EntityRepository):
     id_field = _COUNTRY_ID_FIELD
 
     @classmethod
-    def _from_client(cls, row):
-        # TODO: Map properties
-        return row
+    def _map_row(cls, row):
+        return {
+            'country_iso_code3': row[cls.id_field],
+        }
 
     @classmethod
     def _get_single_entity_class(cls):

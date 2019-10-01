@@ -27,18 +27,28 @@ test_categories = Categories([db_category1, db_category2])
 db_geography1 = {
     'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
     'name': 'ESP - Census',
+    'description': 'Geography data for Spanish census',
     'provider_id': 'bbva',
     'country_iso_code3': 'esp',
+    'language_iso_code3': 'esp',
+    'geom_coverage': '',
+    'update_frequency': 'monthly',
     'version': '20190203',
-    'is_public_data': True
+    'is_public_data': True,
+    'summary_jsonb': {}
 }
 db_geography2 = {
     'id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
     'name': 'ESP - Municipalities',
+    'description': 'Geography data for Spanish municipalities',
     'provider_id': 'bbva',
     'country_iso_code3': 'esp',
+    'language_iso_code3': 'esp',
+    'geom_coverage': '',
+    'update_frequency': 'monthly',
     'version': '20190203',
-    'is_public_data': False
+    'is_public_data': False,
+    'summary_jsonb': {}
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
@@ -47,34 +57,36 @@ test_geographies = Geographies([db_geography1, db_geography2])
 db_dataset1 = {
     'id': 'basicstats-census',
     'name': 'Basic Stats - Census',
+    'description': 'Basic stats on 2019 Spanish census',
     'provider_id': 'bbva',
     'category_id': 'demographics',
+    'data_source_id': 'basicstats',
     'country_iso_code3': 'esp',
+    'language_iso_code3': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019',
-    'temporalaggregations': '5yrs',
+    'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
-    'datasets_groups_id': 'basicstats_esp_2019',
+    'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'subscription_list_price': '',
-    'subscription_tos': '',
-    'is_sample': False
+    'summary_jsonb': {}
 }
 db_dataset2 = {
     'id': 'basicstats-municipalities',
     'name': 'Basic Stats - Municipalities',
+    'description': 'Basic stats on 2019 Spanish municipalities',
     'provider_id': 'bbva',
     'category_id': 'demographics',
+    'data_source_id': 'basicstats',
     'country_iso_code3': 'esp',
+    'language_iso_code3': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
-    'temporalaggregations': '5yrs',
+    'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
-    'datasets_groups_id': 'basicstats_esp_2019',
+    'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'subscription_list_price': '',
-    'subscription_tos': '',
-    'is_sample': False
+    'summary_jsonb': {}
 }
 test_dataset1 = Dataset(db_dataset1)
 test_dataset2 = Dataset(db_dataset2)
@@ -83,24 +95,26 @@ test_datasets = Datasets([db_dataset1, db_dataset2])
 db_variable1 = {
     'id': 'var1',
     'name': 'Population',
-    'variable_group_id': 'vargroup1',
     'description': 'The number of people within each geography',
     'column_name': 'pop',
     'db_type': 'Numeric',
-    'group_id': 'vargroup1',
+    'dataset_id': 'dataset1',
     'agg_method': '',
-    'starred': True
+    'variable_group_id': 'vargroup1',
+    'starred': True,
+    'summary_jsonb': {}
 }
 db_variable2 = {
     'id': 'var2',
     'name': 'Date',
-    'variable_group_id': 'vargroup1',
     'description': 'The date the data refers to (YYYY-MM format for month and YYYY-MM-DD for day).',
     'column_name': 'Date',
     'db_type': 'STRING',
-    'group_id': 'vargroup1',
+    'dataset_id': 'dataset1',
     'agg_method': '',
-    'starred': False
+    'variable_group_id': 'vargroup1',
+    'starred': False,
+    'summary_jsonb': {}
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
@@ -121,11 +135,13 @@ test_providers = Providers([db_provider1, db_provider2])
 db_variable_group1 = {
     'id': 'vargroup1',
     'name': 'Population',
+    'dataset_id': 'dataset1',
     'starred': True
 }
 db_variable_group2 = {
     'id': 'vargroup2',
     'name': 'Date',
+    'dataset_id': 'dataset1',
     'starred': False
 }
 test_variable_group1 = VariableGroup(db_variable_group1)

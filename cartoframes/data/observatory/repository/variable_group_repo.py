@@ -16,9 +16,13 @@ class VariableGroupRepository(EntityRepository):
         return self._get_filtered_entities('dataset_id', dataset_id)
 
     @classmethod
-    def _from_client(cls, row):
-        # TODO: Map properties
-        return row
+    def _map_row(cls, row):
+        return {
+            'id': row[cls.id_field],
+            'name': row['name'],
+            'dataset_id': row['dataset_id'],
+            'starred': row['starred']
+        }
 
     @classmethod
     def _get_single_entity_class(cls):

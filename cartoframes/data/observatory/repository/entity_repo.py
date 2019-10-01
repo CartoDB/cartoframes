@@ -25,7 +25,7 @@ class EntityRepository(ABC):
             raise DiscoveryException('The id does not correspond with any existing entity in the catalog. '
                                      'You can check the full list of available values with get_all() method')
 
-        data = self._from_client(result[0])
+        data = self._map_row(result[0])
         return self._to_single_entity(data)
 
     def _get_filtered_entities(self, field=None, value=None):
@@ -43,7 +43,7 @@ class EntityRepository(ABC):
 
     @classmethod
     @abstractmethod
-    def _from_client(cls, row):
+    def _map_row(cls, row):
         raise NotImplementedError
 
     @abstractmethod
@@ -59,4 +59,4 @@ class EntityRepository(ABC):
         if len(results) == 0:
             return None
 
-        return cls._get_entity_list_class()([cls._from_client(result) for result in results])
+        return cls._get_entity_list_class()([cls._map_row(result) for result in results])

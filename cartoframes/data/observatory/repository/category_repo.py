@@ -12,9 +12,11 @@ class CategoryRepository(EntityRepository):
     id_field = _CATEGORY_ID_FIELD
 
     @classmethod
-    def _from_client(cls, row):
-        # TODO: Map properties
-        return row
+    def _map_row(cls, row):
+        return {
+            'id': row[cls.id_field],
+            'name': row['name']
+        }
 
     @classmethod
     def _get_single_entity_class(cls):

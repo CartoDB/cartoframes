@@ -19,9 +19,19 @@ class VariableRepository(EntityRepository):
         return self._get_filtered_entities('variable_group_id', variable_group_id)
 
     @classmethod
-    def _from_client(cls, row):
-        # TODO: Map properties
-        return row
+    def _map_row(cls, row):
+        return {
+            'id': row[cls.id_field],
+            'name': row['name'],
+            'description': row['description'],
+            'column_name': row['column_name'],
+            'db_type': row['db_type'],
+            'dataset_id': row['dataset_id'],
+            'agg_method': row['agg_method'],
+            'variable_group_id': row['variable_group_id'],
+            'starred': row['starred'],
+            'summary_jsonb': row['summary_jsonb']
+        }
 
     @classmethod
     def _get_single_entity_class(cls):
