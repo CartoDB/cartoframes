@@ -36,7 +36,7 @@ class BigQueryClient(object):
             credentials=google_credentials)
 
     @refresh_client
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
+    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
 
