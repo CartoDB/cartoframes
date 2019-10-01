@@ -133,7 +133,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -164,7 +164,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodf')
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=table_name, dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -189,7 +189,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -215,7 +215,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('isodfds')
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, dry_run=True)
+        result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name, dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -247,7 +247,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -281,7 +281,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -307,7 +307,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -337,7 +337,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True)
+        result = iso.isochrones(ds, [100, 1000], mode='car', table_name=result_table_name, dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
@@ -363,7 +363,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isodistances(df, [100, 1000], mode='car', dry_run=True)
+        result = iso.isodistances(df, [100, 1000], mode='car', dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
