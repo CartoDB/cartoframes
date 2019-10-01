@@ -101,7 +101,6 @@ class Routing(Service):
             if input_dataframe is not None:
                 result = result.download()
         else:
-            # It would be nice to use execute_long_running_query, but we need the results
             result = dataset.download()
             if input_dataframe is None:
                 result = Dataset(result, credentials=self._credentials)
