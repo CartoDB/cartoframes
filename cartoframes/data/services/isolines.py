@@ -128,7 +128,7 @@ class Isolines(Service):
         input_dataframe = None
         if isinstance(source, pd.DataFrame):
             input_dataframe = source
-            source = Dataset(input_dataframe, credentials=self._credentials)
+            source = Dataset(input_dataframe)
 
         if dry_run:
             num_rows = source.get_num_rows()
