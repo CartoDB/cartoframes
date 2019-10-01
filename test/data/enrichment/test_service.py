@@ -40,7 +40,6 @@ class TestEnrichmentService(unittest.TestCase):
         expected_project = 'carto-do-customers'
         credentails = True
         user_dataset = 'test_dataset'
-        ttl = 1
         geom_column = 'the_geom'
         data_copy = pd.DataFrame([[1, '{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
                                  columns=['cartodb_id', geom_column, 'enrichment_id'])
@@ -49,13 +48,12 @@ class TestEnrichmentService(unittest.TestCase):
                                           columns=[geom_column, 'enrichment_id'])
 
         # mock
-        def assert_upload_dataframe(_, dataframe, schema, tablename, project, dataset, ttl_days=None):
+        def assert_upload_dataframe(_, dataframe, schema, tablename, project, dataset):
             assert dataframe.equals(expected_data_copy)
             assert schema == expected_schema
             assert isinstance(tablename, str) and len(tablename) > 0
             assert project == expected_project
             assert dataset == user_dataset
-            assert ttl_days == ttl
 
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_dataframe

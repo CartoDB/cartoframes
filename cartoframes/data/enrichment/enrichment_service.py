@@ -48,7 +48,7 @@ def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
     data_tablename = 'temp_{id}'.format(id=id_tablename)
 
     bq_client.upload_dataframe(data_geometry_id_copy, schema, data_tablename,
-                               project=_WORKING_PROJECT, dataset=user_dataset, ttl_days=1)
+                               project=_WORKING_PROJECT, dataset=user_dataset)
 
     return data_tablename
 
