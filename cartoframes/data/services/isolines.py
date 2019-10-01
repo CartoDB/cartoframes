@@ -171,7 +171,7 @@ class Isolines(Service):
 
         dataset = Dataset(sql, credentials=self._credentials)
         if table_name:
-            dataset.upload(table_name=table_name, credentials=self._credentials, if_exists=if_exists)
+            dataset.upload(table_name=table_name, if_exists=if_exists)
             result = Dataset(table_name, credentials=self._credentials)
             if input_dataframe is not None:
                 result = result.download()
