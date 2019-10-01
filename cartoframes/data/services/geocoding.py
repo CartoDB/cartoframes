@@ -256,8 +256,8 @@ def _column_or_value_arg(arg, valid_columns=None):
     return arg
 
 
-class Geocode(Service):
-    """Geocode using CARTO data services.
+class Geocoding(Service):
+    """Geocoding using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
     (through explicit argument in constructor or via the default credentials).
     Use of these methods will incur in geocoding credit consumption for the provided account.
@@ -268,10 +268,10 @@ class Geocode(Service):
 
         .. code::
 
-            from data.services import Geocode
+            from data.services import Geocoding
             from cartoframes.auth import set_default_credentials
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            gc = Geocode()
+            gc = Geocoding()
             _, info = gc.geocode(dataset, street='address', dry_run=True)
             print(info['required_quota'])
 
@@ -280,13 +280,13 @@ class Geocode(Service):
         .. code::
 
             import pandas
-            from data.services import Geocode
+            from data.services import Geocoding
             from cartoframes.data import Dataset
             from cartoframes.auth import set_default_credentials
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
             dataframe = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            gc = Geocode()
+            gc = Geocoding()
             geocoded_dataframe, info = gc.geocode(dataframe, street='address', city='city', country={'value': 'Spain'})
             print(geocoded_dataframe)
 
@@ -295,13 +295,13 @@ class Geocode(Service):
         .. code::
 
             import pandas
-            from data.services import Geocode
+            from data.services import Geocoding
             from cartoframes.data import Dataset
             from cartoframes.auth import set_default_credentials
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
             dataset = Dataset('YOUR_TABLE_NAME')
-            gc = Geocode()
+            gc = Geocoding()
             geocoded_dataset, info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'})
             print(geocoded_dataset.download())
 
@@ -310,13 +310,13 @@ class Geocode(Service):
         .. code::
 
             import pandas
-            from data.services import Geocode
+            from data.services import Geocoding
             from cartoframes.data import Dataset
             from cartoframes.auth import set_default_credentials
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
             df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
-            gc = Geocode()
+            gc = Geocoding()
             df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, metadata='meta')
             # show rows with relevance greater than 0.7:
             print(df[df.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
@@ -324,7 +324,7 @@ class Geocode(Service):
     """
 
     def __init__(self, credentials=None):
-        super(Geocode, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
+        super(Geocoding, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
 
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,

@@ -19,7 +19,7 @@ from cartoframes.utils.columns import normalize_name
 from cartoframes.data.clients import SQLClient
 
 
-from cartoframes.data.services import Geocode
+from cartoframes.data.services import Geocoding
 
 try:
     import geopandas
@@ -32,8 +32,8 @@ from test.helpers import _UserUrlLoader, _ReportQuotas
 warnings.filterwarnings('ignore')
 
 
-class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
-    """Tests for cartoframes.data.service.Geocode"""
+class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
+    """Tests for cartoframes.data.service.Geocoding"""
 
     def setUp(self):
         if (os.environ.get('APIKEY') is None or
@@ -106,10 +106,10 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
                 warnings.warn('Error deleting tables')
 
     def used_quota(self, gc):
-        return TestGeocode.update_quotas('geocode', gc.used_quota())
+        return TestGeocoding.update_quotas('geocode', gc.used_quota())
 
     def test_invalid_arguments(self):
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         with self.assertRaises(ValueError):
             gc.geocode(df, street='address', city={'columna': 'city'})
@@ -136,7 +136,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
@@ -180,7 +180,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe_preserves_input_cartodb(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([[1, 'Gran Via 46', 'Madrid'], [2, 'Ebro 1', 'Sevilla']], columns=['cartodb_id', 'address', 'city'])
 
@@ -194,7 +194,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
@@ -228,7 +228,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         table_name = self.get_test_table_name('gctb')
@@ -273,7 +273,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_table_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         table_name = self.get_test_table_name('gctb')
@@ -315,7 +315,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         ds = Dataset(df)
@@ -342,7 +342,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
         ds = Dataset(df)
@@ -368,7 +368,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_query(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         ds = Dataset("SELECT 'Gran Via 46' AS address, 'Madrid' AS city", credentials=self.credentials)
 
@@ -394,7 +394,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_query_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         ds = Dataset("SELECT 'Gran Via 46' AS address, 'Madrid' AS city", credentials=self.credentials)
 
@@ -419,7 +419,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_geocode_dataframe_with_metadata(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        gc = Geocode(credentials=self.credentials)
+        gc = Geocoding(credentials=self.credentials)
 
         df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 

@@ -1,11 +1,11 @@
 Geocode
 =======
 
-The ``cartoframes.data.dataservices.Geocode`` class provides geocoding using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
+The ``cartoframes.data.dataservices.Geocoding`` class provides geocoding using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
-The ``Geocode.geocode`` instance method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
+The ``Geocoding.geocode`` instance method provides the interface to geocoding; input data to be geocoded must be provided through a ``Dataset`` or ``DataFrame`` object as the first argument to this method.
 A second mandatory argument, ``street`` defines the name of the data column that contains the street address.
 
 Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be used to either
@@ -40,7 +40,7 @@ To find out the number of quota credits that will be spent when geocoding a data
 
 .. code:: python
 
-    from cartoframes.data.services import Geocode
+    from cartoframes.data.services import Geocoding
     from cartoframes.data import Dataset
     from cartoframes.auth import set_default_credentials
 
@@ -48,7 +48,7 @@ To find out the number of quota credits that will be spent when geocoding a data
         username='YOUR_USERNAME',
         api_key='YOUR_APIKEY'
     )
-    gc = Geocode()
+    gc = Geocoding()
 
     dataset = Dataset('YOUR_DATA')
     _, info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'}, dry_run=True)
@@ -65,7 +65,7 @@ A Dataframe can be geocoded like this:
 .. code:: python
 
     import pandas
-    from cartoframes.data.services import Geocode
+    from cartoframes.data.services import Geocoding
     from cartoframes.data import Dataset
     from cartoframes.auth import set_default_credentials
 
@@ -73,7 +73,7 @@ A Dataframe can be geocoded like this:
         username='YOUR_USERNAME',
         api_key='YOUR_APIKEY'
     )
-    gc = Geocode()
+    gc = Geocoding()
 
     df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
@@ -100,7 +100,7 @@ When the Dataset to be geocoded corresponds to a CARTO table, it will by default
 .. code:: python
 
     import pandas
-    from cartoframes.data.services import Geocode
+    from cartoframes.data.services import Geocoding
     from cartoframes.data import Dataset
     from cartoframes.auth import set_default_credentials
 
@@ -108,7 +108,7 @@ When the Dataset to be geocoded corresponds to a CARTO table, it will by default
         username='YOUR_USERNAME',
         api_key='YOUR_APIKEY'
     )
-    gc = Geocode()
+    gc = Geocoding()
 
     dataset = Dataset('YOUR_DATA')
     dataset, info = gc.geocode(dataset, street='address', country={'value': 'Spain'})
@@ -133,7 +133,7 @@ When the Dataset to be geocoded corresponds to a query, it will by default be ge
 .. code:: python
 
     import pandas
-    from cartoframes.data.services import Geocode
+    from cartoframes.data.services import Geocoding
     from cartoframes.data import Dataset
     from cartoframes.auth import set_default_credentials
 
@@ -141,7 +141,7 @@ When the Dataset to be geocoded corresponds to a query, it will by default be ge
         username='YOUR_USERNAME',
         api_key='YOUR_APIKEY'
     )
-    gc = Geocode()
+    gc = Geocoding()
 
     dataset = Dataset('SELECT * FROM YOUR_DATA WHERE value>1000')
     ds, info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'})
