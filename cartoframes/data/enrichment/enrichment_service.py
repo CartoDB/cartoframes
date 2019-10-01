@@ -1,13 +1,15 @@
 import pandas as pd
 import geopandas as gpd
 import uuid
-from collections import defaultdict
 
+from collections import defaultdict
+from shapely.geometry.base import BaseGeometry
 from ..dataset.dataset import Dataset
+from ..clients import bigquery_client
 from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
 from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
-from ..clients import bigquery_client
+from ...utils.geom_utils import _compute_geometry_from_geom
 
 _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'
@@ -73,12 +75,18 @@ def _execute_enrichment(bq_client, query, data_copy, data_geom_column):
 def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
 
     if isinstance(data, Dataset):
-        data = data.dataframe
+        if data.dataframe is not None:
+            data = data.dataframe
+        else:
+            data = data.download(decode_geom=True)
 
     data_copy = data.copy()
     data_copy[enrichment_id_column] = range(data_copy.shape[0])
 
-    if isinstance(data_copy, gpd.GeoDataFrame):
+    geometry_sample = data_copy.iloc[0]['geometry']
+
+    if isinstance(data_copy, gpd.GeoDataFrame) or isinstance(geometry_sample, BaseGeometry):
+        data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
         data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
