@@ -9,12 +9,12 @@ import pandas as pd
 QUOTA_SERVICE = 'isolines'
 
 
-class Routing(Service):
-    """Routing-based CARTO services using CARTO data services.
+class Isolines(Service):
+    """Time and distance Isoline services using CARTO dataservices.
     """
 
     def __init__(self, credentials=None):
-        super(Routing, self).__init__(credentials, quota_service=QUOTA_SERVICE)
+        super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
     def isochrones(self, source, range, **args):
         """isochrone areas

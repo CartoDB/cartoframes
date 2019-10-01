@@ -1,7 +1,8 @@
-Routing Services
-================
+Isolines Services
+=================
 
-The ``cartoframes.data.dataservices.Routing`` class provides routing-based analysis operations using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
+The ``cartoframes.data.dataservices.Isolines`` class provides `time and distance isolines <https://carto.com/location-data-services/isolines/>`_
+using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
@@ -79,7 +80,7 @@ areas,  pass a ``dry_run=True`` argument:
 
 .. code:: python
 
-    from cartoframes.data.services import Routing
+    from cartoframes.data.services import Isolines
     from cartoframes.data import Dataset
     from cartoframes.auth import set_default_credentials
 
@@ -87,7 +88,7 @@ areas,  pass a ``dry_run=True`` argument:
         username='YOUR_USERNAME',
         api_key='YOUR_APIKEY'
     )
-    travel = Routing()
+    travel = Isolines()
 
     dataset = Dataset('YOUR_DATA')
     info = travel.isochrones(dataset, ranges=[1800, 3600], dry_run=True).metadata

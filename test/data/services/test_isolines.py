@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Unit tests for cartoframes.data.services.Geocode"""
+"""Unit tests for cartoframes.data.services.Isolines"""
 import unittest
 import os
 import sys
@@ -18,7 +18,7 @@ from cartoframes.utils.columns import normalize_name
 from cartoframes.data.clients import SQLClient
 
 
-from cartoframes.data.services import Routing
+from cartoframes.data.services import Isolines
 
 
 try:
@@ -32,7 +32,7 @@ from test.helpers import _UserUrlLoader, _ReportQuotas
 warnings.filterwarnings('ignore')
 
 
-class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
+class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
     """Tests for cartoframes.data.service.Geocode"""
 
     def setUp(self):
@@ -117,7 +117,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
                 warnings.warn('Error deleting tables')
 
     def used_quota(self, iso):
-        return TestRouting.update_quotas('isolines', iso.used_quota())
+        return TestIsolines.update_quotas('isolines', iso.used_quota())
 
     def points_query(self):
         point_query = "SELECT '{name}' AS name, '{geom}'::geometry AS the_geom"
@@ -125,7 +125,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_dataframe_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         ds = Dataset(df, credentials=self.credentials)
@@ -154,7 +154,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         ds = Dataset(df, credentials=self.credentials)
@@ -182,7 +182,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
 
@@ -206,7 +206,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_dataframe_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
 
@@ -237,7 +237,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_table_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
@@ -269,7 +269,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_table_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
         table_name = self.get_test_table_name('isotb')
@@ -300,7 +300,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_query_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         ds = Dataset(self.points_query(), credentials=self.credentials)
 
@@ -328,7 +328,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isochrones_from_table_query_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         ds = Dataset(self.points_query(), credentials=self.credentials)
 
@@ -356,7 +356,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
     def test_isodistances_from_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
+        iso = Isolines(credentials=self.credentials)
 
         df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
 
