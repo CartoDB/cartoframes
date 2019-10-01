@@ -20,7 +20,10 @@ class Service(object):
         self._context = context.create_context(self._credentials)
         self._quota_service = quota_service
         if self._quota_service not in SERVICE_KEYS:
-            raise ValueError('Invalid service "{}" valid services are: {}'.format(self._quota_service, ', '.join(SERVICE_KEYS)))
+            raise ValueError('Invalid service "{}" valid services are: {}'.format(
+                self._quota_service,
+                ', '.join(SERVICE_KEYS)
+            ))
 
     def _quota_info(self, service):
         result = self._execute_query('SELECT * FROM cdb_service_quota_info()')

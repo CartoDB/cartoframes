@@ -64,7 +64,8 @@ class Isolines(Service):
     def isodistances(self, source, range, **args):
         """isodistance areas
 
-        This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public roads.
+        This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public
+        roads.
 
         Args:
             source (Dataset, Dataframe): containing the source points for the isochrones:
