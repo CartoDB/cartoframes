@@ -22,7 +22,7 @@ class Isolines(Service):
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source points for the isochrones:
+            source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel times.
             ranges (list): travel time values in seconds; for each range value and source point a result polygon
@@ -67,7 +67,7 @@ class Isolines(Service):
         This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source points for the isodistances:
+            source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel distances.
             range (list): travel distance values in meters; for each value and source point
