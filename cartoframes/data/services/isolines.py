@@ -22,7 +22,7 @@ class Isolines(Service):
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source points for the isochrones:
+            source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel times.
             ranges (list): travel time values in seconds; for each range value and source point a result polygon
@@ -64,10 +64,11 @@ class Isolines(Service):
     def isodistances(self, source, range, **args):
         """isodistance areas
 
-        This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public roads.
+        This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public
+        roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source points for the isodistances:
+            source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel distances.
             range (list): travel distance values in meters; for each value and source point
@@ -128,7 +129,7 @@ class Isolines(Service):
         input_dataframe = None
         if isinstance(source, pd.DataFrame):
             input_dataframe = source
-            source = Dataset(input_dataframe, credentials=self._credentials)
+            source = Dataset(input_dataframe)
 
         if dry_run:
             num_rows = source.get_num_rows()
@@ -171,7 +172,7 @@ class Isolines(Service):
 
         dataset = Dataset(sql, credentials=self._credentials)
         if table_name:
-            dataset.upload(table_name=table_name, credentials=self._credentials, if_exists=if_exists)
+            dataset.upload(table_name=table_name, if_exists=if_exists)
             result = Dataset(table_name, credentials=self._credentials)
             if input_dataframe is not None:
                 result = result.download()
