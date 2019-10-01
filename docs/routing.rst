@@ -105,8 +105,8 @@ so you can use both in your analyses and visualizations without spendit credits 
 
 The assume the areas are saved in a table with a ``cartodb_id``, a ``source_id`` referencing
 the source points, a ``data_range`` columns for the range values and ``the_geom``, i.e. the
-format created by the ``isochrones`` and ``isodistances`` methods with the
-default value of `True` for the `with_source_id` parameter and saved to a table (``table_name``).
+format created by the ``isochrones`` and ``isodistances`` methods from a source with
+a ``cartodb_id`` and saved to a table (``table_name``).
 
 .. code:: python
 

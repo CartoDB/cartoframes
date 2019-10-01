@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from ...data import Dataset
+from ...utils.utils import remove_column_from_dataframe
 from .service import Service
 import pandas as pd
 
@@ -59,8 +60,8 @@ class Routing(Service):
             a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
-            that identifies the source point corresponding to each area, unless ``with_source_id=False``
-            is used.
+            that identifies the source point corresponding to each area if the source has a
+            ``cartodb_id`` column.
         """
         return self._iso_areas(source, range, function='isochrone', **args)
 
@@ -108,8 +109,8 @@ class Routing(Service):
             a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
-            that identifies the source point corresponding to each area, unless ``with_source_id=False``
-            is used.
+            that identifies the source point corresponding to each area if the source has a
+            ``cartodb_id`` column.
         """
         return self._iso_areas(source, range, function='isodistance', **args)
 
@@ -126,13 +127,8 @@ class Routing(Service):
                    resolution=None,
                    maxpoints=None,
                    quality=None,
-                   with_source_id=True,
-                   with_source_geom=False,
                    exclusive=False,
                    function=None):
-        # we could default source_id=True for table source and
-        # source_geom=True for dataframe source
-
         metadata = {}
 
         input_dataframe = None
@@ -146,6 +142,7 @@ class Routing(Service):
             return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
+        source_has_id = 'cartodb_id' in source_columns
 
         temporary_table_name = False
 
@@ -173,16 +170,10 @@ class Routing(Service):
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
         iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in range]))
 
-        if with_source_geom:
-            # the source_geom is available as the `center` column in the iso_function result,
-            # but this is not supported ATM, because we have not control over wich geometry
-            # column is picked as `the_geom` in the cartodbfied table`
-            raise ValueError('The with_source_geom option is not supported')
-
         sql = _areas_query(
-            source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id or exclusive)
+            source_query, source_columns, iso_function, mode, iso_ranges, iso_options, source_has_id or exclusive)
         if exclusive:
-            sql = _rings_query(sql, with_source_id)
+            sql = _rings_query(sql, source_has_id)
 
         dataset = Dataset(sql, credentials=self._credentials)
         if table_name:
@@ -192,6 +183,8 @@ class Routing(Service):
                 result = result.download()
         else:
             result = dataset.download()
+            if not dry_run and not source_has_id:
+                remove_column_from_dataframe(result, 'cartodb_id')
             if input_dataframe is None:
                 result = Dataset(result, credentials=self._credentials)
 
@@ -215,7 +208,6 @@ def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, i
         _iso_areas AS (
             SELECT
               {source_id}
-              _source.the_geom AS source_geom,
               {iso_function}(
                   _source.the_geom,
                   '{mode}',

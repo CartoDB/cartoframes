@@ -147,6 +147,10 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+        self.assertFalse('cartodb_id' in result_columns)
+        self.assertFalse('cartodb_id' in result.dataframe)
+        self.assertFalse('source_id' in result_columns)
+        self.assertFalse('source_id' in result.dataframe)
 
     def test_isochrones_from_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -174,6 +178,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+        self.assertFalse('source_id' in result_columns)
 
     def test_isochrones_from_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -196,6 +201,8 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result)
         self.assertTrue('data_range' in result)
         self.assertEqual(len(result.index), 6)
+        self.assertFalse('cartodb_id' in result)
+        self.assertFalse('source_id' in result)
 
     def test_isochrones_from_dataframe_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -226,6 +233,7 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(ds.get_num_rows(), 6)
+        self.assertFalse('source_id' in result_columns)
 
     def test_isochrones_from_table_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -253,6 +261,11 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+        self.assertTrue('cartodb_id' in result_columns)
+        self.assertTrue('cartodb_id' in result.dataframe)
+        self.assertTrue('source_id' in result_columns)
+        self.assertTrue('source_id' in result.dataframe)
+
 
     def test_isochrones_from_table_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -282,6 +295,8 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+        self.assertTrue('cartodb_id' in result_columns)
+        self.assertTrue('source_id' in result_columns)
 
     def test_isochrones_from_query_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -306,6 +321,10 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
+        self.assertFalse('cartodb_id' in result_columns)
+        self.assertFalse('cartodb_id' in result.dataframe)
+        self.assertFalse('source_id' in result_columns)
+        self.assertFalse('source_id' in result.dataframe)
 
     def test_isochrones_from_table_query_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -332,30 +351,8 @@ class TestRouting(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result_columns)
         self.assertTrue('data_range' in result_columns)
         self.assertEqual(result.get_num_rows(), 6)
-
-    def test_isochrones_from_query_dataset(self):
-        self.skip(if_no_credits=True, if_no_credentials=True)
-        iso = Routing(credentials=self.credentials)
-
-        ds = Dataset(self.points_query(), credentials=self.credentials)
-
-        quota = self.used_quota(iso)
-
-        # Preview
-        result = iso.isochrones(ds, [100, 1000], mode='car', dry_run=True)
-        self.assertEqual(result.get('required_quota'), 6)
-        self.assertEqual(self.used_quota(iso), quota)
-
-        # Isochrones
-        result = iso.isochrones(ds, [100, 1000], mode='car').data
-        self.assertTrue(isinstance(result, Dataset))
-        self.assertTrue(result.is_local())
-        quota += 6
-        self.assertEqual(self.used_quota(iso), quota)
-        result_columns = result.get_column_names()
-        self.assertTrue('the_geom' in result_columns)
-        self.assertTrue('data_range' in result_columns)
-        self.assertEqual(result.get_num_rows(), 6)
+        self.assertTrue('cartodb_id' in result_columns)
+        self.assertFalse('source_id' in result_columns)
 
     def test_isodistances_from_dataframe(self):
         self.skip(if_no_credits=True, if_no_credentials=True)

@@ -116,6 +116,14 @@ class Service(object):
         info = self._quota_info(self._quota_service)
         return info and (info.get('monthly_quota') - info.get('used_quota'))
 
+    def result(self, data, metadata=None):
+        if isinstance(data, DataFrame):
+            return DataFrameResult(data, metadata)
+        elif isinstance(data, Dataset):
+            return DataFrameResult(data, metadata)
+        else:
+            return Result(data, metadata)
+
     def _new_temporary_table_name(self, base=None):
         return (base or 'table') + '_' + uuid.uuid4().hex[:10]
 
@@ -124,11 +132,3 @@ class Service(object):
 
     def _execute_long_running_query(self, query):
         return self._context.execute_long_running_query(query)
-
-    def result(self, data, metadata=None):
-        if isinstance(data, DataFrame):
-            return DataFrameResult(data, metadata)
-        elif isinstance(data, Dataset):
-            return DataFrameResult(data, metadata)
-        else:
-            return Result(data, metadata)

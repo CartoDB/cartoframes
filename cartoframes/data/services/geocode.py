@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 
 from ...data import Dataset
+from ...utils.utils import remove_column_from_dataframe
 from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
@@ -255,15 +256,6 @@ def _column_or_value_arg(arg, valid_columns=None):
     return arg
 
 
-def _remove_column_or_index(dataframe, name):
-    # Note: we must support the case that name if both a column and the index
-    if name in dataframe.columns:
-        del dataframe[name]
-    if dataframe.index.name == name:
-        dataframe.reset_index(inplace=True)
-        del dataframe[name]
-
-
 class Geocode(Service):
     """Geocode using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
@@ -342,7 +334,7 @@ class Geocode(Service):
         """Geocode a dataset
 
         Args:
-            dataset (Dataset): a Dataset object to be geocoded.
+            dataset (Dataset, DataFrame): a Dataset or DataFrame object to be geocoded.
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' city names or
@@ -395,9 +387,9 @@ class Geocode(Service):
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
         if result_dataset.dataframe is not None and not table_name and not dry_run:
-            # The result is a permanent table; remove cartodb_id if it wasn't present in the input
-            if 'cartodb_id' not in self.columns and 'cartodb_id' in result_dataset.get_column_names():
-                _remove_column_or_index(result_dataset.dataframe, 'cartodb_id')
+            # The result is not a permanent table; remove cartodb_id if it wasn't present in the input
+            if 'cartodb_id' not in self.columns:
+                remove_column_from_dataframe(result_dataset.dataframe, 'cartodb_id')
 
         result = result_dataset
         if input_dataframe is not None:
