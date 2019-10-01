@@ -110,7 +110,8 @@ class Routing(Service):
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area, unless ``with_source_id=False``
             is used.
-        """        return self._iso_areas(source, range, function='isodistance', **args)
+        """
+        return self._iso_areas(source, range, function='isodistance', **args)
 
     def _iso_areas(self,
                    source,
