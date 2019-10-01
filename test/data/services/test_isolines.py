@@ -266,7 +266,6 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('source_id' in result_columns)
         self.assertTrue('source_id' in result.dataframe)
 
-
     def test_isochrones_from_table_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)

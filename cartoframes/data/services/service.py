@@ -4,8 +4,6 @@ from ...lib import context
 from ...auth import get_default_credentials
 import uuid
 from collections import namedtuple
-from pandas import DataFrame
-from ...data import Dataset
 
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')

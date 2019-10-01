@@ -300,6 +300,7 @@ def get_center(center):
 
     return [center.get('lng'), center.get('lat')]
 
+
 def remove_column_from_dataframe(dataframe, name):
     """Removes a column or index (or both) from a DataFrames"""
     if name in dataframe.columns:
