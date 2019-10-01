@@ -3,7 +3,9 @@ Isolines Services
 
 The ``cartoframes.data.dataservices.Isolines`` class provides `time and distance isolines <https://carto.com/location-data-services/isolines/>`_
 using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
-This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned, and its use will incur in the expense of geocoding credits.
+
+This use these functions a CARTO account is required with a geocoding provider and geocoding quota assigned.
+Its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
 Isodistance and Isochrone areas
@@ -14,7 +16,7 @@ Isochrones correspond to the area that can be reached within a given time in sec
 through the roads network using the specified modality (either walking or by car).
 Isodistances are base instead in travel distance as specified in meters.
 
-There are two methods, both taking the same parameters, for each of these operations.
+There are two methods ``isochrones`` and ``isodistances``, both taking the same parameters and returning similar values.
 
 Two of the arguments in these methods are mandatory: the ``source`` and the ``ranges``.
 
@@ -29,28 +31,33 @@ The resulting dataset will include a ``the_geom`` column with the resulting area
 numeric column with the corresponding range value. Optionally a ``source_id`` column identifying
 the source point can be included, which is useful if the source dataset cotains `cartodb_id` identifiers.
 
-By default, the computed polygons represent the whole area reachable within the specified time or distancef
-from its source point. This implies that the areas corresponding to larger range values will
-completely include within them any other area corresponding to smaller range values.
-If you intend to visualize the resulting areas by representing them on a map it may be
-complicated to avoid larger areas obscuring the smaller ones.
-For these reason an alternative outcome, better suited for map representation
-is also provided by using the ``exclusive`` argument; when ``True`` exclusive range areas are
-produced instead of inclusive range areas.
-In *exclusive* mode it will produce, for each range value, the area within an interval of times or distances between
-the next lower range, if any, as a mininum time/distance, and the maximum value.
-In this manner, the produced areas for a given sorce point do not overlap, each one represents
+The computed polygons represent the whole area reachable within the specified time or distance
+from its source point (if the ``is_destination`` option is used, routes are computed *to* the
+source points instead).
+
+This implies that the areas corresponding to larger range values will completely include within them
+the areas corresponding to smaller range values. If you intend to visualize the resulting areas by representing
+them on a map it may be complicated to avoid larger areas obscuring the smaller ones.
+
+For these reason an alternative outcome, better suited for map representation is also provided by using the
+``exclusive`` argument; when this is ``True``, exclusive range areas are produced instead of inclusive range areas.
+In *exclusive* mode, for each range value, computed polygons will represent the area within an interval of times
+(or distances) between the next lower range, if any, as a mininum time/distance, and the maximum value.
+In this manner, the produced areas for a given source point do not overlap, each one representing
 an exclusive interval of times or distances. In this case an additional ``lower_data_range`` column
 will represent the minimun range value in the area. This will be zero in the case of the areas corresponding to the
 smaller range value.
-Note that computing exclusive areas will require longer processing.
+
+Note that computing exclusive areas will require a longer processing time.
 
 Return value
 ____________
 
-By default the result areas are returned as a Dataframe or a (local) Dataset depending on the
-kind of ``source`` input. This data and a dictionary containing metadata about the result are
-returned in a tuple. A named tuple is used with names ``data`` and ``metadata``.
+The result is a tuple composed of two named entries: `data` containing the result
+areas and ``metadata`` containing additional information.
+
+The ``data`` component is a Dataframe or a Dataset depending on the kind of ``source``
+input.  The other, ``metadata``, is a dictionary.
 
 The ``table_name`` argument, when used, forces the result to be saved as a CARTO table.
 When this argurment is used an additional argument ``if_exists`` can be used to determine
@@ -139,6 +146,3 @@ a ``cartodb_id`` and saved to a table (``table_name``).
             FROM {table_name}
         """.format(table_name=exclusive_table_name)
         Dataset(sql, credentials=credentials).upload(table_name=inclusive_table_name, if_exists=if_exists)
-
-
-

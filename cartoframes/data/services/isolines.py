@@ -22,15 +22,15 @@ class Isolines(Service):
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source
-                points to be taken as origin (or destination) of the travel routes.
-            range (list): travel time values in seconds; for each value and source point
-                a distinct isochrone are will be computed.
+            source (Dataset): a Dataset or Dataframe containing the source points for the isochrones:
+                travel routes from the source points are computed to determine areas within
+                specified travel times.
+            ranges (list): travel time values in seconds; for each range value and source point a result polygon
+                will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
-                containing the areas for smaller range values (so the area is reachable from the source
-                whithin the range distance or time value). when True, areas are exclusive, each one
-                corresponding to distance or time values between the immediately smaller range value (or zero)
-                and the area range value.
+                containing the areas for smaller time values (so the area is reachable from the source
+                whithin the given time). When True, areas are exclusive, each one corresponding time values
+                between the immediately smaller range value (or zero) and the area range value,
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -38,26 +38,22 @@ class Isolines(Service):
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
             dry_run (bool, optional): no actual computattion will be performed,
                 and metadata will be returned including the required quota.
-            with_source_id (bool, optional): When this is True (the default), the output
-                areas contain a ``source_id`` value that identifies the corresponding source point.
-                If the source doesn't have a ``cartodb_id`` it will not be possible to determine
-                which point corresponds to each area (but it will be possible which areas corresponds
-                to the same point). So, when input data has to identifiers, the generation of
-                ``source_id`` can be disabled with ``with_source_id=False``.
-
-            mode (str, optional): with possible values ``'car'`` and ``'walk'`` defines the travel mode.
-            is_destination (bool, optional):  indicates that the source points are to be consider destinations for the routes used to compute the area, rather than origins.
+            mode (str, optional):  defines the travel mode: ``'car'`` (the default) or ``'walk'``.
+            is_destination (bool, optional):  indicates that the source points are to be taken as
+                destinations for the routes used to compute the area, rather than origins.
             mode_type (str, optional): type of routes computed: ``'shortest'`` (default) or ``'fastests'``.
             mode_traffic (str, optional): use traffic data to compute routes: ``'disabled'`` (default) or ``'enabled'``.
-            resolution (float, optional): level of detail of the polygons in meters per pixel. Higher resolution may increase the response time of the service.
-            maxpoints (int, optional): Allows to limit the amount of points in the returned polygons. Increasing the number of maxpoints may increase the response time of the service.
-            quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time. Values: 1/2/3.
-
+            resolution (float, optional): level of detail of the polygons in meters per pixel.
+                Higher resolution may increase the response time of the service.
+            maxpoints (int, optional): Allows to limit the amount of points in the returned polygons.
+                Increasing the number of maxpoints may increase the response time of the service.
+            quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
+                Admitted values: 1/2/3.
 
         Returns:
-            result (namedtuple) the result is a tuple ``(data, metadata)`` containing
-            either a ``data`` Dataset or DataFrame (same type as the input ``source``) and
-            a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
+            (same type as the input ``source``) and a ``metadata`` dictionary.
+            For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
@@ -71,15 +67,17 @@ class Isolines(Service):
         This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public roads.
 
         Args:
-            source (Dataset): a Dataset or Dataframe containing the source
-                points to be taken as origin (or destination) of the travel routes.
+            source (Dataset): a Dataset or Dataframe containing the source points for the isodistances:
+                travel routes from the source points are computed to determine areas within
+                specified travel distances.
             range (list): travel distance values in meters; for each value and source point
-                a distinct isochrone are will be computed.
+                a distinct area are will be computed.
+            ranges (list): travel distance values in meters; for each range value and source point a result polygon
+                will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
-                containing the areas for smaller range values (so the area is reachable from the source
-                whithin the range distance or time value). when True, areas are exclusive, each one
-                corresponding to distance or time values between the immediately smaller range value (or zero)
-                and the area range value.
+                containing the areas for smaller distance values (so the area is reachable from the source
+                whithin the given distance). When True, areas are exclusive, each one corresponding distance values
+                between the immediately smaller range value (or zero) and the area range value,
             table_name (str, optional): the resulting areas will be saved in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -87,26 +85,22 @@ class Isolines(Service):
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
             dry_run (bool, optional): no actual computattion will be performed,
                 and metadata will be returned including the required quota.
-            with_source_id (bool, optional): When this is True (the default), the output
-                areas contain a ``source_id`` value that identifies the corresponding source point.
-                If the source doesn't have a ``cartodb_id`` it will not be possible to determine
-                which point corresponds to each area (but it will be possible which areas corresponds
-                to the same point). So, when input data has to identifiers, the generation of
-                ``source_id`` can be disabled with ``with_source_id=False``.
-
-            mode (str, optional): with possible values ``'car'`` and ``'walk'`` defines the travel mode.
-            is_destination (bool, optional):  indicates that the source points are to be consider destinations for the routes used to compute the area, rather than origins.
+            mode (str, optional):  defines the travel mode: ``'car'`` (the default) or ``'walk'``.
+            is_destination (bool, optional):  indicates that the source points are to be taken as
+                destinations for the routes used to compute the area, rather than origins.
             mode_type (str, optional): type of routes computed: ``'shortest'`` (default) or ``'fastests'``.
             mode_traffic (str, optional): use traffic data to compute routes: ``'disabled'`` (default) or ``'enabled'``.
-            resolution (float, optional): level of detail of the polygons in meters per pixel. Higher resolution may increase the response time of the service.
-            maxpoints (int, optional): Allows to limit the amount of points in the returned polygons. Increasing the number of maxpoints may increase the response time of the service.
-            quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time. Values: 1/2/3.
-
+            resolution (float, optional): level of detail of the polygons in meters per pixel.
+                Higher resolution may increase the response time of the service.
+            maxpoints (int, optional): Allows to limit the amount of points in the returned polygons.
+                Increasing the number of maxpoints may increase the response time of the service.
+            quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
+                Admitted values: 1/2/3.
 
         Returns:
-            result (namedtuple) the result is a tuple ``(data, metadata)`` containing
-            either a ``data`` Dataset or DataFrame (same type as the input ``source``) and
-            a ``metadata`` dictionary. For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
+            (same type as the input ``source``) and a ``metadata`` dictionary.
+            For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
