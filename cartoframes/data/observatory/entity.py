@@ -35,6 +35,12 @@ class SingleEntity(CatalogEntity, ABC):
     def to_series(self):
         return pd.Series(self.data)
 
+    def __str__(self):
+        return self.data.__str__()
+
+    def __repr__(self):
+        return self.data.__repr__()
+
 
 class EntitiesList(list, CatalogEntity, ABC):
 
