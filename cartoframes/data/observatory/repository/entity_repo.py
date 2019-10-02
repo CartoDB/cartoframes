@@ -33,6 +33,24 @@ class EntityRepository(ABC):
         return self._to_entity_list(rows)
 
     @classmethod
+    def _to_single_entity(cls, result):
+        return cls._get_single_entity_class()(result)
+
+    @classmethod
+    def _to_entity_list(cls, results):
+        if len(results) == 0:
+            return None
+
+        return cls._get_entity_list_class()([cls._map_row(result) for result in results])
+
+    @classmethod
+    def _normalize_field(cls, row, field):
+        if field in row:
+            return row[field]
+
+        return None
+
+    @classmethod
     @abstractmethod
     def _get_single_entity_class(cls):
         raise NotImplementedError
@@ -50,21 +68,3 @@ class EntityRepository(ABC):
     @abstractmethod
     def _get_rows(self, field=None, value=None):
         raise NotImplementedError
-
-    @classmethod
-    def _to_single_entity(cls, result):
-        return cls._get_single_entity_class()(result)
-
-    @classmethod
-    def _to_entity_list(cls, results):
-        if len(results) == 0:
-            return None
-
-        return cls._get_entity_list_class()([cls._map_row(result) for result in results])
-
-    @classmethod
-    def _normalize_field(cls, row, field):
-        if field in row:
-            return row[field]
-
-        return None
