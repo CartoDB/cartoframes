@@ -1,13 +1,14 @@
+from __future__ import absolute_import
+
 from copy import deepcopy
-from warnings import warn
+from warnings import warn, filterwarnings
 
 from carto.kuvizs import KuvizManager
 
-from ..auth import get_default_credentials
 from .source import Source
+from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 
-from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
@@ -18,8 +19,8 @@ class KuvizPublisher(object):
     @staticmethod
     def all(credentials=None):
         auth_client = _create_auth_client(credentials or get_default_credentials())
-        km = _get_kuviz_manager(auth_client)
-        kuvizs = km.all()
+        kmanager = _get_kuviz_manager(auth_client)
+        kuvizs = kmanager.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
     def set_credentials(self, credentials=None):
@@ -59,15 +60,15 @@ class KuvizPublisher(object):
         if layer.source.dataset.is_local():
             layer.source.dataset.upload(table_name=table_name, credentials=credentials)
             layer.source = Source(table_name, credentials=credentials)
-            warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
-                 'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
+            warn('Table `{0}` created. In order to publish the map, you will need to create a new Regular API '
+                 'key with permissions to Maps API and the table `{0}`. You can do it from your CARTO dashboard or '
                  'using the Auth API. You can get more info at '
-                 'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
+                 'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name))
 
 
 def _create_kuviz(html, name, auth_client, password=None):
-    km = _get_kuviz_manager(auth_client)
-    return km.create(html=html, name=name, password=password)
+    kmanager = _get_kuviz_manager(auth_client)
+    return kmanager.create(html=html, name=name, password=password)
 
 
 def _create_auth_client(credentials):

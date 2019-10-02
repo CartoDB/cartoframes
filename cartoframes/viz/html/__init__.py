@@ -4,6 +4,6 @@ from .HTMLMap import HTMLMap
 from .HTMLLayout import HTMLLayout
 
 __all__ = [
-  'HTMLMap',
-  'HTMLLayout'
+    'HTMLMap',
+    'HTMLLayout'
 ]
