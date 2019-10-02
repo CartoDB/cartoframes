@@ -1,6 +1,12 @@
 [MESSAGES CONTROL]
+max-line-length=120
 disable=
+    import-error,
+    unresolved-import,
+    global-statement,
     too-many-locals,
     too-many-arguments,
     missing-module-docstring,
-    missing-function-docstring
+    missing-function-docstring,
+    useless-object-inheritance,
+    no-self-use

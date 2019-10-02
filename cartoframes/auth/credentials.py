@@ -3,14 +3,14 @@
 import os
 import sys
 import json
-import appdirs
 import warnings
+import appdirs
 
 from carto.exceptions import CartoException
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
 
-from ..__version__ import __version__
+from .. import __version__
 
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
@@ -65,8 +65,8 @@ class Credentials(object):
     @classmethod
     def from_file(cls, config_file=None, session=None):
         """Retrives credentials from a file. Defaults to the user config directory"""
-        with open(config_file or _DEFAULT_PATH, 'r') as f:
-            credentials = json.load(f)
+        with open(config_file or _DEFAULT_PATH, 'r') as _file:
+            credentials = json.load(_file)
 
         return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
 
@@ -171,12 +171,12 @@ class Credentials(object):
         if config_file is None:
             config_file = _DEFAULT_PATH
 
-            """create directory if not exists"""
+            # create directory if not exists
             if not os.path.exists(_USER_CONFIG_DIR):
                 os.makedirs(_USER_CONFIG_DIR)
 
-        with open(config_file, 'w') as f:
-            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, f)
+        with open(config_file, 'w') as _file:
+            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
 
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no

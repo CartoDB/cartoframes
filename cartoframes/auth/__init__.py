@@ -1,11 +1,12 @@
 """Auth namespace contains the class to manage authentication: Credentials.
 It also includes the utility method set_default_credentials."""
 from __future__ import absolute_import
+
 import re
 
 from .credentials import Credentials
 
-_default_credentials = None
+__DEFAULT_CREDENTIALS = None
 
 
 def set_default_credentials(
@@ -97,7 +98,7 @@ def set_default_credentials(
             )
             set_default_credentials(credentials)
     """
-    global _default_credentials
+    global __DEFAULT_CREDENTIALS
 
     _base_url = base_url if first is None else first
     _username = username if first is None else first
@@ -105,24 +106,24 @@ def set_default_credentials(
     _credentials = credentials if first is None else first
 
     if isinstance(_credentials, Credentials):
-        _default_credentials = _credentials
+        __DEFAULT_CREDENTIALS = _credentials
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
         if _base_url and _is_url(_base_url):
-            _default_credentials = Credentials(base_url=_base_url, api_key=_api_key)
+            __DEFAULT_CREDENTIALS = Credentials(base_url=_base_url, api_key=_api_key)
         else:
-            _default_credentials = Credentials(username=_username, api_key=_api_key)
+            __DEFAULT_CREDENTIALS = Credentials(username=_username, api_key=_api_key)
 
     else:
         raise ValueError(
             'Invalid inputs. Pass a Credentials object, a username and api_key pair or a base_url and api_key pair.')
 
     if session:
-        _default_credentials.session = session
+        __DEFAULT_CREDENTIALS.session = session
 
 
 def get_default_credentials():
-    return _default_credentials
+    return __DEFAULT_CREDENTIALS
 
 
 def _is_url(text):
