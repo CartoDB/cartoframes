@@ -6,7 +6,12 @@ disable=
     global-statement,
     too-many-locals,
     too-many-arguments,
+    too-few-public-methods,
+    missing-class-docstring,
     missing-module-docstring,
     missing-function-docstring,
     useless-object-inheritance,
-    no-self-use
+    no-self-use,
+    fixme,
+    redefined-builtin,
+    protected-access
