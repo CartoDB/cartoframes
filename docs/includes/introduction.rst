@@ -1,3 +1,6 @@
+CARTOframes API Reference
+=========================
+
 Introduction
 ------------
 
