@@ -21,13 +21,8 @@ from cartoframes.data.clients import SQLClient
 from cartoframes.data.services import Isolines
 
 
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
-
 from test.helpers import _UserUrlLoader, _ReportQuotas
+
 
 warnings.filterwarnings('ignore')
 
@@ -59,7 +54,6 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
-        has_gpd = 'gpd' if os.environ.get('USE_GEOPANDAS') else 'nongpd'
         pyver = sys.version[0:3].replace('.', '_')
         buildnum = os.environ.get('TRAVIS_BUILD_NUMBER') or 'none'
 
@@ -68,8 +62,8 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         # in that case
         self.no_credits = self.no_credentials or buildnum != 'none'
 
-        self.test_slug = '{ver}_{num}_{mpl}_{gpd}'.format(
-            ver=pyver, num=buildnum, mpl=has_mpl, gpd=has_gpd
+        self.test_slug = '{ver}_{num}_{mpl}'.format(
+            ver=pyver, num=buildnum, mpl=has_mpl
         )
 
         self.test_tables = []
@@ -77,12 +71,6 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.base_url = self.user_url().format(username=self.username)
         self.credentials = Credentials(self.username, self.apikey, self.base_url)
         self.sql_client = SQLClient(self.credentials)
-
-        # self.points = [
-        #     ['a',-73.99239,40.74497],
-        #     ['b',-3.70399,40.42012],
-        #     ['c',-5.98312,37.35547]
-        # ]
 
         self.points = [
             ['a', '0101000020E610000028B85851837F52C025404D2D5B5F4440'],
