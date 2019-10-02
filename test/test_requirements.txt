@@ -1,5 +1,0 @@
-pytest
-geopandas
-matplotlib
-coveralls
-mock
