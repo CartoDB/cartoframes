@@ -49,7 +49,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
             try:
-                creds = json.loads(open('test2/e2e/secret.json').read())
+                creds = json.loads(open('tests/e2e/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except Exception:
