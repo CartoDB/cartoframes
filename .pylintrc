@@ -1,0 +1,6 @@
+[MESSAGES CONTROL]
+disable=
+    too-many-locals,
+    too-many-arguments,
+    missing-module-docstring,
+    missing-function-docstring

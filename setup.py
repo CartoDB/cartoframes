@@ -2,19 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import os
-import io
-from codecs import open
 from setuptools import setup, find_packages
 
+from cartoframes import (
+    __version__,
+    __title__,
+    __description__,
+    __url__,
+    __author__,
+    __email__,
+    __license__
+)
 
 def walk_subpkg(name):
     data_files = []
     package_dir = 'cartoframes'
-    for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
+    for parent, _, files in os.walk(os.path.join(package_dir, name)):
         # Remove package_dir from the path.
         sub_dir = os.sep.join(parent.split(os.sep)[1:])
-        for f in files:
-            data_files.append(os.path.join(sub_dir, f))
+        for _file in files:
+            data_files.append(os.path.join(sub_dir, _file))
     return data_files
 
 
@@ -31,6 +38,15 @@ REQUIRES = [
     'google-cloud-bigquery>=1.19.0,<2.0'
 ]
 
+
+EXTRAS_REQUIRES_TESTS = [
+    'pytest',
+    'pylint',
+    'geopandas',
+    'matplotlib'
+]
+
+
 PACKAGE_DATA = {
     '': [
         'LICENSE',
@@ -42,24 +58,18 @@ PACKAGE_DATA = {
     ] + walk_subpkg('assets'),
 }
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
-
-about = {}
-with open(os.path.join(here, 'cartoframes', '__version__.py'), 'r', 'utf-8') as f:
-    exec(f.read(), about)
-
 setup(
-    name=about['__title__'],
-    version=about['__version__'],
-    description=about['__description__'],
-    long_description=long_description,
-    url=about['__url__'],
-    author=about['__author__'],
-    author_email=about['__email__'],
-    license=about['__license__'],
+    name=__title__,
+    version=__version__,
+
+    description=__description__,
+    long_description=open('README.rst').read(),
+    license=__license__,
+    url=__url__,
+
+    author=__author__,
+    author_email=__email__,
+
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -69,16 +79,20 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
     ],
-    keywords='carto data science maps spatial pandas',
+    keywords=['carto', 'data', 'science', 'maps', 'spatial', 'pandas'],
+
     packages=find_packages(),
-    install_requires=REQUIRES,
-    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
-    include_package_data=True,
-    package_dir={'cartoframes': 'cartoframes'},
     package_data=PACKAGE_DATA,
+    package_dir={'cartoframes': 'cartoframes'},
+    include_package_data=True,
+
+    install_requires=REQUIRES,
+    extras_requires={
+        'tests': EXTRAS_REQUIRES_TESTS
+    },
+    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 )
