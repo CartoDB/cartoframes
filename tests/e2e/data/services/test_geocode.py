@@ -29,7 +29,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-from ..helpers import _UserUrlLoader
+from tests.e2e.helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 

@@ -27,10 +27,10 @@ try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
-from ..unit.mocks.dataset_mock import DatasetMock, QueryDatasetMock
-from ..unit.mocks.context_mock import ContextMock
+from tests.unit.mocks.dataset_mock import DatasetMock, QueryDatasetMock
+from tests.unit.mocks.context_mock import ContextMock
 
-from ..helpers import _UserUrlLoader
+from tests.e2e.helpers import _UserUrlLoader
 
 try:
     import geopandas
@@ -49,7 +49,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
             try:
-                creds = json.loads(open('test/secret.json').read())
+                creds = json.loads(open('test2/e2e/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except Exception:

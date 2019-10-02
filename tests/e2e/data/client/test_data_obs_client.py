@@ -17,7 +17,7 @@ from cartoframes.data.clients import DataObsClient, SQLClient
 from cartoframes.data.clients.data_obs_client import get_countrytag
 from cartoframes.utils.columns import normalize_name
 
-from ..helpers import _UserUrlLoader
+from tests.e2e.helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 
@@ -29,7 +29,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
             try:
-                creds = json.loads(open('test/secret.json').read())
+                creds = json.loads(open('tests/e2e/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
             except Exception:

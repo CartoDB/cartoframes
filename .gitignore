@@ -44,7 +44,7 @@ Pipfile.lock
 # project-specific
 CARTOCREDS.json
 SITEKEY.txt
-tests/secret.json
+secret.json
 examples/scratch/*
 
 # JavaScript 
