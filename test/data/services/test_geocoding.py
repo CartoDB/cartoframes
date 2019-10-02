@@ -182,7 +182,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocoding(credentials=self.credentials)
 
-        df = pd.DataFrame([[1, 'Gran Via 46', 'Madrid'], [2, 'Ebro 1', 'Sevilla']], columns=['cartodb_id', 'address', 'city'])
+        df = pd.DataFrame(
+            [[1, 'Gran Via 46', 'Madrid'], [2, 'Ebro 1', 'Sevilla']], columns=['cartodb_id', 'address', 'city'])
 
         quota = self.used_quota(gc)
 
@@ -203,7 +204,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('gcdf')
 
         # Preview
-        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, table_name=table_name, dry_run=True).metadata
+        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
+                          table_name=table_name, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(self.used_quota(gc), quota)
 
@@ -285,12 +287,14 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(gc)
 
         # Preview
-        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'}, table_name=new_table_name, dry_run=True).metadata
+        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'},
+                          table_name=new_table_name, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(self.used_quota(gc), quota)
 
         # Geocode
-        gc_ds, info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'}, table_name=new_table_name)
+        gc_ds, info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'},
+                                 table_name=new_table_name)
         self.assertTrue(isinstance(gc_ds, Dataset))
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(info.get('successfully_geocoded'), 2)
@@ -352,7 +356,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('gcdfds')
 
         # Preview
-        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'}, table_name=table_name, dry_run=True).metadata
+        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'},
+                          table_name=table_name, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(self.used_quota(gc), quota)
 
@@ -403,7 +408,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         table_name = self.get_test_table_name('gcdfds')
 
         # Preview
-        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'}, table_name=table_name, dry_run=True).metadata
+        info = gc.geocode(ds, street='address', city='city', country={'value': 'Spain'},
+                          table_name=table_name, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 1)
         self.assertEqual(self.used_quota(gc), quota)
 
@@ -426,7 +432,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(gc)
 
         # Preview
-        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, metadata='meta', dry_run=True).metadata
+        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
+                          metadata='meta', dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(self.used_quota(gc), quota)
 
