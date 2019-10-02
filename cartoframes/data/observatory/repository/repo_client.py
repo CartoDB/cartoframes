@@ -1,6 +1,5 @@
 from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
-from do_metadata_key import key
 
 
 class RepoClient(object):
@@ -8,34 +7,34 @@ class RepoClient(object):
     __instance = None
 
     def __init__(self):
-        self.client = SQLClient(Credentials('do-metadata', key))
+        self.client = SQLClient(Credentials('do-metadata', 'default_public'))
 
     def get_countries(self, field=None, value=None):
-        query = 'select distinct country_iso_code3 from datasets'
+        query = 'select distinct country_iso_code3 from datasets_public'
         return self._run_query(query, field, value)
 
     def get_categories(self, field=None, value=None):
-        query = 'select * from categories'
+        query = 'select * from categories_public'
         return self._run_query(query, field, value)
 
     def get_providers(self, field=None, value=None):
-        query = 'select * from providers'
+        query = 'select * from providers_public'
         return self._run_query(query, field, value)
 
     def get_variables(self, field=None, value=None):
-        query = 'select * from variables'
+        query = 'select * from variables_public'
         return self._run_query(query, field, value)
 
     def get_variables_groups(self, field=None, value=None):
-        query = 'select * from variables_groups'
+        query = 'select * from variables_groups_public'
         return self._run_query(query, field, value)
 
     def get_geographies(self, field=None, value=None):
-        query = 'select * from geographies'
+        query = 'select * from geographies_public'
         return self._run_query(query, field, value)
 
     def get_datasets(self, field=None, value=None):
-        query = 'select * from datasets'
+        query = 'select * from datasets_public'
         return self._run_query(query, field, value)
 
     def _run_query(self, query, field, value):
