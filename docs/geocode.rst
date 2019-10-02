@@ -12,10 +12,11 @@ provided through a ``Dataset`` or ``DataFrame`` object as the first argument to 
 
 A second mandatory argument, ``street`` defines the name of the data column that contains the street address.
 
-Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be used to either
-pass the name of a column that contains the corresponding attribute; e.g. ``city={'column': 'column_name_of_the_city'}``, which can
-be shortened as  ``city='column_name_of_the_city'``,
-or, when all the dataset corresponds to a single value of the attribute, a literal text, e.g. ``city={'value': 'London}'``.
+Additional optional arguments can be used to define the ``city``, ``state`` and ``country``. These arguments can be
+used to either pass the name of a column that contains the corresponding attribute;
+e.g. ``city={'column': 'column_name_of_the_city'}``, which can be shortened as  ``city='column_name_of_the_city'``,
+or, when all the dataset corresponds to a single value of the attribute, a literal text,
+e.g. ``city={'value': 'London}'``.
 
 Another optional argument, ``metadata`` can define the name of a result column that will contain additional metadata
 about each gecododed row as a JSON structure.
