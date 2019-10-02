@@ -107,7 +107,7 @@ html_theme = 'alabaster'
 #
 # html_sidebars = {}
 
-html_add_permalinks = None
+html_add_permalinks = ''
 html_use_index = False
 
 

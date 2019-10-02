@@ -1,6 +1,3 @@
-API Reference
-=============
-
 .. include:: includes/introduction.rst
 .. include:: includes/auth.rst
 .. include:: includes/data_observatory.rst
