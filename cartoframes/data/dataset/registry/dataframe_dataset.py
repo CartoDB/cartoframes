@@ -113,10 +113,11 @@ class DataFrameDataset(BaseDataset):
             geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
                 return map_geom_type(geometry.geom_type)
+        return None
 
 
 def _rows(df, dataframe_columns_info, with_lnglat):
-    for i, row in df.iterrows():
+    for _, row in df.iterrows():
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe

@@ -97,6 +97,7 @@ class SQLClient(object):
             columns = ['Column name', 'Column type']
             rows = [(key, fields[key]['type']) for key in fields]
             self._print_table(rows, columns=columns, padding=[10, 5])
+            return None
 
     def describe(self, table_name, column_name):
         """Show information about a column in a specific table."""

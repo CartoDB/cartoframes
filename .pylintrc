@@ -1,15 +1,19 @@
 [MESSAGES CONTROL]
-max-line-length=120
 disable=
+    line-too-long,
     unused-import,
     import-error,
     unresolved-import,
     import-outside-toplevel,
     global-statement,
+    too-many-branches,
     too-many-locals,
     too-many-arguments,
+    too-many-ancestors,
+    too-many-return-statements,
     too-few-public-methods,
     too-many-instance-attributes,
+    too-many-statements,
     missing-class-docstring,
     missing-module-docstring,
     missing-function-docstring,
@@ -29,3 +33,7 @@ disable=
     invalid-name,
     super-init-not-called,
     pointless-string-statement,
+    broad-except,
+    abstract-method,
+    useless-super-delegation,
+    cyclic-import,

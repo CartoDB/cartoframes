@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import
 
+from functools import wraps
+from warnings import filterwarnings, catch_warnings
+
 import os
 import re
 import sys
@@ -10,8 +13,6 @@ import hashlib
 import requests
 import numpy as np
 
-from functools import wraps
-from warnings import filterwarnings, catch_warnings
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -158,8 +159,8 @@ def debug_print(verbose=0, **kwargs):
         if isinstance(value, requests.Response):
             str_value = ("status_code: {status_code}, "
                          "content: {content}").format(
-                status_code=value.status_code,
-                content=value.content)
+                             status_code=value.status_code,
+                             content=value.content)
         else:
             str_value = str(value)
         if verbose < 2 and len(str_value) > 300:
@@ -179,6 +180,7 @@ def get_query_geom_type(context, query):
         st_geom_type = response.get('rows')[0].get('geom_type')
         if st_geom_type:
             return map_geom_type(st_geom_type[3:])
+    return None
 
 
 def get_query_bounds(context, query):
@@ -194,6 +196,7 @@ def get_query_bounds(context, query):
     response = context.execute_query(extent_query, do_post=False)
     if response and response.get('rows') and len(response.get('rows')) > 0:
         return response.get('rows')[0].get('bounds')
+    return None
 
 
 def load_geojson(input_data):

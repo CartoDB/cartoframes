@@ -26,6 +26,7 @@ class BaseDataset():
         self._table_name = None
         self._schema = None
         self._dataset_info = None
+        self._query = None
 
     @staticmethod
     @abstractmethod
@@ -133,6 +134,7 @@ class BaseDataset():
     def _create_context(self):
         if self._credentials:
             return context.create_context(self._credentials)
+        return None
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -167,7 +169,7 @@ class BaseDataset():
 
         converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
         for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: convert_bool(x)
+            converters[bool_column_name] = convert_bool
 
         df = pd.read_csv(raw_result, dtype=df_types,
                          parse_dates=date_column_names,

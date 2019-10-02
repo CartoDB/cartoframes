@@ -2,10 +2,11 @@
 
 from __future__ import absolute_import
 
+from warnings import warn
+
 import json
 import collections
 import pandas as pd
-from warnings import warn
 
 from carto.exceptions import CartoException
 
@@ -581,7 +582,7 @@ class DataObsClient(object):
         if _meta.shape[0] == 0:
             raise ValueError('There are no valid metadata entries. Check '
                              'inputs.')
-        elif _meta.shape[0] > 50:
+        if _meta.shape[0] > 50:
             raise ValueError('The number of metadata entries exceeds 50. Tip: '
                              'If `metadata` is a pandas.DataFrame, iterate '
                              'over this object using `metadata.groupby`. If '

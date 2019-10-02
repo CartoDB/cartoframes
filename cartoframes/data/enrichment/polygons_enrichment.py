@@ -53,8 +53,10 @@ def __prepare_sql(enrichment_id, variables, agg_operators, enrichment_table, enr
     if agg_operators:
         variables_sql = ['{operator}({variable} * \
                          (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                         / ST_area(data_table.{data_geom_column}))) as {variable}'.format(variable=variable,
-                         data_geom_column=data_geom_column, operator=agg_operators[variable]) for variable in variables]
+                         / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
+                             variable=variable,
+                             data_geom_column=data_geom_column,
+                             operator=agg_operators[variable]) for variable in variables]
 
         if isinstance(agg_operators, str):
             agg_operators = {variable: agg_operators for variable in variables}

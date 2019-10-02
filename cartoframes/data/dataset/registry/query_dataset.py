@@ -44,7 +44,7 @@ class QueryDataset(BaseDataset):
         if if_exists == BaseDataset.APPEND:
             raise CartoException('Error using append with a QueryDataset.'
                                  'It is not possible to append data to a query')
-        elif if_exists == BaseDataset.REPLACE or not self.exists():
+        if if_exists == BaseDataset.REPLACE or not self.exists():
             self._create_table_from_query()
         elif if_exists == BaseDataset.FAIL:
             raise self._already_exists_error()

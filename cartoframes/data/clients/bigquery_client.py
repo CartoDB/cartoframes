@@ -1,8 +1,8 @@
 import datetime
 import pytz
 
-from ..enrichment import fake_auth
 from google.cloud import bigquery
+from ..enrichment import fake_auth
 
 # TODO: decorator to authenticate
 

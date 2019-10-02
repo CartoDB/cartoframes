@@ -1,8 +1,9 @@
+from collections import defaultdict
+
 import pandas as pd
 import geopandas as gpd
 
 from ..dataset.dataset import Dataset
-from collections import defaultdict
 from ...exceptions import EnrichmentException
 
 

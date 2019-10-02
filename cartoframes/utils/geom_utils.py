@@ -44,7 +44,7 @@ ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 
-if (sys.version_info < (3, 0)):
+if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
 
@@ -54,6 +54,7 @@ def compute_query(dataset):
             schema=dataset.schema or dataset._get_schema() or 'public',
             table=dataset.table_name
         )
+    return ''
 
 
 def compute_geodataframe(dataset):
@@ -82,12 +83,14 @@ def compute_geodataframe(dataset):
                                      ', '.join(LNG_COLUMN_NAMES)
                                  ))
         return geopandas.GeoDataFrame(df)
+    return None
 
 
 def _get_column(df, options):
     for name in options:
         if name in df:
             return df[name]
+    return None
 
 
 def _warn_new_geometry_column(df):
@@ -160,7 +163,7 @@ def detect_encoding_type(input_geom):
         else:
             srid, geom = _extract_srid(input_geom)
             if not geom:
-                return
+                return None
             if srid:
                 return ENC_EWKT
             else:
@@ -177,6 +180,8 @@ def detect_encoding_type(input_geom):
             return ENC_WKB_BHEX
         except Exception:
             return ENC_WKB
+
+    return None
 
 
 def _load_wkb(geom):

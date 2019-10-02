@@ -276,3 +276,4 @@ def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
         return series.iloc[0]
+    return None
