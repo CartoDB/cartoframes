@@ -364,8 +364,14 @@ class Geocoding(Service):
                 check the needed quota)
 
         Returns:
-            Result: (Dataset, info_dict)
+            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
+            (same type as the input) and a ``metadata`` dictionary with global information
+            about the geocoding process (not to be confused with the optional per-row
+            geocoding enabled by the ``metadata`` parameter)
 
+            The data contains a ``the_geom`` column with point locations for the geocoded addresses
+            and also a ``carto_geocode_hash`` that, if preserved, can avoid re-geocoding
+            unchanged data in future calls to geocode.
         """
 
         input_dataframe = None
