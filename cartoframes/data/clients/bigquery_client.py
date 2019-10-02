@@ -53,3 +53,11 @@ class BigQueryClient(object):
         response = self.client.query(query, **kwargs)
 
         return response
+
+    def download_by_list_rows(self, table):
+        rows_iter = self.client.list_rows(table)
+        return list(rows_iter)
+
+    def download_by_query(self, table):
+        rows_iter = self.client.query('SELECT * FROM `{}`'.format(table))
+        return list(rows_iter)
