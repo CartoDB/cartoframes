@@ -1,13 +1,14 @@
 import pandas as pd
 import geopandas as gpd
 import uuid
-from collections import defaultdict
 
+from collections import defaultdict
 from ..dataset.dataset import Dataset
+from ..clients import bigquery_client
 from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
 from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
-from ..clients import bigquery_client
+from ...utils.geom_utils import _compute_geometry_from_geom
 
 _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'
@@ -72,14 +73,25 @@ def _execute_enrichment(bq_client, query, data_copy, data_geom_column):
 
 def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
 
+    has_to_decode_geom = True
+
     if isinstance(data, Dataset):
+        if data.dataframe is None:
+            has_to_decode_geom = False
+            geometry_column = 'the_geom'
+            data.download(decode_geom=True)
+
         data = data.dataframe
+    elif isinstance(data, gpd.GeoDataFrame):
+        has_to_decode_geom = False
 
     data_copy = data.copy()
     data_copy[enrichment_id_column] = range(data_copy.shape[0])
 
-    if isinstance(data_copy, gpd.GeoDataFrame):
-        data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
+    if has_to_decode_geom:
+        data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
+
+    data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
     return data_copy
 
