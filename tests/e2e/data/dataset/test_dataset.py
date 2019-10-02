@@ -22,16 +22,15 @@ from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
-from cartoframes.utils.columns import DataframeColumnsInfo
 
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
-from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
-from test.mocks.context_mock import ContextMock
+from ..unit.mocks.dataset_mock import DatasetMock, QueryDatasetMock
+from ..unit.mocks.context_mock import ContextMock
 
-from test.helpers import _UserUrlLoader
+from ..helpers import _UserUrlLoader
 
 try:
     import geopandas
@@ -53,7 +52,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:  # noqa: E722
+            except Exception:
                 warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
@@ -64,9 +63,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         else:
             self.apikey = os.environ['APIKEY']
             self.username = os.environ['USERNAME']
-
-        # sets skip value
-        WILL_SKIP = self.apikey is None or self.username is None  # noqa: F841
 
         # table naming info
         has_mpl = 'mpl' if os.environ.get('MPLBACKEND') else 'nonmpl'
@@ -518,7 +514,7 @@ class TestDatasetInfo(unittest.TestCase):
                      'First of all, you should call upload method '
                      'to save your data in CARTO.')
         with self.assertRaises(CartoException, msg=error_msg):
-            dataset.dataset_info
+            self.assertIsNotNone(dataset.dataset_info)
 
     def test_dataset_info_from_dataframe_sync(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
@@ -534,7 +530,7 @@ class TestDatasetInfo(unittest.TestCase):
         error_msg = ('We can not extract Dataset info from a QueryDataset. Use a TableDataset '
                      '`Dataset(table_name)` to get or modify the info from a CARTO table.')
         with self.assertRaises(ValueError, msg=error_msg):
-            dataset.dataset_info
+            self.assertIsNotNone(dataset.dataset_info)
 
     def test_dataset_info_from_query_update(self):
         query = 'SELECT 1'
@@ -623,12 +619,13 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
             self.assertIsDataFrameDatasetInstance(geojson)
 
     def test_creation_from_valid_geojson_file_path(self):
-        paths = [os.path.abspath('test/fixtures/valid.geojson'), os.path.abspath('test/fixtures/validgeo.json')]
+        paths = [os.path.abspath('tests/e2e/fixtures/valid.geojson'),
+                 os.path.abspath('tests/e2e/fixtures/validgeo.json')]
         for path in paths:
             self.assertIsDataFrameDatasetInstance(path)
 
     def test_creation_from_wrong_geojson_file_path(self):
-        geojson_file_path = os.path.abspath('test/fixtures/wrong.geojson')
+        geojson_file_path = os.path.abspath('tests/e2e/fixtures/wrong.geojson')
         with self.assertRaises(Exception):
             self.assertIsDataFrameDatasetInstance(geojson_file_path)
 

@@ -1,9 +1,9 @@
 # coding=UTF-8
 
 """Unit tests for cartoframes.utils"""
+from collections import OrderedDict
 import unittest
 import requests
-from collections import OrderedDict
 
 from cartoframes.utils.utils import dict_items, cssify, importify_params, snake_to_camel, \
     camel_dictionary, debug_print

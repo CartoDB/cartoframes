@@ -5,7 +5,7 @@ from cartoframes.lib import context
 from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
 
-from test.mocks.context_mock import ContextMock
+from ...mocks.context_mock import ContextMock
 
 
 SQL_SELECT_RESPONSE = {

@@ -12,8 +12,8 @@ from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.lib import context
 
-from test.mocks.dataset_mock import DatasetMock
-from test.mocks.context_mock import ContextMock
+from ..unit.mocks.dataset_mock import DatasetMock
+from ..unit.mocks.context_mock import ContextMock
 
 
 class TestDatasetStrategyChanges(unittest.TestCase):

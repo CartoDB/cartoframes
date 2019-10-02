@@ -6,9 +6,9 @@ import os
 import sys
 import json
 import warnings
-import pandas as pd
 import logging
 import pytest
+import pandas as pd
 
 from carto.exceptions import CartoException
 
@@ -29,7 +29,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-from test.helpers import _UserUrlLoader
+from ..helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 
@@ -70,7 +70,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:  # noqa: E722
+            except Exception:
                 warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
@@ -219,7 +219,7 @@ class TestGeocode(unittest.TestCase, _UserUrlLoader):
 
         quota = self.used_quota('hires_geocoder')
 
-        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
+        gc_df, _ = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
         self.assertTrue(isinstance(gc_df, pd.DataFrame))
         quota += 2
         self.assertEqual(self.used_quota('hires_geocoder'), quota)

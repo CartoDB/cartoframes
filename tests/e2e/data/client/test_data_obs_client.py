@@ -17,7 +17,7 @@ from cartoframes.data.clients import DataObsClient, SQLClient
 from cartoframes.data.clients.data_obs_client import get_countrytag
 from cartoframes.utils.columns import normalize_name
 
-from test.helpers import _UserUrlLoader
+from ..helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 
@@ -32,7 +32,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:  # noqa: E722
+            except Exception:
                 warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
