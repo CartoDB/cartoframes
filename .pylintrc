@@ -1,12 +1,15 @@
 [MESSAGES CONTROL]
 max-line-length=120
 disable=
+    unused-import,
     import-error,
     unresolved-import,
+    import-outside-toplevel,
     global-statement,
     too-many-locals,
     too-many-arguments,
     too-few-public-methods,
+    too-many-instance-attributes,
     missing-class-docstring,
     missing-module-docstring,
     missing-function-docstring,
@@ -14,4 +17,9 @@ disable=
     no-self-use,
     fixme,
     redefined-builtin,
-    protected-access
+    protected-access,
+    attribute-defined-outside-init,
+    no-else-return,
+    dangerous-default-value,
+    duplicate-code,
+    deprecated-method,
