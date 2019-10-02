@@ -86,18 +86,18 @@ class TestLegend(unittest.TestCase):
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
-        msg = 'Legend type is not valid. Valid legend types are: default, color-bins, ' + \
-            'color-bins-line, color-bins-point, color-bins-polygon, color-category, ' + \
-            'color-category-line, color-category-point, color-category-polygon, ' + \
-            'color-continuous, color-continuous-line, color-continuous-point, ' + \
-            'color-continuous-polygon, size-bins, size-bins-point, size-continuous, ' + \
-            'size-continuous-point.'
+        msg = 'Legend type is not valid. Valid legend types are: default, color-bins, '
+        'color-bins-line, color-bins-point, color-bins-polygon, color-category, '
+        'color-category-line, color-category-point, color-category-polygon, '
+        'color-continuous, color-continuous-line, color-continuous-point, '
+        'color-continuous-polygon, size-bins, size-bins-point, size-continuous, '
+        'size-continuous-point.'
         with self.assertRaisesRegexp(ValueError, msg):
             Legend({'type': 'xxx'}).get_info()
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
-        msg = 'Legend property is not valid. Valid legend properties are: ' + \
-              'color, strokeColor, width, strokeWidth.'
+        msg = 'Legend property is not valid. Valid legend properties are: '
+        'color, strokeColor, width, strokeWidth.'
         with self.assertRaisesRegexp(ValueError, msg):
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()

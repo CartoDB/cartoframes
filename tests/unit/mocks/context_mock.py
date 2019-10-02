@@ -8,7 +8,7 @@ class ContextMock():
         self.query = query
         self.response = data
 
-    def execute_query(self, query, **kwargs):
+    def execute_query(self, query, do_post=None):
         self.query = query
         return self.response
 

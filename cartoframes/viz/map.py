@@ -10,7 +10,7 @@ from carto.exceptions import CartoException
 from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
-from .html.HTMLMap import HTMLMap
+from .html import HTMLMap
 from ..utils.utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]

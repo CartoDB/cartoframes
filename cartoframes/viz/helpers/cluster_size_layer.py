@@ -54,7 +54,7 @@ def cluster_size_layer(
         source,
         style={
             'point': {
-                'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{3}])'.format(
+                'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
                     cluster_operation, breakpoints),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#FFB927', opacity or '0.8'),

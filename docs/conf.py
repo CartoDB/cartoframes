@@ -20,9 +20,9 @@
 import subprocess
 import os
 import sys
+from cartoframes import __version__ as cf_version  # noqa
 cur_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(cur_dir, '..'))
-from cartoframes.__version__ import __version__ as cf_version  # noqa
 # sys.path.insert(0, os.path.abspath('.'))
 
 
@@ -160,7 +160,6 @@ texinfo_documents = [
 
 
 def run_apidoc(_):
-    cur_dir = os.path.abspath(os.path.dirname(__file__))
     module = os.path.join(cur_dir, '..', 'cartoframes')
     cmd_path = 'sphinx-apidoc'
     if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv

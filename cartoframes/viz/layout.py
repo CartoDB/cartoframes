@@ -1,7 +1,7 @@
 from carto.exceptions import CartoException
 
 from .map import Map
-from .html.HTMLLayout import HTMLLayout
+from .html import HTMLLayout
 from . import constants
 from ..utils.utils import get_center
 

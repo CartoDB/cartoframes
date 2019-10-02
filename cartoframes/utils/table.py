@@ -3,7 +3,7 @@ from carto.auth import APIKeyAuthClient
 
 from ..data import Dataset
 from ..auth import get_default_credentials
-from ..__version__ import __version__
+from .. import __version__
 
 
 def tables(credentials=None):
