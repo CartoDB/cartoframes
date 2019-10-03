@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from carto.exceptions import CartoException
-
 from ...auth import get_default_credentials
 from .registry.strategies_registry import StrategiesRegistry
 from .registry.dataframe_dataset import DataFrameDataset
@@ -204,27 +203,36 @@ class Dataset(object):
         """Download / read a Dataset (table or query) from CARTO account
         associated with the Dataset's instance of :py:class:`Context
         <cartoframes.auth.Context>`.
+
         Args:
-            limit (int, optional): The number of rows of the Dataset to
-              download. Default is to download all rows. This value must be
-              >= 0.
-            decode_geom (bool, optional): Decode Dataset geometries into
-              Shapely geometries from EWKB encoding.
-            retry_times (int, optional): Number of time to retry the download
-              in case it fails. Default is Dataset.DOWNLOAD_RETRY_TIMES.
+            limit (int, optional):
+                The number of rows of the Dataset to download.
+                Default is to download all rows. This value must be >= 0.
+            decode_geom (bool, optional):
+                Decode Dataset geometries into Shapely geometries from EWKB encoding.
+            retry_times (int, optional):
+                Number of time to retry the download in case it fails.
+                Default is Dataset.DOWNLOAD_RETRY_TIMES.
+
         Example:
+
             .. code::
+
                 from cartoframes.data import Dataset
                 from cartoframes.auth import set_default_credentials
+
                 # use cartoframes example account
                 set_default_credentials('https://cartoframes.carto.com')
+
                 d = Dataset('brooklyn_poverty')
                 df = d.download(decode_geom=True)
         """
+
         return self._strategy.download(limit, decode_geom, retry_times)
 
     def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
-        """Upload Dataset to CARTO account associated with `credentials`.
+        r"""Upload Dataset to CARTO account associated with `credentials`.
+
         Args:
             with_lnglat (tuple, optional): Two columns that have the longitude
               and latitude information. If used, a point geometry will be
@@ -244,23 +252,32 @@ class Dataset(object):
               a default credentials (if set with :py:meth:`set_default_credentials
               <cartoframes.auth.set_default_credentials>`) will attempted to be
               used.
+
         Example:
-            Send a pandas DataFrame to CARTO.
+
+            Send a pandas DataFrame to CARTO:
+
             .. code::
+
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data import Dataset
                 import pandas as pd
+
                 set_default_credentials(
                     base_url='https://your_user_name.carto.com',
                     api_key='your api key'
                 )
+
                 df = pd.DataFrame({
                     'lat': [40, 45, 50],
                     'lng': [-80, -85, -90]
                 })
+
                 d = Dataset(df)
                 d.upload(with_lnglat=('lng', 'lat'), table_name='sample_table')
+
         """
+
         if table_name:
             self._strategy.table_name = table_name
         if credentials:
@@ -296,6 +313,7 @@ class Dataset(object):
             bool: True if deletion is successful, False otherwise.
 
         """
+
         return self._strategy.delete()
 
     def exists(self):

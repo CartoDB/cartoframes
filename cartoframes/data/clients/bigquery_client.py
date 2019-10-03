@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
 from google.auth.exceptions import RefreshError

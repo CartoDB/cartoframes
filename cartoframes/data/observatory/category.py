@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from .entity import SingleEntity, EntitiesList
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
