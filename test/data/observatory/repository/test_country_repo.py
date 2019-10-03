@@ -1,7 +1,8 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.country import Countries, Country
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_countries, test_country1, db_country1, db_country2
@@ -25,7 +26,7 @@ class TestCountryRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(countries, Countries)
+        assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
     @patch.object(RepoClient, 'get_countries')
@@ -72,9 +73,9 @@ class TestCountryRepo(unittest.TestCase):
         mocked_repo.return_value = [{}]
         repo = CountryRepository()
 
-        expected_countries = [{
+        expected_countries = CatalogList([Country({
             'country_iso_code3': None
-        }]
+        })])
 
         # When
         countries = repo.get_all()

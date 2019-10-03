@@ -27,14 +27,9 @@ class VariableGroupRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.variable_group import VariableGroup
         return VariableGroup
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.variable_group import VariablesGroups
-        return VariablesGroups
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_variables_groups(field, value)

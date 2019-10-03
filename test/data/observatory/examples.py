@@ -1,16 +1,17 @@
-from cartoframes.data.observatory.variable import Variable, Variables
-from cartoframes.data.observatory.dataset import Dataset, Datasets
-from cartoframes.data.observatory.category import Category, Categories
-from cartoframes.data.observatory.geography import Geography, Geographies
-from cartoframes.data.observatory.country import Country, Countries
-from cartoframes.data.observatory.provider import Provider, Providers
-from cartoframes.data.observatory.variable_group import VariableGroup, VariablesGroups
+from cartoframes.data.observatory.variable import Variable
+from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.category import Category
+from cartoframes.data.observatory.geography import Geography
+from cartoframes.data.observatory.country import Country
+from cartoframes.data.observatory.provider import Provider
+from cartoframes.data.observatory.variable_group import VariableGroup
+from cartoframes.data.observatory.entity import CatalogList
 
 db_country1 = {'country_iso_code3': 'esp'}
 db_country2 = {'country_iso_code3': 'usa'}
 test_country1 = Country(db_country1)
 test_country2 = Country(db_country2)
-test_countries = Countries([db_country1, db_country2])
+test_countries = CatalogList([test_country1, test_country2])
 
 db_category1 = {
     'id': 'cat1',
@@ -22,7 +23,7 @@ db_category2 = {
 }
 test_category1 = Category(db_category1)
 test_category2 = Category(db_category2)
-test_categories = Categories([db_category1, db_category2])
+test_categories = CatalogList([test_category1, test_category2])
 
 db_geography1 = {
     'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
@@ -52,7 +53,7 @@ db_geography2 = {
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
-test_geographies = Geographies([db_geography1, db_geography2])
+test_geographies = CatalogList([test_geography1, test_geography2])
 
 db_dataset1 = {
     'id': 'basicstats-census',
@@ -90,7 +91,7 @@ db_dataset2 = {
 }
 test_dataset1 = Dataset(db_dataset1)
 test_dataset2 = Dataset(db_dataset2)
-test_datasets = Datasets([db_dataset1, db_dataset2])
+test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {
     'id': 'var1',
@@ -118,7 +119,7 @@ db_variable2 = {
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
-test_variables = Variables([db_variable1, db_variable2])
+test_variables = CatalogList([test_variable1, test_variable2])
 
 db_provider1 = {
     'id': 'bbva',
@@ -130,7 +131,7 @@ db_provider2 = {
 }
 test_provider1 = Provider(db_provider1)
 test_provider2 = Provider(db_provider2)
-test_providers = Providers([db_provider1, db_provider2])
+test_providers = CatalogList([test_provider1, test_provider2])
 
 db_variable_group1 = {
     'id': 'vargroup1',
@@ -146,4 +147,4 @@ db_variable_group2 = {
 }
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)
-test_variables_groups = VariablesGroups([db_variable_group1, db_variable_group2])
+test_variables_groups = CatalogList([test_variable_group1, test_variable_group2])

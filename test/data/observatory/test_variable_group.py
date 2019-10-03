@@ -1,11 +1,11 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.variable_group import VariableGroup, VariablesGroups
-from cartoframes.data.observatory.variable import Variables
+from cartoframes.data.observatory.entity import CatalogList
+
+from cartoframes.data.observatory.variable_group import VariableGroup
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
-from cartoframes.exceptions import DiscoveryException
 
 from .examples import test_variables_groups, test_variable_group1, test_variables, db_variable_group1
 
@@ -40,7 +40,7 @@ class TestVariableGroup(unittest.TestCase):
 
         # Then
         assert isinstance(variables, list)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     def test_variable_group_properties(self):
@@ -79,11 +79,11 @@ class TestVariablesGroups(unittest.TestCase):
         mocked_repo.return_value = test_variables_groups
 
         # When
-        variables_groups = VariablesGroups.get_all()
+        variables_groups = VariableGroup.get_all()
 
         # Then
         assert isinstance(variables_groups, list)
-        assert isinstance(variables_groups, VariablesGroups)
+        assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
     @patch.object(VariableGroupRepository, 'get_by_id')
@@ -92,7 +92,7 @@ class TestVariablesGroups(unittest.TestCase):
         mocked_repo.return_value = test_variable_group1
 
         # When
-        variable_group = VariablesGroups.get(test_variable_group1.id)
+        variable_group = VariableGroup.get(test_variable_group1.id)
 
         # Then
         assert isinstance(variable_group, object)

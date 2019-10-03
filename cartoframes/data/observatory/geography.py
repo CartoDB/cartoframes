@@ -1,23 +1,19 @@
 from __future__ import absolute_import
 
-from .entity import SingleEntity, EntitiesList
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
 _GEOGRAPHY_ID_FIELD = 'id'
 
 
-class Geography(SingleEntity):
+class Geography(CatalogEntity):
 
     id_field = _GEOGRAPHY_ID_FIELD
     entity_repo = get_geography_repo()
 
     def datasets(self):
         return get_dataset_repo().get_by_geography(self.id)
-
-    @property
-    def id(self):
-        return self.data[self.id_field]
 
     @property
     def name(self):
@@ -58,13 +54,3 @@ class Geography(SingleEntity):
     @property
     def summary(self):
         return self.data['summary_jsonb']
-
-
-class Geographies(EntitiesList):
-
-    id_field = _GEOGRAPHY_ID_FIELD
-    entity_repo = get_geography_repo()
-
-    @classmethod
-    def _get_single_entity_class(cls):
-        return Geography

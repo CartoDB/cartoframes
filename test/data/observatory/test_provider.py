@@ -1,8 +1,9 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.dataset import Datasets
-from cartoframes.data.observatory.provider import Provider, Providers
+from cartoframes.data.observatory.entity import CatalogList
+
+from cartoframes.data.observatory.provider import Provider
 
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
@@ -40,7 +41,7 @@ class TestProvider(unittest.TestCase):
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     def test_provider_properties(self):
@@ -75,11 +76,11 @@ class TestProviders(unittest.TestCase):
         mocked_repo.return_value = test_providers
 
         # When
-        providers = Providers.get_all()
+        providers = Provider.get_all()
 
         # Then
         assert isinstance(providers, list)
-        assert isinstance(providers, Providers)
+        assert isinstance(providers, CatalogList)
         assert providers == test_providers
 
     @patch.object(ProviderRepository, 'get_by_id')
@@ -88,7 +89,7 @@ class TestProviders(unittest.TestCase):
         mocked_repo.return_value = test_provider1
 
         # When
-        provider = Providers.get('bbva')
+        provider = Provider.get('bbva')
 
         # Then
         assert isinstance(provider, object)

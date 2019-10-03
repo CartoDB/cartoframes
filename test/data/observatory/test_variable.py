@@ -1,8 +1,9 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.variable import Variable, Variables
-from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.entity import CatalogList
+
+from cartoframes.data.observatory.variable import Variable
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
@@ -39,7 +40,7 @@ class TestVariable(unittest.TestCase):
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     def test_variable_properties(self):
@@ -90,11 +91,11 @@ class TestVariables(unittest.TestCase):
         mocked_repo.return_value = test_variables
 
         # When
-        variables = Variables.get_all()
+        variables = Variable.get_all()
 
         # Then
         assert isinstance(variables, list)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(VariableRepository, 'get_by_id')
@@ -103,7 +104,7 @@ class TestVariables(unittest.TestCase):
         mocked_repo.return_value = test_variable1
 
         # When
-        variable = Variables.get(test_variable1.id)
+        variable = Variable.get(test_variable1.id)
 
         # Then
         assert isinstance(variable, object)

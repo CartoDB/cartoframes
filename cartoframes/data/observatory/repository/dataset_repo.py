@@ -50,14 +50,9 @@ class DatasetRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.dataset import Dataset
         return Dataset
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.dataset import Datasets
-        return Datasets
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_datasets(field, value)

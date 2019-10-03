@@ -1,9 +1,8 @@
 import unittest
 
-from cartoframes.data.observatory.provider import Providers, Provider
-
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.provider import Provider
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_provider1, test_providers, db_provider1, db_provider2
@@ -27,7 +26,7 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(providers, Providers)
+        assert isinstance(providers, CatalogList)
         assert providers == test_providers
 
     @patch.object(RepoClient, 'get_providers')
@@ -75,10 +74,10 @@ class TestProviderRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'provider1'}]
         repo = ProviderRepository()
 
-        expected_providers = [{
+        expected_providers = CatalogList([Provider({
             'id': 'provider1',
             'name': None
-        }]
+        })])
 
         # When
         providers = repo.get_all()

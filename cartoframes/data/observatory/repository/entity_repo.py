@@ -1,4 +1,5 @@
 from cartoframes.exceptions import DiscoveryException
+from cartoframes.data.observatory.entity import CatalogList
 from .repo_client import RepoClient
 
 try:
@@ -26,22 +27,20 @@ class EntityRepository(ABC):
                                      'You can check the full list of available values with get_all() method')
 
         data = self._map_row(result[0])
-        return self._to_single_entity(data)
+        return self._to_catalog_entity(data)
 
     def _get_filtered_entities(self, field=None, value=None):
         rows = self._get_rows(field, value)
-        return self._to_entity_list(rows)
 
-    @classmethod
-    def _to_single_entity(cls, result):
-        return cls._get_single_entity_class()(result)
-
-    @classmethod
-    def _to_entity_list(cls, results):
-        if len(results) == 0:
+        if len(rows) == 0:
             return None
 
-        return cls._get_entity_list_class()([cls._map_row(result) for result in results])
+        normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
+        return CatalogList(normalized_data)
+
+    @classmethod
+    def _to_catalog_entity(cls, result):
+        return cls._get_entity_class()(result)
 
     @classmethod
     def _normalize_field(cls, row, field):
@@ -52,12 +51,7 @@ class EntityRepository(ABC):
 
     @classmethod
     @abstractmethod
-    def _get_single_entity_class(cls):
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def _get_entity_list_class(cls):
+    def _get_entity_class(cls):
         raise NotImplementedError
 
     @classmethod

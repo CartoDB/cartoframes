@@ -34,14 +34,9 @@ class GeographyRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.geography import Geography
         return Geography
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.geography import Geographies
-        return Geographies
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_geographies(field, value)

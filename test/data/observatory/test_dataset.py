@@ -1,9 +1,8 @@
 import unittest
 import pandas as pd
-from cartoframes.data.observatory.variable_group import VariablesGroups
 
-from cartoframes.data.observatory.variable import Variables
-from cartoframes.data.observatory.dataset import Datasets, Dataset
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
@@ -41,7 +40,7 @@ class TestDataset(unittest.TestCase):
 
         # Then
         assert isinstance(variables, list)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(VariableGroupRepository, 'get_by_dataset')
@@ -54,7 +53,7 @@ class TestDataset(unittest.TestCase):
 
         # Then
         assert isinstance(variables_groups, list)
-        assert isinstance(variables_groups, VariablesGroups)
+        assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
     def test_dataset_properties(self):
@@ -115,11 +114,11 @@ class TestDatasets(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = Datasets.get_all()
+        datasets = Dataset.get_all()
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
 
     @patch.object(DatasetRepository, 'get_by_id')
     def test_get_dataset_by_id(self, mocked_repo):
@@ -127,7 +126,7 @@ class TestDatasets(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Datasets.get(test_dataset1.id)
+        dataset = Dataset.get(test_dataset1.id)
 
         # Then
         assert isinstance(dataset, object)

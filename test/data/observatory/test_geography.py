@@ -1,9 +1,10 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.geography import Geography, Geographies
+from cartoframes.data.observatory.entity import CatalogList
+
+from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1
@@ -39,7 +40,7 @@ class TestGeography(unittest.TestCase):
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     def test_geography_properties(self):
@@ -92,11 +93,11 @@ class TestGeographies(unittest.TestCase):
         mocked_repo.return_value = test_geographies
 
         # When
-        geographies = Geographies.get_all()
+        geographies = Geography.get_all()
 
         # Then
         assert isinstance(geographies, list)
-        assert isinstance(geographies, Geographies)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
     @patch.object(GeographyRepository, 'get_by_id')
@@ -105,7 +106,7 @@ class TestGeographies(unittest.TestCase):
         mocked_repo.return_value = test_geography1
 
         # When
-        geography = Geographies.get(test_geography1.id)
+        geography = Geography.get(test_geography1.id)
 
         # Then
         assert isinstance(geography, object)

@@ -21,14 +21,9 @@ class CountryRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.country import Country
         return Country
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.country import Countries
-        return Countries
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_countries(field, value)

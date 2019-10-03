@@ -1,9 +1,8 @@
 import unittest
 
-from cartoframes.data.observatory.geography import Geographies, Geography
-
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
@@ -27,7 +26,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(geographies, Geographies)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
@@ -81,7 +80,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
-        assert isinstance(geographies, Geographies)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
@@ -90,7 +89,7 @@ class TestGeographyRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'geography1'}]
         repo = GeographyRepository()
 
-        expected_geographies = [{
+        expected_geographies = CatalogList([Geography({
             'id': 'geography1',
             'name': None,
             'description': None,
@@ -102,7 +101,7 @@ class TestGeographyRepo(unittest.TestCase):
             'version': None,
             'is_public_data': None,
             'summary_jsonb': None
-        }]
+        })])
 
         # When
         geographies = repo.get_all()

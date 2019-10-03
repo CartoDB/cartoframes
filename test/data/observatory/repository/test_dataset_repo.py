@@ -1,9 +1,9 @@
 import unittest
 
-from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.dataset import Dataset
 
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
@@ -27,7 +27,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
@@ -80,7 +80,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
@@ -95,7 +95,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('category_id', category_id)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
@@ -110,7 +110,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('variable_id', variable_id)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
@@ -125,7 +125,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('geography_id', geography_id)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
@@ -134,7 +134,7 @@ class TestDatasetRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'dataset1'}]
         repo = DatasetRepository()
 
-        expected_datasets = [{
+        expected_datasets = CatalogList([Dataset({
             'id': 'dataset1',
             'name': None,
             'description': None,
@@ -150,7 +150,7 @@ class TestDatasetRepo(unittest.TestCase):
             'version': None,
             'is_public_data': None,
             'summary_jsonb': None
-        }]
+        })])
 
         # When
         datasets = repo.get_all()

@@ -1,9 +1,8 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.geography import Geographies
-from cartoframes.data.observatory.dataset import Datasets
-from cartoframes.data.observatory.country import Countries, Country
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
@@ -41,7 +40,7 @@ class TestCountry(unittest.TestCase):
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     @patch.object(GeographyRepository, 'get_by_country')
@@ -54,7 +53,7 @@ class TestCountry(unittest.TestCase):
 
         # Then
         assert isinstance(geographies, list)
-        assert isinstance(geographies, Geographies)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
     def test_country_properties(self):
@@ -62,10 +61,10 @@ class TestCountry(unittest.TestCase):
         country = Country(db_country1)
 
         # When
-        iso_code3 = country.country_iso_code3
+        country_id = country.id
 
         # Then
-        assert iso_code3 == db_country1['country_iso_code3']
+        assert country_id == db_country1['country_iso_code3']
 
     def test_country_is_exported_as_series(self):
         # Given
@@ -87,11 +86,11 @@ class TestCountries(unittest.TestCase):
         mocked_repo.return_value = test_countries
 
         # When
-        countries = Countries.get_all()
+        countries = Country.get_all()
 
         # Then
         assert isinstance(countries, list)
-        assert isinstance(countries, Countries)
+        assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
     @patch.object(CountryRepository, 'get_by_id')
@@ -100,7 +99,7 @@ class TestCountries(unittest.TestCase):
         mocked_repo.return_value = test_country1
 
         # When
-        country = Countries.get('esp')
+        country = Country.get('esp')
 
         # Then
         assert isinstance(country, object)

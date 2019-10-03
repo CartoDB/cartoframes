@@ -22,14 +22,9 @@ class ProviderRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.provider import Provider
         return Provider
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.provider import Providers
-        return Providers
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_providers(field, value)

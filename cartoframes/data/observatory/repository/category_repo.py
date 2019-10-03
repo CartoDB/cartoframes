@@ -22,14 +22,9 @@ class CategoryRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.category import Category
         return Category
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.category import Categories
-        return Categories
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_categories(field, value)

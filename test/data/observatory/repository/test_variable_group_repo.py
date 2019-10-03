@@ -1,9 +1,8 @@
 import unittest
 
-from cartoframes.data.observatory.variable_group import VariablesGroups, VariableGroup
-
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.variable_group import VariableGroup
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_variable_group1, test_variables_groups, db_variable_group1, db_variable_group2
@@ -27,7 +26,7 @@ class TestVariableGroupRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(variables_groups, VariablesGroups)
+        assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
     @patch.object(RepoClient, 'get_variables_groups')
@@ -81,7 +80,7 @@ class TestVariableGroupRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('dataset_id', dataset_id)
-        assert isinstance(variables_groups, VariablesGroups)
+        assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
     @patch.object(RepoClient, 'get_variables_groups')
@@ -90,12 +89,12 @@ class TestVariableGroupRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'variable_group1'}]
         repo = VariableGroupRepository()
 
-        expected_variables_groups = [{
+        expected_variables_groups = CatalogList([VariableGroup({
             'id': 'variable_group1',
             'name': None,
             'dataset_id': None,
             'starred': None
-        }]
+        })])
 
         # When
         variables_groups = repo.get_all()

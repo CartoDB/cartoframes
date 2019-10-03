@@ -1,9 +1,8 @@
 import unittest
 
-from cartoframes.data.observatory.variable import Variables, Variable
-
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.variable import Variable
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_variable1, test_variables, db_variable1, db_variable2
@@ -27,7 +26,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -81,7 +80,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('dataset_id', dataset_id)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -96,7 +95,7 @@ class TestVariableRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
-        assert isinstance(variables, Variables)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -105,7 +104,7 @@ class TestVariableRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'variable1'}]
         repo = VariableRepository()
 
-        expected_variables = [{
+        expected_variables = CatalogList([Variable({
             'id': 'variable1',
             'name': None,
             'description': None,
@@ -116,7 +115,7 @@ class TestVariableRepo(unittest.TestCase):
             'variable_group_id': None,
             'starred': None,
             'summary_jsonb': None
-        }]
+        })])
 
         # When
         variables = repo.get_all()

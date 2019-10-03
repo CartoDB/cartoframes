@@ -1,11 +1,11 @@
 import unittest
 import pandas as pd
 
-from cartoframes.data.observatory.category import Category, Categories
-from cartoframes.data.observatory.dataset import Datasets
+from cartoframes.data.observatory.category import Category
 
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.entity import CatalogList
 
 from .examples import test_category1, test_datasets, test_categories, db_category1
 
@@ -40,7 +40,7 @@ class TestCategory(unittest.TestCase):
 
         # Then
         assert isinstance(datasets, list)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
     def test_category_properties(self):
@@ -75,11 +75,11 @@ class TestCategories(unittest.TestCase):
         mocked_repo.return_value = test_categories
 
         # When
-        categories = Categories.get_all()
+        categories = Category.get_all()
 
         # Then
         assert isinstance(categories, list)
-        assert isinstance(categories, Categories)
+        assert isinstance(categories, CatalogList)
         assert categories == test_categories
 
     @patch.object(CategoryRepository, 'get_by_id')
@@ -88,7 +88,7 @@ class TestCategories(unittest.TestCase):
         mocked_repo.return_value = test_category1
 
         # When
-        category = Categories.get('cat1')
+        category = Category.get('cat1')
 
         # Then
         assert isinstance(category, object)

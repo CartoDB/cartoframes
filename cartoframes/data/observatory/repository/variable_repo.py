@@ -36,14 +36,9 @@ class VariableRepository(EntityRepository):
         }
 
     @classmethod
-    def _get_single_entity_class(cls):
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.variable import Variable
         return Variable
-
-    @classmethod
-    def _get_entity_list_class(cls):
-        from cartoframes.data.observatory.variable import Variables
-        return Variables
 
     def _get_rows(self, field=None, value=None):
         return self.client.get_variables(field, value)
