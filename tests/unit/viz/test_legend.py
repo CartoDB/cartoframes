@@ -1,12 +1,12 @@
-import unittest
+import pytest
 
 from cartoframes.viz import Legend
 
 
-class TestLegend(unittest.TestCase):
+class TestLegend(object):
     def test_is_legend_defined(self):
         """Legend"""
-        self.assertNotEqual(Legend, None)
+        assert Legend is not None
 
     def test_legend_init_dict(self):
         """Legend should be properly initialized when passing a dict"""
@@ -18,12 +18,12 @@ class TestLegend(unittest.TestCase):
             'footer': '[footer]'
         })
 
-        self.assertEqual(legend._type, 'color-category')
-        self.assertEqual(legend._prop, 'strokeColor')
-        self.assertEqual(legend._title, '[TITLE]')
-        self.assertEqual(legend._description, '[description]')
-        self.assertEqual(legend._footer, '[footer]')
-        self.assertEqual(legend._dynamic, True)
+        assert legend._type == 'color-category'
+        assert legend._prop == 'strokeColor'
+        assert legend._title == '[TITLE]'
+        assert legend._description == '[description]'
+        assert legend._footer == '[footer]'
+        assert legend._dynamic is True
 
     def test_legend_init_properties(self):
         """Legend should be properly initialized when passing properties"""
@@ -34,12 +34,12 @@ class TestLegend(unittest.TestCase):
                         footer='[footer]',
                         dynamic=False)
 
-        self.assertEqual(legend._type, 'color-category')
-        self.assertEqual(legend._prop, 'strokeColor')
-        self.assertEqual(legend._title, '[TITLE]')
-        self.assertEqual(legend._description, '[description]')
-        self.assertEqual(legend._footer, '[footer]')
-        self.assertEqual(legend._dynamic, False)
+        assert legend._type == 'color-category'
+        assert legend._prop == 'strokeColor'
+        assert legend._title == '[TITLE]'
+        assert legend._description == '[description]'
+        assert legend._footer == '[footer]'
+        assert legend._dynamic is False
 
     def test_legend_info(self):
         """Legend should return a proper information object"""
@@ -50,7 +50,7 @@ class TestLegend(unittest.TestCase):
             'footer': '[footer]'
         })
 
-        self.assertEqual(legend.get_info(), {
+        assert legend.get_info() == {
             'type': 'color-category',
             'prop': 'color',
             'title': '[TITLE]',
@@ -58,7 +58,7 @@ class TestLegend(unittest.TestCase):
             'footer': '[footer]',
             'dynamic': True,
             'variable': ''
-        })
+        }
 
         legend = Legend({
             'type': {
@@ -68,7 +68,7 @@ class TestLegend(unittest.TestCase):
             }
         })
 
-        self.assertEqual(legend.get_info('line'), {
+        assert legend.get_info('line') == {
             'type': 'color-category-line',
             'prop': 'color',
             'title': '',
@@ -76,13 +76,14 @@ class TestLegend(unittest.TestCase):
             'footer': '',
             'dynamic': True,
             'variable': ''
-        })
+        }
 
     def test_wrong_input(self):
         """Legend should raise an error if legend input is not valid"""
         msg = 'Wrong legend input.'
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             Legend(1234)
+            assert str(e) == msg
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
@@ -92,12 +93,14 @@ class TestLegend(unittest.TestCase):
         'color-continuous, color-continuous-line, color-continuous-point, '
         'color-continuous-polygon, size-bins, size-bins-point, size-continuous, '
         'size-continuous-point.'
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             Legend({'type': 'xxx'}).get_info()
+            assert str(e) == msg
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
         msg = 'Legend property is not valid. Valid legend properties are: '
         'color, strokeColor, width, strokeWidth.'
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
+            assert str(e) == msg
