@@ -19,6 +19,10 @@ class CatalogEntity(ABC):
     def get(cls, id_):
         return cls.entity_repo.get_by_id(id_)
 
+    @classmethod
+    def get_all(cls):
+        return cls.entity_repo.get_all()
+
     def __eq__(self, other):
         return self.data == other.data
 
@@ -52,14 +56,13 @@ class EntitiesList(list, CatalogEntity, ABC):
         item = list.__getitem__(self, y)
         return self._get_single_entity_class()(item)
 
+    def __iter__(self):
+        return (self._get_single_entity_class()(item) for item in list.__iter__(self))
+
     @classmethod
     @abstractmethod
     def _get_single_entity_class(cls):
         raise NotImplementedError
-
-    @classmethod
-    def get_all(cls):
-        return cls.entity_repo.get_all()
 
     def to_dataframe(self):
         return pd.DataFrame(self.data)

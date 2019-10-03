@@ -1,18 +1,18 @@
-from .category import Categories
-from .country import Countries
-from .dataset import Datasets
+from .category import Category
+from .country import Country
+from .dataset import Dataset
 
 
 class Catalog(object):
 
-    @staticmethod
-    def countries():
-        return Countries.get_all()
+    @property
+    def countries(self):
+        return Country.get_all()
 
-    @staticmethod
-    def categories():
-        return Categories.get_all()
+    @property
+    def categories(self):
+        return Category.get_all()
 
-    @staticmethod
-    def datasets():
-        return Datasets.get_all()
+    @property
+    def datasets(self):
+        return Dataset.get_all()
