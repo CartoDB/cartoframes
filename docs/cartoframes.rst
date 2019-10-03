@@ -1,27 +1,7 @@
-cartoframes package
-===================
-
-Subpackages
------------
-
-.. toctree::
-
-   cartoframes.auth
-   cartoframes.data
-   cartoframes.viz
-
-Submodules
-----------
-
-.. toctree::
-
-   cartoframes.examples
-   cartoframes.utils
-
-Module contents
----------------
-
-.. automodule:: cartoframes
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. include:: includes/introduction.rst
+.. include:: includes/auth.rst
+.. include:: includes/data_observatory.rst
+.. include:: includes/data_enrichment.rst
+.. include:: includes/data_services.rst
+.. include:: includes/viz.rst
+.. include:: includes/exceptions.rst

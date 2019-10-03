@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+
 from .entity_repo import EntityRepository
+
 
 _COUNTRY_ID_FIELD = 'country_iso_code3'
 
