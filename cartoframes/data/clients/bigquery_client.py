@@ -57,8 +57,7 @@ class BigQueryClient(object):
     @refresh_client
     def download(self, project, dataset, table, limit=None, offset=None, file_path=None):
         query = _download_query(project, dataset, table, limit, offset)
-        rows_iter = self.client.query(query)
-        return list(rows_iter)
+        return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook')
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
