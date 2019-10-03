@@ -6,6 +6,7 @@ import re
 
 _default_credentials = None
 
+
 def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
