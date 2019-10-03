@@ -1,15 +1,19 @@
 
 class ContextMock():
     def __init__(self):
-        self.query = ''
-        self.response = ''
+        self.query = None
+        self.response = None
 
-    def execute_query(self, q, **kwargs):
-        self.query = q
+    def upload(self, query, data):
+        self.query = query
+        self.response = data
+
+    def execute_query(self, query, **kwargs):
+        self.query = query
         return self.response
 
-    def execute_long_running_query(self, q):
-        self.query = q
+    def execute_long_running_query(self, query):
+        self.query = query
         return self.response
 
     def get_schema(self):

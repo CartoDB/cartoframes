@@ -1,55 +1,28 @@
-import pandas as pd
-
+from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
-_GEOGRAPHY_FIELD_ID = 'id'
+_GEOGRAPHY_ID_FIELD = 'id'
 
 
-class Geography(pd.Series):
+class Geography(SingleEntity):
 
-    @property
-    def _constructor(self):
-        return Geography
+    id_field = _GEOGRAPHY_ID_FIELD
+    entity_repo = get_geography_repo()
 
-    @property
-    def _constructor_expanddim(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Geographies
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return get_geography_repo().get_by_id(geography_id)
 
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
+        return get_dataset_repo().get_by_geography(self._get_id())
 
 
-class Geographies(pd.DataFrame):
+class Geographies(EntitiesList):
 
-    @property
-    def _constructor(self):
-        return Geographies
+    id_field = _GEOGRAPHY_ID_FIELD
+    entity_repo = get_geography_repo()
 
-    @property
-    def _constructor_sliced(self):
+    @classmethod
+    def _get_single_entity_class(cls):
         return Geography
-
-    @staticmethod
-    def get_all():
-        return get_geography_repo().get_all()
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other

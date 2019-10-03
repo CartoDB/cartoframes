@@ -11,6 +11,7 @@ from .source import Source
 from .style import Style
 from .popup import Popup
 from .legend import Legend
+from .legend_list import LegendList
 from .widget import Widget
 from .widget_list import WidgetList
 
@@ -25,6 +26,7 @@ __all__ = [
     'Style',
     'Popup',
     'Legend',
+    'LegendList',
     'Widget',
     'WidgetList'
 ]
