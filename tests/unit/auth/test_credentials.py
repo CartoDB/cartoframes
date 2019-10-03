@@ -14,7 +14,6 @@ except NameError:
 
 
 class TestCredentials(object):
-
     def setup_method(self, method):
         self.api_key = 'fake_api_key'
         self.username = 'fake_user'
@@ -89,22 +88,26 @@ class TestCredentials(object):
         credentials = Credentials(self.username, self.api_key)
         new_api_key = 'new_api_key'
         credentials.api_key = new_api_key
+
         assert credentials.api_key == new_api_key
 
     def test_credentials_username_get_and_set(self):
         credentials = Credentials(self.username, self.api_key)
         new_username = 'new_username'
         credentials.username = new_username
+
         assert credentials.username == new_username
 
     def test_credentials_updating_username_updates_base_url(self):
         base_url = 'https://fakeurl'
         credentials = Credentials(api_key=self.api_key, base_url=base_url)
+
         assert credentials.base_url == base_url
 
         new_username = 'new_username'
         expected_url = 'https://{}.carto.com'.format(new_username)
         credentials.username = new_username
+
         assert credentials.username == new_username
         assert credentials.base_url == expected_url
 
@@ -112,6 +115,7 @@ class TestCredentials(object):
         credentials = Credentials(self.username, self.api_key)
         new_base_url = credentials.base_url + 'new'
         credentials.base_url = new_base_url
+
         assert credentials.base_url == new_base_url
 
     def test_credentials_repr(self):
@@ -133,6 +137,7 @@ class TestCredentials(object):
 
     def test_get_api_key_auth_client(self):
         credentials = Credentials(self.username, self.api_key)
+
         assert credentials._api_key_auth_client is None
         credentials.get_api_key_auth_client()
         assert credentials._api_key_auth_client is not None
@@ -148,11 +153,11 @@ class TestCredentials(object):
 
         credentials = Credentials(self.username, self.api_key)
         token = credentials.get_do_token()
+
         assert token == access_token
 
 
 class TestCredentialsFromFile(object):
-
     def setup_method(self, method):
         # remove default credential file
         if os.path.exists(_DEFAULT_PATH):
@@ -173,6 +178,7 @@ class TestCredentialsFromFile(object):
         credentials1.save()
 
         credentials2 = Credentials.from_file()
+
         assert credentials1 == credentials2
 
         credentials1.delete()
@@ -186,6 +192,7 @@ class TestCredentialsFromFile(object):
         credentials1.save(file)
 
         credentials2 = Credentials.from_file(file)
+
         assert credentials1 == credentials2
 
         credentials1.delete(file)
@@ -199,6 +206,7 @@ class TestCredentialsFromFile(object):
 
         session = 'fake_session'
         credentials2 = Credentials.from_file(session=session)
+
         assert credentials2.session == session
 
         credentials1.delete()

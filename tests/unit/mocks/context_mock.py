@@ -1,8 +1,7 @@
-
 class ContextMock():
-    def __init__(self):
+    def __init__(self, response):
         self.query = None
-        self.response = None
+        self.response = response
 
     def upload(self, query, data):
         self.query = query
