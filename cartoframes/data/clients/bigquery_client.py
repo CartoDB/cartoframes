@@ -59,6 +59,14 @@ class BigQueryClient(object):
         query = _download_query(project, dataset, table, limit, offset)
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook')
 
+    @refresh_client
+    def download_storage_api(self, project, dataset, table, limit=None, offset=None, file_path=None):
+        # pip install google-cloud-bigquery-storage
+        from google.cloud.bigquery_storage_v1beta1 import BigQueryStorageClient
+        storage_client = BigQueryStorageClient(credentials=GoogleCredentials(self._credentials.get_do_token()))
+        query = _download_query(project, dataset, table, limit, offset)
+        return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook', bqstorage_client=storage_client)
+
 
 def _download_query(project, dataset, table, limit=None, offset=None):
     full_table_name = '`{}.{}.{}`'.format(project, dataset, table)
