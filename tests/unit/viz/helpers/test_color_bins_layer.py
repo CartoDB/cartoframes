@@ -1,51 +1,44 @@
-import unittest
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
-from cartoframes.viz import helpers, Source
+import pytest
+
+from cartoframes.viz import helpers
+
+from . import setup_mocks
 
 
-class TestColorBinsLayerHelper(unittest.TestCase):
-    def setUp(self):
-        self.orig_compute_query_bounds = Source._compute_query_bounds
-        Source._compute_query_bounds = Mock(return_valye=None)
-
-    def tearDown(self):
-        Source._compute_query_bounds = self.orig_compute_query_bounds
-
+class TestColorBinsLayerHelper(object):
     def test_helpers(self):
         "should be defined"
-        self.assertNotEqual(helpers.color_bins_layer, None)
+        assert helpers.color_bins_layer is not None
 
-    def test_color_bins_layer(self):
+    def test_color_bins_layer(self, mocker):
         "should create a layer with the proper attributes"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             source='sf_neighborhoods',
             value='name'
         )
 
-        self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(globalQuantiles($name, 5), purpor),1)')
-        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(globalQuantiles($name, 5), purpor),1)')
-        self.assertEqual(layer.style._style['polygon']['color'],
-                         'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)')
-        self.assertNotEqual(layer.popup, None)
-        self.assertEqual(layer.popup._hover, [{
+        assert layer.style is not None
+        assert layer.style._style['point']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
+        assert layer.popup is not None
+        assert layer.popup._hover == [{
             'title': 'name',
             'value': '$name'
-        }])
+        }]
 
-        self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type['point'], 'color-bins-point')
-        self.assertEqual(layer.legend._type['line'], 'color-bins-line')
-        self.assertEqual(layer.legend._type['polygon'], 'color-bins-polygon')
-        self.assertEqual(layer.legend._title, 'name')
-        self.assertEqual(layer.legend._description, '')
-        self.assertEqual(layer.legend._footer, '')
+        assert layer.legend is not None
+        assert layer.legend._type['point'] == 'color-bins-point'
+        assert layer.legend._type['line'] == 'color-bins-line'
+        assert layer.legend._type['polygon'] == 'color-bins-polygon'
+        assert layer.legend._title == 'name'
+        assert layer.legend._description == ''
+        assert layer.legend._footer == ''
 
-    def test_color_bins_layer_point(self):
+    def test_color_bins_layer_point(self, mocker):
         "should create a point type layer"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -54,15 +47,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             palette='prism'
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(globalQuantiles($name, 3), prism),1)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(globalQuantiles($name, 3), prism),1)'
 
-    def test_color_bins_layer_line(self):
+    def test_color_bins_layer_line(self, mocker):
         "should create a line type layer"
-        Source._get_geom_type = Mock(return_value='line')
-
+        setup_mocks(mocker, 'line')
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -71,15 +60,11 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             palette='[blue,#F00]'
         )
 
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]),1)'
-        )
+        assert layer.style._style['line']['color'] == 'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]),1)'
 
-    def test_color_bins_layer_polygon(self):
+    def test_color_bins_layer_polygon(self, mocker):
         "should create a polygon type layer"
-        Source._get_geom_type = Mock(return_value='polygon')
-
+        setup_mocks(mocker, 'polygon')
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
@@ -88,31 +73,20 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             palette=['blue', '#F00']
         )
 
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]), 0.9)'
-        )
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalQuantiles($name, 3), [blue,#F00]), 0.9)'
 
-    def test_color_bins_layer_method(self):
+    def test_color_bins_layer_method(self, mocker):
         "should apply the classification method"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             method='quantiles'
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalQuantiles($name, 5), purpor), 0.9)'
 
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
@@ -120,18 +94,9 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             method='equal'
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(globalEqIntervals($name, 5), purpor), 0.9)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(globalEqIntervals($name, 5), purpor),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalEqIntervals($name, 5), purpor), 0.9)'
 
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
@@ -139,58 +104,43 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             method='stdev'
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(globalStandardDev($name, 5), temps),1)'
-        )
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(globalStandardDev($name, 5), temps),1)'
-        )
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(globalStandardDev($name, 5), temps), 0.9)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(globalStandardDev($name, 5), temps),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(globalStandardDev($name, 5), temps),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(globalStandardDev($name, 5), temps), 0.9)'
 
         msg = 'Available methods are: "quantiles", "equal", "stdev".'
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             helpers.color_bins_layer(
                 'sf_neighborhoods',
                 'name',
-                method='wrong'
+                method='wrong_method'
             )
+        assert str(e.value) == msg
 
-    def test_color_bins_layer_breaks(self):
+    def test_color_bins_layer_breaks(self, mocker):
         "should apply buckets if breaks are passed"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             breaks=[0, 1, 2]
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
-        )
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(buckets($name, [0, 1, 2]), purpor), 0.9)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(buckets($name, [0, 1, 2]), purpor),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(buckets($name, [0, 1, 2]), purpor), 0.9)'
 
-    def test_color_bins_layer_legend(self):
+    def test_color_bins_layer_legend(self, mocker):
         "should show/hide the legend"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             legend=False
         )
 
-        self.assertEqual(layer.legend._type, '')
-        self.assertEqual(layer.legend._title, '')
+        assert layer.legend._type == ''
+        assert layer.legend._title == ''
 
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
@@ -198,22 +148,23 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             legend=True
         )
 
-        self.assertEqual(layer.legend._type, {
+        assert layer.legend._type == {
             'point': 'color-bins-point',
             'line': 'color-bins-line',
             'polygon': 'color-bins-polygon'
-        })
-        self.assertEqual(layer.legend._title, 'name')
+        }
+        assert layer.legend._title == 'name'
 
-    def test_color_bins_layer_popup(self):
+    def test_color_bins_layer_popup(self, mocker):
         "should show/hide the popup"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             popup=False
         )
 
-        self.assertEqual(layer.popup._hover, [])
+        assert layer.popup._hover == []
 
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
@@ -221,20 +172,21 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             popup=True
         )
 
-        self.assertEqual(layer.popup._hover, [{
+        assert layer.popup._hover == [{
             'title': 'name',
             'value': '$name'
-        }])
+        }]
 
-    def test_color_bins_layer_widget(self):
+    def test_color_bins_layer_widget(self, mocker):
         "should show/hide the widget"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             widget=False
         )
 
-        self.assertEqual(layer.widgets._widgets, [])
+        assert layer.widgets._widgets == []
 
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
@@ -242,18 +194,19 @@ class TestColorBinsLayerHelper(unittest.TestCase):
             widget=True
         )
 
-        self.assertEqual(layer.widgets._widgets[0]._type, 'histogram')
-        self.assertEqual(layer.widgets._widgets[0]._title, 'Distribution')
+        assert layer.widgets._widgets[0]._type == 'histogram'
+        assert layer.widgets._widgets[0]._title == 'Distribution'
 
-    def test_color_bins_layer_animate(self):
+    def test_color_bins_layer_animate(self, mocker):
         "should animate a property and disable the popups"
+        setup_mocks(mocker)
         layer = helpers.color_bins_layer(
             'sf_neighborhoods',
             'name',
             animate='time'
         )
 
-        self.assertEqual(layer.popup._hover, [])
-        self.assertEqual(layer.widgets._widgets[0]._type, 'time-series')
-        self.assertEqual(layer.widgets._widgets[0]._title, 'Animation')
-        self.assertEqual(layer.widgets._widgets[0]._value, 'time')
+        assert layer.popup._hover == []
+        assert layer.widgets._widgets[0]._type == 'time-series'
+        assert layer.widgets._widgets[0]._title == 'Animation'
+        assert layer.widgets._widgets[0]._value == 'time'

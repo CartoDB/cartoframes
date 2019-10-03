@@ -1,52 +1,44 @@
-import unittest
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
-from cartoframes.viz import helpers, Source
+import pytest
+
+from cartoframes.viz import helpers
+
+from . import setup_mocks
 
 
-class TestColorContinuousLayerHelper(unittest.TestCase):
-    def setUp(self):
-        self.orig_compute_query_bounds = Source._compute_query_bounds
-        Source._compute_query_bounds = Mock(return_valye=None)
-
-    def tearDown(self):
-        Source._compute_query_bounds = self.orig_compute_query_bounds
-
+class TestColorContinuousLayerHelper(object):
     def test_helpers(self):
         "should be defined"
-        self.assertNotEqual(helpers.color_continuous_layer, None)
+        assert helpers.color_continuous_layer is not None
 
-    def test_color_continuous_layer(self):
+    def test_color_continuous_layer(self, mocker):
         "should create a layer with the proper attributes"
-        Source._get_geom_type = Mock(return_value='point')
-
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             source='sf_neighborhoods',
             value='name'
         )
 
-        self.assertNotEqual(layer.style, None)
-        self.assertEqual(layer.style._style['point']['color'], 'opacity(ramp(linear($name), bluyl),1)')
-        self.assertEqual(layer.style._style['line']['color'], 'opacity(ramp(linear($name), bluyl),1)')
-        self.assertEqual(layer.style._style['polygon']['color'], 'opacity(ramp(linear($name), bluyl), 0.9)')
-        self.assertNotEqual(layer.popup, None)
-        self.assertEqual(layer.popup._hover, [{
+        assert layer.style is not None
+        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name), bluyl),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name), bluyl),1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name), bluyl), 0.9)'
+        assert layer.popup, None
+        assert layer.popup._hover == [{
             'title': 'name',
             'value': '$name'
-        }])
+        }]
 
-        self.assertNotEqual(layer.legend, None)
-        self.assertEqual(layer.legend._type['point'], 'color-continuous-point')
-        self.assertEqual(layer.legend._type['line'], 'color-continuous-line')
-        self.assertEqual(layer.legend._type['polygon'], 'color-continuous-polygon')
-        self.assertEqual(layer.legend._title, 'name')
-        self.assertEqual(layer.legend._description, '')
-        self.assertEqual(layer.legend._footer, '')
+        assert layer.legend is not None
+        assert layer.legend._type['point'] == 'color-continuous-point'
+        assert layer.legend._type['line'] == 'color-continuous-line'
+        assert layer.legend._type['polygon'] == 'color-continuous-polygon'
+        assert layer.legend._title == 'name'
+        assert layer.legend._description == ''
+        assert layer.legend._footer == ''
 
-    def test_color_continuous_layer_point(self):
+    def test_color_continuous_layer_point(self, mocker):
         "should create a point type layer"
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
@@ -54,15 +46,11 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             palette='prism'
         )
 
-        self.assertEqual(
-            layer.style._style['point']['color'],
-            'opacity(ramp(linear($name), prism),1)'
-        )
+        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name), prism),1)'
 
-    def test_color_continuous_layer_line(self):
+    def test_color_continuous_layer_line(self, mocker):
         "should create a line type layer"
-        Source._get_geom_type = Mock(return_value='line')
-
+        setup_mocks(mocker, 'line')
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
@@ -70,15 +58,11 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             palette='[blue,#F00]'
         )
 
-        self.assertEqual(
-            layer.style._style['line']['color'],
-            'opacity(ramp(linear($name), [blue,#F00]),1)'
-        )
+        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name), [blue,#F00]),1)'
 
-    def test_color_continuous_layer_polygon(self):
+    def test_color_continuous_layer_polygon(self, mocker):
         "should create a polygon type layer"
-        Source._get_geom_type = Mock(return_value='polygon')
-
+        setup_mocks(mocker, 'polygon')
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
@@ -86,21 +70,19 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             palette=['blue', '#F00']
         )
 
-        self.assertEqual(
-            layer.style._style['polygon']['color'],
-            'opacity(ramp(linear($name), [blue,#F00]), 0.9)'
-        )
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name), [blue,#F00]), 0.9)'
 
-    def test_color_continuous_layer_legend(self):
+    def test_color_continuous_layer_legend(self, mocker):
         "should show/hide the legend"
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
             legend=False
         )
 
-        self.assertEqual(layer.legend._type, '')
-        self.assertEqual(layer.legend._title, '')
+        assert layer.legend._type == ''
+        assert layer.legend._title == ''
 
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
@@ -108,22 +90,23 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             legend=True
         )
 
-        self.assertEqual(layer.legend._type, {
+        assert layer.legend._type == {
             'point': 'color-continuous-point',
             'line': 'color-continuous-line',
             'polygon': 'color-continuous-polygon'
-        })
-        self.assertEqual(layer.legend._title, 'name')
+        }
+        assert layer.legend._title == 'name'
 
-    def test_color_continuous_layer_popup(self):
+    def test_color_continuous_layer_popup(self, mocker):
         "should show/hide the popup"
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
             popup=False
         )
 
-        self.assertEqual(layer.popup._hover, [])
+        assert layer.popup._hover == []
 
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
@@ -131,20 +114,21 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             popup=True
         )
 
-        self.assertEqual(layer.popup._hover, [{
+        assert layer.popup._hover == [{
             'title': 'name',
             'value': '$name'
-        }])
+        }]
 
-    def test_color_continuous_layer_widget(self):
+    def test_color_continuous_layer_widget(self, mocker):
         "should show/hide the widget"
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
             widget=False
         )
 
-        self.assertEqual(layer.widgets._widgets, [])
+        assert layer.widgets._widgets == []
 
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
@@ -152,18 +136,19 @@ class TestColorContinuousLayerHelper(unittest.TestCase):
             widget=True
         )
 
-        self.assertEqual(layer.widgets._widgets[0]._type, 'histogram')
-        self.assertEqual(layer.widgets._widgets[0]._title, 'Distribution')
+        assert layer.widgets._widgets[0]._type == 'histogram'
+        assert layer.widgets._widgets[0]._title == 'Distribution'
 
-    def test_color_continuous_layer_animate(self):
+    def test_color_continuous_layer_animate(self, mocker):
         "should animate a property and disable the popups"
+        setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
             'sf_neighborhoods',
             'name',
             animate='time'
         )
 
-        self.assertEqual(layer.popup._hover, [])
-        self.assertEqual(layer.widgets._widgets[0]._type, 'time-series')
-        self.assertEqual(layer.widgets._widgets[0]._title, 'Animation')
-        self.assertEqual(layer.widgets._widgets[0]._value, 'time')
+        assert layer.popup._hover == []
+        assert layer.widgets._widgets[0]._type == 'time-series'
+        assert layer.widgets._widgets[0]._title == 'Animation'
+        assert layer.widgets._widgets[0]._value == 'time'

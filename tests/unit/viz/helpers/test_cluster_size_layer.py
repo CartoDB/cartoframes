@@ -2,12 +2,9 @@ import pytest
 
 from carto.exceptions import CartoException
 
-from cartoframes.viz import helpers, Source
+from cartoframes.viz import helpers
 
-
-def setup_mocks(mocker):
-    mocker.patch.object(Source, 'get_geom_type', return_value='point')
-    mocker.patch.object(Source, '_compute_query_bounds')
+from . import setup_mocks
 
 
 class TestClusterSizeLayerHelper(object):
