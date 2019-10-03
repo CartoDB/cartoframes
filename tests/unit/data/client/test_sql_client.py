@@ -80,7 +80,7 @@ def sql_client(mocker, response=''):
     return SQLClient(credentials), context_mock
 
 
-class TestSQLClient():
+class TestSQLClient(object):
     def test_query(self, mocker):
         """client.SQLClient.query"""
         client, _ = sql_client(mocker, SQL_SELECT_RESPONSE)

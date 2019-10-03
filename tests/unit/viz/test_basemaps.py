@@ -1,8 +1,9 @@
-import unittest
+import pytest
+
 from cartoframes.viz import basemaps
 
 
-class TestBasemaps(unittest.TestCase):
+class TestBasemaps(object):
     def test_is_defined(self):
         "basemaps"
         assert basemaps is not None

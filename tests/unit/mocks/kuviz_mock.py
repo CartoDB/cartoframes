@@ -8,7 +8,7 @@ PRIVACY_PASSWORD = 'password'
 
 
 class CartoKuvizMock(Kuviz):
-    def __init__(self, name, id='a12345', url="https://carto.com", password=None):
+    def __init__(self, name, id='a12345', url='https://carto.com', password=None):
         self.id = id
         self.url = url
         self.name = name
@@ -24,13 +24,9 @@ class CartoKuvizMock(Kuviz):
         return True
 
 
-def _create_kuviz(html, name, credentials=None, password=None):
-    return CartoKuvizMock(name=name, password=password)
-
-
 class KuvizPublisherMock(KuvizPublisher):
     def publish(self, html, name, password=None):
-        return _create_kuviz(html=html, name=name, credentials=self._credentials, password=password)
+        return CartoKuvizMock(name=name, password=password)
 
     def _sync_layer(self, layer, table_name, credentials):
         layer.source.dataset = DatasetMock(table_name, credentials)
@@ -40,6 +36,6 @@ class KuvizPublisherMock(KuvizPublisher):
 
     @staticmethod
     def all():
-        kuviz = CartoKuvizMock(name="test")
+        kuviz = CartoKuvizMock(name='test')
         kuvizs = [kuviz, kuviz, kuviz]
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
