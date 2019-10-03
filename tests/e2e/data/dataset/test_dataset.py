@@ -619,13 +619,13 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
             self.assertIsDataFrameDatasetInstance(geojson)
 
     def test_creation_from_valid_geojson_file_path(self):
-        paths = [os.path.abspath('tests/e2e/fixtures/valid.geojson'),
-                 os.path.abspath('tests/e2e/fixtures/validgeo.json')]
+        paths = [os.path.abspath('tests/e2e/data/dataset/fixtures/valid.geojson'),
+                 os.path.abspath('tests/e2e/data/dataset/fixtures/validgeo.json')]
         for path in paths:
             self.assertIsDataFrameDatasetInstance(path)
 
     def test_creation_from_wrong_geojson_file_path(self):
-        geojson_file_path = os.path.abspath('tests/e2e/fixtures/wrong.geojson')
+        geojson_file_path = os.path.abspath('tests/e2e/data/dataset/fixtures/wrong.geojson')
         with self.assertRaises(Exception):
             self.assertIsDataFrameDatasetInstance(geojson_file_path)
 
