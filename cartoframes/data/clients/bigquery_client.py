@@ -55,7 +55,7 @@ class BigQueryClient(object):
         return response
 
     @refresh_client
-    def download(self, project, dataset, table, limit=None, offset=None, file_path=None):
+    def download_dataframe(self, project, dataset, table, limit=None, offset=None, file_path=None):
         query = _download_query(project, dataset, table, limit, offset)
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook')
 
@@ -66,6 +66,14 @@ class BigQueryClient(object):
         storage_client = BigQueryStorageClient(credentials=GoogleCredentials(self._credentials.get_do_token()))
         query = _download_query(project, dataset, table, limit, offset)
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook', bqstorage_client=storage_client)
+
+    @refresh_client
+    def download_file(self, project, dataset, table, limit=None, offset=None, file_path=None):
+        query = _download_query(project, dataset, table, limit, offset)
+        rows_iter = self.client.query(query).result()
+        with open('/tmp/hola.csv', 'w+') as f:
+            for row in rows_iter:
+                f.write(','.join([str(i) for i in row.values()]) + "\n")
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
