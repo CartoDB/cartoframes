@@ -55,6 +55,7 @@ To find out the number of quota credits that will be spent when geocoding a data
     print(info.get('required_quota'))
 
 When ``dry_run`` is True no changes will be made to the data and no quota will be consumed.
+The returned dataset will simply be a reference to the input dataset, unmodified.
 
 Geocoding Dataframes
 """"""""""""""""""""

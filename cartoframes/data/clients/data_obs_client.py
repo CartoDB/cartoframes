@@ -60,7 +60,7 @@ class DataObsClient(object):
             .. code:: python
 
                 from cartoframes.auth import Credentials
-                from cartoframes.client import DataObsClient
+                from cartoframes.data.clients import DataObsClient
                 creds = Credentials('user name', 'api key')
                 do = DataObsClient(creds)
                 au_boundaries = do.boundaries(region='Australia')
@@ -81,7 +81,7 @@ class DataObsClient(object):
             .. code:: python
 
                 from cartoframes.auth import Credentials
-                from cartoframes.client import DataObsClient
+                from cartoframes.data.clients import DataObsClient
                 credentials = Credentials('user name', 'api key')
                 # Note: default credentials will be supported in a future release
                 do = DataObsClient(credentials)
@@ -496,7 +496,7 @@ class DataObsClient(object):
             .. code::
 
                 from cartoframes.auth import Credentials
-                from cartoframes.client import DataObsClient
+                from cartoframes.data.clients import DataObsClient
                 creds = Credentials('user name', 'api key')
                 do = DataObsClient(creds)
                 median_income = do.discovery(

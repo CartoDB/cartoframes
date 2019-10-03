@@ -80,6 +80,10 @@ class DataFrameDataset(BaseDataset):
 
         return columns
 
+    def get_num_rows(self):
+        """Get the number of rows in the dataframe"""
+        return len(self._df.index)
+
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
             table_name=self._table_name,

@@ -5,15 +5,17 @@ from __future__ import absolute_import
 import re
 import hashlib
 import logging
-import uuid
 import pandas as pd
 
-from ...lib import context
-from ...auth import get_default_credentials
 from ...data import Dataset
+from ...utils.utils import remove_column_from_dataframe
+from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
+
+
+QUOTA_SERVICE = 'hires_geocoder'
 
 
 def _lock(context, lock_id):
@@ -184,10 +186,6 @@ def _hash_as_big_int(text):
     return int(hashlib.sha1(text.encode()).hexdigest(), 16) & ((2**63)-1)
 
 
-def _generate_temp_table_name(base=None):
-    return (base or 'table') + '_' + uuid.uuid4().hex[:10]
-
-
 def _set_pre_summary_info(summary, output):
     logging.debug(summary)
     output['total_rows'] = sum(summary.values())
@@ -258,16 +256,7 @@ def _column_or_value_arg(arg, valid_columns=None):
     return arg
 
 
-def _remove_column_or_index(dataframe, name):
-    # Note: we must support the case that name if both a column and the index
-    if name in dataframe.columns:
-        del dataframe[name]
-    if dataframe.index.name == name:
-        dataframe.reset_index(inplace=True)
-        del dataframe[name]
-
-
-class Geocode(object):
+class Geocode(Service):
     """Geocode using CARTO data services.
     This requires a CARTO account with and API key that allows for using geocoding services;
     (through explicit argument in constructor or via the default credentials).
@@ -335,8 +324,7 @@ class Geocode(object):
     """
 
     def __init__(self, credentials=None):
-        self._credentials = credentials or get_default_credentials()
-        self._context = context.create_context(self._credentials)
+        super(Geocode, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
 
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
@@ -346,7 +334,7 @@ class Geocode(object):
         """Geocode a dataset
 
         Args:
-            dataset (Dataset): a Dataset object to be geocoded.
+            dataset (Dataset, DataFrame): a Dataset or DataFrame object to be geocoded.
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' city names or
@@ -371,7 +359,7 @@ class Geocode(object):
                 check the needed quota)
 
         Returns:
-            tuple: (Dataset, info_dict)
+            Result: (Dataset, info_dict)
 
         """
 
@@ -399,9 +387,9 @@ class Geocode(object):
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
         if result_dataset.dataframe is not None and not table_name and not dry_run:
-            # The result is a permanent table; remove cartodb_id if it wasn't present in the input
-            if 'cartodb_id' not in self.columns and 'cartodb_id' in result_dataset.get_column_names():
-                _remove_column_or_index(result_dataset.dataframe, 'cartodb_id')
+            # The result is not a permanent table; remove cartodb_id if it wasn't present in the input
+            if 'cartodb_id' not in self.columns:
+                remove_column_from_dataframe(result_dataset.dataframe, 'cartodb_id')
 
         result = result_dataset
         if input_dataframe is not None:
@@ -415,7 +403,7 @@ class Geocode(object):
                     # but if not temporary we need to download it now
                     result = result_dataset.download()
 
-        return (result, result_info)
+        return self.result(result, metadata=result_info)
 
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
@@ -437,7 +425,7 @@ class Geocode(object):
                 input_table_name = table_name
             else:
                 temporary_table = True
-                input_table_name = _generate_temp_table_name()
+                input_table_name = self._new_temporary_table_name()
                 input_dataset = _dup_dataset(input_dataset)
             input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
         return (input_table_name, temporary_table)
@@ -511,13 +499,13 @@ class Geocode(object):
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
                         table=table_name,
                         add_columns=','.join(['ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
-                    self._context.execute_query(alter_sql)
+                    self._execute_query(alter_sql)
 
                     sql = _geocode_query(table_name, street, city, state, country, metadata)
                     logging.debug("Executing query: %s" % sql)
                     result = None
                     try:
-                        result = self._context.execute_long_running_query(sql)
+                        result = self._execute_long_running_query(sql)
                     except Exception as err:
                         logging.error(err)
                         msg = str(err)
@@ -558,11 +546,11 @@ class Geocode(object):
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
         sql = _exists_column_query(dataset_name, HASH_COLUMN)
         logging.debug("Executing check first time query: %s" % sql)
-        result = self._context.execute_query(sql)
+        result = self._execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
             sql = _first_time_summary_query(dataset_name, street, city, state, country)
             logging.debug("Executing first time summary query: %s" % sql)
         else:
             sql = _prior_summary_query(dataset_name, street, city, state, country)
             logging.debug("Executing summary query: %s" % sql)
-        return self._context.execute_query(sql)
+        return self._execute_query(sql)

@@ -348,3 +348,7 @@ class Dataset(object):
                                  'Then, if you want to work with the remote data, use `Dataset("new_table")`')
 
         return self._strategy.get_table_names()
+
+    def get_num_rows(self):
+        """Get the number of rows in the dataset"""
+        return self._strategy.get_num_rows()
