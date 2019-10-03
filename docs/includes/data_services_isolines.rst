@@ -1,5 +1,5 @@
-Isolines Services
-=================
+Isolines
+^^^^^^^^
 
 The ``cartoframes.data.dataservices.Isolines`` class provides `time and distance isolines <https://carto.com/location-data-services/isolines/>`_
 using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
@@ -9,7 +9,7 @@ Its use will incur in the expense of geocoding credits.
 In the case of accounts with soft geocoding limits, additional charges may apply if the monthly quota is exceeded.
 
 Isodistance and Isochrone areas
--------------------------------
+"""""""""""""""""""""""""""""""
 
 These two operations compute areas that are within a given range (as a travel time or distance) of a central or source point.
 Isochrones correspond to the area that can be reached within a given time in seconds from the source point traveling
@@ -80,7 +80,7 @@ _____________________
 * ``quality`` (1/2/3) Allows you to reduce the quality of the polygons in favor of the response time.
 
 Dry run
--------
+"""""""
 
 To find out the number of quota credits that will be spent when computing isochrone or isodistances
 areas,  pass a ``dry_run=True`` argument:
@@ -106,7 +106,7 @@ The returned dataset (the ``data`` field of the result named tuple) will be ``No
 
 
 Converting between the exclusive and inclusive range representation
--------------------------------------------------------------------
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 These methods are handy to convert a table from one of the representations to the other,
 so you can use both in your analyses and visualizations without spendit credits for the two of them.

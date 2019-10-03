@@ -29,6 +29,7 @@ class Credentials(object):
     there will be an attempt to retrieve credentials from a previously saved
     session. One of the above scenarios needs to be met to successfully
     instantiate a :obj:`Credentials` object.
+
     Args:
         api_key (str, optional): API key of user's CARTO account
         username (str, optional): Username of CARTO account
@@ -40,10 +41,14 @@ class Credentials(object):
             documentation
             <http://docs.python-requests.org/en/master/user/advanced/>`__
             for more information.
+
     Example:
+
         .. code::
+
             from cartoframes.auth import Credentials
             credentials = Credentials(username='eschbacher', api_key='abcdefg')
+
     """
 
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
@@ -143,16 +148,22 @@ class Credentials(object):
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
+
         Args:
             config_loc (str, optional): Location where credentials are to be
                 stored. If no argument is provided, it will be send to the
                 default location.
+
         Example:
+
             .. code::
+
                 from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save()  # save to default location
+
             .. code::
+
                 from cartoframes.auth import Credentials
                 credentials = Credentials(username='eschbacher', api_key='abcdefg')
                 credentials.save('path/to/credentials/file')
@@ -171,17 +182,23 @@ class Credentials(object):
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file.
+
         Args:
+
             config_file (str): Path to configuration file. Defaults to delete
                 the user default location if `None`.
+
         .. Tip::
+
             To see if there is a default user credential file stored, do the
             following::
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
                 Credentials(username='eschbacher', api_key='abcdefg',
                     base_url='https://eschbacher.carto.com/')
+
         """
+
         path_to_remove = config_file or _DEFAULT_PATH
         try:
             os.remove(path_to_remove)

@@ -11,7 +11,9 @@ def set_default_credentials(
         first=None, second=None, credentials=None,
         username=None, base_url=None, api_key=None, session=None):
     """set_default_credentials
+
     Args:
+
         credentials (:py:class:`Credentials <cartoframes.credentials.Credentials>`, optional):
           A :py:class:`Credentials <cartoframes.credentials.Credentials>`
           instance can be used in place of a `username | base_url`/`api_key` combination.
@@ -26,9 +28,13 @@ def set_default_credentials(
           documentation
           <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
           for more information.
+
     Example:
+
         From a pair username, api_key
+
         .. code::
+
             from cartoframes.auth import set_default_credentials
             set_default_credentials(
                 username='your_user_name',
@@ -39,13 +45,19 @@ def set_default_credentials(
                 'your_user_name',
                 'your api key'
             )
+
         From a username (for public datasets).
         The API key `default_public` is used by default.
+
         .. code::
+
             from cartoframes.auth import set_default_credentials
             set_default_credentials('your_user_name')
+
         From a pair base_url, api_key.
+
         .. code::
+
             from cartoframes.auth import set_default_credentials
             set_default_credentials(
                 base_url='https://your_user_name.carto.com',
@@ -56,20 +68,28 @@ def set_default_credentials(
                 'https://your_user_name.carto.com',
                 'your api key'
             )
+
         From a base_url (for public datasets).
         The API key `default_public` is used by default.
+
         .. code::
+
             from cartoframes.auth import set_default_credentials
             set_default_credentials('https://your_user_name.carto.com')
+
         From a :py:class:`Credentials <cartoframes.auth.Credentials>` class.
+
         .. code::
+
             from cartoframes.auth import Credentials, set_default_credentials
             credentials = Credentials(
                 base_url='https://your_user_name.carto.com',
                 api_key='your api key'
             )
             set_default_credentials(credentials)
+
     """
+
     global _default_credentials
 
     _base_url = base_url if first is None else first
