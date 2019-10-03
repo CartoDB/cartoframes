@@ -1,5 +1,3 @@
-"""Auth namespace contains the class to manage authentication: Credentials.
-It also includes the utility method set_default_credentials."""
 from __future__ import absolute_import
 
 from .credentials import Credentials
