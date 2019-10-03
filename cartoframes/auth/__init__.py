@@ -2,7 +2,8 @@
 the user to set its CARTO credentials."""
 from __future__ import absolute_import
 
-from .credentials import Credentials, set_default_credentials, get_default_credentials
+from .credentials import Credentials
+from .defaults import set_default_credentials, get_default_credentials
 
 __all__ = [
     'Credentials',
