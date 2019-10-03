@@ -7,7 +7,7 @@ from google.auth.exceptions import RefreshError
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
-from cartoframes.data.clients.bigquery_client import BigQueryClient
+from cartoframes.data.clients.bigquery_client import BigQueryClient, _download_query
 from google.cloud import bigquery
 
 _WORKING_PROJECT = 'carto-do-customers'
@@ -65,3 +65,52 @@ class TestBigQueryClient(unittest.TestCase):
         self.assertEqual(response, expected_response)
 
         bigquery.Client.query = original_query_method
+
+    def test_download_query_simple(self):
+        project = 'fake_project'
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        limit = None
+        offset = None
+        expected_query = 'SELECT * FROM `{}.{}.{}`'.format(project, dataset, table)
+
+        query = _download_query(project, dataset, table, limit, offset)
+
+        self.assertEqual(query, expected_query)
+
+    def test_download_query_limit(self):
+        project = 'fake_project'
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        limit = 10
+        offset = None
+        expected_query = 'SELECT * FROM `{}.{}.{}` LIMIT {}'.format(project, dataset, table, limit)
+
+        query = _download_query(project, dataset, table, limit, offset)
+
+        self.assertEqual(query, expected_query)
+
+    def test_download_query_offset(self):
+        project = 'fake_project'
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        limit = None
+        offset = 10
+        expected_query = 'SELECT * FROM `{}.{}.{}` OFFSET {}'.format(project, dataset, table, offset)
+
+        query = _download_query(project, dataset, table, limit, offset)
+
+        self.assertEqual(query, expected_query)
+
+    def test_download_query_limit_offset(self):
+        project = 'fake_project'
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        limit = 10
+        offset = 20
+        expected_query = 'SELECT * FROM `{}.{}.{}` LIMIT {} OFFSET {}'.format(project, dataset, table, limit, offset)
+
+        query = _download_query(project, dataset, table, limit, offset)
+
+        self.assertEqual(query, expected_query)
+

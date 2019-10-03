@@ -54,10 +54,20 @@ class BigQueryClient(object):
 
         return response
 
-    def download_by_list_rows(self, table):
-        rows_iter = self.client.list_rows(table)
+    @refresh_client
+    def download(self, project, dataset, table, limit=None, offset=None, file_path=None):
+        query = _download_query(project, dataset, table, limit, offset)
+        rows_iter = self.client.query(query)
         return list(rows_iter)
 
-    def download_by_query(self, table):
-        rows_iter = self.client.query('SELECT * FROM `{}`'.format(table))
-        return list(rows_iter)
+
+def _download_query(project, dataset, table, limit=None, offset=None):
+    full_table_name = '`{}.{}.{}`'.format(project, dataset, table)
+    query = 'SELECT * FROM {}'.format(full_table_name)
+
+    if limit:
+        query += ' LIMIT {}'.format(limit)
+    if offset:
+        query += ' OFFSET {}'.format(offset)
+
+    return query
