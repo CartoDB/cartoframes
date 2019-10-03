@@ -1,3 +1,7 @@
+import os
+import appdirs
+from warnings import warn
+
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
 from google.auth.exceptions import RefreshError
@@ -5,6 +9,8 @@ from google.auth.exceptions import RefreshError
 from carto.exceptions import CartoException
 
 from ...auth import get_default_credentials
+
+_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 
 
 def refresh_client(func):
@@ -69,11 +75,18 @@ class BigQueryClient(object):
 
     @refresh_client
     def download_file(self, project, dataset, table, limit=None, offset=None, file_path=None):
+        if not file_path:
+            file_name = '{}.{}.{}'.format(project, dataset, table)
+            file_path = os.path.join(_USER_CONFIG_DIR, file_name)
+
         query = _download_query(project, dataset, table, limit, offset)
         rows_iter = self.client.query(query).result()
-        with open('/tmp/hola.csv', 'w+') as f:
+
+        with open(file_path, 'w+') as f:
             for row in rows_iter:
                 f.write(','.join([str(i) for i in row.values()]) + "\n")
+
+        warn('Data saved: {}'.format(file_path))
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
