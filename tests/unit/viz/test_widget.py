@@ -3,7 +3,7 @@ import pytest
 from cartoframes.viz import Widget
 
 
-class TestWidget():
+class TestWidget(object):
     def test_is_widget_defined(self):
         """Widget"""
         assert Widget is not None

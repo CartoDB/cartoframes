@@ -16,7 +16,7 @@ WIDGET_B = {
 }
 
 
-class TestWidgetList():
+class TestWidgetList(object):
     def test_is_widget_list_defined(self):
         """WidgetList"""
         assert WidgetList is not None

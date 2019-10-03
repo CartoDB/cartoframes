@@ -1,17 +1,18 @@
-import unittest
+import pytest
+
 from cartoframes.viz import widgets
 
 
-class TestTimeSeriesWidget(unittest.TestCase):
+class TestTimeSeriesWidget(object):
     def test_widgets(self):
         "should be defined"
-        self.assertNotEqual(widgets.time_series_widget, None)
+        assert widgets.time_series_widget is not None
 
     def test_factory(self):
         "should create a time series widget"
         widget = widgets.time_series_widget('$value', title='Time Series Widget')
         widget_info = widget.get_info()
-        self.assertEqual(widget_info.get('type'), 'time-series')
-        self.assertEqual(widget_info.get('value'), '$value')
-        self.assertEqual(widget_info.get('title'), 'Time Series Widget')
-        self.assertEqual(widget_info.get('options').get('readOnly'), False)
+        assert widget_info.get('type') == 'time-series'
+        assert widget_info.get('value') == '$value'
+        assert widget_info.get('title') == 'Time Series Widget'
+        assert widget_info.get('options').get('readOnly') is False
