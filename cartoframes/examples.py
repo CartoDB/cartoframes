@@ -354,7 +354,7 @@ def read_taxi(limit=None, **kwargs):
         To create geometries with `examples.query`, write a query such
         as this::
 
-            from cartoframes.client import SQLClient
+            from cartoframes.data.clients import SQLClient
 
             sql = SQLClient(examples.get_credentials())
 

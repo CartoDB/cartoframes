@@ -1,4 +1,4 @@
-cartoframes==1.0b2
+cartoframes==1.0b3
 # Additional dependencies from examples
 matplotlib
 pandas
