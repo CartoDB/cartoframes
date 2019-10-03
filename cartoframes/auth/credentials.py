@@ -185,13 +185,14 @@ class Credentials(object):
 
         Args:
 
-            config_file (str): Path to configuration file. Defaults to delete
-                the user default location if `None`.
+            config_file (str): Path to configuration file.
+                Defaults to delete the user default location if `None`.
 
         .. Tip::
 
             To see if there is a default user credential file stored, do the
-            following::
+            following:
+
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
                 Credentials(username='eschbacher', api_key='abcdefg',
