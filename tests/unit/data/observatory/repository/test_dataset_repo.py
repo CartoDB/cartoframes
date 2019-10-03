@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from cartoframes.exceptions import DiscoveryException
 
@@ -7,12 +7,12 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestDatasetRepo(unittest.TestCase):
+class TestDatasetRepo(object):
 
     @patch.object(RepoClient, 'get_datasets')
     def test_get_all(self, mocked_repo):
@@ -62,7 +62,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_datasets')

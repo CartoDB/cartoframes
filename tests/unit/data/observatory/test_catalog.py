@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from cartoframes.data.observatory.category import Categories
 from cartoframes.data.observatory.country import Countries
@@ -6,12 +6,12 @@ from cartoframes.data.observatory.catalog import Catalog
 from .examples import test_country2, test_country1, test_category1, test_category2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestCatalog(unittest.TestCase):
+class TestCatalog(object):
 
     @patch.object(Countries, 'get_all')
     def test_countries(self, mocked_countries):

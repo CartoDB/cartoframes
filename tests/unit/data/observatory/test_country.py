@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 
 from cartoframes.data.observatory.geography import Geographies
@@ -12,12 +12,12 @@ from cartoframes.exceptions import DiscoveryException
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestCountry(unittest.TestCase):
+class TestCountry(object):
 
     @patch.object(CountryRepository, 'get_by_id')
     def test_get_country_by_id(self, mocked_repo):
@@ -50,7 +50,7 @@ class TestCountry(unittest.TestCase):
         country = test_countries.country_iso_code3
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             country.datasets()
 
     @patch.object(GeographyRepository, 'get_by_country')
@@ -71,11 +71,11 @@ class TestCountry(unittest.TestCase):
         country = test_countries.country_iso_code3
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             country.geographies()
 
 
-class TestCountries(unittest.TestCase):
+class TestCountries(object):
 
     @patch.object(CountryRepository, 'get_all')
     def test_get_all_countries(self, mocked_repo):

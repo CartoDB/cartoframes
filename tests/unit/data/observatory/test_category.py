@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 
 from cartoframes.data.observatory.category import Category, Categories
@@ -11,12 +11,12 @@ from cartoframes.exceptions import DiscoveryException
 from .examples import test_category1, test_datasets, test_categories, db_category1
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestCategory(unittest.TestCase):
+class TestCategory(object):
 
     @patch.object(CategoryRepository, 'get_by_id')
     def test_get_category_by_id(self, mocked_repo):
@@ -49,11 +49,11 @@ class TestCategory(unittest.TestCase):
         category = test_categories.id
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             category.datasets()
 
 
-class TestCategories(unittest.TestCase):
+class TestCategories(object):
 
     @patch.object(CategoryRepository, 'get_all')
     def test_get_all(self, mocked_repo):

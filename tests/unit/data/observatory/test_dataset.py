@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 
 from cartoframes.data.observatory.variable import Variables
@@ -10,12 +10,12 @@ from cartoframes.exceptions import DiscoveryException
 from .examples import test_dataset1, test_datasets, test_variables, db_dataset1
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestDataset(unittest.TestCase):
+class TestDataset(object):
 
     @patch.object(DatasetRepository, 'get_by_id')
     def test_get_dataset_by_id(self, mocked_repo):
@@ -48,11 +48,11 @@ class TestDataset(unittest.TestCase):
         dataset = test_datasets.id
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             dataset.variables()
 
 
-class TestDatasets(unittest.TestCase):
+class TestDatasets(object):
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):

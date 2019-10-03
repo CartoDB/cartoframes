@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from cartoframes.exceptions import DiscoveryException
 
@@ -7,12 +7,12 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_variable1, test_variables, db_variable1, db_variable2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
-class TestVariableRepo(unittest.TestCase):
+class TestVariableRepo(object):
 
     @patch.object(RepoClient, 'get_variables')
     def test_get_all(self, mocked_repo):
@@ -62,5 +62,5 @@ class TestVariableRepo(unittest.TestCase):
         repo = VariableRepository()
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_id)
