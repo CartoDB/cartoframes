@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import pandas as pd
 from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo

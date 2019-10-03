@@ -203,7 +203,7 @@ class Dataset(object):
         """Download / read a Dataset (table or query) from CARTO account
         associated with the Dataset's instance of :py:class:`Context
         <cartoframes.auth.Context>`.
-        
+
         Args:
             limit (int, optional):
                 The number of rows of the Dataset to download.
@@ -213,14 +213,14 @@ class Dataset(object):
             retry_times (int, optional):
                 Number of time to retry the download in case it fails.
                 Default is Dataset.DOWNLOAD_RETRY_TIMES.
-        
+
         Example:
 
             .. code::
 
                 from cartoframes.data import Dataset
                 from cartoframes.auth import set_default_credentials
-                
+
                 # use cartoframes example account
                 set_default_credentials('https://cartoframes.carto.com')
 
@@ -262,7 +262,7 @@ class Dataset(object):
                 from cartoframes.auth import set_default_credentials
                 from cartoframes.data import Dataset
                 import pandas as pd
-                
+
                 set_default_credentials(
                     base_url='https://your_user_name.carto.com',
                     api_key='your api key'

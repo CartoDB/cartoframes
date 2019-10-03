@@ -210,7 +210,7 @@ class Credentials(object):
             warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
-    
+
     @classmethod
     def get_do_token(self):
         do_token_manager = DoTokenManager(self.get_api_key_auth_client())

@@ -125,7 +125,7 @@ class DataObsClient(object):
                         List of four values (two lng/lat pairs) in the following order:
                         western longitude, southern latitude, eastern longitude,
                         and northern latitude.
-                        For example, Switzerland fits in 
+                        For example, Switzerland fits in
                         ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
             timespan (str, optional):
                 Specific timespan to get geometries from.
@@ -296,7 +296,7 @@ class DataObsClient(object):
 
                 - bounding box (list of float):
                     List of four values (two lng/lat pairs) in the following
-                    order: western longitude, southern latitude, eastern longitude, 
+                    order: western longitude, southern latitude, eastern longitude,
                     and northern latitude. For example, Switzerland fits in
                     ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
 
@@ -546,7 +546,7 @@ class DataObsClient(object):
                 has new columns for each measure in `metadata`.
 
         Raises:
-            NameError: 
+            NameError:
                 If the columns in `table_name` are in the ``suggested_name``
                 column of `metadata`.
             ValueError:

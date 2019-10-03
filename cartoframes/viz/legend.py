@@ -8,7 +8,7 @@ class Legend(object):
 
     Args:
         type (str):
-            'color-category', 'color-bins', 'color-continuous', 'size-bins', 
+            'color-category', 'color-bins', 'color-continuous', 'size-bins',
             or 'size-continuous'.
         prop (str, optional):
             'color', 'width', 'strokeColor', or 'strokeWidth'.
