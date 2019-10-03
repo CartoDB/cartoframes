@@ -58,7 +58,7 @@ class TestMapInitialization(object):
         msg = 'The default legend needs a map title to be displayed'
         with pytest.raises(CartoException) as e:
             Map(default_legend=True)
-            assert str(e) == msg
+        assert str(e.value) == msg
 
 
 class TestMapLayer(object):
@@ -228,7 +228,7 @@ class TestMapPublication(object):
         msg = 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
         with pytest.raises(CartoException) as e:
             map.publish('test', credentials=self.credentials)
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test_map_publish_unsync_sync_data_and_publish(self, mocker):
         dataset = mock_dataset(mocker, self.test_geojson)
@@ -297,6 +297,6 @@ class TestMapPublication(object):
                'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
         with pytest.raises(CartoException) as e:
             map.publish('test', credentials=self.credentials)
-            assert str(e) == msg
+        assert str(e.value) == msg
 
         KuvizPublisherMock.is_public = is_public

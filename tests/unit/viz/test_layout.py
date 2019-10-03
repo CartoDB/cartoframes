@@ -37,7 +37,7 @@ class TestLayoutInitialization(object):
         msg = 'All the elements in the Layout should be an instance of Map'
         with pytest.raises(CartoException) as e:
             Layout([Layer(Source(SOURCE))])
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test__init_maps_size(self):
         """Layout should init properly"""

@@ -83,7 +83,7 @@ class TestLegend(object):
         msg = 'Wrong legend input.'
         with pytest.raises(ValueError) as e:
             Legend(1234)
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
@@ -95,7 +95,7 @@ class TestLegend(object):
         'size-continuous-point.'
         with pytest.raises(ValueError) as e:
             Legend({'type': 'xxx'}).get_info()
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
@@ -103,4 +103,4 @@ class TestLegend(object):
         'color, strokeColor, width, strokeWidth.'
         with pytest.raises(ValueError) as e:
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
-            assert str(e) == msg
+        assert str(e.value) == msg

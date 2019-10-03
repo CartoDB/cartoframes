@@ -53,7 +53,7 @@ class TestWidget(object):
         msg = 'Wrong widget input.'
         with pytest.raises(ValueError) as e:
             Widget(1234)
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test_wrong_type(self):
         """Widget should raise an error if widget type is not valid"""
@@ -61,7 +61,7 @@ class TestWidget(object):
 
         with pytest.raises(ValueError) as e:
             Widget({'type': 'xxx'}).get_info()
-            assert str(e) == msg
+        assert str(e.value) == msg
 
     def test_animation_widget(self):
         """An Animation widget should be created successfully with the default property"""
