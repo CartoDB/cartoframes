@@ -1,12 +1,12 @@
-import unittest
+import pytest
 
 from cartoframes.viz import Widget
 
 
-class TestWidget(unittest.TestCase):
+class TestWidget():
     def test_is_widget_defined(self):
         """Widget"""
-        self.assertNotEqual(Widget, None)
+        assert Widget is not None
 
     def test_widget_init(self):
         """Widget should be properly initialized"""
@@ -18,10 +18,10 @@ class TestWidget(unittest.TestCase):
             'footer': '[footer]'
         })
 
-        self.assertEqual(widget._type, 'formula')
-        self.assertEqual(widget._title, '[TITLE]')
-        self.assertEqual(widget._description, '[description]')
-        self.assertEqual(widget._footer, '[footer]')
+        assert widget._type == 'formula'
+        assert widget._title == '[TITLE]'
+        assert widget._description == '[description]'
+        assert widget._footer == '[footer]'
 
     def test_widget_info(self):
         """Widget should return a proper information object"""
@@ -33,7 +33,7 @@ class TestWidget(unittest.TestCase):
             'footer': '[footer]'
         })
 
-        self.assertEqual(widget.get_info(), {
+        assert widget.get_info() == {
             'type': 'formula',
             'value': 'viewportSum($amount)',
             'title': '[TITLE]',
@@ -46,20 +46,22 @@ class TestWidget(unittest.TestCase):
                 'readOnly': False,
                 'buckets': 20
             }
-        })
+        }
 
     def test_wrong_input(self):
         """Widget should raise an error if the input is not valid"""
         msg = 'Wrong widget input.'
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             Widget(1234)
+            assert str(e) == msg
 
     def test_wrong_type(self):
         """Widget should raise an error if widget type is not valid"""
         msg = 'Widget type is not valid. Valid widget types are: default, formula.'
 
-        with self.assertRaisesRegexp(ValueError, msg):
+        with pytest.raises(ValueError) as e:
             Widget({'type': 'xxx'}).get_info()
+            assert str(e) == msg
 
     def test_animation_widget(self):
         """An Animation widget should be created successfully with the default property"""
@@ -67,7 +69,7 @@ class TestWidget(unittest.TestCase):
             'type': 'animation',
         })
 
-        self.assertEqual(widget.get_info(), {
+        assert widget.get_info() == {
             'type': 'animation',
             'title': '',
             'value': '',
@@ -80,7 +82,7 @@ class TestWidget(unittest.TestCase):
                 'readOnly': False,
                 'buckets': 20
             }
-        })
+        }
 
     def test_animation_widget_prop(self):
         """An Animation widget should be created successfully with a custom property"""
@@ -89,7 +91,7 @@ class TestWidget(unittest.TestCase):
             'prop': 'width'
         })
 
-        self.assertEqual(widget.get_info(), {
+        assert widget.get_info() == {
             'type': 'animation',
             'title': '',
             'value': '',
@@ -102,4 +104,4 @@ class TestWidget(unittest.TestCase):
                 'readOnly': False,
                 'buckets': 20
             }
-        })
+        }

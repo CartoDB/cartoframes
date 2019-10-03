@@ -1,7 +1,6 @@
-import unittest
+import pytest
 
-from cartoframes.viz import WidgetList
-from cartoframes.viz import Widget
+from cartoframes.viz import Widget, WidgetList
 
 WIDGET_A = {
     'type': 'formula',
@@ -17,44 +16,44 @@ WIDGET_B = {
 }
 
 
-class TestWidgetList(unittest.TestCase):
+class TestWidgetList():
     def test_is_widget_list_defined(self):
         """WidgetList"""
-        self.assertNotEqual(WidgetList, None)
+        assert WidgetList is not None
 
     def test_widget_list_init_with_a_dict(self):
         """WidgetList should be properly initialized"""
         widget_list = WidgetList(WIDGET_A)
 
-        self.assertEqual(widget_list._widgets[0]._type, 'formula')
-        self.assertEqual(widget_list._widgets[0]._value, 'viewportSum($amount)')
-        self.assertEqual(widget_list._widgets[0]._title, '[TITLE]')
-        self.assertEqual(widget_list._widgets[0]._description, '[description]')
-        self.assertEqual(widget_list._widgets[0]._footer, '[footer]')
-        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
+        assert widget_list._widgets[0]._type == 'formula'
+        assert widget_list._widgets[0]._value == 'viewportSum($amount)'
+        assert widget_list._widgets[0]._title == '[TITLE]'
+        assert widget_list._widgets[0]._description == '[description]'
+        assert widget_list._widgets[0]._footer == '[footer]'
+        assert isinstance(widget_list._widgets[0], Widget)
 
     def test_widget_list_init_with_a_list_of_dict(self):
         """WidgetList should be properly initialized"""
 
         widget_list = WidgetList([WIDGET_A, WIDGET_B])
 
-        self.assertEqual(widget_list._widgets[0]._type, 'formula')
-        self.assertEqual(widget_list._widgets[0]._value, 'viewportSum($amount)')
-        self.assertEqual(widget_list._widgets[0]._title, '[TITLE]')
-        self.assertEqual(widget_list._widgets[0]._description, '[description]')
-        self.assertEqual(widget_list._widgets[0]._footer, '[footer]')
-        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
+        assert widget_list._widgets[0]._type == 'formula'
+        assert widget_list._widgets[0]._value == 'viewportSum($amount)'
+        assert widget_list._widgets[0]._title == '[TITLE]'
+        assert widget_list._widgets[0]._description == '[description]'
+        assert widget_list._widgets[0]._footer == '[footer]'
+        assert isinstance(widget_list._widgets[0], Widget)
 
-        self.assertEqual(widget_list._widgets[1]._type, 'default')
-        self.assertEqual(widget_list._widgets[1]._title, '"Custom Info"')
-        self.assertEqual(widget_list._widgets[1]._description, '')
-        self.assertEqual(widget_list._widgets[1]._footer, '')
-        self.assertTrue(isinstance(widget_list._widgets[1], Widget))
+        assert widget_list._widgets[1]._type == 'default'
+        assert widget_list._widgets[1]._title == '"Custom Info"'
+        assert widget_list._widgets[1]._description == ''
+        assert widget_list._widgets[1]._footer == ''
+        assert isinstance(widget_list._widgets[1], Widget)
 
     def test_widget_list_init_with_a_widget(self):
         """WidgetList should be properly initialized"""
         widget_list = WidgetList(Widget(WIDGET_A))
-        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
+        assert isinstance(widget_list._widgets[0], Widget)
 
     def test_widget_list_init_with_a_list_of_widgets(self):
         """WidgetList should be properly initialized"""
@@ -64,8 +63,8 @@ class TestWidgetList(unittest.TestCase):
             Widget(WIDGET_B)
         ])
 
-        self.assertTrue(isinstance(widget_list._widgets[0], Widget))
-        self.assertTrue(isinstance(widget_list._widgets[1], Widget))
+        assert isinstance(widget_list._widgets[0], Widget)
+        assert isinstance(widget_list._widgets[1], Widget)
 
     def test_widget_list_get_widgets_info(self):
         """Widget List should return a proper widgets info object"""
@@ -76,7 +75,7 @@ class TestWidgetList(unittest.TestCase):
         ])
 
         widgets_info = widget_list.get_widgets_info()
-        self.assertEqual(widgets_info, [
+        assert widgets_info == [
             {
                 'type': 'formula',
                 'value': 'viewportSum($amount)',
@@ -103,4 +102,4 @@ class TestWidgetList(unittest.TestCase):
                     'readOnly': False,
                     'buckets': 20
                 }
-            }])
+            }]
