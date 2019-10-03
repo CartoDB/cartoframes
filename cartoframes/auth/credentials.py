@@ -138,7 +138,6 @@ class Credentials(object):
 
         raise ValueError('`credentials` must be a Credentials class instance')
 
-    @classmethod
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
 
