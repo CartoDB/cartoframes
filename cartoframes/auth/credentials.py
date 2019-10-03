@@ -63,21 +63,8 @@ class Credentials(object):
 
         self._norm_credentials()
 
-    @classmethod
-    def from_file(cls, config_file=None, session=None):
-        """Retrives credentials from a file. Defaults to the user config directory"""
-        with open(config_file or _DEFAULT_PATH, 'r') as f:
-            credentials = json.load(f)
-
-        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
-
-    @classmethod
-    def from_credentials(cls, credentials):
-        """Retrives credentials from another Credentials object"""
-        if isinstance(credentials, Credentials):
-            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
-
-        raise ValueError('`credentials` must be a Credentials class instance')
+    def __eq__(self, obj):
+        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
     def __repr__(self):
         return ("Credentials(username='{username}', "
@@ -85,9 +72,6 @@ class Credentials(object):
                 "base_url='{base_url}')").format(username=self._username,
                                                  api_key=self._api_key,
                                                  base_url=self._base_url)
-
-    def __eq__(self, obj):
-        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
     @property
     def api_key(self):
@@ -138,14 +122,23 @@ class Credentials(object):
         """Set session"""
         self._session = session
 
-    def _norm_credentials(self):
-        """Standardize credentials"""
-        if self._base_url:
-            self._base_url = self._base_url.strip('/')
+    @classmethod
+    def from_file(cls, config_file=None, session=None):
+        """Retrives credentials from a file. Defaults to the user config directory"""
+        with open(config_file or _DEFAULT_PATH, 'r') as f:
+            credentials = json.load(f)
 
-    def _base_url_from_username(self):
-        return 'https://{}.carto.com/'.format(self._username)
+        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
 
+    @classmethod
+    def from_credentials(cls, credentials):
+        """Retrives credentials from another Credentials object"""
+        if isinstance(credentials, Credentials):
+            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+
+        raise ValueError('`credentials` must be a Credentials class instance')
+
+    @classmethod
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
 
@@ -179,6 +172,7 @@ class Credentials(object):
         with open(config_file, 'w') as f:
             json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, f)
 
+    @classmethod
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file.
@@ -226,3 +220,11 @@ class Credentials(object):
             )
 
         return self._api_key_auth_client
+
+    def _norm_credentials(self):
+        """Standardize credentials"""
+        if self._base_url:
+            self._base_url = self._base_url.strip('/')
+
+    def _base_url_from_username(self):
+        return 'https://{}.carto.com/'.format(self._username)
