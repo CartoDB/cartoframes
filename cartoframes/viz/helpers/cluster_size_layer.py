@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 from carto.exceptions import CartoException
-from ..constants import CLUSTER_OPERATIONS
+from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
 from .. import defaults
 
@@ -124,7 +124,7 @@ def _get_cluster_operation(operation, value):
 
 
 def _check_valid_operation(operation):
-    valid_operations = CLUSTER_OPERATIONS.keys()
+    valid_operations = CLUSTER_KEYS
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'

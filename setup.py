@@ -42,8 +42,7 @@ REQUIRES = [
 EXTRAS_REQUIRES_TESTS = [
     'pytest',
     'pylint',
-    'geopandas',
-    'matplotlib'
+    'geopandas'
 ]
 
 

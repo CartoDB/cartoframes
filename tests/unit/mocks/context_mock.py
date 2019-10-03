@@ -1,5 +1,5 @@
 class ContextMock():
-    def __init__(self, response):
+    def __init__(self, response=''):
         self.query = None
         self.response = response
 

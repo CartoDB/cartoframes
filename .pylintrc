@@ -37,4 +37,8 @@ disable=
     broad-except,
     abstract-method,
     useless-super-delegation,
-    cyclic-import,test
+    cyclic-import,
+    missing-docstring,
+    len-as-condition,
+    old-style-class,
+    superfluous-parens,

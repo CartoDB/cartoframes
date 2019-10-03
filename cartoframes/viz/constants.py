@@ -84,6 +84,14 @@ FORMULA_OPERATIONS_GLOBAL = {
     'sum': 'globalSum'
 }
 
+CLUSTER_KEYS = [
+    'count',
+    'avg',
+    'min',
+    'max',
+    'sum'
+]
+
 CLUSTER_OPERATIONS = {
     'count': 'clusterCount',
     'avg': 'clusterAvg',
