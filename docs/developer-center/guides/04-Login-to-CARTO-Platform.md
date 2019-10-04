@@ -1,6 +1,6 @@
 ## Login to CARTO Platform
 
-In this guide, our purpose is to focus on the basics of authentication in CARTOframes. There's a full [Authorization Fundamentals](https://carto.com/developers/fundamentals/authorization/) guide at CARTO to understand how to configure and manage API Keys.
+In this guide, our purpose is to focus on the basics of authentication in CARTOframes. There's a full [Authorization Fundamentals](https://carto.com/developers/fundamentals/authorization/) at CARTO guide to understand how to configure and manage API Keys.
 
 > To use CARTOframes is not *always* needed to be authenticated.
 
