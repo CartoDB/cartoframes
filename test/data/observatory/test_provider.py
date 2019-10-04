@@ -67,9 +67,6 @@ class TestProvider(unittest.TestCase):
         assert isinstance(provider_series, pd.Series)
         assert provider_series['id'] == provider.id
 
-
-class TestProviders(unittest.TestCase):
-
     @patch.object(ProviderRepository, 'get_all')
     def test_get_all_providers(self, mocked_repo):
         # Given

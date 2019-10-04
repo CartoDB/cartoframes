@@ -105,9 +105,6 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset_series, pd.Series)
         assert dataset_series['id'] == dataset.id
 
-
-class TestDatasets(unittest.TestCase):
-
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
         # Given

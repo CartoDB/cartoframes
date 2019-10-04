@@ -77,9 +77,6 @@ class TestCountry(unittest.TestCase):
         assert isinstance(country_series, pd.Series)
         assert country_series['country_iso_code3'] == country.id
 
-
-class TestCountries(unittest.TestCase):
-
     @patch.object(CountryRepository, 'get_all')
     def test_get_all_countries(self, mocked_repo):
         # Given

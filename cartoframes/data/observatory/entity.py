@@ -37,7 +37,7 @@ class CatalogEntity(ABC):
         return not self == other
 
     def __str__(self):
-        return self.data.__str__()
+        return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
     def __repr__(self):
         return self.data.__repr__()

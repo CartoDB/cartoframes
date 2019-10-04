@@ -70,9 +70,6 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variable_group_series, pd.Series)
         assert variable_group_series['id'] == variable_group.id
 
-
-class TestVariablesGroups(unittest.TestCase):
-
     @patch.object(VariableGroupRepository, 'get_all')
     def test_get_all_variables_groups(self, mocked_repo):
         # Given

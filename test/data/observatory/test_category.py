@@ -66,9 +66,6 @@ class TestCategory(unittest.TestCase):
         assert isinstance(category_series, pd.Series)
         assert category_series['id'] == category.id
 
-
-class TestCategories(unittest.TestCase):
-
     @patch.object(CategoryRepository, 'get_all')
     def test_get_all(self, mocked_repo):
         # Given

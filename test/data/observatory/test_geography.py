@@ -84,9 +84,6 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography_series, pd.Series)
         assert geography_series['id'] == geography.id
 
-
-class TestGeographies(unittest.TestCase):
-
     @patch.object(GeographyRepository, 'get_all')
     def test_get_all_geographies(self, mocked_repo):
         # Given
