@@ -18,7 +18,7 @@ e.g. ``city={'column': 'column_name_of_the_city'}``, which can be shortened as  
 or, when all the dataset corresponds to a single value of the attribute, a literal text,
 e.g. ``city={'value': 'London}'``.
 
-Another optional argument, ``metadata`` can define the name of a result column that will contain additional metadata
+Another optional argument, ``status`` can define the name of a result column that will contain additional metadata
 about each gecododed row as a JSON structure.
 The entries in this structure, as described in https://carto.com/developers/data-services-api/reference/ are:
 
@@ -91,7 +91,7 @@ A Dataframe can be geocoded like this:
 
     df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
-    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, metadata='meta')
+    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status='meta')
     print(info)
     print(geocoded_dataframe)
     # Filtering by relevance

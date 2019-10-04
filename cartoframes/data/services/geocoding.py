@@ -13,6 +13,7 @@ from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
+METADATA_DEFAULT_PREFIX = 'carto_geocode_status_'
 
 
 QUOTA_SERVICE = 'hires_geocoder'
@@ -160,11 +161,9 @@ def _geocode_query(table, street, city, state, country, metadata):
         batch_size=BATCH_SIZE
     )
 
-    metadata_assignment = ''
-    if metadata:
-        metadata_assignment = '{col} = _g.metadata,'.format(col=metadata)
+    metadata_assignment, meta_columns = _metadata_assignment(metadata)
 
-    return """
+    query = """
         UPDATE {table}
         SET
             the_geom = _g.the_geom,
@@ -179,6 +178,53 @@ def _geocode_query(table, street, city, state, country, metadata):
         geocode_expression=geocode_expression,
         metadata_assignment=metadata_assignment
     )
+
+    return (query, meta_columns)
+
+
+METADATA_FIELDS = {
+    'relevance': ('numeric', "(_g.metadata->>'relevance')::numeric"),
+    'precision': ('text', "_g.metadata->>'precision'"),
+    'match_types': ('text', "cdb_dataservices_client.cdb_jsonb_array_casttext(_g.metadata->>'match_types')"),
+    'metadata': ('jsonb', "_g.metadata")
+}
+
+
+def _metadata_column(field, prefix=None, column_name=None):
+    column_name = column_name or '{}{}'.format(prefix, field)
+    column_type, value = METADATA_FIELDS[field]
+    return (column_name, column_type, value)
+
+
+def _column_assignment(column_name, value):
+    return '{} = {},'.format(column_name, value)
+
+
+def _metadata_assignment(metadata):
+    meta_assignment = ''
+    meta_columns = []
+    if isinstance(metadata, dict):
+        # new style: define metadata assignments with dictionary
+        # {'prefix': 'geocode_status_', 'fields':['relevance', 'precision']}
+        # allows to assign individual metadata attributes to columns
+        prefix = metadata.get('prefix', METADATA_DEFAULT_PREFIX)
+        fields = metadata.get('fields', ['relevance'])
+        invalid_fields = _list_difference(fields, METADATA_FIELDS.keys())
+        if any(invalid_fields):
+            raise ValueError("Invalid fields {} valid keys are: {}".format(
+                invalid_fields,
+                METADATA_FIELDS.keys()))
+        columns = [_metadata_column(field, prefix) for field in fields]
+        meta_assignments = [_column_assignment(name, value) for name, _, value in columns]
+        meta_columns = [(name, type_) for name, type_, _ in columns]
+        meta_assignment = ''.join(meta_assignments)
+    elif metadata:
+        # old style: column name
+        # stores all metadata as json in a single column
+        name, type_, value  = _metadata_column('metadata', column_name=metadata)
+        meta_columns = [(name, type_)]
+        meta_assignment = _column_assignment(name, value)
+    return (meta_assignment, meta_columns)
 
 
 def _hash_as_big_int(text):
@@ -322,7 +368,7 @@ class Geocoding(Service):
 
             df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             gc = Geocoding()
-            df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, metadata='meta')
+            df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status='meta')
             # show rows with relevance greater than 0.7:
             print(df[df.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
 
@@ -333,7 +379,7 @@ class Geocoding(Service):
 
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
-                metadata=None,
+                status=None,
                 table_name=None, if_exists=Dataset.FAIL,
                 dry_run=False):
         """Geocode a dataset
@@ -353,8 +399,9 @@ class Geocoding(Service):
                 with the name of a column containing the addresses' country names or
                 a `value` key with a literal country value value, e.g. 'US'.
                 It also accepts a string, in which case `column` is implied.
-            metadata (str, optional): name of a column where metadata (in JSON format)
+            status (str, optional): name of a column where geocode status information (in JSON format)
                 will be stored (see https://carto.com/developers/data-services-api/reference/)
+                TODO: document alternative format
             table_name (str, optional): the geocoding results will be placed in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable
@@ -366,8 +413,7 @@ class Geocoding(Service):
         Returns:
             A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
             (same type as the input) and a ``metadata`` dictionary with global information
-            about the geocoding process (not to be confused with the optional per-row
-            geocoding enabled by the ``metadata`` parameter)
+            about the geocoding process
 
             The data contains a ``the_geom`` column with point locations for the geocoded addresses
             and also a ``carto_geocode_hash`` that, if preserved, can avoid re-geocoding
@@ -388,7 +434,7 @@ class Geocoding(Service):
 
         input_table_name, is_temporary = self._table_for_geocoding(dataset, table_name, if_exists)
 
-        result_info = self._geocode(input_table_name, street, city, state, country, metadata, dry_run)
+        result_info = self._geocode(input_table_name, street, city, state, country, status, dry_run)
 
         if dry_run:
             result_dataset = dataset
@@ -499,12 +545,9 @@ class Geocoding(Service):
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
                 else:
-                    # Create column to store input search hash
-                    add_columns = [(HASH_COLUMN, 'text')]
+                    sql, add_columns = _geocode_query(table_name, street, city, state, country, metadata)
 
-                    if metadata:
-                        # Create column to store result metadata
-                        add_columns.append((metadata, 'jsonb'))
+                    add_columns += [(HASH_COLUMN, 'text')]
 
                     logging.info("Adding columns {} if needed".format(', '.join([c[0] for c in add_columns])))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
@@ -513,7 +556,6 @@ class Geocoding(Service):
                             'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
                     self._execute_query(alter_sql)
 
-                    sql = _geocode_query(table_name, street, city, state, country, metadata)
                     logging.debug("Executing query: %s" % sql)
                     result = None
                     try:
