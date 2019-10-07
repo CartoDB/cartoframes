@@ -330,7 +330,7 @@ class Dataset(object):
 
         """
         return self._strategy.update_dataset_info(privacy, table_name)
-        
+
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         return self._strategy.compute_geom_type()
