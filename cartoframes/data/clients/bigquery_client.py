@@ -2,6 +2,7 @@ import os
 import appdirs
 import csv
 from warnings import warn
+import tqdm
 
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
@@ -87,10 +88,13 @@ class BigQueryClient(object):
         query = _download_query(project, dataset, table, limit, offset)
         rows_iter = self.client.query(query).result()
 
+        progress_bar = tqdm.tqdm_notebook(total=rows_iter.total_rows)
+
         with open(file_path, 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
             for row in rows_iter:
                 csvwriter.writerow(row.values())
+                progress_bar.update(1)
 
         warn('Data saved: {}'.format(file_path))
 
