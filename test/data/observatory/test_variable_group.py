@@ -36,7 +36,7 @@ class TestVariableGroup(unittest.TestCase):
         mocked_repo.return_value = test_variables
 
         # When
-        variables = test_variable_group1.variables()
+        variables = test_variable_group1.variables
 
         # Then
         assert isinstance(variables, list)

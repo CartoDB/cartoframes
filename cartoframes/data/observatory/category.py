@@ -13,6 +13,7 @@ class Category(CatalogEntity):
     id_field = _CATEGORY_ID_FIELD
     entity_repo = get_category_repo()
 
+    @property
     def datasets(self):
         return get_dataset_repo().get_by_category(self.id)
 

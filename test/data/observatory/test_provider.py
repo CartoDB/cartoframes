@@ -37,7 +37,7 @@ class TestProvider(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = test_provider1.datasets()
+        datasets = test_provider1.datasets
 
         # Then
         assert isinstance(datasets, list)

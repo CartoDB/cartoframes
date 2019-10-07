@@ -36,7 +36,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_variables
 
         # When
-        variables = test_dataset1.variables()
+        variables = test_dataset1.variables
 
         # Then
         assert isinstance(variables, list)
@@ -49,7 +49,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_variables_groups
 
         # When
-        variables_groups = test_dataset1.variables_groups()
+        variables_groups = test_dataset1.variables_groups
 
         # Then
         assert isinstance(variables_groups, list)

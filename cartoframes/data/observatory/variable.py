@@ -12,6 +12,7 @@ class Variable(CatalogEntity):
     id_field = _VARIABLE_ID_FIELD
     entity_repo = get_variable_repo()
 
+    @property
     def datasets(self):
         return get_dataset_repo().get_by_variable(self.id)
 

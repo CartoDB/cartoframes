@@ -13,9 +13,11 @@ class Dataset(CatalogEntity):
     id_field = _DATASET_ID_FIELD
     entity_repo = get_dataset_repo()
 
+    @property
     def variables(self):
         return get_variable_repo().get_by_dataset(self.id)
 
+    @property
     def variables_groups(self):
         return get_variable_group_repo().get_by_dataset(self.id)
 

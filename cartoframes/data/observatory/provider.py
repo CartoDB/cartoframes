@@ -13,6 +13,7 @@ class Provider(CatalogEntity):
     id_field = _PROVIDER_ID_FIELD
     entity_repo = get_provider_repo()
 
+    @property
     def datasets(self):
         return get_dataset_repo().get_by_provider(self.id)
 

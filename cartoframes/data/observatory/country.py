@@ -13,8 +13,10 @@ class Country(CatalogEntity):
     id_field = _COUNTRY_ID_FIELD
     entity_repo = get_country_repo()
 
+    @property
     def datasets(self):
         return get_dataset_repo().get_by_country(self.id)
 
+    @property
     def geographies(self):
         return get_geography_repo().get_by_country(self.id)
