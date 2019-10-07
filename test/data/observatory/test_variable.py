@@ -132,8 +132,8 @@ class TestVariable(unittest.TestCase):
         variables_str = str(variables)
 
         # Then
-        assert variables_str == '[Variable({cat1}), Variable({cat2})]'\
-                                .format(cat1=str(db_variable1), cat2=str(db_variable2))
+        assert variables_str == '[Variable({id1}), Variable({id2})]' \
+                                .format(id1=db_variable1['id'], id2=db_variable2['id'])
 
     def test_variable_list_is_represented_with_ids(self):
         # Given

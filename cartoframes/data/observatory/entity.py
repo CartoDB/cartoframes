@@ -56,7 +56,3 @@ class CatalogList(list):
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
-
-    def __str__(self):
-        items_str = ', '.join(map(str, self))
-        return '[{items}]'.format(items=items_str)

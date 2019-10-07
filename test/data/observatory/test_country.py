@@ -129,7 +129,8 @@ class TestCountry(unittest.TestCase):
         countries_str = str(countries)
 
         # Then
-        assert countries_str == '[Country({c1}), Country({c2})]'.format(c1=str(db_country1), c2=str(db_country2))
+        assert countries_str == '[Country({id1}), Country({id2})]' \
+                                .format(id1=db_country1['id'], id2=db_country2['id'])
 
     def test_country_list_is_represented_with_ids(self):
         # Given

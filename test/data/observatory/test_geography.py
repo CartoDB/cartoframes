@@ -134,8 +134,8 @@ class TestGeography(unittest.TestCase):
         categories_str = str(geographies)
 
         # Then
-        assert categories_str == '[Geography({cat1}), Geography({cat2})]'\
-                                 .format(cat1=str(db_geography1), cat2=str(db_geography2))
+        assert categories_str == '[Geography({id1}), Geography({id2})]' \
+                                 .format(id1=db_geography1['id'], id2=db_geography2['id'])
 
     def test_geography_list_is_represented_with_ids(self):
         # Given

@@ -116,8 +116,8 @@ class TestProvider(unittest.TestCase):
         providers_str = str(providers)
 
         # Then
-        assert providers_str == '[Provider({cat1}), Provider({cat2})]'\
-                                .format(cat1=str(db_provider1), cat2=str(db_provider2))
+        assert providers_str == '[Provider({id1}), Provider({id2})]' \
+                                .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     def test_provider_list_is_represented_with_ids(self):
         # Given

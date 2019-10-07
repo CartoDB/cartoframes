@@ -116,8 +116,8 @@ class TestCategory(unittest.TestCase):
         categories_str = str(categories)
 
         # Then
-        assert categories_str == '[Category({cat1}), Category({cat2})]'\
-                                 .format(cat1=str(db_category1), cat2=str(db_category2))
+        assert categories_str == '[Category({id1}), Category({id2})]' \
+                                 .format(id1=db_category1['id'], id2=db_category2['id'])
 
     def test_category_list_is_represented_with_ids(self):
         # Given

@@ -156,7 +156,7 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == '[Dataset({d1}), Dataset({d2})]'.format(d1=str(db_dataset1), d2=str(db_dataset2))
+        assert datasets_str == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
 
     def test_dataset_list_is_represented_with_ids(self):
         # Given
