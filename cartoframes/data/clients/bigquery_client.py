@@ -63,29 +63,11 @@ class BigQueryClient(object):
         return response
 
     @refresh_client
-    def download(self, project, dataset, table, limit=None, offset=None, file_path=None):
-        self._download_file(project, dataset, table, limit, offset, file_path)
-
-    @refresh_client
-    def _download_dataframe(self, project, dataset, table, limit=None, offset=None, file_path=None):
-        query = _download_query(project, dataset, table, limit, offset)
-        return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook')
-
-    @refresh_client
-    def _download_storage_api(self, project, dataset, table, limit=None, offset=None, file_path=None):
-        # pip install google-cloud-bigquery-storage
-        from google.cloud.bigquery_storage_v1beta1 import BigQueryStorageClient
-        storage_client = BigQueryStorageClient(credentials=GoogleCredentials(self._credentials.get_do_token()))
-        query = _download_query(project, dataset, table, limit, offset)
-        return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook', bqstorage_client=storage_client)
-
-    @refresh_client
-    def _download_file(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
+    def download(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
 
-        # fail if exists (Python 2.7 way)
         if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
