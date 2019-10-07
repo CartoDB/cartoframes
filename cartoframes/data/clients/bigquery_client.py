@@ -6,7 +6,7 @@ from google.auth.exceptions import RefreshError
 
 from carto.exceptions import CartoException
 
-from ..auth import get_default_credentials
+from ...auth import get_default_credentials
 
 
 def refresh_client(func):

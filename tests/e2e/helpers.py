@@ -11,7 +11,7 @@ class _UserUrlLoader:
         user_url = None
         if os.environ.get('USERURL') is None:
             try:
-                creds = json.loads(open('test/secret.json').read())
+                creds = json.loads(open('tests/e2e/secret.json').read())
                 user_url = creds['USERURL']
             except Exception:
                 warnings.warn('secret.json not found')

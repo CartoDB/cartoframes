@@ -30,7 +30,7 @@ class RefreshTokenChecker(object):
 class TestBigQueryClient():
     def setup_method(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None):
-            creds = json.loads(open('test/secret.json').read())
+            creds = json.loads(open('tests/e2e/secret.json').read())
             self.apikey = creds['APIKEY']
             self.username = creds['USERNAME']
         else:
