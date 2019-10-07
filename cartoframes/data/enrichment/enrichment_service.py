@@ -24,7 +24,7 @@ def enrich(query_function, **kwargs):
     data_copy = _prepare_data(kwargs['data'], kwargs['data_geom_column'])
     tablename = _upload_dataframe(bq_client, user_dataset, data_copy, kwargs['data_geom_column'])
 
-    queries = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
+    queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
     return _execute_enrichment(bq_client, queries, data_copy, kwargs['data_geom_column'])
 
@@ -56,7 +56,7 @@ def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
     return data_tablename
 
 
-def _enrichment_query(user_dataset, tablename, query_function, **kwargs):
+def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
     table_to_geotable, table_to_variables, table_to_project, table_to_dataset =\
          __get_tables_and_variables(kwargs['variables'], user_dataset)
 
@@ -139,44 +139,44 @@ def __get_tables_and_variables(variables, user_dataset):
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
 
-def __process_enrichment_variables(variables, user_dataset):
+def __process_enrichment_variables(variables_id, user_dataset):
     table_to_geotable = dict()
     table_to_variables = defaultdict(list)
     table_to_project = dict()
     table_to_dataset = dict()
 
-    for variable in variables:
-        variable_split = variable.split('.')
-        project_part, dataset_part, table_part, variable_part = variable_split
+    for variable_id in variables_id:
+        variable_split = variable_id.split('.')
+        project, dataset, table, variable = variable_split
 
-        if project_part != _PUBLIC_PROJECT:
-            table_part = '{dataset}_{table}'.format(dataset=dataset_part,
-                                                    table=table_part,
-                                                    user_dataset=user_dataset)
+        if project != _PUBLIC_PROJECT:
+            table = '{dataset}_{table}'.format(dataset=dataset,
+                                               table=table,
+                                               user_dataset=user_dataset)
 
-        if table_part not in table_to_dataset:
-            if project_part != _PUBLIC_PROJECT:
-                table_to_dataset[table_part] = user_dataset
+        if table not in table_to_dataset:
+            if project != _PUBLIC_PROJECT:
+                table_to_dataset[table] = user_dataset
             else:
-                table_to_dataset[table_part] = _PUBLIC_DATASET
+                table_to_dataset[table] = _PUBLIC_DATASET
 
-        if table_part not in table_to_geotable:
-            geotable = __get_name_geotable_from_datatable(table_part)
+        if table not in table_to_geotable:
+            geotable = __get_name_geotable_from_datatable(table)
 
-            if project_part != _PUBLIC_PROJECT:
-                geotable = '{dataset}_{geotable}'.format(dataset=dataset_part,
+            if project != _PUBLIC_PROJECT:
+                geotable = '{dataset}_{geotable}'.format(dataset=dataset,
                                                          geotable=geotable,
                                                          user_dataset=user_dataset)
 
-            table_to_geotable[table_part] = geotable
+            table_to_geotable[table] = geotable
 
-        if table_part not in table_to_project:
-            if project_part == _PUBLIC_PROJECT:
-                table_to_project[table_part] = _PUBLIC_PROJECT
+        if table not in table_to_project:
+            if project == _PUBLIC_PROJECT:
+                table_to_project[table] = _PUBLIC_PROJECT
             else:
-                table_to_project[table_part] = _WORKING_PROJECT
+                table_to_project[table] = _WORKING_PROJECT
 
-        table_to_variables[table_part].append(variable_part)
+        table_to_variables[table].append(variable)
 
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
