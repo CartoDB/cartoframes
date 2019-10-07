@@ -62,7 +62,8 @@ class BigQueryClient(object):
     def query(self, query, **kwargs):
         return self.client.query(query, **kwargs)
 
-    def download_to_file(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
+    def download_to_file(self, project, dataset, table, limit=None, offset=None,
+                         file_path=None, fail_if_exists=False, progress_bar=True):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
@@ -73,13 +74,15 @@ class BigQueryClient(object):
         query = _download_query(project, dataset, table, limit, offset)
         rows_iter = self.query(query).result()
 
-        progress_bar = tqdm.tqdm_notebook(total=rows_iter.total_rows)
+        if progress_bar:
+            pb = tqdm.tqdm_notebook(total=rows_iter.total_rows)
 
         with open(file_path, 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
             for row in rows_iter:
                 csvwriter.writerow(row.values())
-                progress_bar.update(1)
+                if progress_bar:
+                    pb.update(1)
 
         warn('Data saved: {}'.format(file_path))
 
