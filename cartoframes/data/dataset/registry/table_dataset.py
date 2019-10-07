@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
@@ -56,6 +58,11 @@ class TableDataset(BaseDataset):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the table"""
+        result = self._context.execute_query("SELECT COUNT(*) FROM {table}".format(table=self.table_name))
+        return result.get('rows')[0].get('count')
 
     def _unsync(self):
         self._dataset_info = None

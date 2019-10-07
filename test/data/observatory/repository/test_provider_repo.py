@@ -1,7 +1,8 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.provider import Provider
 from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_provider1, test_providers, db_provider1, db_provider2
@@ -24,7 +25,8 @@ class TestProviderRepo(unittest.TestCase):
         providers = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
+        assert isinstance(providers, CatalogList)
         assert providers == test_providers
 
     @patch.object(RepoClient, 'get_providers')
@@ -37,14 +39,14 @@ class TestProviderRepo(unittest.TestCase):
         providers = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert providers is None
 
     @patch.object(RepoClient, 'get_providers')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_provider1, db_provider2]
-        requested_id = test_provider1['id']
+        requested_id = db_provider1['id']
         repo = ProviderRepository()
 
         # When
@@ -52,6 +54,7 @@ class TestProviderRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(provider, Provider)
         assert provider == test_provider1
 
     @patch.object(RepoClient, 'get_providers')
@@ -64,3 +67,20 @@ class TestProviderRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_providers')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'provider1'}]
+        repo = ProviderRepository()
+
+        expected_providers = CatalogList([Provider({
+            'id': 'provider1',
+            'name': None
+        })])
+
+        # When
+        providers = repo.get_all()
+
+        # Then
+        assert providers == expected_providers

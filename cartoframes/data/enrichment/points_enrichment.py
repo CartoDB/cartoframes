@@ -1,9 +1,22 @@
+from __future__ import absolute_import
+
 from .enrichment_service import enrich
 
 # TODO: process column name in metadata, remove spaces and points
 
 
 def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), credentials=None):
+    """enrich_points
+
+    This method is responsible for # TODO
+
+    Args:
+        data: # TODO
+        variables: # TODO
+        data_geom_column: # TODO
+        filters: # TODO
+        credentials: # TODO
+    """
 
     data_enriched = enrich(_prepare_sql, data=data, variables=variables, data_geom_column=data_geom_column,
                            filters=filters, credentials=credentials)
