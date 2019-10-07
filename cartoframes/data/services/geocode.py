@@ -8,7 +8,6 @@ import logging
 import pandas as pd
 
 from ...data import Dataset
-from ...data.dataset.registry.base_dataset import BaseDataset
 from ...utils.utils import remove_column_from_dataframe
 from .service import Service
 
@@ -330,7 +329,7 @@ class Geocode(Service):
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
                 metadata=None,
-                table_name=None, if_exists=BaseDataset.FAIL,
+                table_name=None, if_exists=Dataset.IF_EXISTS_FAIL,
                 dry_run=False):
         """Geocode a dataset
 

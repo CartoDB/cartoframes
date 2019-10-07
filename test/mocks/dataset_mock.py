@@ -13,7 +13,7 @@ from cartoframes.data import Dataset
 
 class MetadataMock():
     def __init__(self):
-        self.privacy = DatasetInfo.PRIVATE
+        self.privacy = Dataset.PRIVACY_PRIVATE
         self.name = None
 
 

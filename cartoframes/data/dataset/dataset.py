@@ -8,10 +8,6 @@ from .registry.table_dataset import TableDataset
 from .registry.base_dataset import BaseDataset
 from .dataset_info import DatasetInfo
 
-FAIL = BaseDataset.FAIL
-REPLACE = BaseDataset.REPLACE
-APPEND = BaseDataset.APPEND
-
 class Dataset(object):
     """Generic data class for cartoframes data operations. A `Dataset` instance
     can be created from a dataframe, geodataframe, a table hosted on a CARTO
@@ -63,7 +59,7 @@ class Dataset(object):
 
             Dataset('table_name')
 
-        Query using data from a CARTO account
+        Query usign CARTO
 
         .. code::
 
@@ -77,6 +73,7 @@ class Dataset(object):
 
             Dataset('select * from table_name WHERE ...')
     """
+
 
     DOWNLOAD_RETRY_TIMES = 3
 
@@ -218,7 +215,64 @@ class Dataset(object):
 
         return self._strategy.download(limit, decode_geom, retry_times)
 
-    def upload(self, with_lnglat=None, if_exists=BaseDataset.FAIL, table_name=None, schema=None, credentials=None):
+    IF_EXISTS_FAIL = BaseDataset.IF_EXISTS_FAIL
+    """'fail' option to avoid overwritting a table.
+    
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com/',
+                api_key='your api key'
+            )
+
+            d = Dataset('tablename')
+            d.upload(if_exists=Dataset.IF_EXISTS_FAIL, table_name='new_table')
+    """
+
+    IF_EXISTS_REPLACE = BaseDataset.IF_EXISTS_REPLACE
+    """'replace' option to replace the table with the new one.
+    
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com/',
+                api_key='your api key'
+            )
+
+            d = Dataset('tablename')
+            d.upload(if_exists=Dataset.IF_EXISTS_FAIL, table_name='new_table')
+    """
+
+    IF_EXISTS_APPEND = BaseDataset.IF_EXISTS_APPEND
+    """'append' option to append the new table in the existing table.
+    
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com/',
+                api_key='your api key'
+            )
+
+            d = Dataset('tablename')
+            d.upload(if_exists=Dataset.IF_EXISTS_APPEND, table_name='new_table')
+    """
+
+    def upload(self, with_lnglat=None, if_exists=IF_EXISTS_FAIL, table_name=None, schema=None, credentials=None):
         r"""Upload Dataset to CARTO account associated with `credentials`.
 
         Args:
@@ -227,10 +281,11 @@ class Dataset(object):
               created upon upload to CARTO. Example input: `('long', 'lat')`.
               Defaults to `None`.
             if_exists (str, optional): Behavior for adding data from Dataset.
-              Options are 'fail', 'replace', or 'append'. Defaults to 'fail',
-              which means that the Dataset instance will not overwrite a
-              table of the same name if it exists. If the table does not exist,
-              it will be created.
+              Options are :py:attr:`Dataset.IF_EXISTS_FAIL`,
+              :py:attr:`Dataset.IF_EXISTS_REPLACE`, or :py:attr:`Dataset.IF_EXISTS_APPEND`.
+              Defaults to 'fail', which means that the Dataset instance
+              will not overwrite a table of the same name if it exists.
+              If the table does not exist, it will be created.
             table_name (str): Desired table name for the dataset on CARTO. If
               name does not conform to SQL naming conventions, it will be
               'normalized' (e.g., all lower case, adding `_` in place of spaces
@@ -304,12 +359,69 @@ class Dataset(object):
 
         return self._strategy.delete()
 
+    PRIVACY_PRIVATE = DatasetInfo.PRIVACY_PRIVATE
+    """Dataset privacy for datasets that are private.
+    
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com/',
+                api_key='your api key'
+            )
+
+            d = Dataset('tablename')
+            d.update_dataset_info(privacy=Dataset.PRIVACY_PRIVATE)
+    """
+
+    PRIVACY_PUBLIC = DatasetInfo.PRIVACY_PUBLIC
+    """Dataset privacy for datasets that are public.
+
+    Example:
+
+        .. code::
+
+            from cartoframes.data import Dataset, DatasetInfo
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials(
+                base_url='https://your_user_name.carto.com/',
+                api_key='your api key'
+            )
+
+            d = Dataset('tablename')
+            d.update_dataset_info(privacy=Dataset.PRIVACY_PUBLIC)
+    """
+
+    PRIVACY_LINK = DatasetInfo.PRIVACY_LINK
+    """Dataset privacy for datasets that are accessible by link.
+
+    Example:
+
+    .. code::
+
+        from cartoframes.data import Dataset, DatasetInfo
+        from cartoframes.auth import set_default_credentials
+
+        set_default_credentials(
+            base_url='https://your_user_name.carto.com/',
+            api_key='your api key'
+        )
+
+        d = Dataset('tablename')
+        d.update_dataset_info(privacy=Dataset.PRIVACY_LINK)
+    """
+
     def update_dataset_info(self, privacy=None, table_name=None):
         """Update/change Dataset privacy and name
 
         Args:
-          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
-            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
+          privacy (str, optional): One of :py:attr:`Dataset.PRIVACY_PRIVATE`,
+            :py:attr:`Dataset.PRIVACY_PUBLIC` or :py:attr:`Dataset.PRIVACY_LINK`
           table_name (str, optional): Name of the dataset on CARTO. After updating it,
             the table_name will be changed too.
 
@@ -326,9 +438,10 @@ class Dataset(object):
                 )
 
                 d = Dataset('tablename')
-                d.update_dataset_info(privacy=DatasetInfo.LINK)
+                d.update_dataset_info(privacy=Dataset.PRIVACY_LINK)
 
         """
+
         return self._strategy.update_dataset_info(privacy, table_name)
 
     def compute_geom_type(self):

@@ -11,14 +11,14 @@ from ...utils.columns import normalize_name
 
 
 class DatasetInfo(object):
-    PRIVATE = 'PRIVATE'
+    PRIVACY_PRIVATE = 'PRIVATE'
     """Dataset privacy for datasets that are private"""
 
-    PUBLIC = 'PUBLIC'
+    PRIVACY_PUBLIC = 'PUBLIC'
     """Dataset privacy for datasets that are public"""
 
-    LINK = 'LINK'
-    """Dataset privacy for datasets that are accessible by link"""
+    PRIVACY_LINK = 'LINK'
+    """Dataset privacy for link that are accessible by link"""
 
     def __init__(self, context, table_name):
         self._metadata = self._get_metadata(context, table_name)
@@ -82,9 +82,9 @@ class DatasetInfo(object):
 
     def _validate_privacy(self, privacy):
         privacy = privacy.upper()
-        if privacy not in [self.PRIVATE, self.PUBLIC, self.LINK]:
+        if privacy not in [self.PRIVACY_PRIVATE, self.PRIVACY_PUBLIC, self.PRIVACY_LINK]:
             raise ValueError('Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-                p=privacy, o1=self.PRIVATE, o2=self.PUBLIC, o3=self.LINK))
+                p=privacy, o1=self.PRIVACY_PRIVATE, o2=self.PRIVACY_PUBLIC, o3=self.PRIVACY_LINK))
 
         if privacy != self._privacy:
             return True
