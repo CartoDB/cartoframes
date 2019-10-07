@@ -2,12 +2,10 @@ import unittest
 import pandas as pd
 
 from cartoframes.data.observatory.entity import CatalogList
-
 from cartoframes.data.observatory.variable import Variable
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-
-from .examples import test_datasets, test_variable1, test_variables, db_variable1
+from .examples import test_datasets, test_variable1, test_variables, db_variable1, test_variable2, db_variable2
 
 try:
     from unittest.mock import Mock, patch
@@ -82,6 +80,37 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable_series, pd.Series)
         assert variable_series['id'] == variable.id
 
+    def test_variable_is_exported_as_dict(self):
+        # Given
+        variable = Variable(db_variable1)
+
+        # When
+        variable_dict = variable.to_dict()
+
+        # Then
+        assert isinstance(variable_dict, dict)
+        assert variable_dict == db_variable1
+
+    def test_variable_is_represented_with_id(self):
+        # Given
+        variable = Variable(db_variable1)
+
+        # When
+        variable_repr = repr(variable)
+
+        # Then
+        assert variable_repr == 'Variable({id})'.format(id=db_variable1['id'])
+
+    def test_variable_is_printed_with_classname(self):
+        # Given
+        variable = Variable(db_variable1)
+
+        # When
+        variable_str = str(variable)
+
+        # Then
+        assert variable_str == 'Variable({dict_str})'.format(dict_str=str(db_variable1))
+
     @patch.object(VariableRepository, 'get_all')
     def test_get_all_variables(self, mocked_repo):
         # Given
@@ -95,6 +124,28 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
+    def test_variable_list_is_printed_with_classname(self):
+        # Given
+        variables = CatalogList([test_variable1, test_variable2])
+
+        # When
+        variables_str = str(variables)
+
+        # Then
+        assert variables_str == '[Variable({cat1}), Variable({cat2})]'\
+                                .format(cat1=str(db_variable1), cat2=str(db_variable2))
+
+    def test_variable_list_is_represented_with_ids(self):
+        # Given
+        variables = CatalogList([test_variable1, test_variable2])
+
+        # When
+        variables_repr = repr(variables)
+
+        # Then
+        assert variables_repr == '[Variable({id1}), Variable({id2})]'\
+                                 .format(id1=db_variable1['id'], id2=db_variable2['id'])
+
     @patch.object(VariableRepository, 'get_by_id')
     def test_get_variable_by_id(self, mocked_repo):
         # Given
@@ -107,19 +158,6 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable, object)
         assert isinstance(variable, Variable)
         assert variable == test_variable1
-
-    # @patch.object(VariableRepository, 'get_all')
-    # def test_variables_are_indexed_with_id(self, mocked_repo):
-    #     # Given
-    #     mocked_repo.return_value = test_variables
-    #     variable_id = db_variable1['id']
-    #
-    #     # When
-    #     variables = Variables.get_all()
-    #     variable = variables.loc[variable_id]
-    #
-    #     # Then
-    #     assert variable == test_variable1
 
     def test_variables_items_are_obtained_as_variable(self):
         # Given

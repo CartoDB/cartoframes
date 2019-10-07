@@ -2,12 +2,10 @@ import unittest
 import pandas as pd
 
 from cartoframes.data.observatory.entity import CatalogList
-
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-
-from .examples import test_geography1, test_geographies, test_datasets, db_geography1
+from .examples import test_geography1, test_geographies, test_datasets, db_geography1, test_geography2, db_geography2
 
 try:
     from unittest.mock import Mock, patch
@@ -84,6 +82,37 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography_series, pd.Series)
         assert geography_series['id'] == geography.id
 
+    def test_geography_is_exported_as_dict(self):
+        # Given
+        geography = Geography(db_geography1)
+
+        # When
+        geography_dict = geography.to_dict()
+
+        # Then
+        assert isinstance(geography_dict, dict)
+        assert geography_dict == db_geography1
+
+    def test_geography_is_represented_with_id(self):
+        # Given
+        geography = Geography(db_geography1)
+
+        # When
+        geography_repr = repr(geography)
+
+        # Then
+        assert geography_repr == 'Geography({id})'.format(id=db_geography1['id'])
+
+    def test_geography_is_printed_with_classname(self):
+        # Given
+        geography = Geography(db_geography1)
+
+        # When
+        geography_str = str(geography)
+
+        # Then
+        assert geography_str == 'Geography({dict_str})'.format(dict_str=str(db_geography1))
+
     @patch.object(GeographyRepository, 'get_all')
     def test_get_all_geographies(self, mocked_repo):
         # Given
@@ -97,6 +126,28 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
+    def test_geography_list_is_printed_with_classname(self):
+        # Given
+        geographies = CatalogList([test_geography1, test_geography2])
+
+        # When
+        categories_str = str(geographies)
+
+        # Then
+        assert categories_str == '[Geography({cat1}), Geography({cat2})]'\
+                                 .format(cat1=str(db_geography1), cat2=str(db_geography2))
+
+    def test_geography_list_is_represented_with_ids(self):
+        # Given
+        geographies = CatalogList([test_geography1, test_geography2])
+
+        # When
+        categories_repr = repr(geographies)
+
+        # Then
+        assert categories_repr == '[Geography({id1}), Geography({id2})]'\
+                                  .format(id1=db_geography1['id'], id2=db_geography2['id'])
+
     @patch.object(GeographyRepository, 'get_by_id')
     def test_get_geography_by_id(self, mocked_repo):
         # Given
@@ -109,19 +160,6 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography, object)
         assert isinstance(geography, Geography)
         assert geography == test_geography1
-
-    # @patch.object(GeographyRepository, 'get_all')
-    # def test_geographies_are_indexed_with_id(self, mocked_repo):
-    #     # Given
-    #     mocked_repo.return_value = test_geographies
-    #     geography_id = db_geography1['id']
-    #
-    #     # When
-    #     geographies = Geographies.get_all()
-    #     geography = geographies.loc[geography_id]
-    #
-    #     # Then
-    #     assert geography == test_geography1
 
     def test_geographies_items_are_obtained_as_geography(self):
         # Given

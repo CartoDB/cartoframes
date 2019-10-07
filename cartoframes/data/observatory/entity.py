@@ -30,6 +30,9 @@ class CatalogEntity(ABC):
     def to_series(self):
         return pd.Series(self.data)
 
+    def to_dict(self):
+        return self.data
+
     def __eq__(self, other):
         return self.data == other.data
 
@@ -40,7 +43,7 @@ class CatalogEntity(ABC):
         return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
     def __repr__(self):
-        return self.data.__repr__()
+        return '{classname}({entity_id})'.format(classname=self.__class__.__name__, entity_id=self.id)
 
 
 class CatalogList(list):
@@ -53,3 +56,7 @@ class CatalogList(list):
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
+
+    def __str__(self):
+        items_str = ', '.join(map(str, self))
+        return '[{items}]'.format(items=items_str)

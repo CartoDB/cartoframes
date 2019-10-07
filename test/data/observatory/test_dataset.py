@@ -6,8 +6,8 @@ from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-
-from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1
+from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
+    db_dataset2
 
 try:
     from unittest.mock import Mock, patch
@@ -105,6 +105,37 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset_series, pd.Series)
         assert dataset_series['id'] == dataset.id
 
+    def test_dataset_is_exported_as_dict(self):
+        # Given
+        dataset = Dataset(db_dataset1)
+
+        # When
+        dataset_dict = dataset.to_dict()
+
+        # Then
+        assert isinstance(dataset_dict, dict)
+        assert dataset_dict == db_dataset1
+
+    def test_dataset_is_represented_with_id(self):
+        # Given
+        dataset = Dataset(db_dataset1)
+
+        # When
+        dataset_repr = repr(dataset)
+
+        # Then
+        assert dataset_repr == 'Dataset({id})'.format(id=db_dataset1['id'])
+
+    def test_dataset_is_printed_with_classname(self):
+        # Given
+        dataset = Dataset(db_dataset1)
+
+        # When
+        dataset_str = str(dataset)
+
+        # Then
+        assert dataset_str == 'Dataset({dict_str})'.format(dict_str=str(db_dataset1))
+
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
         # Given
@@ -116,6 +147,27 @@ class TestDataset(unittest.TestCase):
         # Then
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
+
+    def test_dataset_list_is_printed_with_classname(self):
+        # Given
+        datasets = CatalogList([test_dataset1, test_dataset2])
+
+        # When
+        datasets_str = str(datasets)
+
+        # Then
+        assert datasets_str == '[Dataset({d1}), Dataset({d2})]'.format(d1=str(db_dataset1), d2=str(db_dataset2))
+
+    def test_dataset_list_is_represented_with_ids(self):
+        # Given
+        datasets = CatalogList([test_dataset1, test_dataset2])
+
+        # When
+        datasets_repr = repr(datasets)
+
+        # Then
+        assert datasets_repr == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+
 
     @patch.object(DatasetRepository, 'get_by_id')
     def test_get_dataset_by_id(self, mocked_repo):
@@ -129,19 +181,6 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset, object)
         assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
-
-    # @patch.object(DatasetRepository, 'get_all')
-    # def test_datasets_are_indexed_with_id(self, mocked_repo):
-    #     # Given
-    #     mocked_repo.return_value = test_datasets
-    #     dataset_id = db_dataset1['id']
-    #
-    #     # When
-    #     datasets = Datasets.get_all()
-    #     dataset = datasets.loc[dataset_id]
-    #
-    #     # Then
-    #     assert dataset == test_dataset1
 
     def test_datasets_items_are_obtained_as_dataset(self):
         # Given
