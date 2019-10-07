@@ -13,7 +13,7 @@ from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
-DEFAULT_STATUS = { 'gc_status_rel': 'relevance'}
+DEFAULT_STATUS = {'gc_status_rel': 'relevance'}
 
 
 QUOTA_SERVICE = 'hires_geocoder'
@@ -135,7 +135,7 @@ def _posterior_summary_query(table):
     )
 
 
-def _geocode_query(table, street, city, state, country, metadata):
+def _geocode_query(table, street, city, state, country, status):
     hash_expression = _hash_expr(street, city, state, country)
     query = """
         SELECT * FROM {table} WHERE {needs_geocoding}
@@ -161,13 +161,13 @@ def _geocode_query(table, street, city, state, country, metadata):
         batch_size=BATCH_SIZE
     )
 
-    metadata_assignment, meta_columns = _metadata_assignment(metadata)
+    status_assignment, status_columns = _status_assignment(status)
 
     query = """
         UPDATE {table}
         SET
             the_geom = _g.the_geom,
-            {metadata_assignment}
+            {status_assignment}
             {hash_column} = {hash_expression}
         FROM (SELECT * FROM {geocode_expression}) _g
         WHERE _g.cartodb_id = {table}.cartodb_id
@@ -176,14 +176,13 @@ def _geocode_query(table, street, city, state, country, metadata):
         hash_column=HASH_COLUMN,
         hash_expression=hash_expression,
         geocode_expression=geocode_expression,
-        metadata_assignment=metadata_assignment
+        status_assignment=status_assignment
     )
 
-    return (query, meta_columns)
+    return (query, status_columns)
 
 
-
-METADATA_FIELDS = {
+STATUS_FIELDS = {
     'relevance': ('numeric', "(_g.metadata->>'relevance')::numeric"),
     'precision': ('text', "_g.metadata->>'precision'"),
     'match_types': ('text', "cdb_dataservices_client.cdb_jsonb_array_casttext(_g.metadata->>'match_types')"),
@@ -191,8 +190,8 @@ METADATA_FIELDS = {
 }
 
 
-def _metadata_column(column_name, field):
-    column_type, value = METADATA_FIELDS[field]
+def _status_column(column_name, field):
+    column_type, value = STATUS_FIELDS[field]
     return (column_name, column_type, value)
 
 
@@ -200,29 +199,29 @@ def _column_assignment(column_name, value):
     return '{} = {},'.format(column_name, value)
 
 
-def _metadata_assignment(metadata):
-    meta_assignment = ''
-    meta_columns = []
-    if isinstance(metadata, dict):
-        # new style: define metadata assignments with dictionary
+def _status_assignment(status):
+    status_assignment = ''
+    status_columns = []
+    if isinstance(status, dict):
+        # new style: define status assignments with dictionary
         # {'column_name': 'status_field', ...}
-        # allows to assign individual metadata attributes to columns
-        invalid_fields = _list_difference(metadata.values(), METADATA_FIELDS.keys())
+        # allows to assign individual status attributes to columns
+        invalid_fields = _list_difference(status.values(), STATUS_FIELDS.keys())
         if any(invalid_fields):
-            raise ValueError("Invalid fields {} valid keys are: {}".format(
+            raise ValueError("Invalid status fields {} valid keys are: {}".format(
                 invalid_fields,
-                METADATA_FIELDS.keys()))
-        columns = [_metadata_column(name, field) for name, field in list(metadata.items())]
-        meta_assignments = [_column_assignment(name, value) for name, _, value in columns]
-        meta_columns = [(name, type_) for name, type_, _ in columns]
-        meta_assignment = ''.join(meta_assignments)
-    elif metadata:
+                STATUS_FIELDS.keys()))
+        columns = [_status_column(name, field) for name, field in list(status.items())]
+        status_assignments = [_column_assignment(name, value) for name, _, value in columns]
+        status_columns = [(name, type_) for name, type_, _ in columns]
+        status_assignment = ''.join(status_assignments)
+    elif status:
         # old style: column name
-        # stores all metadata as json in a single column
-        name, type_, value  = _metadata_column(metadata, '*')
-        meta_columns = [(name, type_)]
-        meta_assignment = _column_assignment(name, value)
-    return (meta_assignment, meta_columns)
+        # stores all status as json in a single column
+        name, type_, value = _status_column(status, '*')
+        status_columns = [(name, type_)]
+        status_assignment = _column_assignment(name, value)
+    return (status_assignment, status_columns)
 
 
 def _hash_as_big_int(text):
@@ -504,7 +503,7 @@ class Geocoding(Service):
     # receiving geocoding results instead of storing in a table, etc.
     # But that would make transition to using AFW harder.
 
-    def _geocode(self, table_name, street, city=None, state=None, country=None, metadata=None, dry_run=False):
+    def _geocode(self, table_name, street, city=None, state=None, country=None, status=None, dry_run=False):
         # Internal Geocoding implementation.
         # Geocode a table's rows not already geocoded in a dataset'
 
@@ -513,7 +512,7 @@ class Geocoding(Service):
         logging.info('city = "%s"' % city)
         logging.info('state = "%s"' % state)
         logging.info('country = "%s"' % country)
-        logging.info('metadata = "%s"' % metadata)
+        logging.info('status = "%s"' % status)
         logging.info('dry_run = "%s"' % dry_run)
 
         output = {}
@@ -547,7 +546,7 @@ class Geocoding(Service):
                     output['error'] = 'The table is already being geocoded'
                     output['aborted'] = aborted = True
                 else:
-                    sql, add_columns = _geocode_query(table_name, street, city, state, country, metadata)
+                    sql, add_columns = _geocode_query(table_name, street, city, state, country, status)
 
                     add_columns += [(HASH_COLUMN, 'text')]
 
