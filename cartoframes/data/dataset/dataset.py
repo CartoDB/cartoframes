@@ -63,7 +63,7 @@ class Dataset(object):
 
             Dataset('table_name')
 
-        Query usign CARTO
+        Query using data from a CARTO account
 
         .. code::
 
