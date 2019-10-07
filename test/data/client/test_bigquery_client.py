@@ -103,7 +103,7 @@ class TestBigQueryClient(unittest.TestCase):
         file_path = self.file_path
 
         bq_client = BigQueryClient(project, self.credentials)
-        bq_client.download(project, dataset, table, file_path=file_path)
+        bq_client.download_to_file(project, dataset, table, file_path=file_path)
 
         self.assertTrue(os.path.isfile(file_path))
 
@@ -124,7 +124,7 @@ class TestBigQueryClient(unittest.TestCase):
 
         with open(file_path, 'w'):
             with self.assertRaises(CartoException):
-                bq_client.download(project, dataset, table, file_path=file_path, fail_if_exists=True)
+                bq_client.download_to_file(project, dataset, table, file_path=file_path, fail_if_exists=True)
 
 
 class TestBigQueryClientUnit(unittest.TestCase):

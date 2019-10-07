@@ -60,7 +60,7 @@ class BigQueryClient(object):
     def query(self, query, **kwargs):
         return self.client.query(query, **kwargs)
 
-    def download(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
+    def download_to_file(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
