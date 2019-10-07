@@ -9,7 +9,7 @@ except ImportError:
 
 class CatalogEntity(ABC):
 
-    id_field = None
+    id_field = 'id'
     entity_repo = None
 
     def __init__(self, data):

@@ -4,12 +4,9 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
-_VARIABLE_ID_FIELD = 'id'
-
 
 class Variable(CatalogEntity):
 
-    id_field = _VARIABLE_ID_FIELD
     entity_repo = get_variable_repo()
 
     @property

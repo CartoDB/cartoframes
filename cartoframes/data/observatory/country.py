@@ -5,12 +5,9 @@ from .repository.geography_repo import get_geography_repo
 from .repository.country_repo import get_country_repo
 from .repository.dataset_repo import get_dataset_repo
 
-_COUNTRY_ID_FIELD = 'id'
-
 
 class Country(CatalogEntity):
 
-    id_field = _COUNTRY_ID_FIELD
     entity_repo = get_country_repo()
 
     @property

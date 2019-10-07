@@ -5,12 +5,8 @@ from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
 
 
-_CATEGORY_ID_FIELD = 'id'
-
-
 class Category(CatalogEntity):
 
-    id_field = _CATEGORY_ID_FIELD
     entity_repo = get_category_repo()
 
     @property

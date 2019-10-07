@@ -4,12 +4,9 @@ from .entity import CatalogEntity
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.variable_repo import get_variable_repo
 
-_VARIABLE_GROUP_ID_FIELD = 'id'
-
 
 class VariableGroup(CatalogEntity):
 
-    id_field = _VARIABLE_GROUP_ID_FIELD
     entity_repo = get_variable_group_repo()
 
     @property

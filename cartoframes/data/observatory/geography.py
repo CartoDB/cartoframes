@@ -4,12 +4,9 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
-_GEOGRAPHY_ID_FIELD = 'id'
-
 
 class Geography(CatalogEntity):
 
-    id_field = _GEOGRAPHY_ID_FIELD
     entity_repo = get_geography_repo()
 
     @property

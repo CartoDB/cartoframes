@@ -5,12 +5,9 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 
-_DATASET_ID_FIELD = 'id'
-
 
 class Dataset(CatalogEntity):
 
-    id_field = _DATASET_ID_FIELD
     entity_repo = get_dataset_repo()
 
     @property
