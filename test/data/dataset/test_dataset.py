@@ -197,7 +197,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = dataset.download()
 
         dataset = Dataset(df)
-        dataset.upload(table_name=self.test_write_table, credentials=self.credentials, if_exists=Dataset.IF_EXISTS_REPLACE)
+        dataset.upload(table_name=self.test_write_table,
+                       credentials=self.credentials,
+                       if_exists=Dataset.IF_EXISTS_REPLACE)
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -386,7 +388,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         # avoid uploading the same cartodb_id
         df['cartodb_id'] += df['cartodb_id'].max() + 1
 
-        Dataset(df).upload(if_exists=Dataset.IF_EXISTS_APPEND, table_name=self.test_write_table, credentials=self.credentials)
+        Dataset(df).upload(if_exists=Dataset.IF_EXISTS_APPEND,
+                           table_name=self.test_write_table,
+                           credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 

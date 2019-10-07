@@ -74,7 +74,6 @@ class Dataset(object):
             Dataset('select * from table_name WHERE ...')
     """
 
-
     DOWNLOAD_RETRY_TIMES = 3
 
     def __init__(self, data, credentials=None, schema=None):
@@ -217,7 +216,7 @@ class Dataset(object):
 
     IF_EXISTS_FAIL = BaseDataset.IF_EXISTS_FAIL
     """'fail' option to avoid overwritting a table.
-    
+
     Example:
 
         .. code::
@@ -236,7 +235,7 @@ class Dataset(object):
 
     IF_EXISTS_REPLACE = BaseDataset.IF_EXISTS_REPLACE
     """'replace' option to replace the table with the new one.
-    
+
     Example:
 
         .. code::
@@ -255,7 +254,7 @@ class Dataset(object):
 
     IF_EXISTS_APPEND = BaseDataset.IF_EXISTS_APPEND
     """'append' option to append the new table in the existing table.
-    
+
     Example:
 
         .. code::
@@ -361,7 +360,7 @@ class Dataset(object):
 
     PRIVACY_PRIVATE = DatasetInfo.PRIVACY_PRIVATE
     """Dataset privacy for datasets that are private.
-    
+
     Example:
 
         .. code::
