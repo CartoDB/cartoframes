@@ -156,14 +156,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table)
-        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
+        dataset.upload(table_name=self.test_write_table, if_exists=BaseDataset.REPLACE)
 
     def test_dataset_upload_validation_fails_with_query_and_append(self):
         query = 'SELECT 1'
         dataset = Dataset(query, credentials=self.credentials)
         err_msg = 'Error using append with a query Dataset. It is not possible to append data to a query'
         with self.assertRaises(CartoException, msg=err_msg):
-            dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
+            dataset.upload(table_name=self.test_write_table, if_exists=BaseDataset.APPEND)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_download_validations(self):
@@ -198,7 +198,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = dataset.download()
 
         dataset = Dataset(df)
-        dataset.upload(table_name=self.test_write_table, credentials=self.credentials, if_exists=Dataset.REPLACE)
+        dataset.upload(table_name=self.test_write_table, credentials=self.credentials, if_exists=BaseDataset.REPLACE)
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -387,7 +387,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         # avoid uploading the same cartodb_id
         df['cartodb_id'] += df['cartodb_id'].max() + 1
 
-        Dataset(df).upload(if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
+        Dataset(df).upload(if_exists=BaseDataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -403,7 +403,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.test_write_table = dataset.table_name
 
         dataset = Dataset(df).upload(
-            if_exists=Dataset.REPLACE, table_name=self.test_write_table, credentials=self.credentials)
+            if_exists=BaseDataset.REPLACE, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -471,7 +471,7 @@ class TestDatasetInfo(unittest.TestCase):
     def test_dataset_info_should_work_from_table(self):
         table_name = 'fake_table'
         dataset = DatasetMock(table_name, credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, BaseDataset.PRIVATE)
 
     def test_dataset_get_privacy_from_new_table(self):
         query = 'SELECT 1'
@@ -479,7 +479,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, BaseDataset.PRIVATE)
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
@@ -487,8 +487,8 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
+        dataset.update_dataset_info(privacy=BaseDataset.PUBLIC)
+        self.assertEqual(dataset.dataset_info.privacy, BaseDataset.PUBLIC)
 
     def test_dataset_set_privacy_with_wrong_parameter(self):
         query = 'SELECT 1'
@@ -496,7 +496,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
         wrong_privacy = 'wrong_privacy'
         error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-            p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+            p=wrong_privacy, o1=BaseDataset.PRIVATE, o2=BaseDataset.PUBLIC, o3=BaseDataset.LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info(privacy=wrong_privacy)
 
@@ -504,12 +504,12 @@ class TestDatasetInfo(unittest.TestCase):
         table_name = 'fake_table'
         dataset = DatasetMock(table_name, credentials=self.credentials)
         dataset_info = dataset.dataset_info
-        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
-        privacy = Dataset.PUBLIC
+        self.assertEqual(dataset_info.privacy, BaseDataset.PRIVATE)
+        privacy = BaseDataset.PUBLIC
         error_msg = str(setting_value_exception('privacy', privacy))
         with self.assertRaises(CartoException, msg=error_msg):
             dataset_info.privacy = privacy
-        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset_info.privacy, BaseDataset.PRIVATE)
 
     def test_dataset_info_from_dataframe(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
@@ -526,7 +526,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table', credentials=self.credentials)
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, BaseDataset.PRIVATE)
 
     def test_dataset_info_from_query(self):
         query = 'SELECT 1'

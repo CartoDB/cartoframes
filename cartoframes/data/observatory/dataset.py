@@ -25,7 +25,6 @@ class Dataset(SingleEntity):
 
 
 class Datasets(EntitiesList):
-
     id_field = _DATASET_ID_FIELD
     entity_repo = get_dataset_repo()
 

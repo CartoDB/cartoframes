@@ -5,11 +5,12 @@ from ...auth import get_default_credentials
 from .registry.strategies_registry import StrategiesRegistry
 from .registry.dataframe_dataset import DataFrameDataset
 from .registry.table_dataset import TableDataset
+from .registry.base_dataset import BaseDataset
 from .dataset_info import DatasetInfo
-from ...utils.utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
 
-DOWNLOAD_RETRY_TIMES = 3
-
+FAIL = BaseDataset.FAIL
+REPLACE = BaseDataset.REPLACE
+APPEND = BaseDataset.APPEND
 
 class Dataset(object):
     """Generic data class for cartoframes data operations. A `Dataset` instance
@@ -62,7 +63,7 @@ class Dataset(object):
 
             Dataset('table_name')
 
-        Query usign CARTO stuff
+        Query usign CARTO
 
         .. code::
 
@@ -77,41 +78,20 @@ class Dataset(object):
             Dataset('select * from table_name WHERE ...')
     """
 
-    FAIL = TableDataset.FAIL
-    REPLACE = TableDataset.REPLACE
-    APPEND = TableDataset.APPEND
-
-    PRIVATE = DatasetInfo.PRIVATE
-    PUBLIC = DatasetInfo.PUBLIC
-    LINK = DatasetInfo.LINK
-
-    GEOM_TYPE_POINT = GEOM_TYPE_POINT
-    GEOM_TYPE_LINE = GEOM_TYPE_LINE
-    GEOM_TYPE_POLYGON = GEOM_TYPE_POLYGON
+    DOWNLOAD_RETRY_TIMES = 3
 
     def __init__(self, data, credentials=None, schema=None):
         self._registry = self._get_strategies_registry()
         self._strategy = self._init_strategy(data, credentials, schema)
 
-    def _init_strategy(self, data, credentials=None, schema=None):
-        credentials = credentials or get_default_credentials()
-        for strategy in self._registry.get_strategies():
-            if strategy.can_work_with(data):
-                return strategy.create(data, credentials, schema)
-
-        raise ValueError('We can not detect the Dataset type')
-
-    def _get_strategies_registry(self):
-        return StrategiesRegistry()
-
     @property
     def credentials(self):
-        """Dataset :py:class:`Context <cartoframes.auth.Context>`"""
+        """Dataset :py:class:`Credentials <cartoframes.auth.Credentials>`"""
         return self._strategy.credentials
 
     @credentials.setter
     def credentials(self, credentials):
-        """Set a new :py:class:`Context <cartoframes.auth.Context>` for a Dataset instance."""
+        """Set a new :py:class:`Credentials <cartoframes.auth.Credentials>` for a Dataset instance."""
         self._strategy.credentials = credentials
 
     @property
@@ -129,17 +109,10 @@ class Dataset(object):
         """Dataset query"""
         return self._strategy.query
 
-    def get_query(self):
-        return self._strategy.get_query()
-
     @property
     def dataframe(self):
-        """Dataset DataFrame"""
+        """Dataset dataframe"""
         return self._strategy.dataframe
-
-    def get_geodataframe(self):
-        """Converts DataFrame into GeoDataFrame if possible"""
-        return self._strategy.get_geodataframe()
 
     @property
     def dataset_info(self):
@@ -172,37 +145,52 @@ class Dataset(object):
 
         return self._strategy.dataset_info
 
-    def update_dataset_info(self, privacy=None, table_name=None):
-        """Update/change Dataset privacy and name
+    def get_query(self):
+        """Get the computed query"""
 
-        Args:
-          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
-            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
-          table_name (str, optional): Name of the dataset on CARTO. After updating it,
-            the table_name will be changed too.
+        return self._strategy.get_query()
 
-        Example:
+    def get_geodataframe(self):
+        """Converts DataFrame into GeoDataFrame if possible"""
+        return self._strategy.get_geodataframe()
 
-            .. code::
+    def get_column_names(self, exclude=None):
+        """Get column names from a dataset"""
+        return self._strategy.get_column_names(exclude)
 
-                from cartoframes.data import Dataset, DatasetInfo
-                from cartoframes.auth import set_default_credentials
+    def get_table_names(self):
+        """Get table names used by Dataset instance"""
+        if self.is_local():
+            raise CartoException('Your data is not synchronized with CARTO. If you want to upload it to CARTO, '
+                                 'you should use: `Dataset.upload(table_name="new_table")` '
+                                 'Then, if you want to work with the remote data, use `Dataset("new_table")`')
 
-                set_default_credentials(
-                    base_url='https://your_user_name.carto.com/',
-                    api_key='your api key'
-                )
+        return self._strategy.get_table_names()
 
-                d = Dataset('tablename')
-                d.update_dataset_info(privacy=DatasetInfo.LINK)
+    def get_num_rows(self):
+        """Get the number of rows in the dataset"""
+        return self._strategy.get_num_rows()
 
-        """
-        return self._strategy.update_dataset_info(privacy, table_name)
+    def exists(self):
+        """Checks to see if table exists"""
+        return self._strategy.exists()
+
+    def is_public(self):
+        """Checks to see if table or table used by query has public privacy"""
+        return self._strategy.is_public()
+
+    def is_local(self):
+        """Checks if the Dataset is local (DataFrameDataset)"""
+        return isinstance(self._strategy, DataFrameDataset)
+
+    def is_remote(self):
+        """Checks if the Dataset is local (TableDataset or QueryDataset)"""
+        return not self.is_local()
 
     def download(self, limit=None, decode_geom=False, retry_times=DOWNLOAD_RETRY_TIMES):
         """Download / read a Dataset (table or query) from CARTO account
-        associated with the Dataset's instance of :py:class:`Context
-        <cartoframes.auth.Context>`.
+        associated with the Dataset's instance of :py:class:`Credentials
+        <cartoframes.auth.Credentials>`.
 
         Args:
             limit (int, optional):
@@ -212,7 +200,7 @@ class Dataset(object):
                 Decode Dataset geometries into Shapely geometries from EWKB encoding.
             retry_times (int, optional):
                 Number of time to retry the download in case it fails.
-                Default is Dataset.DOWNLOAD_RETRY_TIMES.
+                Default is 3.
 
         Example:
 
@@ -230,7 +218,7 @@ class Dataset(object):
 
         return self._strategy.download(limit, decode_geom, retry_times)
 
-    def upload(self, with_lnglat=None, if_exists=FAIL, table_name=None, schema=None, credentials=None):
+    def upload(self, with_lnglat=None, if_exists=BaseDataset.FAIL, table_name=None, schema=None, credentials=None):
         r"""Upload Dataset to CARTO account associated with `credentials`.
 
         Args:
@@ -247,7 +235,7 @@ class Dataset(object):
               name does not conform to SQL naming conventions, it will be
               'normalized' (e.g., all lower case, adding `_` in place of spaces
               and other special characters.
-            credentials (:py:class:`Context <cartoframes.auth.Context>`, optional):
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
               credentials of user account to send Dataset to. If not provided,
               a default credentials (if set with :py:meth:`set_default_credentials
               <cartoframes.auth.set_default_credentials>`) will attempted to be
@@ -316,39 +304,44 @@ class Dataset(object):
 
         return self._strategy.delete()
 
-    def exists(self):
-        """Checks to see if table exists"""
-        return self._strategy.exists()
+    def update_dataset_info(self, privacy=None, table_name=None):
+        """Update/change Dataset privacy and name
 
-    def is_public(self):
-        """Checks to see if table or table used by query has public privacy"""
-        return self._strategy.is_public()
+        Args:
+          privacy (str, optional): One of :py:attr:`DatasetInfo.PRIVATE`,
+            :py:attr:`DatasetInfo.PUBLIC` or :py:attr:`DatasetInfo.LINK`
+          table_name (str, optional): Name of the dataset on CARTO. After updating it,
+            the table_name will be changed too.
 
-    def is_local(self):
-        """Checks if the Dataset is local (DataFrameDataset)"""
-        return isinstance(self._strategy, DataFrameDataset)
+        Example:
 
-    def is_remote(self):
-        """Checks if the Dataset is local (TableDataset or QueryDataset)"""
-        return not self.is_local()
+            .. code::
 
+                from cartoframes.data import Dataset, DatasetInfo
+                from cartoframes.auth import set_default_credentials
+
+                set_default_credentials(
+                    base_url='https://your_user_name.carto.com/',
+                    api_key='your api key'
+                )
+
+                d = Dataset('tablename')
+                d.update_dataset_info(privacy=DatasetInfo.LINK)
+
+        """
+        return self._strategy.update_dataset_info(privacy, table_name)
+        
     def compute_geom_type(self):
         """Compute the geometry type from the data"""
         return self._strategy.compute_geom_type()
 
-    def get_column_names(self, exclude=None):
-        """Get column names from a dataset"""
-        return self._strategy.get_column_names(exclude)
+    def _init_strategy(self, data, credentials=None, schema=None):
+        credentials = credentials or get_default_credentials()
+        for strategy in self._registry.get_strategies():
+            if strategy.can_work_with(data):
+                return strategy.create(data, credentials, schema)
 
-    def get_table_names(self):
-        """Get table names used by Dataset instance"""
-        if self.is_local():
-            raise CartoException('Your data is not synchronized with CARTO. If you want to upload it to CARTO, '
-                                 'you should use: `Dataset.upload(table_name="new_table")` '
-                                 'Then, if you want to work with the remote data, use `Dataset("new_table")`')
+        raise ValueError('We can not detect the Dataset type')
 
-        return self._strategy.get_table_names()
-
-    def get_num_rows(self):
-        """Get the number of rows in the dataset"""
-        return self._strategy.get_num_rows()
+    def _get_strategies_registry(self):
+        return StrategiesRegistry()

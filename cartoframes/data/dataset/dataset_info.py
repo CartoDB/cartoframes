@@ -12,8 +12,13 @@ from ...utils.columns import normalize_name
 
 class DatasetInfo(object):
     PRIVATE = 'PRIVATE'
+    """Dataset privacy for datasets that are private"""
+
     PUBLIC = 'PUBLIC'
+    """Dataset privacy for datasets that are public"""
+
     LINK = 'LINK'
+    """Dataset privacy for link that are accessible by link"""
 
     def __init__(self, context, table_name):
         self._metadata = self._get_metadata(context, table_name)
