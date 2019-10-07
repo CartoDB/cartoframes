@@ -2,7 +2,7 @@ import unittest
 import pandas as pd
 from shapely.geometry.point import Point
 
-from cartoframes.data.enrichment.enrichment_service import _prepare_data, _upload_dataframe, _enrichment_query, \
+from cartoframes.data.enrichment.enrichment_service import _prepare_data, _upload_dataframe, _enrichment_queries, \
     _execute_enrichment, _get_bigquery_client
 from cartoframes.data.enrichment.points_enrichment import _prepare_sql as _prepare_sql_by_points
 from cartoframes.data.enrichment.polygons_enrichment import _prepare_sql as _prepare_sql_by_polygons
@@ -72,7 +72,7 @@ class TestEnrichmentService(unittest.TestCase):
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': 'the_geom', 'variables': variables, 'filters': filters}
 
-        query = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
+        query = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
         expected_query = '''
             SELECT data_table.{enrichment_id},
                 {variables},
@@ -100,7 +100,7 @@ class TestEnrichmentService(unittest.TestCase):
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': 'the_geom', 'variables': variables, 'filters': filters}
 
-        query = _enrichment_query(user_dataset, tablename, query_function, **kwargs)
+        query = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
         expected_query = '''
             SELECT data_table.{enrichment_id}, {variables},
             ST_Area(ST_Intersection(geo_table.geom, data_table.{data_geom_column})) /
