@@ -22,7 +22,7 @@ class TestClusterSizeLayerHelper(object):
         )
 
         assert layer.style is not None
-        assert layer.style._style['point']['width'] == 'ramp(linear(clusterCount(), '
+        assert layer.style._style['point']['width'] == 'ramp(linear(clusterCount(), ' + \
         'viewportMIN(clusterCount()), viewportMAX(clusterCount())), [4.0, 16.0, 32])'
         assert layer.style._style['point']['color'] == 'opacity(#FFB927, 0.8)'
         assert layer.style._style['point']['strokeColor'] == 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'

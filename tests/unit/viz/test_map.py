@@ -225,7 +225,7 @@ class TestMapPublication(object):
         dataset = mock_dataset(mocker, self.test_geojson)
         map = MapMock(Layer(Source(dataset)))
 
-        msg = 'The map layers are not synchronized with CARTO. '
+        msg = 'The map layers are not synchronized with CARTO. ' + \
         'Please, use the `sync_data` method before publishing the map'
         with pytest.raises(CartoException) as e:
             map.publish('test', credentials=self.credentials)
