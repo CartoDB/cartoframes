@@ -64,7 +64,42 @@ class TestEnrichmentService(unittest.TestCase):
 
         BigQueryClient.upload_dataframe = original
 
-    def test_enrichment_query_by_points(self):
+    def test_enrichment_query_by_points_one_variable(self):
+        user_dataset = 'test_dataset'
+        tablename = 'test_table'
+        geometry_column = 'the_geom'
+        query_function = _prepare_sql_by_points
+        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1']],
+                                 columns=['id'])
+        filters = {'a': 'b'}
+        kwargs = {'data_geom_column': geometry_column, 'variables': variables, 'filters': filters}
+
+        queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
+
+        expected_queries = ['''SELECT data_table.enrichment_id,
+            var1,
+            ST_Area(enrichment_geo_table.geom) AS var1_area,
+            NULL AS var1_population
+        FROM `carto-do-customers.{user_dataset}\
+            .dataset_category_table1_comp_geog_geogyear_yearly_datayear` enrichment_table
+        JOIN `carto-do-customers.{user_dataset}\
+            .dataset_geography_comp_geog_geogyear` enrichment_geo_table
+        ON enrichment_table.geoid = enrichment_geo_table.geoid
+        JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
+        ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
+        WHERE a='b';''']
+
+        expected_queries = [query.format(user_dataset=user_dataset, tablename=tablename,
+                                         geometry_column=geometry_column)
+                            .replace("\n", "").replace(" ", "")
+                            for query in expected_queries]
+
+        queries = [query.replace("\n", "").replace(" ", "")
+                   for query in queries]
+
+        self.assertEqual(sorted(queries), sorted(expected_queries))
+
+    def test_enrichment_query_by_points_two_variables(self):
         user_dataset = 'test_dataset'
         tablename = 'test_table'
         geometry_column = 'the_geom'
@@ -112,7 +147,43 @@ class TestEnrichmentService(unittest.TestCase):
 
         self.assertEqual(sorted(queries), sorted(expected_queries))
 
-    def test_enrichment_query_by_polygons(self):
+    def test_enrichment_query_by_polygons_one_variable(self):
+        user_dataset = 'test_dataset'
+        tablename = 'test_table'
+        geometry_column = 'the_geom'
+        query_function = _prepare_sql_by_polygons
+        agg_operators = {'var1': 'AVG'}
+        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1']],
+                                 columns=['id'])
+        filters = {'a': 'b'}
+        kwargs = {'data_geom_column': geometry_column, 'variables': variables,
+                  'filters': filters, 'agg_operators': agg_operators}
+
+        queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
+
+        expected_queries = ['''SELECT data_table.enrichment_id, AVG(var1 *\
+             (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
+                  / ST_area(data_table.{geometry_column}))) as var1
+        FROM `carto-do-customers.{user_dataset}.dataset_category_table1_comp_geog_geogyear_yearly_datayear`\
+             enrichment_table
+        JOIN `carto-do-customers.{user_dataset}.dataset_geography_comp_geog_geogyear` enrichment_geo_table
+        ON enrichment_table.geoid = enrichment_geo_table.geoid
+        JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
+        ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
+        WHERE a='b'
+        group by data_table.enrichment_id;''']
+
+        expected_queries = [query.format(user_dataset=user_dataset, tablename=tablename,
+                                         geometry_column=geometry_column)
+                            .replace("\n", "").replace(" ", "")
+                            for query in expected_queries]
+
+        queries = [query.replace("\n", "").replace(" ", "")
+                   for query in queries]
+
+        self.assertEqual(sorted(queries), sorted(expected_queries))
+    
+    def test_enrichment_query_by_polygons_two_variables(self):
         user_dataset = 'test_dataset'
         tablename = 'test_table'
         geometry_column = 'the_geom'
