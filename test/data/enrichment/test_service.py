@@ -110,7 +110,7 @@ class TestEnrichmentService(unittest.TestCase):
         queries = [query.replace("\n", "").replace(" ", "")
                    for query in queries]
 
-        self.assertEqual(queries, expected_queries)
+        self.assertEqual(sorted(queries), sorted(expected_queries))
 
     def test_enrichment_query_by_polygons(self):
         user_dataset = 'test_dataset'
@@ -159,7 +159,7 @@ class TestEnrichmentService(unittest.TestCase):
         queries = [query.replace("\n", "").replace(" ", "")
                    for query in queries]
 
-        self.assertEqual(queries, expected_queries)
+        self.assertEqual(sorted(queries), sorted(expected_queries))
 
     def test_execute_enrichment(self):
         expected_project = 'carto-do-customers'
