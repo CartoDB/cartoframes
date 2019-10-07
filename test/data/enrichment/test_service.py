@@ -180,9 +180,6 @@ class TestEnrichmentService(unittest.TestCase):
 
         result = _execute_enrichment(bq_client, ['fake_query'], df, geom_column)
 
-        print(result)
-        print(df_final)
-
         self.assertTrue(result.equals(df_final))
 
         BigQueryClient._init_client = original
