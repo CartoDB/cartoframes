@@ -18,7 +18,7 @@ class DatasetInfo(object):
     """Dataset privacy for datasets that are public"""
 
     LINK = 'LINK'
-    """Dataset privacy for link that are accessible by link"""
+    """Dataset privacy for datasets that are accessible by link"""
 
     def __init__(self, context, table_name):
         self._metadata = self._get_metadata(context, table_name)
