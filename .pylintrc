@@ -42,3 +42,4 @@ disable=
     len-as-condition,
     old-style-class,
     superfluous-parens,
+    wrong-import-order,

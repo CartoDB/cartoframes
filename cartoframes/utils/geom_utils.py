@@ -1,11 +1,12 @@
 import re
 import sys
 import binascii as ba
+
 from warnings import warn
 from copy import deepcopy
-import geojson
 
 from carto.exceptions import CartoException
+import geojson
 
 from ..lib import context
 

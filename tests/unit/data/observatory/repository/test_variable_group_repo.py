@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from cartoframes.exceptions import DiscoveryException
 
@@ -12,7 +12,7 @@ except ImportError:
     from mock import Mock, patch
 
 
-class TestVariableGroupRepo(unittest.TestCase):
+class TestVariableGroupRepo():
 
     @patch.object(RepoClient, 'get_variables_groups')
     def test_get_all(self, mocked_repo):
@@ -62,7 +62,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         repo = VariableGroupRepository()
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_variables_groups')

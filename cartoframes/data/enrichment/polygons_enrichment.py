@@ -40,14 +40,15 @@ def _prepare_sql(enrichment_id, filters_processed, variables_processed, enrichme
 
         variables_sql = ['{operator}({variable} * \
                          (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                         / ST_area(data_table.{data_geom_column}))) as {variable}'.format(variable=variable,
-                         data_geom_column=kwargs['data_geom_column'],
-                         operator=agg_operators[variable]) for variable in variables_processed]
+                         / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
+                             variable=variable,
+                             data_geom_column=kwargs['data_geom_column'],
+                             operator=agg_operators[variable]) for variable in variables_processed]
 
     else:
         variables_sql = variables_processed + ['ST_Area(ST_Intersection(geo_table.geom, data_table.{data_geom_column}))\
                                                / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
-                                                data_geom_column=kwargs['data_geom_column'])]
+                                                   data_geom_column=kwargs['data_geom_column'])]
         grouper = ''
 
     sql = '''

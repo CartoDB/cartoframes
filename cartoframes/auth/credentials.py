@@ -172,7 +172,7 @@ class Credentials(object):
             json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
 
     @classmethod
-    def delete(self, config_file=None):
+    def delete(cls, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file.
 

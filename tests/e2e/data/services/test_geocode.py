@@ -27,7 +27,7 @@ try:
 except ImportError:
     HAS_GEOPANDAS = False
 
-from test.helpers import _UserUrlLoader, _ReportQuotas
+from ...helpers import _UserUrlLoader, _ReportQuotas
 
 warnings.filterwarnings('ignore')
 

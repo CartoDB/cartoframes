@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 
 from cartoframes.data.observatory.variable_group import VariableGroup, VariablesGroups
@@ -15,7 +15,7 @@ except ImportError:
     from mock import Mock, patch
 
 
-class TestVariableGroup(unittest.TestCase):
+class TestVariableGroup():
 
     @patch.object(VariableGroupRepository, 'get_by_id')
     def test_get_variable_group_by_id(self, mocked_repo):
@@ -48,11 +48,11 @@ class TestVariableGroup(unittest.TestCase):
         variable_group = test_variables_groups.id
 
         # Then
-        with self.assertRaises(DiscoveryException):
+        with pytest.raises(DiscoveryException):
             variable_group.variables()
 
 
-class TestVariablesGroups(unittest.TestCase):
+class TestVariablesGroups():
 
     @patch.object(VariableGroupRepository, 'get_all')
     def test_get_all_variables_groups(self, mocked_repo):

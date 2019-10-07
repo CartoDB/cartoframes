@@ -1,14 +1,14 @@
-import unittest
 import os
 import json
+import pytest
 
 from google.auth.exceptions import RefreshError
+from google.cloud import bigquery
 
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from google.cloud import bigquery
 
 _WORKING_PROJECT = 'carto-do-customers'
 
@@ -27,8 +27,8 @@ class RefreshTokenChecker(object):
             raise RefreshError()
 
 
-class TestBigQueryClient(unittest.TestCase):
-    def setUp(self):
+class TestBigQueryClient():
+    def setup_method(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None):
             creds = json.loads(open('test/secret.json').read())
             self.apikey = creds['APIKEY']
@@ -41,7 +41,7 @@ class TestBigQueryClient(unittest.TestCase):
 
     def test_instantiation(self):
         bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
-        self.assertIsInstance(bq_client, BigQueryClient)
+        assert isinstance(bq_client, BigQueryClient)
 
     def test_refresh_token_raises_cartoexception(self):
         refresh_token_checker = RefreshTokenChecker('', 10)
@@ -49,7 +49,7 @@ class TestBigQueryClient(unittest.TestCase):
         bigquery.Client.query = refresh_token_checker.query_raiser
 
         bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
-        with self.assertRaises(CartoException):
+        with pytest.raises(CartoException):
             bq_client.query('select * from')
 
         bigquery.Client.query = original_query_method
@@ -62,6 +62,6 @@ class TestBigQueryClient(unittest.TestCase):
 
         bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
         response = bq_client.query('select * from')
-        self.assertEqual(response, expected_response)
+        assert response == expected_response
 
         bigquery.Client.query = original_query_method

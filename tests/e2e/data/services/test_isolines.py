@@ -21,7 +21,7 @@ from cartoframes.data.clients import SQLClient
 from cartoframes.data.services import Isolines
 
 
-from test.helpers import _UserUrlLoader, _ReportQuotas
+from ...helpers import _UserUrlLoader, _ReportQuotas
 
 
 warnings.filterwarnings('ignore')
@@ -37,7 +37,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
                 creds = json.loads(open('test/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:  # noqa: E722
+            except Exception:  # noqa: E722
                 warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "

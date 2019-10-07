@@ -2,8 +2,8 @@
 import os
 import json
 import warnings
-import pytest
 import logging
+import pytest
 
 
 class _UserUrlLoader:
@@ -54,4 +54,4 @@ class _ReportQuotas:
 
     @classmethod
     def update_quotas(cls, service, quota):
-        return _update_quotas(str(cls)+'_'+service, quota)
+        return _update_quotas(str(cls) + '_' + service, quota)

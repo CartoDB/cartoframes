@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 from shapely.geometry.point import Point
 
@@ -15,12 +15,12 @@ except ImportError:
     from mock import Mock
 
 
-class TestEnrichmentService(unittest.TestCase):
-    def setUp(self):
+class TestEnrichmentService():
+    def setup_method(self):
         self.original_init_client = BigQueryClient._init_client
         BigQueryClient._init_client = Mock(return_value=True)
 
-    def tearDown(self):
+    def teardown_method(self):
         BigQueryClient._init_client = self.original_init_client
 
     def test_prepare_data(self):
@@ -32,9 +32,9 @@ class TestEnrichmentService(unittest.TestCase):
                                    columns=['cartodb_id', geom_column, 'enrichment_id'])
 
         result = _prepare_data(ds, geom_column)
-        self.assertTrue(result.equals(expected_df))
+        assert result.equals(expected_df) is True
         result = _prepare_data(df, geom_column)
-        self.assertTrue(result.equals(expected_df))
+        assert result.equals(expected_df) is True
 
     def test_upload_dataframe(self):
         expected_project = 'carto-do-customers'
@@ -90,7 +90,7 @@ class TestEnrichmentService(unittest.TestCase):
                    data_table=tablename, data_geom_column='the_geom',
                    filters="WHERE a='b'")
 
-        self.assertEqual(query.replace("\n", "").replace(" ", ""), expected_query.replace("\n", "").replace(" ", ""))
+        assert query.replace("\n", "").replace(" ", "") == expected_query.replace("\n", "").replace(" ", "")
 
     def test_enrichment_query_by_polygons(self):
         user_dataset = 'test_dataset'
@@ -117,7 +117,7 @@ class TestEnrichmentService(unittest.TestCase):
                    data_table=tablename, data_geom_column='the_geom',
                    filters="WHERE a='b'")
 
-        self.assertEqual(query.replace("\n", "").replace(" ", ""), expected_query.replace("\n", "").replace(" ", ""))
+        assert query.replace("\n", "").replace(" ", "") == expected_query.replace("\n", "").replace(" ", "")
 
     def test_execute_enrichment(self):
         expected_project = 'carto-do-customers'
@@ -137,6 +137,6 @@ class TestEnrichmentService(unittest.TestCase):
         BigQueryClient.query = Mock(return_value=EnrichMock())
 
         result = _execute_enrichment(bq_client, 'fake_query', df, geom_column)
-        self.assertTrue(result.equals(df_final))
+        assert result.equals(df_final) is True
 
         BigQueryClient._init_client = original

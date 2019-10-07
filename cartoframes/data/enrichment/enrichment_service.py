@@ -1,6 +1,6 @@
+import uuid
 import pandas as pd
 import geopandas as gpd
-import uuid
 
 from collections import defaultdict
 from ..dataset.dataset import Dataset
