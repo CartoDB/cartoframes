@@ -115,3 +115,18 @@ class TestSomething(object):
 def function():
     pass
 ```
+
+### Pre-commit (optional, but :sparkles:)
+
+This tool runs the linter before any `git commit` :smile:.
+
+**Installation**
+
+```
+pip install pre-commit
+```
+
+```
+pre-commit install
+```
+
