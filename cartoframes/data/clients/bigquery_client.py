@@ -80,13 +80,13 @@ class BigQueryClient(object):
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook', bqstorage_client=storage_client)
 
     @refresh_client
-    def _download_file(self, project, dataset, table, limit=None, offset=None, file_path=None):
+    def _download_file(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
 
         # fail if exists (Python 2.7 way)
-        if os.path.isfile(file_path):
+        if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
         query = _download_query(project, dataset, table, limit, offset)
