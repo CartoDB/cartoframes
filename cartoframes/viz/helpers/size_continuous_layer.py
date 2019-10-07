@@ -4,6 +4,7 @@ from ..layer import Layer
 
 from .. import defaults
 
+
 def size_continuous_layer(
         source, value, title='', size=None, color=None, opacity=None,
         stroke_width=None, stroke_color=None, description='', footer='',

@@ -4,6 +4,7 @@ from ..layer import Layer
 
 from .. import defaults
 
+
 def size_category_layer(
         source, value, title='', top=5, cat=None,
         size=None, color=None, opacity=None, stroke_width=None,

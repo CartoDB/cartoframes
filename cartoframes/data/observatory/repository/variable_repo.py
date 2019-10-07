@@ -31,7 +31,6 @@ class VariableRepository(object):
     def get_by_variable_group(self, variable_group_id):
         return self._to_variables(self.client.get_variables('variable_group_id', variable_group_id))
 
-
     @staticmethod
     def _to_variable(result):
         from cartoframes.data.observatory.variable import Variable

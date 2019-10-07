@@ -186,11 +186,13 @@ def _hash_as_big_int(text):
 def _set_pre_summary_info(summary, output):
     logging.debug(summary)
     output['total_rows'] = sum(summary.values())
-    output['required_quota'] = sum([summary[s] for s in ['new_geocoded', 'new_nongeocoded', 'changed_geocoded', 'changed_nongeocoded']])
+    output['required_quota'] = sum(
+        [summary[s] for s in ['new_geocoded', 'new_nongeocoded', 'changed_geocoded', 'changed_nongeocoded']])
     output['previously_geocoded'] = summary.get('previously_geocoded', 0)
     output['previously_failed'] = summary.get('previously_nongeocoded', 0)
-    output['records_with_geometry'] = sum([summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded']])
-    # output['records_without_geometry'] = sum([summary[s] for s in ['new_nongeocoded', 'changed_nongeocoded', 'previously_nongeocoded']])
+    output['records_with_geometry'] = sum(
+        [summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded']])
+    # output['records_without_geometry'] = sum([summary[s] for s in ['new_nongeocoded', 'changed_nongeocoded', 'previously_nongeocoded']]) # noqa
 
 
 def _set_post_summary_info(summary, result, output):
@@ -200,7 +202,8 @@ def _set_post_summary_info(summary, result, output):
         output['final_records_with_geometry'] = geom_count
         # output['final_records_without_geometry'] = null_geom_count
         output['geocoded_increment'] = output['final_records_with_geometry'] - output['records_with_geometry']
-        output['successfully_geocoded'] = output['geocoded_increment'] + sum([summary[s] for s in ['new_geocoded', 'changed_geocoded']])
+        output['successfully_geocoded'] = output['geocoded_increment'] + \
+            sum([summary[s] for s in ['new_geocoded', 'changed_geocoded']])
         output['failed_geocodings'] = output['required_quota'] - output['successfully_geocoded']
 
 
@@ -235,7 +238,8 @@ def _column_or_value_arg(arg, valid_columns=None):
         if any(invalid_keys):
             invalid_keys_list = ', '.join(list(invalid_keys))
             valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
-            raise ValueError("Invalid key for argument {} valid keys are: {}".format(invalid_keys_list, valid_keys_list))
+            raise ValueError("Invalid key for argument {} valid keys are: {}".format(
+                invalid_keys_list, valid_keys_list))
         if len(arg.keys()) != 1:
             valid_keys_list = ', '.join(VALID_GEOCODE_KEYS)
             raise ValueError("Exactly one key of {} must be present in argument".format(valid_keys_list))
@@ -405,7 +409,7 @@ class Geocode(Service):
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
         input_dataset = dataset
-        if input_dataset.is_remote() and input_dataset.table_name:  # FIXME: more robust to check first for query (hasattr(input_dataset, 'query'))
+        if input_dataset.is_remote() and input_dataset.table_name:  # FIXME: more robust to check first for query (hasattr(input_dataset, 'query')) # noqa
             # input dataset is a table
             if table_name:
                 # Copy input dataset into a new table
@@ -495,7 +499,8 @@ class Geocode(Service):
                     logging.info("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
                         table=table_name,
-                        add_columns=','.join(['ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
+                        add_columns=','.join([
+                            'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
                     self._execute_query(alter_sql)
 
                     sql = _geocode_query(table_name, street, city, state, country, metadata)

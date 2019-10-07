@@ -1,5 +1,4 @@
 """Unit tests for cartoframes.client.SQLClient"""
-import pytest
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient

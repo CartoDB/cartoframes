@@ -2,7 +2,6 @@ import pytest
 
 from carto.exceptions import CartoException
 
-from cartoframes.lib import context
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.data import StrategiesRegistry
 from cartoframes.auth import Credentials
@@ -226,7 +225,7 @@ class TestMapPublication(object):
         map = MapMock(Layer(Source(dataset)))
 
         msg = 'The map layers are not synchronized with CARTO. ' + \
-        'Please, use the `sync_data` method before publishing the map'
+            'Please, use the `sync_data` method before publishing the map'
         with pytest.raises(CartoException) as e:
             map.publish('test', credentials=self.credentials)
         assert str(e.value) == msg

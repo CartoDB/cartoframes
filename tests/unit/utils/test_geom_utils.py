@@ -17,6 +17,7 @@ from tests.unit.mocks import mock_create_context
 
 class TestDataUtils(object):
     """Tests for functions in data.utils module"""
+
     def setup_method(self):
         self.credentials = Credentials(username='', api_key='1234')
         self.geom = [

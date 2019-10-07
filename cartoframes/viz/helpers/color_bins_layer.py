@@ -5,6 +5,7 @@ from .utils import serialize_palette
 from ..layer import Layer
 from .. import defaults
 
+
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, size=None, opacity=None,

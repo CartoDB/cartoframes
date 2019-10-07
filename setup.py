@@ -14,6 +14,7 @@ from cartoframes import (
     __license__
 )
 
+
 def walk_subpkg(name):
     data_files = []
     package_dir = 'cartoframes'
@@ -43,6 +44,7 @@ REQUIRES = [
 EXTRAS_REQUIRES_TESTS = [
     'pytest',
     'pylint',
+    'flake8',
     'geojson',
     'geopandas'
 ]

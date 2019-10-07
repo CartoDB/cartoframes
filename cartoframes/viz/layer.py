@@ -195,6 +195,7 @@ def _set_popup(popup):
     else:
         return Popup()
 
+
 def _set_legend(legend):
     if isinstance(legend, (Legend, LegendList)):
         return legend
@@ -204,6 +205,7 @@ def _set_legend(legend):
         return LegendList(legend)
     else:
         return Legend('')
+
 
 def _set_widgets(widgets):
     if isinstance(widgets, (dict, list)):

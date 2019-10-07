@@ -1,5 +1,3 @@
-import pytest
-
 from cartoframes.viz import helpers
 
 from . import setup_mocks

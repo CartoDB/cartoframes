@@ -10,9 +10,9 @@ from cartoframes.exceptions import DiscoveryException
 from .examples import test_variables_groups, test_variable_group1, test_variables, db_variable_group1
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
 class TestVariableGroup():

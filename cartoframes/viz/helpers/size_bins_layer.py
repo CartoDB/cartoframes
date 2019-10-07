@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from ..layer import Layer
 from .. import defaults
 
+
 def size_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, size=None, color=None, opacity=None,

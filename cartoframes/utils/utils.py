@@ -82,6 +82,7 @@ def pgquote(string):
     """single-quotes a string if not None, else returns null"""
     return '\'{}\''.format(string) if string else 'null'
 
+
 def temp_ignore_warnings(func):
     """Temporarily ignores warnings like those emitted by the carto python sdk
     """

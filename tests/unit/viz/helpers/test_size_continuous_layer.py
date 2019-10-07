@@ -1,5 +1,3 @@
-import pytest
-
 from cartoframes.viz import helpers
 
 from . import setup_mocks
@@ -20,7 +18,7 @@ class TestSizeContinuousLayerHelper(object):
 
         assert layer.style is not None
         assert layer.style._style['point']['width'] == 'ramp(linear(sqrt($name), ' + \
-        'sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 40])'
+            'sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 40])'
         assert layer.style._style['line']['width'] == 'ramp(linear($name), [1, 10])'
         assert layer.style._style['point']['color'] == 'opacity(#FFB927, 0.8)'
         assert layer.style._style['point']['strokeColor'] == 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
@@ -51,7 +49,7 @@ class TestSizeContinuousLayerHelper(object):
         )
 
         assert layer.style._style['point']['width'] == 'ramp(linear(sqrt($name), ' + \
-        'sqrt(globalMin($name)), sqrt(globalMax($name))), [10, 20])'
+            'sqrt(globalMin($name)), sqrt(globalMax($name))), [10, 20])'
         assert layer.style._style['point']['color'] == 'opacity(blue, 0.8)'
 
     def test_size_continuous_layer_line(self, mocker):

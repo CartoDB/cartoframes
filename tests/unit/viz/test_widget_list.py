@@ -1,5 +1,3 @@
-import pytest
-
 from cartoframes.viz import Widget, WidgetList
 
 WIDGET_A = {

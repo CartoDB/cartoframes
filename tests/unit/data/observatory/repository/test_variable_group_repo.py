@@ -7,9 +7,9 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_variable_group1, test_variables_groups, db_variable_group1, db_variable_group2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
 class TestVariableGroupRepo():

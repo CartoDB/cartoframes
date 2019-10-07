@@ -116,12 +116,12 @@ class DataframeColumnInfo(object):
     def __eq__(self, obj):
         if isinstance(obj, dict):
             return self.dataframe == obj['dataframe'] and \
-                   self.database == obj['database'] and \
-                   self.database_type == obj['database_type']
+                self.database == obj['database'] and \
+                self.database_type == obj['database_type']
         else:
             return self.dataframe == obj.dataframe and \
-                   self.database == obj.database and \
-                   self.database_type == obj.database_type
+                self.database == obj.database and \
+                self.database_type == obj.database_type
 
 
 class DataframeColumnsInfo(object):

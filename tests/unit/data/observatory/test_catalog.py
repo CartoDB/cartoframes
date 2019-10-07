@@ -1,5 +1,3 @@
-import pytest
-
 from cartoframes.data.observatory.category import Categories
 from cartoframes.data.observatory.country import Countries
 from cartoframes.data.observatory.catalog import Catalog
