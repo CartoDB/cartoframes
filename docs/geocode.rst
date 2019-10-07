@@ -18,10 +18,8 @@ e.g. ``city={'column': 'column_name_of_the_city'}``, which can be shortened as  
 or, when all the dataset corresponds to a single value of the attribute, a literal text,
 e.g. ``city={'value': 'London}'``.
 
-Another optional argument, ``status`` can define the name of a result column that will contain additional metadata
-about each gecododed row as a JSON structure.
-The entries in this structure, as described in https://carto.com/developers/data-services-api/reference/ are:
-
+For each geocoded record, some status information is available, as described in
+https://carto.com/developers/data-services-api/reference/
 
 +-------------+--------+------------------------------------------------------------+
 | Name        | Type   | Description                                                |
@@ -35,6 +33,9 @@ The entries in this structure, as described in https://carto.com/developers/data
 |             |        | district, street, intersection, street_number, postal_code |
 +-------------+--------+------------------------------------------------------------+
 
+By default the ``relevance`` is stored in an output column named ``gc_status_rel``. The name of the
+column and in general what attributes are added as columns can be configured by using a ``status`` dictionary
+associating column names to status attribute.
 
 The result of the ``geocode`` method is a named tuple containing both a result ``data``
 (of same class as the input, ``Dataframe``or ``Dataframe``) and a ``metadata`` dictionary with general
@@ -91,11 +92,18 @@ A Dataframe can be geocoded like this:
 
     df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
 
-    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status='meta')
+    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
     print(info)
     print(geocoded_dataframe)
     # Filtering by relevance
-    print(geocoded_dataframe[geocoded_dataframe.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
+    print(geocoded_dataframe[geocoded_dataframe['gc_status_rel']>0.7])
+
+To specify the status attributes and column names explicitly use the ``status`` argument:
+
+.. code:: python
+
+    geocoded_dataframe, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status={'relev':'relevance'})
+    print(geocoded_dataframe[geocoded_dataframe['relev']>0.7])
 
 To store the results permanently in a CARTO dataset the argument ``table_name`` can be used:
 

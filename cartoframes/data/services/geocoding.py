@@ -13,7 +13,7 @@ from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
-METADATA_DEFAULT_PREFIX = 'carto_geocode_status_'
+DEFAULT_STATUS = { 'gc_status_rel': 'relevance'}
 
 
 QUOTA_SERVICE = 'hires_geocoder'
@@ -182,16 +182,16 @@ def _geocode_query(table, street, city, state, country, metadata):
     return (query, meta_columns)
 
 
+
 METADATA_FIELDS = {
     'relevance': ('numeric', "(_g.metadata->>'relevance')::numeric"),
     'precision': ('text', "_g.metadata->>'precision'"),
     'match_types': ('text', "cdb_dataservices_client.cdb_jsonb_array_casttext(_g.metadata->>'match_types')"),
-    'metadata': ('jsonb', "_g.metadata")
+    '*': ('jsonb', "_g.metadata")
 }
 
 
-def _metadata_column(field, prefix=None, column_name=None):
-    column_name = column_name or '{}{}'.format(prefix, field)
+def _metadata_column(column_name, field):
     column_type, value = METADATA_FIELDS[field]
     return (column_name, column_type, value)
 
@@ -205,23 +205,21 @@ def _metadata_assignment(metadata):
     meta_columns = []
     if isinstance(metadata, dict):
         # new style: define metadata assignments with dictionary
-        # {'prefix': 'geocode_status_', 'fields':['relevance', 'precision']}
+        # {'column_name': 'status_field', ...}
         # allows to assign individual metadata attributes to columns
-        prefix = metadata.get('prefix', METADATA_DEFAULT_PREFIX)
-        fields = metadata.get('fields', ['relevance'])
-        invalid_fields = _list_difference(fields, METADATA_FIELDS.keys())
+        invalid_fields = _list_difference(metadata.values(), METADATA_FIELDS.keys())
         if any(invalid_fields):
             raise ValueError("Invalid fields {} valid keys are: {}".format(
                 invalid_fields,
                 METADATA_FIELDS.keys()))
-        columns = [_metadata_column(field, prefix) for field in fields]
+        columns = [_metadata_column(name, field) for name, field in list(metadata.items())]
         meta_assignments = [_column_assignment(name, value) for name, _, value in columns]
         meta_columns = [(name, type_) for name, type_, _ in columns]
         meta_assignment = ''.join(meta_assignments)
     elif metadata:
         # old style: column name
         # stores all metadata as json in a single column
-        name, type_, value  = _metadata_column('metadata', column_name=metadata)
+        name, type_, value  = _metadata_column(metadata, '*')
         meta_columns = [(name, type_)]
         meta_assignment = _column_assignment(name, value)
     return (meta_assignment, meta_columns)
@@ -368,9 +366,9 @@ class Geocoding(Service):
 
             df = pandas.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address','city'])
             gc = Geocoding()
-            df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status='meta')
+            df = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=['relevance']).data
             # show rows with relevance greater than 0.7:
-            print(df[df.apply(lambda x: json.loads(x['meta'])['relevance']>0.7, axis=1)])
+            print(df[df['carto_geocode_relevance']>0.7, axis=1)])
 
     """
 
@@ -379,7 +377,7 @@ class Geocoding(Service):
 
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
-                status=None,
+                status=DEFAULT_STATUS,
                 table_name=None, if_exists=Dataset.FAIL,
                 dry_run=False):
         """Geocode a dataset
@@ -399,9 +397,13 @@ class Geocoding(Service):
                 with the name of a column containing the addresses' country names or
                 a `value` key with a literal country value value, e.g. 'US'.
                 It also accepts a string, in which case `column` is implied.
-            status (str, optional): name of a column where geocode status information (in JSON format)
-                will be stored (see https://carto.com/developers/data-services-api/reference/)
-                TODO: document alternative format
+            status (dict, optional): dictionary that defines a mapping from geocoding state
+                attributes ('relevance', 'precision', 'match_types') to column names.
+                (See https://carto.com/developers/data-services-api/reference/)
+                Columns will be added to the result data for the requested attributes.
+                By default a column ``gc_status_rel`` will be created for the geocoding
+                _relevance_. The special attribute '*' refers to all the status
+                attributes as a JSON object.
             table_name (str, optional): the geocoding results will be placed in a new
                 CARTO table with this name.
             if_exists (str, optional): Behavior for creating new datasets, only applicable

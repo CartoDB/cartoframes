@@ -423,7 +423,62 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
         self.assertTrue('cartodb_id' in gc_ds.get_column_names())
 
-    def test_geocode_dataframe_with_metadata(self):
+    def test_geocode_dataframe_with_default_status(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        gc = Geocoding(credentials=self.credentials)
+
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+
+        quota = self.used_quota(gc)
+
+        status = {'prefix': '_gc_status_', 'fields':['relevance']}
+
+        # Preview
+        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
+                          dry_run=True).metadata
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(self.used_quota(gc), quota)
+
+        # Geocode
+        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'})
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(info.get('successfully_geocoded'), 2)
+        self.assertEqual(info.get('final_records_with_geometry'), 2)
+        quota += 2
+        self.assertEqual(self.used_quota(gc), quota)
+        self.assertIsNotNone(gc_df.the_geom)
+        self.assertIsNotNone(gc_df.gc_status_rel)
+        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'gc_status_rel', 'the_geom'])
+
+    def test_geocode_dataframe_with_json_status(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        gc = Geocoding(credentials=self.credentials)
+
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+
+        quota = self.used_quota(gc)
+
+        # Preview
+        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
+                          status={'meta':'*'}, dry_run=True).metadata
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(self.used_quota(gc), quota)
+
+        # Geocode
+        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status={'meta':'*'})
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(info.get('successfully_geocoded'), 2)
+        self.assertEqual(info.get('final_records_with_geometry'), 2)
+        quota += 2
+        self.assertEqual(self.used_quota(gc), quota)
+        self.assertIsNotNone(gc_df.the_geom)
+        self.assertIsNotNone(gc_df.meta)
+        self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
+        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'meta', 'the_geom'])
+
+    def test_geocode_dataframe_with_json_legacy_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocoding(credentials=self.credentials)
 
@@ -448,8 +503,9 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
+        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'meta', 'the_geom'])
 
-    def test_geocode_dataframe_with_individual_metadata(self):
+    def test_geocode_dataframe_with_no_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocoding(credentials=self.credentials)
 
@@ -457,7 +513,32 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         quota = self.used_quota(gc)
 
-        status = {'prefix': '_gc_status_', 'fields':['relevance']}
+        # Preview
+        info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
+                          status=None, dry_run=True).metadata
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(self.used_quota(gc), quota)
+
+        # Geocode
+        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=None)
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertEqual(info.get('required_quota'), 2)
+        self.assertEqual(info.get('successfully_geocoded'), 2)
+        self.assertEqual(info.get('final_records_with_geometry'), 2)
+        quota += 2
+        self.assertEqual(self.used_quota(gc), quota)
+        self.assertIsNotNone(gc_df.the_geom)
+        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'the_geom'])
+
+    def test_geocode_dataframe_with_custom_status(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        gc = Geocoding(credentials=self.credentials)
+
+        df = pd.DataFrame([['Gran Via 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=['address', 'city'])
+
+        quota = self.used_quota(gc)
+
+        status = {'gc_rel': 'relevance'}
 
         # Preview
         info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
@@ -474,9 +555,10 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 2
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
-        self.assertIsNotNone(gc_df._gc_status_relevance)
+        self.assertIsNotNone(gc_df.gc_rel)
+        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'gc_rel', 'the_geom'])
 
-    def test_geocode_dataframe_fails_with_invalid_metadata_fields(self):
+    def test_geocode_dataframe_fails_with_invalid_status_fields(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         gc = Geocoding(credentials=self.credentials)
 
@@ -484,7 +566,7 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         quota = self.used_quota(gc)
 
-        status = {'prefix': '_gc_status_', 'fields':['xyz']}
+        status = {'relevance': 'xyz'}
 
         with self.assertRaises(ValueError):
             gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=status)
