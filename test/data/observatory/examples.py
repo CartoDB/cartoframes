@@ -7,8 +7,8 @@ from cartoframes.data.observatory.provider import Provider
 from cartoframes.data.observatory.variable_group import VariableGroup
 from cartoframes.data.observatory.entity import CatalogList
 
-db_country1 = {'country_iso_code3': 'esp'}
-db_country2 = {'country_iso_code3': 'usa'}
+db_country1 = {'id': 'esp'}
+db_country2 = {'id': 'usa'}
 test_country1 = Country(db_country1)
 test_country2 = Country(db_country2)
 test_countries = CatalogList([test_country1, test_country2])

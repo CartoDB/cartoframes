@@ -45,7 +45,7 @@ class TestCountryRepo(unittest.TestCase):
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_country1, db_country2]
-        requested_iso_code = db_country1['country_iso_code3']
+        requested_iso_code = db_country1['id']
         repo = CountryRepository()
 
         # When
@@ -74,7 +74,7 @@ class TestCountryRepo(unittest.TestCase):
         repo = CountryRepository()
 
         expected_countries = CatalogList([Country({
-            'country_iso_code3': None
+            'id': None
         })])
 
         # When

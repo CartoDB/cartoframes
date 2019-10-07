@@ -64,7 +64,7 @@ class TestCountry(unittest.TestCase):
         country_id = country.id
 
         # Then
-        assert country_id == db_country1['country_iso_code3']
+        assert country_id == db_country1['id']
 
     def test_country_is_exported_as_series(self):
         # Given
@@ -75,7 +75,7 @@ class TestCountry(unittest.TestCase):
 
         # Then
         assert isinstance(country_series, pd.Series)
-        assert country_series['country_iso_code3'] == country.id
+        assert country_series['id'] == country.id
 
     def test_country_is_exported_as_dict(self):
         # Given
@@ -96,7 +96,7 @@ class TestCountry(unittest.TestCase):
         country_repr = repr(country)
 
         # Then
-        assert country_repr == 'Country({id})'.format(id=db_country1['country_iso_code3'])
+        assert country_repr == 'Country({id})'.format(id=db_country1['id'])
 
     def test_country_is_printed_with_classname(self):
         # Given
@@ -140,7 +140,7 @@ class TestCountry(unittest.TestCase):
 
         # Then
         assert countries_repr == '[Country({id1}), Country({id2})]'\
-                                 .format(id1=db_country1['country_iso_code3'], id2=db_country2['country_iso_code3'])
+                                 .format(id1=db_country1['id'], id2=db_country2['id'])
 
     @patch.object(CountryRepository, 'get_by_id')
     def test_get_country_by_id(self, mocked_repo):
