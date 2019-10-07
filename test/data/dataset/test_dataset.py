@@ -20,6 +20,7 @@ from cartoframes.data import StrategiesRegistry
 from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
 from cartoframes.utils.columns import DataframeColumnsInfo
 
