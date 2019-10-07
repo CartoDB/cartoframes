@@ -58,11 +58,8 @@ class BigQueryClient(object):
 
     @refresh_client
     def query(self, query, **kwargs):
-        response = self.client.query(query, **kwargs)
+        return self.client.query(query, **kwargs)
 
-        return response
-
-    @refresh_client
     def download(self, project, dataset, table, limit=None, offset=None, file_path=None, fail_if_exists=False):
         if not file_path:
             file_name = '{}.{}.{}.csv'.format(project, dataset, table)
@@ -72,7 +69,7 @@ class BigQueryClient(object):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
         query = _download_query(project, dataset, table, limit, offset)
-        rows_iter = self.client.query(query).result()
+        rows_iter = self.query(query).result()
 
         progress_bar = tqdm.tqdm_notebook(total=rows_iter.total_rows)
 
