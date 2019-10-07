@@ -1,6 +1,7 @@
 import unittest
 import os
 import json
+import csv
 
 from google.auth.exceptions import RefreshError
 
@@ -9,6 +10,11 @@ from carto.exceptions import CartoException
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient, _download_query
 from google.cloud import bigquery
+
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 _WORKING_PROJECT = 'carto-do-customers'
 
@@ -27,6 +33,20 @@ class RefreshTokenChecker(object):
             raise RefreshError()
 
 
+class ResponseMock(list):
+    def __init__(self, data, **kwargs):
+        super(ResponseMock, self).__init__(data, **kwargs)
+        self.total_rows = len(data)
+
+
+class QueryJobMock(object):
+    def __init__(self, response):
+        self.response = response
+
+    def result(self):
+        return ResponseMock(self.response)
+
+
 class TestBigQueryClient(unittest.TestCase):
     def setUp(self):
         if (os.environ.get('APIKEY') is None or os.environ.get('USERNAME') is None):
@@ -38,6 +58,11 @@ class TestBigQueryClient(unittest.TestCase):
             self.username = os.environ['USERNAME']
 
         self.credentials = Credentials(self.username, self.apikey)
+        self.file_path = '/tmp/test_download.csv'
+
+    def tearDown(self):
+        if os.path.isfile(self.file_path):
+            os.remove(self.file_path)
 
     def test_instantiation(self):
         bq_client = BigQueryClient(_WORKING_PROJECT, self.credentials)
@@ -66,6 +91,43 @@ class TestBigQueryClient(unittest.TestCase):
 
         bigquery.Client.query = original_query_method
 
+    def test_download_full(self):
+        expected_result = [{'0': 'word', '1': 'word word'}]
+
+        original_query = BigQueryClient.query
+        BigQueryClient.query = Mock(return_value=QueryJobMock(expected_result))
+
+        project = _WORKING_PROJECT
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        file_path = self.file_path
+
+        bq_client = BigQueryClient(project, self.credentials)
+        bq_client.download(project, dataset, table, file_path=file_path)
+
+        self.assertTrue(os.path.isfile(file_path))
+
+        with open(file_path) as csvfile:
+            csvreader = csv.reader(csvfile)
+            row = next(csvreader)
+            self.assertEqual(row, list(expected_result[0].values()))
+
+        BigQueryClient.query = original_query
+
+    def test_download_using_if_exists(self):
+        project = _WORKING_PROJECT
+        dataset = 'fake_dataset'
+        table = 'fake_table'
+        file_path = self.file_path
+
+        bq_client = BigQueryClient(project, self.credentials)
+
+        with open(file_path, 'w'):
+            with self.assertRaises(CartoException):
+                bq_client.download(project, dataset, table, file_path=file_path, fail_if_exists=True)
+
+
+class TestBigQueryClientUnit(unittest.TestCase):
     def test_download_query_simple(self):
         project = 'fake_project'
         dataset = 'fake_dataset'
@@ -113,4 +175,3 @@ class TestBigQueryClient(unittest.TestCase):
         query = _download_query(project, dataset, table, limit, offset)
 
         self.assertEqual(query, expected_query)
-
