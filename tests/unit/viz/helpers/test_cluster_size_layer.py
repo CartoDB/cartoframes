@@ -1,5 +1,4 @@
 import pytest
-
 from carto.exceptions import CartoException
 
 from cartoframes.viz import helpers

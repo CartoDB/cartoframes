@@ -2,14 +2,14 @@ from __future__ import absolute_import
 
 import pandas
 
-from .source import Source
-from .style import Style
-from .popup import Popup
-from .legend import Legend
-from .widget_list import WidgetList
-from .legend_list import LegendList
 from ..data import Dataset
 from ..utils.utils import merge_dicts
+from .legend import Legend
+from .legend_list import LegendList
+from .popup import Popup
+from .source import Source
+from .style import Style
+from .widget_list import WidgetList
 
 try:
     import geopandas

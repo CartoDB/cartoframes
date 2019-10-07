@@ -1,10 +1,12 @@
 import pytest
 
+from cartoframes.data.observatory.repository.geography_repo import \
+    GeographyRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 from cartoframes.exceptions import DiscoveryException
 
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
+from ..examples import (db_geography1, db_geography2, test_geographies,
+                        test_geography1)
 
 try:
     from unittest.mock import patch

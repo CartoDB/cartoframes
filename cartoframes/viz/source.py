@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
-from . import defaults
 from ..data import Dataset
-from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
+from ..utils.utils import (encode_geodataframe, get_geodataframe_bounds,
+                           get_query_bounds)
+from . import defaults
 
 
 class SourceType:

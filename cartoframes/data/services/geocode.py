@@ -2,9 +2,10 @@
 
 from __future__ import absolute_import
 
-import re
 import hashlib
 import logging
+import re
+
 import pandas as pd
 
 from ...data import Dataset

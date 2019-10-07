@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from .enrichment_service import enrich
 
-
 # TODO: process column name in metadata, remove spaces and points
 
 

@@ -1,6 +1,7 @@
 from carto.kuvizs import Kuviz
 
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
+
 from .dataset_mock import DatasetMock
 
 PRIVACY_PUBLIC = 'public'
@@ -38,4 +39,4 @@ class KuvizPublisherMock(KuvizPublisher):
     def all():
         kuviz = CartoKuvizMock(name='test')
         kuvizs = [kuviz, kuviz, kuviz]
-        return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
+        return [kuviz_to_dict(k) for k in kuvizs]

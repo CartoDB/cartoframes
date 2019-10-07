@@ -5,7 +5,7 @@ import sys
 
 from unidecode import unidecode
 
-from .geom_utils import detect_encoding_type, decode_geometry
+from .geom_utils import decode_geometry, detect_encoding_type
 
 
 class Column(object):

@@ -2,11 +2,11 @@ from __future__ import absolute_import
 
 from collections import defaultdict
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 
-from ..dataset.dataset import Dataset
 from ...exceptions import EnrichmentException
+from ..dataset.dataset import Dataset
 
 
 def copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):

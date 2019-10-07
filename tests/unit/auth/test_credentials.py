@@ -1,10 +1,10 @@
 """Unit tests for cartoframes.keys"""
 import os
+
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.auth.credentials import _USER_CONFIG_DIR, _DEFAULT_PATH
-
+from cartoframes.auth.credentials import _DEFAULT_PATH, _USER_CONFIG_DIR
 
 # FIXME python 2.7 compatibility
 try:

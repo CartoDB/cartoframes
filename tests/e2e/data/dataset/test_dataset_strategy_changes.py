@@ -2,18 +2,19 @@
 
 """Unit tests for cartoframes.data.dataset about strategy changes"""
 import unittest
+
 import pandas as pd
 
 from cartoframes.auth import Credentials
-from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset
-from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data.dataset.registry.dataframe_dataset import \
+    DataFrameDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.lib import context
-
-from tests.unit.mocks.dataset_mock import DatasetMock
+from cartoframes.utils.utils import load_geojson
 from tests.unit.mocks.context_mock import ContextMock
+from tests.unit.mocks.dataset_mock import DatasetMock
 
 
 class TestDatasetStrategyChanges(unittest.TestCase):

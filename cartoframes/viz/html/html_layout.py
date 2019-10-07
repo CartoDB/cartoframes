@@ -1,6 +1,7 @@
 from jinja2 import Environment, PackageLoader
-from . import utils
+
 from .. import constants
+from . import utils
 
 
 class HTMLLayout(object):

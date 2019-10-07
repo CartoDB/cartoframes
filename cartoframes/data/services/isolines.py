@@ -6,7 +6,6 @@ from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
 from .service import Service
 
-
 QUOTA_SERVICE = 'isolines'
 
 

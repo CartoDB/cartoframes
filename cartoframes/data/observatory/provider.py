@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-from .entity import SingleEntity, EntitiesList
-from .repository.provider_repo import get_provider_repo
+from .entity import EntitiesList, SingleEntity
 from .repository.dataset_repo import get_dataset_repo
-
+from .repository.provider_repo import get_provider_repo
 
 _PROVIDER_ID_FIELD = 'id'
 

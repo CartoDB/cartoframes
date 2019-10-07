@@ -2,9 +2,7 @@
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
-
 from tests.unit.mocks import mock_create_context
-
 
 SQL_SELECT_RESPONSE = {
     'rows': [{

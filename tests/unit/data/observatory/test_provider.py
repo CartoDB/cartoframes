@@ -1,14 +1,16 @@
-import pytest
 import pandas as pd
+import pytest
 
 from cartoframes.data.observatory.dataset import Datasets
 from cartoframes.data.observatory.provider import Provider, Providers
-
-from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.repository.dataset_repo import \
+    DatasetRepository
+from cartoframes.data.observatory.repository.provider_repo import \
+    ProviderRepository
 from cartoframes.exceptions import DiscoveryException
 
-from .examples import test_datasets, test_provider1, test_providers, db_provider1
+from .examples import (db_provider1, test_datasets, test_provider1,
+                       test_providers)
 
 try:
     from unittest.mock import patch

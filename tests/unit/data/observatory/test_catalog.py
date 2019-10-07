@@ -1,7 +1,9 @@
+from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data.observatory.category import Categories
 from cartoframes.data.observatory.country import Countries
-from cartoframes.data.observatory.catalog import Catalog
-from .examples import test_country2, test_country1, test_category1, test_category2
+
+from .examples import (test_category1, test_category2, test_country1,
+                       test_country2)
 
 try:
     from unittest.mock import patch

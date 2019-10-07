@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from ...lib import context
 from ...auth import get_default_credentials
+from ...lib import context
 
 
 class SQLClient(object):

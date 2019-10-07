@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 from .entity import EntitiesList, SingleEntity
-from .repository.geography_repo import get_geography_repo
 from .repository.country_repo import get_country_repo
 from .repository.dataset_repo import get_dataset_repo
+from .repository.geography_repo import get_geography_repo
 
 _COUNTRY_ID_FIELD = 'country_iso_code3'
 

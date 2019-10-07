@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from .entity import SingleEntity, EntitiesList
+from .entity import EntitiesList, SingleEntity
 from .repository.dataset_repo import get_dataset_repo
-from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
+from .repository.variable_repo import get_variable_repo
 
 _DATASET_ID_FIELD = 'id'
 

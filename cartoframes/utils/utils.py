@@ -2,17 +2,16 @@
 
 from __future__ import absolute_import
 
-from functools import wraps
-from warnings import filterwarnings, catch_warnings
-
+import base64
+import hashlib
 import os
 import re
 import sys
-import base64
-import hashlib
-import requests
-import numpy as np
+from functools import wraps
+from warnings import catch_warnings, filterwarnings
 
+import numpy as np
+import requests
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'

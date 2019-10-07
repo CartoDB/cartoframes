@@ -4,7 +4,6 @@ import re
 
 from .credentials import Credentials
 
-
 _default_credentials = None
 
 

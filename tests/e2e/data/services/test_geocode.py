@@ -1,27 +1,22 @@
 # -*- coding: utf-8 -*-
 
 """Unit tests for cartoframes.data.services.Geocode"""
-import unittest
+import json
 import os
 import sys
-import json
+import unittest
 import warnings
-import pandas as pd
 
+import pandas as pd
 from carto.exceptions import CartoException
 
-from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
+from cartoframes.data import Dataset
+from cartoframes.data.clients import SQLClient
+from cartoframes.data.services import Geocode
 from cartoframes.utils.columns import normalize_name
 
-
-from cartoframes.data.clients import SQLClient
-
-
-from cartoframes.data.services import Geocode
-
-
-from ...helpers import _UserUrlLoader, _ReportQuotas
+from ...helpers import _ReportQuotas, _UserUrlLoader
 
 warnings.filterwarnings('ignore')
 

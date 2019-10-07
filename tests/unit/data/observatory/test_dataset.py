@@ -1,15 +1,19 @@
-import pytest
 import pandas as pd
-from cartoframes.data.observatory.variable_group import VariablesGroups
+import pytest
 
+from cartoframes.data.observatory.dataset import Dataset, Datasets
+from cartoframes.data.observatory.repository.dataset_repo import \
+    DatasetRepository
+from cartoframes.data.observatory.repository.variable_group_repo import \
+    VariableGroupRepository
+from cartoframes.data.observatory.repository.variable_repo import \
+    VariableRepository
 from cartoframes.data.observatory.variable import Variables
-from cartoframes.data.observatory.dataset import Datasets, Dataset
-from cartoframes.data.observatory.repository.variable_repo import VariableRepository
-from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.variable_group import VariablesGroups
 from cartoframes.exceptions import DiscoveryException
 
-from .examples import test_dataset1, test_datasets, test_variables, db_dataset1, test_variables_groups
+from .examples import (db_dataset1, test_dataset1, test_datasets,
+                       test_variables, test_variables_groups)
 
 try:
     from unittest.mock import patch

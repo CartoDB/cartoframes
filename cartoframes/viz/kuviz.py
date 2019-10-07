@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
 from copy import deepcopy
-from warnings import warn, filterwarnings
+from warnings import filterwarnings, warn
 
 from carto.kuvizs import KuvizManager
 
-from .source import Source
 from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
+from .source import Source
 
 filterwarnings("ignore", category=FutureWarning, module="carto")
 

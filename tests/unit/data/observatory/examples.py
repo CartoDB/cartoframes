@@ -1,10 +1,11 @@
-from cartoframes.data.observatory.variable import Variable, Variables
+from cartoframes.data.observatory.category import Categories, Category
+from cartoframes.data.observatory.country import Countries, Country
 from cartoframes.data.observatory.dataset import Dataset, Datasets
-from cartoframes.data.observatory.category import Category, Categories
-from cartoframes.data.observatory.geography import Geography, Geographies
-from cartoframes.data.observatory.country import Country, Countries
+from cartoframes.data.observatory.geography import Geographies, Geography
 from cartoframes.data.observatory.provider import Provider, Providers
-from cartoframes.data.observatory.variable_group import VariableGroup, VariablesGroups
+from cartoframes.data.observatory.variable import Variable, Variables
+from cartoframes.data.observatory.variable_group import (VariableGroup,
+                                                         VariablesGroups)
 
 db_country1 = {'country_iso_code3': 'esp'}
 db_country2 = {'country_iso_code3': 'usa'}

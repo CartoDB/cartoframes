@@ -1,4 +1,4 @@
-from .entity import SingleEntity, EntitiesList
+from .entity import EntitiesList, SingleEntity
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.variable_repo import get_variable_repo
 

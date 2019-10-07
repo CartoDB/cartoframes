@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-from .utils import serialize_palette
-
-from ..layer import Layer
 from .. import defaults
+from ..layer import Layer
+from .utils import serialize_palette
 
 
 def color_bins_layer(

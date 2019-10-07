@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
+from cartoframes.data.clients import SQLClient
+
 from .constants import DO_METADATA_KEY
 
 

@@ -2,9 +2,12 @@
 
 """Unit tests for cartoframes.data.columns"""
 import unittest
+
 import pandas as pd
 
-from cartoframes.utils.columns import Column, normalize_names, pg2dtypes, DataframeColumnInfo, DataframeColumnsInfo
+from cartoframes.utils.columns import (Column, DataframeColumnInfo,
+                                       DataframeColumnsInfo, normalize_names,
+                                       pg2dtypes)
 
 
 class TestColumns(unittest.TestCase):

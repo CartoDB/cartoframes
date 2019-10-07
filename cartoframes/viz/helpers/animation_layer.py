@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from ..layer import Layer
 from .. import defaults
+from ..layer import Layer
 
 
 def animation_layer(

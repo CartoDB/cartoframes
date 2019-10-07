@@ -1,13 +1,16 @@
-import pytest
 import pandas as pd
+import pytest
 
-from cartoframes.data.observatory.geography import Geography, Geographies
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.dataset import Datasets
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.geography import Geographies, Geography
+from cartoframes.data.observatory.repository.dataset_repo import \
+    DatasetRepository
+from cartoframes.data.observatory.repository.geography_repo import \
+    GeographyRepository
 from cartoframes.exceptions import DiscoveryException
 
-from .examples import test_geography1, test_geographies, test_datasets, db_geography1
+from .examples import (db_geography1, test_datasets, test_geographies,
+                       test_geography1)
 
 try:
     from unittest.mock import patch

@@ -1,11 +1,10 @@
-import os
 import json
-import pytest
+import os
 
+import pytest
+from carto.exceptions import CartoException
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
-
-from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient

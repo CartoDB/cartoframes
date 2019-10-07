@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
+from ..constants import FORMULA_OPERATIONS_GLOBAL, FORMULA_OPERATIONS_VIEWPORT
 from ..widget import Widget
-from ..constants import FORMULA_OPERATIONS_VIEWPORT, FORMULA_OPERATIONS_GLOBAL
 
 
 def formula_widget(value, operation=None, **kwargs):

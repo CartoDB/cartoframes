@@ -1,14 +1,14 @@
 """Credentials management for cartoframes usage."""
 
+import json
 import os
 import sys
-import json
 import warnings
-import appdirs
 
-from carto.exceptions import CartoException
+import appdirs
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
+from carto.exceptions import CartoException
 
 from .. import __version__
 

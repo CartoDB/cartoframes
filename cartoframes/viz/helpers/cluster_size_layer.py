@@ -1,10 +1,10 @@
-from __future__ import absolute_import
-from __future__ import division
+from __future__ import absolute_import, division
 
 from carto.exceptions import CartoException
+
+from .. import defaults
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
-from .. import defaults
 
 
 def cluster_size_layer(

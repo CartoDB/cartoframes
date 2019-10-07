@@ -1,17 +1,17 @@
 """Unit tests for cartoframes.data.utils"""
-import pytest
 import pandas as pd
-
+import pytest
+from geopandas.geoseries import GeoSeries
 from shapely.geometry import Point
 from shapely.geos import lgeos
-from geopandas.geoseries import GeoSeries
 
-from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
-from cartoframes.utils.geom_utils import compute_query, compute_geodataframe, \
-    decode_geometry, detect_encoding_type, ENC_SHAPELY, \
-    ENC_WKB, ENC_WKB_HEX, ENC_WKB_BHEX, ENC_WKT, ENC_EWKT
-
+from cartoframes.data import Dataset
+from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
+                                          ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
+                                          compute_geodataframe, compute_query,
+                                          decode_geometry,
+                                          detect_encoding_type)
 from tests.unit.mocks import mock_create_context
 
 

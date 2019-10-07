@@ -1,5 +1,5 @@
-from pandas import DataFrame
 from geopandas import GeoDataFrame
+from pandas import DataFrame
 from shapely.geometry import Point
 
 

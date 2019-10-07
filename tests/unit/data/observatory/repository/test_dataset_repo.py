@@ -1,10 +1,11 @@
 import pytest
 
+from cartoframes.data.observatory.repository.dataset_repo import \
+    DatasetRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
 from cartoframes.exceptions import DiscoveryException
 
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
+from ..examples import db_dataset1, db_dataset2, test_dataset1, test_datasets
 
 try:
     from unittest.mock import patch

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from cartoframes.viz import Map, Layer, Source
-from cartoframes.data import StrategiesRegistry
 from cartoframes.auth import Credentials
-
+from cartoframes.data import StrategiesRegistry
+from cartoframes.viz import Layer, Map, Source
 from tests.unit.mocks import mock_dataset, mock_kuviz
-from tests.unit.mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from tests.unit.mocks.kuviz_mock import (PRIVACY_PASSWORD, PRIVACY_PUBLIC,
+                                         KuvizPublisherMock)
 
 from .utils import build_geojson
 

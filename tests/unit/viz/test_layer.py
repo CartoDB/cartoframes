@@ -1,4 +1,4 @@
-from cartoframes.viz import Layer, Source, Style, Popup, Legend
+from cartoframes.viz import Layer, Legend, Popup, Source, Style
 
 
 def setup_mocks(mocker):

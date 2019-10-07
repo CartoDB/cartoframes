@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
 from carto.exceptions import CartoException
+
 from ...auth import get_default_credentials
-from .registry.strategies_registry import StrategiesRegistry
-from .registry.dataframe_dataset import DataFrameDataset
-from .registry.table_dataset import TableDataset
+from ...utils.utils import GEOM_TYPE_LINE, GEOM_TYPE_POINT, GEOM_TYPE_POLYGON
 from .dataset_info import DatasetInfo
-from ...utils.utils import GEOM_TYPE_POINT, GEOM_TYPE_LINE, GEOM_TYPE_POLYGON
+from .registry.dataframe_dataset import DataFrameDataset
+from .registry.strategies_registry import StrategiesRegistry
+from .registry.table_dataset import TableDataset
 
 DOWNLOAD_RETRY_TIMES = 3
 

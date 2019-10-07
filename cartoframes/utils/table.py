@@ -1,9 +1,9 @@
-from carto.datasets import DatasetManager
 from carto.auth import APIKeyAuthClient
+from carto.datasets import DatasetManager
 
-from ..data import Dataset
-from ..auth import get_default_credentials
 from .. import __version__
+from ..auth import get_default_credentials
+from ..data import Dataset
 
 
 def tables(credentials=None):

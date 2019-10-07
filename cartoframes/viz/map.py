@@ -1,17 +1,16 @@
 from __future__ import absolute_import
 
+import collections
 from warnings import warn
 
-import collections
 import numpy as np
-
 from carto.exceptions import CartoException
 
+from ..utils.utils import get_center
 from . import constants
 from .basemaps import Basemaps
-from .kuviz import KuvizPublisher, kuviz_to_dict
 from .html import HTMLMap
-from ..utils.utils import get_center
+from .kuviz import KuvizPublisher, kuviz_to_dict
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 

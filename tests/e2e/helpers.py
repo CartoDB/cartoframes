@@ -1,8 +1,9 @@
 """Utility functions for cartoframes testing"""
-import os
 import json
-import warnings
 import logging
+import os
+import warnings
+
 import pytest
 
 

@@ -1,36 +1,36 @@
 # -*- coding: utf-8 -*-
 
 """Unit tests for cartoframes.data.Dataset"""
-import unittest
+import json
 import os
 import sys
-import json
+import unittest
 import warnings
-import pandas as pd
 
+import pandas as pd
 from carto.exceptions import CartoException
 
-from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
+from cartoframes.data import Dataset, StrategiesRegistry
 from cartoframes.data.clients import SQLClient
-from cartoframes.utils.geom_utils import setting_value_exception
-from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
-from cartoframes.utils.utils import load_geojson
-from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
-from cartoframes.data.dataset.registry.table_dataset import TableDataset
-from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.data.dataset.registry.base_dataset import BaseDataset
+from cartoframes.data.dataset.registry.dataframe_dataset import (
+    DataFrameDataset, _rows)
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.lib import context
+from cartoframes.utils.columns import DataframeColumnsInfo, normalize_name
+from cartoframes.utils.geom_utils import setting_value_exception
+from cartoframes.utils.utils import load_geojson
+from tests.e2e.helpers import _UserUrlLoader
+from tests.unit.mocks.context_mock import ContextMock
+from tests.unit.mocks.dataset_mock import DatasetMock, QueryDatasetMock
 
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
-from tests.unit.mocks.dataset_mock import DatasetMock, QueryDatasetMock
-from tests.unit.mocks.context_mock import ContextMock
 
-from tests.e2e.helpers import _UserUrlLoader
 
 try:
     import geopandas

@@ -71,7 +71,7 @@ good method:
 from .auth import Credentials
 from .data import Dataset
 from .utils.table import tables
-from .viz import Map, Layer
+from .viz import Layer, Map
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'

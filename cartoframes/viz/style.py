@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from . import defaults
 from ..utils.utils import merge_dicts, text_match
+from . import defaults
 
 
 class Style(object):

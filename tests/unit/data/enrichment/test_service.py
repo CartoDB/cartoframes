@@ -1,12 +1,15 @@
 import pandas as pd
 from shapely.geometry.point import Point
 
-from cartoframes.data.enrichment.enrichment_service import _prepare_data, _upload_dataframe, _enrichment_query, \
-    _execute_enrichment, _get_bigquery_client
-from cartoframes.data.enrichment.points_enrichment import _prepare_sql as _prepare_sql_by_points
-from cartoframes.data.enrichment.polygons_enrichment import _prepare_sql as _prepare_sql_by_polygons
 from cartoframes.data import Dataset
 from cartoframes.data.clients.bigquery_client import BigQueryClient
+from cartoframes.data.enrichment.enrichment_service import (
+    _enrichment_query, _execute_enrichment, _get_bigquery_client,
+    _prepare_data, _upload_dataframe)
+from cartoframes.data.enrichment.points_enrichment import \
+    _prepare_sql as _prepare_sql_by_points
+from cartoframes.data.enrichment.polygons_enrichment import \
+    _prepare_sql as _prepare_sql_by_polygons
 
 try:
     from unittest.mock import Mock

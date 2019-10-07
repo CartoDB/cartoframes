@@ -2,13 +2,13 @@
 
 """Unit tests for cartoframes.client.DataObsClient"""
 
-import unittest
+import json
 import os
 import sys
-import json
+import unittest
 import warnings
-import pandas as pd
 
+import pandas as pd
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
@@ -16,7 +16,6 @@ from cartoframes.data import Dataset
 from cartoframes.data.clients import DataObsClient, SQLClient
 from cartoframes.data.clients.data_obs_client import get_countrytag
 from cartoframes.utils.columns import normalize_name
-
 from tests.e2e.helpers import _UserUrlLoader
 
 warnings.filterwarnings('ignore')

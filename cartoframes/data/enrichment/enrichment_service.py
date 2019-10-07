@@ -1,14 +1,15 @@
 import uuid
-import pandas as pd
-import geopandas as gpd
-
 from collections import defaultdict
-from ..dataset.dataset import Dataset
-from ..clients import bigquery_client
-from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
-from ...exceptions import EnrichmentException
+
+import geopandas as gpd
+import pandas as pd
+
 from ...auth import get_default_credentials
-from ...utils.geom_utils import _compute_geometry_from_geom
+from ...exceptions import EnrichmentException
+from ...utils.geom_utils import (_compute_geometry_from_geom, geojson_to_wkt,
+                                 wkt_to_geojson)
+from ..clients import bigquery_client
+from ..dataset.dataset import Dataset
 
 _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'

@@ -4,6 +4,7 @@
 import unittest
 
 import pandas as pd
+
 from cartoframes.examples import Examples
 
 

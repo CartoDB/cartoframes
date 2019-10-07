@@ -1,7 +1,7 @@
 import pytest
-
 from carto.exceptions import CartoException
-from cartoframes.viz import Map, Layout, Layer, Source
+
+from cartoframes.viz import Layer, Layout, Map, Source
 
 from .utils import build_geojson
 

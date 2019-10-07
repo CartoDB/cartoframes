@@ -1,14 +1,13 @@
 import pytest
-
 from carto.exceptions import CartoException
 
-from cartoframes.viz import Map, Layer, Source, constants
-from cartoframes.data import StrategiesRegistry
 from cartoframes.auth import Credentials
-
-from tests.unit.mocks.map_mock import MapMock
+from cartoframes.data import StrategiesRegistry
+from cartoframes.viz import Layer, Map, Source, constants
 from tests.unit.mocks import mock_dataset
-from tests.unit.mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+from tests.unit.mocks.kuviz_mock import (PRIVACY_PASSWORD, PRIVACY_PUBLIC,
+                                         KuvizPublisherMock)
+from tests.unit.mocks.map_mock import MapMock
 
 from .utils import build_geojson
 

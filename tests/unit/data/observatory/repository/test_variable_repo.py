@@ -1,10 +1,12 @@
 import pytest
 
+from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.repository.variable_repo import \
+    VariableRepository
 from cartoframes.exceptions import DiscoveryException
 
-from cartoframes.data.observatory.repository.variable_repo import VariableRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
-from ..examples import test_variable1, test_variables, db_variable1, db_variable2
+from ..examples import (db_variable1, db_variable2, test_variable1,
+                        test_variables)
 
 try:
     from unittest.mock import patch
