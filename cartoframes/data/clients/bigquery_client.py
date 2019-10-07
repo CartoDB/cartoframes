@@ -1,5 +1,6 @@
 import os
 import appdirs
+import csv
 from warnings import warn
 
 from google.cloud import bigquery
@@ -61,12 +62,16 @@ class BigQueryClient(object):
         return response
 
     @refresh_client
-    def download_dataframe(self, project, dataset, table, limit=None, offset=None, file_path=None):
+    def download(self, project, dataset, table, limit=None, offset=None, file_path=None):
+        self._download_file(project, dataset, table, limit, offset, file_path)
+
+    @refresh_client
+    def _download_dataframe(self, project, dataset, table, limit=None, offset=None, file_path=None):
         query = _download_query(project, dataset, table, limit, offset)
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook')
 
     @refresh_client
-    def download_storage_api(self, project, dataset, table, limit=None, offset=None, file_path=None):
+    def _download_storage_api(self, project, dataset, table, limit=None, offset=None, file_path=None):
         # pip install google-cloud-bigquery-storage
         from google.cloud.bigquery_storage_v1beta1 import BigQueryStorageClient
         storage_client = BigQueryStorageClient(credentials=GoogleCredentials(self._credentials.get_do_token()))
@@ -74,17 +79,18 @@ class BigQueryClient(object):
         return self.client.query(query).to_dataframe(progress_bar_type='tqdm_notebook', bqstorage_client=storage_client)
 
     @refresh_client
-    def download_file(self, project, dataset, table, limit=None, offset=None, file_path=None):
+    def _download_file(self, project, dataset, table, limit=None, offset=None, file_path=None):
         if not file_path:
-            file_name = '{}.{}.{}'.format(project, dataset, table)
+            file_name = '{}.{}.{}.csv'.format(project, dataset, table)
             file_path = os.path.join(_USER_CONFIG_DIR, file_name)
 
         query = _download_query(project, dataset, table, limit, offset)
         rows_iter = self.client.query(query).result()
 
-        with open(file_path, 'w+') as f:
+        with open(file_path, 'w') as csvfile:
+            csvwriter = csv.writer(csvfile)
             for row in rows_iter:
-                f.write(','.join([str(i) for i in row.values()]) + "\n")
+                csvwriter.writerow(row.values())
 
         warn('Data saved: {}'.format(file_path))
 
