@@ -407,7 +407,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.test_write_table = dataset.table_name
 
         dataset = Dataset(df).upload(
-            if_exists=Dataset.IF_EXISTS, table_name=self.test_write_table, credentials=self.credentials)
+            if_exists=Dataset.IF_EXISTS_REPLACE, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
