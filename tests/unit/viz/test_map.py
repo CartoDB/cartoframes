@@ -8,7 +8,7 @@ from cartoframes.data import StrategiesRegistry
 from cartoframes.auth import Credentials
 
 from tests.unit.mocks.map_mock import MapMock
-from tests.unit.mocks import mock_dataset, mock_kuviz
+from tests.unit.mocks import mock_dataset
 from tests.unit.mocks.kuviz_mock import KuvizPublisherMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 from .utils import build_geojson
