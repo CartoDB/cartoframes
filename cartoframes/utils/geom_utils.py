@@ -3,6 +3,7 @@ import sys
 import binascii as ba
 from warnings import warn
 from copy import deepcopy
+import geojson
 
 from carto.exceptions import CartoException
 
@@ -151,7 +152,6 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
-    from shapely import wkb
     from shapely.geometry.base import BaseGeometry
 
     if isinstance(input_geom, BaseGeometry):
@@ -169,7 +169,7 @@ def detect_encoding_type(input_geom):
             else:
                 try:
                     # This is required because in P27 bytes = str
-                    wkb.loads(geom)
+                    _load_wkb(geom)
                     return ENC_WKB
                 except Exception:
                     return ENC_WKT
@@ -214,9 +214,8 @@ def _load_ewkt(egeom):
     """Load EWKT geometry.
     The SRID must be removed before loading and added after loading.
     """
-    from shapely.wkt import loads
     srid, geom = _extract_srid(egeom)
-    ogeom = loads(geom)
+    ogeom = _load_wkt(geom)
     if srid:
         from shapely.geos import lgeos
         lgeos.GEOSSetSRID(ogeom._geom, int(srid))
@@ -233,6 +232,23 @@ def _extract_srid(egeom):
         return (result.group(1), result.group(2))
     else:
         return (0, egeom)
+
+
+def wkt_to_geojson(wkt):
+    shapely_geom = _load_wkt(wkt)
+    geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
+
+    return str(geojson_geometry.geometry)
+
+
+def geojson_to_wkt(geojson_str):
+    from shapely.geometry import shape
+    geojson_geom = geojson.loads(geojson_str)
+    wkt_geometry = shape(geojson_geom)
+
+    shapely_geom = _load_wkt(wkt_geometry.wkt)
+
+    return shapely_geom
 
 
 def setting_value_exception(prop, value):

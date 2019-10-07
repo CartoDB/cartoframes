@@ -302,3 +302,12 @@ def get_center(center):
         return None
 
     return [center.get('lng'), center.get('lat')]
+
+
+def remove_column_from_dataframe(dataframe, name):
+    """Removes a column or index (or both) from a DataFrames"""
+    if name in dataframe.columns:
+        del dataframe[name]
+    if dataframe.index.name == name:
+        dataframe.reset_index(inplace=True)
+        del dataframe[name]

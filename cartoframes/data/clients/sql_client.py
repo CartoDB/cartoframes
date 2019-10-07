@@ -11,8 +11,8 @@ class SQLClient(object):
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
-          A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+            A :py:class:`Credentials <cartoframes.auth.Credentials>`
+            instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
     Example:
 

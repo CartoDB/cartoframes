@@ -64,3 +64,31 @@ class TestVariableRepo(object):
         # Then
         with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_get_by_dataset(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        dataset_id = 'dataset1'
+        repo = VariableRepository()
+
+        # When
+        variables = repo.get_by_dataset(dataset_id)
+
+        # Then
+        mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        assert variables == test_variables
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_get_by_variable_group(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        variable_group_id = 'vargroup1'
+        repo = VariableRepository()
+
+        # When
+        variables = repo.get_by_variable_group(variable_group_id)
+
+        # Then
+        mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
+        assert variables == test_variables

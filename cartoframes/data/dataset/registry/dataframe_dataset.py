@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -77,6 +79,10 @@ class DataFrameDataset(BaseDataset):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the dataframe"""
+        return len(self._df.index)
 
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(

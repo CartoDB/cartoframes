@@ -55,3 +55,8 @@ node_modules
 .coverage
 test_*.json
 .pytest_cache
+
+# Sphinx documentation
+docs/build/
+docs/_static/
+docs/_templates/

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
@@ -78,6 +80,11 @@ class QueryDataset(BaseDataset):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the query"""
+        result = self._context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=self.get_query()))
+        return result.get('rows')[0].get('count')
 
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(

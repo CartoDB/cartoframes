@@ -22,15 +22,15 @@ class DataObsClient(object):
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-      - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with
-        the geographic boundaries (geometries) or their metadata.
-      - discovery: returns a pandas.DataFrame with the measures found.
-      - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
+        - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with
+            the geographic boundaries (geometries) or their metadata.
+        - discovery: returns a pandas.DataFrame with the measures found.
+        - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
-          A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+            A :py:class:`Credentials <cartoframes.auth.Credentials>`
+            instance can be used in place of a `username`|`base_url` / `api_key` combination.
     """
 
     def __init__(self, credentials=None):
@@ -106,41 +106,48 @@ class DataObsClient(object):
                 idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
-            boundary (str, optional): Boundary identifier for the boundaries
-              that are of interest. For example, US census tracts have a
-              boundary ID of ``us.census.tiger.census_tract``, and Brazilian
-              Municipios have an ID of ``br.geo.municipios``. Find IDs by
-              running :py:meth:`DataObsClient.boundaries
-              <cartoframes.client.DataObsClient.boundaries>`
-              without any arguments, or by looking in the `Data Observatory
-              catalog <http://cartodb.github.io/bigmetadata/>`__.
-            region (str, optional): Region where boundary information or,
-              if `boundary` is specified, boundary polygons are of interest.
-              `region` can be one of the following:
+            boundary (str, optional):
+                Boundary identifier for the boundaries
+                that are of interest. For example, US census tracts have a
+                boundary ID of ``us.census.tiger.census_tract``, and Brazilian
+                Municipios have an ID of ``br.geo.municipios``. Find IDs by
+                running :py:meth:`DataObsClient.boundaries
+                <cartoframes.client.DataObsClient.boundaries>`
+                without any arguments, or by looking in the `Data Observatory
+                catalog <http://cartodb.github.io/bigmetadata/>`__.
+            region (str, optional):
+                Region where boundary information or,
+                if `boundary` is specified, boundary polygons are of interest.
+                `region` can be one of the following:
 
-                - table name (str): Name of a table in user's CARTO account
-                - bounding box (list of float): List of four values (two
-                  lng/lat pairs) in the following order: western longitude,
-                  southern latitude, eastern longitude, and northern latitude.
-                  For example, Switzerland fits in
-                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
-            timespan (str, optional): Specific timespan to get geometries from.
-              Defaults to use the most recent. See the Data Observatory catalog
-              for more information.
-            decode_geom (bool, optional): Whether to return the geometries as
-              Shapely objects or keep them encoded as EWKB strings. Defaults
-              to False.
-            include_nonclipped (bool, optional): Optionally include
-              non-shoreline-clipped boundaries. These boundaries are the raw
-              boundaries provided by, for example, US Census Tiger.
+                    - table name (str):
+                        Name of a table in user's CARTO account
+                    - bounding box (list of float):
+                        List of four values (two lng/lat pairs) in the following order:
+                        western longitude, southern latitude, eastern longitude,
+                        and northern latitude.
+                        For example, Switzerland fits in
+                        ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+            timespan (str, optional):
+                Specific timespan to get geometries from.
+                Defaults to use the most recent. See the Data Observatory catalog
+                for more information.
+            decode_geom (bool, optional):
+                Whether to return the geometries as
+                Shapely objects or keep them encoded as EWKB strings. Defaults
+                to False.
+            include_nonclipped (bool, optional):
+                Optionally include non-shoreline-clipped boundaries.
+                These boundaries are the raw boundaries provided by, for example,
+                US Census Tiger.
 
         Returns:
             :py:class:`Dataset <cartoframes.data.Dataset>`:
-            If `boundary` is specified, then all available
-            boundaries and accompanying `geom_refs` in `region` (or the world
-            if `region` is ``None`` or not specified) are returned. If
-            `boundary` is not specified, then a Dataset of all available
-            boundaries in `region` (or the world if `region` is ``None``).
+                If `boundary` is specified, then all available
+                boundaries and accompanying `geom_refs` in `region` (or the world
+                if `region` is ``None`` or not specified) are returned. If
+                `boundary` is not specified, then a Dataset of all available
+                boundaries in `region` (or the world if `region` is ``None``).
         """
         # TODO: create a function out of this?
         if isinstance(region, str):
@@ -269,27 +276,30 @@ class DataObsClient(object):
                                        time='2010')
                 freight_meta['numer_name'].head()
 
-        Arguments:
-            region (str or list of float): Information about the region of
-              interest. `region` can be one of three types:
+        Args:
+            region (str or list of float):
+                Information about the region of interest.
+                `region` can be one of three types:
 
-                - region name (str): Name of region of interest. Acceptable
-                  values are limited to: 'Australia', 'Brazil', 'Canada',
-                  'European Union', 'France', 'Mexico', 'Spain',
-                  'United Kingdom', 'United States'.
-                - table name (str): Name of a table in user's CARTO account
-                  with geometries. The region will be the bounding box of
-                  the table.
+                    - region name (str):
+                        Name of region of interest. Acceptable
+                        values are limited to: 'Australia', 'Brazil', 'Canada',
+                        'European Union', 'France', 'Mexico', 'Spain',
+                        'United Kingdom', 'United States'.
+                    - table name (str):
+                        Name of a table in user's CARTO account
+                        with geometries. The region will be the bounding box of
+                        the table.
 
                   .. Note:: If a table name is also a valid Data Observatory
                       region name, the Data Observatory name will be chosen
                       over the table.
 
-                - bounding box (list of float): List of four values (two
-                  lng/lat pairs) in the following order: western longitude,
-                  southern latitude, eastern longitude, and northern latitude.
-                  For example, Switzerland fits in
-                  ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
+                - bounding box (list of float):
+                    List of four values (two lng/lat pairs) in the following
+                    order: western longitude, southern latitude, eastern longitude,
+                    and northern latitude. For example, Switzerland fits in
+                    ``[5.9559111595,45.8179931641,10.4920501709,47.808380127]``
 
                 .. Note:: Geometry levels are generally chosen by subdividing
                     the region into the next smallest administrative unit. To
@@ -298,27 +308,30 @@ class DataObsClient(object):
                     ``'us.census.tiger.census_tract'`` to choose US census
                     tracts.
 
-            keywords (str or list of str, optional): Keyword or list of
-              keywords in measure description or name. Response will be matched
-              on all keywords listed (boolean `or`).
-            regex (str, optional): A regular expression to search the measure
-              descriptions and names. Note that this relies on PostgreSQL's
-              case insensitive operator ``~*``. See `PostgreSQL docs
-              <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
-              for more information.
-            boundaries (str or list of str, optional): Boundary or list of
-              boundaries that specify the measure resolution. See the
-              boundaries section for each region in the `Data Observatory
-              catalog <http://cartodb.github.io/bigmetadata/>`__.
-            include_quantiles (bool, optional): Include quantiles calculations
-              which are a calculation of how a measure compares to all measures
-              in the full dataset. Defaults to ``False``. If ``True``,
-              quantiles columns will be returned for each column which has it
-              pre-calculated.
+            keywords (str or list of str, optional):
+                Keyword or list of keywords in measure description or name.
+                Response will be matched on all keywords listed (boolean `or`).
+
+            regex (str, optional):
+                A regular expression to search the measure
+                descriptions and names. Note that this relies on PostgreSQL's
+                case insensitive operator ``~*``. See `PostgreSQL docs
+                <https://www.postgresql.org/docs/9.5/static/functions-matching.html>`__
+                for more information.
+            boundaries (str or list of str, optional):
+                Boundary or list of boundaries that specify the measure resolution. See the
+                boundaries section for each region in the `Data Observatory
+                catalog <http://cartodb.github.io/bigmetadata/>`__.
+            include_quantiles (bool, optional):
+                Include quantiles calculations which are a calculation
+                of how a measure compares to all measures in the full dataset.
+                Defaults to ``False``. If ``True``, quantiles columns will be returned
+                for each column which has it pre-calculated.
 
         Returns:
-            pandas.DataFrame: A dataframe of the complete metadata model for
-            specific measures based on the search parameters.
+            pandas.DataFrame:
+                A dataframe of the complete metadata model for specific measures based
+                on the search parameters.
 
         Raises:
             ValueError: If `region` is a :obj:`list` and does not consist of
@@ -506,18 +519,21 @@ class DataObsClient(object):
                 ds = do.augment('transaction_events', median_income)
 
         Args:
-            table_name (str): Name of table on CARTO account that Data
-                Observatory measures are to be added to.
-            metadata (pandas.DataFrame): List of all measures to add to
+            table_name (str):
+                Name of table on CARTO account that Data Observatory measures
+                are to be added to.
+            metadata (pandas.DataFrame):
+                List of all measures to add to
                 `table_name`. See :py:meth:`DataObsClient.discovery
                 <cartoframes.client.DataObsClient.discovery>` outputs
                 for a full list of metadata columns.
-            persist_as (str, optional): Output the results of augmenting
+            persist_as (str, optional):
+                Output the results of augmenting
                 `table_name` to `persist_as` as a persistent table on CARTO.
                 Defaults to ``None``, which will not create a table.
-            how (str, optional): Column name for
-                identifying the geometry from which to fetch the data. Defaults
-                to `the_geom`, which results in measures that are spatially
+            how (str, optional):
+                Column name for identifying the geometry from which to fetch the data.
+                Defaults to `the_geom`, which results in measures that are spatially
                 interpolated (e.g., a neighborhood boundary's population will
                 be calculated from underlying census tracts). Specifying a
                 column that has the geometry identifier (for example, GEOID for
@@ -527,17 +543,20 @@ class DataObsClient(object):
 
         Returns:
             :py:class:`Dataset <cartoframes.data.Dataset>`:
-            A Dataset representation of `table_name` which
-            has new columns for each measure in `metadata`.
+                A Dataset representation of `table_name` which
+                has new columns for each measure in `metadata`.
 
         Raises:
-            NameError: If the columns in `table_name` are in the
-              ``suggested_name`` column of `metadata`.
-            ValueError: If metadata object is invalid or empty, or if the
-              number of requested measures exceeds 50.
-            CartoException: If user account consumes all of Data Observatory
-              quota
+            NameError:
+                If the columns in `table_name` are in the ``suggested_name``
+                column of `metadata`.
+            ValueError:
+                If metadata object is invalid or empty, or if the number of
+                requested measures exceeds 50.
+            CartoException:
+                If user account consumes all of Data Observatory quota
         """
+
         if isinstance(metadata, pd.DataFrame):
             _meta = metadata.copy().reset_index()
         elif isinstance(metadata, collections.Iterable):

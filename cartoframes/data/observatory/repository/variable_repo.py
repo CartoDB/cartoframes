@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
@@ -25,6 +27,10 @@ class VariableRepository(object):
 
     def get_by_dataset(self, dataset_id):
         return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
+
+    def get_by_variable_group(self, variable_group_id):
+        return self._to_variables(self.client.get_variables('variable_group_id', variable_group_id))
+
 
     @staticmethod
     def _to_variable(result):
