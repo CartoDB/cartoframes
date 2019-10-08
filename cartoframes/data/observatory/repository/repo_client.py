@@ -40,6 +40,7 @@ class RepoClient(object):
 
     def get_geographies(self, field=None, value=None):
         query = 'SELECT * FROM geographies_public'
+        # TODO future: Filter by purchased geography ids
         return self._run_query(query, field, value)
 
     def get_datasets(self, field=None, value=None):

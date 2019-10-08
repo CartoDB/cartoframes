@@ -30,8 +30,19 @@ class Catalog(object):
 
         return Category.get_all()
 
+    @property
+    def datasets(self):
+        """Get all the datasets in the Catalog
+
+        Returns:
+            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+
+        """
+
+        return Dataset.get_all()
+
     @classmethod
-    def datasets(self, credentials=None):
+    def purchased_datasets(self, credentials):
         """Get all the datasets in the Catalog
 
         Args:
