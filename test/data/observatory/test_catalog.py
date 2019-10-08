@@ -94,7 +94,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        geographies = catalog.country('usa').category('demographics').geographies
+        catalog.country('usa').category('demographics').geographies
 
         # Then
         mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
