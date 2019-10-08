@@ -61,7 +61,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        countries = catalog.category('demographics').datasets
+        catalog.category('demographics').datasets
 
         # Then
         mocked_countries.called_once_with({'category_id': 'demographics'})
@@ -72,7 +72,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        categories = catalog.country('usa').categories
+        catalog.country('usa').categories
 
         # Then
         mocked_categories.called_once_with({'country_id': 'usa'})
@@ -83,7 +83,7 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        datasets = catalog.country('usa').category('demographics').datasets
+        catalog.country('usa').category('demographics').datasets
 
         # Then
         mocked_datasets.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
