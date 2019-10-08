@@ -54,4 +54,14 @@ class Geography(CatalogEntity):
         return self.data['summary_jsonb']
 
     def download(self, credentials=None):
+        """Download Geography data.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+              credentials of CARTO user account. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              <cartoframes.auth.set_default_credentials>`) will attempted to be
+              used.
+        """
+
         return self._download(credentials)
