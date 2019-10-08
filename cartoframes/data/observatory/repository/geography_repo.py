@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 
+from .constants import COUNTRY_FILTER
 from .entity_repo import EntityRepository
 
 
 _GEOGRAPHY_ID_FIELD = 'id'
+_ALLOWED_FILTERS = [COUNTRY_FILTER]
 
 
 def get_geography_repo():
@@ -12,26 +14,11 @@ def get_geography_repo():
 
 class GeographyRepository(EntityRepository):
 
-    id_field = _GEOGRAPHY_ID_FIELD
+    def __init__(self):
+        super(GeographyRepository, self).__init__(_GEOGRAPHY_ID_FIELD, _ALLOWED_FILTERS)
 
     def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({'country_iso_code3': iso_code3})
-
-    @classmethod
-    def _map_row(cls, row):
-        return {
-            'id': cls._normalize_field(row, cls.id_field),
-            'name': cls._normalize_field(row, 'name'),
-            'description': cls._normalize_field(row, 'description'),
-            'provider_id': cls._normalize_field(row, 'provider_id'),
-            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
-            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
-            'geom_coverage': cls._normalize_field(row, 'geom_coverage'),
-            'update_frequency': cls._normalize_field(row, 'update_frequency'),
-            'version': cls._normalize_field(row, 'version'),
-            'is_public_data': cls._normalize_field(row, 'is_public_data'),
-            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
-        }
+        return self._get_filtered_entities({'country_id': iso_code3})
 
     @classmethod
     def _get_entity_class(cls):
@@ -40,6 +27,21 @@ class GeographyRepository(EntityRepository):
 
     def _get_rows(self, filters=None):
         return self.client.get_geographies(filters)
+
+    def _map_row(self, row):
+        return {
+            'id': self._normalize_field(row, self.id_field),
+            'name': self._normalize_field(row, 'name'),
+            'description': self._normalize_field(row, 'description'),
+            'provider_id': self._normalize_field(row, 'provider_id'),
+            'country_iso_code3': self._normalize_field(row, 'country_iso_code3'),
+            'language_iso_code3': self._normalize_field(row, 'language_iso_code3'),
+            'geom_coverage': self._normalize_field(row, 'geom_coverage'),
+            'update_frequency': self._normalize_field(row, 'update_frequency'),
+            'version': self._normalize_field(row, 'version'),
+            'is_public_data': self._normalize_field(row, 'is_public_data'),
+            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+        }
 
 
 _REPO = GeographyRepository()

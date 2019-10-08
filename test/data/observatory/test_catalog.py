@@ -52,3 +52,37 @@ class TestCatalog(unittest.TestCase):
 
         # Then
         assert datasets == expected_datasets
+
+    @patch.object(Country, 'get_all')
+    def test_filters_on_countries(self, mocked_datasets):
+        # Given
+        catalog = Catalog()
+
+        # When
+        countries = catalog.category('demographics').datasets
+
+        # Then
+        mocked_datasets.called_once_with({'category_id': 'demographics'})
+
+    @patch.object(Category, 'get_all')
+    def test_filters_on_categories(self, mocked_datasets):
+        # Given
+        catalog = Catalog()
+
+        # When
+        categories = catalog.country('usa').categories
+
+        # Then
+        mocked_datasets.called_once_with({'country_id': 'usa'})
+
+    @patch.object(Dataset, 'get_all')
+    def test_filters_on_datasets(self, mocked_datasets):
+        # Given
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.country('usa').category('demographics').datasets
+
+        # Then
+        mocked_datasets.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
+

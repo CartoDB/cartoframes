@@ -3,10 +3,14 @@ from __future__ import absolute_import
 from .category import Category
 from .country import Country
 from .dataset import Dataset
+from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
 
 class Catalog(object):
     """Data Observatory Catalog"""
+
+    def __init__(self):
+        self.filters = {}
 
     @property
     def countries(self):
@@ -17,7 +21,7 @@ class Catalog(object):
 
         """
 
-        return Country.get_all()
+        return Country.get_all(self.filters)
 
     @property
     def categories(self):
@@ -28,7 +32,7 @@ class Catalog(object):
 
         """
 
-        return Category.get_all()
+        return Category.get_all(self.filters)
 
     @property
     def datasets(self):
@@ -39,4 +43,19 @@ class Catalog(object):
 
         """
 
-        return Dataset.get_all()
+        return Dataset.get_all(self.filters)
+
+    def country(self, country_id):
+        self.filters[COUNTRY_FILTER] = country_id
+        return self
+
+    def category(self, category_id):
+        self.filters[CATEGORY_FILTER] = category_id
+        return self
+
+    def geography(self, geography_id):
+        self.filters[GEOGRAPHY_FILTER] = geography_id
+        return self
+
+    def clear_filters(self):
+        self.filters = {}

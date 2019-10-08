@@ -79,7 +79,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with({'country_iso_code3': country_code})
+        mocked_repo.assert_called_once_with({'country_id': country_code})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

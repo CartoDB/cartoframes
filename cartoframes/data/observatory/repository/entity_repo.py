@@ -11,13 +11,14 @@ except ImportError:
 
 class EntityRepository(ABC):
 
-    id_field = None
-
-    def __init__(self):
+    def __init__(self, id_field, filters):
         self.client = RepoClient()
 
-    def get_all(self):
-        return self._get_filtered_entities()
+        self.id_field = id_field
+        self.allowed_filters = filters + [id_field]
+
+    def get_all(self, filters=None):
+        return self._get_filtered_entities(filters)
 
     def get_by_id(self, id_):
         result = self._get_rows({self.id_field: id_})
@@ -30,13 +31,19 @@ class EntityRepository(ABC):
         return self._to_catalog_entity(data)
 
     def _get_filtered_entities(self, filters=None):
-        rows = self._get_rows(filters)
+        cleaned_filters = self._get_filters(filters)
+        rows = self._get_rows(cleaned_filters)
 
         if len(rows) == 0:
             return None
 
         normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
         return CatalogList(normalized_data)
+
+    def _get_filters(self, filters):
+        if filters is not None:
+            cleaned_filters = {field: value for field, value in filters.items() if field in self.allowed_filters}
+            return cleaned_filters
 
     @classmethod
     def _to_catalog_entity(cls, result):
