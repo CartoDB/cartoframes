@@ -7,6 +7,7 @@ import sys
 import json
 import warnings
 import pandas as pd
+import geopandas as gpd
 
 from carto.exceptions import CartoException
 
@@ -32,12 +33,6 @@ from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
 from test.mocks.context_mock import ContextMock
 
 from test.helpers import _UserUrlLoader
-
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
 
 WILL_SKIP = False
 warnings.filterwarnings('ignore')
@@ -325,7 +320,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         import shapely
-        import geopandas as gpd
         df = read_taxi(limit=50)
         df.drop(['the_geom'], axis=1, inplace=True)
         gdf = gpd.GeoDataFrame(df.drop(['dropoff_longitude', 'dropoff_latitude'], axis=1),
@@ -612,10 +606,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
         self.assertIsDataFrameDatasetInstance(df)
 
-    @unittest.skipIf(not HAS_GEOPANDAS, 'no geopandas imported, skipping this test')
     def test_creation_from_valid_geodataframe(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        gdf = geopandas.GeoDataFrame(df)
+        gdf = gpd.GeoDataFrame(df)
         self.assertIsDataFrameDatasetInstance(gdf)
 
     def test_creation_from_valid_localgeojson(self):

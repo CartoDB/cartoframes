@@ -5,12 +5,6 @@ from ..data import Dataset
 from ..data.dataset.registry.base_dataset import BaseDataset
 from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
 
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
-
 
 class SourceType:
     QUERY = 'Query'
