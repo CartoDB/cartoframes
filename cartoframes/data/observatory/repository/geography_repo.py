@@ -1,45 +1,45 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .entity_repo import EntityRepository
+
+
+_GEOGRAPHY_ID_FIELD = 'id'
 
 
 def get_geography_repo():
     return _REPO
 
 
-class GeographyRepository(object):
+class GeographyRepository(EntityRepository):
 
-    def __init__(self):
-        self.client = RepoClient()
-
-    def get_all(self):
-        return self._to_geographies(self.client.get_geographies())
-
-    def get_by_id(self, geography_id):
-        result = self.client.get_geographies('id', geography_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing geography in the catalog. '
-                                     'You can check the full list of available geographies with Geographies.get_all()')
-
-        return self._to_geography(result[0])
+    id_field = _GEOGRAPHY_ID_FIELD
 
     def get_by_country(self, iso_code3):
-        return self._to_geographies(self.client.get_geographies('country_iso_code3', iso_code3))
+        return self._get_filtered_entities('country_iso_code3', iso_code3)
 
-    @staticmethod
-    def _to_geography(result):
+    @classmethod
+    def _map_row(cls, row):
+        return {
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'description': cls._normalize_field(row, 'description'),
+            'provider_id': cls._normalize_field(row, 'provider_id'),
+            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
+            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
+            'geom_coverage': cls._normalize_field(row, 'geom_coverage'),
+            'update_frequency': cls._normalize_field(row, 'update_frequency'),
+            'version': cls._normalize_field(row, 'version'),
+            'is_public_data': cls._normalize_field(row, 'is_public_data'),
+            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
+        }
+
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.geography import Geography
+        return Geography
 
-        return Geography(result)
-
-    @staticmethod
-    def _to_geographies(results):
-        if len(results) == 0:
-            return None
-
-        from cartoframes.data.observatory.geography import Geographies
-
-        return Geographies(GeographyRepository._to_geography(result) for result in results)
+    def _get_rows(self, field=None, value=None):
+        return self.client.get_geographies(field, value)
 
 
 _REPO = GeographyRepository()

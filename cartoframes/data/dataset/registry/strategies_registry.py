@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from .dataframe_dataset import DataFrameDataset
 from .query_dataset import QueryDataset
 from .table_dataset import TableDataset
@@ -12,11 +14,13 @@ class StrategiesRegistry(object):
         Add a new strategy:
 
         .. code::
-        from cartoframes.data import StrategiesRegistry
 
-        strategyRegistry = StrategiesRegistry()
-        strategyRegistry.add(CSVDataset)
+            from cartoframes.data import StrategiesRegistry
+
+            strategyRegistry = StrategiesRegistry()
+            strategyRegistry.add(CSVDataset)
     """
+
     class __StrategiesRegistry:
         def __init__(self, strategies):
             self.registry = strategies
