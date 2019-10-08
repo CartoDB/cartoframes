@@ -188,6 +188,7 @@ STATUS_FIELDS = {
     'match_types': ('text', "cdb_dataservices_client.cdb_jsonb_array_casttext(_g.metadata->>'match_types')"),
     '*': ('jsonb', "_g.metadata")
 }
+STATUS_FIELDS_KEYS = sorted(STATUS_FIELDS.keys())
 
 
 def _status_column(column_name, field):
@@ -206,11 +207,11 @@ def _status_assignment(status):
         # new style: define status assignments with dictionary
         # {'column_name': 'status_field', ...}
         # allows to assign individual status attributes to columns
-        invalid_fields = _list_difference(status.values(), STATUS_FIELDS.keys())
+        invalid_fields = _list_difference(status.values(), STATUS_FIELDS_KEYS)
         if any(invalid_fields):
             raise ValueError("Invalid status fields {} valid keys are: {}".format(
                 invalid_fields,
-                STATUS_FIELDS.keys()))
+                STATUS_FIELDS_KEYS))
         columns = [_status_column(name, field) for name, field in list(status.items())]
         status_assignments = [_column_assignment(name, value) for name, _, value in columns]
         status_columns = [(name, type_) for name, type_, _ in columns]
