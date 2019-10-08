@@ -128,7 +128,7 @@ def __process_variables(variables):
         first_element = variables[0]
 
         if isinstance(first_element, str):
-            variables_result = Variable.get(variables)
+            variables_result = [Variable.get(variable) for variable in variables]
         else:
             variables_result = variables
     else:
@@ -156,8 +156,8 @@ def __process_agg_operators(agg_operators, variables):
     agg_operators_result = agg_operators.copy()
 
     for variable in variables:
-        if variable.name not in agg_operators_result:
-            agg_operators_result[variable.name] = variable.agg_method
+        if variable.column_name not in agg_operators_result:
+            agg_operators_result[variable.column_name] = variable.agg_method
 
     return agg_operators_result
 
@@ -170,23 +170,25 @@ def __get_tables_and_variables(variables, user_dataset):
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
 
-def __process_enrichment_variables(variables_id, user_dataset):
+def __process_enrichment_variables(variables, user_dataset):
     table_to_geotable = dict()
     table_to_variables = defaultdict(list)
     table_to_project = dict()
     table_to_dataset = dict()
 
-    for variable_id in variables_id:
-        variable_split = variable_id.id.split('.')
-        project, dataset, table, variable = variable_split
+    for variable in variables:
+        project_name = variable.project_name
+        dataset_name = variable.project_name
+        table_name = variable.project_name
+        variable_name = variable.project_name
 
-        if project != _PUBLIC_PROJECT:
-            table = '{dataset}_{table}'.format(dataset=dataset,
-                                               table=table,
+        if project_name != _PUBLIC_PROJECT:
+            table = '{dataset}_{table}'.format(dataset=dataset_name,
+                                               table=table_name,
                                                user_dataset=user_dataset)
 
         if table not in table_to_dataset:
-            if project != _PUBLIC_PROJECT:
+            if project_name != _PUBLIC_PROJECT:
                 table_to_dataset[table] = user_dataset
             else:
                 table_to_dataset[table] = _PUBLIC_DATASET
@@ -194,20 +196,20 @@ def __process_enrichment_variables(variables_id, user_dataset):
         if table not in table_to_geotable:
             geotable = __get_name_geotable_from_datatable(table)
 
-            if project != _PUBLIC_PROJECT:
-                geotable = '{dataset}_{geotable}'.format(dataset=dataset,
+            if project_name != _PUBLIC_PROJECT:
+                geotable = '{dataset}_{geotable}'.format(dataset=dataset_name,
                                                          geotable=geotable,
                                                          user_dataset=user_dataset)
 
             table_to_geotable[table] = geotable
 
         if table not in table_to_project:
-            if project == _PUBLIC_PROJECT:
+            if project_name == _PUBLIC_PROJECT:
                 table_to_project[table] = _PUBLIC_PROJECT
             else:
                 table_to_project[table] = _WORKING_PROJECT
 
-        table_to_variables[table].append(variable)
+        table_to_variables[table].append(variable_name)
 
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
