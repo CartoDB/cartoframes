@@ -132,7 +132,7 @@ def __process_variables(variables):
         else:
             variables_result = variables
     else:
-        raise EnrichmentException('Variable(s) to enrich should be an instance of Series or DataFrame')
+        raise EnrichmentException('Variable(s) to enrich should be an instance of Variable / CatalogList / str / list')
 
     return variables_result
 
