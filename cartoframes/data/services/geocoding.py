@@ -237,7 +237,7 @@ def _set_pre_summary_info(summary, output):
     output['previously_geocoded'] = summary.get('previously_geocoded', 0)
     output['previously_failed'] = summary.get('previously_nongeocoded', 0)
     output['records_with_geometry'] = sum(
-        [summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded']])
+        summary[s] for s in ['new_geocoded', 'changed_geocoded', 'previously_geocoded'])
 
 
 def _set_post_summary_info(summary, result, output):
