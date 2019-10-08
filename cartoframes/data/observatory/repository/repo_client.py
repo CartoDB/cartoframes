@@ -19,32 +19,36 @@ class RepoClient(object):
         self._user_credentials = credentials
 
     def get_countries(self, field=None, value=None):
-        query = 'select distinct country_iso_code3 as id from datasets_public'
+        query = 'SELECT DISTICT country_iso_code3 AS id FROM datasets_public'
         return self._run_query(query, field, value)
 
     def get_categories(self, field=None, value=None):
-        query = 'select * from categories_public'
+        query = 'SELECT * FROM categories_public'
         return self._run_query(query, field, value)
 
     def get_providers(self, field=None, value=None):
-        query = 'select * from providers_public'
+        query = 'SELECT * FROM providers_public'
         return self._run_query(query, field, value)
 
     def get_variables(self, field=None, value=None):
-        query = 'select * from variables_public'
+        query = 'SELECT * FROM variables_public'
         return self._run_query(query, field, value)
 
     def get_variables_groups(self, field=None, value=None):
-        query = 'select * from variables_groups_public'
+        query = 'SELECT * FROM variables_groups_public'
         return self._run_query(query, field, value)
 
     def get_geographies(self, field=None, value=None):
-        query = 'select * from geographies_public'
+        query = 'SELECT * FROM geographies_public'
         return self._run_query(query, field, value)
 
     def get_datasets(self, field=None, value=None):
         query = 'SELECT * FROM datasets_public'
-        extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+
+        extra_condition = ''
+        if self._user_credentials is not None:
+            extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+
         return self._run_query(query, field, value, extra_condition)
 
     def _run_query(self, query, field, value, extra_condition=None):
@@ -67,11 +71,10 @@ class RepoClient(object):
         return ','.join(["'" + id + "'" for id in purchased_dataset_ids])
 
     def _fetch_purchased_datasets(self):
-        if self._user_credentials is not None:
-            api_key_auth_client = self._user_credentials.get_api_key_auth_client()
-            do_manager = DODatasetManager(api_key_auth_client)
-            if do_manager is not None:
-                return do_manager.all()
+        api_key_auth_client = self._user_credentials.get_api_key_auth_client()
+        do_manager = DODatasetManager(api_key_auth_client)
+        if do_manager is not None:
+            return do_manager.all()
         return []
 
     def __new__(cls):
