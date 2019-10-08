@@ -207,7 +207,7 @@ class TestGeography(unittest.TestCase):
         assert sliced_geography.equals(geography.to_series())
 
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.geography._get_bigquery_client')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
     def test_dataset_download(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
@@ -226,7 +226,7 @@ class TestGeography(unittest.TestCase):
         assert response == file_path
 
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.geography._get_bigquery_client')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
     def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1

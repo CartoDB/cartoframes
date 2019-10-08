@@ -1,10 +1,20 @@
 import pandas as pd
+from warnings import warn
+
+from google.api_core.exceptions import NotFound
+
+from carto.exceptions import CartoException
+
+from ..clients.bigquery_client import BigQueryClient
+from ...auth import get_default_credentials
 
 try:
     from abc import ABC, abstractmethod
 except ImportError:
     from abc import ABCMeta, abstractmethod
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
+
+_WORKING_PROJECT = 'carto-do-customers'
 
 
 class CatalogEntity(ABC):
@@ -44,6 +54,32 @@ class CatalogEntity(ABC):
 
     def __repr__(self):
         return '{classname}({entity_id})'.format(classname=self.__class__.__name__, entity_id=self.id)
+
+    def _download(self, credentials=None):
+        credentials = _get_credentials(credentials)
+        user_dataset = credentials.username.replace('-', '_')
+        bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+
+        project, dataset, table = self.id.split('.')
+        view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
+
+        try:
+            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+        except NotFound:
+            raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
+
+        warn('Data saved: {}.'.format(file_path))
+        warn("Read it by: `pandas.read_csv('{}')`.".format(file_path))
+
+        return file_path
+
+
+def _get_credentials(credentials=None):
+    return credentials or get_default_credentials()
+
+
+def _get_bigquery_client(project, credentials):
+    return BigQueryClient(project, credentials)
 
 
 class CatalogList(list):

@@ -228,7 +228,7 @@ class TestDataset(unittest.TestCase):
         assert sliced_dataset.equals(dataset.to_series())
 
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.dataset._get_bigquery_client')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
     def test_dataset_download(self, mocked_bq_client, mocked_repo):
         # mock dataset
         mocked_repo.return_value = test_dataset1
@@ -247,7 +247,7 @@ class TestDataset(unittest.TestCase):
         assert response == file_path
 
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.dataset._get_bigquery_client')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
     def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock dataset
         mocked_repo.return_value = test_dataset1
