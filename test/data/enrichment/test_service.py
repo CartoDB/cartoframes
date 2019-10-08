@@ -182,7 +182,7 @@ class TestEnrichmentService(unittest.TestCase):
                    for query in queries]
 
         self.assertEqual(sorted(queries), sorted(expected_queries))
-    
+
     def test_enrichment_query_by_polygons_two_variables(self):
         user_dataset = 'test_dataset'
         tablename = 'test_table'
