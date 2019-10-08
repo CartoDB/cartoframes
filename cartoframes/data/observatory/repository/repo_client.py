@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from carto.do_datasets import DODatasetManager
+
 from cartoframes.data.clients import SQLClient
 from cartoframes.auth import Credentials
 
@@ -9,7 +11,12 @@ class RepoClient(object):
     __instance = None
 
     def __init__(self):
-        self.client = SQLClient(Credentials('do-metadata', 'default_public'))
+        self._user_credentials = None
+        self._do_credentials = Credentials('do-metadata', 'default_public')
+        self.client = SQLClient(self._do_credentials)
+
+    def set_user_credentials(self, credentials):
+        self._user_credentials = credentials
 
     def get_countries(self, field=None, value=None):
         query = 'select distinct country_iso_code3 as id from datasets_public'
@@ -36,14 +43,36 @@ class RepoClient(object):
         return self._run_query(query, field, value)
 
     def get_datasets(self, field=None, value=None):
-        query = 'select * from datasets_public'
-        return self._run_query(query, field, value)
+        query = 'SELECT * FROM datasets_public'
+        extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+        return self._run_query(query, field, value, extra_condition)
 
-    def _run_query(self, query, field, value):
-        if field is not None and value is not None:
-            query += " where {f} = '{v}'".format(f=field, v=value)
-
+    def _run_query(self, query, field, value, extra_condition=None):
+        conditions = self._compute_conditions(field, value, extra_condition)
+        if len(conditions) > 0:
+            query += ' WHERE {}'.format(' AND '.join(conditions))
         return self.client.query(query)
+
+    def _compute_conditions(self, field, value, extra_condition):
+        conditions = []
+        if field is not None and value is not None:
+            conditions.append("{f} = '{v}'".format(f=field, v=value))
+        if extra_condition:
+            conditions.append(extra_condition)
+        return conditions
+
+    def _get_purchased_dataset_ids(self):
+        purchased_datasets = self._fetch_purchased_datasets()
+        purchased_dataset_ids = list(map(lambda pd: pd.id, purchased_datasets))
+        return ','.join(["'" + id + "'" for id in purchased_dataset_ids])
+
+    def _fetch_purchased_datasets(self):
+        if self._user_credentials is not None:
+            api_key_auth_client = self._user_credentials.get_api_key_auth_client()
+            do_manager = DODatasetManager(api_key_auth_client)
+            if do_manager is not None:
+                return do_manager.all()
+        return []
 
     def __new__(cls):
         if not RepoClient.__instance:

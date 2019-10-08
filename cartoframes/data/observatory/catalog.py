@@ -30,13 +30,18 @@ class Catalog(object):
 
         return Category.get_all()
 
-    @property
-    def datasets(self):
+    @classmethod
+    def datasets(self, credentials):
         """Get all the datasets in the Catalog
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+                A :py:class:`Credentials <cartoframes.auth.Credentials>`
+                instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
         Returns:
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
 
         """
 
-        return Dataset.get_all()
+        return Dataset.get_all(credentials)
