@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import os
 import appdirs
 import csv
-from warnings import warn
 import tqdm
 
 from google.cloud import bigquery
@@ -84,7 +83,7 @@ class BigQueryClient(object):
                 if progress_bar:
                     pb.update(1)
 
-        warn('Data saved: {}'.format(file_path))
+        return file_path
 
 
 def _download_query(project, dataset, table, limit=None, offset=None):
