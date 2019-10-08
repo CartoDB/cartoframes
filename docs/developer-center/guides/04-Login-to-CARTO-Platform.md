@@ -4,7 +4,7 @@ In this guide, our purpose is to focus on the basics of authentication in CARTOf
 
 > To use CARTOframes is not *always* needed to be authenticated.
 
-It is needed to set up the user credentials to use Data Services, Data Enrichment or the Data Observatory, between others. In these cases, it's required to have a CARTO account. Once the user has created an account, the credentials can be found at **http://johnsmith.carto.com/your_apps.** for user `johnsmith`, and it should be a **Master** API Key:
+It is needed to set up the user credentials to use Data Services, Data Enrichment or the Data Observatory, between others. In these cases, it's required to have a [CARTO account](https://carto.com/signup/). Once the user has created an account, the credentials can be found at **http://johnsmith.carto.com/your_apps.** for user `johnsmith`, and it should be a **Master** API Key:
 
 ![Master API Key - CARTO Dashboard](../../img/guides/credentials/api-keys.png)
 
