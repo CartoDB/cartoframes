@@ -128,7 +128,7 @@ def __process_variables(variables):
         first_element = variables[0]
 
         if isinstance(first_element, str):
-            variables_result = [Variable.get(variable) for variable in variables]
+            variables_result = Variable.get(variables)
         else:
             variables_result = variables
     else:
@@ -156,10 +156,8 @@ def __process_agg_operators(agg_operators, variables):
     agg_operators_result = agg_operators.copy()
 
     for variable in variables:
-        variable_name = variable.id.split('.')[-1]
-
-        if variable_name not in agg_operators_result:
-            agg_operators_result[variable_name] = variable.agg_method
+        if variable.name not in agg_operators_result:
+            agg_operators_result[variable.name] = variable.agg_method
 
     return agg_operators_result
 
