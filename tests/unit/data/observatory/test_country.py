@@ -1,19 +1,12 @@
 import pandas as pd
-import pytest
 
-from cartoframes.data.observatory.country import Countries, Country
-from cartoframes.data.observatory.dataset import Datasets
-from cartoframes.data.observatory.geography import Geographies
-from cartoframes.data.observatory.repository.country_repo import \
-    CountryRepository
-from cartoframes.data.observatory.repository.dataset_repo import \
-    DatasetRepository
-from cartoframes.data.observatory.repository.geography_repo import \
-    GeographyRepository
-from cartoframes.exceptions import DiscoveryException
-
-from .examples import (db_country1, test_countries, test_country1,
-                       test_datasets, test_geographies)
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.country import Country
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.repository.country_repo import CountryRepository
+from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
+    db_country2
 
 try:
     from unittest.mock import patch
@@ -29,10 +22,10 @@ class TestCountry(object):
         mocked_repo.return_value = test_country1
 
         # When
-        country = Country.get_by_id('esp')
+        country = Country.get('esp')
 
         # Then
-        assert isinstance(country, pd.Series)
+        assert isinstance(country, object)
         assert isinstance(country, Country)
         assert country == test_country1
 
@@ -42,20 +35,12 @@ class TestCountry(object):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = test_country1.datasets()
+        datasets = test_country1.datasets
 
         # Then
-        assert isinstance(datasets, pd.DataFrame)
-        assert isinstance(datasets, Datasets)
+        assert isinstance(datasets, list)
+        assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
-
-    def test_get_datasets_by_country_fails_if_column_Series(self):
-        # Given
-        country = test_countries.country_iso_code3
-
-        # Then
-        with pytest.raises(DiscoveryException):
-            country.datasets()
 
     @patch.object(GeographyRepository, 'get_by_country')
     def test_get_geographies_by_country(self, mocked_repo):
@@ -63,23 +48,64 @@ class TestCountry(object):
         mocked_repo.return_value = test_geographies
 
         # When
-        geographies = test_country1.geographies()
+        geographies = test_country1.geographies
 
         # Then
-        assert isinstance(geographies, pd.DataFrame)
-        assert isinstance(geographies, Geographies)
+        assert isinstance(geographies, list)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-    def test_get_geographies_by_country_fails_if_column_Series(self):
+    def test_country_properties(self):
         # Given
-        country = test_countries.country_iso_code3
+        country = Country(db_country1)
+
+        # When
+        country_id = country.id
 
         # Then
-        with pytest.raises(DiscoveryException):
-            country.geographies()
+        assert country_id == db_country1['id']
 
+    def test_country_is_exported_as_series(self):
+        # Given
+        country = Country(db_country1)
 
-class TestCountries(object):
+        # When
+        country_series = country.to_series()
+
+        # Then
+        assert isinstance(country_series, pd.Series)
+        assert country_series['id'] == country.id
+
+    def test_country_is_exported_as_dict(self):
+        # Given
+        country = Country(db_country1)
+
+        # When
+        country_dict = country.to_dict()
+
+        # Then
+        assert isinstance(country_dict, dict)
+        assert country_dict == db_country1
+
+    def test_country_is_represented_with_id(self):
+        # Given
+        country = Country(db_country1)
+
+        # When
+        country_repr = repr(country)
+
+        # Then
+        assert country_repr == 'Country({id})'.format(id=db_country1['id'])
+
+    def test_country_is_printed_with_classname(self):
+        # Given
+        country = Country(db_country1)
+
+        # When
+        country_str = str(country)
+
+        # Then
+        assert country_str == 'Country({dict_str})'.format(dict_str=str(db_country1))
 
     @patch.object(CountryRepository, 'get_all')
     def test_get_all_countries(self, mocked_repo):
@@ -87,48 +113,56 @@ class TestCountries(object):
         mocked_repo.return_value = test_countries
 
         # When
-        countries = Countries.get_all()
+        countries = Country.get_all()
 
         # Then
-        assert isinstance(countries, pd.DataFrame)
-        assert isinstance(countries, Countries)
+        assert isinstance(countries, list)
+        assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
-    @patch.object(CountryRepository, 'get_by_id')
-    def test_get_country_by_id(self, mocked_repo):
+    def test_country_list_is_printed_with_classname(self):
         # Given
-        mocked_repo.return_value = test_country1
+        countries = CatalogList([test_country1, test_country2])
 
         # When
-        country = Countries.get_by_id('esp')
+        countries_str = str(countries)
 
         # Then
-        assert isinstance(country, pd.Series)
-        assert isinstance(country, Country)
-        assert country == test_country1
+        assert countries_str == '[Country({id1}), Country({id2})]' \
+                                .format(id1=db_country1['id'], id2=db_country2['id'])
 
-    @patch.object(CountryRepository, 'get_all')
-    def test_countries_are_indexed_with_id(self, mocked_repo):
+    def test_country_list_is_represented_with_ids(self):
         # Given
-        mocked_repo.return_value = test_countries
-        country_id = db_country1['country_iso_code3']
+        countries = CatalogList([test_country1, test_country2])
 
         # When
-        countries = Countries.get_all()
-        country = countries.loc[country_id]
+        countries_repr = repr(countries)
 
         # Then
-        assert country == test_country1
+        assert countries_repr == '[Country({id1}), Country({id2})]'\
+                                 .format(id1=db_country1['id'], id2=db_country2['id'])
 
-    @patch.object(CountryRepository, 'get_all')
-    def test_countries_slice_is_country_and_series(self, mocked_repo):
+    def test_countries_items_are_obtained_as_country(self):
         # Given
-        mocked_repo.return_value = test_countries
+        countries = test_countries
 
         # When
-        countries = Countries.get_all()
-        country = countries.iloc[0]
+        country = countries[0]
 
         # Then
         assert isinstance(country, Country)
-        assert isinstance(country, pd.Series)
+        assert country == test_country1
+
+    def test_countries_are_exported_as_dataframe(self):
+        # Given
+        countries = test_countries
+        country = countries[0]
+
+        # When
+        countries_df = countries.to_dataframe()
+        sliced_country = countries_df.iloc[0]
+
+        # Then
+        assert isinstance(countries_df, pd.DataFrame)
+        assert isinstance(sliced_country, pd.Series)
+        assert sliced_country.equals(country.to_series())

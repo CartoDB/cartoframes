@@ -1,60 +1,61 @@
 from __future__ import absolute_import
 
-from cartoframes.exceptions import DiscoveryException
+from .entity_repo import EntityRepository
 
-from .repo_client import RepoClient
+
+_DATASET_ID_FIELD = 'id'
 
 
 def get_dataset_repo():
     return _REPO
 
 
-class DatasetRepository(object):
+class DatasetRepository(EntityRepository):
 
-    def __init__(self):
-        self.client = RepoClient()
-
-    def get_all(self):
-        return self._to_datasets(self.client.get_datasets())
-
-    def get_by_id(self, dataset_id):
-        result = self.client.get_datasets('id', dataset_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing dataset in the catalog. '
-                                     'You can check the full list of available datasets with Datasets.get_all()')
-
-        return self._to_dataset(result[0])
+    id_field = _DATASET_ID_FIELD
 
     def get_by_country(self, iso_code3):
-        return self._to_datasets(self.client.get_datasets('country_iso_code3', iso_code3))
+        return self._get_filtered_entities('country_iso_code3', iso_code3)
 
     def get_by_category(self, category_id):
-        return self._to_datasets(self.client.get_datasets('category_id', category_id))
+        return self._get_filtered_entities('category_id', category_id)
 
     def get_by_variable(self, variable_id):
-        return self._to_datasets(self.client.get_datasets('variable_id', variable_id))
+        return self._get_filtered_entities('variable_id', variable_id)
 
     def get_by_geography(self, geography_id):
-        return self._to_datasets(self.client.get_datasets('geography_id', geography_id))
+        return self._get_filtered_entities('geography_id', geography_id)
 
     def get_by_provider(self, provider_id):
-        return self._to_datasets(self.client.get_datasets('provider_id', provider_id))
+        return self._get_filtered_entities('provider_id', provider_id)
 
-    @staticmethod
-    def _to_dataset(result):
+    @classmethod
+    def _map_row(cls, row):
+        return {
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name'),
+            'description': cls._normalize_field(row, 'description'),
+            'provider_id': cls._normalize_field(row, 'provider_id'),
+            'category_id': cls._normalize_field(row, 'category_id'),
+            'data_source_id': cls._normalize_field(row, 'data_source_id'),
+            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
+            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
+            'geography_id': cls._normalize_field(row, 'geography_id'),
+            'temporal_aggregation': cls._normalize_field(row, 'temporal_aggregation'),
+            'time_coverage': cls._normalize_field(row, 'time_coverage'),
+            'update_frequency': cls._normalize_field(row, 'update_frequency'),
+            'version': cls._normalize_field(row, 'version'),
+            'is_public_data': cls._normalize_field(row, 'is_public_data'),
+            'summary_jsonb': cls._normalize_field(row, 'summary_jsonb')
+        }
+
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.dataset import Dataset
+        return Dataset
 
-        return Dataset(result)
-
-    @staticmethod
-    def _to_datasets(results):
-        if len(results) == 0:
-            return None
-
-        from cartoframes.data.observatory.dataset import Datasets
-
-        return Datasets(DatasetRepository._to_dataset(result) for result in results)
+    def _get_rows(self, field=None, value=None):
+        return self.client.get_datasets(field, value)
 
 
 _REPO = DatasetRepository()

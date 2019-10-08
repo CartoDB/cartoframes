@@ -1,12 +1,11 @@
 import pytest
 
-from cartoframes.data.observatory.repository.repo_client import RepoClient
-from cartoframes.data.observatory.repository.variable_repo import \
-    VariableRepository
 from cartoframes.exceptions import DiscoveryException
-
-from ..examples import (db_variable1, db_variable2, test_variable1,
-                        test_variables)
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.variable import Variable
+from cartoframes.data.observatory.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
+from ..examples import test_variable1, test_variables, db_variable1, db_variable2
 
 try:
     from unittest.mock import patch
@@ -26,7 +25,8 @@ class TestVariableRepo(object):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -39,14 +39,14 @@ class TestVariableRepo(object):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert variables is None
 
     @patch.object(RepoClient, 'get_variables')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable1, db_variable2]
-        requested_id = test_variable1['id']
+        requested_id = db_variable1['id']
 
         # When
         repo = VariableRepository()
@@ -54,6 +54,7 @@ class TestVariableRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(variable, Variable)
         assert variable == test_variable1
 
     @patch.object(RepoClient, 'get_variables')
@@ -79,6 +80,7 @@ class TestVariableRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
@@ -93,4 +95,30 @@ class TestVariableRepo(object):
 
         # Then
         mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
+        assert isinstance(variables, CatalogList)
         assert variables == test_variables
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'variable1'}]
+        repo = VariableRepository()
+
+        expected_variables = CatalogList([Variable({
+            'id': 'variable1',
+            'name': None,
+            'description': None,
+            'column_name': None,
+            'db_type': None,
+            'dataset_id': None,
+            'agg_method': None,
+            'variable_group_id': None,
+            'starred': None,
+            'summary_jsonb': None
+        })])
+
+        # When
+        variables = repo.get_all()
+
+        # Then
+        assert variables == expected_variables

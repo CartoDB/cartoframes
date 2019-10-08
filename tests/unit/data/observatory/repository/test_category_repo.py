@@ -1,12 +1,12 @@
 import pytest
 
-from cartoframes.data.observatory.repository.category_repo import \
-    CategoryRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
-from cartoframes.exceptions import DiscoveryException
+from cartoframes.data.observatory.category import Category
 
-from ..examples import (db_category1, db_category2, test_categories,
-                        test_category1)
+from cartoframes.exceptions import DiscoveryException
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
+from cartoframes.data.observatory.repository.repo_client import RepoClient
+from ..examples import test_category1, test_categories, db_category1, db_category2
 
 try:
     from unittest.mock import patch
@@ -26,11 +26,9 @@ class TestCategoryRepo(object):
         categories = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
+        assert isinstance(categories, CatalogList)
         assert categories == test_categories
-
-        id1 = db_category1['id']
-        assert categories.loc[id1] == test_category1
 
     @patch.object(RepoClient, 'get_categories')
     def test_get_all_when_empty(self, mocked_repo):
@@ -42,14 +40,14 @@ class TestCategoryRepo(object):
         categories = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert categories is None
 
     @patch.object(RepoClient, 'get_categories')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_category1, db_category2]
-        requested_id = test_category1['id']
+        requested_id = db_category1['id']
         repo = CategoryRepository()
 
         # When
@@ -69,3 +67,20 @@ class TestCategoryRepo(object):
         # Then
         with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_categories')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'cat1'}]
+        repo = CategoryRepository()
+
+        expected_categories = CatalogList([Category({
+            'id': 'cat1',
+            'name': None
+        })])
+
+        # When
+        categories = repo.get_all()
+
+        # Then
+        assert categories == expected_categories
