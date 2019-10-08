@@ -7,11 +7,13 @@ import hashlib
 import os
 import re
 import sys
+import requests
+import geopandas
+import numpy as np
+
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
-import numpy as np
-import requests
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -200,19 +202,6 @@ def get_query_bounds(context, query):
 
 
 def load_geojson(input_data):
-    try:
-        import geopandas
-        HAS_GEOPANDAS = True
-    except ImportError:
-        HAS_GEOPANDAS = False
-
-    if not HAS_GEOPANDAS:
-        raise ValueError(
-            '''
-            GeoJSON source only works with GeoDataFrames from
-            the geopandas package http://geopandas.org/data_structures.html#geodataframe
-            ''')
-
     if isinstance(input_data, str):
         # File name
         data = geopandas.read_file(input_data)

@@ -1,0 +1,4 @@
+pytest
+matplotlib
+coveralls
+mock
