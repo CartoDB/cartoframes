@@ -10,27 +10,12 @@ from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1, test_geography2, db_geography2
+from .mocks import BigQueryClientMock, CredentialsMock
 
 try:
     from unittest.mock import Mock, patch
 except ImportError:
     from mock import Mock, patch
-
-
-class BigQueryClientMock(object):
-    def __init__(self, response):
-        self.response = response
-
-    def download_to_file(self, _1, _2, _3):
-        if isinstance(self.response, Exception):
-            raise self.response
-        else:
-            return self.response
-
-
-class CredentialsMock(object):
-    def __init__(self, username):
-        self.username = username
 
 
 class TestGeography(unittest.TestCase):
