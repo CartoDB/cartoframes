@@ -115,8 +115,13 @@ def set_default_credentials(
 
 
 def get_default_credentials():
-    return _default_credentials
+    """get_default_credentials
+    
+    Returns: 
+        :obj:`Credentials`: The credentials that have been set by default.        
 
+    """
+    return _default_credentials
 
 def _is_url(text):
     return re.match(r'^https?://.*$', text)

@@ -217,8 +217,6 @@ class Credentials(object):
         return token.access_token
 
     def get_api_key_auth_client(self):
-        """Returns the CARTO API Key"""
-
         if not self._api_key_auth_client:
             self._api_key_auth_client = APIKeyAuthClient(
                 base_url=self.base_url,
