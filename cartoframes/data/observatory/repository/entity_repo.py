@@ -20,7 +20,7 @@ class EntityRepository(ABC):
         return self._get_filtered_entities()
 
     def get_by_id(self, id_):
-        result = self._get_rows(self.id_field, id_)
+        result = self._get_rows({self.id_field: id_})
 
         if len(result) == 0:
             raise DiscoveryException('The id does not correspond with any existing entity in the catalog. '
@@ -29,8 +29,8 @@ class EntityRepository(ABC):
         data = self._map_row(result[0])
         return self._to_catalog_entity(data)
 
-    def _get_filtered_entities(self, field=None, value=None):
-        rows = self._get_rows(field, value)
+    def _get_filtered_entities(self, filters=None):
+        rows = self._get_rows(filters)
 
         if len(rows) == 0:
             return None
@@ -60,5 +60,5 @@ class EntityRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_rows(self, field=None, value=None):
+    def _get_rows(self, filters=None):
         raise NotImplementedError

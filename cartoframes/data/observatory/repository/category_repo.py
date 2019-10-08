@@ -26,8 +26,8 @@ class CategoryRepository(EntityRepository):
         from cartoframes.data.observatory.category import Category
         return Category
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_categories(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_categories(filters)
 
 
 _REPO = CategoryRepository()

@@ -15,7 +15,7 @@ class GeographyRepository(EntityRepository):
     id_field = _GEOGRAPHY_ID_FIELD
 
     def get_by_country(self, iso_code3):
-        return self._get_filtered_entities('country_iso_code3', iso_code3)
+        return self._get_filtered_entities({'country_iso_code3': iso_code3})
 
     @classmethod
     def _map_row(cls, row):
@@ -38,8 +38,8 @@ class GeographyRepository(EntityRepository):
         from cartoframes.data.observatory.geography import Geography
         return Geography
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_geographies(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_geographies(filters)
 
 
 _REPO = GeographyRepository()

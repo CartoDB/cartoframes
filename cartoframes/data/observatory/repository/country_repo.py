@@ -25,8 +25,8 @@ class CountryRepository(EntityRepository):
         from cartoframes.data.observatory.country import Country
         return Country
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_countries(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_countries(filters)
 
 
 _REPO = CountryRepository()

@@ -15,19 +15,19 @@ class DatasetRepository(EntityRepository):
     id_field = _DATASET_ID_FIELD
 
     def get_by_country(self, iso_code3):
-        return self._get_filtered_entities('country_iso_code3', iso_code3)
+        return self._get_filtered_entities({'country_iso_code3': iso_code3})
 
     def get_by_category(self, category_id):
-        return self._get_filtered_entities('category_id', category_id)
+        return self._get_filtered_entities({'category_id': category_id})
 
     def get_by_variable(self, variable_id):
-        return self._get_filtered_entities('variable_id', variable_id)
+        return self._get_filtered_entities({'variable_id': variable_id})
 
     def get_by_geography(self, geography_id):
-        return self._get_filtered_entities('geography_id', geography_id)
+        return self._get_filtered_entities({'geography_id': geography_id})
 
     def get_by_provider(self, provider_id):
-        return self._get_filtered_entities('provider_id', provider_id)
+        return self._get_filtered_entities({'provider_id': provider_id})
 
     @classmethod
     def _map_row(cls, row):
@@ -54,8 +54,8 @@ class DatasetRepository(EntityRepository):
         from cartoframes.data.observatory.dataset import Dataset
         return Dataset
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_datasets(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_datasets(filters)
 
 
 _REPO = DatasetRepository()

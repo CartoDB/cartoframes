@@ -26,7 +26,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -40,7 +40,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert datasets is None
 
     @patch.object(RepoClient, 'get_datasets')
@@ -54,7 +54,7 @@ class TestDatasetRepo(unittest.TestCase):
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
@@ -79,7 +79,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_iso_code3', country_code)
+        mocked_repo.assert_called_once_with({'country_iso_code3': country_code})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -94,7 +94,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_category(category_id)
 
         # Then
-        mocked_repo.assert_called_once_with('category_id', category_id)
+        mocked_repo.assert_called_once_with({'category_id': category_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -109,7 +109,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_variable(variable_id)
 
         # Then
-        mocked_repo.assert_called_once_with('variable_id', variable_id)
+        mocked_repo.assert_called_once_with({'variable_id': variable_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -124,7 +124,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_geography(geography_id)
 
         # Then
-        mocked_repo.assert_called_once_with('geography_id', geography_id)
+        mocked_repo.assert_called_once_with({'geography_id': geography_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 

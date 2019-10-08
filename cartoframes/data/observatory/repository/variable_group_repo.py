@@ -15,7 +15,7 @@ class VariableGroupRepository(EntityRepository):
     id_field = _VARIABLE_GROUP_ID_FIELD
 
     def get_by_dataset(self, dataset_id):
-        return self._get_filtered_entities('dataset_id', dataset_id)
+        return self._get_filtered_entities({'dataset_id': dataset_id})
 
     @classmethod
     def _map_row(cls, row):
@@ -31,8 +31,8 @@ class VariableGroupRepository(EntityRepository):
         from cartoframes.data.observatory.variable_group import VariableGroup
         return VariableGroup
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_variables_groups(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_variables_groups(filters)
 
 
 _REPO = VariableGroupRepository()

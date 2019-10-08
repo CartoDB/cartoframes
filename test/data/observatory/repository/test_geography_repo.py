@@ -25,7 +25,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
@@ -39,7 +39,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert geographies is None
 
     @patch.object(RepoClient, 'get_geographies')
@@ -53,7 +53,7 @@ class TestGeographyRepo(unittest.TestCase):
         geography = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
@@ -79,7 +79,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_iso_code3', country_code)
+        mocked_repo.assert_called_once_with({'country_iso_code3': country_code})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

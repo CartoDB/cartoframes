@@ -26,7 +26,7 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(categories, CatalogList)
         assert categories == test_categories
 
@@ -40,7 +40,7 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert categories is None
 
     @patch.object(RepoClient, 'get_categories')
@@ -54,7 +54,7 @@ class TestCategoryRepo(unittest.TestCase):
         category = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert category == test_category1
 
     @patch.object(RepoClient, 'get_categories')

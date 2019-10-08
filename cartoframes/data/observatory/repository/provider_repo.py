@@ -26,8 +26,8 @@ class ProviderRepository(EntityRepository):
         from cartoframes.data.observatory.provider import Provider
         return Provider
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_providers(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_providers(filters)
 
 
 _REPO = ProviderRepository()

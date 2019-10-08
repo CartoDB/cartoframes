@@ -13,7 +13,7 @@ class Catalog(object):
         """Get all the countries in the Catalog
 
         Returns:
-            :py:class:`Categories <cartoframes.data.observatory.Countries>`
+            :py:class:`Countries <cartoframes.data.observatory.Countries>`
 
         """
 

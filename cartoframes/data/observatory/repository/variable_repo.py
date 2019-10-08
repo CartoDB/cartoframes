@@ -15,10 +15,10 @@ class VariableRepository(EntityRepository):
     id_field = _VARIABLE_ID_FIELD
 
     def get_by_dataset(self, dataset_id):
-        return self._get_filtered_entities('dataset_id', dataset_id)
+        return self._get_filtered_entities({'dataset_id': dataset_id})
 
     def get_by_variable_group(self, variable_group_id):
-        return self._get_filtered_entities('variable_group_id', variable_group_id)
+        return self._get_filtered_entities({'variable_group_id': variable_group_id})
 
     @classmethod
     def _map_row(cls, row):
@@ -40,8 +40,8 @@ class VariableRepository(EntityRepository):
         from cartoframes.data.observatory.variable import Variable
         return Variable
 
-    def _get_rows(self, field=None, value=None):
-        return self.client.get_variables(field, value)
+    def _get_rows(self, filters=None):
+        return self.client.get_variables(filters)
 
 
 _REPO = VariableRepository()
