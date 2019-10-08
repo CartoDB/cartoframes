@@ -1,7 +1,8 @@
 import unittest
 
 from cartoframes.exceptions import DiscoveryException
-
+from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
@@ -24,7 +25,8 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
+        assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
@@ -37,14 +39,14 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with()
+        mocked_repo.assert_called_once_with(None, None)
         assert geographies is None
 
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
-        requested_id = test_geography1['id']
+        requested_id = db_geography1['id']
         repo = GeographyRepository()
 
         # When
@@ -52,6 +54,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with('id', requested_id)
+        assert isinstance(geography, Geography)
         assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies')
@@ -73,8 +76,35 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geography = repo.get_by_country(country_code)
+        geographies = repo.get_by_country(country_code)
 
         # Then
         mocked_repo.assert_called_once_with('country_iso_code3', country_code)
-        assert geography == test_geographies
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_missing_fields_are_mapped_as_None(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [{'id': 'geography1'}]
+        repo = GeographyRepository()
+
+        expected_geographies = CatalogList([Geography({
+            'id': 'geography1',
+            'name': None,
+            'description': None,
+            'provider_id': None,
+            'country_iso_code3': None,
+            'language_iso_code3': None,
+            'geom_coverage': None,
+            'update_frequency': None,
+            'version': None,
+            'is_public_data': None,
+            'summary_jsonb': None
+        })])
+
+        # When
+        geographies = repo.get_all()
+
+        # Then
+        assert geographies == expected_geographies

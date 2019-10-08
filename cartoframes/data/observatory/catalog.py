@@ -1,14 +1,15 @@
 from __future__ import absolute_import
 
-from .category import Categories
-from .country import Countries
+from .category import Category
+from .country import Country
+from .dataset import Dataset
 
 
 class Catalog(object):
     """Data Observatory Catalog"""
 
-    @staticmethod
-    def countries():
+    @property
+    def countries(self):
         """Get all the countries in the Catalog
 
         Returns:
@@ -16,10 +17,10 @@ class Catalog(object):
 
         """
 
-        return Countries.get_all()
+        return Country.get_all()
 
-    @staticmethod
-    def categories():
+    @property
+    def categories(self):
         """Get all the categories in the Catalog
 
         Returns:
@@ -27,4 +28,15 @@ class Catalog(object):
 
         """
 
-        return Categories.get_all()
+        return Category.get_all()
+
+    @property
+    def datasets(self):
+        """Get all the datasets in the Catalog
+
+        Returns:
+            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+
+        """
+
+        return Dataset.get_all()
