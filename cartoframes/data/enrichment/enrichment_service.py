@@ -178,38 +178,38 @@ def __process_enrichment_variables(variables, user_dataset):
 
     for variable in variables:
         project_name = variable.project_name
-        dataset_name = variable.project_name
-        table_name = variable.project_name
-        variable_name = variable.project_name
+        dataset_name = variable.schema_name
+        table_name = variable.dataset_name
+        variable_name = variable.column_name
 
         if project_name != _PUBLIC_PROJECT:
-            table = '{dataset}_{table}'.format(dataset=dataset_name,
-                                               table=table_name,
-                                               user_dataset=user_dataset)
+            table_name = '{dataset}_{table}'.format(dataset=dataset_name,
+                                                    table=table_name,
+                                                    user_dataset=user_dataset)
 
-        if table not in table_to_dataset:
+        if table_name not in table_to_dataset:
             if project_name != _PUBLIC_PROJECT:
-                table_to_dataset[table] = user_dataset
+                table_to_dataset[table_name] = user_dataset
             else:
-                table_to_dataset[table] = _PUBLIC_DATASET
+                table_to_dataset[table_name] = _PUBLIC_DATASET
 
-        if table not in table_to_geotable:
-            geotable = __get_name_geotable_from_datatable(table)
+        if table_name not in table_to_geotable:
+            geotable = __get_name_geotable_from_datatable(table_name)
 
             if project_name != _PUBLIC_PROJECT:
                 geotable = '{dataset}_{geotable}'.format(dataset=dataset_name,
                                                          geotable=geotable,
                                                          user_dataset=user_dataset)
 
-            table_to_geotable[table] = geotable
+            table_to_geotable[table_name] = geotable
 
-        if table not in table_to_project:
+        if table_name not in table_to_project:
             if project_name == _PUBLIC_PROJECT:
-                table_to_project[table] = _PUBLIC_PROJECT
+                table_to_project[table_name] = _PUBLIC_PROJECT
             else:
-                table_to_project[table] = _WORKING_PROJECT
+                table_to_project[table_name] = _WORKING_PROJECT
 
-        table_to_variables[table].append(variable_name)
+        table_to_variables[table_name].append(variable_name)
 
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
