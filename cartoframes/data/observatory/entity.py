@@ -69,7 +69,7 @@ class CatalogEntity(ABC):
             raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
 
         warn('Data saved: {}.'.format(file_path))
-        warn("Read it by: `pandas.read_csv('{}')`.".format(file_path))
+        warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
 
         return file_path
 
