@@ -1,5 +1,7 @@
 import unittest
 
+from cartoframes.data.observatory.geography import Geography
+
 from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.dataset import Dataset
@@ -54,7 +56,7 @@ class TestCatalog(unittest.TestCase):
         assert datasets == expected_datasets
 
     @patch.object(Country, 'get_all')
-    def test_filters_on_countries(self, mocked_datasets):
+    def test_filters_on_countries(self, mocked_countries):
         # Given
         catalog = Catalog()
 
@@ -62,10 +64,10 @@ class TestCatalog(unittest.TestCase):
         countries = catalog.category('demographics').datasets
 
         # Then
-        mocked_datasets.called_once_with({'category_id': 'demographics'})
+        mocked_countries.called_once_with({'category_id': 'demographics'})
 
     @patch.object(Category, 'get_all')
-    def test_filters_on_categories(self, mocked_datasets):
+    def test_filters_on_categories(self, mocked_categories):
         # Given
         catalog = Catalog()
 
@@ -73,7 +75,7 @@ class TestCatalog(unittest.TestCase):
         categories = catalog.country('usa').categories
 
         # Then
-        mocked_datasets.called_once_with({'country_id': 'usa'})
+        mocked_categories.called_once_with({'country_id': 'usa'})
 
     @patch.object(Dataset, 'get_all')
     def test_filters_on_datasets(self, mocked_datasets):
@@ -86,3 +88,13 @@ class TestCatalog(unittest.TestCase):
         # Then
         mocked_datasets.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
 
+    @patch.object(Geography, 'get_all')
+    def test_filters_on_geographies(self, mocked_geographies):
+        # Given
+        catalog = Catalog()
+
+        # When
+        geographies = catalog.country('usa').category('demographics').geographies
+
+        # Then
+        mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})

@@ -17,7 +17,7 @@ class Catalog(object):
         """Get all the countries in the Catalog
 
         Returns:
-            :py:class:`Countries <cartoframes.data.observatory.Countries>`
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         """
 
@@ -28,7 +28,7 @@ class Catalog(object):
         """Get all the categories in the Catalog
 
         Returns:
-            :py:class:`Categories <cartoframes.data.observatory.Categories>`
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         """
 
@@ -39,7 +39,18 @@ class Catalog(object):
         """Get all the datasets in the Catalog
 
         Returns:
-            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        """
+
+        return Dataset.get_all(self.filters)
+
+    @property
+    def geographies(self):
+        """Get all the geographies in the Catalog
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
         """
 

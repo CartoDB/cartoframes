@@ -1,11 +1,11 @@
 from __future__ import absolute_import
 
-from .constants import COUNTRY_FILTER
+from .constants import COUNTRY_FILTER, CATEGORY_FILTER
 from .entity_repo import EntityRepository
 
 
 _GEOGRAPHY_ID_FIELD = 'id'
-_ALLOWED_FILTERS = [COUNTRY_FILTER]
+_ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER]
 
 
 def get_geography_repo():
@@ -26,6 +26,9 @@ class GeographyRepository(EntityRepository):
         return Geography
 
     def _get_rows(self, filters=None):
+        if filters is not None and (COUNTRY_FILTER or COUNTRY_FILTER) in filters.keys():
+            return self.client.get_geographies_joined_datasets(filters)
+
         return self.client.get_geographies(filters)
 
     def _map_row(self, row):
@@ -34,8 +37,8 @@ class GeographyRepository(EntityRepository):
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
             'provider_id': self._normalize_field(row, 'provider_id'),
-            'country_iso_code3': self._normalize_field(row, 'country_iso_code3'),
-            'language_iso_code3': self._normalize_field(row, 'language_iso_code3'),
+            'country_id': self._normalize_field(row, 'country_id'),
+            'lang': self._normalize_field(row, 'lang'),
             'geom_coverage': self._normalize_field(row, 'geom_coverage'),
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),

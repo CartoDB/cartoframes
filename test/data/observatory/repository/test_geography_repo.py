@@ -68,7 +68,7 @@ class TestGeographyRepo(unittest.TestCase):
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
 
-    @patch.object(RepoClient, 'get_geographies')
+    @patch.object(RepoClient, 'get_geographies_joined_datasets')
     def test_get_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -94,8 +94,8 @@ class TestGeographyRepo(unittest.TestCase):
             'name': None,
             'description': None,
             'provider_id': None,
-            'country_iso_code3': None,
-            'language_iso_code3': None,
+            'country_id': None,
+            'lang': None,
             'geom_coverage': None,
             'update_frequency': None,
             'version': None,
