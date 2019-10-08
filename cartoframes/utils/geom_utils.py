@@ -4,16 +4,11 @@ import binascii as ba
 from warnings import warn
 from copy import deepcopy
 import geojson
+import geopandas
 
 from carto.exceptions import CartoException
 
 from ..lib import context
-
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
 
 
 GEOM_COLUMN_NAMES = [
@@ -58,7 +53,7 @@ def compute_query(dataset):
 
 
 def compute_geodataframe(dataset):
-    if HAS_GEOPANDAS and dataset.dataframe is not None:
+    if dataset.dataframe is not None:
         if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
             return dataset.dataframe
 

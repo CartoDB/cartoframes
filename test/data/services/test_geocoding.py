@@ -21,12 +21,6 @@ from cartoframes.data.clients import SQLClient
 
 from cartoframes.data.services import Geocoding
 
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
-
 from test.helpers import _UserUrlLoader, _ReportQuotas
 
 warnings.filterwarnings('ignore')

@@ -8,7 +8,6 @@ Requirements
 
 - sphinx>=1.6.5
 - sphinxcontrib-napoleon>=0.7.0
-- geopandas>=0.5.1
 
 This can be installed with the following command:
 
