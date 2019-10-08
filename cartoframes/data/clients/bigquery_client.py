@@ -66,6 +66,10 @@ class BigQueryClient(object):
         full_table_name = '{}.{}.{}'.format(project, dataset, table)
         return self.client.get_table(full_table_name)
 
+    def get_table_column_names(self, project, dataset, table):
+        table_info = self.get_table(project, dataset, table)
+        return [field.name for field in table_info.schema]
+
     def download_to_file(self, project, dataset, table, limit=None, offset=None,
                          file_path=None, fail_if_exists=False, progress_bar=True):
         if not file_path:
@@ -75,8 +79,7 @@ class BigQueryClient(object):
         if fail_if_exists and os.path.isfile(file_path):
             raise CartoException('The file `{}` already exists.'.format(file_path))
 
-        table_info = self.get_table(project, dataset, table)
-        fields = [field.name for field in table_info.schema]
+        column_names = self.get_table_column_names(project, dataset, table)
 
         query = _download_query(project, dataset, table, limit, offset)
         rows_iter = self.query(query).result()
@@ -87,7 +90,7 @@ class BigQueryClient(object):
         with open(file_path, 'w') as csvfile:
             csvwriter = csv.writer(csvfile)
 
-            csvwriter.writerow(fields)
+            csvwriter.writerow(column_names)
 
             for row in rows_iter:
                 csvwriter.writerow(row.values())

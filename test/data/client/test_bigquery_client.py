@@ -92,10 +92,13 @@ class TestBigQueryClient(unittest.TestCase):
         bigquery.Client.query = original_query_method
 
     def test_download_full(self):
-        expected_result = [{'0': 'word', '1': 'word word'}]
+        data = [{'0': 'word', '1': 'word word'}]
+        columns = ['column1', 'column2']
 
         original_query = BigQueryClient.query
-        BigQueryClient.query = Mock(return_value=QueryJobMock(expected_result))
+        BigQueryClient.query = Mock(return_value=QueryJobMock(data))
+        original_get_table_column_names = BigQueryClient.get_table_column_names
+        BigQueryClient.get_table_column_names = Mock(return_value=columns)
 
         project = _WORKING_PROJECT
         dataset = 'fake_dataset'
@@ -107,12 +110,17 @@ class TestBigQueryClient(unittest.TestCase):
 
         self.assertTrue(os.path.isfile(file_path))
 
+        rows = []
         with open(file_path) as csvfile:
             csvreader = csv.reader(csvfile)
-            row = next(csvreader)
-            self.assertEqual(row, list(expected_result[0].values()))
+            rows.append(next(csvreader))
+            rows.append(next(csvreader))
+
+        self.assertEqual(rows[0], columns)
+        self.assertEqual(rows[1], list(data[0].values()))
 
         BigQueryClient.query = original_query
+        BigQueryClient.get_table_column_names = original_get_table_column_names
 
     def test_download_using_if_exists(self):
         project = _WORKING_PROJECT
