@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import pandas
+import geopandas
 
 from .source import Source
 from .style import Style
@@ -10,12 +11,6 @@ from .widget_list import WidgetList
 from .legend_list import LegendList
 from ..data import Dataset
 from ..utils.utils import merge_dicts
-
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
 
 
 class Layer(object):
@@ -167,8 +162,7 @@ class Layer(object):
 
 def _set_source(source, credentials, bounds):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or \
-       HAS_GEOPANDAS and isinstance(source, geopandas.GeoDataFrame):
+    if isinstance(source, (str, list, dict, Dataset, pandas.DataFrame)) or isinstance(source, geopandas.GeoDataFrame):
         return Source(source, credentials, bounds)
     elif isinstance(source, Source):
         return source
