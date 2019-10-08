@@ -81,7 +81,7 @@ class Dataset(CatalogEntity):
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
               credentials of CARTO user account. If not provided,
               a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will attempted to be
+              <cartoframes.auth.set_default_credentials>`) will be attempted to be
               used.
         """
 
