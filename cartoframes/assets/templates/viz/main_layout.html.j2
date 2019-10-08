@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{{title}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <!-- Include CARTO VL JS -->
+  <script src="{{carto_vl_path}}"></script>
+  <!-- Include Mapbox GL JS -->
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js"></script>
+  <!-- Include Mapbox GL CSS -->
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- Include Airship -->
+  <script nomodule="" src="{{airship_components_path}}"></script>
+  <script type="module" src="{{airship_module_path}}"></script>
+  <script src="{{airship_bridge_path}}"></script>
+  <link href="{{airship_styles_path}}" rel="stylesheet">
+  <link href="{{airship_icons_path}}" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+
+  <!-- External libraries -->
+  
+  <!-- base64-js -->
+  <script src='https://libs.cartocdn.com/cartoframes/dependencies/base64.js'></script>
+  <!-- html2canvas -->
+  <script src="https://libs.cartocdn.com/cartoframes/dependencies/html2canvas.min.js"></script>
+
+  {% if theme %}
+    {% include 'style/themes/' + theme + '.html.j2' %}
+  {% endif %}
+  {% include 'style/common.html.j2' %}
+  {% include 'style/map.html.j2' %}
+  {% include 'style/layout.html.j2' %}
+  {% include 'style/error.html.j2' %}
+  {% include 'style/popup.html.j2' %}
+</head>
+
+<body class="as-app-body as-app">
+  <main id="main-container" class="layout-map-container">
+  {% for i in range(n) %}
+    <div class="layout-map-row">
+    {% for j in range(m) %}
+      {% set index = i * m + j %}
+      {% set title = maps[index]['title'] %}
+      {% set has_legends = maps[index]['has_legends'] %}
+      
+      <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}px">
+          {% if title %}<p>{{ title }}</p>{% endif %}
+          {% if has_legends %}
+            {% set layers = maps[index]['layers'] %}
+            {% include 'templates/viz/legends_layout.html.j2' %}
+          {% endif %}
+          <img id="map-image-{{ index }}" class="map-image" alt="Static Map {{index}}" />
+          <div class="as-main layout-map" id="main-container-{{index}}">
+            <div class="as-map-area">
+              <div id="map-{{ index }}" class="map"></div>
+            </div> <!-- as-map-area -->
+          </div> <!-- as-main -->
+      </div>
+    {% endfor %}
+    </div>
+  {% endfor %}
+  </main>
+
+  {% if is_embed %}
+    {% include 'templates/viz/footer.html.j2' %}
+  {% endif %}
+
+  {% include 'templates/error/basic.html.j2' %}
+</body>
+<script>
+  {% include 'src/bundle.js' %}
+</script>
+<script>
+  {% include 'init_layout.js.j2' %}
+</script>
+</html>

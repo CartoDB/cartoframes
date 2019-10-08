@@ -17,10 +17,11 @@ export function initMapLayer(layer, layerIndex, numLayers, hasLegends, map, mapI
     throw e;
   }
 
-  setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
-  setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
   mapLayer.addTo(map);
+
+  setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
+  setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
   return mapLayer;
 }

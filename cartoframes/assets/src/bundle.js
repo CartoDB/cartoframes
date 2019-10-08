@@ -122,18 +122,30 @@ var init = (function () {
 
   function createLegend(layer, legendData, layerIndex, mapIndex=0) {
     const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend`);
+    
+    if (legendData.length) {
+      legendData.forEach((legend, legendIndex) => _createLegend(layer, legend, layerIndex, legendIndex, mapIndex));
+    } else {
+      _createLegend(layer, legendData, layerIndex, 0, mapIndex);
+    }
+  }
 
-    if (legendData.prop) {
-      const config = { othersLabel: 'Others' };  // TODO: i18n
-      const prop = legendData.prop;
-      const dynamic = legendData.dynamic;
-      const opts = { format, config, dynamic };
+  function _createLegend(layer, legend, layerIndex, legendIndex, mapIndex=0) {
+    const element = document.querySelector(`#layer${layerIndex}_map${mapIndex}_legend${legendIndex}`);
 
-      if (legendData.type.startsWith('size-continuous')) {
+    if (legend.prop) {
+      const othersLabel = 'Others';   // TODO: i18n
+      const prop = legend.prop;
+      const dynamic = legend.dynamic;
+      const variable = legend.variable;
+      const config = { othersLabel, variable };
+      const options = { format, config, dynamic };
+
+      if (legend.type.startsWith('size-continuous')) {
         config.samples = 4;
       }
       
-      AsBridge.VL.Legends.rampLegend(element, layer, prop, opts);
+      AsBridge.VL.Legends.rampLegend(element, layer, prop, options);
     }
   }
 
@@ -366,10 +378,10 @@ var init = (function () {
 
   function renderBridge(bridge, widget, mapLayer) {
     widget.element = widget.element || document.querySelector(`#${widget.id}`);
-    const type = mapLayer.metadata.properties[widget.value].type;
 
     switch (widget.type) {
       case 'histogram':
+        const type = _getWidgetType(mapLayer, widget.value, widget.prop);
         const histogram = type === 'category' ? 'categoricalHistogram' : 'numericalHistogram';
         bridge[histogram](widget.element, widget.value, widget.options);
 
@@ -396,13 +408,23 @@ var init = (function () {
       map: map
     });
 
-    mapLayer.on('loaded', () => {
-      widgets
-        .filter((widget) => widget.has_bridge)
-        .forEach((widget) => renderBridge(bridge, widget, mapLayer));
+    widgets
+      .filter((widget) => widget.has_bridge)
+      .forEach((widget) => renderBridge(bridge, widget, mapLayer));
 
-      bridge.build();
-    });
+    bridge.build();
+  }
+
+  function _getWidgetType(layer, property, value) {
+    return layer.metadata && layer.metadata.properties[value] ?
+      layer.metadata.properties[value].type
+      : _getWidgetPropertyType(layer, property);
+  }
+
+  function _getWidgetPropertyType(layer, property) {
+    return layer.metadata && layer.metadata.properties[property] ?
+      layer.metadata.properties[property].type
+      : null;
   }
 
   function SourceFactory() {
@@ -452,10 +474,11 @@ var init = (function () {
       throw e;
     }
 
-    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
-    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     mapLayer.addTo(map);
+
+    setLayerLegend(layer, mapLayerIndex, mapLayer, mapIndex, hasLegends);
+    setLayerWidgets(map, layer, mapLayer, mapLayerIndex, mapSource);
 
     return mapLayer;
   }
@@ -534,8 +557,6 @@ var init = (function () {
     const basemapStyle =  BASEMAPS[settings.basemap] || settings.basemap || basecolor;
     const container = mapIndex !== undefined ? `map-${mapIndex}` : 'map';
     const map = createMap(container, basemapStyle, settings.bounds, settings.mapboxtoken);
-
-    console.log('!!! settings', settings);
 
     if (settings.show_info) {
       updateViewport(map);

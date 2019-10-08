@@ -68,9 +68,10 @@ good method:
           lnglat=('pickup_latitude', 'pickup_longitude')
           credentials=credentials)
 """  # noqa
-from cartoframes.auth import Credentials
-from cartoframes.data import Dataset, tables
-from cartoframes.viz import Map, Layer
+from .auth import Credentials
+from .data import Dataset
+from .utils.table import tables
+from .viz import Map, Layer
 
 EXAMPLE_BASE_URL = 'https://cartoframes.carto.com'
 EXAMPLE_API_KEY = 'default_public'
@@ -353,7 +354,7 @@ def read_taxi(limit=None, **kwargs):
         To create geometries with `examples.query`, write a query such
         as this::
 
-            from cartoframes.client import SQLClient
+            from cartoframes.data.clients import SQLClient
 
             sql = SQLClient(examples.get_credentials())
 

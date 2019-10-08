@@ -2,7 +2,7 @@ CARTO_VL_VERSION = 'v1.4'
 CARTO_VL_DEV = '/dist/carto-vl.js'
 CARTO_VL_URL = 'https://libs.cartocdn.com/carto-vl/{}/carto-vl.min.js'.format(CARTO_VL_VERSION)
 
-AIRSHIP_VERSION = 'v2.2.0-rc.2'
+AIRSHIP_VERSION = 'v2.2.0-rc.2.1'
 AIRSHIP_COMPONENTS_DEV = '/packages/components/dist/airship.js'
 AIRSHIP_BRIDGE_DEV = '/packages/bridge/dist/asbridge.js'
 AIRSHIP_MODULE_DEV = '/packages/components/dist/airship/airship.esm.js'
@@ -94,4 +94,4 @@ CLUSTER_OPERATIONS = {
 
 THEMES = ['dark', 'light']
 
-DEFAULT_GRID_M_SIZE = 1
+DEFAULT_LAYOUT_M_SIZE = 1

@@ -2,11 +2,12 @@
 
 import pandas as pd
 
-from cartoframes.data.registry.strategies_registry import StrategiesRegistry
-from cartoframes.data.registry.dataframe_dataset import DataFrameDataset
-from cartoframes.data.registry.query_dataset import QueryDataset
-from cartoframes.data.registry.table_dataset import TableDataset
-from cartoframes.data import Dataset, DatasetInfo
+from cartoframes.data import StrategiesRegistry
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset
+from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data import Dataset
+from cartoframes.data.dataset.dataset_info import DatasetInfo
 
 
 class MetadataMock():
@@ -33,7 +34,7 @@ class DataFrameDatasetMock(DataFrameDataset):
     def _get_dataset_info(self, table_name=None):
         return DatasetInfoMock(self._credentials, table_name or self._table_name)
 
-    def _create_table(self, _, _2):
+    def _create_table(self, _):
         return True
 
     def _copyfrom(self, _, _2):
@@ -99,16 +100,6 @@ class StrategiesRegistryMock(StrategiesRegistry):
 class DatasetMock(Dataset):
     def _get_strategies_registry(self):
         return StrategiesRegistryMock()
-
-    def _set_strategy(self, strategy, data, credentials=None, schema=None):
-        if strategy == DataFrameDataset:
-            strategy = DataFrameDatasetMock
-        elif strategy == TableDataset:
-            strategy = TableDatasetMock
-        elif strategy == QueryDataset:
-            strategy = QueryDatasetMock
-
-        super(DatasetMock, self)._set_strategy(strategy, data, credentials, schema)
 
     def compute_geom_type(self):
         return Dataset.GEOM_TYPE_POINT

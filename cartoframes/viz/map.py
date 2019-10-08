@@ -2,14 +2,15 @@ from __future__ import absolute_import
 
 import collections
 import numpy as np
+from warnings import warn
+
 from carto.exceptions import CartoException
 
-from warnings import warn
 from . import constants
 from .basemaps import Basemaps
 from .kuviz import KuvizPublisher, kuviz_to_dict
 from .html.HTMLMap import HTMLMap
-from ..utils import get_center
+from ..utils.utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
 
@@ -428,6 +429,7 @@ def _get_layer_def(layer):
         'credentials': layer.credentials,
         'interactivity': layer.interactivity,
         'legend': layer.legend_info,
+        'has_legend_list': layer.has_legend_list,
         'widgets': layer.widgets_info,
         'query': layer.source.query,
         'type': layer.source.type,
