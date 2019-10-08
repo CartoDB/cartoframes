@@ -431,8 +431,6 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         quota = self.used_quota(gc)
 
-        status = {'prefix': '_gc_status_', 'fields':['relevance']}
-
         # Preview
         info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
                           dry_run=True).metadata
@@ -461,12 +459,12 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         # Preview
         info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'},
-                          status={'meta':'*'}, dry_run=True).metadata
+                          status={'meta': '*'}, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(self.used_quota(gc), quota)
 
         # Geocode
-        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status={'meta':'*'})
+        gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status={'meta': '*'})
         self.assertTrue(isinstance(gc_df, pd.DataFrame))
         self.assertEqual(info.get('required_quota'), 2)
         self.assertEqual(info.get('successfully_geocoded'), 2)
