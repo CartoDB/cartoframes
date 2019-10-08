@@ -7,7 +7,6 @@ from .repository.variable_group_repo import get_variable_group_repo
 
 
 class Dataset(CatalogEntity):
-
     entity_repo = get_dataset_repo()
 
     @property
