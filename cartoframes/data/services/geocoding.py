@@ -10,6 +10,7 @@ import pandas as pd
 from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
 from .service import Service
+from ...data.clients import SQLClient
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
@@ -57,7 +58,14 @@ def _column_name(col):
         return 'NULL'
 
 
-def _hash_expr(street, city, state, country):
+def _prefixed_column_or_value(attr, prefix):
+    if prefix and attr is not None and attr[0] != "'":
+        return "{}.{}".format(prefix, attr)
+    return attr
+
+
+def _hash_expr(street, city, state, country, table_prefix=None):
+    street, city, state, country = (_prefixed_column_or_value(v, table_prefix) for v in (street, city, state, country))
     hashed_expr = " || '<>' || ".join([street, city or "''", state or "''", country or "''"])
     return "md5({hashed_expr})".format(hashed_expr=hashed_expr)
 
@@ -463,6 +471,44 @@ class Geocoding(Service):
                     result = result_dataset.download()
 
         return self.result(result, metadata=result_info)
+
+    def cached_geocode(self, dataframe, table_name, street, city=None, state=None, country=None, dry_run=False):
+        """
+        Geocode a dataframe caching results into a table.
+        If the same dataframe if geocoded repeatedly no credits will be spent.
+        But note there is a time overhead related to uploading the dataframe to a
+        temporary table for checking for changes.
+        """
+        dataset = Dataset(table_name, credentials=self._credentials)
+        if dataset.exists():
+            if HASH_COLUMN not in dataset.get_column_names():
+                raise ValueError('Cache table {} exists but is not a valid geocode table'.format(table_name))
+        else:
+            return self.geocode(dataframe, street=street, city=city, state=state, country=country, table_name=table_name, dry_run=dry_run)
+
+        tmp_table_name = self._new_temporary_table_name()
+        logging.warning('++CACHE TMP TAB {}'.format(tmp_table_name))
+        Dataset(dataframe).upload(table_name=tmp_table_name, credentials=self._credentials)
+        self._execute_query(
+            """
+            ALTER TABLE {tmp_table} ADD COLUMN {hash} text
+            """.format(tmp_table=tmp_table_name, hash=HASH_COLUMN))
+        hcity, hstate, hcountry = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
+        hash_expr = _hash_expr(street, hcity, hstate, hcountry, table_prefix=tmp_table_name)
+        self._execute_query(
+            """
+            UPDATE {tmp_table} SET {hash}={table}.{hash}, the_geom={table}.the_geom
+            FROM {table} WHERE {hash_expr}={table}.{hash}
+            """.format(tmp_table=tmp_table_name, table=table_name, hash=HASH_COLUMN, hash_expr=hash_expr))
+        sql_client = SQLClient(self._credentials)
+        sql_client.drop_table(table_name)
+        sql_client.rename_table(tmp_table_name, table_name)
+        # TODO: should remove the cartodb_id column from the result
+        # TODO: refactor to share code with geocode() and call self._geocode() here instead
+        # actually to keep hashing knowledge encapulated (AFW) this should be handled by
+        # _geocode using an additional parameter for an input table
+        dataset = Dataset(table_name, credentials=self._credentials)
+        return self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
 
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
