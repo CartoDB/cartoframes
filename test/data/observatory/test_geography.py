@@ -107,7 +107,7 @@ class TestGeography(unittest.TestCase):
         geography_repr = repr(geography)
 
         # Then
-        assert geography_repr == 'Geography({id})'.format(id=db_geography1['id'])
+        assert geography_repr == "<Geography('{id}')>".format(id=db_geography1['slug'])
 
     def test_geography_is_printed_with_classname(self):
         # Given
@@ -155,8 +155,8 @@ class TestGeography(unittest.TestCase):
         categories_str = str(geographies)
 
         # Then
-        assert categories_str == '[Geography({id1}), Geography({id2})]' \
-                                 .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_str == "[<Geography('{id1}')>, <Geography('{id2}')>]" \
+                                 .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     def test_geography_list_is_represented_with_ids(self):
         # Given
@@ -166,8 +166,8 @@ class TestGeography(unittest.TestCase):
         categories_repr = repr(geographies)
 
         # Then
-        assert categories_repr == '[Geography({id1}), Geography({id2})]'\
-                                  .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_repr == "[<Geography('{id1}')>, <Geography('{id2}')>]"\
+                                  .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     def test_geographies_items_are_obtained_as_geography(self):
         # Given

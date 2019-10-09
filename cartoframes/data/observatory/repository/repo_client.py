@@ -18,56 +18,67 @@ class RepoClient(object):
     def set_user_credentials(self, credentials):
         self._user_credentials = credentials
 
-    def get_countries(self, field=None, value=None):
-        query = 'SELECT DISTICT country_id AS id FROM datasets_public'
-        return self._run_query(query, field, value)
+    def get_countries(self, filters=None):
+        query = 'SELECT DISTINCT view.country_id AS id FROM datasets_public view'
+        return self._run_query(query, filters)
 
-    def get_categories(self, field=None, value=None):
-        query = 'SELECT * FROM categories_public'
-        return self._run_query(query, field, value)
+    def get_categories(self, filters=None):
+        query = 'SELECT view.* FROM categories_public view'
+        return self._run_query(query, filters)
 
-    def get_providers(self, field=None, value=None):
-        query = 'SELECT * FROM providers_public'
-        return self._run_query(query, field, value)
+    def get_categories_joined_datasets(self, filters=None):
+        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public view'
+        return self._run_query(query,  filters, ['c.id = view.category_id'])
 
-    def get_variables(self, field=None, value=None):
-        query = 'SELECT * FROM variables_public'
-        return self._run_query(query, field, value)
+    def get_providers(self, filters=None):
+        query = 'SELECT view.* FROM providers_public view'
+        return self._run_query(query, filters)
 
-    def get_variables_groups(self, field=None, value=None):
-        query = 'SELECT * FROM variables_groups_public'
-        return self._run_query(query, field, value)
+    def get_variables(self, filters=None):
+        query = 'SELECT view.* FROM variables_public view'
+        return self._run_query(query, filters)
 
-    def get_geographies(self, field=None, value=None):
-        query = 'SELECT * FROM geographies_public'
+    def get_variables_groups(self, filters=None):
+        query = 'SELECT view.* FROM variables_groups_public view'
+        return self._run_query(query, filters)
 
-        extra_condition = ''
+    def get_geographies(self, filters=None):
+        query = 'SELECT view.* FROM geographies_public view'
+
+        extra_condition = []
         if self._user_credentials is not None:
-            extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+            extra_condition.append('view.id IN ({})'.format(self._get_purchased_dataset_ids()))
 
-        return self._run_query(query, field, value, extra_condition)
+        return self._run_query(query, filters, extra_condition)
 
-    def get_datasets(self, field=None, value=None):
-        query = 'SELECT * FROM datasets_public'
+    def get_geographies_joined_datasets(self, filters=None):
+        query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public view'
+        return self._run_query(query,  filters, ['g.id = view.geography_id'])
 
-        extra_condition = ''
+    def get_datasets(self, filters=None):
+        query = 'SELECT view.* FROM datasets_public view'
+
+        extra_condition = []
         if self._user_credentials is not None:
-            extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+            extra_condition.append('view.id IN ({})'.format(self._get_purchased_dataset_ids()))
 
-        return self._run_query(query, field, value, extra_condition)
+        return self._run_query(query, filters, extra_condition)
 
-    def _run_query(self, query, field, value, extra_condition=None):
-        conditions = self._compute_conditions(field, value, extra_condition)
+    def _run_query(self, query, filters, extra_conditions=None):
+        conditions = self._compute_conditions(filters, extra_conditions)
+
         if len(conditions) > 0:
-            query += ' WHERE {}'.format(' AND '.join(conditions))
+            where_clause = ' AND '.join(conditions)
+            query += ' WHERE {}'.format(where_clause)
+
         return self.client.query(query)
 
-    def _compute_conditions(self, field, value, extra_condition):
-        conditions = []
-        if field is not None and value is not None:
-            conditions.append("{f} = '{v}'".format(f=field, v=value))
-        if extra_condition:
-            conditions.append(extra_condition)
+    def _compute_conditions(self, filters, extra_conditions):
+        conditions = extra_conditions or []
+
+        if filters is not None and len(filters) > 0:
+            conditions.extend(["view.{} = '{}'".format(key, value) for key, value in filters.items()])
+
         return conditions
 
     def _get_purchased_dataset_ids(self):

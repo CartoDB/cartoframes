@@ -6,7 +6,8 @@ from .enrichment_service import enrich
 # TODO: process column name in metadata, remove spaces and points
 
 
-def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry', filters=dict(), credentials=None):
+def enrich_polygons(data, variables, data_geom_column='geometry', agg_operators=dict(),
+                    filters=dict(), credentials=None):
     """enrich_polygons
 
     This method is responsible for # TODO
