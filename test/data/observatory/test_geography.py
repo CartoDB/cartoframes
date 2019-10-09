@@ -5,6 +5,7 @@ from google.api_core.exceptions import NotFound
 
 from carto.exceptions import CartoException
 
+from cartoframes.auth import Credentials
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
@@ -131,6 +132,21 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
+    @patch.object(GeographyRepository, 'get_all')
+    def test_get_all_geographies_credentials(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_geographies
+        credentials = Credentials('user', '1234')
+
+        # When
+        geographies = Geography.get_all()
+
+        # Then
+        mocked_repo.assert_called_once_with(credentials)
+        assert isinstance(geographies, list)
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
     def test_geography_list_is_printed_with_classname(self):
         # Given
         geographies = CatalogList([test_geography1, test_geography2])
@@ -152,19 +168,6 @@ class TestGeography(unittest.TestCase):
         # Then
         assert categories_repr == '[Geography({id1}), Geography({id2})]'\
                                   .format(id1=db_geography1['id'], id2=db_geography2['id'])
-
-    @patch.object(GeographyRepository, 'get_by_id')
-    def test_get_geography_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_geography1
-
-        # When
-        geography = Geography.get(test_geography1.id)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
 
     def test_geographies_items_are_obtained_as_geography(self):
         # Given

@@ -153,6 +153,7 @@ class TestDataset(unittest.TestCase):
         # Then
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets_credentials(self, mocked_repo):
@@ -167,6 +168,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.assert_called_once_with(credentials)
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
 
     def test_dataset_list_is_printed_with_classname(self):
         # Given

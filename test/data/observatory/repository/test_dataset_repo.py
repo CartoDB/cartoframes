@@ -1,9 +1,8 @@
 import unittest
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.dataset import Dataset
-
 from cartoframes.exceptions import DiscoveryException
+from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
