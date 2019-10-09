@@ -26,7 +26,7 @@ class GeographyRepository(EntityRepository):
         return Geography
 
     def _get_rows(self, filters=None):
-        if filters is not None and (COUNTRY_FILTER or COUNTRY_FILTER) in filters.keys():
+        if filters is not None and (COUNTRY_FILTER in filters.keys() or CATEGORY_FILTER in filters.keys()):
             return self.client.get_geographies_joined_datasets(filters)
 
         return self.client.get_geographies(filters)

@@ -83,6 +83,20 @@ class TestGeographyRepo(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
+    @patch.object(RepoClient, 'get_geographies_joined_datasets')
+    def test_get_all_with_join_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_all({'category_id': 'demographics'})
+
+        # Then
+        mocked_repo.assert_called_once_with({'category_id': 'demographics'})
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
     @patch.object(RepoClient, 'get_geographies')
     def test_missing_fields_are_mapped_as_None(self, mocked_repo):
         # Given

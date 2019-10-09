@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from .category import Category
 from .country import Country
+from .geography import Geography
 from .dataset import Dataset
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
@@ -54,7 +55,7 @@ class Catalog(object):
 
         """
 
-        return Dataset.get_all(self.filters)
+        return Geography.get_all(self.filters)
 
     def country(self, country_id):
         self.filters[COUNTRY_FILTER] = country_id

@@ -40,7 +40,7 @@ class RepoClient(object):
         return self._run_query(query, filters)
 
     def get_geographies_joined_datasets(self, filters=None):
-        query = 'select distinct g.* from geographies_public g, datasets_public d'
+        query = 'select distinct g.* from geographies_public g'
         return self._run_join_query(query, "g.id = d.geography_id",  filters)
 
     def get_datasets(self, filters=None):
