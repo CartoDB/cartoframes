@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from carto.do_datasets import DODatasetManager
 
 from ...clients import SQLClient
-from ....auth import Credentials, get_default_credentials
+from ....auth import Credentials
 
 
 class RepoClient(object):
@@ -16,7 +16,7 @@ class RepoClient(object):
         self.client = SQLClient(self._do_credentials)
 
     def set_user_credentials(self, credentials):
-        self._user_credentials = credentials or get_default_credentials()
+        self._user_credentials = credentials
 
     def get_countries(self, field=None, value=None):
         query = 'SELECT DISTICT country_id AS id FROM datasets_public'

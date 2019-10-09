@@ -1,3 +1,4 @@
+import pytest
 import unittest
 
 from cartoframes.auth import Credentials
@@ -55,16 +56,31 @@ class TestCatalog(unittest.TestCase):
         assert datasets == expected_datasets
 
     @patch.object(Dataset, 'get_all')
-    def test_purchased_datasets(self, mocked_purchased_datasets):
+    def test_subscriptions(self, mocked_subscriptions):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]
-        mocked_purchased_datasets.return_value = expected_datasets
+        mocked_subscriptions.return_value = expected_datasets
         credentials = Credentials('user', '1234')
         catalog = Catalog()
 
         # When
-        datasets = catalog.purchased_datasets(credentials)
+        datasets = catalog.subscriptions(credentials)
 
         # Then
-        mocked_purchased_datasets.assert_called_once_with(credentials)
+        mocked_subscriptions.assert_called_once_with(credentials)
         assert datasets == expected_datasets
+
+    @patch.object(Dataset, 'get_all')
+    def test_subscriptions_wrong_param(self, mocked_subscriptions):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        mocked_subscriptions.return_value = expected_datasets
+        wrong_credentials = 1234
+        catalog = Catalog()
+
+        # When
+        with pytest.raises(ValueError) as e:
+            catalog.subscriptions(wrong_credentials)
+
+        # Then
+        assert str(e.value) == '`credentials` must be a Credentials class instance'

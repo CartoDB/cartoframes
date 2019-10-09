@@ -4,6 +4,8 @@ from .category import Category
 from .country import Country
 from .dataset import Dataset
 
+from ...auth import Credentials, get_default_credentials
+
 
 class Catalog(object):
     """Data Observatory Catalog"""
@@ -42,18 +44,22 @@ class Catalog(object):
         return Dataset.get_all()
 
     @classmethod
-    def purchased_datasets(self, credentials=None):
-        """Get all the datasets in the Catalog
+    def subscriptions(self, credentials=None):
+        """Get all the subscriptions in the Catalog
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A :py:class:`Credentials <cartoframes.auth.Credentials>`
                 instance can be used in place of a `username`|`base_url` / `api_key` combination.
-                Only required for the purchased datasets.
 
         Returns:
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
 
         """
 
-        return Dataset.get_all(credentials)
+        _credentials = credentials or get_default_credentials()
+
+        if not isinstance(credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+
+        return Dataset.get_all(_credentials)
