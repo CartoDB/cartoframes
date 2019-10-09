@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.auth import Credentials
 from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.dataset import Dataset
@@ -51,4 +52,19 @@ class TestCatalog(unittest.TestCase):
         datasets = catalog.datasets
 
         # Then
+        assert datasets == expected_datasets
+
+    @patch.object(Dataset, 'get_all')
+    def test_purchased_datasets(self, mocked_purchased_datasets):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        mocked_purchased_datasets.return_value = expected_datasets
+        credentials = Credentials('user', '1234')
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.purchased_datasets(credentials)
+
+        # Then
+        mocked_purchased_datasets.assert_called_once_with(credentials)
         assert datasets == expected_datasets
