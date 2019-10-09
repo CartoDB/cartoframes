@@ -28,7 +28,8 @@ def enrich_polygons(data, variables, data_geom_column='geometry', agg_operators=
 
 
 def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_variables,
-                 table_to_project, table_to_dataset, user_dataset, working_project, data_table, **kwargs):
+                 table_to_project, table_to_dataset, geotable_to_project, geotable_to_dataset,
+                 user_dataset, working_project, data_table, **kwargs):
 
     grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=enrichment_id)
 
@@ -58,7 +59,7 @@ def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_v
         sql = '''
             SELECT data_table.{enrichment_id}, {variables}
             FROM `{project}.{dataset}.{enrichment_table}` enrichment_table
-            JOIN `{project}.{dataset}.{enrichment_geo_table}` enrichment_geo_table
+            JOIN `{geo_project}.{geo_dataset}.{enrichment_geo_table}` enrichment_geo_table
             ON enrichment_table.geoid = enrichment_geo_table.geoid
             JOIN `{working_project}.{user_dataset}.{data_table}` data_table
             ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
@@ -69,7 +70,8 @@ def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_v
                    user_dataset=user_dataset, working_project=working_project,
                    data_table=data_table, data_geom_column=kwargs['data_geom_column'],
                    filters=filters_processed, grouper=grouper, project=table_to_project[table],
-                   dataset=table_to_dataset[table])
+                   dataset=table_to_dataset[table], geo_project=geotable_to_project[table],
+                   geo_dataset=geotable_to_dataset[table])
 
         sqls.append(sql)
 

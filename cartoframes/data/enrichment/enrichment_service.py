@@ -9,6 +9,7 @@ from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
 from ...utils.geom_utils import _compute_geometry_from_geom
 from ..observatory.variable import Variable
+from ..observatory.dataset import Dataset as DatasetCatalog
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -61,8 +62,8 @@ def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
 
     variables = __process_variables(kwargs['variables'])
 
-    table_to_geotable, table_to_variables, table_to_project, table_to_dataset =\
-        __process_enrichment_variables(variables, user_dataset)
+    table_to_geotable, table_to_variables, table_to_project, table_to_dataset,\
+        geotable_to_project, geotable_to_dataset = __process_enrichment_variables(variables, user_dataset)
 
     filters_str = __process_filters(kwargs['filters'])
 
@@ -70,7 +71,7 @@ def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
         kwargs['agg_operators'] = __process_agg_operators(kwargs['agg_operators'], variables)
 
     return query_function(_ENRICHMENT_ID, filters_str, table_to_geotable, table_to_variables, table_to_project,
-                          table_to_dataset, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
+                          table_to_dataset, geotable_to_project, geotable_to_dataset, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
 
 
 def _execute_enrichment(bq_client, queries, data_copy, data_geom_column):
@@ -162,30 +163,25 @@ def __process_agg_operators(agg_operators, variables):
     return agg_operators_result
 
 
-def __get_tables_and_variables(variables, user_dataset):
-
-    table_to_geotable, table_to_variables, table_to_project, table_to_dataset =\
-        __process_enrichment_variables(variables, user_dataset)
-
-    return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
-
-
 def __process_enrichment_variables(variables, user_dataset):
     table_to_geotable = dict()
     table_to_variables = defaultdict(list)
     table_to_project = dict()
     table_to_dataset = dict()
+    geotable_to_project = dict()
+    geotable_to_dataset = dict()
 
     for variable in variables:
         project_name = variable.project_name
         dataset_name = variable.schema_name
         table_name = variable.dataset_name
         variable_name = variable.column_name
+        project_geotable, dataset_geotable, geotable = __get_properties_geotable(variable)
 
         if project_name != _PUBLIC_PROJECT:
-            table_name = '{dataset}_{table}'.format(dataset=dataset_name,
-                                                    table=table_name,
-                                                    user_dataset=user_dataset)
+            table_name = 'view_{dataset}_{table}'.format(dataset=dataset_name,
+                                                         table=table_name,
+                                                         user_dataset=user_dataset)
 
         if table_name not in table_to_dataset:
             if project_name != _PUBLIC_PROJECT:
@@ -194,13 +190,12 @@ def __process_enrichment_variables(variables, user_dataset):
                 table_to_dataset[table_name] = _PUBLIC_DATASET
 
         if table_name not in table_to_geotable:
-            geotable = __get_name_geotable_from_datatable(table_name)
-
             if project_name != _PUBLIC_PROJECT:
-                geotable = '{dataset}_{geotable}'.format(dataset=dataset_name,
-                                                         geotable=geotable,
-                                                         user_dataset=user_dataset)
+                geotable = 'view_{dataset}_{geotable}'.format(dataset=dataset_geotable,
+                                                              geotable=geotable)
 
+            geotable_to_project[table_name] = project_geotable
+            geotable_to_dataset[table_name] = dataset_geotable
             table_to_geotable[table_name] = geotable
 
         if table_name not in table_to_project:
@@ -211,18 +206,14 @@ def __process_enrichment_variables(variables, user_dataset):
 
         table_to_variables[table_name].append(variable_name)
 
-    return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
+    return table_to_geotable, table_to_variables, table_to_project,\
+        table_to_dataset, geotable_to_project, geotable_to_dataset
 
 
-def __get_name_geotable_from_datatable(datatable):
+def __get_properties_geotable(variable):
 
-    datatable_split = datatable.split('_')
+    geography_id = DatasetCatalog.get(variable.dataset).geography
 
-    if len(datatable_split) == 8:
-        geo_information = datatable_split[3:6]
-    elif len(datatable_split) == 7:
-        geo_information = datatable_split[2:5]
+    geo_project, geo_dataset, geo_table = geography_id.split('.')
 
-    geotable = 'geography_{geo_information_joined}'.format(geo_information_joined='_'.join(geo_information))
-
-    return geotable
+    return geo_project, geo_dataset, geo_table
