@@ -8,8 +8,8 @@ from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
 from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
 from ...utils.geom_utils import _compute_geometry_from_geom
-from ..observatory.variable import Variable
-from ..observatory.dataset import Dataset as DatasetCatalog
+from ..observatory import Variable
+from ..observatory import Dataset as DatasetCatalog
 
 
 _ENRICHMENT_ID = 'enrichment_id'
