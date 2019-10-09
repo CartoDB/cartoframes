@@ -138,11 +138,5 @@ class TestCatalog(unittest.TestCase):
         datasets = catalog.purchased_datasets(credentials)
 
         # Then
-        mocked_purchased_datasets.assert_called_once_with(credentials)
+        mocked_purchased_datasets.assert_called_once_with({}, credentials)
         assert datasets == expected_datasets
-
-    def test_pete(self):
-        catalog = Catalog()
-        datasets = catalog.country('usa').datasets
-
-        assert len(datasets) > 0

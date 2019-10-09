@@ -161,10 +161,10 @@ class TestDataset(unittest.TestCase):
         credentials = Credentials('user', '1234')
 
         # When
-        datasets = Dataset.get_all(credentials)
+        datasets = Dataset.get_all(credentials=credentials)
 
         # Then
-        mocked_repo.assert_called_once_with(credentials)
+        mocked_repo.assert_called_once_with(None, credentials)
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
 
@@ -189,19 +189,6 @@ class TestDataset(unittest.TestCase):
         # Then
         assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
                                 .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
-
-    @patch.object(DatasetRepository, 'get_by_id')
-    def test_get_dataset_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_dataset1
-
-        # When
-        dataset = Dataset.get(test_dataset1.id)
-
-        # Then
-        assert isinstance(dataset, object)
-        assert isinstance(dataset, Dataset)
-        assert dataset == test_dataset1
 
     def test_datasets_items_are_obtained_as_dataset(self):
         # Given
