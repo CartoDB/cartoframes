@@ -18,9 +18,9 @@ class GeographyRepository(EntityRepository):
     def __init__(self):
         super(GeographyRepository, self).__init__(_GEOGRAPHY_ID_FIELD, _ALLOWED_FILTERS, _GEOGRAPHY_SLUG_FIELD)
 
-    def get_all(self, credentials=None):
+    def get_all(self, filters=None, credentials=None):
         self.client.set_user_credentials(credentials)
-        return self._get_filtered_entities()
+        return self._get_filtered_entities(filters)
 
     def get_by_country(self, iso_code3):
         return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
