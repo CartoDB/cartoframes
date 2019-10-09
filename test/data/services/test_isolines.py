@@ -362,3 +362,32 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('the_geom' in result)
         self.assertTrue('data_range' in result)
         self.assertEqual(len(result.index), 6)
+
+    def test_isochrones_from_dataframe_dataset_with_isoline_options(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Isolines(credentials=self.credentials)
+
+        df = pd.DataFrame(self.points, columns=['name', 'the_geom'])
+        ds = Dataset(df, credentials=self.credentials)
+
+        quota = self.used_quota(iso)
+
+        # Preview
+        result = iso.isochrones(ds, [100, 1000], mode='car', maxpoints=10, dry_run=True).metadata
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isochrones
+        result = iso.isochrones(ds, [100, 1000], mode='car', maxpoints=10).data
+        self.assertTrue(isinstance(result, Dataset))
+        self.assertTrue(result.is_local())
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
+        result_columns = result.get_column_names()
+        self.assertTrue('the_geom' in result_columns)
+        self.assertTrue('data_range' in result_columns)
+        self.assertEqual(result.get_num_rows(), 6)
+        self.assertFalse('cartodb_id' in result_columns)
+        self.assertFalse('cartodb_id' in result.dataframe)
+        self.assertFalse('source_id' in result_columns)
+        self.assertFalse('source_id' in result.dataframe)
