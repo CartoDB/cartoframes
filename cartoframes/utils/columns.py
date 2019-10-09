@@ -137,12 +137,17 @@ class DataframeColumnsInfo(object):
         self.columns = self._get_columns_info()
 
     def _get_columns_info(self):
+        df_columns = [(name, self.df.dtypes[name]) for name in self.df.columns]
+        if self.df.index.name is not None and self.df.index.name not in df_columns:
+            df_columns.append((self.df.index.name, self.df.index.dtype))
+
         columns = []
-        for c in self.df.columns:
+
+        for c, dtype in df_columns:
             if self._filter_column(c):
                 continue
 
-            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, self.df.dtypes[c]))
+            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, dtype))
 
         if self.with_lnglat:
             columns.append(DataframeColumnInfo(None))
