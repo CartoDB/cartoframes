@@ -321,14 +321,9 @@ class Map(object):
             password (str): setting it your Kuviz will be protected by
                 password and using `None` the Kuviz will be public
         """
-        if not self._kuviz:
-            raise CartoException('The map has not been published. Use the `publish` method.')
 
-        self._kuviz.data = self._get_publication_html(name)
-        self._kuviz.name = name
-        self._kuviz.password = password
-        self._kuviz.save()
-        return kuviz_to_dict(self._kuviz)
+        data = self._get_publication_html(name)
+        return self._publisher.update(data, name, password)
 
     @staticmethod
     def all_publications(credentials=None):
