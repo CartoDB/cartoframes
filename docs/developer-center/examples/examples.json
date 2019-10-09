@@ -12,9 +12,9 @@
           "file": "change_default_carto_basemap",
           "path": "map_configuration"
         }, {
-          "title": "Solid background color",
-          "desc": "Solid background color",
-          "file": "solid_color_background",
+          "title": "Custom Viewport",
+          "desc": "Custom Viewport",
+          "file": "custom_viewport",
           "path": "map_configuration"
         }, {
           "title": "Solid background color",
@@ -44,7 +44,42 @@
       "samples": []
     }, {
       "title": "Downloading and Uploading Data",
-      "samples": []
+      "samples": [{
+        "title": "Create a Dataset from a .csv file",
+        "desc": "Create a Dataset from a .csv file",
+        "file": "create_dataset_from_csv",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Create a Dataset from a .json file",
+        "desc": "Create a Dataset from a .json file",
+        "file": "create_dataset_from_json",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Create a Dataset from a .geojson file",
+        "desc": "Create a Dataset from a .geojson file",
+        "file": "create_dataset_from_geojson",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Create a Dataset from a Query",
+        "desc": "Create a Dataset from a Query",
+        "file": "create_dataset_from_query",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Download a Dataset from CARTO",
+        "desc": "Download a Dataset from CARTO",
+        "file": "download_dataset_from_carto",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Upload a Dataset to CARTO",
+        "desc": "Upload a Dataset to CARTO",
+        "file": "upload_dataset_to_carto",
+        "path": "downloading_and_uploading_data"
+      }, {
+        "title": "Change a Dataset Privacy",
+        "desc": "Change Dataset Privacy",
+        "file": "change_dataset_privacy",
+        "path": "downloading_and_uploading_data"
+      }]
     }, {
       "title": "Geocoding and Isolines Services",
       "samples": [
