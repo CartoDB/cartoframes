@@ -270,13 +270,16 @@ class Map(object):
             '_airship_path': self._airship_path
         }
 
-    def publish(self, name, maps_api_key='default_public', credentials=None, password=None):
+    def publish(self, name, table_name=None, credentials=None, password=None):
         """Publish the map visualization as a CARTO custom visualization (aka Kuviz).
 
         Args:
             name (str): The Kuviz name on CARTO
-            maps_api_key (str, optional): A Regular API key with permissions
-                to Maps API and datasets used by the map
+            table_name (str, optional): Desired table name for the dataset on CARTO.
+                It is required working with local data (we need to upload it to CARTO)
+                If name does not conform to SQL naming conventions, it will be
+                'normalized' (e.g., all lower case, adding `_` in place of spaces
+                and other special characters.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
                 obtained from the default credentials if available.
@@ -296,32 +299,18 @@ class Map(object):
                 tmap.publish('Custom Map Title')
 
         """
-        if not self._publisher.is_sync():
-            raise CartoException('The map layers are not synchronized with CARTO. '
-                                 'Please, use the `sync_data` method before publishing the map')
-
-        if maps_api_key == 'default_public':
-            self._validate_public_publication()
-
         self._publisher.set_credentials(credentials)
+
+        maps_api_key = 'default_public'
+        if not self._publisher.is_sync():
+            self._publisher.sync_layers(table_name)
+            maps_api_key = None  # create API KEY
+        elif private # if data private
+            maps_api_key = None  # create API KEY
+
         html = self._get_publication_html(name, maps_api_key)
         self._kuviz = self._publisher.publish(html, name, password)
         return kuviz_to_dict(self._kuviz)
-
-    def sync_data(self, table_name, credentials=None):
-        """Synchronize datasets used by the map with CARTO.
-
-        Args:
-            table_name (str): Desired table name for the dataset on CARTO. If
-                name does not conform to SQL naming conventions, it will be
-                'normalized' (e.g., all lower case, adding `_` in place of spaces
-                and other special characters.
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A Credentials instance. If not provided, the credentials will be automatically
-                obtained from the default credentials if available.
-        """
-        if not self._publisher.is_sync():
-            self._publisher.sync_layers(table_name, credentials)
 
     def delete_publication(self):
         """Delete the published map Kuviz."""
@@ -393,13 +382,6 @@ class Map(object):
 
     def _get_publisher(self):
         return KuvizPublisher(self.layers)
-
-    def _validate_public_publication(self):
-        if not self._publisher.is_public():
-            raise CartoException('The datasets used in your map are not public. '
-                                 'You need add new Regular API key with permissions to Maps API and the datasets. '
-                                 'You can do it from your CARTO dashboard or using the Auth API. You can get more '
-                                 'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
 
 
 def _get_bounds(bounds, layers):
