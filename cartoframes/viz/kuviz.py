@@ -2,6 +2,7 @@ from copy import deepcopy
 from warnings import warn
 
 from carto.kuvizs import KuvizManager
+from carto.exceptions import CartoException
 
 from ..auth import get_default_credentials
 from .source import Source
@@ -42,11 +43,24 @@ class KuvizPublisher(object):
         self.kuviz = _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
         return kuviz_to_dict(self.kuviz)
 
+    def update(self, data, name, password):
+        if not self.kuviz:
+            raise CartoException('The map has not been published. Use the `publish` method.')
+
+        self.kuviz.data = data
+        self.kuviz.name = name
+        self.kuviz.password = password
+        self.kuviz.save()
+
+        return kuviz_to_dict(self.kuviz)
+
     def delete(self):
         if self.kuviz:
             self.kuviz.delete()
             warn("Publication '{n}' ({id}) deleted".format(n=self._publisher.kuviz.name, id=self._publisher.kuviz.id))
             self.kuviz = None
+            return True
+        return False
 
     def _sync_layers(self, layers):
         for idx, layer in enumerate(layers):
