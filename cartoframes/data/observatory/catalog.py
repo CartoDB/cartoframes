@@ -42,7 +42,7 @@ class Catalog(object):
         return Dataset.get_all()
 
     @classmethod
-    def purchased_datasets(self, credentials):
+    def purchased_datasets(self, credentials=None):
         """Get all the datasets in the Catalog
 
         Args:
