@@ -98,7 +98,7 @@ class Dataset(CatalogEntity):
 
 
     @classmethod
-    def get_datasets_by_geography(cls, filter_dataset):
+    def datasets_by_geography(cls, filter_dataset):
 
         if isinstance(filter_dataset, gpd.GeoDataFrame):
             # Geopandas dataframe
