@@ -26,60 +26,124 @@
           "desc": "Use the dark theme",
           "file": "dark_theme",
           "path": "map_configuration"
-        }]
+        }
+      ]
+      }, {
+      "title": "Data Workflows",
+      "samples": [{
+          "title": "Create a Dataset from a .csv file",
+          "desc": "Create a Dataset from a .csv file",
+          "file": "create_dataset_from_csv",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Create a Dataset from a .json file",
+          "desc": "Create a Dataset from a .json file",
+          "file": "create_dataset_from_json",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Create a Dataset from a .geojson file",
+          "desc": "Create a Dataset from a .geojson file",
+          "file": "create_dataset_from_geojson",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Create a Dataset from a Query",
+          "desc": "Create a Dataset from a Query",
+          "file": "create_dataset_from_query",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Download a Dataset from CARTO",
+          "desc": "Download a Dataset from CARTO",
+          "file": "download_dataset_from_carto",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Upload a Dataset to CARTO",
+          "desc": "Upload a Dataset to CARTO",
+          "file": "upload_dataset_to_carto",
+          "path": "downloading_and_uploading_data"
+        }, {
+          "title": "Change a Dataset Privacy",
+          "desc": "Change Dataset Privacy",
+          "file": "change_dataset_privacy",
+          "path": "downloading_and_uploading_data"
+        }
+      ]
+    }, {
+      "title": "Layers",
+      "samples": [
+        {
+          "title": "Create a Dataset from a .csv file",
+          "desc": "Create a Dataset from a .csv file",
+          "file": "add-layer",
+          "path": "layers"        
+        }
+      ]
     }, {
       "title": "Visualization Layer Helpers",
       "samples": []
     }, {
-      "title": "Adding Legends",
+      "title": "Legends",
+      "samples": [
+        {
+          "title": "Default Legend",
+          "desc": "Default Legend",
+          "file": "default_legend",
+          "path": "legends"
+        }, {
+          "title": "Color bins legend",
+          "desc": "Color bins legend",
+          "file": "color_bins_legend",
+          "path": "legends"
+        }, {
+          "title": "Color continuous legend",
+          "desc": "Color continuous legend",
+          "file": "color_continuous_legend",
+          "path": "legends"
+        }, {
+          "title": "Size category legend",
+          "desc": "Size category legend",
+          "file": "size_category_legend",
+          "path": "legends"
+        }, {
+          "title": "Size bins legend",
+          "desc": "Size bins legend",
+          "file": "size_bins_legend",
+          "path": "legends"
+        }, {
+          "title": "Size continuous legend",
+          "desc": "Size continuous legend",
+          "file": "size_continuous_legend",
+          "path": "legends"
+        }, {
+          "title": "Multiple Legends",
+          "desc": "Multiple Legends",
+          "file": "multiple-legends",
+          "path": "legends"
+        }, {
+          "title": "Legend Subtype",
+          "desc": "Legend Subtype",
+          "file": "legend-subtype",
+          "path": "legends"
+        }, {
+          "title": "Use stroke color for Legend",
+          "desc": "Use stroke color for Legend",
+          "file": "stroke_color_legend",
+          "path": "legends"
+        }, {
+          "title": "Use opacity for Legend",
+          "desc": "Use opacity for Legend",
+          "file": "opacity_legend",
+          "path": "legends"
+        }
+      ]
+    }, {
+      "title": "Widgets",
       "samples": []
     }, {
-      "title": "Adding Widgets",
-      "samples": []
-    }, {
-      "title": "Adding Popups",
+      "title": "Popups",
       "samples": []
     }, {
       "title": "Map Layout",
       "samples": []
-    }, {
-      "title": "Downloading and Uploading Data",
-      "samples": [{
-        "title": "Create a Dataset from a .csv file",
-        "desc": "Create a Dataset from a .csv file",
-        "file": "create_dataset_from_csv",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Create a Dataset from a .json file",
-        "desc": "Create a Dataset from a .json file",
-        "file": "create_dataset_from_json",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Create a Dataset from a .geojson file",
-        "desc": "Create a Dataset from a .geojson file",
-        "file": "create_dataset_from_geojson",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Create a Dataset from a Query",
-        "desc": "Create a Dataset from a Query",
-        "file": "create_dataset_from_query",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Download a Dataset from CARTO",
-        "desc": "Download a Dataset from CARTO",
-        "file": "download_dataset_from_carto",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Upload a Dataset to CARTO",
-        "desc": "Upload a Dataset to CARTO",
-        "file": "upload_dataset_to_carto",
-        "path": "downloading_and_uploading_data"
-      }, {
-        "title": "Change a Dataset Privacy",
-        "desc": "Change Dataset Privacy",
-        "file": "change_dataset_privacy",
-        "path": "downloading_and_uploading_data"
-      }]
     }, {
       "title": "Geocoding and Isolines Services",
       "samples": [
@@ -103,20 +167,22 @@
           "desc": "Using both Geocoding and Isolines Services",
           "file": "geocoding_and_isolines",
           "path": "data_services"
-        }]
+        }
+      ]
     }, {
       "title": "Publish and Share",
       "samples": [{
-        "title": "Publish a public visualization",
-        "desc": "Publish a public visualization",
-        "file": "publish_a_public_visualization",
-        "path": "publish_and_share"
-      },{
-        "title": "Publish a private visualization",
-        "desc": "Publish a private visualization",
-        "file": "publish_a_private_visualization",
-        "path": "publish_and_share"
-      }]
+          "title": "Publish a public visualization",
+          "desc": "Publish a public visualization",
+          "file": "publish_a_public_visualization",
+          "path": "publish_and_share"
+        },{
+          "title": "Publish a private visualization",
+          "desc": "Publish a private visualization",
+          "file": "publish_a_private_visualization",
+          "path": "publish_and_share"
+        }
+      ]
     }, {
       "title": "Data Enrichment",
       "samples": []
@@ -126,31 +192,32 @@
     }, {
       "title": "Real Use Cases",
       "samples": [, {
-        "title": "Temperatures Visualization",
-        "desc": "Visualize warm temperatures",
-        "file": "visualize_temperatures",
-        "path": "real_use_cases"
-      }, {
-        "title": "Paris WiFi Services",
-        "desc": "Download data in json format",
-        "file": "paris_wifi_services",
-        "path": "real_use_cases"
-      }, {
-        "title": "Paris Remarkable Trees",
-        "desc": "Transform and visualize data from a json file",
-        "file": "paris_remarkable_trees",
-        "path": "real_use_cases"       
-      }, {
-        "title": "Police Department Incident Reports in San Francisco",
-        "desc": "Use and analyze datasets from different sources",
-        "file": "police_department_incident_reports",
-        "path": "real_use_cases"
-      }, {
-        "title": "Geocode London Stations",
-        "desc": "Geocode a dataset in xls format",
-        "file": "geocode_london_stations",
-        "path": "real_use_cases"
-      }]
+          "title": "Temperatures Visualization",
+          "desc": "Visualize warm temperatures",
+          "file": "visualize_temperatures",
+          "path": "real_use_cases"
+        }, {
+          "title": "Paris WiFi Services",
+          "desc": "Download data in json format",
+          "file": "paris_wifi_services",
+          "path": "real_use_cases"
+        }, {
+          "title": "Paris Remarkable Trees",
+          "desc": "Transform and visualize data from a json file",
+          "file": "paris_remarkable_trees",
+          "path": "real_use_cases"       
+        }, {
+          "title": "Police Department Incident Reports in San Francisco",
+          "desc": "Use and analyze datasets from different sources",
+          "file": "police_department_incident_reports",
+          "path": "real_use_cases"
+        }, {
+          "title": "Geocode London Stations",
+          "desc": "Geocode a dataset in xls format",
+          "file": "geocode_london_stations",
+          "path": "real_use_cases"
+        }
+      ]
     }
   ]
 }
