@@ -178,13 +178,8 @@ def __process_enrichment_variables(variables, user_dataset):
 
         if project_name != _PUBLIC_PROJECT:
             table_name = 'view_{dataset}_{table}'.format(dataset=dataset_name,
-<<<<<<< HEAD
-                                                    table=table_name,
-                                                    user_dataset=user_dataset)
-=======
                                                          table=table_name,
                                                          user_dataset=user_dataset)
->>>>>>> acaea5ab87972f67a8a02d28f8f2727bd051ce97
 
         if table_name not in table_to_dataset:
             if project_name != _PUBLIC_PROJECT:
@@ -194,15 +189,8 @@ def __process_enrichment_variables(variables, user_dataset):
 
         if table_name not in table_to_geotable:
             if project_name != _PUBLIC_PROJECT:
-<<<<<<< HEAD
-                geotable = 'view_{dataset}_{geotable}'.format(dataset=dataset_name,
-                                                         geotable=geotable,
-                                                         user_dataset=user_dataset)
-
-=======
                 geotable = 'view_{dataset}_{geotable}'.format(dataset=dataset_geotable,
                                                               geotable=geotable)
->>>>>>> acaea5ab87972f67a8a02d28f8f2727bd051ce97
             table_to_geotable[table_name] = geotable
 
         if table_name not in table_to_project:
@@ -216,21 +204,9 @@ def __process_enrichment_variables(variables, user_dataset):
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
 
-<<<<<<< HEAD
-def __get_name_geotable_from_datatable(datatable):
-
-    datatable_split = datatable.split('_')
-    print(datatable_split)
-
-    if len(datatable_split) == 9:
-        geo_information = datatable_split[4:7]
-    elif len(datatable_split) == 7:
-        geo_information = datatable_split[2:5]
-=======
 def __get_properties_geotable(variable):
 
     geography_id = DatasetCatalog.get(variable.dataset).geography
->>>>>>> acaea5ab87972f67a8a02d28f8f2727bd051ce97
 
     _, geo_dataset, geo_table = geography_id.split('.')
 
