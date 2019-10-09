@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.auth import Credentials
 from cartoframes.data.observatory.dataset import Dataset
 
 from cartoframes.exceptions import DiscoveryException
@@ -27,6 +28,23 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None)
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
+    @patch.object(RepoClient, 'set_user_credentials')
+    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_datasets):
+        # Given
+        mocked_get_datasets.return_value = [db_dataset1, db_dataset2]
+        credentials = Credentials('user', '1234')
+        repo = DatasetRepository()
+
+        # When
+        datasets = repo.get_all(credentials)
+
+        # Then
+        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_get_datasets.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 

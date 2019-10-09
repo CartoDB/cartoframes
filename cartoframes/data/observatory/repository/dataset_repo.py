@@ -18,6 +18,10 @@ class DatasetRepository(EntityRepository):
     def __init__(self):
         super(DatasetRepository, self).__init__(_DATASET_ID_FIELD, _ALLOWED_FILTERS, _DATASET_SLUG_FIELD)
 
+    def get_all(self, filters=None, credentials=None):
+        self.client.set_user_credentials(credentials)
+        return self._get_filtered_entities(filters)
+
     def get_by_country(self, iso_code3):
         return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
 

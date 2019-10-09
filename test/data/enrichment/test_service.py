@@ -69,21 +69,20 @@ class TestEnrichmentService(unittest.TestCase):
         tablename = 'test_table'
         geometry_column = 'the_geom'
         query_function = _prepare_sql_by_points
-        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1']],
-                                 columns=['id'])
+        variables = 'carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG'
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': geometry_column, 'variables': variables, 'filters': filters}
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
         expected_queries = ['''SELECT data_table.enrichment_id,
-            var1,
-            ST_Area(enrichment_geo_table.geom) AS var1_area,
-            NULL AS var1_population
+            CRMCYBURG,
+            ST_Area(enrichment_geo_table.geom) AS CRMCYBURG_area,
+            NULL AS CRMCYBURG_population
         FROM `carto-do-customers.{user_dataset}\
-            .dataset_category_table1_comp_geog_geogyear_yearly_datayear` enrichment_table
+            .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
-            .dataset_geography_comp_geog_geogyear` enrichment_geo_table
+            .ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -104,34 +103,33 @@ class TestEnrichmentService(unittest.TestCase):
         tablename = 'test_table'
         geometry_column = 'the_geom'
         query_function = _prepare_sql_by_points
-        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1'],
-                                  ['project.dataset.category_table2_comp_geog_geogyear_yearly_datayear.var1']],
-                                 columns=['id'])
+        variables = ['carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG',
+                     'carto-do.mastercard.financial_mrli_usa_blockgroup_2019_monthly_2019.ticket_size_score']
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': geometry_column, 'variables': variables, 'filters': filters}
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
         expected_queries = ['''SELECT data_table.enrichment_id,
-            var1,
-            ST_Area(enrichment_geo_table.geom) AS var1_area,
-            NULL AS var1_population
+            CRMCYBURG,
+            ST_Area(enrichment_geo_table.geom) AS CRMCYBURG_area,
+            NULL AS CRMCYBURG_population
         FROM `carto-do-customers.{user_dataset}\
-            .dataset_category_table1_comp_geog_geogyear_yearly_datayear` enrichment_table
+            .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
-            .dataset_geography_comp_geog_geogyear` enrichment_geo_table
+            .ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
         WHERE a='b';''', '''
         SELECT data_table.enrichment_id,
-            var1,
-            ST_Area(enrichment_geo_table.geom) AS var1_area,
-            NULL AS var1_population
+            ticket_size_score,
+            ST_Area(enrichment_geo_table.geom) AS ticket_size_score_area,
+            NULL AS ticket_size_score_population
         FROM `carto-do-customers.{user_dataset}\
-            .dataset_category_table2_comp_geog_geogyear_yearly_datayear` enrichment_table
+            .mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
-            .dataset_geography_comp_geog_geogyear` enrichment_geo_table
+            .mastercard_geography_usa_blockgroup_2019` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -153,20 +151,19 @@ class TestEnrichmentService(unittest.TestCase):
         geometry_column = 'the_geom'
         query_function = _prepare_sql_by_polygons
         agg_operators = {'var1': 'AVG'}
-        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1']],
-                                 columns=['id'])
+        variables = 'carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG'
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': geometry_column, 'variables': variables,
                   'filters': filters, 'agg_operators': agg_operators}
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
-        expected_queries = ['''SELECT data_table.enrichment_id, AVG(var1 *\
+        expected_queries = ['''SELECT data_table.enrichment_id, avg(CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
-                  / ST_area(data_table.{geometry_column}))) as var1
-        FROM `carto-do-customers.{user_dataset}.dataset_category_table1_comp_geog_geogyear_yearly_datayear`\
+                  / ST_area(data_table.{geometry_column}))) as CRMCYBURG
+        FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.dataset_geography_comp_geog_geogyear` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -189,32 +186,31 @@ class TestEnrichmentService(unittest.TestCase):
         geometry_column = 'the_geom'
         query_function = _prepare_sql_by_polygons
         agg_operators = {'var1': 'AVG'}
-        variables = pd.DataFrame([['project.dataset.category_table1_comp_geog_geogyear_yearly_datayear.var1'],
-                                  ['project.dataset.category_table2_comp_geog_geogyear_yearly_datayear.var1']],
-                                 columns=['id'])
+        variables = ['carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG',
+                     'carto-do.mastercard.financial_mrli_usa_blockgroup_2019_monthly_2019.ticket_size_score']
         filters = {'a': 'b'}
         kwargs = {'data_geom_column': geometry_column, 'variables': variables,
                   'filters': filters, 'agg_operators': agg_operators}
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
-        expected_queries = ['''SELECT data_table.enrichment_id, AVG(var1 *\
+        expected_queries = ['''SELECT data_table.enrichment_id, avg(CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
-                  / ST_area(data_table.{geometry_column}))) as var1
-        FROM `carto-do-customers.{user_dataset}.dataset_category_table1_comp_geog_geogyear_yearly_datayear`\
+                  / ST_area(data_table.{geometry_column}))) as CRMCYBURG
+        FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.dataset_geography_comp_geog_geogyear` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
         WHERE a='b'
         group by data_table.enrichment_id;''', '''
-        SELECT data_table.enrichment_id, AVG(var1 *\
+        SELECT data_table.enrichment_id, avg(ticket_size_score *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
-                  / ST_area(data_table.{geometry_column}))) as var1
-        FROM `carto-do-customers.{user_dataset}.dataset_category_table2_comp_geog_geogyear_yearly_datayear`\
+                  / ST_area(data_table.{geometry_column}))) as ticket_size_score
+        FROM `carto-do-customers.{user_dataset}.mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.dataset_geography_comp_geog_geogyear` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.mastercard_geography_usa_blockgroup_2019` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)

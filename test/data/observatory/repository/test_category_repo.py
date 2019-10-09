@@ -68,7 +68,7 @@ class TestCategoryRepo(unittest.TestCase):
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
 
-    @patch.object(RepoClient, '_run_join_query')
+    @patch.object(RepoClient, '_run_query')
     def test_get_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_category1, db_category2]
@@ -79,8 +79,8 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all({'country_id': country_code})
 
         # Then
-        query = 'select distinct c.* from categories_public c, datasets_public d'
-        mocked_repo.assert_called_once_with(query, 'c.id = d.category_id', {'country_id': country_code})
+        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public view'
+        mocked_repo.assert_called_once_with(query, {'country_id': country_code}, ['c.id = view.category_id'])
         assert isinstance(categories, CatalogList)
         assert categories == test_categories
 

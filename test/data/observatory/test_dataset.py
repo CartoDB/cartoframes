@@ -5,6 +5,7 @@ from google.api_core.exceptions import NotFound
 
 from carto.exceptions import CartoException
 
+from cartoframes.auth import Credentials
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
@@ -150,6 +151,20 @@ class TestDataset(unittest.TestCase):
         datasets = Dataset.get_all()
 
         # Then
+        assert isinstance(datasets, list)
+        assert isinstance(datasets, CatalogList)
+
+    @patch.object(DatasetRepository, 'get_all')
+    def test_get_all_datasets_credentials(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_datasets
+        credentials = Credentials('user', '1234')
+
+        # When
+        datasets = Dataset.get_all(credentials)
+
+        # Then
+        mocked_repo.assert_called_once_with(credentials)
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
 
