@@ -16,7 +16,7 @@ class Isolines(Service):
     def __init__(self, credentials=None):
         super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
-    def isochrones(self, source, range, **args):
+    def isochrones(self, source, ranges, **args):
         """isochrone areas
 
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
@@ -59,9 +59,9 @@ class Isolines(Service):
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
         """
-        return self._iso_areas(source, range, function='isochrone', **args)
+        return self._iso_areas(source, ranges, function='isochrone', **args)
 
-    def isodistances(self, source, range, **args):
+    def isodistances(self, source, ranges, **args):
         """isodistance areas
 
         This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public
@@ -71,8 +71,6 @@ class Isolines(Service):
             source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel distances.
-            range (list): travel distance values in meters; for each value and source point
-                a distinct area are will be computed.
             ranges (list): travel distance values in meters; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
@@ -107,11 +105,11 @@ class Isolines(Service):
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
         """
-        return self._iso_areas(source, range, function='isodistance', **args)
+        return self._iso_areas(source, ranges, function='isodistance', **args)
 
     def _iso_areas(self,
                    source,
-                   range,
+                   ranges,
                    dry_run=False,
                    table_name=None,
                    if_exists=None,
@@ -133,7 +131,7 @@ class Isolines(Service):
 
         if dry_run:
             num_rows = source.get_num_rows()
-            metadata['required_quota'] = num_rows * len(range)
+            metadata['required_quota'] = num_rows * len(ranges)
             return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
@@ -163,7 +161,7 @@ class Isolines(Service):
         }
         iso_options = [str(k)+'='+str(v) for k, v in options.items() if v is not None]
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
-        iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in range]))
+        iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in ranges]))
 
         sql = _areas_query(
             source_query, source_columns, iso_function, mode, iso_ranges, iso_options, source_has_id or exclusive)
