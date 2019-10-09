@@ -126,9 +126,10 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(ds, [100, 1000], mode='car').data
+        result, meta = iso.isochrones(ds, [100, 1000], mode='car')
         self.assertTrue(isinstance(result, Dataset))
         self.assertTrue(result.is_local())
+        self.assertEqual(meta.get('required_quota'), 6)
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
         result_columns = result.get_column_names()
