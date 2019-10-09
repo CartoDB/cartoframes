@@ -5,6 +5,7 @@ from warnings import warn
 from copy import deepcopy
 import geojson
 import geopandas
+import pandas as pd
 
 from carto.exceptions import CartoException
 
@@ -79,6 +80,45 @@ def compute_geodataframe(dataset):
                                  ))
         return geopandas.GeoDataFrame(df)
 
+def to_geodataframe(input_dataset):   
+    from ..data import Dataset
+
+    if isinstance(input_dataset, geopandas.GeoDataFrame):
+        # It's already a dataframe
+        return input_dataset
+    
+    elif isinstance(input_dataset, Dataset):
+        if input_dataset.dataframe is None:
+            return None
+        elif isinstance(input_dataset.dataframe, geopandas.GeoDataFrame):
+            return input_dataset.dataframe
+        df = input_dataset.dataframe
+    elif isinstance(input_dataset, pd.DataFrame):
+        df = input_dataset
+
+    geom_column = _get_column(df, GEOM_COLUMN_NAMES)
+    if geom_column is not None:
+        df['geometry'] = _compute_geometry_from_geom(geom_column)
+        _warn_new_geometry_column(df)
+    else:
+        lat_column = _get_column(df, LAT_COLUMN_NAMES)
+        lng_column = _get_column(df, LNG_COLUMN_NAMES)
+        if lat_column is not None and lng_column is not None:
+            df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
+            _warn_new_geometry_column(df)
+        else:
+            raise ValueError('''No geographic data found. '''
+                                '''If a geometry exists, change the column name ({0}) or '''
+                                '''ensure it is a DataFrame with a valid geometry. '''
+                                '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
+                                    ', '.join(GEOM_COLUMN_NAMES),
+                                    ', '.join(LAT_COLUMN_NAMES),
+                                    ', '.join(LNG_COLUMN_NAMES)
+                                ))
+
+    df.drop(columns=['the_geom'],axis=1,inplace=True)
+
+    return geopandas.GeoDataFrame(df)   
 
 def _get_column(df, options):
     for name in options:

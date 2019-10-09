@@ -183,7 +183,7 @@ def __process_enrichment_variables(variables, user_dataset):
         variable_name = variable.column_name
 
         if project_name != _PUBLIC_PROJECT:
-            table_name = '{dataset}_{table}'.format(dataset=dataset_name,
+            table_name = 'view_{dataset}_{table}'.format(dataset=dataset_name,
                                                     table=table_name,
                                                     user_dataset=user_dataset)
 
@@ -197,7 +197,7 @@ def __process_enrichment_variables(variables, user_dataset):
             geotable = __get_name_geotable_from_datatable(table_name)
 
             if project_name != _PUBLIC_PROJECT:
-                geotable = '{dataset}_{geotable}'.format(dataset=dataset_name,
+                geotable = 'view_{dataset}_{geotable}'.format(dataset=dataset_name,
                                                          geotable=geotable,
                                                          user_dataset=user_dataset)
 
@@ -217,9 +217,10 @@ def __process_enrichment_variables(variables, user_dataset):
 def __get_name_geotable_from_datatable(datatable):
 
     datatable_split = datatable.split('_')
+    print(datatable_split)
 
-    if len(datatable_split) == 8:
-        geo_information = datatable_split[3:6]
+    if len(datatable_split) == 9:
+        geo_information = datatable_split[4:7]
     elif len(datatable_split) == 7:
         geo_information = datatable_split[2:5]
 
