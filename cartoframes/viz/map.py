@@ -8,7 +8,7 @@ from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
-from .kuviz import KuvizPublisher, kuviz_to_dict
+from .kuviz import KuvizPublisher
 from .html.HTMLMap import HTMLMap
 from ..utils.utils import get_center
 
@@ -303,8 +303,8 @@ class Map(object):
         """
         table_name = table_name or '{}_table'.format(name)
 
-        self._publisher = self._get_publisher(table_name, credentials)
-        self._publisher.set_layers(self.layers, table_name)
+        self._publisher = _get_publisher(table_name, credentials)
+        self._publisher.set_layers(self.layers, name, table_name)
 
         html = self._get_publication_html(name)
         return self._publisher.publish(html, name, password)
@@ -322,8 +322,8 @@ class Map(object):
                 password and using `None` the Kuviz will be public
         """
 
-        data = self._get_publication_html(name)
-        return self._publisher.update(data, name, password)
+        html = self._get_publication_html(name)
+        return self._publisher.update(html, name, password)
 
     @staticmethod
     def all_publications(credentials=None):

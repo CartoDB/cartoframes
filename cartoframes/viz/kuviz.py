@@ -34,9 +34,9 @@ class KuvizPublisher(object):
     def get_layers(self):
         return self._layers
 
-    def set_layers(self, layers, table_name):
-        self._sync_layers(layers)
-        self._manage_maps_api_key()
+    def set_layers(self, layers, name, table_name):
+        self._sync_layers(layers, table_name)
+        self._manage_maps_api_key(name)
         self._add_layers_credentials()
 
     def publish(self, html, name, password=None):
@@ -62,10 +62,10 @@ class KuvizPublisher(object):
             return True
         return False
 
-    def _sync_layers(self, layers):
+    def _sync_layers(self, layers, table_name):
         for idx, layer in enumerate(layers):
-            table_name = normalize_name("{name}_{idx}".format(name=self._table_name, idx=idx))
             if layer.source.dataset.is_local():
+                table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx))
                 layer = self._sync_layer(layer, table_name)
             self._layers.append(layer)
 
@@ -79,13 +79,13 @@ class KuvizPublisher(object):
 
         return layer
 
-    def _manage_maps_api_key(self):
+    def _manage_maps_api_key(self, name):
         non_public_datasets = [layer.source.dataset
                                for layer in self._layers
                                if not layer.source.dataset.is_public()]
 
         if len(non_public_datasets) > 0:
-            api_key_name = '{}_api_key'.format(self._table_name)
+            api_key_name = '{}_api_key'.format(name)
             auth_api_client = AuthAPIClient(self._credentials)
             self._maps_api_key = auth_api_client.create_api_key(non_public_datasets, api_key_name, ['maps'])
 
