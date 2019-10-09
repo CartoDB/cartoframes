@@ -14,7 +14,7 @@ class DatasetRepository(EntityRepository):
 
     id_field = _DATASET_ID_FIELD
 
-    def get_all(self, credentials):
+    def get_all(self, credentials=None):
         self.client.set_user_credentials(credentials)
         return self._get_filtered_entities()
 
