@@ -4,6 +4,7 @@ from .category import Category
 from .country import Country
 from .dataset import Dataset
 from .geography import Geography
+from .subscriptions import Subscriptions
 
 from ...auth import Credentials, get_default_credentials
 
@@ -63,4 +64,7 @@ class Catalog(object):
         if not isinstance(credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
-        return (Dataset.get_all(_credentials), Geography.get_all(_credentials))
+        return Subscriptions(
+            Dataset.get_all(_credentials),
+            Geography.get_all(_credentials)
+        )

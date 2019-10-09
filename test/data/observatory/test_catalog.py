@@ -7,6 +7,7 @@ from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.catalog import Catalog
+from cartoframes.data.observatory.subscriptions import Subscriptions
 from .examples import test_country2, test_country1, test_category1, \
     test_category2, test_dataset1, test_dataset2, test_geography1, test_geography2
 
@@ -69,13 +70,14 @@ class TestCatalog(unittest.TestCase):
         catalog = Catalog()
 
         # When
-        (datasets, geographies) = catalog.subscriptions(credentials)
+        subscriptions = catalog.subscriptions(credentials)
 
         # Then
         mocked_datasets.assert_called_once_with(credentials)
         mocked_geographies.assert_called_once_with(credentials)
-        assert datasets == expected_datasets
-        assert geographies == expected_geographies
+        assert isinstance(subscriptions, Subscriptions)
+        assert subscriptions.datasets == expected_datasets
+        assert subscriptions.geographies == expected_geographies
 
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
