@@ -47,7 +47,28 @@
       "samples": []
     }, {
       "title": "Geocoding and Isolines Services",
-      "samples": []
+      "samples": [
+        {
+          "title": "Geocoding a Dataframe",
+          "desc": "Using the Geocoding Services to geocode a Dataframe",
+          "file": "geocoding_dataframe",
+          "path": "data_services"
+        }, {
+          "title": "Calculating Isochrones",
+          "desc": "Using the Isolines Services to calculate isochrones",
+          "file": "isochrones",
+          "path": "data_services"
+        }, {
+          "title": "Calculating Isodistances",
+          "desc": "Using the Isolines Services to calculate isodistances",
+          "file": "isodistance",
+          "path": "data_services"
+        },{
+          "title": "Using both Geocoding and Isolines Services",
+          "desc": "Using both Geocoding and Isolines Services",
+          "file": "geocoding_and_isolines",
+          "path": "data_services"
+        }]
     }, {
       "title": "Data Enrichment",
       "samples": []
