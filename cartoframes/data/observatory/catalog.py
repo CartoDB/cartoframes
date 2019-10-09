@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from .category import Category
 from .country import Country
 from .dataset import Dataset
+from .geography import Geography
 
 from ...auth import Credentials, get_default_credentials
 
@@ -62,4 +63,4 @@ class Catalog(object):
         if not isinstance(credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
-        return Dataset.get_all(_credentials)
+        return (Dataset.get_all(_credentials), Geography.get_all(_credentials))

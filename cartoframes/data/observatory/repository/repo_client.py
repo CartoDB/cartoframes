@@ -40,8 +40,12 @@ class RepoClient(object):
 
     def get_geographies(self, field=None, value=None):
         query = 'SELECT * FROM geographies_public'
-        # TODO future: Filter by purchased geography ids
-        return self._run_query(query, field, value)
+
+        extra_condition = ''
+        if self._user_credentials is not None:
+            extra_condition = 'id IN ({})'.format(self._get_purchased_dataset_ids())
+
+        return self._run_query(query, field, value, extra_condition)
 
     def get_datasets(self, field=None, value=None):
         query = 'SELECT * FROM datasets_public'

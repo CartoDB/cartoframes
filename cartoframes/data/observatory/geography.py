@@ -53,6 +53,10 @@ class Geography(CatalogEntity):
     def summary(self):
         return self.data['summary_jsonb']
 
+    @classmethod
+    def get_all(cls, credentials=None):
+        return cls.entity_repo.get_all(credentials)
+
     def download(self, credentials=None):
         """Download Geography data.
 
