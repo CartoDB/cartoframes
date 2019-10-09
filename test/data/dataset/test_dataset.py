@@ -7,6 +7,7 @@ import sys
 import json
 import warnings
 import pandas as pd
+import geopandas as gpd
 
 from carto.exceptions import CartoException
 
@@ -14,13 +15,15 @@ from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
 from cartoframes.utils.geom_utils import setting_value_exception
-from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
-from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows, _normalize_column_names
+from cartoframes.data.dataset.registry.dataframe_dataset import DataFrameDataset, _rows
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
+from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
+from cartoframes.utils.columns import DataframeColumnsInfo
 
 try:
     from unittest.mock import Mock
@@ -30,12 +33,6 @@ from test.mocks.dataset_mock import DatasetMock, QueryDatasetMock
 from test.mocks.context_mock import ContextMock
 
 from test.helpers import _UserUrlLoader
-
-try:
-    import geopandas
-    HAS_GEOPANDAS = True
-except ImportError:
-    HAS_GEOPANDAS = False
 
 WILL_SKIP = False
 warnings.filterwarnings('ignore')
@@ -154,14 +151,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
                    'or use if_exists="replace" to overwrite it').format(t=self.test_write_table, s='public')
         with self.assertRaises(CartoException, msg=err_msg):
             dataset.upload(table_name=self.test_write_table)
-        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.REPLACE)
+        dataset.upload(table_name=self.test_write_table, if_exists=Dataset.IF_EXISTS_REPLACE)
 
     def test_dataset_upload_validation_fails_with_query_and_append(self):
         query = 'SELECT 1'
         dataset = Dataset(query, credentials=self.credentials)
         err_msg = 'Error using append with a query Dataset. It is not possible to append data to a query'
         with self.assertRaises(CartoException, msg=err_msg):
-            dataset.upload(table_name=self.test_write_table, if_exists=Dataset.APPEND)
+            dataset.upload(table_name=self.test_write_table, if_exists=Dataset.IF_EXISTS_APPEND)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_download_validations(self):
@@ -196,7 +193,9 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = dataset.download()
 
         dataset = Dataset(df)
-        dataset.upload(table_name=self.test_write_table, credentials=self.credentials, if_exists=Dataset.REPLACE)
+        dataset.upload(table_name=self.test_write_table,
+                       credentials=self.credentials,
+                       if_exists=Dataset.IF_EXISTS_REPLACE)
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -258,17 +257,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
-        df = read_taxi(limit=100)
+        df = read_taxi(limit=50)
         lnglat = ('dropoff_longitude', 'dropoff_latitude')
-        dataset = Dataset(df).upload(
-            with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
-
+        Dataset(df).upload(with_lnglat=lnglat, table_name=self.test_write_table, credentials=self.credentials)
         self.assertExistsTable(self.test_write_table)
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 100)
+        self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_null_geometry_column(self):
@@ -324,7 +320,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         from cartoframes.examples import read_taxi
         import shapely
-        import geopandas as gpd
         df = read_taxi(limit=50)
         df.drop(['the_geom'], axis=1, inplace=True)
         gdf = gpd.GeoDataFrame(df.drop(['dropoff_longitude', 'dropoff_latitude'], axis=1),
@@ -383,11 +378,14 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
     def test_dataset_write_if_exists_append(self):
         from cartoframes.examples import read_brooklyn_poverty
         df = read_brooklyn_poverty()
-        dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
+        Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        dataset = Dataset(df).upload(
-            if_exists=Dataset.APPEND, table_name=self.test_write_table, credentials=self.credentials)
+        # avoid uploading the same cartodb_id
+        df['cartodb_id'] += df['cartodb_id'].max() + 1
+
+        Dataset(df).upload(if_exists=Dataset.IF_EXISTS_APPEND,
+                           table_name=self.test_write_table,
+                           credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -403,7 +401,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.test_write_table = dataset.table_name
 
         dataset = Dataset(df).upload(
-            if_exists=Dataset.REPLACE, table_name=self.test_write_table, credentials=self.credentials)
+            if_exists=Dataset.IF_EXISTS_REPLACE, table_name=self.test_write_table, credentials=self.credentials)
 
         self.assertExistsTable(self.test_write_table)
 
@@ -471,7 +469,7 @@ class TestDatasetInfo(unittest.TestCase):
     def test_dataset_info_should_work_from_table(self):
         table_name = 'fake_table'
         dataset = DatasetMock(table_name, credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVACY_PRIVATE)
 
     def test_dataset_get_privacy_from_new_table(self):
         query = 'SELECT 1'
@@ -479,7 +477,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVACY_PRIVATE)
 
     def test_dataset_set_privacy_to_new_table(self):
         query = 'SELECT 1'
@@ -487,8 +485,8 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        dataset.update_dataset_info(privacy=Dataset.PUBLIC)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PUBLIC)
+        dataset.update_dataset_info(privacy=Dataset.PRIVACY_PUBLIC)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVACY_PUBLIC)
 
     def test_dataset_set_privacy_with_wrong_parameter(self):
         query = 'SELECT 1'
@@ -496,7 +494,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table')
         wrong_privacy = 'wrong_privacy'
         error_msg = 'Wrong privacy. The privacy: {p} is not valid. You can use: {o1}, {o2}, {o3}'.format(
-            p=wrong_privacy, o1=Dataset.PRIVATE, o2=Dataset.PUBLIC, o3=Dataset.LINK)
+            p=wrong_privacy, o1=Dataset.PRIVACY_PRIVATE, o2=Dataset.PRIVACY_PUBLIC, o3=Dataset.PRIVACY_LINK)
         with self.assertRaises(ValueError, msg=error_msg):
             dataset.update_dataset_info(privacy=wrong_privacy)
 
@@ -504,12 +502,12 @@ class TestDatasetInfo(unittest.TestCase):
         table_name = 'fake_table'
         dataset = DatasetMock(table_name, credentials=self.credentials)
         dataset_info = dataset.dataset_info
-        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
-        privacy = Dataset.PUBLIC
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVACY_PRIVATE)
+        privacy = Dataset.PRIVACY_PUBLIC
         error_msg = str(setting_value_exception('privacy', privacy))
         with self.assertRaises(CartoException, msg=error_msg):
             dataset_info.privacy = privacy
-        self.assertEqual(dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset_info.privacy, Dataset.PRIVACY_PRIVATE)
 
     def test_dataset_info_from_dataframe(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
@@ -526,7 +524,7 @@ class TestDatasetInfo(unittest.TestCase):
         dataset.upload(table_name='fake_table', credentials=self.credentials)
 
         dataset = DatasetMock('fake_table', credentials=self.credentials)
-        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVATE)
+        self.assertEqual(dataset.dataset_info.privacy, Dataset.PRIVACY_PRIVATE)
 
     def test_dataset_info_from_query(self):
         query = 'SELECT 1'
@@ -608,10 +606,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
         self.assertIsDataFrameDatasetInstance(df)
 
-    @unittest.skipIf(not HAS_GEOPANDAS, 'no geopandas imported, skipping this test')
     def test_creation_from_valid_geodataframe(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        gdf = geopandas.GeoDataFrame(df)
+        gdf = gpd.GeoDataFrame(df)
         self.assertIsDataFrameDatasetInstance(gdf)
 
     def test_creation_from_valid_localgeojson(self):
@@ -705,82 +702,215 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         with self.assertRaises(CartoException, msg=error_msg):
             dataset.get_table_names()
 
-    def test_copyfrom_column_names_with_geom(self):
-        the_geom = 'geometry'
-        with_lnglat = None
+    def test_create_table_query(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1], 'the_geom': ['POINT (1 1)']})
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint, the_geom geometry(Point, 4326))'.format(table_name)
 
-        expected_columns_origin = [the_geom, 'address', 'city']
-        expected_columns_normalized = ['address', 'city', 'the_geom']
-
-        df = pd.DataFrame(
-            [['Gran Vía 46', 'Madrid', 'fake_geom'], ['Ebro 1', 'Sevilla', 'fake_geom']],
-            columns=['address', 'city', 'geometry'])
         dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        self.assertEqual(result, expected_result)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+    def test_create_table_query_without_geom(self):
+        df = pd.DataFrame.from_dict({'cartodb_id': [1]})
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (cartodb_id bigint)'.format(table_name)
 
-    def test_copyfrom_column_names_with_lnglat(self):
-        the_geom = None
-        with_lnglat = ('lng', 'lat')
-
-        expected_columns_origin = ['lng', 'lat']
-        expected_columns_normalized = ['lng', 'lat', 'the_geom']
-
-        df = pd.DataFrame([['0', '0'], ['1', '1']], columns=['lng', 'lat'])
         dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        self.assertEqual(result, expected_result)
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+    def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['geom'])
+        ds = Dataset(df)
 
-    def test_copyfrom_column_names_without_geom(self):
-        columns = ['address', 'city']
-        the_geom = None
-        with_lnglat = None
+        BaseDataset.exists = Mock(return_value=False)
 
-        expected_columns_origin = columns
-        expected_columns_normalized = columns
+        ds.upload(table_name=table, credentials=credentials)
 
-        df = pd.DataFrame([['Gran Vía 46', 'Madrid'], ['Ebro 1', 'Sevilla']], columns=columns)
-        dataset = DataFrameDataset(df)
-        columns_normalized, columns_origin = dataset._copyfrom_column_names(
-            the_geom,
-            _normalize_column_names(df),
-            with_lnglat)
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
 
-        self.assertEqual(expected_columns_origin, columns_origin)
-        self.assertEqual(expected_columns_normalized, columns_normalized)
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_one_geometry_that_is_the_geom_uses_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (1 1)']], columns=['the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_several_geometry_columns_prioritize_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(geom,the_geom,geometry) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_the_geom_webmercator_column_is_removed(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 'POINT (1 1)', 'fake']], columns=['cartodb_id', 'the_geom', 'the_geom_webmercator'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_lng_lat(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1]], columns=['lng', 'lat'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_the_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'the_geom'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_prioritizing_with_lng_lat_over_other_geom_names(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, 1, 'POINT (2 2)']], columns=['lng', 'lat', 'geometry'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
+
+        expected_query = "COPY {}(lng,lat,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
+            table)
+        expected_data = [b'1|1|SRID=4326;POINT (1 1)\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_without_geom(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([[1, True, 'text']], columns=['col1', 'col2', 'col3'])
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(col1,col2,col3) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'1|True|text\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_null_values(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        ds = Dataset(df)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(test) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'\n', b'\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
 
 
 class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_rows(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
         self.assertEqual(list(rows), [b'\n', b'\n'])
 
     def test_rows_with_geom(self):
-        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
+        self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
         df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
-        rows = _rows(df, ['test'], None, '', '')
+        with_lnglat = None
+        dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
+        rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'\n', b'\n'])
+        self.assertEqual(list(rows), [b'|\n', b'|\n'])
+
+    def test_rows_non_ascii(self):
+        attribute = 'áéí'
+        unicode_attribute = u'áéí'
+        encoded_attribute = unicode_attribute.encode('utf-8')
+        encoded_line = encoded_attribute + '\n'.encode()
+
+        df = pd.DataFrame.from_dict({'test': [attribute, unicode_attribute, encoded_attribute, 'xyz']})
+        columns_info = DataframeColumnsInfo(df)
+        rows = _rows(df, columns_info, None)
+        self.assertEqual(list(rows), [encoded_line, encoded_line, encoded_line, b'xyz\n'])

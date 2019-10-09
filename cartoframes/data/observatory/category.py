@@ -1,56 +1,18 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import CatalogEntity
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
 
 
-_CATEGORY_ID_FIELD = 'id'
+class Category(CatalogEntity):
 
-
-class Category(pd.Series):
-
-    @property
-    def _constructor(self):
-        return Category
+    entity_repo = get_category_repo()
 
     @property
-    def _constructor_expanddim(self):
-        return Categories
-
-    @staticmethod
-    def get_by_id(category_id):
-        return get_category_repo().get_by_id(category_id)
-
     def datasets(self):
-        return get_dataset_repo().get_by_category(self[_CATEGORY_ID_FIELD])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Categories(pd.DataFrame):
+        return get_dataset_repo().get_by_category(self.id)
 
     @property
-    def _constructor(self):
-        return Categories
-
-    @property
-    def _constructor_sliced(self):
-        return Category
-
-    @staticmethod
-    def get_all():
-        return get_category_repo().get_all()
-
-    @staticmethod
-    def get_by_id(category_id):
-        return Category.get_by_id(category_id)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
+    def name(self):
+        return self.data['name']

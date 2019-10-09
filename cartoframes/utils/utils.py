@@ -8,6 +8,7 @@ import sys
 import base64
 import hashlib
 import requests
+import geopandas
 import numpy as np
 
 from functools import wraps
@@ -197,19 +198,6 @@ def get_query_bounds(context, query):
 
 
 def load_geojson(input_data):
-    try:
-        import geopandas
-        HAS_GEOPANDAS = True
-    except ImportError:
-        HAS_GEOPANDAS = False
-
-    if not HAS_GEOPANDAS:
-        raise ValueError(
-            '''
-            GeoJSON source only works with GeoDataFrames from
-            the geopandas package http://geopandas.org/data_structures.html#geodataframe
-            ''')
-
     if isinstance(input_data, str):
         # File name
         data = geopandas.read_file(input_data)
@@ -299,3 +287,12 @@ def get_center(center):
         return None
 
     return [center.get('lng'), center.get('lat')]
+
+
+def remove_column_from_dataframe(dataframe, name):
+    """Removes a column or index (or both) from a DataFrames"""
+    if name in dataframe.columns:
+        del dataframe[name]
+    if dataframe.index.name == name:
+        dataframe.reset_index(inplace=True)
+        del dataframe[name]

@@ -1,39 +1,33 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .entity_repo import EntityRepository
+
+
+_CATEGORY_ID_FIELD = 'id'
 
 
 def get_category_repo():
     return _REPO
 
 
-class CategoryRepository(object):
+class CategoryRepository(EntityRepository):
 
-    def __init__(self):
-        self.client = RepoClient()
+    id_field = _CATEGORY_ID_FIELD
 
-    def get_all(self):
-        return self._to_categories(self.client.get_categories())
+    @classmethod
+    def _map_row(cls, row):
+        return {
+            'id': cls._normalize_field(row, cls.id_field),
+            'name': cls._normalize_field(row, 'name')
+        }
 
-    def get_by_id(self, category_id):
-        result = self.client.get_categories('id', category_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing category in the catalog. '
-                                     'You can check the full list of available categories with Categories.get_all()')
-
-        return self._to_category(result[0])
-
-    @staticmethod
-    def _to_category(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.category import Category
+        return Category
 
-        return Category(result)
-
-    @staticmethod
-    def _to_categories(results):
-        from cartoframes.data.observatory.category import Categories
-
-        return Categories([CategoryRepository._to_category(result) for result in results])
+    def _get_rows(self, field=None, value=None):
+        return self.client.get_categories(field, value)
 
 
 _REPO = CategoryRepository()

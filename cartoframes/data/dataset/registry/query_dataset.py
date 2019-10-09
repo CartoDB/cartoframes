@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from .base_dataset import BaseDataset
@@ -41,12 +43,12 @@ class QueryDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
-        if if_exists == BaseDataset.APPEND:
+        if if_exists == BaseDataset.IF_EXISTS_APPEND:
             raise CartoException('Error using append with a QueryDataset.'
                                  'It is not possible to append data to a query')
-        elif if_exists == BaseDataset.REPLACE or not self.exists():
+        elif if_exists == BaseDataset.IF_EXISTS_REPLACE or not self.exists():
             self._create_table_from_query()
-        elif if_exists == BaseDataset.FAIL:
+        elif if_exists == BaseDataset.IF_EXISTS_FAIL:
             raise self._already_exists_error()
 
     def delete(self):
@@ -69,6 +71,20 @@ class QueryDataset(BaseDataset):
             tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
 
         return tables
+
+    def get_column_names(self, exclude=None):
+        """Get column names"""
+        columns = [c.name for c in self._get_query_columns()]
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the query"""
+        result = self._context.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=self.get_query()))
+        return result.get('rows')[0].get('count')
 
     def _create_table_from_query(self):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(

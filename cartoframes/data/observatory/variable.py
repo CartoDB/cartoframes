@@ -1,55 +1,50 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
-_VARIABLE_FIELD_ID = 'id'
 
+class Variable(CatalogEntity):
 
-class Variable(pd.Series):
-
-    @property
-    def _constructor(self):
-        return Variable
+    entity_repo = get_variable_repo()
 
     @property
-    def _constructor_expanddim(self):
-        return Variables
-
-    @staticmethod
-    def get_by_id(variable_id):
-        return get_variable_repo().get_by_id(variable_id)
-
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self[_VARIABLE_FIELD_ID])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Variables(pd.DataFrame):
+        return get_dataset_repo().get_by_variable(self.id)
 
     @property
-    def _constructor(self):
-        return Variables
+    def name(self):
+        return self.data['name']
 
     @property
-    def _constructor_sliced(self):
-        return Variable
+    def description(self):
+        return self.data['description']
 
-    @staticmethod
-    def get_all():
-        return get_variable_repo().get_all()
+    @property
+    def column_name(self):
+        return self.data['column_name']
 
-    @staticmethod
-    def get_by_id(variable_id):
-        return Variable.get_by_id(variable_id)
+    @property
+    def db_type(self):
+        return self.data['db_type']
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @property
+    def dataset(self):
+        return self.data['dataset_id']
 
-    def __ne__(self, other):
-        return not self == other
+    @property
+    def agg_method(self):
+        return self.data['agg_method']
+
+    @property
+    def variable_group(self):
+        return self.data['variable_group_id']
+
+    @property
+    def starred(self):
+        return self.data['starred']
+
+    @property
+    def summary(self):
+        return self.data['summary_jsonb']

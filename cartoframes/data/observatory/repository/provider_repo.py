@@ -1,42 +1,33 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .entity_repo import EntityRepository
+
+
+_PROVIDER_ID_FIELD = 'id'
 
 
 def get_provider_repo():
     return _REPO
 
 
-class ProviderRepository(object):
+class ProviderRepository(EntityRepository):
 
-    def __init__(self):
-        self.client = RepoClient()
+    id_field = _PROVIDER_ID_FIELD
 
-    def get_all(self):
-        return self._to_providers(self.client.get_providers())
+    @classmethod
+    def _map_row(cls, row):
+        return {
+           'id': cls._normalize_field(row, cls.id_field),
+           'name': cls._normalize_field(row, 'name')
+        }
 
-    def get_by_id(self, provider_id):
-        result = self.client.get_providers('id', provider_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing provider in the catalog. '
-                                     'You can check the full list of available providers with Providers.get_all()')
-
-        return self._to_provider(result[0])
-
-    @staticmethod
-    def _to_provider(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.provider import Provider
+        return Provider
 
-        return Provider({
-            'id': result['id'],
-            'name': result['name']
-        })
-
-    @staticmethod
-    def _to_providers(results):
-        from cartoframes.data.observatory.provider import Providers
-
-        return Providers([ProviderRepository._to_provider(result) for result in results])
+    def _get_rows(self, field=None, value=None):
+        return self.client.get_providers(field, value)
 
 
 _REPO = ProviderRepository()

@@ -1,55 +1,54 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 
-_GEOGRAPHY_FIELD_ID = 'id'
 
+class Geography(CatalogEntity):
 
-class Geography(pd.Series):
-
-    @property
-    def _constructor(self):
-        return Geography
+    entity_repo = get_geography_repo()
 
     @property
-    def _constructor_expanddim(self):
-        return Geographies
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return get_geography_repo().get_by_id(geography_id)
-
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self[_GEOGRAPHY_FIELD_ID])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Geographies(pd.DataFrame):
+        return get_dataset_repo().get_by_geography(self.id)
 
     @property
-    def _constructor(self):
-        return Geographies
+    def name(self):
+        return self.data['name']
 
     @property
-    def _constructor_sliced(self):
-        return Geography
+    def description(self):
+        return self.data['description']
 
-    @staticmethod
-    def get_all():
-        return get_geography_repo().get_all()
+    @property
+    def country(self):
+        return self.data['country_iso_code3']
 
-    @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
+    @property
+    def language(self):
+        return self.data['language_iso_code3']
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @property
+    def provider(self):
+        return self.data['provider_id']
 
-    def __ne__(self, other):
-        return not self == other
+    @property
+    def geom_coverage(self):
+        return self.data['geom_coverage']
+
+    @property
+    def update_frequency(self):
+        return self.data['update_frequency']
+
+    @property
+    def version(self):
+        return self.data['version']
+
+    @property
+    def is_public_data(self):
+        return self.data['is_public_data']
+
+    @property
+    def summary(self):
+        return self.data['summary_jsonb']
