@@ -6,16 +6,25 @@ from carto.kuvizs import KuvizManager
 from ..auth import get_default_credentials
 from .source import Source
 from ..utils.columns import normalize_name
+from ..data.clients.auth_api_client import AuthAPIClient
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
+DEFAULT_PUBLIC = 'default_public'
+
 
 class KuvizPublisher(object):
-    def __init__(self, layers, credentials=None):
-        self._layers = deepcopy(layers)
+    def __init__(self, layers, table_name=None, credentials=None):
+        self.kuviz = None
+        self._maps_api_key = DEFAULT_PUBLIC
+
+        self._table_name = table_name
         self._credentials = credentials or get_default_credentials()
         self._auth_client = _create_auth_client(self._credentials)
+        self._layers = []
+
+        self._initialize(deepcopy(layers))
 
     @staticmethod
     def all(credentials=None):
@@ -24,31 +33,33 @@ class KuvizPublisher(object):
         kuvizs = km.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
+    def _initialize(self, layers):
+        self._sync_layers(layers)
+        self._manage_maps_api_key()
+
     def publish(self, html, name, password=None):
-        return _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
+        self.kuviz = _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
+        return kuviz_to_dict(self.kuviz)
 
-    def is_sync(self):
-        return all(layer.source.dataset.is_remote() for layer in self._layers)
-
-    def is_public(self):
-        return all(layer.source.dataset.is_public() for layer in self._layers)
-
-    def get_layers(self, maps_api_key='default_public'):
+    def get_layers(self):
         for layer in self._layers:
-            layer.source.dataset.credentials = self._credentials
+            if not layer.source.dataset.credentials:
+                layer.source.dataset.credentials = self._credentials
 
             layer.credentials = {
-                'username': self._credentials.username,
-                'api_key': maps_api_key,
-                'base_url': self._credentials.base_url
+                'username': layer.source.dataset.credentials.username,
+                'api_key': self._maps_api_key,
+                'base_url': layer.source.dataset.credentials.base_url
             }
 
         return self._layers
 
-    def sync_layers(self, table_name):
-        for idx, layer in enumerate(self._layers):
-            table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx + 1))
-            self._sync_layer(layer, table_name)
+    def _sync_layers(self, layers):
+        for idx, layer in enumerate(layers):
+            table_name = normalize_name("{name}_{idx}".format(name=self._table_name, idx=idx))
+            layer = self._sync_layer(layer, table_name)
+
+        self._layers.append(layer)
 
     def _sync_layer(self, layer, table_name):
         if layer.source.dataset.is_local():
@@ -58,6 +69,18 @@ class KuvizPublisher(object):
                  'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
                  'using the Auth API. You can get more info at '
                  'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
+
+        return layer
+
+    def _manage_maps_api_key(self):
+        non_public_datasets = [layer.source.dataset
+                               for layer in self._layers
+                               if not layer.source.dataset.is_public()]
+
+        if len(non_public_datasets) > 0:
+            api_key_name = '{}_api_key'.format(self._table_name)
+            auth_api_client = AuthAPIClient(self._credentials)
+            self._maps_api_key = auth_api_client.create_api_key(non_public_datasets, api_key_name, ['maps'])
 
 
 def _create_kuviz(html, name, auth_client, password=None):
