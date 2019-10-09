@@ -65,12 +65,13 @@ def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_v
             ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
             {filters}
             {grouper};
-        '''.format(enrichment_id=enrichment_id, variables=', '.join(variables_sql),
-                   enrichment_table=table, enrichment_geo_table=table_to_geotable[table],
+        '''.format(enrichment_id=enrichment_id, enrichment_table=table,
+                   enrichment_geo_table=table_to_geotable[table],
                    user_dataset=user_dataset, working_project=working_project,
                    data_table=data_table, data_geom_column=kwargs['data_geom_column'],
                    filters=filters_processed, grouper=grouper, project=table_to_project[table],
-                   dataset=table_to_dataset[table])
+                   dataset=table_to_dataset[table],
+                   variables=', '.join(['enrichment_table.{}'.format(variable) for variable in variables]))
 
         sqls.append(sql)
 
