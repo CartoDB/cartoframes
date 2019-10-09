@@ -24,24 +24,31 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
     return data_enriched
 
 
-def _prepare_sql(enrichment_id, filters_processed, variables_processed, enrichment_table,
-                 enrichment_geo_table, user_dataset, working_project, data_table, **kwargs):
+def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_variables,
+                 table_to_project, table_to_dataset, user_dataset, working_project, data_table, **kwargs):
 
-    sql = '''
-        SELECT data_table.{enrichment_id},
-              {variables},
-              ST_Area(enrichment_geo_table.geom) AS area,
-              NULL AS population
-        FROM `{working_project}.{user_dataset}.{enrichment_table}` enrichment_table
-        JOIN `{working_project}.{user_dataset}.{enrichment_geo_table}` enrichment_geo_table
-          ON enrichment_table.geoid = enrichment_geo_table.geoid
-        JOIN `{working_project}.{user_dataset}.{data_table}` data_table
-          ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-        {filters};
-    '''.format(enrichment_id=enrichment_id, variables=', '.join(variables_processed),
-               enrichment_table=enrichment_table, enrichment_geo_table=enrichment_geo_table,
-               user_dataset=user_dataset, working_project=working_project,
-               data_table=data_table, data_geom_column=kwargs['data_geom_column'],
-               filters=filters_processed)
+    sqls = list()
 
-    return sql
+    for table, variables in table_to_variables.items():
+
+        sql = '''
+            SELECT data_table.{enrichment_id},
+                {variables},
+                ST_Area(enrichment_geo_table.geom) AS {variables_underscored}_area,
+                NULL AS {variables_underscored}_population
+            FROM `{project}.{dataset}.{enrichment_table}` enrichment_table
+            JOIN `{project}.{dataset}.{enrichment_geo_table}` enrichment_geo_table
+            ON enrichment_table.geoid = enrichment_geo_table.geoid
+            JOIN `{working_project}.{user_dataset}.{data_table}` data_table
+            ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
+            {filters};
+        '''.format(enrichment_id=enrichment_id, variables=', '.join(variables),
+                   variables_underscored='_'.join(variables), enrichment_table=table,
+                   enrichment_geo_table=table_to_geotable[table], user_dataset=user_dataset,
+                   working_project=working_project, data_table=data_table,
+                   data_geom_column=kwargs['data_geom_column'], filters=filters_processed,
+                   project=table_to_project[table], dataset=table_to_dataset[table])
+
+        sqls.append(sql)
+
+    return sqls

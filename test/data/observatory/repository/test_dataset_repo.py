@@ -97,7 +97,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_iso_code3', country_code)
+        mocked_repo.assert_called_once_with('country_id', country_code)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -159,8 +159,8 @@ class TestDatasetRepo(unittest.TestCase):
             'provider_id': None,
             'category_id': None,
             'data_source_id': None,
-            'country_iso_code3': None,
-            'language_iso_code3': None,
+            'country_id': None,
+            'lang': None,
             'geography_id': None,
             'temporal_aggregation': None,
             'time_coverage': None,

@@ -23,11 +23,11 @@ class Geography(CatalogEntity):
 
     @property
     def country(self):
-        return self.data['country_iso_code3']
+        return self.data['country_id']
 
     @property
     def language(self):
-        return self.data['language_iso_code3']
+        return self.data['lang']
 
     @property
     def provider(self):
@@ -52,3 +52,16 @@ class Geography(CatalogEntity):
     @property
     def summary(self):
         return self.data['summary_jsonb']
+
+    def download(self, credentials=None):
+        """Download Geography data.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+              credentials of CARTO user account. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              <cartoframes.auth.set_default_credentials>`) will attempted to be
+              used.
+        """
+
+        return self._download(credentials)

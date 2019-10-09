@@ -19,7 +19,7 @@ class DatasetRepository(EntityRepository):
         return self._get_filtered_entities()
 
     def get_by_country(self, iso_code3):
-        return self._get_filtered_entities('country_iso_code3', iso_code3)
+        return self._get_filtered_entities('country_id', iso_code3)
 
     def get_by_category(self, category_id):
         return self._get_filtered_entities('category_id', category_id)
@@ -42,8 +42,8 @@ class DatasetRepository(EntityRepository):
             'provider_id': cls._normalize_field(row, 'provider_id'),
             'category_id': cls._normalize_field(row, 'category_id'),
             'data_source_id': cls._normalize_field(row, 'data_source_id'),
-            'country_iso_code3': cls._normalize_field(row, 'country_iso_code3'),
-            'language_iso_code3': cls._normalize_field(row, 'language_iso_code3'),
+            'country_id': cls._normalize_field(row, 'country_id'),
+            'lang': cls._normalize_field(row, 'lang'),
             'geography_id': cls._normalize_field(row, 'geography_id'),
             'temporal_aggregation': cls._normalize_field(row, 'temporal_aggregation'),
             'time_coverage': cls._normalize_field(row, 'time_coverage'),

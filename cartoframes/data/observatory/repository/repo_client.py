@@ -19,7 +19,7 @@ class RepoClient(object):
         self._user_credentials = credentials or get_default_credentials()
 
     def get_countries(self, field=None, value=None):
-        query = 'SELECT DISTICT country_iso_code3 AS id FROM datasets_public'
+        query = 'SELECT DISTICT country_id AS id FROM datasets_public'
         return self._run_query(query, field, value)
 
     def get_categories(self, field=None, value=None):

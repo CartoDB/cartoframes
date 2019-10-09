@@ -39,11 +39,11 @@ class Dataset(CatalogEntity):
 
     @property
     def country(self):
-        return self.data['country_iso_code3']
+        return self.data['country_id']
 
     @property
     def language(self):
-        return self.data['language_iso_code3']
+        return self.data['lang']
 
     @property
     def geography(self):
@@ -76,3 +76,16 @@ class Dataset(CatalogEntity):
     @classmethod
     def get_all(cls, credentials=None):
         return cls.entity_repo.get_all(credentials)
+
+    def download(self, credentials=None):
+        """Download Dataset data.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+              credentials of CARTO user account. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              <cartoframes.auth.set_default_credentials>`) will be attempted to be
+              used.
+        """
+
+        return self._download(credentials)
