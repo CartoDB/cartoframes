@@ -48,5 +48,7 @@ class GeographyRepository(EntityRepository):
             'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
         }
 
+    def get_geographies_gdf(self):
+        return self.client.get_geographies_gdf()
 
 _REPO = GeographyRepository()
