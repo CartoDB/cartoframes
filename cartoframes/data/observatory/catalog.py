@@ -116,8 +116,9 @@ class Catalog(object):
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A :py:class:`Credentials <cartoframes.auth.Credentials>`
-                instance can be used in place of a `username`|`base_url` / `api_key` combination.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`

@@ -62,10 +62,37 @@ class Geography(CatalogEntity):
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
+
+    def subscribe(self, credentials=None):
+        """Subscribe to a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return None  # TODO
+
+    def subscription_info(self, credentials=None):
+        """Get the information of a subscription.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return None  # TODO
