@@ -71,9 +71,34 @@
       "title": "Layers",
       "samples": [
         {
-          "title": "Create a Dataset from a .csv file",
-          "desc": "Create a Dataset from a .csv file",
-          "file": "add-layer",
+          "title": "Add a Layer",
+          "desc":  "Add a Layer",
+          "file": "add_layer",
+          "path": "layers"        
+        }, {
+          "title": "Add a default Widget",
+          "desc":  "Add a default Widget",
+          "file": "add_default_widget_layer",
+          "path": "layers"
+        }, {
+          "title": "Add a default Legend",
+          "desc":  "Add a default Legend",
+          "file": "add_default_widget_legend",
+          "path": "layers"
+        }, {
+          "title": "Add popup on click to Layer",
+          "desc":  "Add popup on click to Layer",
+          "file": "add_popup_click_layer",
+          "path": "layers"
+        }, {
+          "title": "Add hover on click to Layer",
+          "desc":  "Add hover on click to Layer",
+          "file": "add_hover_click_layer",
+          "path": "layers"
+        }, {
+          "title": "Add basic style to a layer",
+          "desc":  "Add basic style to a layer",
+          "file": "add_style_layer",
           "path": "layers"        
         }
       ]
@@ -116,12 +141,12 @@
         }, {
           "title": "Multiple Legends",
           "desc": "Multiple Legends",
-          "file": "multiple-legends",
+          "file": "multiple_legends",
           "path": "legends"
         }, {
           "title": "Legend Subtype",
           "desc": "Legend Subtype",
-          "file": "legend-subtype",
+          "file": "legend_subtype",
           "path": "legends"
         }, {
           "title": "Use stroke color for Legend",
