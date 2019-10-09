@@ -161,7 +161,7 @@ class Isolines(Service):
             'maxpoints': maxpoints,
             'quality': quality
         }
-        iso_options = [str(k)+'='+str(v) for k, v in options.items() if v is not None]
+        iso_options = ["'{}={}'".format(k, v) for k, v in options.items() if v is not None]
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
         iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in range]))
 
