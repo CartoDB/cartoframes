@@ -48,3 +48,18 @@ class Variable(CatalogEntity):
     @property
     def summary(self):
         return self.data['summary_jsonb']
+
+    @property
+    def project_name(self):
+        project, _, _, _ = self.id.split('.')
+        return project
+
+    @property
+    def schema_name(self):
+        _, schema, _, _ = self.id.split('.')
+        return schema
+
+    @property
+    def dataset_name(self):
+        _, _, dataset, _ = self.id.split('.')
+        return dataset

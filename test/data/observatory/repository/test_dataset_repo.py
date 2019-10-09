@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.auth import Credentials
 from cartoframes.data.observatory.dataset import Dataset
 
 from cartoframes.exceptions import DiscoveryException
@@ -27,6 +28,23 @@ class TestDatasetRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None, None)
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
+    @patch.object(RepoClient, 'set_user_credentials')
+    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_datasets):
+        # Given
+        mocked_get_datasets.return_value = [db_dataset1, db_dataset2]
+        credentials = Credentials('user', '1234')
+        repo = DatasetRepository()
+
+        # When
+        datasets = repo.get_all(credentials)
+
+        # Then
+        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_get_datasets.assert_called_once_with(None, None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -79,7 +97,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_iso_code3', country_code)
+        mocked_repo.assert_called_once_with('country_id', country_code)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -141,8 +159,8 @@ class TestDatasetRepo(unittest.TestCase):
             'provider_id': None,
             'category_id': None,
             'data_source_id': None,
-            'country_iso_code3': None,
-            'language_iso_code3': None,
+            'country_id': None,
+            'lang': None,
             'geography_id': None,
             'temporal_aggregation': None,
             'time_coverage': None,

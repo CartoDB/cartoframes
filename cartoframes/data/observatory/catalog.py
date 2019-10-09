@@ -40,3 +40,20 @@ class Catalog(object):
         """
 
         return Dataset.get_all()
+
+    @classmethod
+    def purchased_datasets(self, credentials=None):
+        """Get all the datasets in the Catalog
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                A :py:class:`Credentials <cartoframes.auth.Credentials>`
+                instance can be used in place of a `username`|`base_url` / `api_key` combination.
+                Only required for the purchased datasets.
+
+        Returns:
+            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+
+        """
+
+        return Dataset.get_all(credentials)

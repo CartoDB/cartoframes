@@ -445,11 +445,6 @@ class Geocoding(Service):
 
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
-        if result_dataset.dataframe is not None and not table_name and not dry_run:
-            # The result is not a permanent table; remove cartodb_id if it wasn't present in the input
-            if 'cartodb_id' not in self.columns:
-                remove_column_from_dataframe(result_dataset.dataframe, 'cartodb_id')
-
         result = result_dataset
         if input_dataframe is not None:
             # Note that we return a dataframe whenever the input is dataframe,
