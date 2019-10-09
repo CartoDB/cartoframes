@@ -5,6 +5,7 @@ from .entity_repo import EntityRepository
 
 
 _DATASET_ID_FIELD = 'id'
+_DATASET_SLUG_FIELD = 'slug'
 _ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER]
 
 
@@ -15,7 +16,7 @@ def get_dataset_repo():
 class DatasetRepository(EntityRepository):
 
     def __init__(self):
-        super(DatasetRepository, self).__init__(_DATASET_ID_FIELD, _ALLOWED_FILTERS)
+        super(DatasetRepository, self).__init__(_DATASET_ID_FIELD, _ALLOWED_FILTERS, _DATASET_SLUG_FIELD)
 
     def get_by_country(self, iso_code3):
         return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
@@ -27,7 +28,7 @@ class DatasetRepository(EntityRepository):
         return self._get_filtered_entities({VARIABLE_FILTER: variable_id})
 
     def get_by_geography(self, geography_id):
-        return self._get_filtered_entities({'geography_id': geography_id})
+        return self._get_filtered_entities({GEOGRAPHY_FILTER: geography_id})
 
     def get_by_provider(self, provider_id):
         return self._get_filtered_entities({PROVIDER_FILTER: provider_id})

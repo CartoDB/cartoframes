@@ -129,7 +129,7 @@ class TestDataset(unittest.TestCase):
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == "Dataset('{id}')".format(id=db_dataset1['slug'])
+        assert dataset_repr == "<Dataset('{id}')>".format(id=db_dataset1['slug'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
@@ -161,7 +161,7 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == "[Dataset('{id1}'), Dataset('{id2}')]"\
+        assert datasets_str == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     def test_dataset_list_is_represented_with_slugs(self):
@@ -172,7 +172,7 @@ class TestDataset(unittest.TestCase):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == "[Dataset('{id1}'), Dataset('{id2}')]"\
+        assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
                                 .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     @patch.object(DatasetRepository, 'get_by_id')

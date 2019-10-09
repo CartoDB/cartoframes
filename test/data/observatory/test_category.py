@@ -83,7 +83,7 @@ class TestCategory(unittest.TestCase):
         category_repr = repr(category)
 
         # Then
-        assert category_repr == "Category('{id}')".format(id=db_category1['id'])
+        assert category_repr == "<Category('{id}')>".format(id=db_category1['id'])
 
     def test_category_is_printed_with_classname(self):
         # Given
@@ -116,7 +116,7 @@ class TestCategory(unittest.TestCase):
         categories_str = str(categories)
 
         # Then
-        assert categories_str == "[Category('{id1}'), Category('{id2}')]" \
+        assert categories_str == "[<Category('{id1}')>, <Category('{id2}')>]" \
                                  .format(id1=db_category1['id'], id2=db_category2['id'])
 
     def test_category_list_is_represented_with_ids(self):
@@ -127,7 +127,7 @@ class TestCategory(unittest.TestCase):
         categories_repr = repr(categories)
 
         # Then
-        assert categories_repr == "[Category('{id1}'), Category('{id2}')]"\
+        assert categories_repr == "[<Category('{id1}')>, <Category('{id2}')>]"\
                                   .format(id1=db_category1['id'], id2=db_category2['id'])
 
     @patch.object(CategoryRepository, 'get_by_id')

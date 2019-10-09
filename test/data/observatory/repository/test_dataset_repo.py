@@ -46,7 +46,7 @@ class TestDatasetRepo(unittest.TestCase):
     @patch.object(RepoClient, 'get_datasets')
     def test_get_by_id(self, mocked_repo):
         # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        mocked_repo.return_value = [db_dataset1]
         requested_id = db_dataset1['id']
         repo = DatasetRepository()
 
@@ -67,6 +67,20 @@ class TestDatasetRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_datasets')
+    def test_get_by_slug(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1]
+        requested_slug = db_dataset1['slug']
+        repo = DatasetRepository()
+
+        # When
+        dataset = repo.get_by_id(requested_slug)
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
     def test_get_by_country(self, mocked_repo):

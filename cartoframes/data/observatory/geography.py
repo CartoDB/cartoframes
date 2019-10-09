@@ -65,6 +65,3 @@ class Geography(CatalogEntity):
         """
 
         return self._download(credentials)
-
-    def __repr__(self):
-        return "{classname}('{entity_id}')".format(classname=self.__class__.__name__, entity_id=self.data['slug'])

@@ -45,7 +45,7 @@ class TestGeographyRepo(unittest.TestCase):
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_id(self, mocked_repo):
         # Given
-        mocked_repo.return_value = [db_geography1, db_geography2]
+        mocked_repo.return_value = [db_geography1]
         requested_id = db_geography1['id']
         repo = GeographyRepository()
 
@@ -67,6 +67,20 @@ class TestGeographyRepo(unittest.TestCase):
         # Then
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_slug(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1]
+        requested_slug = db_geography1['slug']
+        repo = GeographyRepository()
+
+        # When
+        geography = repo.get_by_id(requested_slug)
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert geography == test_geography1
 
     @patch.object(RepoClient, 'get_geographies_joined_datasets')
     def test_get_by_country(self, mocked_repo):

@@ -11,17 +11,18 @@ except ImportError:
 
 class EntityRepository(ABC):
 
-    def __init__(self, id_field, filters):
+    def __init__(self, id_field, filters, slug_field=None):
         self.client = RepoClient()
 
         self.id_field = id_field
+        self.slug_field = slug_field
         self.allowed_filters = filters + [id_field]
 
     def get_all(self, filters=None):
         return self._get_filtered_entities(filters)
 
     def get_by_id(self, id_):
-        result = self._get_rows({self.id_field: id_})
+        result = self._get_rows(self._get_id_filter(id_))
 
         if len(result) == 0:
             raise DiscoveryException('The id does not correspond with any existing entity in the catalog. '
@@ -44,6 +45,12 @@ class EntityRepository(ABC):
         if filters is not None:
             cleaned_filters = {field: value for field, value in filters.items() if field in self.allowed_filters}
             return cleaned_filters
+
+    def _get_id_filter(self, id_):
+        if self.slug_field is not None and len(id_.split('.')) == 1:
+            return {self.slug_field: id_}
+
+        return {self.id_field: id_}
 
     @classmethod
     def _to_catalog_entity(cls, result):
