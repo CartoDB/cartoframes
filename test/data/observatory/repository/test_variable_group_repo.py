@@ -25,7 +25,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
@@ -39,7 +39,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert variables_groups is None
 
     @patch.object(RepoClient, 'get_variables_groups')
@@ -53,7 +53,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variable_group = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
@@ -79,7 +79,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_by_dataset(dataset_id)
 
         # Then
-        mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        mocked_repo.assert_called_once_with({'dataset_id': dataset_id})
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 

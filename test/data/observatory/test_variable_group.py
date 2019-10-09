@@ -88,7 +88,7 @@ class TestVariableGroup(unittest.TestCase):
         variable_group_repr = repr(variable_group)
 
         # Then
-        assert variable_group_repr == 'VariableGroup({id})'.format(id=db_variable_group1['id'])
+        assert variable_group_repr == "<VariableGroup('{id}')>".format(id=db_variable_group1['id'])
 
     def test_variable_group_is_printed_with_classname(self):
         # Given
@@ -121,7 +121,7 @@ class TestVariableGroup(unittest.TestCase):
         variables_groups_str = str(variables_groups)
 
         # Then
-        assert variables_groups_str == '[VariableGroup({id1}), VariableGroup({id2})]' \
+        assert variables_groups_str == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]" \
                                        .format(id1=db_variable_group1['id'], id2=db_variable_group2['id'])
 
     def test_variable_group_list_is_represented_with_ids(self):
@@ -132,7 +132,7 @@ class TestVariableGroup(unittest.TestCase):
         variables_groups_repr = repr(variables_groups)
 
         # Then
-        assert variables_groups_repr == '[VariableGroup({id1}), VariableGroup({id2})]'\
+        assert variables_groups_repr == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]"\
                                         .format(id1=db_variable_group1['id'], id2=db_variable_group2['id'])
 
     @patch.object(VariableGroupRepository, 'get_by_id')
