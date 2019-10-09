@@ -212,7 +212,8 @@ class Map(object):
 
         self._carto_vl_path = kwargs.get('_carto_vl_path', None)
         self._airship_path = kwargs.get('_airship_path', None)
-        self._publisher = self._get_publisher()
+
+        self._publisher = None
         self._kuviz = None
 
         self.camera = None
@@ -282,7 +283,8 @@ class Map(object):
                 and other special characters.
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 A Credentials instance. If not provided, the credentials will be automatically
-                obtained from the default credentials if available.
+                obtained from the default credentials if available. It is used to create the
+                publication and also to save local data (if exists) into your CARTO account
             password (str, optional): setting it your Kuviz will be protected by
                 password. When someone will try to show the Kuviz, the password
                 will be requested
@@ -299,18 +301,10 @@ class Map(object):
                 tmap.publish('Custom Map Title')
 
         """
-        self._publisher.set_credentials(credentials)
+        self._publisher = self._get_publisher(table_name, credentials)
 
-        maps_api_key = 'default_public'
-        if not self._publisher.is_sync():
-            self._publisher.sync_layers(table_name)
-            maps_api_key = None  # create API KEY
-        elif private # if data private
-            maps_api_key = None  # create API KEY
-
-        html = self._get_publication_html(name, maps_api_key)
-        self._kuviz = self._publisher.publish(html, name, password)
-        return kuviz_to_dict(self._kuviz)
+        html = self._get_publication_html(name)
+        return self._publisher.publish(html, name, password)
 
     def delete_publication(self):
         """Delete the published map Kuviz."""
@@ -319,27 +313,22 @@ class Map(object):
             print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
             self._kuviz = None
 
-    def update_publication(self, name, password, maps_api_key='default_public'):
+    def update_publication(self, name, password):
         """Update the published map Kuviz.
 
         Args:
             name (str): The Kuviz name on CARTO
             password (str): setting it your Kuviz will be protected by
                 password and using `None` the Kuviz will be public
-            maps_api_key (str, optional): A Regular API key with permissions
-                to Maps API and datasets used by the map
         """
         if not self._kuviz:
             raise CartoException('The map has not been published. Use the `publish` method.')
 
-        if not self._publisher.is_sync():
-            raise CartoException('The map layers are not synchronized with CARTO. '
-                                 'Please, use the `sync_data` method before publishing the map')
+        # maps_api_key == 'default_public' should be a responsibility of Publisher
 
-        if maps_api_key == 'default_public':
-            self._validate_public_publication()
+        layers = _get_layer_defs(self._publisher.get_layers())
 
-        self._kuviz.data = self._get_publication_html(name, maps_api_key)
+        self._kuviz.data = self._get_publication_html(layers, name)
         self._kuviz.name = name
         self._kuviz.password = password
         self._kuviz.save()
@@ -356,10 +345,10 @@ class Map(object):
         """
         return KuvizPublisher.all(credentials)
 
-    def _get_publication_html(self, name, maps_api_key):
+    def _get_publication_html(self, name):
         html_map = HTMLMap('templates/viz/main.html.j2')
         html_map.set_content(
-            layers=_get_layer_defs(self._publisher.get_layers(maps_api_key)),
+            layers=_get_layer_defs(self._publisher.get_layers()),
             bounds=self.bounds,
             size=None,
             viewport=self.viewport,
@@ -380,8 +369,8 @@ class Map(object):
         if default_legend and not title:
             raise CartoException('The default legend needs a map title to be displayed')
 
-    def _get_publisher(self):
-        return KuvizPublisher(self.layers)
+    def _get_publisher(self, table_name, credentials):
+        return KuvizPublisher(self.layers, table_name, credentials)
 
 
 def _get_bounds(bounds, layers):
