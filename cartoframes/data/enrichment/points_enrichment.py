@@ -25,7 +25,8 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
 
 def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_variables,
-                 table_to_project, table_to_dataset, user_dataset, working_project, data_table, **kwargs):
+                 table_to_project, table_to_dataset, user_dataset, working_project,
+                 data_table, **kwargs):
 
     sqls = list()
 
@@ -34,8 +35,8 @@ def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_v
         sql = '''
             SELECT data_table.{enrichment_id},
                 {variables},
-                ST_Area(enrichment_geo_table.geom) AS {variables_underscored}_area,
-                NULL AS {variables_underscored}_population
+                ST_Area(enrichment_geo_table.geom) AS {enrichment_table}_area,
+                NULL AS {enrichment_table}_population
             FROM `{project}.{dataset}.{enrichment_table}` enrichment_table
             JOIN `{project}.{dataset}.{enrichment_geo_table}` enrichment_geo_table
             ON enrichment_table.geoid = enrichment_geo_table.geoid

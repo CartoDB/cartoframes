@@ -28,7 +28,8 @@ def enrich_polygons(data, variables, data_geom_column='geometry', agg_operators=
 
 
 def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_variables,
-                 table_to_project, table_to_dataset, user_dataset, working_project, data_table, **kwargs):
+                 table_to_project, table_to_dataset, user_dataset, working_project,
+                 data_table, **kwargs):
 
     grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=enrichment_id)
 
