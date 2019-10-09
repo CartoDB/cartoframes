@@ -4,81 +4,83 @@
   },
   "categories": [
     {
-      "title": "Quickstart",
-      "samples": [{
-        "title": "Basic usage",
-        "desc": "Basic methods",
-        "file": "01_basic_usage",
-        "path": "01_quickstart"
-      }, {
-        "title": "Credentials Setup",
-        "desc": "How to setup your CARTO credentials",
-        "file": "02_credentials_setup",
-        "path": "01_quickstart"
-      }, {
-        "title": "Basemap and viewport",
-        "desc": "Basemap and viewport",
-        "file": "03_basemap_and_viewport",
-        "path": "01_quickstart"
-      }]
-    }, {
-      "title": "Sources",
-      "samples": [{
-        "title": "GeoJSON",
-        "desc": "Use a GeoJSON",
-        "file": "02_geojson",
-        "path": "02_sources"
-      }, {
-        "title": "Dataframe",
-        "desc": "Use a Dataframe",
-        "file": "03_dataframes",
-        "path": "02_sources"
-      }]
-    }, {
-      "title": "Visualization",
-      "samples": [{
-        "title": "Legends",
-        "desc": "",
-        "file": "01_legends",
-        "path": "03_visualizations"
-      }, {
-        "title": "Popups",
-        "desc": "",
-        "file": "02_popups",
-        "path": "03_visualizations"
-      }, {
-        "title": "Widgets part 1",
-        "desc": "",
-        "file": "03_widgets_part_1",
-        "path": "03_visualizations"
-      }, {
-        "title": "Widgets part 2",
-        "desc": "",
-        "file": "04_widgets_part_2",
-        "path": "03_visualizations"
-      }, {
-        "title": "Layout",
-        "desc": "",
-        "file": "05_layout",
-        "path": "03_visualizations"
-      }, {
-        "title": "Helper methods",
-        "samples": [{
-          "title": "Part 1",
-          "desc": "",
-          "file": "01_helper_methods_part_1",
-          "path": "04_helper_methods"
+      "title": "Map Configuration",
+      "samples": [
+        {
+          "title": "Change default CARTO basemap",
+          "desc": "Change default CARTO basemap",
+          "file": "change_default_carto_basemap",
+          "path": "map_configuration"
         }, {
-          "title": "Part 2",
-          "desc": "",
-          "file": "02_helper_methods_part_2",
-          "path": "04_helper_methods"
+          "title": "Solid background color",
+          "desc": "Solid background color",
+          "file": "solid_color_background",
+          "path": "map_configuration"
         }, {
-          "title": "Part 3",
-          "desc": "",
-          "file": "03_helper_methods_part_3",
-          "path": "04_helper_methods"
+          "title": "Solid background color",
+          "desc": "Solid background color",
+          "file": "solid_color_background",
+          "path": "map_configuration"
+        }, {
+          "title": "Dark theme",
+          "desc": "Use the dark theme",
+          "file": "dark_theme",
+          "path": "map_configuration"
         }]
+    }, {
+      "title": "Visualization Layer Helpers",
+      "samples": []
+    }, {
+      "title": "Adding Legends",
+      "samples": []
+    }, {
+      "title": "Adding Widgets",
+      "samples": []
+    }, {
+      "title": "Adding Popups",
+      "samples": []
+    }, {
+      "title": "Map Layout",
+      "samples": []
+    }, {
+      "title": "Downloading and Uploading Data",
+      "samples": []
+    }, {
+      "title": "Geocoding and Isolines Services",
+      "samples": []
+    }, {
+      "title": "Data Enrichment",
+      "samples": []
+    }, {
+      "title": "Data Discovery",
+      "samples": []
+    }, {
+      "title": "Real Use Cases",
+      "samples": [, {
+        "title": "Temperatures Visualization",
+        "desc": "Visualize warm temperatures",
+        "file": "visualize_temperatures",
+        "path": "real_use_cases"
+      }, {
+        "title": "Paris WiFi Services",
+        "desc": "Download data in json format",
+        "file": "paris_wifi_services",
+        "path": "real_use_cases"
+      }, {
+        "title": "Paris Remarkable Trees",
+        "desc": "Transform and visualize data from a json file",
+        "file": "paris_remarkable_trees",
+        "path": "real_use_cases"       
+      }, {
+        "title": "Police Department Incident Reports in San Francisco",
+        "desc": "Use and analyze datasets from different sources",
+        "file": "police_department_incident_reports",
+        "path": "real_use_cases"
+      }, {
+        "title": "Geocode London Stations",
+        "desc": "Geocode a dataset in xls format",
+        "file": "geocode_london_stations",
+        "path": "real_use_cases"
       }]
     }
   ]
