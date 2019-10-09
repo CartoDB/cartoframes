@@ -36,24 +36,25 @@ def _prepare_sql(enrichment_id, filters_processed, table_to_geotable, table_to_v
     sqls = list()
 
     for table, variables in table_to_variables.items():
+        agg_operators = kwargs.get('agg_operators')
 
-        if 'agg_operators' in kwargs:
+        if agg_operators is not None:
 
-            if isinstance(kwargs['agg_operators'], str):
-                agg_operators = {variable: kwargs['agg_operators'] for variable in variables}
-            else:
-                agg_operators = kwargs['agg_operators']
+            if isinstance(agg_operators, str):
+                agg_operators = {variable: agg_operators for variable in variables}
 
-            variables_sql = ['{operator}({variable} * \
+            variables_sql = ['{operator}(enrichment_table.{variable} * \
                               (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                               / ST_area(data_table.{data_geom_column}))) as {variable}'.format(variable=variable,
                              data_geom_column=kwargs['data_geom_column'],
                             operator=agg_operators[variable]) for variable in variables]
 
         else:
-            variables_sql = variables + ['ST_Area(ST_Intersection(geo_table.geom, data_table.{data_geom_column}))\
-                                         / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
-                                         data_geom_column=kwargs['data_geom_column'])]
+            variables_sql = ['enrichment_table.{}'.format(variable) for variable in variables] +\
+                 ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
+                    / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
+                        data_geom_column=kwargs['data_geom_column'])]
+
             grouper = ''
 
         sql = '''

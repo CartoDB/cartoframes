@@ -28,7 +28,11 @@ def enrich(query_function, **kwargs):
 
     queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
-    return _execute_enrichment(bq_client, queries, data_copy, kwargs['data_geom_column'])
+    data_enriched = _execute_enrichment(bq_client, queries, data_copy, kwargs['data_geom_column'])
+
+    data_enriched[kwargs['data_geom_column']] = _compute_geometry_from_geom(data_enriched[kwargs['data_geom_column']])
+
+    return data_enriched
 
 
 def _get_credentials(credentials=None):
@@ -59,8 +63,8 @@ def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
 
 
 def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
-
-    variables = __process_variables(kwargs['variables'])
+    is_polygon_enrichment = 'agg_operators' in kwargs
+    variables = __process_variables(kwargs['variables'], is_polygon_enrichment)
 
     table_to_geotable, table_to_variables,\
         table_to_project, table_to_dataset = __process_enrichment_variables(variables, user_dataset)
@@ -118,7 +122,7 @@ def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_
     return data_copy
 
 
-def __process_variables(variables):
+def __process_variables(variables, is_polygon_enrichment):
 
     variables_result = list()
     if isinstance(variables, Variable):
@@ -134,6 +138,9 @@ def __process_variables(variables):
             variables_result = variables
     else:
         raise EnrichmentException('Variable(s) to enrich should be an instance of Variable / CatalogList / str / list')
+
+    if is_polygon_enrichment:
+        variables_result = [variable for variable in variables_result if variable.agg_method is not None]
 
     return variables_result
 
