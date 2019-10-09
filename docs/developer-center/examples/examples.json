@@ -105,6 +105,19 @@
           "path": "data_services"
         }]
     }, {
+      "title": "Publish and Share",
+      "samples": [{
+        "title": "Publish a public visualization",
+        "desc": "Publish a public visualization",
+        "file": "publish_a_public_visualization",
+        "path": "publish_and_share"
+      },{
+        "title": "Publish a private visualization",
+        "desc": "Publish a private visualization",
+        "file": "publish_a_private_visualization",
+        "path": "publish_and_share"
+      }]
+    }, {
       "title": "Data Enrichment",
       "samples": []
     }, {
