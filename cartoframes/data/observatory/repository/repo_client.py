@@ -66,7 +66,6 @@ class RepoClient(object):
             where_clause = ' AND '.join(conditions)
             query += ' WHERE {}'.format(where_clause)
 
-        print(query)
         return self.client.query(query)
 
     def _compute_conditions(self, filters, extra_conditions):
