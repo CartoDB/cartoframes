@@ -139,10 +139,10 @@ class TestGeography(unittest.TestCase):
         credentials = Credentials('user', '1234')
 
         # When
-        geographies = Geography.get_all()
+        geographies = Geography.get_all(credentials=credentials)
 
         # Then
-        mocked_repo.assert_called_once_with(credentials)
+        mocked_repo.assert_called_once_with(None, credentials)
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies

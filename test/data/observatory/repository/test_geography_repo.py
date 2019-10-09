@@ -40,11 +40,11 @@ class TestGeographyRepo(unittest.TestCase):
         repo = GeographyRepository()
 
         # When
-        geographies = repo.get_all(credentials)
+        geographies = repo.get_all(credentials=credentials)
 
         # Then
         mocked_set_user_credentials.assert_called_once_with(credentials)
-        mocked_get_geographies.assert_called_once_with(None, None)
+        mocked_get_geographies.assert_called_once_with(None)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
