@@ -43,6 +43,7 @@ class DatasetRepository(EntityRepository):
     def _map_row(self, row):
         return {
             'id': self._normalize_field(row, self.id_field),
+            'slug': self._normalize_field(row, 'slug'),
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
             'provider_id': self._normalize_field(row, 'provider_id'),

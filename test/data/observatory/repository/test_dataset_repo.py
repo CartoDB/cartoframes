@@ -136,6 +136,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         expected_datasets = CatalogList([Dataset({
             'id': 'dataset1',
+            'slug': None,
             'name': None,
             'description': None,
             'provider_id': None,

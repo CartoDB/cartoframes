@@ -105,6 +105,7 @@ class TestGeographyRepo(unittest.TestCase):
 
         expected_geographies = CatalogList([Geography({
             'id': 'geography1',
+            'slug': None,
             'name': None,
             'description': None,
             'provider_id': None,
