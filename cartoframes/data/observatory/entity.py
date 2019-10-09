@@ -43,7 +43,7 @@ class CatalogEntity(ABC):
         return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
     def __repr__(self):
-        return '{classname}({entity_id})'.format(classname=self.__class__.__name__, entity_id=self.id)
+        return "{classname}('{entity_id}')".format(classname=self.__class__.__name__, entity_id=self.id)
 
 
 class CatalogList(list):
