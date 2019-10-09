@@ -12,8 +12,10 @@ filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
 class KuvizPublisher(object):
-    def __init__(self, layers):
+    def __init__(self, layers, credentials=None):
         self._layers = deepcopy(layers)
+        self._credentials = credentials or get_default_credentials()
+        self._auth_client = _create_auth_client(self._credentials)
 
     @staticmethod
     def all(credentials=None):
@@ -21,10 +23,6 @@ class KuvizPublisher(object):
         km = _get_kuviz_manager(auth_client)
         kuvizs = km.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
-
-    def set_credentials(self, credentials=None):
-        self._credentials = credentials or get_default_credentials()
-        self._auth_client = _create_auth_client(self._credentials)
 
     def publish(self, html, name, password=None):
         return _create_kuviz(html=html, name=name, auth_client=self._auth_client, password=password)
