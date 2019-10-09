@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ## Changed
 - Remove pandas extension in catalog classes (#1038)
+- Download dataset and geographies (#1050)
 
 ## [1.0b3] - 2019-08-27
 ### Added

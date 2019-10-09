@@ -1,6 +1,10 @@
 import unittest
 import pandas as pd
 
+from google.api_core.exceptions import NotFound
+
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
@@ -8,6 +12,7 @@ from cartoframes.data.observatory.repository.variable_group_repo import Variable
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
     db_dataset2
+from .mocks import BigQueryClientMock, CredentialsMock
 
 try:
     from unittest.mock import Mock, patch
@@ -84,8 +89,8 @@ class TestDataset(unittest.TestCase):
         assert provider == db_dataset1['provider_id']
         assert category == db_dataset1['category_id']
         assert data_source == db_dataset1['data_source_id']
-        assert country == db_dataset1['country_iso_code3']
-        assert language == db_dataset1['language_iso_code3']
+        assert country == db_dataset1['country_id']
+        assert language == db_dataset1['lang']
         assert geography == db_dataset1['geography_id']
         assert temporal_aggregation == db_dataset1['temporal_aggregation']
         assert time_coverage == db_dataset1['time_coverage']
@@ -206,3 +211,39 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset_df, pd.DataFrame)
         assert isinstance(sliced_dataset, pd.Series)
         assert sliced_dataset.equals(dataset.to_series())
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download(self, mocked_bq_client, mocked_repo):
+        # mock dataset
+        mocked_repo.return_value = test_dataset1
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Dataset.get(test_dataset1.id)
+        response = dataset.download(credentials)
+
+        assert response == file_path
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+        # mock dataset
+        mocked_repo.return_value = test_dataset1
+
+        # mock big query client
+        mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Dataset.get(test_dataset1.id)
+        with self.assertRaises(CartoException):
+            dataset.download(credentials)

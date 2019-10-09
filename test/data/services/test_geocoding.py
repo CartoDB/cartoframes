@@ -150,8 +150,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 2
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
-        self.assertFalse('cartodb_id' in gc_df)
-        self.assertNotEqual(gc_df.index.name, 'cartodb_id')
+        self.assertTrue('cartodb_id' in gc_df)
+        self.assertEqual(gc_df.index.name, 'cartodb_id')
 
 
         # Preview, Geocode again (should do nothing)
@@ -334,9 +334,9 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 2
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
-        self.assertFalse('cartodb_id' in gc_ds.get_column_names())
-        self.assertFalse('cartodb_id' in gc_ds.dataframe)
-        self.assertNotEqual(gc_ds.dataframe.index.name, 'cartodb_id')
+        self.assertTrue('cartodb_id' in gc_ds.get_column_names())
+        self.assertTrue('cartodb_id' in gc_ds.dataframe)
+        self.assertEqual(gc_ds.dataframe.index.name, 'cartodb_id')
 
     def test_geocode_dataframe_dataset_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -387,9 +387,9 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 1
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_ds.dataframe.the_geom)
-        self.assertFalse('cartodb_id' in gc_ds.get_column_names())
-        self.assertFalse('cartodb_id' in gc_ds.dataframe)
-        self.assertNotEqual(gc_ds.dataframe.index.name, 'cartodb_id')
+        self.assertTrue('cartodb_id' in gc_ds.get_column_names())
+        self.assertTrue('cartodb_id' in gc_ds.dataframe)
+        self.assertEqual(gc_ds.dataframe.index.name, 'cartodb_id')
 
     def test_geocode_query_as_new_table(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -441,7 +441,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.gc_status_rel)
-        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'gc_status_rel', 'the_geom'])
+        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'gc_status_rel', 'the_geom']
+        self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_json_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -468,7 +469,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
-        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'meta', 'the_geom'])
+        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'meta', 'the_geom']
+        self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_json_legacy_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -495,7 +497,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
-        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'meta', 'the_geom'])
+        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'meta', 'the_geom']
+        self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_no_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -520,7 +523,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 2
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
-        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'the_geom'])
+        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'the_geom']
+        self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_custom_status(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
@@ -548,7 +552,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.gc_rel)
-        self.assertEqual(sorted(gc_df.columns), ['address', 'carto_geocode_hash', 'city', 'gc_rel', 'the_geom'])
+        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'gc_rel', 'the_geom']
+        self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_fails_with_invalid_status_fields(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
