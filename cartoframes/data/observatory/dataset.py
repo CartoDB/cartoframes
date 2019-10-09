@@ -4,6 +4,12 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
+from .repository.geography_repo import get_geography_repo
+
+import geopandas as gpd
+import pandas as pd
+from cartoframes.data import Dataset as CFDataset
+from shapely import wkt
 
 
 class Dataset(CatalogEntity):
@@ -89,3 +95,39 @@ class Dataset(CatalogEntity):
         """
 
         return self._download(credentials)
+
+
+    @classmethod
+    def get_datasets_spatial_filtered(cls, filter_dataset):
+
+        if isinstance(filter_dataset, gpd.GeoDataFrame):
+            # Geopandas dataframe
+            user_gdf = filter_dataset
+            
+        elif isinstance(filter_dataset, CFDataset):
+            # CARTOFrames Dataset
+            user_df = filter_dataset.download(decode_geom=True)
+            user_gdf = gpd.GeoDataFrame(user_df, geometry='geometry')
+
+        elif isinstance(filter_dataset, str):
+            ## String WKT
+            df = pd.DataFrame([{'geometry': filter_dataset}])
+            df['geometry'] = df['geometry'].apply(wkt.loads)
+            user_gdf = gpd.GeoDataFrame(df)
+
+        ##TODO: check if the dataframe has a geometry column if not exception
+        # Saving memory
+        user_gdf = user_gdf[[user_gdf.geometry.name]]
+
+        geography_repo = get_geography_repo()
+        # Get catalog geographies as a geodataframe
+        geographies_gdf = geography_repo.get_geographies_gdf()
+
+        # Join both dataframes
+        join_gdf = gpd.sjoin(geographies_gdf, user_gdf, how='inner', op='intersects')
+        matched_boundaries = join_gdf['id'].unique()
+        
+        # Get Dataset objects
+        return cls.entity_repo.get_datasets_for_geographies(matched_boundaries)
+        
+       
