@@ -18,10 +18,10 @@ class VariableRepository(EntityRepository):
         super(VariableRepository, self).__init__(_VARIABLE_ID_FIELD, _ALLOWED_DATASETS)
 
     def get_by_dataset(self, dataset_id):
-        return self._get_filtered_entities({'dataset_id': dataset_id})
+        return self._get_filtered_entities({DATASET_FILTER: dataset_id})
 
     def get_by_variable_group(self, variable_group_id):
-        return self._get_filtered_entities({'variable_group_id': variable_group_id})
+        return self._get_filtered_entities({VARIABLE_GROUP_FILTER: variable_group_id})
 
     @classmethod
     def _get_entity_class(cls):

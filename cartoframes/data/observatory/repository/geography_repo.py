@@ -18,7 +18,7 @@ class GeographyRepository(EntityRepository):
         super(GeographyRepository, self).__init__(_GEOGRAPHY_ID_FIELD, _ALLOWED_FILTERS)
 
     def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({'country_id': iso_code3})
+        return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
 
     @classmethod
     def _get_entity_class(cls):
