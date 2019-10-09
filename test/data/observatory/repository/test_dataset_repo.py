@@ -40,7 +40,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.get_all(credentials)
+        datasets = repo.get_all(credentials=credentials)
 
         # Then
         mocked_set_user_credentials.assert_called_once_with(credentials)
