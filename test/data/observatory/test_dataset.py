@@ -130,7 +130,7 @@ class TestDataset(unittest.TestCase):
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == 'Dataset({id})'.format(id=db_dataset1['id'])
+        assert dataset_repr == "<Dataset('{id}')>".format(id=db_dataset1['slug'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
@@ -176,9 +176,10 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+        assert datasets_str == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+                               .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
-    def test_dataset_list_is_represented_with_ids(self):
+    def test_dataset_list_is_represented_with_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
@@ -186,7 +187,21 @@ class TestDataset(unittest.TestCase):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+        assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
+
+    @patch.object(DatasetRepository, 'get_by_id')
+    def test_get_dataset_by_id(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_dataset1
+
+        # When
+        dataset = Dataset.get(test_dataset1.id)
+
+        # Then
+        assert isinstance(dataset, object)
+        assert isinstance(dataset, Dataset)
+        assert dataset == test_dataset1
 
     def test_datasets_items_are_obtained_as_dataset(self):
         # Given
