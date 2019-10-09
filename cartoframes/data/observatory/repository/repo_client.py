@@ -12,7 +12,7 @@ class RepoClient(object):
         self.client = SQLClient(Credentials('do-metadata', 'default_public'))
 
     def get_countries(self, field=None, value=None):
-        query = 'select distinct country_iso_code3 as id from datasets_public'
+        query = 'select distinct country_id as id from datasets_public'
         return self._run_query(query, field, value)
 
     def get_categories(self, field=None, value=None):

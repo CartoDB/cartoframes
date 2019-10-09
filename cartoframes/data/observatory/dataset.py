@@ -39,11 +39,11 @@ class Dataset(CatalogEntity):
 
     @property
     def country(self):
-        return self.data['country_iso_code3']
+        return self.data['country_id']
 
     @property
     def language(self):
-        return self.data['language_iso_code3']
+        return self.data['lang']
 
     @property
     def geography(self):
