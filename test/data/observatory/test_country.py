@@ -96,7 +96,7 @@ class TestCountry(unittest.TestCase):
         country_repr = repr(country)
 
         # Then
-        assert country_repr == 'Country({id})'.format(id=db_country1['id'])
+        assert country_repr == "Country('{id}')".format(id=db_country1['id'])
 
     def test_country_is_printed_with_classname(self):
         # Given
@@ -129,7 +129,7 @@ class TestCountry(unittest.TestCase):
         countries_str = str(countries)
 
         # Then
-        assert countries_str == '[Country({id1}), Country({id2})]' \
+        assert countries_str == "[Country('{id1}'), Country('{id2}')]" \
                                 .format(id1=db_country1['id'], id2=db_country2['id'])
 
     def test_country_list_is_represented_with_ids(self):
@@ -140,7 +140,7 @@ class TestCountry(unittest.TestCase):
         countries_repr = repr(countries)
 
         # Then
-        assert countries_repr == '[Country({id1}), Country({id2})]'\
+        assert countries_repr == "[Country('{id1}'), Country('{id2}')]"\
                                  .format(id1=db_country1['id'], id2=db_country2['id'])
 
     @patch.object(CountryRepository, 'get_by_id')

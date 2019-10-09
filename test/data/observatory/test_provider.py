@@ -83,7 +83,7 @@ class TestProvider(unittest.TestCase):
         provider_repr = repr(provider)
 
         # Then
-        assert provider_repr == 'Provider({id})'.format(id=db_provider1['id'])
+        assert provider_repr == "Provider('{id}')".format(id=db_provider1['id'])
 
     def test_provider_is_printed_with_classname(self):
         # Given
@@ -116,7 +116,7 @@ class TestProvider(unittest.TestCase):
         providers_str = str(providers)
 
         # Then
-        assert providers_str == '[Provider({id1}), Provider({id2})]' \
+        assert providers_str == "[Provider('{id1}'), Provider('{id2}')]" \
                                 .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     def test_provider_list_is_represented_with_ids(self):
@@ -127,7 +127,7 @@ class TestProvider(unittest.TestCase):
         providers_repr = repr(providers)
 
         # Then
-        assert providers_repr == '[Provider({id1}), Provider({id2})]'\
+        assert providers_repr == "[Provider('{id1}'), Provider('{id2}')]"\
                                  .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     @patch.object(ProviderRepository, 'get_by_id')

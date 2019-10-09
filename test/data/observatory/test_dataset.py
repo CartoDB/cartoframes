@@ -129,7 +129,7 @@ class TestDataset(unittest.TestCase):
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == 'Dataset({id})'.format(id=db_dataset1['id'])
+        assert dataset_repr == "Dataset('{id}')".format(id=db_dataset1['id'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
@@ -161,7 +161,7 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+        assert datasets_str == "[Dataset('{id1}'), Dataset('{id2}')]".format(id1=db_dataset1['id'], id2=db_dataset2['id'])
 
     def test_dataset_list_is_represented_with_ids(self):
         # Given
@@ -171,8 +171,7 @@ class TestDataset(unittest.TestCase):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
-
+        assert datasets_repr == "[Dataset('{id1}'), Dataset('{id2}')]".format(id1=db_dataset1['id'], id2=db_dataset2['id'])
 
     @patch.object(DatasetRepository, 'get_by_id')
     def test_get_dataset_by_id(self, mocked_repo):

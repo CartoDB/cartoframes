@@ -79,7 +79,6 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_by_country(country_code)
 
         # Then
-<<<<<<< HEAD
         mocked_repo.assert_called_once_with({'country_id': country_code})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
@@ -95,9 +94,6 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with({'category_id': 'demographics'})
-=======
-        mocked_repo.assert_called_once_with('country_id', country_code)
->>>>>>> develop
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

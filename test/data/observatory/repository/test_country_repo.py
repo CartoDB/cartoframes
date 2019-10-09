@@ -52,11 +52,7 @@ class TestCountryRepo(unittest.TestCase):
         country = repo.get_by_id(requested_iso_code)
 
         # Then
-<<<<<<< HEAD
         mocked_repo.assert_called_once_with({'country_id': requested_iso_code})
-=======
-        mocked_repo.assert_called_once_with('country_id', requested_iso_code)
->>>>>>> develop
         assert isinstance(country, Country)
         assert country == test_country1
 
