@@ -301,17 +301,17 @@ class Map(object):
                 tmap.publish('Custom Map Title')
 
         """
+        table_name = table_name or '{}_table'.format(name)
+
         self._publisher = self._get_publisher(table_name, credentials)
+        self._publisher.set_layers(self.layers, table_name)
 
         html = self._get_publication_html(name)
         return self._publisher.publish(html, name, password)
 
     def delete_publication(self):
         """Delete the published map Kuviz."""
-        if self._kuviz:
-            self._kuviz.delete()
-            print("Publication '{n}' ({id}) deleted".format(n=self._kuviz.name, id=self._kuviz.id))
-            self._kuviz = None
+        self._publisher.delete()
 
     def update_publication(self, name, password):
         """Update the published map Kuviz.
@@ -324,11 +324,7 @@ class Map(object):
         if not self._kuviz:
             raise CartoException('The map has not been published. Use the `publish` method.')
 
-        # maps_api_key == 'default_public' should be a responsibility of Publisher
-
-        layers = _get_layer_defs(self._publisher.get_layers())
-
-        self._kuviz.data = self._get_publication_html(layers, name)
+        self._kuviz.data = self._get_publication_html(name)
         self._kuviz.name = name
         self._kuviz.password = password
         self._kuviz.save()
@@ -369,8 +365,9 @@ class Map(object):
         if default_legend and not title:
             raise CartoException('The default legend needs a map title to be displayed')
 
-    def _get_publisher(self, table_name, credentials):
-        return KuvizPublisher(self.layers, table_name, credentials)
+
+def _get_publisher(self, credentials):
+    return KuvizPublisher(credentials)
 
 
 def _get_bounds(bounds, layers):
