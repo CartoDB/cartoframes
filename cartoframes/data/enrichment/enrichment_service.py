@@ -18,7 +18,7 @@ _PUBLIC_DATASET = 'open_data'
 
 def enrich(query_function, **kwargs):
     credentials = _get_credentials(kwargs['credentials'])
-    user_dataset = credentials.username.replace('-', '_')
+    user_dataset = credentials.get_do_dataset()
     bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
 
     data_copy = _prepare_data(kwargs['data'], kwargs['data_geom_column'])

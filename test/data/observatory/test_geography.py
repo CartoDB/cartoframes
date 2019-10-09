@@ -1,11 +1,16 @@
 import unittest
 import pandas as pd
 
+from google.api_core.exceptions import NotFound
+
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1, test_geography2, db_geography2
+from .mocks import BigQueryClientMock, CredentialsMock
 
 try:
     from unittest.mock import Mock, patch
@@ -185,3 +190,39 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography_df, pd.DataFrame)
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(geography.to_series())
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography1
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Geography.get(test_geography1.id)
+        response = dataset.download(credentials)
+
+        assert response == file_path
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography1
+
+        # mock big query client
+        mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Geography.get(test_geography1.id)
+        with self.assertRaises(CartoException):
+            dataset.download(credentials)
