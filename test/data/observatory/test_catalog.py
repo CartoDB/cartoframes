@@ -106,3 +106,21 @@ class TestCatalog(unittest.TestCase):
         # Then
         mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
         assert geographies == test_geographies
+
+    @patch.object(Dataset, 'get_all')
+    def test_all_filters(self, mocked_datasets):
+        # Given
+        mocked_datasets.return_value = test_datasets
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.country('usa').category('demographics') \
+            .geography('carto-do-public-data.tiger.geography_esp_census_2019').datasets
+
+        # Then
+        mocked_datasets.called_once_with({
+            'country_id': 'usa',
+            'category_id': 'demographics',
+            'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019'})
+
+        assert datasets == test_datasets
