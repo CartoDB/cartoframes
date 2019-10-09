@@ -129,9 +129,10 @@ class Isolines(Service):
             input_dataframe = source
             source = Dataset(input_dataframe)
 
+        num_rows = source.get_num_rows()
+        metadata['required_quota'] = num_rows * len(ranges)
+
         if dry_run:
-            num_rows = source.get_num_rows()
-            metadata['required_quota'] = num_rows * len(ranges)
             return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
@@ -159,7 +160,7 @@ class Isolines(Service):
             'maxpoints': maxpoints,
             'quality': quality
         }
-        iso_options = [str(k)+'='+str(v) for k, v in options.items() if v is not None]
+        iso_options = ["'{}={}'".format(k, v) for k, v in options.items() if v is not None]
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
         iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in ranges]))
 
@@ -184,7 +185,7 @@ class Isolines(Service):
         if temporary_table_name:
             Dataset(temporary_table_name, credentials=self._credentials).delete()
 
-        return self.result(result)
+        return self.result(data=result, metadata=metadata)
 
 
 def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id):

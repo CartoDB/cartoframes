@@ -14,6 +14,10 @@ class DatasetRepository(EntityRepository):
 
     id_field = _DATASET_ID_FIELD
 
+    def get_all(self, credentials=None):
+        self.client.set_user_credentials(credentials)
+        return self._get_filtered_entities()
+
     def get_by_country(self, iso_code3):
         return self._get_filtered_entities('country_id', iso_code3)
 
