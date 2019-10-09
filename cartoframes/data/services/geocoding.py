@@ -378,7 +378,7 @@ class Geocoding(Service):
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
                 status=DEFAULT_STATUS,
-                table_name=None, if_exists=Dataset.FAIL,
+                table_name=None, if_exists=Dataset.IF_EXISTS_FAIL,
                 dry_run=False):
         """Geocode a dataset
 

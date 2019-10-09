@@ -79,7 +79,11 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_country(country_code)
 
         # Then
+<<<<<<< HEAD
         mocked_repo.assert_called_once_with({'country_id': country_code})
+=======
+        mocked_repo.assert_called_once_with('country_id', country_code)
+>>>>>>> develop
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 

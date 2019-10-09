@@ -56,7 +56,7 @@ test_geography2 = Geography(db_geography2)
 test_geographies = CatalogList([test_geography1, test_geography2])
 
 db_dataset1 = {
-    'id': 'basicstats-census',
+    'id': 'project.dataset.basicstats-census',
     'name': 'Basic Stats - Census',
     'description': 'Basic stats on 2019 Spanish census',
     'provider_id': 'bbva',
