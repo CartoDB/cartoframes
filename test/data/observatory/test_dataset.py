@@ -13,7 +13,7 @@ from cartoframes.data.observatory.repository.variable_group_repo import Variable
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
     db_dataset2
-from .mocks import BigQueryClientMock, CredentialsMock
+from .mocks import BigQueryClientMock
 
 try:
     from unittest.mock import Mock, patch
@@ -229,7 +229,7 @@ class TestDataset(unittest.TestCase):
 
         # test
         username = 'fake_user'
-        credentials = CredentialsMock(username)
+        credentials = Credentials(username, '1234')
 
         dataset = Dataset.get(test_dataset1.id)
         response = dataset.download(credentials)
@@ -247,7 +247,7 @@ class TestDataset(unittest.TestCase):
 
         # test
         username = 'fake_user'
-        credentials = CredentialsMock(username)
+        credentials = Credentials(username, '1234')
 
         dataset = Dataset.get(test_dataset1.id)
         with self.assertRaises(CartoException):
