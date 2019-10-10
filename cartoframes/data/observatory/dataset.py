@@ -4,6 +4,7 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
+from .utils import display_subscription_form
 
 
 class Dataset(CatalogEntity):
@@ -101,18 +102,7 @@ class Dataset(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        return None  # TODO
-
-    def subscription_info(self, credentials=None):
-        """Get the information of a subscription.
-
-        Args:
-            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                credentials of CARTO user account. If not provided,
-                a default credentials (if set with :py:meth:`set_default_credentials
-                <cartoframes.auth.set_default_credentials>`) will be used.
-        """
-
-        _credentials = self._get_credentials(credentials)
+        display_subscription_form()
 
         return None  # TODO
+
