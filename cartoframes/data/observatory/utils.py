@@ -4,7 +4,8 @@ from __future__ import absolute_import
 #       and the display form functions. Maybe we should consider to
 #       separate this content, rename the file or refactor in classes.
 
-# from carto.do_subscriptions import DOSubscriptionManager
+from carto.do_subscriptions import DOSubscriptionManager
+# from carto.do_subscription_info import DOSubscriptionInfoManager
 
 
 def get_subscription_ids(credentials):
@@ -14,16 +15,16 @@ def get_subscription_ids(credentials):
 
 
 def fetch_subscriptions(credentials):
-    # if credentials:
-    #     api_key_auth_client = credentials.get_api_key_auth_client()
-    #     do_manager = DOSubscriptionManager(api_key_auth_client)
-    #     if do_manager is not None:
-    #         return do_manager.all()
+    if credentials:
+        api_key_auth_client = credentials.get_api_key_auth_client()
+        do_manager = DOSubscriptionManager(api_key_auth_client)
+        if do_manager is not None:
+            return do_manager.all()
     return []
 
 
 def fetch_subscription_info(id):
-    # TODO: implement
+    # TODO: implement DOSubscriptionInfoManager
     return {
         'id': id,
         'subscription_list_price': '195',
@@ -34,7 +35,7 @@ def fetch_subscription_info(id):
 
 
 def trigger_subscription(id, credentials):
-    # TODO: implement
+    # TODO: implement with DOSubscriptionManager
     return 'OK'
 
 
@@ -63,12 +64,19 @@ def display_subscription_form_notebook(id, info, credentials):
     <br>Do you want to proceed?
     '''.format(**info)
 
-    text, buttons = _create_notebook_form(message)
+    ok_response = '''
+    <b>Congrats!</b><br>{id} has been requested and it will be available in your account soon.
+    '''.format(**info)
+    cancel_message = '''
+    {id} has not been purchased.
+    '''.format(**info)
+
+    text, buttons = _create_notebook_form(message, ok_response, cancel_message)
 
     display(text, buttons)
 
 
-def _create_notebook_form(message=''):
+def _create_notebook_form(message, ok_response, cancel_message):
     from IPython.display import display
     from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
@@ -91,13 +99,13 @@ def _create_notebook_form(message=''):
         disable_buttons()
         response = trigger_subscription('', '')
         if response:
-            display(HTML('Yes'))
+            display(HTML(ok_response))
         else:
-            display(HTML('No'))
+            display(HTML('Error'))
 
     def on_button_no_clicked(b):
         disable_buttons()
-        display(HTML('No'))
+        display(HTML(cancel_message))
 
     button_yes.on_click(on_button_yes_clicked)
     button_no.on_click(on_button_no_clicked)
