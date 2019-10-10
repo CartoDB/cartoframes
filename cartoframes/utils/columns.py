@@ -138,7 +138,7 @@ class DataframeColumnsInfo(object):
 
     def _get_columns_info(self):
         df_columns = [(name, self.df.dtypes[name]) for name in self.df.columns]
-        if self.df.index.name is not None and self.df.index.name not in df_columns:
+        if self.df.index.name is not None and self.df.index.name not in self.df:
             df_columns.append((self.df.index.name, self.df.index.dtype))
 
         columns = []
