@@ -32,8 +32,8 @@ class KuvizPublisherMock(KuvizPublisher):
     def publish(self, html, name, password=None):
         return _create_kuviz(html=html, name=name, credentials=self._credentials, password=password)
 
-    def _sync_layer(self, layer, table_name, credentials):
-        layer.source.dataset = DatasetMock(table_name, credentials)
+    def _sync_layer(self, layer, table_name):
+        layer.source.dataset = DatasetMock(table_name, self._credentials)
 
     def is_public(self):
         return True
