@@ -96,38 +96,38 @@ class Dataset(CatalogEntity):
 
         return self._download(credentials)
 
-
     @classmethod
     def get_datasets_spatial_filtered(cls, filter_dataset):
+        user_gdf = cls._get_user_geodataframe(filter_dataset)
 
-        if isinstance(filter_dataset, gpd.GeoDataFrame):
-            # Geopandas dataframe
-            user_gdf = filter_dataset
-            
-        elif isinstance(filter_dataset, CFDataset):
-            # CARTOFrames Dataset
-            user_df = filter_dataset.download(decode_geom=True)
-            user_gdf = gpd.GeoDataFrame(user_df, geometry='geometry')
-
-        elif isinstance(filter_dataset, str):
-            ## String WKT
-            df = pd.DataFrame([{'geometry': filter_dataset}])
-            df['geometry'] = df['geometry'].apply(wkt.loads)
-            user_gdf = gpd.GeoDataFrame(df)
-
-        ##TODO: check if the dataframe has a geometry column if not exception
+        # TODO: check if the dataframe has a geometry column if not exception
         # Saving memory
         user_gdf = user_gdf[[user_gdf.geometry.name]]
-
-        geography_repo = get_geography_repo()
-        # Get catalog geographies as a geodataframe
-        geographies_gdf = geography_repo.get_geographies_gdf()
-
-        # Join both dataframes
-        join_gdf = gpd.sjoin(geographies_gdf, user_gdf, how='inner', op='intersects')
-        matched_boundaries = join_gdf['id'].unique()
+        catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
+        matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
         
         # Get Dataset objects
-        return cls.entity_repo.get_datasets_for_geographies(matched_boundaries)
-        
-       
+        return get_dataset_repo().get_all({'geography_id': matched_geographies_ids})
+
+    @staticmethod
+    def _get_user_geodataframe(filter_dataset):
+        if isinstance(filter_dataset, gpd.GeoDataFrame):
+            # Geopandas dataframe
+            return filter_dataset
+
+        if isinstance(filter_dataset, CFDataset):
+            # CARTOFrames Dataset
+            user_df = filter_dataset.download(decode_geom=True)
+            return gpd.GeoDataFrame(user_df, geometry='geometry')
+
+        if isinstance(filter_dataset, str):
+            # String WKT
+            df = pd.DataFrame([{'geometry': filter_dataset}])
+            df['geometry'] = df['geometry'].apply(wkt.loads)
+            return gpd.GeoDataFrame(df)
+
+    @staticmethod
+    def _join_geographies_geodataframes(geographies_gdf1, geographies_gdf2):
+        join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
+        return join_gdf['id'].unique()
+

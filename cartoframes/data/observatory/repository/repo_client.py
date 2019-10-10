@@ -1,10 +1,9 @@
 from __future__ import absolute_import
 
 from carto.do_datasets import DODatasetManager
-from ....data import Dataset
-from ...clients import SQLClient
-from ....auth import Credentials, get_default_credentials
-import geopandas as gpd
+from cartoframes.data.clients import SQLClient
+from cartoframes.auth import Credentials, get_default_credentials
+
 
 class RepoClient(object):
 
@@ -100,13 +99,3 @@ class RepoClient(object):
         if not RepoClient.__instance:
             RepoClient.__instance = object.__new__(cls)
         return RepoClient.__instance
-
-    def get_geographies_gdf(self):
-        query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
-        df = Dataset(query, credentials=self._do_credentials).download(decode_geom=True)
-        return gpd.GeoDataFrame(df, geometry='geometry')  
-
-    def get_datasets_for_geographies(self, geographies):
-        ids = "','".join(geographies)
-        query = "select * from datasets_public where geography_id IN ('{ids}') ".format(ids=ids)
-        return self.client.query(query)

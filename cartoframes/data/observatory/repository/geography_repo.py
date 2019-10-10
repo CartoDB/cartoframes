@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import geopandas as gpd
+
+from cartoframes.data import Dataset
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER
 from .entity_repo import EntityRepository
 
@@ -49,6 +52,10 @@ class GeographyRepository(EntityRepository):
         }
 
     def get_geographies_gdf(self):
-        return self.client.get_geographies_gdf()
+        query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
+        df = Dataset(query, credentials=self._do_credentials).download(decode_geom=True)
+
+        return gpd.GeoDataFrame(df, geometry='geometry')
+
 
 _REPO = GeographyRepository()
