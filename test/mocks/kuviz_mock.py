@@ -13,3 +13,9 @@ class CartoKuvizMock(Kuviz):
             self.privacy = PRIVACY_PASSWORD
         else:
             self.privacy = PRIVACY_PUBLIC
+
+    def save(self):
+        return True
+
+    def delete(self):
+        return True

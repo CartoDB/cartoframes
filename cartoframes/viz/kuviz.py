@@ -57,7 +57,7 @@ class KuvizPublisher(object):
     def delete(self):
         if self.kuviz:
             self.kuviz.delete()
-            warn("Publication '{n}' ({id}) deleted".format(n=self._publisher.kuviz.name, id=self._publisher.kuviz.id))
+            warn("Publication '{n}' ({id}) deleted".format(n=self.kuviz.name, id=self.kuviz.id))
             self.kuviz = None
             return True
         return False
