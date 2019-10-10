@@ -74,8 +74,8 @@ class Dataset(CatalogEntity):
         return self.data['summary_jsonb']
 
     @classmethod
-    def get_all(cls, credentials=None):
-        return cls.entity_repo.get_all(credentials)
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):
         """Download Dataset data.
