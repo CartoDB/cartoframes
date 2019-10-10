@@ -57,7 +57,7 @@ def display_subscription_form_notebook(id, info, credentials):
     If you want to proceed, a Request will be sent to CARTO who will
     order the data and load it into your account.
     This {type} is available for Instant Order for your organization,
-    so it will automatically process the order and you will get inmediate access to the {type}.
+    so it will automatically process the order and you will get immediate access to the {type}.
     In order to proceed we need you to agree to the License of the {type}
     available at <b><a href="{tos_link}" target="_blank">this link</a></b>.
     <br>Do you want to proceed?
@@ -101,7 +101,7 @@ def _create_notebook_form(message=''):
 
     button_yes.on_click(on_button_yes_clicked)
     button_no.on_click(on_button_no_clicked)
-    
+
     return (text, buttons)
 
 
