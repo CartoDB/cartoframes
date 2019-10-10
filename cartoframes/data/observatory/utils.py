@@ -1,5 +1,9 @@
 from __future__ import absolute_import
 
+# TODO: This file contains both the subscriptions endpoint functions
+#       and the display form functions. Maybe we should consider to
+#       separate this content, rename the file or refactor in classes.
+
 # from carto.do_subscriptions import DOSubscriptionManager
 
 
@@ -21,9 +25,11 @@ def fetch_subscriptions(credentials):
 def fetch_subscription_info(id):
     # TODO: implement
     return {
-        'dataset_name': id,
-        'price': '100.0',
-        'url': 'http://carto.com'
+        'id': id,
+        'subscription_list_price': '195',
+        'tos': '',
+        'tos_link': 'https://carto.com',
+        'type': 'dataset'
     }
 
 
@@ -43,27 +49,35 @@ def display_subscription_form(id, credentials):
 
 def display_subscription_form_notebook(id, info, credentials):
     from IPython.display import display
-    from ipywidgets.widgets import HTML, GridspecLayout, Button, Layout
-
-    def create_expanded_button(description, button_style):
-        return Button(description=description, button_style=button_style, layout=Layout(height='32px', width='176px'))
 
     message = '''
     <h3>Subscription contract</h3>
-    You are about to subscribe to <b>{dataset_name}</b>.
-    The cost of this dataset is <b>${price}</b>.
+    You are about to subscribe to <b>{id}</b>.
+    The cost of this {type} is <b>${subscription_list_price}</b>.
     If you want to proceed, a Request will be sent to CARTO who will
     order the data and load it into your account.
-    This dataset is available for Instant Order for your organization,
-    so it will automatically process the order and you will get inmediate access to the dataset.
-    In order to proceed we need you to agree to the License of the dataset
-    available at <b><a href="{url}" target="_blank">{url}</a></b>.
+    This {type} is available for Instant Order for your organization,
+    so it will automatically process the order and you will get inmediate access to the {type}.
+    In order to proceed we need you to agree to the License of the {type}
+    available at <b><a href="{tos_link}" target="_blank">this link</a></b>.
     <br>Do you want to proceed?
     '''.format(**info)
+
+    text, buttons = _create_notebook_form(message)
+
+    display(text, buttons)
+
+
+def _create_notebook_form(message=''):
+    from IPython.display import display
+    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
+
     text = HTML(message)
 
-    button_yes = create_expanded_button('Yes', 'info')
-    button_no = create_expanded_button('No', '')
+    button_yes = Button(
+        description='Yes', button_style='info', layout=Layout(height='32px', width='176px'))
+    button_no = Button(
+        description='No', button_style='', layout=Layout(height='32px', width='176px'))
 
     buttons = GridspecLayout(1, 5)
     buttons[0, 0] = button_yes
@@ -87,8 +101,8 @@ def display_subscription_form_notebook(id, info, credentials):
 
     button_yes.on_click(on_button_yes_clicked)
     button_no.on_click(on_button_no_clicked)
-
-    display(text, buttons)
+    
+    return (text, buttons)
 
 
 def display_subscription_form_cli():
