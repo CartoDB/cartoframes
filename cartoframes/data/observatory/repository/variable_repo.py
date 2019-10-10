@@ -5,6 +5,7 @@ from .entity_repo import EntityRepository
 
 
 _VARIABLE_ID_FIELD = 'id'
+_VARIABLE_SLUG_FIELD = 'slug'
 _ALLOWED_DATASETS = [DATASET_FILTER, VARIABLE_GROUP_FILTER]
 
 
@@ -15,7 +16,7 @@ def get_variable_repo():
 class VariableRepository(EntityRepository):
 
     def __init__(self):
-        super(VariableRepository, self).__init__(_VARIABLE_ID_FIELD, _ALLOWED_DATASETS)
+        super(VariableRepository, self).__init__(_VARIABLE_ID_FIELD, _ALLOWED_DATASETS, _VARIABLE_SLUG_FIELD)
 
     def get_by_dataset(self, dataset_id):
         return self._get_filtered_entities({DATASET_FILTER: dataset_id})
@@ -34,6 +35,7 @@ class VariableRepository(EntityRepository):
     def _map_row(self, row):
         return {
             'id': self._normalize_field(row, self.id_field),
+            'slug': self._normalize_field(row, 'slug'),
             'name': self._normalize_field(row, 'name'),
             'description': self._normalize_field(row, 'description'),
             'column_name': self._normalize_field(row, 'column_name'),
