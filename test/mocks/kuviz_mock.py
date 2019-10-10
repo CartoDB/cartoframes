@@ -1,8 +1,5 @@
 from carto.kuvizs import Kuviz
 
-from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
-from .dataset_mock import DatasetMock
-
 PRIVACY_PUBLIC = 'public'
 PRIVACY_PASSWORD = 'password'
 
@@ -16,26 +13,3 @@ class CartoKuvizMock(Kuviz):
             self.privacy = PRIVACY_PASSWORD
         else:
             self.privacy = PRIVACY_PUBLIC
-
-    # def delete(self):
-    #     return True
-
-    # def save(self):
-    #     return True
-
-
-class KuvizPublisherMock(KuvizPublisher):
-    def publish(self, html, name, password=None):
-        return _create_kuviz(html=html, name=name, credentials=self._credentials, password=password)
-
-    def _sync_layer(self, layer, table_name):
-        layer.source.dataset = DatasetMock(table_name, self._credentials)
-
-    def is_public(self):
-        return True
-
-    @staticmethod
-    def all():
-        kuviz = CartoKuvizMock(name="test")
-        kuvizs = [kuviz, kuviz, kuviz]
-        return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
