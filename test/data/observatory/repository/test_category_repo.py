@@ -68,6 +68,20 @@ class TestCategoryRepo(unittest.TestCase):
         with self.assertRaises(DiscoveryException):
             repo.get_by_id(requested_id)
 
+    @patch.object(RepoClient, 'get_categories')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_category1, db_category2]
+        repo = CategoryRepository()
+
+        # When
+        categories = repo.get_by_id_list([db_category1['id'], db_category2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_category1['id'], db_category2['id']]})
+        assert isinstance(categories, CatalogList)
+        assert categories == test_categories
+
     @patch.object(RepoClient, '_run_query')
     def test_get_by_country(self, mocked_repo):
         # Given

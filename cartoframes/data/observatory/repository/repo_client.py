@@ -72,9 +72,17 @@ class RepoClient(object):
         conditions = extra_conditions or []
 
         if filters is not None and len(filters) > 0:
-            conditions.extend(["t.{} = '{}'".format(key, value) for key, value in filters.items()])
+            conditions.extend([self._generate_condition(key, value) for key, value in filters.items()])
 
         return conditions
+
+    @staticmethod
+    def _generate_condition(key, value):
+        if type(value) == list:
+            value_list = ','.join(["'" + v + "'" for v in value])
+            return "t.{} IN ({})".format(key, value_list)
+
+        return "t.{} = '{}'".format(key, value)
 
     def _get_purchased_dataset_ids(self):
         purchased_datasets = self._fetch_purchased_datasets()
