@@ -766,7 +766,8 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(geom,the_geom,geometry,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = ("COPY {}(geom,the_geom,geometry,cartodb_id)"
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -798,7 +799,8 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = ("COPY {}(lng,lat,cartodb_id,the_geom)"
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
