@@ -7,9 +7,10 @@ from cartoframes.viz import Map, Layer, Source
 from cartoframes.data import Dataset, StrategiesRegistry
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
-from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC
+from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
 
 from ..mocks.context_mock import ContextMock
+from ..mocks.kuviz_mock import CartoKuvizMock
 
 from .utils import build_geojson
 
@@ -161,3 +162,29 @@ class TestKuvizPublisher(unittest.TestCase):
 
         kuviz_publisher._manage_maps_api_key('fake_name')
         assert kuviz_publisher._maps_api_key == token
+
+    @patch('cartoframes.viz.kuviz._create_kuviz')
+    @patch.object(KuvizPublisher, '_sync_layer')
+    @patch('cartoframes.viz.kuviz._get_kuviz_manager')
+    @patch('cartoframes.viz.kuviz._create_auth_client')
+    def test_kuviz_with_public_use_defaul_public(self, _create_auth_client_mock, _get_kuviz_manager_mock,
+                                                 _sync_layer, _create_kuviz):
+        kuviz = CartoKuvizMock('fake_kuviz')
+
+        _create_auth_client_mock.return_value = None
+        _get_kuviz_manager_mock.return_value = None
+        _sync_layer.return_value = Layer(Dataset('fake_table', self.credentials))
+        _create_kuviz.return_value = kuviz
+
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        vmap = Map(Layer(dataset))
+
+        html = 'fake_html'
+        kuviz_name = 'fake_name'
+
+        kuviz_publisher = KuvizPublisher(None)
+        kuviz_publisher.set_layers(vmap.layers, kuviz_name, 'fake_table_name')
+        result = kuviz_publisher.publish(html, kuviz_name)
+
+        assert kuviz_publisher.kuviz == kuviz
+        assert result == kuviz_to_dict(kuviz)
