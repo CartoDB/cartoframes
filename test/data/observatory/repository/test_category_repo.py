@@ -79,8 +79,8 @@ class TestCategoryRepo(unittest.TestCase):
         categories = repo.get_all({'country_id': country_code})
 
         # Then
-        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public view'
-        mocked_repo.assert_called_once_with(query, {'country_id': country_code}, ['c.id = view.category_id'])
+        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public t'
+        mocked_repo.assert_called_once_with(query, {'country_id': country_code}, ['c.id = t.category_id'])
         assert isinstance(categories, CatalogList)
         assert categories == test_categories
 
