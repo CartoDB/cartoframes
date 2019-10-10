@@ -30,7 +30,6 @@ class TestGeographyRepo(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-
     @patch.object(RepoClient, 'get_geographies')
     @patch.object(RepoClient, 'set_user_credentials')
     def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_geographies):

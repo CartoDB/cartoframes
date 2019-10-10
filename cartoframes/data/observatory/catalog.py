@@ -4,7 +4,6 @@ from .category import Category
 from .country import Country
 from .geography import Geography
 from .dataset import Dataset
-from .geography import Geography
 from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 

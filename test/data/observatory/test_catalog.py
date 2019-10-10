@@ -6,7 +6,6 @@ from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.dataset import Dataset
-from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data.observatory.subscriptions import Subscriptions
 from .examples import test_country1, test_country2, test_category1, test_category2, \

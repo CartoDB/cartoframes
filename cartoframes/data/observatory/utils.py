@@ -52,9 +52,12 @@ def display_subscription_form_notebook(id, info, credentials):
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{dataset_name}</b>.
     The cost of this dataset is <b>${price}</b>.
-    If you want to proceed, a Request will be sent to CARTO who will order the data and load it into your account.
-    This dataset is available for Instant Order for your organization, so it will automatically process the order and you will get inmediate access to the dataset.
-    In order to proceed we need you to agree to the License of the dataset available at <b><a href="{url}" target="_blank">{url}</a></b>.
+    If you want to proceed, a Request will be sent to CARTO who will
+    order the data and load it into your account.
+    This dataset is available for Instant Order for your organization,
+    so it will automatically process the order and you will get inmediate access to the dataset.
+    In order to proceed we need you to agree to the License of the dataset
+    available at <b><a href="{url}" target="_blank">{url}</a></b>.
     <br>Do you want to proceed?
     '''.format(**info)
     text = HTML(message)
