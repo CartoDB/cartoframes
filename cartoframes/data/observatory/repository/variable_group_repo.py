@@ -16,7 +16,8 @@ def get_variable_group_repo():
 class VariableGroupRepository(EntityRepository):
 
     def __init__(self):
-        super(VariableGroupRepository, self).__init__(_VARIABLE_GROUP_ID_FIELD, _ALLOWED_FILTERS, _VARIABLE_GROUP_SLUG_FIELD)
+        super(VariableGroupRepository, self).__init__(_VARIABLE_GROUP_ID_FIELD, _ALLOWED_FILTERS,
+                                                      _VARIABLE_GROUP_SLUG_FIELD)
 
     def get_by_dataset(self, dataset_id):
         return self._get_filtered_entities({DATASET_FILTER: dataset_id})
