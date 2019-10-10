@@ -344,7 +344,7 @@
       "samples": []
     }, {
       "title": "Real Use Cases",
-      "samples": [, {
+      "samples": [{
           "title": "Temperatures Visualization",
           "desc": "Visualize warm temperatures",
           "file": "visualize_temperatures",
