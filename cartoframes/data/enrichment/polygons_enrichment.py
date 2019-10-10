@@ -29,8 +29,8 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
 
             dataset_enrich = enrichment.enrich_polygons(dataset, variables)
-        
-        
+
+
         Enrich a polygons dataset with list of ids:
 
         .. code::

@@ -59,8 +59,8 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
     Args:
         data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
             a Dataset, DataFrame or GeoDataFrame object to be enriched.
-        variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str): variable(s), discovered through Catalog,
-            for enriching the `data` argument.
+        variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
+            variable(s), discovered through Catalog, for enriching the `data` argument.
         data_geom_column (str): string indicating the 4326 geometry column in `data`.
         filters (dict, optional): dictionary with either a `column` key
             with the name of the column to filter or a `value` value with the value to filter by.
