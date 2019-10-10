@@ -387,7 +387,7 @@ class Geocoding(Service):
                 city=None, state=None, country=None,
                 status=DEFAULT_STATUS,
                 table_name=None, if_exists=Dataset.FAIL,
-                dry_run=False):
+                dry_run=False, cached=None):
         """Geocode a dataset
 
         Args:
@@ -417,6 +417,9 @@ class Geocoding(Service):
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
+            cached (str, optional): name of a table used cache geocoding results. Can only
+                be used with DataFrames or queries. This parameter is not compatbile
+                with table_name.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
 
@@ -429,6 +432,12 @@ class Geocoding(Service):
             and also a ``carto_geocode_hash`` that, if preserved, can avoid re-geocoding
             unchanged data in future calls to geocode.
         """
+
+        if cached:
+            if table_name:
+                raise ValueError('tablecached geocoding is not compatible with parameters "table_name"')
+            return self._cached_geocode(
+                dataset, cached, street, city=city, state=state, country=country, dry_run=dry_run)
 
         input_dataframe = None
         if isinstance(dataset, pd.DataFrame):
@@ -472,7 +481,7 @@ class Geocoding(Service):
 
         return self.result(result, metadata=result_info)
 
-    def cached_geocode(self, dataframe, table_name, street, city=None, state=None, country=None, dry_run=False):
+    def _cached_geocode(self, input, table_name, street, city=None, state=None, country=None, dry_run=False):
         """
         Geocode a dataframe caching results into a table.
         If the same dataframe if geocoded repeatedly no credits will be spent.
@@ -484,11 +493,17 @@ class Geocoding(Service):
             if HASH_COLUMN not in dataset.get_column_names():
                 raise ValueError('Cache table {} exists but is not a valid geocode table'.format(table_name))
         else:
-            return self.geocode(dataframe, street=street, city=city, state=state, country=country, table_name=table_name, dry_run=dry_run)
+            return self.geocode(
+                input, street=street, city=city, state=state, country=country, table_name=table_name, dry_run=dry_run)
 
         tmp_table_name = self._new_temporary_table_name()
         logging.warning('++CACHE TMP TAB {}'.format(tmp_table_name))
-        Dataset(dataframe).upload(table_name=tmp_table_name, credentials=self._credentials)
+        if isinstance(input, pd.DataFrame):
+            input = Dataset(input)
+        else:
+            if input.is_remote() and input.table_name:
+                raise ValueError('cached geocoding cannot be used with tables')
+        input.upload(table_name=tmp_table_name, credentials=self._credentials)
         self._execute_query(
             """
             ALTER TABLE {tmp_table} ADD COLUMN {hash} text
