@@ -57,7 +57,7 @@ class TestKuvizPublisher(unittest.TestCase):
     @patch.object(KuvizPublisher, '_sync_layer')
     @patch('cartoframes.viz.kuviz._get_kuviz_manager')
     @patch('cartoframes.viz.kuviz._create_auth_client')
-    def test_kuviz_publisher_create_local(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
+    def test_kuviz_publisher_set_layers(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
         _sync_layer.return_value = Layer(Dataset('fake_table', self.credentials))
