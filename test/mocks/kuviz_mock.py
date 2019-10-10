@@ -17,15 +17,11 @@ class CartoKuvizMock(Kuviz):
         else:
             self.privacy = PRIVACY_PUBLIC
 
-    def delete(self):
-        return True
+    # def delete(self):
+    #     return True
 
-    def save(self):
-        return True
-
-
-def _create_kuviz(html, name, credentials=None, password=None):
-    return CartoKuvizMock(name=name, password=password)
+    # def save(self):
+    #     return True
 
 
 class KuvizPublisherMock(KuvizPublisher):

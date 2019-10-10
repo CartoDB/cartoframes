@@ -9,7 +9,6 @@ from cartoframes.auth import Credentials
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC
 
-from ..mocks.kuviz_mock import KuvizPublisherMock, _create_kuviz, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 from ..mocks.context_mock import ContextMock
 
 from .utils import build_geojson
@@ -20,34 +19,6 @@ except ImportError:
     from mock import Mock, patch
 
 TOKEN_MOCK = '1234'
-
-
-class TestKuviz(unittest.TestCase):
-    def setUp(self):
-        self.username = 'fake_username'
-        self.api_key = 'fake_api_key'
-        self.credentials = Credentials(username=self.username, api_key=self.api_key)
-
-        self.html = "<html><body><h1>Hi Kuviz yeee</h1></body></html>"
-
-    def tearDown(self):
-        StrategiesRegistry.instance = None
-
-    def test_kuviz_create(self):
-        name = 'test-name'
-        kuviz = _create_kuviz(credentials=self.credentials, html=self.html, name=name)
-        self.assertIsNotNone(kuviz.id)
-        self.assertIsNotNone(kuviz.url)
-        self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, PRIVACY_PUBLIC)
-
-    def test_kuviz_create_with_password(self):
-        name = 'test-name'
-        kuviz = _create_kuviz(credentials=self.credentials, html=self.html, name=name, password="1234")
-        self.assertIsNotNone(kuviz.id)
-        self.assertIsNotNone(kuviz.url)
-        self.assertEqual(kuviz.name, name)
-        self.assertEqual(kuviz.privacy, PRIVACY_PASSWORD)
 
 
 class TestKuvizPublisher(unittest.TestCase):
@@ -190,8 +161,3 @@ class TestKuvizPublisher(unittest.TestCase):
 
         kuviz_publisher._manage_maps_api_key('fake_name')
         assert kuviz_publisher._maps_api_key == token
-
-    def test_kuviz_publisher_all(self):
-        kuviz_dicts = KuvizPublisherMock.all()
-        for kuviz_dict in kuviz_dicts:
-            self.assert_kuviz_dict(kuviz_dict, name="test", privacy=PRIVACY_PUBLIC)
