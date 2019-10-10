@@ -130,7 +130,7 @@ class TestDataset(unittest.TestCase):
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == 'Dataset({id})'.format(id=db_dataset1['id'])
+        assert dataset_repr == "<Dataset('{id}')>".format(id=db_dataset1['slug'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
@@ -161,10 +161,10 @@ class TestDataset(unittest.TestCase):
         credentials = Credentials('user', '1234')
 
         # When
-        datasets = Dataset.get_all(credentials)
+        datasets = Dataset.get_all(credentials=credentials)
 
         # Then
-        mocked_repo.assert_called_once_with(credentials)
+        mocked_repo.assert_called_once_with(None, credentials)
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
 
@@ -176,9 +176,10 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+        assert datasets_str == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+                               .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
-    def test_dataset_list_is_represented_with_ids(self):
+    def test_dataset_list_is_represented_with_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
@@ -186,7 +187,8 @@ class TestDataset(unittest.TestCase):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == '[Dataset({id1}), Dataset({id2})]'.format(id1=db_dataset1['id'], id2=db_dataset2['id'])
+        assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     def test_datasets_items_are_obtained_as_dataset(self):
         # Given
