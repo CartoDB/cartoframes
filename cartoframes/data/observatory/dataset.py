@@ -102,7 +102,4 @@ class Dataset(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        display_subscription_form()
-
-        return None  # TODO
-
+        display_subscription_form(self.id, _credentials)

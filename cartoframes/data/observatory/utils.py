@@ -1,4 +1,6 @@
-from carto.do_subscriptions import DOSubscriptionManager
+from __future__ import absolute_import
+
+# from carto.do_subscriptions import DOSubscriptionManager
 
 
 def get_subscription_ids(credentials):
@@ -8,22 +10,38 @@ def get_subscription_ids(credentials):
 
 
 def fetch_subscriptions(credentials):
-    if credentials:
-        api_key_auth_client = credentials.get_api_key_auth_client()
-        do_manager = DOSubscriptionManager(api_key_auth_client)
-        if do_manager is not None:
-            return do_manager.all()
+    # if credentials:
+    #     api_key_auth_client = credentials.get_api_key_auth_client()
+    #     do_manager = DOSubscriptionManager(api_key_auth_client)
+    #     if do_manager is not None:
+    #         return do_manager.all()
     return []
 
 
-def display_subscription_form():
+def fetch_subscription_info(id):
+    # TODO: implement
+    return {
+        'dataset_name': id,
+        'price': '100.0',
+        'url': 'http://carto.com'
+    }
+
+
+def trigger_subscription(id, credentials):
+    # TODO: implement
+    return 'OK'
+
+
+def display_subscription_form(id, credentials):
+    info = fetch_subscription_info(id)
+
     if is_ipython_notebook():
-        display_notebook_subscription_form()
+        display_subscription_form_notebook(id, info, credentials)
     else:
-        display_cli_subscription_form()
+        display_subscription_form_cli()
 
 
-def display_notebook_subscription_form():
+def display_subscription_form_notebook(id, info, credentials):
     from IPython.display import display
     from ipywidgets.widgets import HTML, GridspecLayout, Button, Layout
 
@@ -32,13 +50,13 @@ def display_notebook_subscription_form():
 
     message = '''
     <h3>Subscription contract</h3>
-    You are about to subscribe to <b>%{dataset_name}</b>.
-    The cost of this dataset is <b>$%{price}/%{update_frequency}</b>.
+    You are about to subscribe to <b>{dataset_name}</b>.
+    The cost of this dataset is <b>${price}</b>.
     If you want to proceed, a Request will be sent to CARTO who will order the data and load it into your account.
     This dataset is available for Instant Order for your organization, so it will automatically process the order and you will get inmediate access to the dataset.
-    In order to proceed we need you to agree to the License of the dataset available at <b><a href=http://carto.com>http://carto.com</a></b>.
+    In order to proceed we need you to agree to the License of the dataset available at <b><a href="{url}" target="_blank">{url}</a></b>.
     <br>Do you want to proceed?
-    '''
+    '''.format(**info)
     text = HTML(message)
 
     button_yes = create_expanded_button('Yes', 'info')
@@ -54,7 +72,11 @@ def display_notebook_subscription_form():
 
     def on_button_yes_clicked(b):
         disable_buttons()
-        display(HTML('Yes'))
+        response = trigger_subscription('', '')
+        if response:
+            display(HTML('Yes'))
+        else:
+            display(HTML('No'))
 
     def on_button_no_clicked(b):
         disable_buttons()
@@ -66,7 +88,7 @@ def display_notebook_subscription_form():
     display(text, buttons)
 
 
-def display_cli_subscription_form():
+def display_subscription_form_cli():
     print('This method is not yet implemented in CLI')
 
 
