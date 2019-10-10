@@ -69,6 +69,20 @@ class TestVariableRepo(unittest.TestCase):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_variables')
+    def test_get_by_slug(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1]
+        requested_slug = db_variable1['slug']
+        repo = VariableRepository()
+
+        # When
+        variable = repo.get_by_id(requested_slug)
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert variable == test_variable1
+
+    @patch.object(RepoClient, 'get_variables')
     def test_get_by_dataset(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable1, db_variable2]
@@ -106,6 +120,7 @@ class TestVariableRepo(unittest.TestCase):
 
         expected_variables = CatalogList([Variable({
             'id': 'variable1',
+            'slug': None,
             'name': None,
             'description': None,
             'column_name': None,
