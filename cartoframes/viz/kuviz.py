@@ -34,7 +34,7 @@ class KuvizPublisher(object):
     def get_layers(self):
         return self._layers
 
-    def set_layers(self, layers, name, table_name):
+    def set_layers(self, layers, name, table_name=None):
         self._sync_layers(layers, table_name)
         self._manage_maps_api_key(name)
         self._add_layers_credentials()
@@ -62,7 +62,7 @@ class KuvizPublisher(object):
             return True
         return False
 
-    def _sync_layers(self, layers, table_name):
+    def _sync_layers(self, layers, table_name=None):
         for idx, layer in enumerate(layers):
             if layer.source.dataset.is_local():
                 table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx))
