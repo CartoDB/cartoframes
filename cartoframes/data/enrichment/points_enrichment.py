@@ -8,7 +8,7 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
     Enrich a points dataset
 
-    This method will allow you to enrich your dataset with columns from our data, intersecting
+    This method allows you to enrich your dataset with columns from our data, intersecting
     your points with our geographies. Extra columns as area and population will be provided
     with the aims of normalize these columns.
 
@@ -21,9 +21,10 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
             dataset_enrich = enrichment.enrich_points(dataset, variables)
-        
+
 
         Enrich a points dataset with list of ids:
 
@@ -31,9 +32,14 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            variables = ['carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                        'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile']
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
             dataset_enrich = enrichment.enrich_points(dataset, variables)
 
 
@@ -43,11 +49,12 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
             filters = {'do_date': '2019-09-01'}
             dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
-        
 
     Args:
         data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
@@ -59,10 +66,10 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
             with the name of the column to filter or a `value` value with the value to filter by.
             Filters will be used using the `AND` operator
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-        credentials of user account. If not provided,
-        a default credentials (if set with :py:meth:`set_default_credentials
-        <cartoframes.auth.set_default_credentials>`) will attempted to be
-        used.
+            credentials of user account. If not provided,
+            a default credentials (if set with :py:meth:`set_default_credentials
+            <cartoframes.auth.set_default_credentials>`) will attempted to be
+            used.
 
     Returns:
         A dataframe as the provided one but with the variables to enrich appended to it

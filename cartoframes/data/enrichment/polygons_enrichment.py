@@ -8,8 +8,7 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
     Enrich a polygons dataset
 
-
-    This method will allow you to enrich your dataset with columns from our data, intersecting
+    This method allows you to enrich your dataset with columns from our data, intersecting
     your polygons with our geographies. When a polygon intersects with multiple geographies of our
     dataset, the proportional part of the intersection will be used to interpolate the quantity of the
     polygon value intersected, aggregating them with the operator provided by `agg_operators` argument.
@@ -19,12 +18,15 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
         Enrich a polygons dataset with Catalog classes and default aggregation methods:
 
-        .. code::cartoframes/data/observatory/repository/repo_client.py
+        .. code::
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
+
             dataset_enrich = enrichment.enrich_polygons(dataset, variables)
         
         
@@ -34,9 +36,14 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            variables = ['carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                        'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile']
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
             dataset_enrich = enrichment.enrich_polygons(dataset, variables)
 
 
@@ -46,9 +53,12 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
             filters = {'do_date': '2019-09-01'}
+
             dataset_enrich = enrichment.enrich_polygons(dataset, variables, filters)
         
 
@@ -58,9 +68,14 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            variables = ['carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                        'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile']
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
             agg_operators = {'in_grades_1_to_4_quantile': 'SUM', 'in_school_quantile': 'AVG'}
             dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
 
@@ -70,12 +85,16 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
 
             from data.observatory import enrichment
             from cartoframes.auth import set_default_credentials
+
             set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-            variables = ['carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                        'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile']
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
             agg_operators = None
             dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
-
 
 
     Args:
