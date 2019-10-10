@@ -53,21 +53,24 @@ def compute_query(dataset):
 
 
 def compute_geodataframe(dataset):
-    if dataset.dataframe is not None:
-        if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
-            return dataset.dataframe
+    return geodataframe_from_dataframe(dataset.dataframe)
 
-        df = dataset.dataframe
-        geom_column = _get_column(df, GEOM_COLUMN_NAMES)
+
+def geodataframe_from_dataframe(dataframe):
+    if dataframe is not None:
+        if isinstance(dataframe, geopandas.GeoDataFrame):
+            return dataframe
+
+        geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
         if geom_column is not None:
-            df['geometry'] = _compute_geometry_from_geom(geom_column)
-            _warn_new_geometry_column(df)
+            dataframe['geometry'] = _compute_geometry_from_geom(geom_column)
+            _warn_new_geometry_column(dataframe)
         else:
-            lat_column = _get_column(df, LAT_COLUMN_NAMES)
-            lng_column = _get_column(df, LNG_COLUMN_NAMES)
+            lat_column = _get_column(dataframe, LAT_COLUMN_NAMES)
+            lng_column = _get_column(dataframe, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
-                df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
-                _warn_new_geometry_column(df)
+                dataframe['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
+                _warn_new_geometry_column(dataframe)
             else:
                 raise ValueError('''No geographic data found. '''
                                  '''If a geometry exists, change the column name ({0}) or '''
@@ -77,7 +80,7 @@ def compute_geodataframe(dataset):
                                      ', '.join(LAT_COLUMN_NAMES),
                                      ', '.join(LNG_COLUMN_NAMES)
                                  ))
-        return geopandas.GeoDataFrame(df)
+        return geopandas.GeoDataFrame(dataframe)
 
 
 def _get_column(df, options):
