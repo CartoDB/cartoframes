@@ -16,9 +16,9 @@ class EntityRepository(ABC):
 
         self.id_field = id_field
         self.allowed_filters = filters + [id_field]
+        self.slug_field = slug_field
 
         if slug_field:
-            self.slug_field = slug_field
             self.allowed_filters.append(slug_field)
 
     def get_all(self, filters=None):
