@@ -92,6 +92,10 @@ def _get_bigquery_client(project, credentials):
     return BigQueryClient(project, credentials)
 
 
+def is_slug_value(id_value):
+    return len(id_value.split('.')) == 1
+
+
 class CatalogList(list):
 
     def __init__(self, data):

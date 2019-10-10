@@ -91,6 +91,7 @@ class TestVariableGroupRepo(unittest.TestCase):
 
         expected_variables_groups = CatalogList([VariableGroup({
             'id': 'variable_group1',
+            'slug': None,
             'name': None,
             'dataset_id': None,
             'starred': None

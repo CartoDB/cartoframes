@@ -1,6 +1,7 @@
 import pytest
 import unittest
 
+
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
@@ -8,9 +9,9 @@ from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.dataset import Dataset
 from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data.observatory.subscriptions import Subscriptions
-from .examples import test_country1, test_country2, test_category1, test_category2, \
-    test_dataset1, test_dataset2, test_geography1, test_geography2, \
-    test_countries, test_categories, test_datasets, test_geographies
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
+from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2, \
+    test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
 
 try:
     from unittest.mock import Mock, patch
@@ -127,6 +128,23 @@ class TestCatalog(unittest.TestCase):
             'category_id': 'demographics',
             'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019'})
 
+        assert datasets == test_datasets
+
+    @patch.object(Dataset, 'get_all')
+    @patch.object(GeographyRepository, 'get_by_id')
+    def test_geography_filter_by_slug(self, mocked_repo, mocked_datasets):
+        # Given
+        mocked_repo.return_value = test_geography1
+        mocked_datasets.return_value = test_datasets
+        slug = 'esp_census_2019_4567890d'
+        catalog = Catalog()
+
+        # When
+        datasets = catalog.geography(slug).datasets
+
+        # Then
+        mocked_repo.assert_called_once_with(slug)
+        mocked_datasets.assert_called_once_with({'geography_id': test_geography1.id})
         assert datasets == test_datasets
 
     @patch.object(Dataset, 'get_all')
