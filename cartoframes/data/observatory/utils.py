@@ -3,7 +3,15 @@ message = '''
 You are about to subscribe to <b>%{dataset_name}</b>. The cost of this dataset is <b>$%{price}/%{update_frequency}</b>. If you want to proceed, a Request will be sent to CARTO who will order the data and load it into your account. This dataset is available for Instant Order for your organization, so it will automatically process the order and you will get inmediate access to the dataset. In order to proceed we need you to agree to the License of the dataset available at http://adasdasd.<br>Do you want to proceed?
 '''
 
+
 def display_subscription_form():
+    if is_ipython_notebook():
+        display_notebook_subscription_form()
+    else:
+        display_cli_subscription_form()
+
+
+def display_notebook_subscription_form():
     from IPython.display import display
     from ipywidgets.widgets import HTML, GridspecLayout, Button, Layout
 
@@ -19,24 +27,37 @@ def display_subscription_form():
     buttons[0, 0] = button_yes
     buttons[0, 1] = button_no
 
-
     def disable_buttons():
         button_yes.disabled = True
         button_no.disabled = True
-
 
     def on_button_yes_clicked(b):
         disable_buttons()
         display(HTML('Yes'))
 
-
     def on_button_no_clicked(b):
         disable_buttons()
         display(HTML('No'))
 
-
     button_yes.on_click(on_button_yes_clicked)
     button_no.on_click(on_button_no_clicked)
 
-
     display(text, buttons)
+
+
+def display_cli_subscription_form():
+    pass
+
+
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False
