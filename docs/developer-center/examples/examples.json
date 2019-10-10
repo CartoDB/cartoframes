@@ -104,7 +104,39 @@
       ]
     }, {
       "title": "Visualization Layer Helpers",
-      "samples": []
+      "samples": [
+        {
+          "title": "Color Category Layer",
+          "desc":  "Color Category Layer",
+          "file": "color_category_layer",
+          "path": "visualization_layers"   
+        }, {
+          "title": "Color Continuous Layer",
+          "desc":  "Color Continuous Layer",
+          "file": "color_continuous_layer",
+          "path": "visualization_layers"   
+        }, {
+          "title": "Color Bins Layer",
+          "desc":  "Color Bins Layer",
+          "file": "color_bins_layer",
+          "path": "visualization_layers"   
+        }, {
+          "title": "Size Category Layer",
+          "desc":  "Size Category Layer",
+          "file": "size_category_layer",
+          "path": "visualization_layers"   
+        }, {
+          "title": "Size Continuous Layer",
+          "desc":  "Size Continuous Layer",
+          "file": "size_continuous_layer",
+          "path": "visualization_layers"  
+        }, {
+          "title": "Cluster Size Layer",
+          "desc":  "Cluster Size Layer",
+          "file": "cluster_size_layer",
+          "path": "visualization_layers"  
+        }
+      ]
     }, {
       "title": "Legends",
       "samples": [
@@ -162,13 +194,109 @@
       ]
     }, {
       "title": "Widgets",
-      "samples": []
+      "samples": [
+        {
+          "title": "Default Widget",
+          "desc":  "Default Widget",
+          "file": "default_widget",
+          "path": "widgets"  
+        }, {
+          "title": "Category Widget",
+          "desc":  "Category Widget",
+          "file": "category_widget",
+          "path": "widgets"  
+        }, {
+          "title": "Histogram Widget",
+          "desc":  "Histogram Widget",
+          "file": "histogram_widget",
+          "path": "widgets"  
+        }, {
+          "title": "Formula Widget",
+          "desc":  "Formula Widget",
+          "file": "formula_widget",
+          "path": "widgets"  
+        }, {
+          "title": "Animation Widget",
+          "desc":  "Animation Widget",
+          "file": "animation_widget",
+          "path": "widgets"  
+        }, {
+          "title": "Time Series Widget",
+          "desc":  "Time Series Widget",
+          "file": "time_series_widget",
+          "path": "widgets"          
+        }, {
+          "title": "Animation Widget to style property",
+          "desc":  "Animation Widget to style property",
+          "file": "animation_widget_style_property",
+          "path": "widgets"  
+        }, {
+          "title": "Multiple Widgets",
+          "desc":  "Multiple Widgets",
+          "file": "multiple_widgets",
+          "path": "widgets"  
+        }
+      ]
     }, {
       "title": "Popups",
-      "samples": []
+      "samples": [
+        {
+          "title": "Popup on Click",
+          "desc":  "Popup on Click",
+          "file": "popup_on_click",
+          "path": "popups"
+        }, {
+          "title": "Popup on Hover",
+          "desc":  "Popup on Hover",
+          "file": "popup_on_hover",
+          "path": "popups"        
+        }, {
+          "title": "Popup titles",
+          "desc":  "Popup titles",
+          "file": "popup_titles",
+          "path": "popups"       
+        }, {
+          "title": "Multiple Popup Events",
+          "desc":  "Multiple Popup Events",
+          "file": "multiple_popup_events",
+          "path": "popups"   
+        }, {
+          "title": "Popups With Expressions",
+          "desc":  "Popups With Expressions",
+          "file": "popup_expressions",
+          "path": "popups"   
+        }
+      ]
     }, {
       "title": "Map Layout",
-      "samples": []
+      "samples": [
+        {
+          "title": "Default Layout",
+          "desc":  "Default Layout",
+          "file": "default_layout",
+          "path": "map_layout"
+        }, {
+          "title": "Custom Layout",
+          "desc":  "Custom Layout",
+          "file": "custom_layout",
+          "path": "map_layout"
+        }, {
+          "title": "Layout Titles",
+          "desc":  "Layout Titles",
+          "file": "layout_titles",
+          "path": "map_layout"    
+        }, {
+          "title": "Layout Viewport",
+          "desc":  "Layout Viewport",
+          "file": "layout_viewport",
+          "path": "map_layout"    
+        }, {
+          "title": "Interactive Layout",
+          "desc":  "Interactive Layout",
+          "file": "interactive_layout",
+          "path": "map_layout"    
+        }
+      ]
     }, {
       "title": "Geocoding and Isolines Services",
       "samples": [
