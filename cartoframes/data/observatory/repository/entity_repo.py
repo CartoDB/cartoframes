@@ -1,5 +1,5 @@
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.entity import CatalogList, is_slug_value
 from .repo_client import RepoClient
 
 try:
@@ -47,7 +47,7 @@ class EntityRepository(ABC):
             return cleaned_filters
 
     def _get_id_filter(self, id_):
-        if self.slug_field is not None and len(id_.split('.')) == 1:
+        if self.slug_field is not None and is_slug_value(id_):
             return {self.slug_field: id_}
 
         return {self.id_field: id_}
