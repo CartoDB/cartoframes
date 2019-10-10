@@ -98,7 +98,8 @@ test_dataset2 = Dataset(db_dataset2)
 test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {
-    'id': 'var1',
+    'id': 'carto-do.variable.var1',
+    'slug': 'var1',
     'name': 'Population',
     'description': 'The number of people within each geography',
     'column_name': 'pop',
@@ -110,7 +111,8 @@ db_variable1 = {
     'summary_jsonb': {}
 }
 db_variable2 = {
-    'id': 'var2',
+    'id': 'carto-do.variable.var2',
+    'slug': 'var2',
     'name': 'Date',
     'description': 'The date the data refers to (YYYY-MM format for month and YYYY-MM-DD for day).',
     'column_name': 'Date',
@@ -138,13 +140,15 @@ test_provider2 = Provider(db_provider2)
 test_providers = CatalogList([test_provider1, test_provider2])
 
 db_variable_group1 = {
-    'id': 'vargroup1',
+    'id': 'carto-do.variable_group.vargroup1',
+    'slug': 'vargroup1',
     'name': 'Population',
     'dataset_id': 'dataset1',
     'starred': True
 }
 db_variable_group2 = {
-    'id': 'vargroup2',
+    'id': 'carto-do.variable_group.vargroup2',
+    'slug': 'vargroup2',
     'name': 'Date',
     'dataset_id': 'dataset1',
     'starred': False
