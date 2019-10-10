@@ -82,6 +82,48 @@ class TestGeographyRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with({'slug': requested_slug})
         assert geography == test_geography1
 
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_by_id_list([db_geography1['id'], db_geography2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_geography1['id'], db_geography2['id']]})
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_slug_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_by_id_list([db_geography1['slug'], db_geography2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': [db_geography1['slug'], db_geography2['slug']]})
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
+    def test_get_by_slug_and_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_by_id_list([db_geography1['id'], db_geography2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_geography1['id']], 'slug': [db_geography2['slug']]})
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
     @patch.object(RepoClient, 'get_geographies_joined_datasets')
     def test_get_by_country(self, mocked_repo):
         # Given
