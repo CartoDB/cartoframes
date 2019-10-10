@@ -3,7 +3,8 @@ from __future__ import absolute_import
 from .enrichment_service import enrich
 
 
-def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry', filters=dict(), credentials=None):
+def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
+                    filters=dict(), credentials=None):
     """enrich_polygons
 
     Enrich a polygons dataset

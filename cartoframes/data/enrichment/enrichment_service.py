@@ -1,4 +1,3 @@
-import pandas as pd
 import geopandas as gpd
 import uuid
 
@@ -9,6 +8,8 @@ from ...utils.geom_utils import wkt_to_geojson, geojson_to_wkt
 from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
 from ...utils.geom_utils import _compute_geometry_from_geom
+from ..observatory.variable import Variable
+
 
 _ENRICHMENT_ID = 'enrichment_id'
 _WORKING_PROJECT = 'carto-do-customers'
@@ -57,10 +58,16 @@ def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
 
 
 def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
+
+    variables = __process_variables(kwargs['variables'])
+
     table_to_geotable, table_to_variables, table_to_project, table_to_dataset =\
-         __get_tables_and_variables(kwargs['variables'], user_dataset)
+        __process_enrichment_variables(variables, user_dataset)
 
     filters_str = __process_filters(kwargs['filters'])
+
+    if kwargs.get('agg_operators') is not None:
+        kwargs['agg_operators'] = __process_agg_operators(kwargs['agg_operators'], variables)
 
     return query_function(_ENRICHMENT_ID, filters_str, table_to_geotable, table_to_variables, table_to_project,
                           table_to_dataset, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
@@ -71,6 +78,7 @@ def _execute_enrichment(bq_client, queries, data_copy, data_geom_column):
     dfs_enriched = list()
 
     for query in queries:
+
         df_enriched = bq_client.query(query).to_dataframe()
 
         dfs_enriched.append(df_enriched)
@@ -109,6 +117,26 @@ def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_
     return data_copy
 
 
+def __process_variables(variables):
+
+    variables_result = list()
+    if isinstance(variables, Variable):
+        variables_result = [variables]
+    elif isinstance(variables, str):
+        variables_result = [Variable.get(variables)]
+    elif isinstance(variables, list):
+        first_element = variables[0]
+
+        if isinstance(first_element, str):
+            variables_result = [Variable.get(variable) for variable in variables]
+        else:
+            variables_result = variables
+    else:
+        raise EnrichmentException('Variable(s) to enrich should be an instance of Variable / CatalogList / str / list')
+
+    return variables_result
+
+
 def __process_filters(filters_dict):
     filters = ''
     # TODO: Add data table ref in fields of filters
@@ -124,59 +152,64 @@ def __process_filters(filters_dict):
     return filters
 
 
+def __process_agg_operators(agg_operators, variables):
+    agg_operators_result = agg_operators.copy()
+
+    for variable in variables:
+        if variable.column_name not in agg_operators_result:
+            agg_operators_result[variable.column_name] = variable.agg_method
+
+    return agg_operators_result
+
+
 def __get_tables_and_variables(variables, user_dataset):
 
-    if isinstance(variables, pd.Series):
-        variables_id = [variables['id']]
-    elif isinstance(variables, pd.DataFrame):
-        variables_id = variables['id'].tolist()
-    else:
-        raise EnrichmentException('Variable(s) to enrich should be an instance of Series or DataFrame')
-
     table_to_geotable, table_to_variables, table_to_project, table_to_dataset =\
-        __process_enrichment_variables(variables_id, user_dataset)
+        __process_enrichment_variables(variables, user_dataset)
 
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 
 
-def __process_enrichment_variables(variables_id, user_dataset):
+def __process_enrichment_variables(variables, user_dataset):
     table_to_geotable = dict()
     table_to_variables = defaultdict(list)
     table_to_project = dict()
     table_to_dataset = dict()
 
-    for variable_id in variables_id:
-        variable_split = variable_id.split('.')
-        project, dataset, table, variable = variable_split
+    for variable in variables:
+        project_name = variable.project_name
+        dataset_name = variable.schema_name
+        table_name = variable.dataset_name
+        variable_name = variable.column_name
 
-        if project != _PUBLIC_PROJECT:
-            table = '{dataset}_{table}'.format(dataset=dataset,
-                                               table=table,
-                                               user_dataset=user_dataset)
+        if project_name != _PUBLIC_PROJECT:
+            table_name = '{dataset}_{table}'.format(dataset=dataset_name,
+                                                    table=table_name,
+                                                    user_dataset=user_dataset)
 
-        if table not in table_to_dataset:
-            if project != _PUBLIC_PROJECT:
-                table_to_dataset[table] = user_dataset
+        if table_name not in table_to_dataset:
+            if project_name != _PUBLIC_PROJECT:
+                table_to_dataset[table_name] = user_dataset
             else:
-                table_to_dataset[table] = _PUBLIC_DATASET
+                table_to_dataset[table_name] = _PUBLIC_DATASET
 
-        if table not in table_to_geotable:
-            geotable = __get_name_geotable_from_datatable(table)
+        if table_name not in table_to_geotable:
+            geotable = __get_name_geotable_from_datatable(table_name)
 
-            if project != _PUBLIC_PROJECT:
-                geotable = '{dataset}_{geotable}'.format(dataset=dataset,
+            if project_name != _PUBLIC_PROJECT:
+                geotable = '{dataset}_{geotable}'.format(dataset=dataset_name,
                                                          geotable=geotable,
                                                          user_dataset=user_dataset)
 
-            table_to_geotable[table] = geotable
+            table_to_geotable[table_name] = geotable
 
-        if table not in table_to_project:
-            if project == _PUBLIC_PROJECT:
-                table_to_project[table] = _PUBLIC_PROJECT
+        if table_name not in table_to_project:
+            if project_name == _PUBLIC_PROJECT:
+                table_to_project[table_name] = _PUBLIC_PROJECT
             else:
-                table_to_project[table] = _WORKING_PROJECT
+                table_to_project[table_name] = _WORKING_PROJECT
 
-        table_to_variables[table].append(variable)
+        table_to_variables[table_name].append(variable_name)
 
     return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
 

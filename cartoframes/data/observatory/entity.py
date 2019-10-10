@@ -34,8 +34,8 @@ class CatalogEntity(ABC):
         return cls.entity_repo.get_by_id(id_)
 
     @classmethod
-    def get_all(cls):
-        return cls.entity_repo.get_all()
+    def get_all(cls, filters=None):
+        return cls.entity_repo.get_all(filters)
 
     def to_series(self):
         return pd.Series(self.data)
@@ -53,7 +53,13 @@ class CatalogEntity(ABC):
         return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
     def __repr__(self):
-        return '{classname}({entity_id})'.format(classname=self.__class__.__name__, entity_id=self.id)
+        return "<{classname}('{entity_id}')>".format(classname=self.__class__.__name__, entity_id=self._get_print_id())
+
+    def _get_print_id(self):
+        if 'slug' in self.data.keys():
+            return self.data['slug']
+
+        return self.id
 
     def _download(self, credentials=None):
         credentials = _get_credentials(credentials)
