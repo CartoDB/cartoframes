@@ -83,7 +83,7 @@
         }, {
           "title": "Add a default Legend",
           "desc":  "Add a default Legend",
-          "file": "add_default_legend_legend",
+          "file": "add_default_legend_layer",
           "path": "layers"
         }, {
           "title": "Add popup on click to Layer",
