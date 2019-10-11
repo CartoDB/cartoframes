@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
+from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 import pandas as pd
 
@@ -176,9 +177,9 @@ class Isolines(Service):
             dataset.upload(table_name=table_name, if_exists=if_exists)
             result = Dataset(table_name, credentials=self._credentials)
             if input_dataframe is not None:
-                result = result.download()
+                result = geodataframe_from_dataframe(result.download())
         else:
-            result = dataset.download()
+            result = geodataframe_from_dataframe(dataset.download())
             if input_dataframe is None:
                 result = Dataset(result, credentials=self._credentials)
 
