@@ -1,11 +1,16 @@
 import unittest
 import pandas as pd
 
+from google.api_core.exceptions import NotFound
+
+from carto.exceptions import CartoException
+
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1, test_geography2, db_geography2
+from .mocks import BigQueryClientMock, CredentialsMock
 
 try:
     from unittest.mock import Mock, patch
@@ -62,8 +67,8 @@ class TestGeography(unittest.TestCase):
         assert geography_id == db_geography1['id']
         assert name == db_geography1['name']
         assert description == db_geography1['description']
-        assert country == db_geography1['country_iso_code3']
-        assert language == db_geography1['language_iso_code3']
+        assert country == db_geography1['country_id']
+        assert language == db_geography1['lang']
         assert provider == db_geography1['provider_id']
         assert geom_coverage == db_geography1['geom_coverage']
         assert update_frequency == db_geography1['update_frequency']
@@ -101,7 +106,7 @@ class TestGeography(unittest.TestCase):
         geography_repr = repr(geography)
 
         # Then
-        assert geography_repr == 'Geography({id})'.format(id=db_geography1['id'])
+        assert geography_repr == "<Geography('{id}')>".format(id=db_geography1['slug'])
 
     def test_geography_is_printed_with_classname(self):
         # Given
@@ -134,8 +139,8 @@ class TestGeography(unittest.TestCase):
         categories_str = str(geographies)
 
         # Then
-        assert categories_str == '[Geography({id1}), Geography({id2})]' \
-                                 .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_str == "[<Geography('{id1}')>, <Geography('{id2}')>]" \
+                                 .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     def test_geography_list_is_represented_with_ids(self):
         # Given
@@ -145,8 +150,8 @@ class TestGeography(unittest.TestCase):
         categories_repr = repr(geographies)
 
         # Then
-        assert categories_repr == '[Geography({id1}), Geography({id2})]'\
-                                  .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_repr == "[<Geography('{id1}')>, <Geography('{id2}')>]"\
+                                  .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     @patch.object(GeographyRepository, 'get_by_id')
     def test_get_geography_by_id(self, mocked_repo):
@@ -185,3 +190,39 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography_df, pd.DataFrame)
         assert isinstance(sliced_geography, pd.Series)
         assert sliced_geography.equals(geography.to_series())
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography1
+
+        # mock big query client
+        file_path = 'fake_path'
+        mocked_bq_client.return_value = BigQueryClientMock(file_path)
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Geography.get(test_geography1.id)
+        response = dataset.download(credentials)
+
+        assert response == file_path
+
+    @patch.object(GeographyRepository, 'get_by_id')
+    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+        # mock geography
+        mocked_repo.return_value = test_geography1
+
+        # mock big query client
+        mocked_bq_client.return_value = BigQueryClientMock(NotFound('Fake error'))
+
+        # test
+        username = 'fake_user'
+        credentials = CredentialsMock(username)
+
+        dataset = Geography.get(test_geography1.id)
+        with self.assertRaises(CartoException):
+            dataset.download(credentials)

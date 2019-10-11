@@ -99,7 +99,7 @@ class TestVariable(unittest.TestCase):
         variable_repr = repr(variable)
 
         # Then
-        assert variable_repr == 'Variable({id})'.format(id=db_variable1['id'])
+        assert variable_repr == "<Variable('{id}')>".format(id=db_variable1['slug'])
 
     def test_variable_is_printed_with_classname(self):
         # Given
@@ -132,8 +132,8 @@ class TestVariable(unittest.TestCase):
         variables_str = str(variables)
 
         # Then
-        assert variables_str == '[Variable({id1}), Variable({id2})]' \
-                                .format(id1=db_variable1['id'], id2=db_variable2['id'])
+        assert variables_str == "[<Variable('{id1}')>, <Variable('{id2}')>]" \
+                                .format(id1=db_variable1['slug'], id2=db_variable2['slug'])
 
     def test_variable_list_is_represented_with_ids(self):
         # Given
@@ -143,8 +143,8 @@ class TestVariable(unittest.TestCase):
         variables_repr = repr(variables)
 
         # Then
-        assert variables_repr == '[Variable({id1}), Variable({id2})]'\
-                                 .format(id1=db_variable1['id'], id2=db_variable2['id'])
+        assert variables_repr == "[<Variable('{id1}')>, <Variable('{id2}')>]"\
+                                 .format(id1=db_variable1['slug'], id2=db_variable2['slug'])
 
     @patch.object(VariableRepository, 'get_by_id')
     def test_get_variable_by_id(self, mocked_repo):

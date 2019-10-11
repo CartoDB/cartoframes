@@ -9,6 +9,7 @@ import pandas as pd
 
 from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
+from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 from ...data.clients import SQLClient
 
@@ -386,7 +387,7 @@ class Geocoding(Service):
     def geocode(self, dataset, street,
                 city=None, state=None, country=None,
                 status=DEFAULT_STATUS,
-                table_name=None, if_exists=Dataset.FAIL,
+                table_name=None, if_exists=Dataset.IF_EXISTS_FAIL,
                 dry_run=False, cached=None):
         """Geocode a dataset
 
@@ -462,11 +463,6 @@ class Geocoding(Service):
 
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
-        if result_dataset.dataframe is not None and not table_name and not dry_run:
-            # The result is not a permanent table; remove cartodb_id if it wasn't present in the input
-            if 'cartodb_id' not in self.columns:
-                remove_column_from_dataframe(result_dataset.dataframe, 'cartodb_id')
-
         result = result_dataset
         if input_dataframe is not None:
             # Note that we return a dataframe whenever the input is dataframe,
@@ -478,6 +474,7 @@ class Geocoding(Service):
                 if result is None:
                     # but if not temporary we need to download it now
                     result = result_dataset.download()
+                result = geodataframe_from_dataframe(result)
 
         return self.result(result, metadata=result_info)
 
@@ -526,7 +523,7 @@ class Geocoding(Service):
         dataset = Dataset(table_name, credentials=self._credentials)
         result, meta = self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
         if input_dataframe:
-            result = result.download()
+            result = geodataframe_from_dataframe(result.download())
         return self.result(result, metadata=meta)
 
 

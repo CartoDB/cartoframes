@@ -55,9 +55,9 @@ class DataFrameDataset(BaseDataset):
 
         dataframe_columns_info = DataframeColumnsInfo(self._df, with_lnglat)
 
-        if if_exists == BaseDataset.REPLACE or not self.exists():
+        if if_exists == BaseDataset.IF_EXISTS_REPLACE or not self.exists():
             self._create_table(dataframe_columns_info.columns)
-        elif if_exists == BaseDataset.FAIL:
+        elif if_exists == BaseDataset.IF_EXISTS_FAIL:
             raise self._already_exists_error()
 
         self._copyfrom(dataframe_columns_info, with_lnglat)
