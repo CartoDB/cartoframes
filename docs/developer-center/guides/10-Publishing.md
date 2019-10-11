@@ -29,6 +29,8 @@ public_data_map.publish('public_data_map')
 
 #### Case 2: private dataset from your CARTO account
 
+In this case, a regular API key has been created with read only permissions of your private table.
+
 ```py
 from cartoframes.viz import Map, Layer
 
@@ -37,6 +39,8 @@ private_data_map.publish('cf_publish_case_2')
 ```
 
 #### Case 3: local data
+
+In this case, a table has been created in your CARTO account and a `regular API key` with read only permissions of the table.
 
 ```py
 from cartoframes.viz import Map, Layer
