@@ -1,5 +1,6 @@
 import unittest
 import pandas as pd
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.country import Country
@@ -7,7 +8,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
-    db_country2
+    db_country2, test_categories
 
 try:
     from unittest.mock import Mock, patch
@@ -30,7 +31,7 @@ class TestCountry(unittest.TestCase):
         assert isinstance(country, Country)
         assert country == test_country1
 
-    @patch.object(DatasetRepository, 'get_by_country')
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -39,11 +40,12 @@ class TestCountry(unittest.TestCase):
         datasets = test_country1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
-    @patch.object(GeographyRepository, 'get_by_country')
+    @patch.object(GeographyRepository, 'get_all')
     def test_get_geographies_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
@@ -52,9 +54,38 @@ class TestCountry(unittest.TestCase):
         geographies = test_country1.geographies
 
         # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
+
+    @patch.object(DatasetRepository, 'get_all')
+    def test_get_datasets_by_country(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_datasets
+
+        # When
+        datasets = test_country1.datasets
+
+        # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        assert isinstance(datasets, list)
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(CategoryRepository, 'get_all')
+    def test_get_categories_by_country(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_categories
+
+        # When
+        categories = test_country1.categories
+
+        # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        assert isinstance(categories, list)
+        assert isinstance(categories, CatalogList)
+        assert categories == test_categories
 
     def test_country_properties(self):
         # Given

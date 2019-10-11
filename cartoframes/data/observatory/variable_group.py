@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from .entity import CatalogEntity
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.constants import VARIABLE_GROUP_FILTER
 
 
 class VariableGroup(CatalogEntity):
@@ -11,7 +12,7 @@ class VariableGroup(CatalogEntity):
 
     @property
     def variables(self):
-        return get_variable_repo().get_by_variable_group(self.id)
+        return get_variable_repo().get_all({VARIABLE_GROUP_FILTER: self.id})
 
     @property
     def name(self):

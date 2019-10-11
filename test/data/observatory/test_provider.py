@@ -28,7 +28,7 @@ class TestProvider(unittest.TestCase):
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    @patch.object(DatasetRepository, 'get_by_provider')
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_provider(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -37,6 +37,7 @@ class TestProvider(unittest.TestCase):
         datasets = test_provider1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'provider_id': test_provider1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets

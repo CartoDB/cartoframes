@@ -33,7 +33,7 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    @patch.object(DatasetRepository, 'get_by_geography')
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_geography(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -42,6 +42,7 @@ class TestGeography(unittest.TestCase):
         datasets = test_geography1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'geography_id': test_geography1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets

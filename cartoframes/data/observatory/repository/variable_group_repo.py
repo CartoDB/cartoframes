@@ -19,9 +19,6 @@ class VariableGroupRepository(EntityRepository):
         super(VariableGroupRepository, self).__init__(_VARIABLE_GROUP_ID_FIELD, _ALLOWED_FILTERS,
                                                       _VARIABLE_GROUP_SLUG_FIELD)
 
-    def get_by_dataset(self, dataset_id):
-        return self._get_filtered_entities({DATASET_FILTER: dataset_id})
-
     @classmethod
     def _get_entity_class(cls):
         from cartoframes.data.observatory.variable_group import VariableGroup
