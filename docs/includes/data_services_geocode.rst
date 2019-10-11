@@ -199,3 +199,17 @@ for example:
     dataframe = pandas.read_csv('my_data')
     dataframe = Geocode().geocode(dataframe, 'address').data
     dataframe.to_csv('my_data')
+
+As an alternative you can use the ``cached`` option to store geocoding results in a CARTO table
+and reuse them in later geocodings. The parameter is the name of the table used to cache the results,
+and can be used with dataframe or query datasets.
+
+.. code:: python
+
+    dataframe = pandas.read_csv('my_data')
+    dataframe = Geocode().geocode(dataframe, 'address', cached='my_data').data
+
+If you execute the previous code multiple times it will only spend credits on the first geocoding;
+later ones will reuse the results stored in the ``my_data`` table. This will require extra processing
+time. If the csv file should ever change, cached results will only be applied to unmodified
+records, and new geocoding will be performed only on new or changed records.
