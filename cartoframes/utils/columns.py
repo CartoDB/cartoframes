@@ -25,6 +25,7 @@ class Column(object):
                       'REFERENCES', 'RIGHT', 'SELECT', 'SESSION_USER', 'SIMILAR', 'SOME', 'SYMMETRIC', 'TABLE', 'THEN',
                       'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
                       'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
+    NORMALIZED_GEOM_COL_NAME = 'the_geom'
 
     @staticmethod
     def from_sql_api_fields(sql_api_fields):
@@ -94,12 +95,12 @@ class DataframeColumnInfo(object):
             self.database_type = self._db_column_type(geom_column, geom_type, dtype)
         else:
             self.dataframe = None
-            self.database = 'the_geom'
+            self.database = Column.NORMALIZED_GEOM_COL_NAME
             self.database_type = 'geometry(Point, 4326)'
 
     def _database_column_name(self, geom_column):
         if geom_column and self.dataframe == geom_column:
-            normalized_name = 'the_geom'
+            normalized_name = Column.NORMALIZED_GEOM_COL_NAME
         else:
             normalized_name = normalize_name(self.dataframe)
 
@@ -155,7 +156,16 @@ class DataframeColumnsInfo(object):
         return columns
 
     def _filter_column(self, column):
-        return column.lower() in Column.FORBIDDEN_COLUMN_NAMES or (self.with_lnglat and column == self.geom_column)
+        return (
+            column.lower() in Column.FORBIDDEN_COLUMN_NAMES
+            or (self.with_lnglat and column == self.geom_column)
+            or (
+                # Exclude duplicated geom columns when the geometry column (normalized)
+                # collides when another column named as the normalized geometry.
+                column == Column.NORMALIZED_GEOM_COL_NAME and self.geom_column
+                and self.geom_column != Column.NORMALIZED_GEOM_COL_NAME
+            )
+        )
 
     def _get_geom_col_name(self):
         geom_col = getattr(self.df, '_geometry_column_name', None)

@@ -27,7 +27,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -40,11 +40,11 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
-        datasets = repo.get_all(credentials)
+        datasets = repo.get_all(credentials=credentials)
 
         # Then
         mocked_set_user_credentials.assert_called_once_with(credentials)
-        mocked_get_datasets.assert_called_once_with(None, None)
+        mocked_get_datasets.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -58,13 +58,13 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert datasets is None
 
     @patch.object(RepoClient, 'get_datasets')
     def test_get_by_id(self, mocked_repo):
         # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        mocked_repo.return_value = [db_dataset1]
         requested_id = db_dataset1['id']
         repo = DatasetRepository()
 
@@ -72,7 +72,7 @@ class TestDatasetRepo(unittest.TestCase):
         dataset = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert dataset == test_dataset1
 
     @patch.object(RepoClient, 'get_datasets')
@@ -87,6 +87,62 @@ class TestDatasetRepo(unittest.TestCase):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_datasets')
+    def test_get_by_slug(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1]
+        requested_slug = db_dataset1['slug']
+        repo = DatasetRepository()
+
+        # When
+        dataset = repo.get_by_id(requested_slug)
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert dataset == test_dataset1
+
+    @patch.object(RepoClient, 'get_datasets')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        repo = DatasetRepository()
+
+        # When
+        datasets = repo.get_by_id_list([db_dataset1['id'], db_dataset2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_dataset1['id'], db_dataset2['id']]})
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
+    def test_get_by_slug_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        repo = DatasetRepository()
+
+        # When
+        datasets = repo.get_by_id_list([db_dataset1['slug'], db_dataset2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': [db_dataset1['slug'], db_dataset2['slug']]})
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
+    def test_get_by_slug_and_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        repo = DatasetRepository()
+
+        # When
+        datasets = repo.get_by_id_list([db_dataset1['id'], db_dataset2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_dataset1['id']], 'slug': [db_dataset2['slug']]})
+        assert isinstance(datasets, CatalogList)
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
     def test_get_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1, db_dataset2]
@@ -97,7 +153,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_country(country_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_id', country_code)
+        mocked_repo.assert_called_once_with({'country_id': country_code})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -112,7 +168,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_category(category_id)
 
         # Then
-        mocked_repo.assert_called_once_with('category_id', category_id)
+        mocked_repo.assert_called_once_with({'category_id': category_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -127,7 +183,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_variable(variable_id)
 
         # Then
-        mocked_repo.assert_called_once_with('variable_id', variable_id)
+        mocked_repo.assert_called_once_with({'variable_id': variable_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -142,7 +198,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_by_geography(geography_id)
 
         # Then
-        mocked_repo.assert_called_once_with('geography_id', geography_id)
+        mocked_repo.assert_called_once_with({'geography_id': geography_id})
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
@@ -154,6 +210,7 @@ class TestDatasetRepo(unittest.TestCase):
 
         expected_datasets = CatalogList([Dataset({
             'id': 'dataset1',
+            'slug': None,
             'name': None,
             'description': None,
             'provider_id': None,
