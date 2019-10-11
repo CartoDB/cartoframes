@@ -136,7 +136,6 @@
           "file": "size_continuous_layer",
           "path": "visualization_layers"
         }, {
-        }, {
           "title": "Size Bins Layer",
           "desc":  "Size Bins Layer",
           "file": "size_bins_layer",
