@@ -39,11 +39,11 @@ class Dataset(CatalogEntity):
 
     @property
     def country(self):
-        return self.data['country_iso_code3']
+        return self.data['country_id']
 
     @property
     def language(self):
-        return self.data['language_iso_code3']
+        return self.data['lang']
 
     @property
     def geography(self):
@@ -72,6 +72,10 @@ class Dataset(CatalogEntity):
     @property
     def summary(self):
         return self.data['summary_jsonb']
+
+    @classmethod
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):
         """Download Dataset data.

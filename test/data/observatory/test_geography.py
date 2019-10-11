@@ -67,8 +67,8 @@ class TestGeography(unittest.TestCase):
         assert geography_id == db_geography1['id']
         assert name == db_geography1['name']
         assert description == db_geography1['description']
-        assert country == db_geography1['country_iso_code3']
-        assert language == db_geography1['language_iso_code3']
+        assert country == db_geography1['country_id']
+        assert language == db_geography1['lang']
         assert provider == db_geography1['provider_id']
         assert geom_coverage == db_geography1['geom_coverage']
         assert update_frequency == db_geography1['update_frequency']
@@ -106,7 +106,7 @@ class TestGeography(unittest.TestCase):
         geography_repr = repr(geography)
 
         # Then
-        assert geography_repr == 'Geography({id})'.format(id=db_geography1['id'])
+        assert geography_repr == "<Geography('{id}')>".format(id=db_geography1['slug'])
 
     def test_geography_is_printed_with_classname(self):
         # Given
@@ -139,8 +139,8 @@ class TestGeography(unittest.TestCase):
         categories_str = str(geographies)
 
         # Then
-        assert categories_str == '[Geography({id1}), Geography({id2})]' \
-                                 .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_str == "[<Geography('{id1}')>, <Geography('{id2}')>]" \
+                                 .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     def test_geography_list_is_represented_with_ids(self):
         # Given
@@ -150,8 +150,8 @@ class TestGeography(unittest.TestCase):
         categories_repr = repr(geographies)
 
         # Then
-        assert categories_repr == '[Geography({id1}), Geography({id2})]'\
-                                  .format(id1=db_geography1['id'], id2=db_geography2['id'])
+        assert categories_repr == "[<Geography('{id1}')>, <Geography('{id2}')>]"\
+                                  .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
     @patch.object(GeographyRepository, 'get_by_id')
     def test_get_geography_by_id(self, mocked_repo):

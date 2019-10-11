@@ -34,8 +34,12 @@ class CatalogEntity(ABC):
         return cls.entity_repo.get_by_id(id_)
 
     @classmethod
-    def get_all(cls):
-        return cls.entity_repo.get_all()
+    def get_all(cls, filters=None):
+        return cls.entity_repo.get_all(filters)
+
+    @classmethod
+    def get_list(cls, id_list):
+        return cls.entity_repo.get_by_id_list(id_list)
 
     def to_series(self):
         return pd.Series(self.data)
@@ -53,7 +57,13 @@ class CatalogEntity(ABC):
         return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
     def __repr__(self):
-        return '{classname}({entity_id})'.format(classname=self.__class__.__name__, entity_id=self.id)
+        return "<{classname}('{entity_id}')>".format(classname=self.__class__.__name__, entity_id=self._get_print_id())
+
+    def _get_print_id(self):
+        if 'slug' in self.data.keys():
+            return self.data['slug']
+
+        return self.id
 
     def _download(self, credentials=None):
         credentials = _get_credentials(credentials)
@@ -80,6 +90,10 @@ def _get_credentials(credentials=None):
 
 def _get_bigquery_client(project, credentials):
     return BigQueryClient(project, credentials)
+
+
+def is_slug_value(id_value):
+    return len(id_value.split('.')) == 1
 
 
 class CatalogList(list):

@@ -9,6 +9,7 @@ import pandas as pd
 
 from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
+from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 
 HASH_COLUMN = 'carto_geocode_hash'
@@ -445,11 +446,6 @@ class Geocoding(Service):
 
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
-        if result_dataset.dataframe is not None and not table_name and not dry_run:
-            # The result is not a permanent table; remove cartodb_id if it wasn't present in the input
-            if 'cartodb_id' not in self.columns:
-                remove_column_from_dataframe(result_dataset.dataframe, 'cartodb_id')
-
         result = result_dataset
         if input_dataframe is not None:
             # Note that we return a dataframe whenever the input is dataframe,
@@ -461,6 +457,7 @@ class Geocoding(Service):
                 if result is None:
                     # but if not temporary we need to download it now
                     result = result_dataset.download()
+                result = geodataframe_from_dataframe(result)
 
         return self.result(result, metadata=result_info)
 

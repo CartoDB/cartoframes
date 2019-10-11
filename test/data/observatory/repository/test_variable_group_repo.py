@@ -25,7 +25,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
@@ -39,7 +39,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert variables_groups is None
 
     @patch.object(RepoClient, 'get_variables_groups')
@@ -53,7 +53,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variable_group = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
@@ -69,6 +69,62 @@ class TestVariableGroupRepo(unittest.TestCase):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_variables_groups')
+    def test_get_by_slug(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable_group1]
+        requested_slug = db_variable_group1['slug']
+        repo = VariableGroupRepository()
+
+        # When
+        variable = repo.get_by_id(requested_slug)
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert variable == test_variable_group1
+
+    @patch.object(RepoClient, 'get_variables_groups')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable_group1, db_variable_group2]
+        repo = VariableGroupRepository()
+
+        # When
+        variable_groups = repo.get_by_id_list([db_variable_group1['id'], db_variable_group2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_variable_group1['id'], db_variable_group2['id']]})
+        assert isinstance(variable_groups, CatalogList)
+        assert variable_groups == test_variables_groups
+
+    @patch.object(RepoClient, 'get_variables_groups')
+    def test_get_by_slug_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable_group1, db_variable_group2]
+        repo = VariableGroupRepository()
+
+        # When
+        variable_groups = repo.get_by_id_list([db_variable_group1['slug'], db_variable_group2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'slug': [db_variable_group1['slug'], db_variable_group2['slug']]})
+        assert isinstance(variable_groups, CatalogList)
+        assert variable_groups == test_variables_groups
+
+    @patch.object(RepoClient, 'get_variables_groups')
+    def test_get_by_slug_and_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable_group1, db_variable_group2]
+        repo = VariableGroupRepository()
+
+        # When
+        variable_groups = repo.get_by_id_list([db_variable_group1['id'], db_variable_group2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_variable_group1['id']], 'slug': [db_variable_group2['slug']]})
+        assert isinstance(variable_groups, CatalogList)
+        assert variable_groups == test_variables_groups
+
+    @patch.object(RepoClient, 'get_variables_groups')
     def test_get_by_dataset(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable_group1, db_variable_group2]
@@ -79,7 +135,7 @@ class TestVariableGroupRepo(unittest.TestCase):
         variables_groups = repo.get_by_dataset(dataset_id)
 
         # Then
-        mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        mocked_repo.assert_called_once_with({'dataset_id': dataset_id})
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
@@ -91,6 +147,7 @@ class TestVariableGroupRepo(unittest.TestCase):
 
         expected_variables_groups = CatalogList([VariableGroup({
             'id': 'variable_group1',
+            'slug': None,
             'name': None,
             'dataset_id': None,
             'starred': None
