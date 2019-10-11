@@ -59,20 +59,6 @@ class TestCountry(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-    @patch.object(DatasetRepository, 'get_all')
-    def test_get_datasets_by_country(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_datasets
-
-        # When
-        datasets = test_country1.datasets
-
-        # Then
-        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
-        assert isinstance(datasets, list)
-        assert isinstance(datasets, CatalogList)
-        assert datasets == test_datasets
-
     @patch.object(CategoryRepository, 'get_all')
     def test_get_categories_by_country(self, mocked_repo):
         # Given
