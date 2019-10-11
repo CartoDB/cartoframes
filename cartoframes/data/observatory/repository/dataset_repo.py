@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
@@ -46,6 +48,9 @@ class DatasetRepository(object):
 
     @staticmethod
     def _to_datasets(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.dataset import Datasets
 
         return Datasets(DatasetRepository._to_dataset(result) for result in results)

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
@@ -31,6 +33,9 @@ class CategoryRepository(object):
 
     @staticmethod
     def _to_categories(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.category import Categories
 
         return Categories([CategoryRepository._to_category(result) for result in results])

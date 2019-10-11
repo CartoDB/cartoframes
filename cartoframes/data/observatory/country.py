@@ -1,5 +1,6 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import EntitiesList, SingleEntity
 from .repository.geography_repo import get_geography_repo
 from .repository.country_repo import get_country_repo
 from .repository.dataset_repo import get_dataset_repo
@@ -7,53 +8,27 @@ from .repository.dataset_repo import get_dataset_repo
 _COUNTRY_ID_FIELD = 'country_iso_code3'
 
 
-class Country(pd.Series):
+class Country(SingleEntity):
 
-    @property
-    def _constructor(self):
-        return Country
+    id_field = _COUNTRY_ID_FIELD
+    entity_repo = get_country_repo()
 
-    @property
-    def _constructor_expanddim(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Countries
-
-    @staticmethod
-    def get_by_id(iso_code3):
-        return get_country_repo().get_by_id(iso_code3)
 
     def datasets(self):
-        return get_dataset_repo().get_by_country(self[_COUNTRY_ID_FIELD])
+        return get_dataset_repo().get_by_country(self._get_id())
 
     def geographies(self):
-        return get_geography_repo().get_by_country(self[_COUNTRY_ID_FIELD])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
+        return get_geography_repo().get_by_country(self._get_id())
 
 
-class Countries(pd.DataFrame):
+class Countries(EntitiesList):
 
-    @property
-    def _constructor(self):
-        return Countries
+    id_field = _COUNTRY_ID_FIELD
+    entity_repo = get_country_repo()
 
-    @property
-    def _constructor_sliced(self):
+    @classmethod
+    def _get_single_entity_class(cls):
         return Country
-
-    @staticmethod
-    def get_all():
-        return get_country_repo().get_all()
-
-    @staticmethod
-    def get_by_id(iso_code3):
-        return Country.get_by_id(iso_code3)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other

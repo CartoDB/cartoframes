@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from cartoframes.exceptions import DiscoveryException
 from .repo_client import RepoClient
 
@@ -34,6 +36,9 @@ class GeographyRepository(object):
 
     @staticmethod
     def _to_geographies(results):
+        if len(results) == 0:
+            return None
+
         from cartoframes.data.observatory.geography import Geographies
 
         return Geographies(GeographyRepository._to_geography(result) for result in results)

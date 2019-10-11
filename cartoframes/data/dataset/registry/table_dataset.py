@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from warnings import warn
 
 from carto.exceptions import CartoException, CartoRateLimitException
@@ -48,14 +50,19 @@ class TableDataset(BaseDataset):
         """Compute the geometry type from the data"""
         return self._get_geom_type()
 
-    def get_table_column_names(self, exclude=None):
-        """Get column names and types from a table"""
+    def get_column_names(self, exclude=None):
+        """Get column names from a table"""
         columns = [c.name for c in self._get_table_columns()]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the table"""
+        result = self._context.execute_query("SELECT COUNT(*) FROM {table}".format(table=self.table_name))
+        return result.get('rows')[0].get('count')
 
     def _unsync(self):
         self._dataset_info = None

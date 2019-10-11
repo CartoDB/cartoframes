@@ -1,55 +1,34 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import SingleEntity, EntitiesList
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.variable_group_repo import get_variable_group_repo
 
 _DATASET_ID_FIELD = 'id'
 
 
-class Dataset(pd.Series):
+class Dataset(SingleEntity):
 
-    @property
-    def _constructor(self):
-        return Dataset
+    id_field = _DATASET_ID_FIELD
+    entity_repo = get_dataset_repo()
 
-    @property
-    def _constructor_expanddim(self):
+    @classmethod
+    def _get_entities_list_class(cls):
         return Datasets
-
-    @staticmethod
-    def get_by_id(dataset_id):
-        return get_dataset_repo().get_by_id(dataset_id)
 
     def variables(self):
-        return get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD])
+        return get_variable_repo().get_by_dataset(self._get_id())
 
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
+    def variables_groups(self):
+        return get_variable_group_repo().get_by_dataset(self._get_id())
 
 
-class Datasets(pd.DataFrame):
+class Datasets(EntitiesList):
 
-    @property
-    def _constructor(self):
-        return Datasets
+    id_field = _DATASET_ID_FIELD
+    entity_repo = get_dataset_repo()
 
-    @property
-    def _constructor_sliced(self):
+    @classmethod
+    def _get_single_entity_class(cls):
         return Dataset
-
-    @staticmethod
-    def get_all():
-        return get_dataset_repo().get_all()
-
-    @staticmethod
-    def get_by_id(dataset_id):
-        return Dataset.get_by_id(dataset_id)
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other

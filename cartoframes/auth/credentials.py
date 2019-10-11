@@ -1,10 +1,17 @@
-"""Credentials management for cartoframes usage."""
+"""Credentials management for CARTOframes usage."""
 
 import os
 import sys
 import json
 import appdirs
 import warnings
+
+from carto.exceptions import CartoException
+from carto.auth import APIKeyAuthClient
+from carto.do_token import DoTokenManager
+
+from ..__version__ import __version__
+
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
 else:
@@ -18,16 +25,18 @@ class Credentials(object):
     """Credentials class for managing and storing user CARTO credentials. The
     arguments are listed in order of precedence: :obj:`Credentials` instances
     are first, `key` and `base_url`/`username` are taken next, and
-    `config_file` (if given) is taken last. If no arguments are passed, then
-    there will be an attempt to retrieve credentials from a previously saved
-    session. One of the above scenarios needs to be met to successfully
+    `config_file` (if given) is taken last. The config file is `cartocreds.json`
+    by default. If no arguments are passed, then there will be an attempt to
+    retrieve credentials from a previously saved session.
+    One of the above scenarios needs to be met to successfully
     instantiate a :obj:`Credentials` object.
 
     Args:
-        api_key (str, optional): API key of user's CARTO account
+        api_key (str, optional): API key of user's CARTO account. If the dataset is
+            public, it can be set to 'default_public'.
         username (str, optional): Username of CARTO account
         base_url (str, optional): Base URL used for API calls. This is usually
-            of the form `https://eschbacher.carto.com/` for user `eschbacher`.
+            of the form `https://johnsmith.carto.com/` for user `johnsmith`.
             On premises installations (and others) have a different URL
             pattern.
         session (requests.Session, optional): requests session. See `requests
@@ -37,10 +46,13 @@ class Credentials(object):
 
     Example:
 
+        Setting basic credentials:
+
         .. code::
 
             from cartoframes.auth import Credentials
-            credentials = Credentials(username='eschbacher', api_key='abcdefg')
+            credentials = Credentials(username='johnsmith', api_key='abcdefg')
+
     """
 
     def __init__(self, username=None, api_key='default_public', base_url=None, session=None):
@@ -51,24 +63,12 @@ class Credentials(object):
         self._username = username
         self.base_url = base_url or self._base_url_from_username()
         self._session = session
+        self._api_key_auth_client = None
 
         self._norm_credentials()
 
-    @classmethod
-    def from_file(cls, config_file=None, session=None):
-        """Retrives credentials from a file. Defaults to the user config directory"""
-        with open(config_file or _DEFAULT_PATH, 'r') as f:
-            credentials = json.load(f)
-
-        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
-
-    @classmethod
-    def from_credentials(cls, credentials):
-        """Retrives credentials from another Credentials object"""
-        if isinstance(credentials, Credentials):
-            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
-
-        raise ValueError('`credentials` must be a Credentials class instance')
+    def __eq__(self, obj):
+        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
     def __repr__(self):
         return ("Credentials(username='{username}', "
@@ -76,9 +76,6 @@ class Credentials(object):
                 "base_url='{base_url}')").format(username=self._username,
                                                  api_key=self._api_key,
                                                  base_url=self._base_url)
-
-    def __eq__(self, obj):
-        return self._api_key == obj._api_key and self._username == obj._username and self._base_url == obj._base_url
 
     @property
     def api_key(self):
@@ -129,19 +126,27 @@ class Credentials(object):
         """Set session"""
         self._session = session
 
-    def _norm_credentials(self):
-        """Standardize credentials"""
-        if self._base_url:
-            self._base_url = self._base_url.strip('/')
+    @classmethod
+    def from_file(cls, config_file=None, session=None):
+        """Retrives credentials from a file. Defaults to the user config directory"""
+        with open(config_file or _DEFAULT_PATH, 'r') as f:
+            credentials = json.load(f)
 
-    def _base_url_from_username(self):
-        return 'https://{}.carto.com/'.format(self._username)
+        return cls(credentials.get('username'), credentials.get('api_key'), credentials.get('base_url'), session)
+
+    @classmethod
+    def from_credentials(cls, credentials):
+        """Retrives credentials from another Credentials object"""
+        if isinstance(credentials, Credentials):
+            return cls(credentials.username, credentials.api_key, credentials.base_url, credentials.session)
+
+        raise ValueError('`credentials` must be a Credentials class instance')
 
     def save(self, config_file=None):
         """Saves current user credentials to user directory.
 
         Args:
-            config_loc (str, optional): Location where credentials are to be
+            config_file (str, optional): Location where credentials are to be
                 stored. If no argument is provided, it will be send to the
                 default location.
 
@@ -149,14 +154,14 @@ class Credentials(object):
 
             .. code::
 
-                from cartoframes import Credentials
-                credentials = Credentials(username='eschbacher', api_key='abcdefg')
+                from cartoframes.auth import Credentials
+                credentials = Credentials(username='johnsmith', api_key='abcdefg')
                 credentials.save()  # save to default location
 
             .. code::
 
-                from cartoframes import Credentials
-                credentials = Credentials(username='eschbacher', api_key='abcdefg')
+                from cartoframes.auth import Credentials
+                credentials = Credentials(username='johnsmith', api_key='abcdefg')
                 credentials.save('path/to/credentials/file')
         """
 
@@ -170,27 +175,63 @@ class Credentials(object):
         with open(config_file, 'w') as f:
             json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, f)
 
+    @classmethod
     def delete(self, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
-        file is specified, it deletes the default user credential file.
+        file is specified, it deletes the default user credential file
+        (`cartocreds.json`)
 
         Args:
-            config_file (str): Path to configuration file. Defaults to delete
-                the user default location if `None`.
+
+            config_file (str): Path to configuration file.
+                Defaults to delete the user default location if `None`.
 
         .. Tip::
 
             To see if there is a default user credential file stored, do the
-            following::
+            following:
 
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
-                Credentials(username='eschbacher', api_key='abcdefg',
-                    base_url='https://eschbacher.carto.com/')
+                Credentials(username='johnsmith', api_key='abcdefg',
+                    base_url='https://johnsmith.carto.com/')
+
         """
+
         path_to_remove = config_file or _DEFAULT_PATH
+
         try:
             os.remove(path_to_remove)
             warnings.warn('Credentials at {} successfully removed.'.format(path_to_remove))
         except OSError:
             warnings.warn('No credential file found at {}.'.format(path_to_remove))
+
+    def get_do_token(self):
+        """Returns the Data Observatory v2 token"""
+
+        do_token_manager = DoTokenManager(self.get_api_key_auth_client())
+        token = do_token_manager.get()
+        if not token:
+            raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
+
+        return token.access_token
+
+    def get_api_key_auth_client(self):
+        if not self._api_key_auth_client:
+            self._api_key_auth_client = APIKeyAuthClient(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                session=self.session,
+                client_id='cartoframes_{}'.format(__version__),
+                user_agent='cartoframes_{}'.format(__version__)
+            )
+
+        return self._api_key_auth_client
+
+    def _norm_credentials(self):
+        """Standardize credentials"""
+        if self._base_url:
+            self._base_url = self._base_url.strip('/')
+
+    def _base_url_from_username(self):
+        return 'https://{}.carto.com/'.format(self._username)
