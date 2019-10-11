@@ -1,55 +1,91 @@
-import pandas as pd
+from __future__ import absolute_import
 
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.variable_group_repo import get_variable_group_repo
 
-_DATASET_ID_FIELD = 'id'
 
-
-class Dataset(pd.Series):
-
-    @property
-    def _constructor(self):
-        return Dataset
+class Dataset(CatalogEntity):
+    entity_repo = get_dataset_repo()
 
     @property
-    def _constructor_expanddim(self):
-        return Datasets
-
-    @staticmethod
-    def get_by_id(dataset_id):
-        return get_dataset_repo().get_by_id(dataset_id)
-
     def variables(self):
-        return get_variable_repo().get_by_dataset(self[_DATASET_ID_FIELD])
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Datasets(pd.DataFrame):
+        return get_variable_repo().get_by_dataset(self.id)
 
     @property
-    def _constructor(self):
-        return Datasets
+    def variables_groups(self):
+        return get_variable_group_repo().get_by_dataset(self.id)
 
     @property
-    def _constructor_sliced(self):
-        return Dataset
+    def name(self):
+        return self.data['name']
 
-    @staticmethod
-    def get_all():
-        return get_dataset_repo().get_all()
+    @property
+    def description(self):
+        return self.data['description']
 
-    @staticmethod
-    def get_by_id(dataset_id):
-        return Dataset.get_by_id(dataset_id)
+    @property
+    def provider(self):
+        return self.data['provider_id']
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @property
+    def category(self):
+        return self.data['category_id']
 
-    def __ne__(self, other):
-        return not self == other
+    @property
+    def data_source(self):
+        return self.data['data_source_id']
+
+    @property
+    def country(self):
+        return self.data['country_id']
+
+    @property
+    def language(self):
+        return self.data['lang']
+
+    @property
+    def geography(self):
+        return self.data['geography_id']
+
+    @property
+    def temporal_aggregation(self):
+        return self.data['temporal_aggregation']
+
+    @property
+    def time_coverage(self):
+        return self.data['time_coverage']
+
+    @property
+    def update_frequency(self):
+        return self.data['update_frequency']
+
+    @property
+    def version(self):
+        return self.data['version']
+
+    @property
+    def is_public_data(self):
+        return self.data['is_public_data']
+
+    @property
+    def summary(self):
+        return self.data['summary_jsonb']
+
+    @classmethod
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
+
+    def download(self, credentials=None):
+        """Download Dataset data.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+              credentials of CARTO user account. If not provided,
+              a default credentials (if set with :py:meth:`set_default_credentials
+              <cartoframes.auth.set_default_credentials>`) will be attempted to be
+              used.
+        """
+
+        return self._download(credentials)
