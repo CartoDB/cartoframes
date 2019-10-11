@@ -1,5 +1,6 @@
 from copy import deepcopy
 from warnings import warn
+import time
 
 from carto.kuvizs import KuvizManager
 from carto.exceptions import CartoException
@@ -87,7 +88,7 @@ class KuvizPublisher(object):
                                if not layer.source.dataset.is_public()]
 
         if len(non_public_datasets) > 0:
-            api_key_name = '{}_api_key'.format(name)
+            api_key_name = '{}_{}_api_key'.format(name, int(time.time() * 1000))
             auth_api_client = AuthAPIClient(self._credentials)
             self._maps_api_key = auth_api_client.create_api_key(non_public_datasets, api_key_name, ['maps'])
 
