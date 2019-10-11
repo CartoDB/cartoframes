@@ -67,6 +67,8 @@ class KuvizPublisher(object):
             if layer.source.dataset.is_local():
                 table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx))
                 layer = self._sync_layer(layer, table_name)
+            else:
+                layer = deepcopy(layer)
             self._layers.append(layer)
 
     def _sync_layer(self, layer, table_name):

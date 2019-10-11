@@ -88,13 +88,15 @@ class TestKuvizPublisher(unittest.TestCase):
         _get_kuviz_manager_mock.return_value = None
         _sync_layer.return_value = Layer(Dataset('fake_table', self.credentials))
 
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
+        source_1 = Source(Dataset('fake_table_2', self.credentials))
         layer_1 = Layer(source_1)
-        vmap = Map(layer_1)
+        vmap = Map([layer_1])
 
         kuviz_publisher = KuvizPublisher(None)
         kuviz_publisher.set_layers(vmap.layers, 'fake_name', 'fake_table_name')
+
         self.assertEqual(len(kuviz_publisher._layers), len(vmap.layers))
+        self.assertNotEqual(kuviz_publisher._layers, vmap.layers)
 
         vmap.layers = []
         self.assertNotEqual(len(kuviz_publisher._layers), len(vmap.layers))
