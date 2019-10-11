@@ -301,8 +301,6 @@ class Map(object):
                 tmap.publish('Custom Map Title')
 
         """
-        table_name = table_name or '{}_table'.format(name)
-
         self._publisher = _get_publisher(table_name, credentials)
         self._publisher.set_layers(self.layers, name, table_name)
 
