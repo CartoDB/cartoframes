@@ -5,9 +5,9 @@ from cartoframes.data import Dataset
 
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 TOKEN_MOCK = '1234'
 
