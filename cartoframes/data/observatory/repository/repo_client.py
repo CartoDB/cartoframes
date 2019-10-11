@@ -5,6 +5,10 @@ from ....data import Dataset
 from ...clients import SQLClient
 from ....auth import Credentials, get_default_credentials
 import geopandas as gpd
+from ...clients import SQLClient
+from ....auth import Credentials
+from ..utils import get_subscription_ids
+
 
 class RepoClient(object):
 
@@ -16,7 +20,7 @@ class RepoClient(object):
         self.client = SQLClient(self._do_credentials)
 
     def set_user_credentials(self, credentials):
-        self._user_credentials = credentials or get_default_credentials()
+        self._user_credentials = credentials
 
     def get_countries(self, filters=None):
         query = 'SELECT DISTINCT t.country_id AS id FROM datasets_public t'
@@ -44,6 +48,13 @@ class RepoClient(object):
 
     def get_geographies(self, filters=None):
         query = 'SELECT t.* FROM geographies_public t'
+
+        extra_condition = []
+        if self._user_credentials is not None:
+            ids = get_subscription_ids(self._user_credentials)
+            if len(ids) > 0:
+                extra_condition.append('t.id IN ({})'.format(ids))
+
         return self._run_query(query, filters)
 
     def get_geographies_joined_datasets(self, filters=None):
@@ -55,7 +66,9 @@ class RepoClient(object):
 
         extra_condition = []
         if self._user_credentials is not None:
-            extra_condition.append('t.id IN ({})'.format(self._get_purchased_dataset_ids()))
+            ids = get_subscription_ids(self._user_credentials)
+            if len(ids) > 0:
+                extra_condition.append('t.id IN ({})'.format(ids))
 
         return self._run_query(query, filters, extra_condition)
 

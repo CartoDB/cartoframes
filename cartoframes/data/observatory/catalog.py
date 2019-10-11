@@ -5,7 +5,10 @@ from .category import Category
 from .country import Country
 from .geography import Geography
 from .dataset import Dataset
+from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
+
+from ...auth import Credentials, get_default_credentials
 
 
 class Catalog(object):
@@ -114,21 +117,29 @@ class Catalog(object):
 
         self.filters = {}
 
-    def purchased_datasets(self, credentials=None):
-        """Get all the datasets in the Catalog
+    def subscriptions(self, credentials=None):
+        """Get all the subscriptions in the Catalog
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-                A :py:class:`Credentials <cartoframes.auth.Credentials>`
-                instance can be used in place of a `username`|`base_url` / `api_key` combination.
-                Only required for the purchased datasets.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
 
         """
 
-        return Dataset.get_all(self.filters, credentials)
+        _credentials = credentials or get_default_credentials()
+
+        if not isinstance(credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+
+        return Subscriptions(
+            Dataset.get_all(self.filters, _credentials),
+            Geography.get_all(self.filters, _credentials)
+        )
 
     def datasets_by_geography(self, filter_dataset):
         """Get all the datasets in the Catalog filtered 

@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.auth import Credentials
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
@@ -26,6 +27,23 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with(None)
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
+    @patch.object(RepoClient, 'set_user_credentials')
+    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_geographies):
+        # Given
+        mocked_get_geographies.return_value = [db_geography1, db_geography2]
+        credentials = Credentials('user', '1234')
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_all(credentials=credentials)
+
+        # Then
+        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_get_geographies.assert_called_once_with(None)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 

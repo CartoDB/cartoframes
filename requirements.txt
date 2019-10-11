@@ -1,2 +1,2 @@
+-e git+https://github.com/CartoDB/carto-python.git@integrate-subscriptions#egg=integrate-subscriptions
 .
--e git+https://github.com/CartoDB/carto-python.git#egg=master

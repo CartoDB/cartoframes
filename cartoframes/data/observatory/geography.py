@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
+from .utils import display_subscription_form
 
 
 class Geography(CatalogEntity):
@@ -53,15 +54,32 @@ class Geography(CatalogEntity):
     def summary(self):
         return self.data['summary_jsonb']
 
+    @classmethod
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
+
     def download(self, credentials=None):
         """Download Geography data.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
+
+    def subscribe(self, credentials=None):
+        """Subscribe to a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        display_subscription_form(self.id, _credentials)

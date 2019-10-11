@@ -10,7 +10,7 @@ import geopandas as gpd
 import pandas as pd
 from cartoframes.data import Dataset as CFDataset
 from shapely import wkt
-
+from .utils import display_subscription_form
 
 class Dataset(CatalogEntity):
     entity_repo = get_dataset_repo()
@@ -88,14 +88,14 @@ class Dataset(CatalogEntity):
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will be attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
 
+<<<<<<< HEAD
 
     @classmethod
     def datasets_by_geography(cls, filter_dataset):
@@ -131,3 +131,18 @@ class Dataset(CatalogEntity):
         return cls.entity_repo.get_datasets_for_geographies(matched_boundaries)
         
        
+=======
+    def subscribe(self, credentials=None):
+        """Subscribe to a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        display_subscription_form(self.id, _credentials)
+>>>>>>> ca20f1318a53ab8e3bb513450f583976eee0b6f4
