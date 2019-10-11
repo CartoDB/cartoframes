@@ -4,31 +4,6 @@
   },
   "categories": [
     {
-      "title": "Map Configuration",
-      "samples": [
-        {
-          "title": "Change Default Basemap",
-          "desc": "Change the default CARTO basemap",
-          "file": "change_default_carto_basemap",
-          "path": "map_configuration"
-        }, {
-          "title": "Set Custom Viewport",
-          "desc": "Set a custom viewport",
-          "file": "custom_viewport",
-          "path": "map_configuration"
-        }, {
-          "title": "Set Background Color",
-          "desc": "Set a background color",
-          "file": "solid_color_background",
-          "path": "map_configuration"
-        }, {
-          "title": "Switch to Dark Theme",
-          "desc": "Switch to the dark theme",
-          "file": "dark_theme",
-          "path": "map_configuration"
-        }
-      ]
-      }, {
       "title": "Data Workflows",
       "samples": [{
           "title": "Create Dataset from .csv",
@@ -105,6 +80,31 @@
           "desc":  "Add a data driven style to a layer",
           "file": "add_data_driven_style_layer",
           "path": "layers"
+        }
+      ]
+    }, {
+      "title": "Map Configuration",
+      "samples": [
+        {
+          "title": "Change Default Basemap",
+          "desc": "Change the default CARTO basemap",
+          "file": "change_default_carto_basemap",
+          "path": "map_configuration"
+        }, {
+          "title": "Set Custom Viewport",
+          "desc": "Set a custom viewport",
+          "file": "custom_viewport",
+          "path": "map_configuration"
+        }, {
+          "title": "Set Background Color",
+          "desc": "Set a background color",
+          "file": "solid_color_background",
+          "path": "map_configuration"
+        }, {
+          "title": "Switch to Dark Theme",
+          "desc": "Switch to the dark theme",
+          "file": "dark_theme",
+          "path": "map_configuration"
         }
       ]
     }, {
