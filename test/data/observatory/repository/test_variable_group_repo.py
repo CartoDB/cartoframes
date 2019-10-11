@@ -43,6 +43,31 @@ class TestVariableGroupRepo(unittest.TestCase):
         assert variables_groups is None
 
     @patch.object(RepoClient, 'get_variables_groups')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable_group1, db_variable_group2]
+        repo = VariableGroupRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        variables_groups = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'dataset_id': 'carto-do.project.census2011'
+        })
+        assert variables_groups == test_variables_groups
+
+    @patch.object(RepoClient, 'get_variables_groups')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable_group1, db_variable_group2]
@@ -123,21 +148,6 @@ class TestVariableGroupRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with({'id': [db_variable_group1['id']], 'slug': [db_variable_group2['slug']]})
         assert isinstance(variable_groups, CatalogList)
         assert variable_groups == test_variables_groups
-
-    @patch.object(RepoClient, 'get_variables_groups')
-    def test_get_by_dataset(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_variable_group1, db_variable_group2]
-        dataset_id = 'dataset1'
-        repo = VariableGroupRepository()
-
-        # When
-        variables_groups = repo.get_by_dataset(dataset_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'dataset_id': dataset_id})
-        assert isinstance(variables_groups, CatalogList)
-        assert variables_groups == test_variables_groups
 
     @patch.object(RepoClient, 'get_variables_groups')
     def test_missing_fields_are_mapped_as_None(self, mocked_repo):

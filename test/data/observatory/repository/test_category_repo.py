@@ -43,6 +43,31 @@ class TestCategoryRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with(None)
         assert categories is None
 
+    @patch.object(RepoClient, 'get_categories_joined_datasets')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_category1, db_category2]
+        repo = CategoryRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        categories = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'country_id': 'usa'
+        })
+        assert categories == test_categories
+
+
     @patch.object(RepoClient, 'get_categories')
     def test_get_by_id(self, mocked_repo):
         # Given

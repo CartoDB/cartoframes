@@ -29,7 +29,7 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
-    @patch.object(VariableRepository, 'get_by_variable_group')
+    @patch.object(VariableRepository, 'get_all')
     def test_get_variables_by_variable_group(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
@@ -38,6 +38,7 @@ class TestVariableGroup(unittest.TestCase):
         variables = test_variable_group1.variables
 
         # Then
+        mocked_repo.assert_called_once_with({'variable_group_id': test_variable_group1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables

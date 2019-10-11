@@ -28,7 +28,7 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
-    @patch.object(DatasetRepository, 'get_by_variable')
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_variable(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -37,6 +37,7 @@ class TestVariable(unittest.TestCase):
         datasets = test_variable1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'variable_id': test_variable1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets

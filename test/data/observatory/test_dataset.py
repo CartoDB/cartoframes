@@ -36,7 +36,7 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset, Dataset)
         assert dataset == test_dataset1
 
-    @patch.object(VariableRepository, 'get_by_dataset')
+    @patch.object(VariableRepository, 'get_all')
     def test_get_variables_by_dataset(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
@@ -45,11 +45,12 @@ class TestDataset(unittest.TestCase):
         variables = test_dataset1.variables
 
         # Then
+        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
-    @patch.object(VariableGroupRepository, 'get_by_dataset')
+    @patch.object(VariableGroupRepository, 'get_all')
     def test_get_variables_groups_by_dataset(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables_groups
@@ -58,6 +59,7 @@ class TestDataset(unittest.TestCase):
         variables_groups = test_dataset1.variables_groups
 
         # Then
+        mocked_repo.assert_called_once_with({'dataset_id': test_dataset1.id})
         assert isinstance(variables_groups, list)
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
