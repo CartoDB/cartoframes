@@ -171,7 +171,6 @@
           "file": "color_category_legend",
           "path": "legends"
         }, {
-        }, {
           "title": "Color Bins Legend",
           "desc": "Color Bins Legend",
           "file": "color_bins_legend",
