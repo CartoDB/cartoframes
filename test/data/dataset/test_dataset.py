@@ -747,7 +747,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         dataset = DataFrameDataset(gdf)
         dataset.table_name = table_name
         result = dataset._create_table_query(dataframe_columns_info.columns)
-        import pdb; pdb.set_trace()
         self.assertEqual(result, expected_result)
 
     def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
