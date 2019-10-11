@@ -23,7 +23,8 @@ def fetch_subscriptions(credentials):
     return []
 
 
-def fetch_subscription_info(id, type):
+def fetch_subscription_info(id, type, credentials):
+    api_key_auth_client = credentials.get_api_key_auth_client()
     do_manager = DOSubscriptionInfoManager(api_key_auth_client)
     return do_manager.get(id, type)
     # TODO: should we return as a SubscriptionInfo instance?
@@ -37,11 +38,11 @@ def trigger_subscription(id, type, credentials):
 
 
 def _resource_to_dict(resource):
-    return {field:getattr(resource, field) for field in resource.fields}
+    return {field: getattr(resource, field) for field in resource.fields}
 
 
 def display_subscription_form(id, type, credentials):
-    info = fetch_subscription_info(id, type)
+    info = fetch_subscription_info(id, type, credentials)
 
     if is_ipython_notebook():
         display_subscription_form_notebook(id, type, _resource_to_dict(info), credentials)
