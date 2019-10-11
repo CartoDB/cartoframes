@@ -2,69 +2,67 @@
 
 This guide walks through the steps to publish a visualization and get a URL to share it. To do this, we'll need to use "CARTO custom visualizations", also known as **Kuviz**.
 
-Let's start by creating a default credentials.
+Let's start by creating a default credentials. You will need to use your `master API key` in the notebook in order to create a visualization, but it is not going to used in your visualization and your `mater API key` will not be shared:
+- The visualizations use `default public API key` when possible (if you use public datasets from your CARTO account).
+- If it is not possible, a `regular API key` is created with read only permissions of your data used in the map.
+
+You can get more info about API keys at https://carto.com/developers/auth-api/guides/types-of-API-Keys/
 
 ```py
-from cartoframes.auth import set_default_credentials
+from cartoframes.auth import Credentials, set_default_credentials
 
-set_default_credentials('your_carto_user')
+set_default_credentials(Credentials.from_file())
 ```
 
 ### Publish
 
-#### Case 1: using a synchronized and public table
+#### Case 1: public dataset from your CARTO account
 
-The 'publish' method uses 'default_public' by default. Therefore, I don't need to use my API Key in this case. Additionally, it's possible to publish a visualization with **password**.
-
-```py
-from cartoframes.viz import Map, Layer
-
-tmap = Map(Layer('public_table_name')) # -> Set here a table name from your account
-tmap.publish('cf_publish_case_1')
-tmap.publish('cf_publish_case_1_password', password="1234")
-```
-
-#### Case 2: using a synchronized and private table
-
-In this case it's mandatory to add the `maps_api_key` parameter in the publish method. You can get more info at [https://carto.com/developers/auth-api/guides/types-of-API-Keys/](https://carto.com/developers/auth-api/guides/types-of-API-Keys/). This is due to the `publish` method uses `default_public` by default, and the dataset is private.
-
-1. Go to https://your_carto_user.carto.com/your_apps URL
-2. Click on "New API Key"
-3. Give the API key a name
-4. Select the related dataset
-5. Save changes
-6. Use your new Maps API Key!
-
-![API Keys dashboard page](../../img/guides/publishing/publishing-1.png)
+As you are using a public table from your account, the publish method uses default public API key.
 
 ```py
 from cartoframes.viz import Map, Layer
 
-tmap = Map(Layer('private_table_name')) # -> Set here a table name from your account
-tmap.publish('cf_publish_case_2', maps_api_key='your_maps_api_key')
+public_data_map = Map(Layer('public_table_name')) # -> Set here a public table name from your account
+public_data_map.publish('public_data_map')
 ```
 
-#### Case 3: using a non-synchronized and private table
+#### Case 2: private dataset from your CARTO account
 
-If you try to publish a non synchronized dataset, you will get an **error**:
+```py
+from cartoframes.viz import Map, Layer
 
-> 'The map layers are not synchronized with CARTO. Please, use the `sync_data` before publishing the map'
+private_data_map = Map(Layer('private_table_name')) # -> Set here a private table name from your account
+private_data_map.publish('cf_publish_case_2')
+```
 
-As the error message says, we'll need to make a previous step synchronizing the data. Once it's been synchronized, as your new table will be private, you will need to create a Maps API key **with permissions** for your new private table from your CARTO dashboard or Auth API.
-
-Finally, we will be ready to publish the visualization!
+#### Case 3: local data
 
 ```py
 from cartoframes.viz import Map, Layer
 from cartoframes.data import Dataset
 
-ds = Dataset('private_table_name')
-ds.download()
+# getting a DataFrame from a table for the example
+# but you can try it with the DataFrame you wish
+ds = Dataset('rings') # -> Set here a table name from your account
+df = ds.download()
 
-tmap = Map(Layer(ds))
+# create the map with your DataFrame
+ds = Dataset(df)
+local_data_map = Map(Layer(ds))
 
-tmap.sync_data('private_table_name_sync')
-tmap.publish('cf_publish_case_2', maps_api_key='your_maps_api_key')
+local_data_map.publish('local_data_map')
+```
+
+### Publish with password
+
+In any of the previous cases, you could create the shared visualization with a password. You only need to add a password parameter in the publish method:
+
+```py
+from cartoframes.viz import Map, Layer
+
+tmap = Map(Layer('public_table_name'))
+public_data_map.publish('public_data_map_with_password', password="1234")
 ```
 
 ### Update
