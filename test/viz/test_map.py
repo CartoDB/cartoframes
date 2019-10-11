@@ -14,9 +14,9 @@ from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
 class TestMap(unittest.TestCase):
