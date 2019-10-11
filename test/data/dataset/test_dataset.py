@@ -14,7 +14,7 @@ from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
-from cartoframes.utils.geom_utils import setting_value_exception
+from cartoframes.utils.geom_utils import setting_value_exception, _load_wkt
 from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
@@ -23,7 +23,6 @@ from cartoframes.data.dataset.registry.table_dataset import TableDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 from cartoframes.lib import context
-from cartoframes.utils.columns import DataframeColumnsInfo
 
 try:
     from unittest.mock import Mock
@@ -724,6 +723,33 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         result = dataset._create_table_query(dataframe_columns_info.columns)
         self.assertEqual(result, expected_result)
 
+    def test_create_table_query_with_several_geometry_columns_prioritize_the_geom(self):
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        dataframe_columns_info = DataframeColumnsInfo(df, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (geom text, the_geom geometry(Point, 4326), geometry text)'.format(
+            table_name)
+
+        dataset = DataFrameDataset(df)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        self.assertEqual(result, expected_result)
+
+    def test_create_table_query_with_several_geometry_columns_and_geodataframe_prioritize_geometry(self):
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        from shapely.wkt import loads
+        df['geometry'] = df['geometry'].apply(loads)
+        gdf = gpd.GeoDataFrame(df, geometry='geometry')
+        dataframe_columns_info = DataframeColumnsInfo(gdf, None)
+        table_name = 'fake_table'
+        expected_result = 'CREATE TABLE {} (geom text, the_geom geometry(Point, 4326))'.format(table_name)
+
+        dataset = DataFrameDataset(gdf)
+        dataset.table_name = table_name
+        result = dataset._create_table_query(dataframe_columns_info.columns)
+        import pdb; pdb.set_trace()
+        self.assertEqual(result, expected_result)
+
     def test_dataset_upload_one_geometry_that_is_not_the_geom_uses_the_geom(self):
         table = 'fake_table'
         credentials = 'fake'
@@ -769,6 +795,25 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         expected_query = ("COPY {}(geom,the_geom,geometry,cartodb_id)"
                           " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)|0\n']
+
+        self.assertEqual(ds._strategy._context.query, expected_query)
+        self.assertEqual(list(ds._strategy._context.response), expected_data)
+
+    def test_dataset_upload_with_several_geometry_columns_and_geodataframe_prioritize_geometry(self):
+        table = 'fake_table'
+        credentials = 'fake'
+        df = pd.DataFrame([['POINT (0 0)', 'POINT (1 1)', 'POINT (2 2)']], columns=['geom', 'the_geom', 'geometry'])
+        from shapely.wkt import loads
+        df['geometry'] = df['geometry'].apply(loads)
+        gdf = gpd.GeoDataFrame(df, geometry='geometry')
+        ds = Dataset(gdf)
+
+        BaseDataset.exists = Mock(return_value=False)
+
+        ds.upload(table_name=table, credentials=credentials)
+
+        expected_query = "COPY {}(geom,the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_data = [b'POINT (0 0)|SRID=4326;POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
