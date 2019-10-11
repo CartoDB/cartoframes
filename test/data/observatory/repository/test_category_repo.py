@@ -67,7 +67,6 @@ class TestCategoryRepo(unittest.TestCase):
         })
         assert categories == test_categories
 
-
     @patch.object(RepoClient, 'get_categories')
     def test_get_by_id(self, mocked_repo):
         # Given
