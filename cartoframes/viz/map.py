@@ -309,7 +309,7 @@ class Map(object):
 
     def delete_publication(self):
         """Delete the published map Kuviz."""
-        self._publisher.delete()
+        return self._publisher.delete()
 
     def update_publication(self, name, password):
         """Update the published map Kuviz.
