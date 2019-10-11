@@ -7,6 +7,7 @@ import sys
 import json
 import warnings
 import pandas as pd
+import geopandas as gpd
 
 from carto.exceptions import CartoException
 
@@ -186,7 +187,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         # Isochrones
         result = iso.isochrones(df, [100, 1000], mode='car').data
-        self.assertTrue(isinstance(result, pd.DataFrame))
+        self.assertTrue(isinstance(result, gpd.GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
         self.assertTrue('the_geom' in result)
@@ -215,7 +216,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         # Isochrones
         result = iso.isochrones(df, [100, 1000], mode='car', table_name=table_name) .data
-        self.assertTrue(isinstance(result, pd.DataFrame))
+        self.assertTrue(isinstance(result, gpd.GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
         self.assertTrue('the_geom' in result)
@@ -362,7 +363,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
 
         # Isodistances
         result = iso.isodistances(df, [100, 1000], mode='car').data
-        self.assertTrue(isinstance(result, pd.DataFrame))
+        self.assertTrue(isinstance(result, gpd.GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)
         self.assertTrue('the_geom' in result)
