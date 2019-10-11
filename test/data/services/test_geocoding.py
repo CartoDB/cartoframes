@@ -603,7 +603,9 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
             df, cached=table_name, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 0)
         self.assertEqual(self.used_quota(gc), quota)
-        info = gc.geocode(df, cached=table_name, street='address', city='city', country={'value': 'Spain'}).metadata
+        gc_df, info = gc.geocode(df, cached=table_name, street='address', city='city', country={'value': 'Spain'})
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertIsNotNone(gc_df.the_geom)
         self.assertEqual(info.get('required_quota'), 0)
         self.assertEqual(self.used_quota(gc), quota)
 
@@ -613,8 +615,10 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
             df, cached=table_name, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 1)
         self.assertEqual(self.used_quota(gc), quota)
-        info = gc.geocode(
-            df, cached=table_name, street='address', city={'column': 'city'}, country={'value': 'Spain'}).metadata
+        gc_df, info = gc.geocode(
+            df, cached=table_name, street='address', city={'column': 'city'}, country={'value': 'Spain'})
+        self.assertTrue(isinstance(gc_df, pd.DataFrame))
+        self.assertIsNotNone(gc_df.the_geom)
         self.assertEqual(info.get('required_quota'), 1)
         quota += 1
         self.assertEqual(self.used_quota(gc), quota)

@@ -497,7 +497,9 @@ class Geocoding(Service):
                 input, street=street, city=city, state=state, country=country, table_name=table_name, dry_run=dry_run)
 
         tmp_table_name = self._new_temporary_table_name()
+        input_dataframe = False
         if isinstance(input, pd.DataFrame):
+            input_dataframe = True
             input = Dataset(input)
         else:
             if input.is_remote() and input.table_name:
@@ -519,10 +521,14 @@ class Geocoding(Service):
         sql_client.rename_table(tmp_table_name, table_name)
         # TODO: should remove the cartodb_id column from the result
         # TODO: refactor to share code with geocode() and call self._geocode() here instead
-        # actually to keep hashing knowledge encapulated (AFW) this should be handled by
+        # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
         # _geocode using an additional parameter for an input table
         dataset = Dataset(table_name, credentials=self._credentials)
-        return self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
+        result, meta = self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
+        if input_dataframe:
+            result = result.download()
+        return self.result(result, metadata=meta)
+
 
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
