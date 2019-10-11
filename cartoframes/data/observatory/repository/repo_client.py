@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from carto.do_datasets import DODatasetManager
+# from carto.do_datasets import DODatasetManager
 from ....data import Dataset
 from ...clients import SQLClient
 from ....auth import Credentials, get_default_credentials

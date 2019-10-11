@@ -95,7 +95,6 @@ class Dataset(CatalogEntity):
 
         return self._download(credentials)
 
-<<<<<<< HEAD
 
     @classmethod
     def datasets_by_geography(cls, filter_dataset):
@@ -131,7 +130,6 @@ class Dataset(CatalogEntity):
         return cls.entity_repo.get_datasets_for_geographies(matched_boundaries)
         
        
-=======
     def subscribe(self, credentials=None):
         """Subscribe to a Dataset.
 
@@ -145,4 +143,3 @@ class Dataset(CatalogEntity):
         _credentials = self._get_credentials(credentials)
 
         display_subscription_form(self.id, _credentials)
->>>>>>> ca20f1318a53ab8e3bb513450f583976eee0b6f4
