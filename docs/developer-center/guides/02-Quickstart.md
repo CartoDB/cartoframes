@@ -12,11 +12,11 @@ If you don't have CARTOframes installed, check out the installation steps [here]
 
 ### Authentication
 
-If you have a CARTO account that you want to use with CARTOframes, you need to authenticate it by passing in your CARTO credentials. You will need your username (`username`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
+If you don't have a CARTO account but want to try out CARTOframes, you only need the `cartoframes` library. To learn more, take a look at the [Data Workflow](LINK) examples to visualize data from either a DataFrame or a GeoJSON.
 
-If you don't have a CARTO account but want to try out CARTOframes, you only need the `cartoframes` library. To learn more, take a look at the [Data Workflow](LINK) examples to visualize data from either a Dataframe or a GeoJSON.
+If you have a CARTO account that you want to use with CARTOframes, you need to authenticate it by passing in your CARTO credentials. You will need your username (`username`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps. When using a CARTO account, the elements you need to authenticate are under the `cartoframes.auth` namespace. 
 
-When using a CARTO account, the elements you need to authenticate are under the `cartoframes.auth` namespace. For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
+For this guide, we'll use a public dataset from the `cartoframes` account called [`spend_data`](https://cartoframes.carto.com/tables/spend_data/public/map) that contains information about customer spending activities in the city of Barcelona .
 
 ```py
 from cartoframes.auth import set_default_credentials
