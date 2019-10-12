@@ -65,7 +65,7 @@ Map(
 
 There are two ways to change a layer's style and add legends, popups and widgets: manually (provides greater customization) or with visualization helpers.
 
-First, let's take a look at how to do this manually and in the next section, we will use a visualization helper.
+First, let's take a look at how to add each element manually and in the next section, we will use a visualization helper to create a similar map.
 
 ### Change the Style
 
@@ -176,6 +176,8 @@ Map(
 )
 ```
 And now you have an interactive visualization!
+
+![Final interactive visualization](../../img/guides/quickstart/quickstart-4.png)
 
 ## Use a Visualization Helper
 
