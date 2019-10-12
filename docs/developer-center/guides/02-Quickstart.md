@@ -12,7 +12,7 @@ If you don't have CARTOframes installed, check out the installation steps [here]
 
 ### Authentication
 
-If you have a CARTO account that you want to use with CARTOframes, you need to authenticate it by passing in your CARTO credentials. You will need your username (`base_url`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
+If you have a CARTO account that you want to use with CARTOframes, you need to authenticate it by passing in your CARTO credentials. You will need your username (`username`) and an API key (`api_key`), which can be found at http://your_user_name.carto.com/your_apps.
 
 If you don't have a CARTO account but want to try out CARTOframes, you only need the `cartoframes` library. To learn more, take a look at the [Data Workflow](LINK) examples to visualize data from either a Dataframe or a GeoJSON.
 
@@ -32,7 +32,7 @@ Map(Layer('spend_data'))
 
 ![Visualize the 'spend_data' dataset](../../img/guides/quickstart/quickstart-1.png)
 
-### Change the viewport and basemap
+### Change the Viewport and Basemap
 
 By default, the map's center and zoom is set to encompass the entire dataset and visualized on CARTO's Positron basemap. For this map, let's modify these settings to use CARTO's Dark Matter basemap and adjust the viewport to better suite our area of interest:
 
@@ -77,7 +77,7 @@ The style can be set directly as the **second** parameter of a Layer.
 Map(
     Layer(
         'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
-        'color: ramp($category, bold)'
+        'color: ramp(top($category_en,10), bold)'
     ),
     viewport={'zoom': 12, 'lat': 41.38, 'lng': 2.17},
     basemap=basemaps.darkmatter
@@ -114,19 +114,24 @@ Map(
 Now, let's add the Popup settings in the **fourth** parameter:
 
 ```py
+from cartoframes.viz import Popup
+
 Map(
     Layer(
         'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
-        'color: ramp($category, bold)',
+        'color: ramp(top($category_en,10), bold)',
         legend=Legend(
             'color-bins',
-            title= 'Categories'
+            title= 'Spending Categories'
         ),
         popup=Popup({
-            'hover': {
-                'title': 'Hour',
-                'value': '$hour'
-            }
+            'hover': [{
+                'title': 'Day of Week',
+                'value': '$weekday'
+            },{
+                'title': 'Time of Day',
+                'value': '$daytime'
+            }]
         })
     ),
     viewport={'zoom': 12, 'lat': 41.38, 'lng': 2.17},
@@ -141,21 +146,22 @@ Map(
 Next, let's add a Widget in the **fifth** parameter:
 
 ```py
-from cartoframes.viz.widgets import histogram_widget
-
 Map(
     Layer(
         'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
-        'color: ramp(top($category,10), bold)',
+        'color: ramp(top($category_en,10), bold)',
         legend=Legend(
             'color-bins',
             title= 'Spending Categories'
         ),
         popup=Popup({
-            'hover': {
-                'title': 'Hour',
-                'value': '$hour'
-            }
+            'hover': [{
+                'title': 'Day of Week',
+                'value': '$weekday'
+            },{
+                'title': 'Time of Day',
+                'value': '$daytime'
+            }]
         }),
         widgets=[
             histogram_widget(
@@ -169,10 +175,13 @@ Map(
     basemap=basemaps.darkmatter
 )
 ```
+And now you have an interactive visualization!
 
 ## Use a Visualization Helper
 
-CARTOframes has a set of built-in [Helper Methods]({{ site.url }}/developers/cartoframes/guides/helper-methods-part-1/) that can be used to create visualizations with default style, legends and popups, all together!.
+In the steps above, you saw how to add each component to a map manually which gives you greater flexibility in customizing the individual pieces of your map.
+
+Next, let's take a look at creating a similar map using the `color_category_layer` which is one of the built-in [Visualization Helpers](LINK TO EXAMPLES) available in CARTOframes. Using a helper, you can quickly create a visualization with default styles,legends, popups, and widgets all together!
 
 ```py
 from cartoframes.viz.helpers import color_category_layer
@@ -180,7 +189,7 @@ from cartoframes.viz.helpers import color_category_layer
 Map(
     color_category_layer(
         'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
-        'category', 
+        'category_en',
         'Spending in Barcelona',
         description='Categories',
         widget=True
@@ -191,3 +200,25 @@ Map(
 ```
 
 ![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
+
+## Publish and Share
+
+Once you have a complete visualization, you can publish it and share the output URL!
+
+```py
+visualization = Map(
+    color_category_layer(
+        'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
+        'category_en', 
+        'Spending in Barcelona',
+        description='Categories',
+        widget=True
+    ),
+    viewport={'zoom': 12, 'lat': 41.38, 'lng': 2.17},
+    basemap=basemaps.darkmatter
+)
+
+kuviz = visualization.publish('spending_in_barcelona')
+
+print(kuviz['url'])
+```
