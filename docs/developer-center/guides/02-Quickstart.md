@@ -4,7 +4,7 @@
 
 This guide walks through the process of authenticating CARTOframes to create an interactive visualization with a shareable link. The full notebook example can be found in the [01_basic_usage](https://github.com/CartoDB/cartoframes/blob/develop/examples/01_quickstart/01_basic_usage.ipynb) notebook.
 
-![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
+![Final visualization](TODO)
 
 ### Install CARTOframes
 
@@ -139,7 +139,7 @@ Map(
 )
 ```
 
-![Show popups when interacting with the features](../../img/guides/quickstart/quickstart-5.png)
+![Show popups when interacting with the features](TODO)
 
 ### Add a Widget
 
@@ -177,7 +177,7 @@ Map(
 ```
 And now you have an interactive visualization!
 
-![Final interactive visualization](../../img/guides/quickstart/quickstart-4.png)
+![Final interactive visualization](TODO)
 
 ## Use a Visualization Helper
 
@@ -201,7 +201,7 @@ Map(
 )
 ```
 
-![Final visualization](../../img/guides/quickstart/quickstart-final.gif)
+![Final Interactive Visualization with Helper](../../img/guides/quickstart/quickstart-7.png)
 
 ## Publish and Share
 
@@ -211,7 +211,7 @@ Once you have a complete visualization, you can publish it and share the output 
 visualization = Map(
     color_category_layer(
         'SELECT * FROM spend_data WHERE amount > 150 AND amount < 200',
-        'category_en', 
+        'category_en',
         'Spending in Barcelona',
         description='Categories',
         widget=True
