@@ -48,7 +48,7 @@ class KuvizPublisher(object):
 
     def update(self, data, name, password):
         if not self.kuviz:
-            raise CartoException('The map has not been published. Use the `publish` method.')
+            raise CartoException('The map has not been published yet. Use the `publish` method instead.')
 
         self.kuviz.data = data
         self.kuviz.name = name
@@ -77,10 +77,6 @@ class KuvizPublisher(object):
     def _sync_layer(self, layer, table_name):
         layer.source.dataset.upload(table_name=table_name, credentials=self._credentials)
         layer.source = Source(table_name, credentials=self._credentials)
-        warn('Table `{}` created. In order to publish the map, you will need to create a new Regular API '
-             'key with permissions to Maps API and the table `{}`. You can do it from your CARTO dashboard or '
-             'using the Auth API. You can get more info at '
-             'https://carto.com/developers/auth-api/guides/types-of-API-Keys/'.format(table_name, table_name))
 
         return layer
 
