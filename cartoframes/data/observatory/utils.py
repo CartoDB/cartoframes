@@ -5,7 +5,7 @@ from __future__ import absolute_import
 #       separate this content, rename the file or refactor in classes.
 
 from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
-from carto.do_subscription_info import DOSubscriptionInfoManager
+from carto.do_subscriptions_info import DOSubscriptionInfoManager
 
 
 def get_subscription_ids(credentials):
