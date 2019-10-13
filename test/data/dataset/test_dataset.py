@@ -14,7 +14,7 @@ from carto.exceptions import CartoException
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
-from cartoframes.utils.geom_utils import setting_value_exception, _load_wkt
+from cartoframes.utils.geom_utils import setting_value_exception
 from cartoframes.utils.columns import normalize_name, DataframeColumnsInfo
 from cartoframes.utils.utils import load_geojson
 from cartoframes.data import StrategiesRegistry
