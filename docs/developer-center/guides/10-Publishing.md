@@ -2,7 +2,7 @@
 
 This guide walks through the steps to publish a visualization and get a URL to share it. To do this, we'll need to use "CARTO custom visualizations", also known as **Kuviz**.
 
-Let's start by creating a default credentials. You will need to use your `master API key` in the notebook in order to create a visualization, but it is not going to used in your visualization and your `mater API key` will not be shared:
+Let's start by creating a default credentials. You will need to use your `master API key` in the notebook in order to create a visualization, but it is not going to be used in your visualization and your `master API key` will not be shared:
 - The visualizations use `default public API key` when possible (if you use public datasets from your CARTO account).
 - If it is not possible, a `regular API key` is created with read only permissions of your data used in the map.
 
