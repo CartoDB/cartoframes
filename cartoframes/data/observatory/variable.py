@@ -76,4 +76,3 @@ class Variable(CatalogEntity):
 
         return "<{classname}('{entity_id}','{descr}')>"\
                .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)
-

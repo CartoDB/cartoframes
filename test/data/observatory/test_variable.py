@@ -176,7 +176,7 @@ class TestVariable(unittest.TestCase):
 
         # Then
         assert variables_repr == "[<Variable('{id1}','{descr1}')>, <Variable('{id2}','{descr2}')>]" \
-                                .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
+                                 .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
                                         id2=db_variable2['slug'], descr2=shorten_description)
 
     def test_variables_items_are_obtained_as_variable(self):
