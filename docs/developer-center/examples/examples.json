@@ -362,12 +362,6 @@
         }
       ]
     }, {
-      "title": "Data Enrichment",
-      "samples": []
-    }, {
-      "title": "Data Discovery",
-      "samples": []
-    }, {
       "title": "Use Cases",
       "samples": [{
           "title": "Visualize Temperatures",
