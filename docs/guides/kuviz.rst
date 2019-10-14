@@ -5,7 +5,7 @@ Publishing and sharing a map
 
 In CARTOframes, you can publish a map visualization and then share it. When you publish the map visualization, you receive an URL where to see your visualization outside of the Notebook, so you can share it or use it where you want.
 
-You will need to use your `master API key` in the notebook in order to create a visualization, but it is not going to used in your visualization and your `mater API key` will not be shared:
+You will need to use your `master API key` in the notebook in order to create a visualization, but it is not going to be used in your visualization and your `master API key` will not be shared:
 - The visualizations use `default public API key` when possible (if you use public datasets from your CARTO account).
 - If it is not possible, a `regular API key` is created with read only permissions of your data used in the map.
 
