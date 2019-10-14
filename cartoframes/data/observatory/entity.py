@@ -29,6 +29,13 @@ class CatalogEntity(ABC):
     def id(self):
         return self.data[self.id_field]
 
+    @property
+    def slug(self):
+        try:
+            return self.data['slug']
+        except KeyError:
+            return None
+
     @classmethod
     def get(cls, id_):
         return cls.entity_repo.get_by_id(id_)
@@ -36,6 +43,10 @@ class CatalogEntity(ABC):
     @classmethod
     def get_all(cls, filters=None):
         return cls.entity_repo.get_all(filters)
+
+    @classmethod
+    def get_list(cls, id_list):
+        return cls.entity_repo.get_by_id_list(id_list)
 
     def to_series(self):
         return pd.Series(self.data)
@@ -88,13 +99,17 @@ def _get_bigquery_client(project, credentials):
     return BigQueryClient(project, credentials)
 
 
+def is_slug_value(id_value):
+    return len(id_value.split('.')) == 1
+
+
 class CatalogList(list):
 
     def __init__(self, data):
         super(CatalogList, self).__init__(data)
 
     def get(self, item_id):
-        return next(filter(lambda item: item.id == item_id, self), None)
+        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
