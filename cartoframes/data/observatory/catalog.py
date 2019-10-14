@@ -131,12 +131,13 @@ class Catalog(object):
 
         """
 
+        _no_filters = {}
         _credentials = credentials or get_default_credentials()
 
         if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
-            Dataset.get_all(self.filters, _credentials),
-            Geography.get_all(self.filters, _credentials)
+            Dataset.get_all(_no_filters, _credentials),
+            Geography.get_all(_no_filters, _credentials)
         )
