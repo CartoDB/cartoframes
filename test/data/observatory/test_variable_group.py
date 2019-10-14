@@ -73,12 +73,14 @@ class TestVariableGroup(unittest.TestCase):
 
         # When
         variable_group_id = variable_group.id
+        slug = variable_group.slug
         name = variable_group.name
         dataset = variable_group.dataset
         starred = variable_group.starred
 
         # Then
         assert variable_group_id == db_variable_group1['id']
+        assert slug == db_variable_group1['slug']
         assert name == db_variable_group1['name']
         assert dataset == db_variable_group1['dataset_id']
         assert starred == db_variable_group1['starred']

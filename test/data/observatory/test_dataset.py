@@ -94,6 +94,7 @@ class TestDataset(unittest.TestCase):
 
         # When
         dataset_id = dataset.id
+        slug = dataset.slug
         name = dataset.name
         description = dataset.description
         provider = dataset.provider
@@ -111,6 +112,7 @@ class TestDataset(unittest.TestCase):
 
         # Then
         assert dataset_id == db_dataset1['id']
+        assert slug == db_dataset1['slug']
         assert name == db_dataset1['name']
         assert description == db_dataset1['description']
         assert provider == db_dataset1['provider_id']

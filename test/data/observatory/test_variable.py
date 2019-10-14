@@ -72,6 +72,7 @@ class TestVariable(unittest.TestCase):
 
         # When
         variable_id = variable.id
+        slug = variable.slug
         name = variable.name
         description = variable.description
         column_name = variable.column_name
@@ -84,6 +85,7 @@ class TestVariable(unittest.TestCase):
 
         # Then
         assert variable_id == db_variable1['id']
+        assert slug == db_variable1['slug']
         assert name == db_variable1['name']
         assert description == db_variable1['description']
         assert column_name == db_variable1['column_name']

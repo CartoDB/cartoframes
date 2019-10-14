@@ -77,6 +77,7 @@ class TestGeography(unittest.TestCase):
 
         # When
         geography_id = geography.id
+        slug = geography.slug
         name = geography.name
         description = geography.description
         country = geography.country
@@ -90,6 +91,7 @@ class TestGeography(unittest.TestCase):
 
         # Then
         assert geography_id == db_geography1['id']
+        assert slug == db_geography1['slug']
         assert name == db_geography1['name']
         assert description == db_geography1['description']
         assert country == db_geography1['country_id']
