@@ -1,8 +1,18 @@
 from __future__ import absolute_import
 
+from IPython.display import display
+from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
+
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
 
+
+def display_existing_subscription_message(type):
+    message = '''
+    This {} has already been purchased.
+    '''.format(type)
+    text = HTML(message)
+    display(text)
 
 def display_subscription_form(id, type, credentials):
     info = fetch_subscription_info(id, type, credentials)
@@ -20,8 +30,6 @@ def display_subscription_form(id, type, credentials):
 
 
 def display_subscription_form_notebook(id, info, credentials):
-    from IPython.display import display
-
     message = '''
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{id}</b>.
@@ -48,9 +56,6 @@ def display_subscription_form_notebook(id, info, credentials):
 
 
 def _create_notebook_form(id, type, message, ok_response, cancel_message, credentials):
-    from IPython.display import display
-    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
-
     text = HTML(message)
 
     button_yes = Button(

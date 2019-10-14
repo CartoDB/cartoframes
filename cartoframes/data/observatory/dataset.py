@@ -8,7 +8,9 @@ from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
 from .subscriptions import get_subscription_ids
 from .subscription_info import fetch_subscription_info, SubscriptionInfo
-from .utils import display_subscription_form
+from .utils import display_subscription_form, display_existing_subscription_message
+
+DATASET_TYPE = 'dataset'
 
 
 class Dataset(CatalogEntity):
@@ -109,9 +111,9 @@ class Dataset(CatalogEntity):
         subscribed_ids = get_subscription_ids(_credentials)
 
         if self.id in subscribed_ids:
-            raise Exception('The dataset is already purchased.')
-
-        display_subscription_form(self.id, 'dataset', _credentials)
+            display_existing_subscription_message(DATASET_TYPE)
+        else:
+            display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset.
@@ -125,4 +127,4 @@ class Dataset(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        return SubscriptionInfo(fetch_subscription_info(self.id, 'dataset', _credentials))
+        return SubscriptionInfo(fetch_subscription_info(self.id, DATASET_TYPE, _credentials))

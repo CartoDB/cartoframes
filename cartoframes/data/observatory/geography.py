@@ -7,7 +7,9 @@ from .repository.geography_repo import get_geography_repo
 from .repository.constants import GEOGRAPHY_FILTER
 from .subscriptions import get_subscription_ids
 from .subscription_info import fetch_subscription_info, SubscriptionInfo
-from .utils import display_subscription_form
+from .utils import display_subscription_form, display_existing_subscription_message
+
+GEOGRAPHY_TYPE = 'geography'
 
 
 class Geography(CatalogEntity):
@@ -89,9 +91,9 @@ class Geography(CatalogEntity):
         subscribed_ids = get_subscription_ids(_credentials)
 
         if self.id in subscribed_ids:
-            raise Exception('The geography is already purchased.')
-
-        display_subscription_form(self.id, 'geography', _credentials)
+            display_existing_subscription_message(GEOGRAPHY_TYPE)
+        else:
+            display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Geography.
@@ -105,4 +107,4 @@ class Geography(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        return SubscriptionInfo(fetch_subscription_info(self.id, 'geography', _credentials))
+        return SubscriptionInfo(fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
