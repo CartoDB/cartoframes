@@ -90,13 +90,14 @@ class TestGeography(unittest.TestCase):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
+        expected_dict = {key: value for key, value in db_geography1.items() if key is not 'summary_jsonb'}
 
         # When
         geography_dict = geography.to_dict()
 
         # Then
         assert isinstance(geography_dict, dict)
-        assert geography_dict == db_geography1
+        assert geography_dict == expected_dict
 
     def test_geography_is_represented_with_id(self):
         # Given

@@ -21,6 +21,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     entity_repo = None
+    export_excluded_fields = ['summary_jsonb']
 
     def __init__(self, data):
         self.data = data
@@ -45,7 +46,7 @@ class CatalogEntity(ABC):
         return pd.Series(self.data)
 
     def to_dict(self):
-        return self.data
+        return {key: value for key, value in self.data.items() if key not in self.export_excluded_fields}
 
     def __eq__(self, other):
         return self.data == other.data
