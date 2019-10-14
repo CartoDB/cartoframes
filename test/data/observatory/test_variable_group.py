@@ -136,19 +136,6 @@ class TestVariableGroup(unittest.TestCase):
         assert variables_groups_repr == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]"\
                                         .format(id1=db_variable_group1['slug'], id2=db_variable_group2['slug'])
 
-    @patch.object(VariableGroupRepository, 'get_by_id')
-    def test_get_variable_group_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_variable_group1
-
-        # When
-        variable_group = VariableGroup.get(test_variable_group1.id)
-
-        # Then
-        assert isinstance(variable_group, object)
-        assert isinstance(variable_group, VariableGroup)
-        assert variable_group == test_variable_group1
-
     def test_variables_groups_items_are_obtained_as_variable_group(self):
         # Given
         variables_groups = test_variables_groups

@@ -154,19 +154,6 @@ class TestGeography(unittest.TestCase):
         assert categories_repr == "[<Geography('{id1}')>, <Geography('{id2}')>]"\
                                   .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
-    @patch.object(GeographyRepository, 'get_by_id')
-    def test_get_geography_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_geography1
-
-        # When
-        geography = Geography.get(test_geography1.id)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
-
     def test_geographies_items_are_obtained_as_geography(self):
         # Given
         geographies = test_geographies
