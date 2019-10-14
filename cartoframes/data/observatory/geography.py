@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
+
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
+from .repository.constants import GEOGRAPHY_FILTER
 
 
 class Geography(CatalogEntity):
@@ -11,7 +13,7 @@ class Geography(CatalogEntity):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self.id)
+        return get_dataset_repo().get_all({GEOGRAPHY_FILTER: self.id})
 
     @property
     def name(self):

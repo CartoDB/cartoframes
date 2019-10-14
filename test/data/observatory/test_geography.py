@@ -33,7 +33,31 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography, Geography)
         assert geography == test_geography1
 
-    @patch.object(DatasetRepository, 'get_by_geography')
+    def test_get_geography_by_id_from_geographies_list(self):
+        # Given
+        geographies = CatalogList([test_geography1, test_geography2])
+
+        # When
+        geography = geographies.get(test_geography1.id)
+
+        # Then
+        assert isinstance(geography, object)
+        assert isinstance(geography, Geography)
+        assert geography == test_geography1
+
+    def test_get_geography_by_slug_from_geographies_list(self):
+        # Given
+        geographies = CatalogList([test_geography1, test_geography2])
+
+        # When
+        geography = geographies.get(test_geography1.slug)
+
+        # Then
+        assert isinstance(geography, object)
+        assert isinstance(geography, Geography)
+        assert geography == test_geography1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_geography(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -42,6 +66,7 @@ class TestGeography(unittest.TestCase):
         datasets = test_geography1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'geography_id': test_geography1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -52,6 +77,7 @@ class TestGeography(unittest.TestCase):
 
         # When
         geography_id = geography.id
+        slug = geography.slug
         name = geography.name
         description = geography.description
         country = geography.country
@@ -65,6 +91,7 @@ class TestGeography(unittest.TestCase):
 
         # Then
         assert geography_id == db_geography1['id']
+        assert slug == db_geography1['slug']
         assert name == db_geography1['name']
         assert description == db_geography1['description']
         assert country == db_geography1['country_id']
@@ -153,19 +180,6 @@ class TestGeography(unittest.TestCase):
         # Then
         assert categories_repr == "[<Geography('{id1}')>, <Geography('{id2}')>]"\
                                   .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
-
-    @patch.object(GeographyRepository, 'get_by_id')
-    def test_get_geography_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_geography1
-
-        # When
-        geography = Geography.get(test_geography1.id)
-
-        # Then
-        assert isinstance(geography, object)
-        assert isinstance(geography, Geography)
-        assert geography == test_geography1
 
     def test_geographies_items_are_obtained_as_geography(self):
         # Given
