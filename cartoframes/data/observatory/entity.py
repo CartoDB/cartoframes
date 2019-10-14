@@ -1,6 +1,12 @@
 import pandas as pd
+from warnings import warn
 
-from cartoframes.exceptions import DiscoveryException
+from google.api_core.exceptions import NotFound
+
+from carto.exceptions import CartoException
+
+from ..clients.bigquery_client import BigQueryClient
+from ...auth import get_default_credentials
 
 try:
     from abc import ABC, abstractmethod
@@ -8,74 +14,95 @@ except ImportError:
     from abc import ABCMeta, abstractmethod
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
+_WORKING_PROJECT = 'carto-do-customers'
+
 
 class CatalogEntity(ABC):
 
-    id_field = None
+    id_field = 'id'
     entity_repo = None
 
-    @classmethod
-    @abstractmethod
-    def _get_single_entity_class(cls):
-        raise NotImplementedError
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def id(self):
+        return self.data[self.id_field]
 
     @classmethod
-    @abstractmethod
-    def _get_entities_list_class(cls):
-        raise NotImplementedError
-
-    @classmethod
-    def get_by_id(cls, id_):
+    def get(cls, id_):
         return cls.entity_repo.get_by_id(id_)
 
+    @classmethod
+    def get_all(cls, filters=None):
+        return cls.entity_repo.get_all(filters)
+
+    @classmethod
+    def get_list(cls, id_list):
+        return cls.entity_repo.get_by_id_list(id_list)
+
+    def to_series(self):
+        return pd.Series(self.data)
+
+    def to_dict(self):
+        return self.data
+
     def __eq__(self, other):
-        return self.equals(other)
+        return self.data == other.data
 
     def __ne__(self, other):
         return not self == other
 
+    def __str__(self):
+        return '{classname}({data})'.format(classname=self.__class__.__name__, data=self.data.__str__())
 
-class SingleEntity(CatalogEntity, pd.Series, ABC):
+    def __repr__(self):
+        return "<{classname}('{entity_id}')>".format(classname=self.__class__.__name__, entity_id=self._get_print_id())
 
-    @property
-    def _constructor_expanddim(self):
-        return self._get_entities_list_class()
+    def _get_print_id(self):
+        if 'slug' in self.data.keys():
+            return self.data['slug']
 
-    @classmethod
-    def _get_single_entity_class(cls):
-        return cls
+        return self.id
 
-    def _get_id(self):
+    def _download(self, credentials=None):
+        credentials = _get_credentials(credentials)
+        user_dataset = credentials.get_do_dataset()
+        bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+
+        project, dataset, table = self.id.split('.')
+        view = 'view_{}_{}'.format(dataset.replace('-', '_'), table)
+
         try:
-            return self[self.id_field]
-        except KeyError:
-            raise DiscoveryException('Unsupported function: this instance actually represents a subset of entities.'
-                                     ' You should use the method `get_by_id("id")` to obtain a valid '
-                                     'instance of the class and then attempt this function on it.')
+            file_path = bq_client.download_to_file(_WORKING_PROJECT, user_dataset, view)
+        except NotFound:
+            raise CartoException('You have not purchased the dataset `{}` yet'.format(self.id))
+
+        warn('Data saved: {}.'.format(file_path))
+        warn("To read it you can do: `pandas.read_csv('{}')`.".format(file_path))
+
+        return file_path
 
 
-class EntitiesList(CatalogEntity, pd.DataFrame, ABC):
+def _get_credentials(credentials=None):
+    return credentials or get_default_credentials()
+
+
+def _get_bigquery_client(project, credentials):
+    return BigQueryClient(project, credentials)
+
+
+def is_slug_value(id_value):
+    return len(id_value.split('.')) == 1
+
+
+class CatalogList(list):
 
     def __init__(self, data):
-        super(EntitiesList, self).__init__(data)
-        self.set_index(self.id_field, inplace=True, drop=False)
+        super(CatalogList, self).__init__(data)
 
-    @property
-    def _constructor(self):
-        return self.__class__
+    def get(self, item_id):
+        return next(filter(lambda item: item.id == item_id, self), None)
 
-    @property
-    def _constructor_sliced(self):
-        return self._get_single_entity_class()
-
-    @property
-    def _constructor_expanddim(self):
-        return self.__class__
-
-    @classmethod
-    def _get_entities_list_class(cls):
-        return cls
-
-    @classmethod
-    def get_all(cls):
-        return cls.entity_repo.get_all()
+    def to_dataframe(self):
+        return pd.DataFrame([item.data for item in self])

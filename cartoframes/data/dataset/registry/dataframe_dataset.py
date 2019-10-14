@@ -53,11 +53,13 @@ class DataFrameDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
+        self._rename_index_for_upload()
+
         dataframe_columns_info = DataframeColumnsInfo(self._df, with_lnglat)
 
-        if if_exists == BaseDataset.REPLACE or not self.exists():
+        if if_exists == BaseDataset.IF_EXISTS_REPLACE or not self.exists():
             self._create_table(dataframe_columns_info.columns)
-        elif if_exists == BaseDataset.FAIL:
+        elif if_exists == BaseDataset.IF_EXISTS_FAIL:
             raise self._already_exists_error()
 
         self._copyfrom(dataframe_columns_info, with_lnglat)
@@ -120,15 +122,34 @@ class DataFrameDataset(BaseDataset):
             if geometry and geometry.geom_type:
                 return map_geom_type(geometry.geom_type)
 
+    def _rename_index_for_upload(self):
+        if self._df.index.name != 'cartodb_id':
+            if 'cartodb_id' not in self._df:
+                if _is_valid_index_for_cartodb_id(self._df.index):
+                    # rename a integer unnamed index to cartodb_id
+                    self._df.index.rename('cartodb_id', inplace=True)
+            else:
+                if self._df.index.name is None:
+                    # replace an unnamed index by a cartodb_id column
+                    self._df.set_index('cartodb_id')
+
+
+def _is_valid_index_for_cartodb_id(index):
+    return index.name is None and index.nlevels == 1 and index.dtype == 'int' and index.is_unique
+
 
 def _rows(df, dataframe_columns_info, with_lnglat):
     for i, row in df.iterrows():
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe
-            if col not in df.columns:  # we could have filtered columns in the df. See DataframeColumnsInfo
-                continue
-            val = row[col]
+            if col not in df.columns:
+                if col == df.index.name:
+                    val = i
+                else:  # we could have filtered columns in the df. See DataframeColumnsInfo
+                    continue
+            else:
+                val = row[col]
 
             if _is_null(val):
                 val = ''

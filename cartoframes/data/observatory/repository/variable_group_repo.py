@@ -1,45 +1,43 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .constants import DATASET_FILTER
+from .entity_repo import EntityRepository
+
+
+_VARIABLE_GROUP_ID_FIELD = 'id'
+_VARIABLE_GROUP_SLUG_FIELD = 'slug'
+_ALLOWED_FILTERS = [DATASET_FILTER]
 
 
 def get_variable_group_repo():
     return _REPO
 
 
-class VariableGroupRepository(object):
+class VariableGroupRepository(EntityRepository):
 
     def __init__(self):
-        self.client = RepoClient()
-
-    def get_all(self):
-        return self._to_variables_groups(self.client.get_variables_groups())
-
-    def get_by_id(self, variable_group_id):
-        result = self.client.get_variables_groups('id', variable_group_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing variable group in the catalog. '
-                                     'You can check the full list of available variables with VariableGroups.get_all()')
-
-        return self._to_variable_group(result[0])
+        super(VariableGroupRepository, self).__init__(_VARIABLE_GROUP_ID_FIELD, _ALLOWED_FILTERS,
+                                                      _VARIABLE_GROUP_SLUG_FIELD)
 
     def get_by_dataset(self, dataset_id):
-        return self._to_variables_groups(self.client.get_variables_groups('dataset_id', dataset_id))
+        return self._get_filtered_entities({DATASET_FILTER: dataset_id})
 
-    @staticmethod
-    def _to_variable_group(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.variable_group import VariableGroup
+        return VariableGroup
 
-        return VariableGroup(result)
+    def _get_rows(self, filters=None):
+        return self.client.get_variables_groups(filters)
 
-    @staticmethod
-    def _to_variables_groups(results):
-        if len(results) == 0:
-            return None
-
-        from cartoframes.data.observatory.variable_group import VariablesGroups
-
-        return VariablesGroups([VariableGroupRepository._to_variable_group(result) for result in results])
+    def _map_row(self, row):
+        return {
+            'id': self._normalize_field(row, self.id_field),
+            'slug': self._normalize_field(row, 'slug'),
+            'name': self._normalize_field(row, 'name'),
+            'dataset_id': self._normalize_field(row, 'dataset_id'),
+            'starred': self._normalize_field(row, 'starred')
+        }
 
 
 _REPO = VariableGroupRepository()

@@ -12,6 +12,9 @@ from carto.do_token import DoTokenManager
 
 from ..__version__ import __version__
 
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
+
 if sys.version_info >= (3, 0):
     from urllib.parse import urlparse
 else:
@@ -215,6 +218,9 @@ class Credentials(object):
             raise CartoException('Authentication error: do you have permissions to access Data Observatory v2?')
 
         return token.access_token
+
+    def get_do_dataset(self):
+        return self._username.replace('-', '_')
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:

@@ -1,51 +1,51 @@
 from __future__ import absolute_import
 
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from .constants import DATASET_FILTER, VARIABLE_GROUP_FILTER
+from .entity_repo import EntityRepository
+
+
+_VARIABLE_ID_FIELD = 'id'
+_VARIABLE_SLUG_FIELD = 'slug'
+_ALLOWED_DATASETS = [DATASET_FILTER, VARIABLE_GROUP_FILTER]
 
 
 def get_variable_repo():
     return _REPO
 
 
-class VariableRepository(object):
+class VariableRepository(EntityRepository):
 
     def __init__(self):
-        self.client = RepoClient()
-
-    def get_all(self):
-        return self._to_variables(self.client.get_variables())
-
-    def get_by_id(self, variable_id):
-        result = self.client.get_variables('id', variable_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing variable in the catalog. '
-                                     'You can check the full list of available variables with Variables.get_all()')
-
-        return self._to_variable(result[0])
+        super(VariableRepository, self).__init__(_VARIABLE_ID_FIELD, _ALLOWED_DATASETS, _VARIABLE_SLUG_FIELD)
 
     def get_by_dataset(self, dataset_id):
-        return self._to_variables(self.client.get_variables('dataset_id', dataset_id))
+        return self._get_filtered_entities({DATASET_FILTER: dataset_id})
 
     def get_by_variable_group(self, variable_group_id):
-        return self._to_variables(self.client.get_variables('variable_group_id', variable_group_id))
+        return self._get_filtered_entities({VARIABLE_GROUP_FILTER: variable_group_id})
 
-
-    @staticmethod
-    def _to_variable(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.variable import Variable
+        return Variable
 
-        return Variable(result)
+    def _get_rows(self, filters=None):
+        return self.client.get_variables(filters)
 
-    @staticmethod
-    def _to_variables(results):
-        if len(results) == 0:
-            return None
-
-        from cartoframes.data.observatory.variable import Variables
-
-        return Variables([VariableRepository._to_variable(result) for result in results])
+    def _map_row(self, row):
+        return {
+            'id': self._normalize_field(row, self.id_field),
+            'slug': self._normalize_field(row, 'slug'),
+            'name': self._normalize_field(row, 'name'),
+            'description': self._normalize_field(row, 'description'),
+            'column_name': self._normalize_field(row, 'column_name'),
+            'db_type': self._normalize_field(row, 'db_type'),
+            'dataset_id': self._normalize_field(row, 'dataset_id'),
+            'agg_method': self._normalize_field(row, 'agg_method'),
+            'variable_group_id': self._normalize_field(row, 'variable_group_id'),
+            'starred': self._normalize_field(row, 'starred'),
+            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+        }
 
 
 _REPO = VariableRepository()

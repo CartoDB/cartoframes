@@ -16,9 +16,13 @@ from ....utils.columns import Column, normalize_name, dtypes, date_columns_names
 class BaseDataset():
     __metaclass__ = ABCMeta
 
-    FAIL = 'fail'
-    REPLACE = 'replace'
-    APPEND = 'append'
+    GEOM_TYPE_POINT = 'point'
+    GEOM_TYPE_LINE = 'line'
+    GEOM_TYPE_POLYGON = 'polygon'
+
+    IF_EXISTS_FAIL = 'fail'
+    IF_EXISTS_REPLACE = 'replace'
+    IF_EXISTS_APPEND = 'append'
 
     def __init__(self, credentials=None):
         self._verbose = 0
