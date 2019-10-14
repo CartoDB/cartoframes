@@ -37,6 +37,10 @@ class CatalogEntity(ABC):
     def get_all(cls, filters=None):
         return cls.entity_repo.get_all(filters)
 
+    @classmethod
+    def get_list(cls, id_list):
+        return cls.entity_repo.get_by_id_list(id_list)
+
     def to_series(self):
         return pd.Series(self.data)
 
