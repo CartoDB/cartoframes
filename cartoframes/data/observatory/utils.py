@@ -14,7 +14,7 @@ def display_subscription_form(id, type, credentials):
         raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
 
     if is_ipython_notebook():
-        display_subscription_form_notebook(id, _resource_to_dict(info), credentials)
+        display_subscription_form_notebook(id, info, credentials)
     else:
         display_subscription_form_cli()
 
@@ -100,7 +100,3 @@ def is_ipython_notebook():
             return False
     except NameError:
         return False
-
-
-def _resource_to_dict(resource):
-    return {field: getattr(resource, field) for field in resource.fields}

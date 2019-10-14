@@ -7,6 +7,11 @@ class SubscriptionInfo(object):
     def __init__(self, raw_data):
         self._raw_data = raw_data
 
+    def __repr__(self):
+        props = ['id', 'estimated_delivery_days', 'price',
+                 'tos', 'tos_link', 'licenses', 'licenses_link', 'rights']
+        return 'Properties: {}'.format(', '.join(props))
+
     @property
     def id(self):
         return self._raw_data.get('id')
@@ -16,7 +21,7 @@ class SubscriptionInfo(object):
         return self._raw_data.get('estimated_delivery_days')
 
     @property
-    def subscription_list_price(self):
+    def price(self):
         return self._raw_data.get('subscription_list_price')
 
     @property
@@ -43,4 +48,8 @@ class SubscriptionInfo(object):
 def fetch_subscription_info(id, type, credentials):
     api_key_auth_client = credentials.get_api_key_auth_client()
     do_manager = DOSubscriptionInfoManager(api_key_auth_client)
-    return do_manager.get(id, type)
+    return _resource_to_dict(do_manager.get(id, type))
+
+
+def _resource_to_dict(resource):
+    return {field: getattr(resource, field) for field in resource.fields}

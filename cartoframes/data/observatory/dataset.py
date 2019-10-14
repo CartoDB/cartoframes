@@ -7,6 +7,7 @@ from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
 from .subscriptions import get_subscription_ids
+from .subscription_info import fetch_subscription_info, SubscriptionInfo
 from .utils import display_subscription_form
 
 
@@ -111,3 +112,17 @@ class Dataset(CatalogEntity):
             raise Exception('The dataset is already purchased.')
 
         display_subscription_form(self.id, 'dataset', _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return SubscriptionInfo(fetch_subscription_info(self.id, 'dataset', _credentials))
