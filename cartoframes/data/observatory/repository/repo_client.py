@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from carto.do_datasets import DODatasetManager
+from carto.do_subscriptions import DOSubscriptionManager
 
 from ...clients import SQLClient
 from ....auth import Credentials, get_default_credentials
@@ -91,7 +91,7 @@ class RepoClient(object):
 
     def _fetch_purchased_datasets(self):
         api_key_auth_client = self._user_credentials.get_api_key_auth_client()
-        do_manager = DODatasetManager(api_key_auth_client)
+        do_manager = DOSubscriptionManager(api_key_auth_client)
         if do_manager is not None:
             return do_manager.all()
         return []
