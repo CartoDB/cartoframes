@@ -4,8 +4,8 @@ from __future__ import absolute_import
 #       and the display form functions. Maybe we should consider to
 #       separate this content, rename the file or refactor in classes.
 
-from carto.do_subscriptions import DOSubscriptionManager
-# from carto.do_subscription_info import DOSubscriptionInfoManager
+from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
+from carto.do_subscription_info import DOSubscriptionInfoManager
 
 
 def get_subscription_ids(credentials):
@@ -23,27 +23,35 @@ def fetch_subscriptions(credentials):
     return []
 
 
-def fetch_subscription_info(id):
-    # TODO: implement DOSubscriptionInfoManager
-    return {
-        'id': id,
-        'subscription_list_price': '195',
-        'tos': '',
-        'tos_link': 'https://carto.com',
-        'type': 'dataset'
-    }
+def fetch_subscription_info(id, type, credentials):
+    api_key_auth_client = credentials.get_api_key_auth_client()
+    do_manager = DOSubscriptionInfoManager(api_key_auth_client)
+    return do_manager.get(id, type)
+    # TODO: should we return as a SubscriptionInfo instance?
 
 
-def trigger_subscription(id, credentials):
-    # TODO: implement with DOSubscriptionManager
-    return 'OK'
+def trigger_subscription(id, type, credentials):
+    api_key_auth_client = credentials.get_api_key_auth_client()
+    do_manager = DOSubscriptionCreationManager(api_key_auth_client)
+    # TODO: proper error handling
+    return do_manager.create(id=id, type=type)
 
 
-def display_subscription_form(id, credentials):
-    info = fetch_subscription_info(id)
+def _resource_to_dict(resource):
+    return {field: getattr(resource, field) for field in resource.fields}
+
+
+def display_subscription_form(id, type, credentials):
+    info = fetch_subscription_info(id, type, credentials)
+
+    if getattr(info, 'type') != type:
+        raise Exception('Incorrect type returned.')
+
+    if getattr(info, 'subscription_list_price') is None:
+        raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
 
     if is_ipython_notebook():
-        display_subscription_form_notebook(id, info, credentials)
+        display_subscription_form_notebook(id, _resource_to_dict(info), credentials)
     else:
         display_subscription_form_cli()
 
@@ -65,18 +73,18 @@ def display_subscription_form_notebook(id, info, credentials):
     '''.format(**info)
 
     ok_response = '''
-    <b>Congrats!</b><br>{id} has been requested and it will be available in your account soon.
+    <b>Congrats!</b><br>{type} {id} has been requested and it will be available in your account soon.
     '''.format(**info)
     cancel_message = '''
-    {id} has not been purchased.
+    {type} {id} has not been purchased.
     '''.format(**info)
 
-    text, buttons = _create_notebook_form(message, ok_response, cancel_message)
+    text, buttons = _create_notebook_form(id, info.get('type'), message, ok_response, cancel_message, credentials)
 
     display(text, buttons)
 
 
-def _create_notebook_form(message, ok_response, cancel_message):
+def _create_notebook_form(id, type, message, ok_response, cancel_message, credentials):
     from IPython.display import display
     from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
@@ -97,7 +105,7 @@ def _create_notebook_form(message, ok_response, cancel_message):
 
     def on_button_yes_clicked(b):
         disable_buttons()
-        response = trigger_subscription('', '')
+        response = trigger_subscription(id, type, credentials)
         if response:
             display(HTML(ok_response))
         else:

@@ -144,4 +144,4 @@ class Dataset(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        display_subscription_form(self.id, _credentials)
+        display_subscription_form(self.id, 'dataset', _credentials)
