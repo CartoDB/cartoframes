@@ -4,7 +4,7 @@ from .entity import is_slug_value
 from .category import Category
 from .country import Country
 from .geography import Geography
-from .dataset import Dataset
+from .dataset import CatalogDataset
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
 
@@ -45,7 +45,7 @@ class Catalog(object):
 
         """
 
-        return Dataset.get_all(self.filters)
+        return CatalogDataset.get_all(self.filters)
 
     @property
     def geographies(self):
@@ -128,4 +128,4 @@ class Catalog(object):
 
         """
 
-        return Dataset.get_all(self.filters, credentials)
+        return CatalogDataset.get_all(self.filters, credentials)
