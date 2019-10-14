@@ -10,6 +10,9 @@ from carto.exceptions import CartoRateLimitException
 from .base_context import BaseContext
 from ...__version__ import __version__
 
+from warnings import filterwarnings
+filterwarnings("ignore", category=Warning, module="carto")
+
 DEFAULT_RETRY_TIMES = 3
 
 
