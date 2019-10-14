@@ -50,7 +50,7 @@ class RepoClient(object):
             if len(ids) > 0:
                 extra_condition.append('t.id IN ({})'.format(ids))
 
-        return self._run_query(query, filters)
+        return self._run_query(query, filters, extra_condition)
 
     def get_geographies_joined_datasets(self, filters=None):
         query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public t'
