@@ -71,7 +71,7 @@ class Variable(CatalogEntity):
     def __repr__(self):
         descr = self.description
 
-        if len(descr) > _DESCRIPTION_LENGTH_LIMIT:
+        if descr and len(descr) > _DESCRIPTION_LENGTH_LIMIT:
             descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
 
         return "<{classname}('{entity_id}','{descr}')>"\
