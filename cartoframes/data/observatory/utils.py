@@ -5,7 +5,7 @@ from __future__ import absolute_import
 #       separate this content, rename the file or refactor in classes.
 
 from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
-from carto.do_subscriptions_info import DOSubscriptionInfoManager
+from carto.do_subscription_info import DOSubscriptionInfoManager
 
 
 def get_subscription_ids(credentials):
@@ -44,13 +44,16 @@ def _resource_to_dict(resource):
 def display_subscription_form(id, type, credentials):
     info = fetch_subscription_info(id, type, credentials)
 
+    if getattr(info, 'type') != type:
+        raise Exception('Incorrect type returned.')
+
     if is_ipython_notebook():
-        display_subscription_form_notebook(id, type, _resource_to_dict(info), credentials)
+        display_subscription_form_notebook(id, _resource_to_dict(info), credentials)
     else:
         display_subscription_form_cli()
 
 
-def display_subscription_form_notebook(id, type, info, credentials):
+def display_subscription_form_notebook(id, info, credentials):
     from IPython.display import display
 
     message = '''
@@ -71,14 +74,14 @@ def display_subscription_form_notebook(id, type, info, credentials):
     '''.format(**info)
     cancel_message = '''
     {type} {id} has not been purchased.
-    '''.format(type=type, **info)
+    '''.format(**info)
 
-    text, buttons = _create_notebook_form(id, type, message, ok_response, cancel_message)
+    text, buttons = _create_notebook_form(id, info.get('type'), message, ok_response, cancel_message, credentials)
 
     display(text, buttons)
 
 
-def _create_notebook_form(id, type, message, ok_response, cancel_message):
+def _create_notebook_form(id, type, message, ok_response, cancel_message, credentials):
     from IPython.display import display
     from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
@@ -99,7 +102,7 @@ def _create_notebook_form(id, type, message, ok_response, cancel_message):
 
     def on_button_yes_clicked(b):
         disable_buttons()
-        response = trigger_subscription(id, type)
+        response = trigger_subscription(id, type, credentials)
         if response:
             display(HTML(ok_response))
         else:
