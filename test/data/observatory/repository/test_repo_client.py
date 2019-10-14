@@ -38,13 +38,19 @@ class TestRepoClient(unittest.TestCase):
         filters = {
             'category_id': 'demographics',
             'country_id': 'usa'}
-        expected_query = "SELECT t.* FROM datasets t WHERE t.category_id = 'demographics' AND t.country_id = 'usa'"
+        expected_select = 'SELECT t.* FROM datasets t WHERE'
+        expected_filter_category = "t.category_id = 'demographics'"
+        expected_filter_country = "t.country_id = 'usa'"
 
         # When
         datasets = repo._run_query(query, filters)
 
         # Then
-        mocked_client.assert_called_once_with(expected_query)
+        mocked_client.assert_called_once()
+        actual_query = str(mocked_client.call_args_list)
+        assert expected_select in actual_query
+        assert expected_filter_category in actual_query
+        assert expected_filter_country in actual_query
         assert datasets == [db_dataset1, db_dataset2]
 
     @patch.object(SQLClient, 'query')
