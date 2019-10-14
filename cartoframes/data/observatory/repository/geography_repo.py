@@ -24,9 +24,6 @@ class GeographyRepository(EntityRepository):
         self.client.set_user_credentials(None)
         return response
 
-    def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
-
     @classmethod
     def _get_entity_class(cls):
         from cartoframes.data.observatory.geography import Geography

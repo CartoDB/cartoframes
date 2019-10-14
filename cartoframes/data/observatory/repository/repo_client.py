@@ -80,7 +80,7 @@ class RepoClient(object):
         conditions = extra_conditions or []
 
         if filters is not None and len(filters) > 0:
-            conditions.extend([self._generate_condition(key, value) for key, value in filters.items()])
+            conditions.extend([self._generate_condition(key, value) for key, value in sorted(filters.items())])
 
         return conditions
 

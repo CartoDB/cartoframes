@@ -42,6 +42,30 @@ class TestCountryRepo(unittest.TestCase):
         assert countries is None
 
     @patch.object(RepoClient, 'get_countries')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_country1, db_country2]
+        repo = CountryRepository()
+        filters = {
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        countries = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'category_id': 'demographics'
+        })
+        assert countries == test_countries
+
+    @patch.object(RepoClient, 'get_countries')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_country1, db_country2]

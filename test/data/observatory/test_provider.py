@@ -28,7 +28,19 @@ class TestProvider(unittest.TestCase):
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    @patch.object(DatasetRepository, 'get_by_provider')
+    def test_get_provider_by_id_from_providers_list(self):
+        # Given
+        providers = CatalogList([test_provider1, test_provider2])
+
+        # When
+        provider = providers.get(test_provider1.id)
+
+        # Then
+        assert isinstance(provider, object)
+        assert isinstance(provider, Provider)
+        assert provider == test_provider1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_provider(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -37,6 +49,7 @@ class TestProvider(unittest.TestCase):
         datasets = test_provider1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'provider_id': test_provider1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -129,19 +142,6 @@ class TestProvider(unittest.TestCase):
         # Then
         assert providers_repr == "[<Provider('{id1}')>, <Provider('{id2}')>]"\
                                  .format(id1=db_provider1['id'], id2=db_provider2['id'])
-
-    @patch.object(ProviderRepository, 'get_by_id')
-    def test_get_provider_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_provider1
-
-        # When
-        provider = Provider.get('bbva')
-
-        # Then
-        assert isinstance(provider, object)
-        assert isinstance(provider, Provider)
-        assert provider == test_provider1
 
     def test_providers_items_are_obtained_as_provider(self):
         # Given

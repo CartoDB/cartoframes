@@ -29,6 +29,13 @@ class CatalogEntity(ABC):
     def id(self):
         return self.data[self.id_field]
 
+    @property
+    def slug(self):
+        try:
+            return self.data['slug']
+        except KeyError:
+            return None
+
     @classmethod
     def get(cls, id_):
         return cls.entity_repo.get_by_id(id_)
@@ -106,7 +113,7 @@ class CatalogList(list):
         super(CatalogList, self).__init__(data)
 
     def get(self, item_id):
-        return next(filter(lambda item: item.id == item_id, self), None)
+        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
