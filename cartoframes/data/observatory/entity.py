@@ -109,7 +109,7 @@ class CatalogList(list):
         super(CatalogList, self).__init__(data)
 
     def get(self, item_id):
-        return next(filter(lambda item: item.id == item_id or item.slug == item_id, self), None)
+        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
