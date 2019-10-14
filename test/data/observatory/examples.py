@@ -101,7 +101,7 @@ db_variable1 = {
     'id': 'carto-do.variable.var1',
     'slug': 'var1',
     'name': 'Population',
-    'description': 'The number of people within each geography',
+    'description': 'Number of people',
     'column_name': 'pop',
     'db_type': 'Numeric',
     'dataset_id': 'dataset1',
