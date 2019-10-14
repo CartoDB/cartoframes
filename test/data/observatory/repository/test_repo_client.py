@@ -46,7 +46,6 @@ class TestRepoClient(unittest.TestCase):
         datasets = repo._run_query(query, filters)
 
         # Then
-        mocked_client.assert_called_once()
         actual_query = str(mocked_client.call_args_list)
         assert expected_select in actual_query
         assert expected_filter_category in actual_query
