@@ -6,7 +6,8 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
-from .utils import get_subscription_ids, display_subscription_form
+from .subscriptions import get_subscription_ids
+from .utils import display_subscription_form
 
 
 class Dataset(CatalogEntity):

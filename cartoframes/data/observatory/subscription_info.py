@@ -1,4 +1,7 @@
 
+from carto.do_subscription_info import DOSubscriptionInfoManager
+
+
 class SubscriptionInfo(object):
 
     def __init__(self, raw_data):
@@ -35,3 +38,9 @@ class SubscriptionInfo(object):
     @property
     def rights(self):
         return self._raw_data.get('rights')
+
+
+def fetch_subscription_info(id, type, credentials):
+    api_key_auth_client = credentials.get_api_key_auth_client()
+    do_manager = DOSubscriptionInfoManager(api_key_auth_client)
+    return do_manager.get(id, type)

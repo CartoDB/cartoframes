@@ -5,7 +5,8 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import GEOGRAPHY_FILTER
-from .utils import get_subscription_ids, display_subscription_form
+from .subscriptions import get_subscription_ids
+from .utils import display_subscription_form
 
 
 class Geography(CatalogEntity):

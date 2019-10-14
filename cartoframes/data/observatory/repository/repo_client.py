@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from ...clients import SQLClient
 from ....auth import Credentials
-from ..utils import get_subscription_ids
+from ..subscriptions import get_subscription_ids
 
 
 class RepoClient(object):

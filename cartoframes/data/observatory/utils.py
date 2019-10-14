@@ -1,44 +1,7 @@
 from __future__ import absolute_import
 
-# TODO: This file contains both the subscriptions endpoint functions
-#       and the display form functions. Maybe we should consider to
-#       separate this content, rename the file or refactor in classes.
-
-from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
-from carto.do_subscription_info import DOSubscriptionInfoManager
-
-
-def get_subscription_ids(credentials):
-    purchased_datasets = fetch_subscriptions(credentials)
-    purchased_dataset_ids = list(map(lambda pd: pd.id, purchased_datasets))
-    return ','.join(["'" + id + "'" for id in purchased_dataset_ids])
-
-
-def fetch_subscriptions(credentials):
-    if credentials:
-        api_key_auth_client = credentials.get_api_key_auth_client()
-        do_manager = DOSubscriptionManager(api_key_auth_client)
-        if do_manager is not None:
-            return do_manager.all()
-    return []
-
-
-def fetch_subscription_info(id, type, credentials):
-    api_key_auth_client = credentials.get_api_key_auth_client()
-    do_manager = DOSubscriptionInfoManager(api_key_auth_client)
-    return do_manager.get(id, type)
-    # TODO: should we return as a SubscriptionInfo instance?
-
-
-def trigger_subscription(id, type, credentials):
-    api_key_auth_client = credentials.get_api_key_auth_client()
-    do_manager = DOSubscriptionCreationManager(api_key_auth_client)
-    # TODO: proper error handling
-    return do_manager.create(id=id, type=type)
-
-
-def _resource_to_dict(resource):
-    return {field: getattr(resource, field) for field in resource.fields}
+from .subscriptions import trigger_subscription
+from .subscription_info import fetch_subscription_info
 
 
 def display_subscription_form(id, type, credentials):
@@ -137,3 +100,7 @@ def is_ipython_notebook():
             return False
     except NameError:
         return False
+
+
+def _resource_to_dict(resource):
+    return {field: getattr(resource, field) for field in resource.fields}
