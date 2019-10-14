@@ -20,7 +20,9 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         self.client.set_user_credentials(credentials)
-        return self._get_filtered_entities(filters)
+        response = self._get_filtered_entities(filters)
+        self.client.set_user_credentials(None)
+        return response
 
     def get_by_country(self, iso_code3):
         return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
