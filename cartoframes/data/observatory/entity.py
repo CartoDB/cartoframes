@@ -82,7 +82,7 @@ class CatalogEntity(ABC):
     def _get_credentials(self, credentials=None):
         _credentials = credentials or get_default_credentials()
 
-        if not isinstance(credentials, Credentials):
+        if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return _credentials
