@@ -7,10 +7,10 @@ from .subscription_info import fetch_subscription_info
 def display_subscription_form(id, type, credentials):
     info = fetch_subscription_info(id, type, credentials)
 
-    if getattr(info, 'type') != type:
+    if info.get('type') != type:
         raise Exception('Incorrect type returned.')
 
-    if getattr(info, 'subscription_list_price') is None:
+    if info.get('subscription_list_price') is None:
         raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
 
     if is_ipython_notebook():
