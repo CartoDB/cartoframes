@@ -1,2 +1,1 @@
--e git+https://github.com/CartoDB/carto-python.git@master#egg=carto
 .
