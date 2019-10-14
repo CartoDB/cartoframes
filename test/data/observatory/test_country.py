@@ -31,6 +31,18 @@ class TestCountry(unittest.TestCase):
         assert isinstance(country, Country)
         assert country == test_country1
 
+    def test_get_country_by_id_from_countries_list(self):
+        # Given
+        countries = CatalogList([test_country1, test_country2])
+
+        # When
+        country = countries.get(test_country1.id)
+
+        # Then
+        assert isinstance(country, object)
+        assert isinstance(country, Country)
+        assert country == test_country1
+
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_country(self, mocked_repo):
         # Given
@@ -159,19 +171,6 @@ class TestCountry(unittest.TestCase):
         # Then
         assert countries_repr == "[<Country('{id1}')>, <Country('{id2}')>]"\
                                  .format(id1=db_country1['id'], id2=db_country2['id'])
-
-    @patch.object(CountryRepository, 'get_by_id')
-    def test_get_country_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_country1
-
-        # When
-        country = Country.get('esp')
-
-        # Then
-        assert isinstance(country, object)
-        assert isinstance(country, Country)
-        assert country == test_country1
 
     def test_countries_items_are_obtained_as_country(self):
         # Given
