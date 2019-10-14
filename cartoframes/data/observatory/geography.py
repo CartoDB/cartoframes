@@ -1,9 +1,11 @@
 from __future__ import absolute_import
 
+
+
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
-from .utils import display_subscription_form
+from .utils import get_subscription_ids, display_subscription_form
 
 
 class Geography(CatalogEntity):
@@ -81,5 +83,10 @@ class Geography(CatalogEntity):
         """
 
         _credentials = self._get_credentials(credentials)
+
+        subscribed_ids = get_subscription_ids(_credentials)
+
+        if self.id in subscribed_ids:
+            raise Exception('The geography is already purchased.')
 
         display_subscription_form(self.id, 'geography', _credentials)
