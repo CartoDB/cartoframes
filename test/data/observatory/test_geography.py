@@ -99,7 +99,7 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geography_dict, dict)
         assert geography_dict == expected_dict
 
-    def test_geography_is_represented_with_id(self):
+    def test_geography_is_represented_with_classname_and_slug(self):
         # Given
         geography = Geography(db_geography1)
 
@@ -132,7 +132,7 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-    def test_geography_list_is_printed_with_classname(self):
+    def test_geography_list_is_printed_with_classname_and_slugs(self):
         # Given
         geographies = CatalogList([test_geography1, test_geography2])
 
@@ -143,7 +143,7 @@ class TestGeography(unittest.TestCase):
         assert categories_str == "[<Geography('{id1}')>, <Geography('{id2}')>]" \
                                  .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
-    def test_geography_list_is_represented_with_ids(self):
+    def test_geography_list_is_represented_with_classname_and_slugs(self):
         # Given
         geographies = CatalogList([test_geography1, test_geography2])
 

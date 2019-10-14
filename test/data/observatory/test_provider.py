@@ -75,7 +75,7 @@ class TestProvider(unittest.TestCase):
         assert isinstance(provider_dict, dict)
         assert provider_dict == db_provider1
 
-    def test_provider_is_represented_with_id(self):
+    def test_provider_is_represented_with_classname_and_id(self):
         # Given
         provider = Provider(db_provider1)
 
@@ -108,7 +108,7 @@ class TestProvider(unittest.TestCase):
         assert isinstance(providers, CatalogList)
         assert providers == test_providers
 
-    def test_provider_list_is_printed_with_classname(self):
+    def test_provider_list_is_printed_with_classname_and_ids(self):
         # Given
         providers = CatalogList([test_provider1, test_provider2])
 
@@ -119,7 +119,7 @@ class TestProvider(unittest.TestCase):
         assert providers_str == "[<Provider('{id1}')>, <Provider('{id2}')>]" \
                                 .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
-    def test_provider_list_is_represented_with_ids(self):
+    def test_provider_list_is_represented_with_classname_and_ids(self):
         # Given
         providers = CatalogList([test_provider1, test_provider2])
 

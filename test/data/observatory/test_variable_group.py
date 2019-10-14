@@ -80,7 +80,7 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variable_group_dict, dict)
         assert variable_group_dict == db_variable_group1
 
-    def test_variable_group_is_represented_with_id(self):
+    def test_variable_group_is_represented_with_classname_and_slug(self):
         # Given
         variable_group = VariableGroup(db_variable_group1)
 
@@ -113,7 +113,7 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
-    def test_variable_group_list_is_printed_with_classname(self):
+    def test_variable_group_list_is_printed_with_classname_and_slug(self):
         # Given
         variables_groups = CatalogList([test_variable_group1, test_variable_group2])
 
@@ -124,7 +124,7 @@ class TestVariableGroup(unittest.TestCase):
         assert variables_groups_str == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]" \
                                        .format(id1=db_variable_group1['slug'], id2=db_variable_group2['slug'])
 
-    def test_variable_group_list_is_represented_with_ids(self):
+    def test_variable_group_list_is_represented_with_classname_and_slug(self):
         # Given
         variables_groups = CatalogList([test_variable_group1, test_variable_group2])
 

@@ -88,7 +88,7 @@ class TestCountry(unittest.TestCase):
         assert isinstance(country_dict, dict)
         assert country_dict == db_country1
 
-    def test_country_is_represented_with_id(self):
+    def test_country_is_represented_with_classname_and_id(self):
         # Given
         country = Country(db_country1)
 
@@ -121,7 +121,7 @@ class TestCountry(unittest.TestCase):
         assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
-    def test_country_list_is_printed_with_classname(self):
+    def test_country_list_is_printed_with_classname_and_ids(self):
         # Given
         countries = CatalogList([test_country1, test_country2])
 
@@ -132,7 +132,7 @@ class TestCountry(unittest.TestCase):
         assert countries_str == "[<Country('{id1}')>, <Country('{id2}')>]" \
                                 .format(id1=db_country1['id'], id2=db_country2['id'])
 
-    def test_country_list_is_represented_with_ids(self):
+    def test_country_list_is_represented_with_classname_and_ids(self):
         # Given
         countries = CatalogList([test_country1, test_country2])
 

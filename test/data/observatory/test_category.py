@@ -75,7 +75,7 @@ class TestCategory(unittest.TestCase):
         assert isinstance(category_dict, dict)
         assert category_dict == db_category1
 
-    def test_category_is_represented_with_id(self):
+    def test_category_is_represented_with_classname_and_id(self):
         # Given
         category = Category(db_category1)
 
@@ -108,7 +108,7 @@ class TestCategory(unittest.TestCase):
         assert isinstance(categories, CatalogList)
         assert categories == test_categories
 
-    def test_category_list_is_printed_with_classname(self):
+    def test_category_list_is_printed_with_classname_and_ids(self):
         # Given
         categories = CatalogList([test_category1, test_category2])
 
@@ -119,7 +119,7 @@ class TestCategory(unittest.TestCase):
         assert categories_str == "[<Category('{id1}')>, <Category('{id2}')>]" \
                                  .format(id1=db_category1['id'], id2=db_category2['id'])
 
-    def test_category_list_is_represented_with_ids(self):
+    def test_category_list_is_represented_with_classname_and_ids(self):
         # Given
         categories = CatalogList([test_category1, test_category2])
 

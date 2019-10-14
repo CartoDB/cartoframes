@@ -5,6 +5,9 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 
 
+_DESCRIPTION_LENGTH_LIMIT = 20
+
+
 class Variable(CatalogEntity):
 
     entity_repo = get_variable_repo()
@@ -63,3 +66,13 @@ class Variable(CatalogEntity):
     def dataset_name(self):
         _, _, dataset, _ = self.id.split('.')
         return dataset
+
+    def __repr__(self):
+        descr = self.description
+
+        if len(descr) > _DESCRIPTION_LENGTH_LIMIT:
+            descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
+
+        return "<{classname}('{entity_id}','{descr}')>"\
+               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)
+

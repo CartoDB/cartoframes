@@ -92,7 +92,7 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable_dict, dict)
         assert variable_dict == expected_dict
 
-    def test_variable_is_represented_with_id(self):
+    def test_variable_is_represented_with_slug_and_description(self):
         # Given
         variable = Variable(db_variable1)
 
@@ -100,7 +100,8 @@ class TestVariable(unittest.TestCase):
         variable_repr = repr(variable)
 
         # Then
-        assert variable_repr == "<Variable('{id}')>".format(id=db_variable1['slug'])
+        assert variable_repr == "<Variable('{slug}','{descr}')>"\
+                                .format(slug=db_variable1['slug'], descr=db_variable1['description'])
 
     def test_variable_is_printed_with_classname(self):
         # Given
@@ -125,27 +126,31 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
-    def test_variable_list_is_printed_with_classname(self):
+    def test_variable_list_is_printed_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
+        shorten_description = test_variable2.description[0:20] + '...'
 
         # When
         variables_str = str(variables)
 
         # Then
-        assert variables_str == "[<Variable('{id1}')>, <Variable('{id2}')>]" \
-                                .format(id1=db_variable1['slug'], id2=db_variable2['slug'])
+        assert variables_str == "[<Variable('{id1}','{descr1}')>, <Variable('{id2}','{descr2}')>]" \
+                                .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
+                                        id2=db_variable2['slug'], descr2=shorten_description)
 
-    def test_variable_list_is_represented_with_ids(self):
+    def test_variable_list_is_represented_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
+        shorten_description = test_variable2.description[0:20] + '...'
 
         # When
         variables_repr = repr(variables)
 
         # Then
-        assert variables_repr == "[<Variable('{id1}')>, <Variable('{id2}')>]"\
-                                 .format(id1=db_variable1['slug'], id2=db_variable2['slug'])
+        assert variables_repr == "[<Variable('{id1}','{descr1}')>, <Variable('{id2}','{descr2}')>]" \
+                                .format(id1=db_variable1['slug'], descr1=db_variable1['description'],
+                                        id2=db_variable2['slug'], descr2=shorten_description)
 
     @patch.object(VariableRepository, 'get_by_id')
     def test_get_variable_by_id(self, mocked_repo):

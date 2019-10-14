@@ -147,7 +147,7 @@ class TestDataset(unittest.TestCase):
         assert isinstance(dataset_dict, dict)
         assert dataset_dict == expected_dict
 
-    def test_dataset_is_represented_with_id(self):
+    def test_dataset_is_represented_with_classname_and_slug(self):
         # Given
         dataset = CatalogDataset(db_dataset1)
 
@@ -193,7 +193,7 @@ class TestDataset(unittest.TestCase):
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
 
-    def test_dataset_list_is_printed_with_classname(self):
+    def test_dataset_list_is_printed_with_classname_and_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
@@ -204,7 +204,7 @@ class TestDataset(unittest.TestCase):
         assert datasets_str == "[<CatalogDataset('{id1}')>, <CatalogDataset('{id2}')>]"\
                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
-    def test_dataset_list_is_represented_with_slugs(self):
+    def test_dataset_list_is_represented_with_classname_and_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
