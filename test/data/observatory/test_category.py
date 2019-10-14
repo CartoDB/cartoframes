@@ -30,6 +30,18 @@ class TestCategory(unittest.TestCase):
         assert isinstance(category, Category)
         assert category == test_category1
 
+    def test_get_category_by_id_from_categories_list(self):
+        # Given
+        categories = CatalogList([test_category1, test_category2])
+
+        # When
+        category = categories.get(test_category1.id)
+
+        # Then
+        assert isinstance(category, object)
+        assert isinstance(category, Category)
+        assert category == test_category1
+
     @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_category(self, mocked_repo):
         # Given
@@ -146,19 +158,6 @@ class TestCategory(unittest.TestCase):
         # Then
         assert categories_repr == "[<Category('{id1}')>, <Category('{id2}')>]"\
                                   .format(id1=db_category1['id'], id2=db_category2['id'])
-
-    @patch.object(CategoryRepository, 'get_by_id')
-    def test_get_category_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_category1
-
-        # When
-        category = Category.get('cat1')
-
-        # Then
-        assert isinstance(category, object)
-        assert isinstance(category, Category)
-        assert category == test_category1
 
     def test_categories_items_are_obtained_as_category(self):
         # Given
