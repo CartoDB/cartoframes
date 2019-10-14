@@ -47,6 +47,9 @@ def display_subscription_form(id, type, credentials):
     if getattr(info, 'type') != type:
         raise Exception('Incorrect type returned.')
 
+    if getattr(info, 'subscription_list_price') is None:
+        raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
+
     if is_ipython_notebook():
         display_subscription_form_notebook(id, _resource_to_dict(info), credentials)
     else:
