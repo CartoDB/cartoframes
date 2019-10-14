@@ -142,13 +142,14 @@ class TestDataset(unittest.TestCase):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = Dataset(db_dataset1)
+        expected_dict = {key: value for key, value in db_dataset1.items() if key is not 'summary_jsonb'}
 
         # When
         dataset_dict = dataset.to_dict()
 
         # Then
         assert isinstance(dataset_dict, dict)
-        assert dataset_dict == db_dataset1
+        assert dataset_dict == expected_dict
 
     def test_dataset_is_represented_with_id(self):
         # Given

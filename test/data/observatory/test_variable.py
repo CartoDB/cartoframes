@@ -110,13 +110,14 @@ class TestVariable(unittest.TestCase):
     def test_variable_is_exported_as_dict(self):
         # Given
         variable = Variable(db_variable1)
+        expected_dict = {key: value for key, value in db_variable1.items() if key is not 'summary_jsonb'}
 
         # When
         variable_dict = variable.to_dict()
 
         # Then
         assert isinstance(variable_dict, dict)
-        assert variable_dict == db_variable1
+        assert variable_dict == expected_dict
 
     def test_variable_is_represented_with_id(self):
         # Given
