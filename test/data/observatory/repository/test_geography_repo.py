@@ -9,9 +9,9 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import Mock, patch, call
 except ImportError:
-    from mock import Mock, patch
+    from mock import Mock, patch, call
 
 
 class TestGeographyRepo(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestGeographyRepo(unittest.TestCase):
         geographies = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
         mocked_get_geographies.assert_called_once_with(None)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
