@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+
 from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
 from .entity_repo import EntityRepository
 
@@ -62,7 +63,7 @@ class DatasetRepository(EntityRepository):
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
 

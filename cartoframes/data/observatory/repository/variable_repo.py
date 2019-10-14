@@ -42,7 +42,7 @@ class VariableRepository(EntityRepository):
             'agg_method': self._normalize_field(row, 'agg_method'),
             'variable_group_id': self._normalize_field(row, 'variable_group_id'),
             'starred': self._normalize_field(row, 'starred'),
-            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
 
