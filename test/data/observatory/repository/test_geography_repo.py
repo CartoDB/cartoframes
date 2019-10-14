@@ -42,6 +42,32 @@ class TestGeographyRepo(unittest.TestCase):
         mocked_repo.assert_called_once_with(None)
         assert geographies is None
 
+    @patch.object(RepoClient, 'get_geographies_joined_datasets')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        geographies = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'country_id': 'usa',
+            'category_id': 'demographics'
+        })
+        assert geographies == test_geographies
+
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_id(self, mocked_repo):
         # Given
@@ -121,21 +147,6 @@ class TestGeographyRepo(unittest.TestCase):
 
         # Then
         mocked_repo.assert_called_once_with({'id': [db_geography1['id']], 'slug': [db_geography2['slug']]})
-        assert isinstance(geographies, CatalogList)
-        assert geographies == test_geographies
-
-    @patch.object(RepoClient, 'get_geographies_joined_datasets')
-    def test_get_by_country(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_geography1, db_geography2]
-        country_code = 'esp'
-        repo = GeographyRepository()
-
-        # When
-        geographies = repo.get_by_country(country_code)
-
-        # Then
-        mocked_repo.assert_called_once_with({'country_id': country_code})
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
