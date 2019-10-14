@@ -104,4 +104,17 @@ def geom_coverage(geography_id):
 
 
 def histogram(data):
-    return data['histogram']
+
+    range_element = [round(element['min_range'], 2) for element in data['histogram']]
+    count = [element['count'] for element in data['histogram']]
+
+    count_normalized = [element/sum(count) for element in count]
+
+    position = list(range(len(range_element)))
+    plt.figure(figsize=(12, 7))
+    plt.bar(position, count_normalized, align='center', alpha=0.5, width=abs(position[1] - position[0]))
+    plt.xticks(position, range_element)
+
+    plt.title('Histogram')
+    plt.xticks(rotation=60)
+    plt.show()
