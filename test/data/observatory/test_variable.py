@@ -28,7 +28,31 @@ class TestVariable(unittest.TestCase):
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
-    @patch.object(DatasetRepository, 'get_by_variable')
+    def test_get_variable_by_id_from_variables_list(self):
+        # Given
+        variables = CatalogList([test_variable1, test_variable2])
+
+        # When
+        variable = variables.get(test_variable1.id)
+
+        # Then
+        assert isinstance(variable, object)
+        assert isinstance(variable, Variable)
+        assert variable == test_variable1
+
+    def test_get_variable_by_slug_from_variables_list(self):
+        # Given
+        variables = CatalogList([test_variable1, test_variable2])
+
+        # When
+        variable = variables.get(test_variable1.slug)
+
+        # Then
+        assert isinstance(variable, object)
+        assert isinstance(variable, Variable)
+        assert variable == test_variable1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_variable(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -37,6 +61,7 @@ class TestVariable(unittest.TestCase):
         datasets = test_variable1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'variable_id': test_variable1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -47,6 +72,7 @@ class TestVariable(unittest.TestCase):
 
         # When
         variable_id = variable.id
+        slug = variable.slug
         name = variable.name
         description = variable.description
         column_name = variable.column_name
@@ -59,6 +85,7 @@ class TestVariable(unittest.TestCase):
 
         # Then
         assert variable_id == db_variable1['id']
+        assert slug == db_variable1['slug']
         assert name == db_variable1['name']
         assert description == db_variable1['description']
         assert column_name == db_variable1['column_name']
@@ -145,19 +172,6 @@ class TestVariable(unittest.TestCase):
         # Then
         assert variables_repr == "[<Variable('{id1}')>, <Variable('{id2}')>]"\
                                  .format(id1=db_variable1['slug'], id2=db_variable2['slug'])
-
-    @patch.object(VariableRepository, 'get_by_id')
-    def test_get_variable_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_variable1
-
-        # When
-        variable = Variable.get(test_variable1.id)
-
-        # Then
-        assert isinstance(variable, object)
-        assert isinstance(variable, Variable)
-        assert variable == test_variable1
 
     def test_variables_items_are_obtained_as_variable(self):
         # Given

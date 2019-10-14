@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 
+
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.geography_repo import get_geography_repo
+from .repository.constants import DATASET_FILTER
 
 import geopandas as gpd
 import pandas as pd
@@ -17,11 +19,11 @@ class Dataset(CatalogEntity):
 
     @property
     def variables(self):
-        return get_variable_repo().get_by_dataset(self.id)
+        return get_variable_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def variables_groups(self):
-        return get_variable_group_repo().get_by_dataset(self.id)
+        return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def name(self):

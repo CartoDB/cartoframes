@@ -9,7 +9,6 @@ from ...clients import SQLClient
 from ....auth import Credentials
 from ..utils import get_subscription_ids
 
-
 class RepoClient(object):
 
     __instance = None
@@ -86,7 +85,7 @@ class RepoClient(object):
         conditions = extra_conditions or []
 
         if filters is not None and len(filters) > 0:
-            conditions.extend([self._generate_condition(key, value) for key, value in filters.items()])
+            conditions.extend([self._generate_condition(key, value) for key, value in sorted(filters.items())])
 
         return conditions
 
@@ -105,7 +104,7 @@ class RepoClient(object):
 
     def _fetch_purchased_datasets(self):
         api_key_auth_client = self._user_credentials.get_api_key_auth_client()
-        do_manager = DODatasetManager(api_key_auth_client)
+        do_manager = DOSubscriptionManager(api_key_auth_client)
         if do_manager is not None:
             return do_manager.all()
         return []
