@@ -7,6 +7,7 @@ from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import DATASET_FILTER
+from .utils import get_subscription_ids, display_subscription_form
 
 import geopandas as gpd
 import pandas as pd
@@ -143,5 +144,10 @@ class Dataset(CatalogEntity):
         """
 
         _credentials = self._get_credentials(credentials)
+
+        subscribed_ids = get_subscription_ids(_credentials)
+
+        if self.id in subscribed_ids:
+            raise Exception('The dataset is already purchased.')
 
         display_subscription_form(self.id, 'dataset', _credentials)
