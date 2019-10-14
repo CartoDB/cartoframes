@@ -6,6 +6,7 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import GEOGRAPHY_FILTER
 from .subscriptions import get_subscription_ids
+from .subscription_info import fetch_subscription_info, SubscriptionInfo
 from .utils import display_subscription_form
 
 
@@ -74,7 +75,7 @@ class Geography(CatalogEntity):
         return self._download(credentials)
 
     def subscribe(self, credentials=None):
-        """Subscribe to a Dataset.
+        """Subscribe to a Geography.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -91,3 +92,17 @@ class Geography(CatalogEntity):
             raise Exception('The geography is already purchased.')
 
         display_subscription_form(self.id, 'geography', _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Geography.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return SubscriptionInfo(fetch_subscription_info(self.id, 'geography', _credentials))
