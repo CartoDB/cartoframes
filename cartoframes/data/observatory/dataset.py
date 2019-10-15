@@ -7,6 +7,7 @@ from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import DATASET_FILTER
+from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_coverage
 from . import subscription_info
 from . import subscriptions
 from . import utils
@@ -83,7 +84,29 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def summary(self):
-        return self.data['summary_jsonb']
+        return self.data['summary_json']
+
+    def head(self):
+        data = self.data['summary_json']
+        return head(self.__class__, data)
+
+    def tail(self):
+        data = self.data['summary_json']
+        return tail(self.__class__, data)
+
+    def counts(self):
+        data = self.data['summary_json']
+        return counts(data)
+
+    def fields_by_type(self):
+        data = self.data['summary_json']
+        return fields_by_type(data)
+
+    def geom_coverage(self):
+        return geom_coverage(self.geography)
+
+    def describe(self):
+        return dataset_describe(self.variables)
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
