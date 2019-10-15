@@ -76,9 +76,8 @@ class TestEnrichmentService(unittest.TestCase):
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
         expected_queries = ['''SELECT data_table.enrichment_id,
-            CRMCYBURG,
-            ST_Area(enrichment_geo_table.geom) AS CRMCYBURG_area,
-            NULL AS CRMCYBURG_population
+            enrichment_table.CRMCYBURG,
+            ST_Area(enrichment_geo_table.geom) AS view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018_area
         FROM `carto-do-customers.{user_dataset}\
             .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
@@ -111,9 +110,8 @@ class TestEnrichmentService(unittest.TestCase):
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
         expected_queries = ['''SELECT data_table.enrichment_id,
-            CRMCYBURG,
-            ST_Area(enrichment_geo_table.geom) AS CRMCYBURG_area,
-            NULL AS CRMCYBURG_population
+            enrichment_table.CRMCYBURG,
+            ST_Area(enrichment_geo_table.geom) AS view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018_area,
         FROM `carto-do-customers.{user_dataset}\
             .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
@@ -158,7 +156,7 @@ class TestEnrichmentService(unittest.TestCase):
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
-        expected_queries = ['''SELECT data_table.enrichment_id, avg(CRMCYBURG *\
+        expected_queries = ['''SELECT data_table.enrichment_id, avg(enrichment_table.CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
                   / ST_area(data_table.{geometry_column}))) as CRMCYBURG
         FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
@@ -194,7 +192,7 @@ class TestEnrichmentService(unittest.TestCase):
 
         queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
 
-        expected_queries = ['''SELECT data_table.enrichment_id, avg(CRMCYBURG *\
+        expected_queries = ['''SELECT data_table.enrichment_id, avg(enrichment_table.CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
                   / ST_area(data_table.{geometry_column}))) as CRMCYBURG
         FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
