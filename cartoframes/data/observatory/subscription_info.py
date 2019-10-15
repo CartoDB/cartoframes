@@ -8,7 +8,7 @@ class SubscriptionInfo(object):
         self._raw_data = raw_data
 
     def __repr__(self):
-        props = ['id', 'estimated_delivery_days', 'price',
+        props = ['id', 'estimated_delivery_days', 'subscription_list_price',
                  'tos', 'tos_link', 'licenses', 'licenses_link', 'rights']
         return 'Properties: {}'.format(', '.join(props))
 
@@ -21,7 +21,7 @@ class SubscriptionInfo(object):
         return self._raw_data.get('estimated_delivery_days')
 
     @property
-    def price(self):
+    def subscription_list_price(self):
         return self._raw_data.get('subscription_list_price')
 
     @property

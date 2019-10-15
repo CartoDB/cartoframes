@@ -156,3 +156,14 @@ db_variable_group2 = {
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)
 test_variables_groups = CatalogList([test_variable_group1, test_variable_group2])
+
+test_subscription_info = {
+    'id': 'id',
+    'estimated_delivery_days': 0,
+    'subscription_list_price': 100,
+    'tos': 'tos',
+    'tos_link': 'tos_link',
+    'licenses': 'licenses',
+    'licenses_link': 'licenses_link',
+    'rights': 'rights'
+}

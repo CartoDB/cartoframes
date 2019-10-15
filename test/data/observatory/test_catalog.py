@@ -169,7 +169,7 @@ class TestCatalog(unittest.TestCase):
 
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
-    @patch('cartoframes.auth.get_default_credentials')
+    @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_subscriptions_default_credentials(self, mocked_credentials, mocked_geographies, mocked_datasets):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]

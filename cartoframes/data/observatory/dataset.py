@@ -6,9 +6,9 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
-from .subscriptions import get_subscription_ids
-from .subscription_info import fetch_subscription_info, SubscriptionInfo
-from .utils import display_subscription_form, display_existing_subscription_message
+from . import subscription_info
+from . import subscriptions
+from . import utils
 
 DATASET_TYPE = 'dataset'
 
@@ -107,13 +107,12 @@ class Dataset(CatalogEntity):
         """
 
         _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
 
-        subscribed_ids = get_subscription_ids(_credentials)
-
-        if self.id in subscribed_ids:
-            display_existing_subscription_message(self.id, DATASET_TYPE)
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, DATASET_TYPE)
         else:
-            display_subscription_form(self.id, DATASET_TYPE, _credentials)
+            utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Dataset.
@@ -127,4 +126,5 @@ class Dataset(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        return SubscriptionInfo(fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
