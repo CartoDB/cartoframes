@@ -156,7 +156,7 @@ class TestVariable(unittest.TestCase):
     def test_variable_list_is_printed_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
-        shorten_description = test_variable2.description[0:20] + '...'
+        shorten_description = test_variable2.description[0:30] + '...'
 
         # When
         variables_str = str(variables)
@@ -169,7 +169,7 @@ class TestVariable(unittest.TestCase):
     def test_variable_list_is_represented_correctly(self):
         # Given
         variables = CatalogList([test_variable1, test_variable2])
-        shorten_description = test_variable2.description[0:20] + '...'
+        shorten_description = test_variable2.description[0:30] + '...'
 
         # When
         variables_repr = repr(variables)
