@@ -5,9 +5,9 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import GEOGRAPHY_FILTER
-from .subscriptions import get_subscription_ids
-from .subscription_info import fetch_subscription_info, SubscriptionInfo
-from .utils import display_subscription_form, display_existing_subscription_message
+from . import subscription_info
+from . import subscriptions
+from . import utils
 
 GEOGRAPHY_TYPE = 'geography'
 
@@ -87,13 +87,12 @@ class Geography(CatalogEntity):
         """
 
         _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
 
-        subscribed_ids = get_subscription_ids(_credentials)
-
-        if self.id in subscribed_ids:
-            display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)
         else:
-            display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
+            utils.display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
         """Get the subscription information of a Geography.
@@ -107,4 +106,5 @@ class Geography(CatalogEntity):
 
         _credentials = self._get_credentials(credentials)
 
-        return SubscriptionInfo(fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))

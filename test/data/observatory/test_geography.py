@@ -1,3 +1,4 @@
+import pytest
 import unittest
 import pandas as pd
 
@@ -10,7 +11,9 @@ from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from .examples import test_geography1, test_geographies, test_datasets, db_geography1, test_geography2, db_geography2
+from cartoframes.data.observatory.subscription_info import SubscriptionInfo
+from .examples import test_geography1, test_geographies, test_datasets, db_geography1, \
+    test_geography2, db_geography2, test_subscription_info
 from .mocks import BigQueryClientMock
 
 try:
@@ -223,7 +226,7 @@ class TestGeography(unittest.TestCase):
 
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.entity._get_bigquery_client')
-    def test_dataset_download(self, mocked_bq_client, mocked_repo):
+    def test_geography_download(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
 
@@ -242,7 +245,7 @@ class TestGeography(unittest.TestCase):
 
     @patch.object(GeographyRepository, 'get_by_id')
     @patch('cartoframes.data.observatory.entity._get_bigquery_client')
-    def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
+    def test_geography_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
 
@@ -253,6 +256,125 @@ class TestGeography(unittest.TestCase):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = Geography.get(test_geography1.id)
+        geography = Geography.get(test_geography1.id)
         with self.assertRaises(CartoException):
-            dataset.download(credentials)
+            geography.download(credentials)
+
+    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    def test_geography_subscribe(self, mock_display_message, mock_display_form, mock_subscription_ids):
+        # Given
+        expected_id = 'z'
+        expected_subscribed_ids = ['a', 'b', 'c']
+        mock_subscription_ids.return_value = expected_subscribed_ids
+        credentials = Credentials('user', '1234')
+        geography = Geography(db_geography1)
+        geography.data['id'] = expected_id
+
+        # When
+        geography.subscribe(credentials)
+
+        # Then
+        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_display_form.assert_called_once_with(expected_id, 'geography', credentials)
+        assert not mock_display_message.called
+
+    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    def test_geography_subscribe_existing(self, mock_display_message, mock_display_form, mock_subscription_ids):
+        # Given
+        expected_id = 'a'
+        expected_subscribed_ids = ['a', 'b', 'c']
+        mock_subscription_ids.return_value = expected_subscribed_ids
+        credentials = Credentials('user', '1234')
+        geography = Geography(db_geography1)
+        geography.data['id'] = expected_id
+
+        # When
+        geography.subscribe(credentials)
+
+        # Then
+        mock_subscription_ids.assert_called_once_with(credentials)
+        mock_display_message.assert_called_once_with(expected_id, 'geography')
+        assert not mock_display_form.called
+
+    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.utils.display_subscription_form')
+    @patch('cartoframes.auth.defaults.get_default_credentials')
+    def test_geography_subscribe_default_credentials(self, mocked_credentials, mock_display_form, mock_subscription_ids):
+        # Given
+        expected_credentials = Credentials('user', '1234')
+        mocked_credentials.return_value = expected_credentials
+        geography = Geography(db_geography1)
+
+        # When
+        geography.subscribe()
+
+        # Then
+        mock_subscription_ids.assert_called_once_with(expected_credentials)
+        mock_display_form.assert_called_once_with(db_geography1['id'], 'geography', expected_credentials)
+
+    def test_geography_subscribe_wrong_credentials(self):
+        # Given
+        wrong_credentials = 1234
+        geography = Geography(db_geography1)
+
+        # When
+        with pytest.raises(ValueError) as e:
+            geography.subscribe(wrong_credentials)
+
+        # Then
+        assert str(e.value) == '`credentials` must be a Credentials class instance'
+
+    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    def test_geography_subscription_info(self, mock_fetch):
+        # Given
+        mock_fetch.return_value = test_subscription_info
+        credentials = Credentials('user', '1234')
+        geography = Geography(db_geography1)
+
+        # When
+        info = geography.subscription_info(credentials)
+
+        # Then
+        mock_fetch.assert_called_once_with(db_geography1['id'], 'geography', credentials)
+        assert isinstance(info, SubscriptionInfo)
+        assert info.id == test_subscription_info['id']
+        assert info.estimated_delivery_days == test_subscription_info['estimated_delivery_days']
+        assert info.subscription_list_price == test_subscription_info['subscription_list_price']
+        assert info.tos == test_subscription_info['tos']
+        assert info.tos_link == test_subscription_info['tos_link']
+        assert info.licenses == test_subscription_info['licenses']
+        assert info.licenses_link == test_subscription_info['licenses_link']
+        assert info.rights == test_subscription_info['rights']
+        assert str(info) == 'Properties: id, estimated_delivery_days, ' + \
+                            'subscription_list_price, tos, tos_link, ' + \
+                            'licenses, licenses_link, rights'
+
+    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    @patch('cartoframes.auth.defaults.get_default_credentials')
+    def test_geography_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
+        # Given
+        expected_credentials = Credentials('user', '1234')
+        mocked_credentials.return_value = expected_credentials
+        geography = Geography(db_geography1)
+
+        # When
+        geography.subscription_info()
+
+        # Then
+        mock_fetch.assert_called_once_with(db_geography1['id'], 'geography', expected_credentials)
+
+    def test_geography_subscription_info_wrong_credentials(self):
+        # Given
+        wrong_credentials = 1234
+        geography = Geography(db_geography1)
+
+        # When
+        with pytest.raises(ValueError) as e:
+            geography.subscription_info(wrong_credentials)
+
+        # Then
+        assert str(e.value) == '`credentials` must be a Credentials class instance'
