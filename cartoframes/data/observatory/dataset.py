@@ -111,7 +111,7 @@ class Dataset(CatalogEntity):
         subscribed_ids = get_subscription_ids(_credentials)
 
         if self.id in subscribed_ids:
-            display_existing_subscription_message(DATASET_TYPE)
+            display_existing_subscription_message(self.id, DATASET_TYPE)
         else:
             display_subscription_form(self.id, DATASET_TYPE, _credentials)
 

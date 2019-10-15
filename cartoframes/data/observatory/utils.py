@@ -7,10 +7,11 @@ from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
 
 
-def display_existing_subscription_message(type):
+def display_existing_subscription_message(id, type):
     message = '''
-    This {} has already been purchased.
-    '''.format(type)
+    <h3>Subscription already purchased</h3>
+    The {0} <b>{1}</b> has already been purchased.
+    '''.format(type, id)
     text = HTML(message)
     display(text)
 
@@ -44,10 +45,10 @@ def display_subscription_form_notebook(id, info, credentials):
     '''.format(**info)
 
     ok_response = '''
-    <b>Congrats!</b><br>{type} {id} has been requested and it will be available in your account soon.
+    <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it will be available in your account soon.
     '''.format(**info)
     cancel_message = '''
-    {type} {id} has not been purchased.
+    The {type} <b>{id}</b> has not been purchased.
     '''.format(**info)
 
     text, buttons = _create_notebook_form(id, info.get('type'), message, ok_response, cancel_message, credentials)
