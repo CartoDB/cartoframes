@@ -37,7 +37,7 @@ db_geography1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_geography2 = {
     'id': 'carto-do-public.tiger.geography_esp_municipalities_2019',
@@ -51,7 +51,7 @@ db_geography2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
@@ -73,7 +73,7 @@ db_dataset1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_dataset2 = {
     'id': 'carto-do-public.project.basicstats-municipalities',
@@ -91,7 +91,7 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_dataset1 = CatalogDataset(db_dataset1)
 test_dataset2 = CatalogDataset(db_dataset2)
@@ -108,7 +108,7 @@ db_variable1 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_variable2 = {
     'id': 'carto-do.variable.var2',
@@ -121,7 +121,7 @@ db_variable2 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
