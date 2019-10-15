@@ -1,14 +1,18 @@
 from __future__ import absolute_import
 
+from .dataset import CatalogDataset
 from .entity import is_slug_value
 from .category import Category
 from .country import Country
 from .geography import Geography
 from .subscriptions import Subscriptions
+<<<<<<< HEAD
 from .dataset import CatalogDataset
+=======
+>>>>>>> 68a3fbfd2bccac242afa46c40315ad8c77278a8a
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
-from ...auth import Credentials, get_default_credentials
+from ...auth import Credentials, defaults
 
 
 class Catalog(object):
@@ -131,14 +135,15 @@ class Catalog(object):
 
         """
 
-        _credentials = credentials or get_default_credentials()
+        _no_filters = {}
+        _credentials = credentials or defaults.get_default_credentials()
 
         if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
-            CatalogDataset.get_all(self.filters, _credentials),
-            Geography.get_all(self.filters, _credentials)
+            CatalogDataset.get_all(_no_filters, _credentials),
+            Geography.get_all(_no_filters, _credentials)
         )
 
     def datasets_by_geography(self, filter_dataset):
@@ -148,3 +153,4 @@ class Catalog(object):
         """
 
         return CatalogDataset.datasets_by_geography(filter_dataset)
+            

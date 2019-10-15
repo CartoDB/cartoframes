@@ -7,7 +7,7 @@ from ....auth import Credentials, get_default_credentials
 import geopandas as gpd
 from ...clients import SQLClient
 from ....auth import Credentials
-from ..utils import get_subscription_ids
+from ..subscriptions import get_subscription_ids
 
 class RepoClient(object):
 

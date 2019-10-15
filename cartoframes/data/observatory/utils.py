@@ -1,64 +1,54 @@
 from __future__ import absolute_import
 
-# TODO: This file contains both the subscriptions endpoint functions
-#       and the display form functions. Maybe we should consider to
-#       separate this content, rename the file or refactor in classes.
-
-from carto.do_subscriptions import DOSubscriptionManager, DOSubscriptionCreationManager
-from carto.do_subscription_info import DOSubscriptionInfoManager
+from .subscriptions import trigger_subscription
+from .subscription_info import fetch_subscription_info
 
 
-def get_subscription_ids(credentials):
-    purchased_datasets = fetch_subscriptions(credentials)
-    purchased_dataset_ids = list(map(lambda pd: pd.id, purchased_datasets))
-    return ','.join(["'" + id + "'" for id in purchased_dataset_ids])
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False
 
 
-def fetch_subscriptions(credentials):
-    if credentials:
-        api_key_auth_client = credentials.get_api_key_auth_client()
-        do_manager = DOSubscriptionManager(api_key_auth_client)
-        if do_manager is not None:
-            return do_manager.all()
-    return []
+if is_ipython_notebook():
+    from IPython.display import display
+    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
 
 
-def fetch_subscription_info(id, type, credentials):
-    api_key_auth_client = credentials.get_api_key_auth_client()
-    do_manager = DOSubscriptionInfoManager(api_key_auth_client)
-    return do_manager.get(id, type)
-    # TODO: should we return as a SubscriptionInfo instance?
-
-
-def trigger_subscription(id, type, credentials):
-    api_key_auth_client = credentials.get_api_key_auth_client()
-    do_manager = DOSubscriptionCreationManager(api_key_auth_client)
-    # TODO: proper error handling
-    return do_manager.create(id=id, type=type)
-
-
-def _resource_to_dict(resource):
-    return {field: getattr(resource, field) for field in resource.fields}
+def display_existing_subscription_message(id, type):
+    if is_ipython_notebook():
+        message = '''
+        <h3>Subscription already purchased</h3>
+        The {0} <b>{1}</b> has already been purchased.
+        '''.format(type, id)
+        text = HTML(message)
+        display(text)
 
 
 def display_subscription_form(id, type, credentials):
     info = fetch_subscription_info(id, type, credentials)
 
-    if getattr(info, 'type') != type:
+    if info.get('type') != type:
         raise Exception('Incorrect type returned.')
 
-    if getattr(info, 'subscription_list_price') is None:
+    if info.get('subscription_list_price') is None:
         raise Exception('This {} has incomplete information. Please contact to support@carto.com.'.format(type))
 
     if is_ipython_notebook():
-        display_subscription_form_notebook(id, _resource_to_dict(info), credentials)
+        display_subscription_form_notebook(id, info, credentials)
     else:
         display_subscription_form_cli()
 
 
 def display_subscription_form_notebook(id, info, credentials):
-    from IPython.display import display
-
     message = '''
     <h3>Subscription contract</h3>
     You are about to subscribe to <b>{id}</b>.
@@ -73,10 +63,10 @@ def display_subscription_form_notebook(id, info, credentials):
     '''.format(**info)
 
     ok_response = '''
-    <b>Congrats!</b><br>{type} {id} has been requested and it will be available in your account soon.
+    <b>Congrats!</b><br>The {type} <b>{id}</b> has been requested and it will be available in your account soon.
     '''.format(**info)
     cancel_message = '''
-    {type} {id} has not been purchased.
+    The {type} <b>{id}</b> has not been purchased.
     '''.format(**info)
 
     text, buttons = _create_notebook_form(id, info.get('type'), message, ok_response, cancel_message, credentials)
@@ -85,9 +75,6 @@ def display_subscription_form_notebook(id, info, credentials):
 
 
 def _create_notebook_form(id, type, message, ok_response, cancel_message, credentials):
-    from IPython.display import display
-    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
-
     text = HTML(message)
 
     button_yes = Button(
@@ -123,17 +110,3 @@ def _create_notebook_form(id, type, message, ok_response, cancel_message, creden
 
 def display_subscription_form_cli():
     print('This method is not yet implemented in CLI')
-
-
-def is_ipython_notebook():
-    """
-    Detect whether we are in a Jupyter notebook.
-    """
-    try:
-        cfg = get_ipython().config
-        if 'IPKernelApp' in cfg:
-            return True
-        else:
-            return False
-    except NameError:
-        return False

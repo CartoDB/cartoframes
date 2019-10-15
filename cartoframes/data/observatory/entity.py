@@ -6,7 +6,7 @@ from google.api_core.exceptions import NotFound
 from carto.exceptions import CartoException
 
 from ..clients.bigquery_client import BigQueryClient
-from ...auth import Credentials, get_default_credentials
+from ...auth import Credentials, defaults
 
 try:
     from abc import ABC, abstractmethod
@@ -92,7 +92,7 @@ class CatalogEntity(ABC):
         return file_path
 
     def _get_credentials(self, credentials=None):
-        _credentials = credentials or get_default_credentials()
+        _credentials = credentials or defaults.get_default_credentials()
 
         if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')

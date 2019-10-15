@@ -1,8 +1,16 @@
 
+from carto.do_subscription_info import DOSubscriptionInfoManager
+
+
 class SubscriptionInfo(object):
 
     def __init__(self, raw_data):
         self._raw_data = raw_data
+
+    def __repr__(self):
+        props = ['id', 'estimated_delivery_days', 'subscription_list_price',
+                 'tos', 'tos_link', 'licenses', 'licenses_link', 'rights']
+        return 'Properties: {}'.format(', '.join(props))
 
     @property
     def id(self):
@@ -35,3 +43,13 @@ class SubscriptionInfo(object):
     @property
     def rights(self):
         return self._raw_data.get('rights')
+
+
+def fetch_subscription_info(id, type, credentials):
+    api_key_auth_client = credentials.get_api_key_auth_client()
+    do_manager = DOSubscriptionInfoManager(api_key_auth_client)
+    return _resource_to_dict(do_manager.get(id, type))
+
+
+def _resource_to_dict(resource):
+    return {field: getattr(resource, field) for field in resource.fields}

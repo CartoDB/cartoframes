@@ -1,18 +1,22 @@
 import unittest
 
 from cartoframes.auth import Credentials
+<<<<<<< HEAD
 from cartoframes.data.observatory.dataset import CatalogDataset
+=======
+
+>>>>>>> 68a3fbfd2bccac242afa46c40315ad8c77278a8a
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import Mock, patch, call
 except ImportError:
-    from mock import Mock, patch
+    from mock import Mock, patch, call
 
 
 class TestDatasetRepo(unittest.TestCase):
@@ -43,7 +47,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
         mocked_get_datasets.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -97,6 +101,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
+        print(requested_id)
         dataset = repo.get_by_id(requested_id)
 
         # Then
