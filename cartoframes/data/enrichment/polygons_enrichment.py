@@ -3,22 +3,127 @@ from __future__ import absolute_import
 from .enrichment_service import enrich
 
 
-# TODO: process column name in metadata, remove spaces and points
-
-
-def enrich_polygons(data, variables, data_geom_column='geometry', agg_operators=dict(),
+def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
                     filters=dict(), credentials=None):
     """enrich_polygons
 
-    This method is responsible for # TODO
+    Enrich a polygons dataset
+
+    This method allows you to enrich your dataset with columns from our data, intersecting
+    your polygons with our geographies. When a polygon intersects with multiple geographies of our
+    dataset, the proportional part of the intersection will be used to interpolate the quantity of the
+    polygon value intersected, aggregating them with the operator provided by `agg_operators` argument.
+
+
+    Examples:
+
+        Enrich a polygons dataset with Catalog classes and default aggregation methods:
+
+        .. code::
+
+            from data.observatory import enrichment
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            variables = Catalog().country('usa').category('demographics').datasets[0].variables
+
+            dataset_enrich = enrichment.enrich_polygons(dataset, variables)
+
+
+        Enrich a polygons dataset with list of ids:
+
+        .. code::
+
+            from data.observatory import enrichment
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
+            dataset_enrich = enrichment.enrich_polygons(dataset, variables)
+
+
+        Enrich a polygons dataset filtering our data:
+
+        .. code::
+
+            from data.observatory import enrichment
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            variables = Catalog().country('usa').category('demographics').datasets[0].variables
+            filters = {'do_date': '2019-09-01'}
+
+            dataset_enrich = enrichment.enrich_polygons(dataset, variables, filters)
+        
+
+        Enrich a polygons dataset with custom aggregation methods:
+
+        .. code::
+
+            from data.observatory import enrichment
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
+            agg_operators = {'in_grades_1_to_4_quantile': 'SUM', 'in_school_quantile': 'AVG'}
+            dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
+
+        Enrich a polygons dataset with no aggregation methods:
+
+        .. code::
+
+            from data.observatory import enrichment
+            from cartoframes.auth import set_default_credentials
+
+            set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+
+            variables = [
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
+                'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+            ]
+
+            agg_operators = None
+            dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
+
 
     Args:
-        data: # TODO
-        variables: # TODO
-        agg_operators: # TODO
-        data_geom_column: # TODO
-        filters: # TODO
-        credentials: # TODO
+        data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
+        variables (Variable, CatalogList, list, str): variable(s), discovered through Catalog,
+            for enriching the `data` argument.
+        agg_operators (dict, str, None, optional): dictionary with either a `column` key
+            with the name of the column to aggregate or a `operator` value with the operator to group by.
+            If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
+            will be retrieved from metadata column.
+            If `agg_operators` is a string then all columns will be aggregated by this operator.
+            If `agg_operators` is `None` then no aggregations will be computed. All the values which
+            data geometry intersects with will be returned.
+        data_geom_column (str): string indicating the 4326 geometry column in `data`.
+        filters (dict, optional): dictionary with either a `column` key
+            with the name of the column to filter or a `value` value with the value to filter by.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            credentials of user account. If not provided,
+            a default credentials (if set with :py:meth:`set_default_credentials
+            <cartoframes.auth.set_default_credentials>`) will attempted to be
+            used.
+
+    Returns:
+        A dataframe as the provided one but with the variables to enrich appended to it
+
+        Note that if the geometry of the `data` you provide intersects with more than one geometry
+        in the enrichment dataset, the number of rows of the returned dataframe could be different
+        than the `data` argument number of rows.
     """
 
     data_enriched = enrich(_prepare_sql, data=data, variables=variables, agg_operators=agg_operators,

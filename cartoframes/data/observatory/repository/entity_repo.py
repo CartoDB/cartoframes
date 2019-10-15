@@ -1,5 +1,5 @@
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
+from cartoframes.data.observatory.entity import CatalogList, is_slug_value
 from .repo_client import RepoClient
 
 try:
@@ -11,12 +11,15 @@ except ImportError:
 
 class EntityRepository(ABC):
 
-    def __init__(self, id_field, filters, slug_field=None):
+    def __init__(self, id_field, filters=[], slug_field=None):
         self.client = RepoClient()
 
         self.id_field = id_field
-        self.slug_field = slug_field
         self.allowed_filters = filters + [id_field]
+        self.slug_field = slug_field
+
+        if slug_field:
+            self.allowed_filters.append(slug_field)
 
     def get_all(self, filters=None):
         return self._get_filtered_entities(filters)
@@ -30,6 +33,9 @@ class EntityRepository(ABC):
 
         data = self._map_row(result[0])
         return self._to_catalog_entity(data)
+
+    def get_by_id_list(self, id_list):
+        return self._get_filtered_entities(self._get_id_list_filters(id_list))
 
     def _get_filtered_entities(self, filters=None):
         cleaned_filters = self._get_filters(filters)
@@ -47,10 +53,32 @@ class EntityRepository(ABC):
             return cleaned_filters
 
     def _get_id_filter(self, id_):
-        if self.slug_field is not None and len(id_.split('.')) == 1:
+        if self.slug_field is not None and is_slug_value(id_):
             return {self.slug_field: id_}
 
         return {self.id_field: id_}
+
+    def _get_id_list_filters(self, id_list):
+        if self.slug_field is None:
+            return {self.id_field: id_list}
+
+        ids = []
+        slugs = []
+        filters = {}
+
+        for id_ in id_list:
+            if is_slug_value(id_):
+                slugs.append(id_)
+            else:
+                ids.append(id_)
+
+        if len(ids) > 0:
+            filters[self.id_field] = ids
+
+        if len(slugs) > 0:
+            filters[self.slug_field] = slugs
+
+        return filters
 
     @classmethod
     def _to_catalog_entity(cls, result):
