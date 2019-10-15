@@ -124,7 +124,7 @@ class Catalog(object):
                 Only required for the purchased datasets.
 
         Returns:
-            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+            :py:class:`CatalogDatasets <cartoframes.data.observatory.CatalogDatasets>`
 
         """
 
