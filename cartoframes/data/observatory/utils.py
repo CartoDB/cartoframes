@@ -1,19 +1,36 @@
 from __future__ import absolute_import
 
-from IPython.display import display
-from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
-
 from .subscriptions import trigger_subscription
 from .subscription_info import fetch_subscription_info
 
 
+def is_ipython_notebook():
+    """
+    Detect whether we are in a Jupyter notebook.
+    """
+    try:
+        cfg = get_ipython().config
+        if 'IPKernelApp' in cfg:
+            return True
+        else:
+            return False
+    except NameError:
+        return False
+
+
+if is_ipython_notebook():
+    from IPython.display import display
+    from ipywidgets.widgets import HTML, Layout, Button, GridspecLayout
+
+
 def display_existing_subscription_message(id, type):
-    message = '''
-    <h3>Subscription already purchased</h3>
-    The {0} <b>{1}</b> has already been purchased.
-    '''.format(type, id)
-    text = HTML(message)
-    display(text)
+    if is_ipython_notebook():
+        message = '''
+        <h3>Subscription already purchased</h3>
+        The {0} <b>{1}</b> has already been purchased.
+        '''.format(type, id)
+        text = HTML(message)
+        display(text)
 
 
 def display_subscription_form(id, type, credentials):
@@ -93,17 +110,3 @@ def _create_notebook_form(id, type, message, ok_response, cancel_message, creden
 
 def display_subscription_form_cli():
     print('This method is not yet implemented in CLI')
-
-
-def is_ipython_notebook():
-    """
-    Detect whether we are in a Jupyter notebook.
-    """
-    try:
-        cfg = get_ipython().config
-        if 'IPKernelApp' in cfg:
-            return True
-        else:
-            return False
-    except NameError:
-        return False
