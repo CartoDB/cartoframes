@@ -122,7 +122,7 @@ class TestEnrichmentService(unittest.TestCase):
         WHERE a='b';''', '''
         SELECT data_table.enrichment_id,
             enrichment_table.ticket_size_score,
-            ST_Area(enrichment_geo_table.geom) AS view_mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019_area,
+            ST_Area(enrichment_geo_table.geom) AS view_mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019_area
         FROM `carto-do-customers.{user_dataset}\
             .view_mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
