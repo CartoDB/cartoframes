@@ -1,7 +1,6 @@
 import pytest
 import unittest
 
-
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
@@ -170,7 +169,30 @@ class TestCatalog(unittest.TestCase):
 
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
-    def test_subscriptions_wrong_param(self, mocked_geographies, mocked_datasets):
+    @patch('cartoframes.auth.get_default_credentials')
+    def test_subscriptions_default_credentials(self, mocked_credentials, mocked_geographies, mocked_datasets):
+        # Given
+        expected_datasets = [test_dataset1, test_dataset2]
+        expected_geographies = [test_geography1, test_geography2]
+        expected_credentials = Credentials('user', '1234')
+        mocked_datasets.return_value = expected_datasets
+        mocked_geographies.return_value = expected_geographies
+        mocked_credentials.return_value = expected_credentials
+        catalog = Catalog()
+
+        # When
+        subscriptions = catalog.subscriptions()
+
+        # Then
+        mocked_datasets.assert_called_once_with({}, expected_credentials)
+        mocked_geographies.assert_called_once_with({}, expected_credentials)
+        assert isinstance(subscriptions, Subscriptions)
+        assert subscriptions.datasets == expected_datasets
+        assert subscriptions.geographies == expected_geographies
+
+    @patch.object(Dataset, 'get_all')
+    @patch.object(Geography, 'get_all')
+    def test_subscriptions_wrong_credentials(self, mocked_geographies, mocked_datasets):
         # Given
         wrong_credentials = 1234
         catalog = Catalog()

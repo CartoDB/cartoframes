@@ -8,7 +8,7 @@ from .dataset import Dataset
 from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
-from ...auth import Credentials, get_default_credentials
+from ... import auth
 
 
 class Catalog(object):
@@ -132,9 +132,9 @@ class Catalog(object):
         """
 
         _no_filters = {}
-        _credentials = credentials or get_default_credentials()
+        _credentials = credentials or auth.get_default_credentials()
 
-        if not isinstance(_credentials, Credentials):
+        if not isinstance(_credentials, auth.Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
