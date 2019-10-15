@@ -15,7 +15,7 @@ from cartoframes.data import Dataset as CFDataset
 from shapely import wkt
 from .utils import display_subscription_form
 
-class Dataset(CatalogEntity):
+class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property

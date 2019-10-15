@@ -6,7 +6,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.category import Category
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data.observatory.subscriptions import Subscriptions
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
@@ -47,7 +47,7 @@ class TestCatalog(unittest.TestCase):
         # Then
         assert categories == expected_categories
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_datasets(self, mocked_datasets):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]
@@ -86,7 +86,7 @@ class TestCatalog(unittest.TestCase):
         mocked_categories.called_once_with({'country_id': 'usa'})
         assert categories == test_categories
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_filters_on_datasets(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -112,7 +112,7 @@ class TestCatalog(unittest.TestCase):
         mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
         assert geographies == test_geographies
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_all_filters(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -130,7 +130,7 @@ class TestCatalog(unittest.TestCase):
 
         assert datasets == test_datasets
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     def test_geography_filter_by_slug(self, mocked_repo, mocked_datasets):
         # Given
@@ -150,6 +150,7 @@ class TestCatalog(unittest.TestCase):
     @patch.object(Dataset, 'get_all')
     @patch.object(Geography, 'get_all')
     def test_subscriptions(self, mocked_geographies, mocked_datasets):
+
         # Given
         expected_datasets = [test_dataset1, test_dataset2]
         expected_geographies = [test_geography1, test_geography2]
