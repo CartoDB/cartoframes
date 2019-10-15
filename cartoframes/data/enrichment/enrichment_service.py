@@ -9,7 +9,7 @@ from ...exceptions import EnrichmentException
 from ...auth import get_default_credentials
 from ...utils.geom_utils import _compute_geometry_from_geom
 from ..observatory.variable import Variable
-from ..observatory.dataset import Dataset as DatasetCatalog
+from ..observatory.dataset import CatalogDataset
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -206,7 +206,7 @@ def __process_enrichment_variables(variables, user_dataset):
 
 def __get_properties_geotable(variable):
 
-    geography_id = DatasetCatalog.get(variable.dataset).geography
+    geography_id = CatalogDataset.get(variable.dataset).geography
 
     _, geo_dataset, geo_table = geography_id.split('.')
 

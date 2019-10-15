@@ -4,12 +4,8 @@ from .entity import is_slug_value
 from .category import Category
 from .country import Country
 from .geography import Geography
-<<<<<<< HEAD
-from .dataset import Dataset
 from .subscriptions import Subscriptions
-=======
 from .dataset import CatalogDataset
->>>>>>> 115df54396a991db43673d28215d9cfe1e28223f
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
 from ...auth import Credentials, get_default_credentials
@@ -135,14 +131,13 @@ class Catalog(object):
 
         """
 
-<<<<<<< HEAD
         _credentials = credentials or get_default_credentials()
 
         if not isinstance(_credentials, Credentials):
             raise ValueError('`credentials` must be a Credentials class instance')
 
         return Subscriptions(
-            Dataset.get_all(self.filters, _credentials),
+            CatalogDataset.get_all(self.filters, _credentials),
             Geography.get_all(self.filters, _credentials)
         )
 
@@ -152,7 +147,4 @@ class Catalog(object):
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
         """
 
-        return Dataset.datasets_by_geography(filter_dataset)
-=======
-        return CatalogDataset.get_all(self.filters, credentials)
->>>>>>> 115df54396a991db43673d28215d9cfe1e28223f
+        return CatalogDataset.datasets_by_geography(filter_dataset)

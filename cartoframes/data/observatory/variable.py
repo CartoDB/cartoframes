@@ -6,7 +6,7 @@ from .repository.variable_repo import get_variable_repo
 from .repository.constants import VARIABLE_FILTER
 
 
-_DESCRIPTION_LENGTH_LIMIT = 30
+_DESCRIPTION_LENGTH_LIMIT = 40
 
 
 class Variable(CatalogEntity):
