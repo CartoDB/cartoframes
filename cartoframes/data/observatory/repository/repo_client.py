@@ -1,13 +1,10 @@
 from __future__ import absolute_import
 
-<<<<<<< HEAD
 # from carto.do_datasets import DODatasetManager
 from ....data import Dataset
 from ...clients import SQLClient
 from ....auth import Credentials, get_default_credentials
 import geopandas as gpd
-=======
->>>>>>> 511869bfb253b43748e559434b9c8d16de91c85e
 from ...clients import SQLClient
 from ....auth import Credentials
 from ..utils import get_subscription_ids
