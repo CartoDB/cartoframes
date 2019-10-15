@@ -5,7 +5,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
 from cartoframes.data.observatory.category import Category
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2, \
@@ -45,7 +45,7 @@ class TestCatalog(unittest.TestCase):
         # Then
         assert categories == expected_categories
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_datasets(self, mocked_datasets):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]
@@ -84,7 +84,7 @@ class TestCatalog(unittest.TestCase):
         mocked_categories.called_once_with({'country_id': 'usa'})
         assert categories == test_categories
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_filters_on_datasets(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -110,7 +110,7 @@ class TestCatalog(unittest.TestCase):
         mocked_geographies.called_once_with({'country_id': 'usa', 'category_id': 'demographics'})
         assert geographies == test_geographies
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_all_filters(self, mocked_datasets):
         # Given
         mocked_datasets.return_value = test_datasets
@@ -128,7 +128,7 @@ class TestCatalog(unittest.TestCase):
 
         assert datasets == test_datasets
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     @patch.object(GeographyRepository, 'get_by_id')
     def test_geography_filter_by_slug(self, mocked_repo, mocked_datasets):
         # Given
@@ -145,7 +145,7 @@ class TestCatalog(unittest.TestCase):
         mocked_datasets.assert_called_once_with({'geography_id': test_geography1.id})
         assert datasets == test_datasets
 
-    @patch.object(Dataset, 'get_all')
+    @patch.object(CatalogDataset, 'get_all')
     def test_purchased_datasets(self, mocked_purchased_datasets):
         # Given
         expected_datasets = [test_dataset1, test_dataset2]

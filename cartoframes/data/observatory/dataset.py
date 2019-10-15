@@ -8,7 +8,7 @@ from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
 
 
-class Dataset(CatalogEntity):
+class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property
