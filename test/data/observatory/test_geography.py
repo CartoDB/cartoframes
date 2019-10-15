@@ -121,15 +121,16 @@ class TestGeography(unittest.TestCase):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
+        expected_dict = {key: value for key, value in db_geography1.items() if key is not 'summary_jsonb'}
 
         # When
         geography_dict = geography.to_dict()
 
         # Then
         assert isinstance(geography_dict, dict)
-        assert geography_dict == db_geography1
+        assert geography_dict == expected_dict
 
-    def test_geography_is_represented_with_id(self):
+    def test_geography_is_represented_with_classname_and_slug(self):
         # Given
         geography = Geography(db_geography1)
 
@@ -177,7 +178,7 @@ class TestGeography(unittest.TestCase):
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
 
-    def test_geography_list_is_printed_with_classname(self):
+    def test_geography_list_is_printed_with_classname_and_slugs(self):
         # Given
         geographies = CatalogList([test_geography1, test_geography2])
 
@@ -188,7 +189,7 @@ class TestGeography(unittest.TestCase):
         assert categories_str == "[<Geography('{id1}')>, <Geography('{id2}')>]" \
                                  .format(id1=db_geography1['slug'], id2=db_geography2['slug'])
 
-    def test_geography_list_is_represented_with_ids(self):
+    def test_geography_list_is_represented_with_classname_and_slugs(self):
         # Given
         geographies = CatalogList([test_geography1, test_geography2])
 
@@ -265,12 +266,11 @@ class TestGeography(unittest.TestCase):
     @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
     def test_geography_subscribe(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
-        expected_id = 'z'
-        expected_subscribed_ids = ['a', 'b', 'c']
+        expected_id = db_geography1['id']
+        expected_subscribed_ids = []
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
         geography = Geography(db_geography1)
-        geography.data['id'] = expected_id
 
         # When
         geography.subscribe(credentials)
@@ -285,12 +285,11 @@ class TestGeography(unittest.TestCase):
     @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
     def test_geography_subscribe_existing(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
-        expected_id = 'a'
-        expected_subscribed_ids = ['a', 'b', 'c']
+        expected_id = db_geography1['id']
+        expected_subscribed_ids = [expected_id]
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
         geography = Geography(db_geography1)
-        geography.data['id'] = expected_id
 
         # When
         geography.subscribe(credentials)

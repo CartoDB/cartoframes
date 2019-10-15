@@ -1,8 +1,9 @@
 import unittest
 
 from cartoframes.auth import Credentials
+
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
@@ -96,6 +97,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
+        print(requested_id)
         dataset = repo.get_by_id(requested_id)
 
         # Then
@@ -175,7 +177,7 @@ class TestDatasetRepo(unittest.TestCase):
         mocked_repo.return_value = [{'id': 'dataset1'}]
         repo = DatasetRepository()
 
-        expected_datasets = CatalogList([Dataset({
+        expected_datasets = CatalogList([CatalogDataset({
             'id': 'dataset1',
             'slug': None,
             'name': None,

@@ -8,7 +8,7 @@ from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.repository.variable_repo import VariableRepository
 from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
@@ -31,11 +31,11 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_dataset1
 
         # When
-        dataset = Dataset.get(test_dataset1.id)
+        dataset = CatalogDataset.get(test_dataset1.id)
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, Dataset)
+        assert isinstance(dataset, CatalogDataset)
         assert dataset == test_dataset1
 
     def test_get_dataset_by_id_from_datasets_list(self):
@@ -47,7 +47,7 @@ class TestDataset(unittest.TestCase):
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, Dataset)
+        assert isinstance(dataset, CatalogDataset)
         assert dataset == test_dataset1
 
     def test_get_dataset_by_slug_from_datasets_list(self):
@@ -59,7 +59,7 @@ class TestDataset(unittest.TestCase):
 
         # Then
         assert isinstance(dataset, object)
-        assert isinstance(dataset, Dataset)
+        assert isinstance(dataset, CatalogDataset)
         assert dataset == test_dataset1
 
     @patch.object(VariableRepository, 'get_all')
@@ -92,7 +92,7 @@ class TestDataset(unittest.TestCase):
 
     def test_dataset_properties(self):
         # Given
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset_id = dataset.id
@@ -143,34 +143,35 @@ class TestDataset(unittest.TestCase):
 
     def test_dataset_is_exported_as_dict(self):
         # Given
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
+        expected_dict = {key: value for key, value in db_dataset1.items() if key is not 'summary_jsonb'}
 
         # When
         dataset_dict = dataset.to_dict()
 
         # Then
         assert isinstance(dataset_dict, dict)
-        assert dataset_dict == db_dataset1
+        assert dataset_dict == expected_dict
 
-    def test_dataset_is_represented_with_id(self):
+    def test_dataset_is_represented_with_classname_and_slug(self):
         # Given
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset_repr = repr(dataset)
 
         # Then
-        assert dataset_repr == "<Dataset('{id}')>".format(id=db_dataset1['slug'])
+        assert dataset_repr == "<CatalogDataset('{id}')>".format(id=db_dataset1['slug'])
 
     def test_dataset_is_printed_with_classname(self):
         # Given
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset_str = str(dataset)
 
         # Then
-        assert dataset_str == 'Dataset({dict_str})'.format(dict_str=str(db_dataset1))
+        assert dataset_str == 'CatalogDataset({dict_str})'.format(dict_str=str(db_dataset1))
 
     @patch.object(DatasetRepository, 'get_all')
     def test_get_all_datasets(self, mocked_repo):
@@ -178,7 +179,7 @@ class TestDataset(unittest.TestCase):
         mocked_repo.return_value = test_datasets
 
         # When
-        datasets = Dataset.get_all()
+        datasets = CatalogDataset.get_all()
 
         # Then
         assert isinstance(datasets, list)
@@ -192,7 +193,7 @@ class TestDataset(unittest.TestCase):
         credentials = Credentials('user', '1234')
 
         # When
-        datasets = Dataset.get_all(credentials=credentials)
+        datasets = CatalogDataset.get_all(credentials=credentials)
 
         # Then
         mocked_repo.assert_called_once_with(None, credentials)
@@ -200,7 +201,7 @@ class TestDataset(unittest.TestCase):
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
-    def test_dataset_list_is_printed_with_classname(self):
+    def test_dataset_list_is_printed_with_classname_and_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
@@ -208,10 +209,10 @@ class TestDataset(unittest.TestCase):
         datasets_str = str(datasets)
 
         # Then
-        assert datasets_str == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+        assert datasets_str == "[<CatalogDataset('{id1}')>, <CatalogDataset('{id2}')>]"\
                                .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
-    def test_dataset_list_is_represented_with_slugs(self):
+    def test_dataset_list_is_represented_with_classname_and_slugs(self):
         # Given
         datasets = CatalogList([test_dataset1, test_dataset2])
 
@@ -219,7 +220,7 @@ class TestDataset(unittest.TestCase):
         datasets_repr = repr(datasets)
 
         # Then
-        assert datasets_repr == "[<Dataset('{id1}')>, <Dataset('{id2}')>]"\
+        assert datasets_repr == "[<CatalogDataset('{id1}')>, <CatalogDataset('{id2}')>]"\
                                 .format(id1=db_dataset1['slug'], id2=db_dataset2['slug'])
 
     def test_datasets_items_are_obtained_as_dataset(self):
@@ -230,7 +231,7 @@ class TestDataset(unittest.TestCase):
         dataset = datasets[0]
 
         # Then
-        assert isinstance(dataset, Dataset)
+        assert isinstance(dataset, CatalogDataset)
         assert dataset == test_dataset1
 
     def test_datasets_are_exported_as_dataframe(self):
@@ -261,7 +262,7 @@ class TestDataset(unittest.TestCase):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = Dataset.get(test_dataset1.id)
+        dataset = CatalogDataset.get(test_dataset1.id)
         response = dataset.download(credentials)
 
         assert response == file_path
@@ -279,7 +280,7 @@ class TestDataset(unittest.TestCase):
         username = 'fake_user'
         credentials = Credentials(username, '1234')
 
-        dataset = Dataset.get(test_dataset1.id)
+        dataset = CatalogDataset.get(test_dataset1.id)
         with self.assertRaises(CartoException):
             dataset.download(credentials)
 
@@ -288,12 +289,11 @@ class TestDataset(unittest.TestCase):
     @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
     def test_dataset_subscribe(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
-        expected_id = 'z'
-        expected_subscribed_ids = ['a', 'b', 'c']
+        expected_id = db_dataset1['id']
+        expected_subscribed_ids = []
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
-        dataset = Dataset(db_dataset1)
-        dataset.data['id'] = expected_id
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset.subscribe(credentials)
@@ -308,12 +308,11 @@ class TestDataset(unittest.TestCase):
     @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
     def test_dataset_subscribe_existing(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
-        expected_id = 'a'
-        expected_subscribed_ids = ['a', 'b', 'c']
+        expected_id = db_dataset1['id']
+        expected_subscribed_ids = [expected_id]
         mock_subscription_ids.return_value = expected_subscribed_ids
         credentials = Credentials('user', '1234')
-        dataset = Dataset(db_dataset1)
-        dataset.data['id'] = expected_id
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset.subscribe(credentials)
@@ -330,7 +329,7 @@ class TestDataset(unittest.TestCase):
         # Given
         expected_credentials = Credentials('user', '1234')
         mocked_credentials.return_value = expected_credentials
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset.subscribe()
@@ -342,7 +341,7 @@ class TestDataset(unittest.TestCase):
     def test_dataset_subscribe_wrong_credentials(self):
         # Given
         wrong_credentials = 1234
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         with pytest.raises(ValueError) as e:
@@ -356,7 +355,7 @@ class TestDataset(unittest.TestCase):
         # Given
         mock_fetch.return_value = test_subscription_info
         credentials = Credentials('user', '1234')
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         info = dataset.subscription_info(credentials)
@@ -382,7 +381,7 @@ class TestDataset(unittest.TestCase):
         # Given
         expected_credentials = Credentials('user', '1234')
         mocked_credentials.return_value = expected_credentials
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         dataset.subscription_info()
@@ -393,7 +392,7 @@ class TestDataset(unittest.TestCase):
     def test_dataset_subscription_info_wrong_credentials(self):
         # Given
         wrong_credentials = 1234
-        dataset = Dataset(db_dataset1)
+        dataset = CatalogDataset(db_dataset1)
 
         # When
         with pytest.raises(ValueError) as e:
