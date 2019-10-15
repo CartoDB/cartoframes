@@ -9,7 +9,7 @@ from .repository.constants import DATASET_FILTER
 from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_coverage
 
 
-class Dataset(CatalogEntity):
+class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property
