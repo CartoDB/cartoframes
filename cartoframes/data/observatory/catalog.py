@@ -6,10 +6,7 @@ from .category import Category
 from .country import Country
 from .geography import Geography
 from .subscriptions import Subscriptions
-<<<<<<< HEAD
 from .dataset import CatalogDataset
-=======
->>>>>>> 68a3fbfd2bccac242afa46c40315ad8c77278a8a
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
 from ...auth import Credentials, defaults
