@@ -20,12 +20,14 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         self.client.set_user_credentials(credentials)
-        return self._get_filtered_entities(filters)
+        response = self._get_filtered_entities(filters)
+        self.client.set_user_credentials(None)
+        return response
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.dataset import Dataset
-        return Dataset
+        from cartoframes.data.observatory.dataset import CatalogDataset
+        return CatalogDataset
 
     def _get_rows(self, filters=None):
         return self.client.get_datasets(filters)
