@@ -79,9 +79,9 @@ class TestEnrichmentService(unittest.TestCase):
             enrichment_table.CRMCYBURG,
             ST_Area(enrichment_geo_table.geom) AS view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018_area
         FROM `carto-do-customers.{user_dataset}\
-            .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
+            .view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
-            .ags_geography_usa_blockgroup_2015` enrichment_geo_table
+            .view_ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -113,9 +113,9 @@ class TestEnrichmentService(unittest.TestCase):
             enrichment_table.CRMCYBURG,
             ST_Area(enrichment_geo_table.geom) AS view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018_area,
         FROM `carto-do-customers.{user_dataset}\
-            .ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
+            .view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018` enrichment_table
         JOIN `carto-do-customers.{user_dataset}\
-            .ags_geography_usa_blockgroup_2015` enrichment_geo_table
+            .view_ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Within(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -159,9 +159,9 @@ class TestEnrichmentService(unittest.TestCase):
         expected_queries = ['''SELECT data_table.enrichment_id, avg(enrichment_table.CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
                   / ST_area(data_table.{geometry_column}))) as CRMCYBURG
-        FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
+        FROM `carto-do-customers.{user_dataset}.view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.ags_geography_usa_blockgroup_2015` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.view_ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -195,9 +195,9 @@ class TestEnrichmentService(unittest.TestCase):
         expected_queries = ['''SELECT data_table.enrichment_id, avg(enrichment_table.CRMCYBURG *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
                   / ST_area(data_table.{geometry_column}))) as CRMCYBURG
-        FROM `carto-do-customers.{user_dataset}.ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
+        FROM `carto-do-customers.{user_dataset}.view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.ags_geography_usa_blockgroup_2015` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.view_ags_geography_usa_blockgroup_2015` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
@@ -206,9 +206,9 @@ class TestEnrichmentService(unittest.TestCase):
         SELECT data_table.enrichment_id, avg(ticket_size_score *\
              (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geometry_column}))\
                   / ST_area(data_table.{geometry_column}))) as ticket_size_score
-        FROM `carto-do-customers.{user_dataset}.mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019`\
+        FROM `carto-do-customers.{user_dataset}.view_mastercard_financial_mrli_usa_blockgroup_2019_monthly_2019`\
              enrichment_table
-        JOIN `carto-do-customers.{user_dataset}.mastercard_geography_usa_blockgroup_2019` enrichment_geo_table
+        JOIN `carto-do-customers.{user_dataset}.view_mastercard_geography_usa_blockgroup_2019` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{user_dataset}.{tablename}` data_table
         ON ST_Intersects(data_table.{geometry_column}, enrichment_geo_table.geom)
