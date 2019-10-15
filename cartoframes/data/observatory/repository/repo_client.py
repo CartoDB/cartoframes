@@ -47,7 +47,9 @@ class RepoClient(object):
         extra_condition = []
         if self._user_credentials is not None:
             ids = get_subscription_ids(self._user_credentials)
-            if len(ids) > 0:
+            if len(ids) == 0:
+                return []
+            elif len(ids) > 0:
                 extra_condition.append('t.id IN ({})'.format(ids))
 
         return self._run_query(query, filters, extra_condition)
@@ -62,7 +64,9 @@ class RepoClient(object):
         extra_condition = []
         if self._user_credentials is not None:
             ids = get_subscription_ids(self._user_credentials)
-            if len(ids) > 0:
+            if len(ids) == 0:
+                return []
+            elif len(ids) > 0:
                 extra_condition.append('t.id IN ({})'.format(ids))
 
         return self._run_query(query, filters, extra_condition)
