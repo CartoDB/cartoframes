@@ -15,6 +15,7 @@ def display_existing_subscription_message(id, type):
     text = HTML(message)
     display(text)
 
+
 def display_subscription_form(id, type, credentials):
     info = fetch_subscription_info(id, type, credentials)
 
