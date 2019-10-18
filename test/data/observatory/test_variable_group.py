@@ -29,7 +29,31 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variable_group, VariableGroup)
         assert variable_group == test_variable_group1
 
-    @patch.object(VariableRepository, 'get_by_variable_group')
+    def test_get_variable_group_by_id_from_variables_groups_list(self):
+        # Given
+        variables_groups = CatalogList([test_variable_group1, test_variable_group2])
+
+        # When
+        variable_group = variables_groups.get(test_variable_group1.id)
+
+        # Then
+        assert isinstance(variable_group, object)
+        assert isinstance(variable_group, VariableGroup)
+        assert variable_group == test_variable_group1
+
+    def test_get_variable_group_by_slug_from_variables_groups_leist(selef):
+        # Given
+        variables_groups = CatalogList([test_variable_group1, test_variable_group2])
+
+        # When
+        variable_group = variables_groups.get(test_variable_group1.slug)
+
+        # Then
+        assert isinstance(variable_group, object)
+        assert isinstance(variable_group, VariableGroup)
+        assert variable_group == test_variable_group1
+
+    @patch.object(VariableRepository, 'get_all')
     def test_get_variables_by_variable_group(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_variables
@@ -38,6 +62,7 @@ class TestVariableGroup(unittest.TestCase):
         variables = test_variable_group1.variables
 
         # Then
+        mocked_repo.assert_called_once_with({'variable_group_id': test_variable_group1.id})
         assert isinstance(variables, list)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
@@ -48,12 +73,14 @@ class TestVariableGroup(unittest.TestCase):
 
         # When
         variable_group_id = variable_group.id
+        slug = variable_group.slug
         name = variable_group.name
         dataset = variable_group.dataset
         starred = variable_group.starred
 
         # Then
         assert variable_group_id == db_variable_group1['id']
+        assert slug == db_variable_group1['slug']
         assert name == db_variable_group1['name']
         assert dataset == db_variable_group1['dataset_id']
         assert starred == db_variable_group1['starred']
@@ -80,7 +107,7 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variable_group_dict, dict)
         assert variable_group_dict == db_variable_group1
 
-    def test_variable_group_is_represented_with_id(self):
+    def test_variable_group_is_represented_with_classname_and_slug(self):
         # Given
         variable_group = VariableGroup(db_variable_group1)
 
@@ -113,7 +140,7 @@ class TestVariableGroup(unittest.TestCase):
         assert isinstance(variables_groups, CatalogList)
         assert variables_groups == test_variables_groups
 
-    def test_variable_group_list_is_printed_with_classname(self):
+    def test_variable_group_list_is_printed_with_classname_and_slug(self):
         # Given
         variables_groups = CatalogList([test_variable_group1, test_variable_group2])
 
@@ -124,7 +151,7 @@ class TestVariableGroup(unittest.TestCase):
         assert variables_groups_str == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]" \
                                        .format(id1=db_variable_group1['slug'], id2=db_variable_group2['slug'])
 
-    def test_variable_group_list_is_represented_with_ids(self):
+    def test_variable_group_list_is_represented_with_classname_and_slug(self):
         # Given
         variables_groups = CatalogList([test_variable_group1, test_variable_group2])
 
@@ -134,19 +161,6 @@ class TestVariableGroup(unittest.TestCase):
         # Then
         assert variables_groups_repr == "[<VariableGroup('{id1}')>, <VariableGroup('{id2}')>]"\
                                         .format(id1=db_variable_group1['slug'], id2=db_variable_group2['slug'])
-
-    @patch.object(VariableGroupRepository, 'get_by_id')
-    def test_get_variable_group_by_id(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = test_variable_group1
-
-        # When
-        variable_group = VariableGroup.get(test_variable_group1.id)
-
-        # Then
-        assert isinstance(variable_group, object)
-        assert isinstance(variable_group, VariableGroup)
-        assert variable_group == test_variable_group1
 
     def test_variables_groups_items_are_obtained_as_variable_group(self):
         # Given

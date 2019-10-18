@@ -20,27 +20,14 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         self.client.set_user_credentials(credentials)
-        return self._get_filtered_entities(filters)
-
-    def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
-
-    def get_by_category(self, category_id):
-        return self._get_filtered_entities({CATEGORY_FILTER: category_id})
-
-    def get_by_variable(self, variable_id):
-        return self._get_filtered_entities({VARIABLE_FILTER: variable_id})
-
-    def get_by_geography(self, geography_id):
-        return self._get_filtered_entities({GEOGRAPHY_FILTER: geography_id})
-
-    def get_by_provider(self, provider_id):
-        return self._get_filtered_entities({PROVIDER_FILTER: provider_id})
+        response = self._get_filtered_entities(filters)
+        self.client.set_user_credentials(None)
+        return response
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.dataset import Dataset
-        return Dataset
+        from cartoframes.data.observatory.dataset import CatalogDataset
+        return CatalogDataset
 
     def _get_rows(self, filters=None):
         return self.client.get_datasets(filters)

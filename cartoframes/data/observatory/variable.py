@@ -3,6 +3,10 @@ from __future__ import absolute_import
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.constants import VARIABLE_FILTER
+
+
+_DESCRIPTION_LENGTH_LIMIT = 30
 
 
 class Variable(CatalogEntity):
@@ -11,7 +15,7 @@ class Variable(CatalogEntity):
 
     @property
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self.id)
+        return get_dataset_repo().get_all({VARIABLE_FILTER: self.id})
 
     @property
     def name(self):
@@ -63,3 +67,12 @@ class Variable(CatalogEntity):
     def dataset_name(self):
         _, _, dataset, _ = self.id.split('.')
         return dataset
+
+    def __repr__(self):
+        descr = self.description
+
+        if descr and len(descr) > _DESCRIPTION_LENGTH_LIMIT:
+            descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
+
+        return "<{classname}('{entity_id}','{descr}')>"\
+               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)

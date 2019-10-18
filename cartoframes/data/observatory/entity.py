@@ -6,7 +6,7 @@ from google.api_core.exceptions import NotFound
 from carto.exceptions import CartoException
 
 from ..clients.bigquery_client import BigQueryClient
-from ...auth import get_default_credentials
+from ...auth import Credentials, defaults
 
 try:
     from abc import ABC, abstractmethod
@@ -21,6 +21,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     entity_repo = None
+    export_excluded_fields = ['summary_jsonb']
 
     def __init__(self, data):
         self.data = data
@@ -28,6 +29,13 @@ class CatalogEntity(ABC):
     @property
     def id(self):
         return self.data[self.id_field]
+
+    @property
+    def slug(self):
+        try:
+            return self.data['slug']
+        except KeyError:
+            return None
 
     @classmethod
     def get(cls, id_):
@@ -45,7 +53,7 @@ class CatalogEntity(ABC):
         return pd.Series(self.data)
 
     def to_dict(self):
-        return self.data
+        return {key: value for key, value in self.data.items() if key not in self.export_excluded_fields}
 
     def __eq__(self, other):
         return self.data == other.data
@@ -66,7 +74,7 @@ class CatalogEntity(ABC):
         return self.id
 
     def _download(self, credentials=None):
-        credentials = _get_credentials(credentials)
+        credentials = self._get_credentials(credentials)
         user_dataset = credentials.get_do_dataset()
         bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
 
@@ -83,9 +91,13 @@ class CatalogEntity(ABC):
 
         return file_path
 
+    def _get_credentials(self, credentials=None):
+        _credentials = credentials or defaults.get_default_credentials()
 
-def _get_credentials(credentials=None):
-    return credentials or get_default_credentials()
+        if not isinstance(_credentials, Credentials):
+            raise ValueError('`credentials` must be a Credentials class instance')
+
+        return _credentials
 
 
 def _get_bigquery_client(project, credentials):
@@ -102,7 +114,7 @@ class CatalogList(list):
         super(CatalogList, self).__init__(data)
 
     def get(self, item_id):
-        return next(filter(lambda item: item.id == item_id, self), None)
+        return next(iter(filter(lambda item: item.id == item_id or item.slug == item_id, self)), None)
 
     def to_dataframe(self):
         return pd.DataFrame([item.data for item in self])
