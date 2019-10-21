@@ -5,6 +5,11 @@ from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
 from .repository.constants import GEOGRAPHY_FILTER
+from . import subscription_info
+from . import subscriptions
+from . import utils
+
+GEOGRAPHY_TYPE = 'geography'
 
 
 class Geography(CatalogEntity):
@@ -55,15 +60,51 @@ class Geography(CatalogEntity):
     def summary(self):
         return self.data['summary_jsonb']
 
+    @classmethod
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
+
     def download(self, credentials=None):
         """Download Geography data.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
+
+    def subscribe(self, credentials=None):
+        """Subscribe to a Geography.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)
+        else:
+            utils.display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Geography.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))

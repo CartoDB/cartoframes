@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-from carto.do_subscriptions import DOSubscriptionManager
-
 from ...clients import SQLClient
-from ....auth import Credentials, get_default_credentials
+from ....auth import Credentials
+from ..subscriptions import get_subscription_ids
 
 
 class RepoClient(object):
@@ -16,7 +15,7 @@ class RepoClient(object):
         self.client = SQLClient(self._do_credentials)
 
     def set_user_credentials(self, credentials):
-        self._user_credentials = credentials or get_default_credentials()
+        self._user_credentials = credentials
 
     def get_countries(self, filters=None):
         query = 'SELECT DISTINCT t.country_id AS id FROM datasets_public t'
@@ -44,7 +43,16 @@ class RepoClient(object):
 
     def get_geographies(self, filters=None):
         query = 'SELECT t.* FROM geographies_public t'
-        return self._run_query(query, filters)
+
+        extra_condition = []
+        if self._user_credentials is not None:
+            ids = get_subscription_ids(self._user_credentials)
+            if len(ids) == 0:
+                return []
+            elif len(ids) > 0:
+                extra_condition.append('t.id IN ({})'.format(ids))
+
+        return self._run_query(query, filters, extra_condition)
 
     def get_geographies_joined_datasets(self, filters=None):
         query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public t'
@@ -55,7 +63,11 @@ class RepoClient(object):
 
         extra_condition = []
         if self._user_credentials is not None:
-            extra_condition.append('t.id IN ({})'.format(self._get_purchased_dataset_ids()))
+            ids = get_subscription_ids(self._user_credentials)
+            if len(ids) == 0:
+                return []
+            elif len(ids) > 0:
+                extra_condition.append('t.id IN ({})'.format(ids))
 
         return self._run_query(query, filters, extra_condition)
 
@@ -83,18 +95,6 @@ class RepoClient(object):
             return "t.{} IN ({})".format(key, value_list)
 
         return "t.{} = '{}'".format(key, value)
-
-    def _get_purchased_dataset_ids(self):
-        purchased_datasets = self._fetch_purchased_datasets()
-        purchased_dataset_ids = list(map(lambda pd: pd.id, purchased_datasets))
-        return ','.join(["'" + id + "'" for id in purchased_dataset_ids])
-
-    def _fetch_purchased_datasets(self):
-        api_key_auth_client = self._user_credentials.get_api_key_auth_client()
-        do_manager = DOSubscriptionManager(api_key_auth_client)
-        if do_manager is not None:
-            return do_manager.all()
-        return []
 
     def __new__(cls):
         if not RepoClient.__instance:

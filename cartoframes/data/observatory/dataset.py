@@ -6,9 +6,14 @@ from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
+from . import subscription_info
+from . import subscriptions
+from . import utils
+
+DATASET_TYPE = 'dataset'
 
 
-class Dataset(CatalogEntity):
+class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property
@@ -84,10 +89,42 @@ class Dataset(CatalogEntity):
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will be attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
+
+    def subscribe(self, credentials=None):
+        """Subscribe to a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, DATASET_TYPE)
+        else:
+            utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))
