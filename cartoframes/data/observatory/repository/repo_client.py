@@ -1,10 +1,9 @@
 from __future__ import absolute_import
 
 from carto.do_datasets import DODatasetManager
-from ....data import Dataset
-from ...clients import SQLClient
-from ....auth import Credentials, get_default_credentials
-import geopandas as gpd
+from cartoframes.data.clients import SQLClient
+from cartoframes.auth import Credentials, get_default_credentials
+
 
 class RepoClient(object):
 
@@ -19,43 +18,43 @@ class RepoClient(object):
         self._user_credentials = credentials or get_default_credentials()
 
     def get_countries(self, filters=None):
-        query = 'SELECT DISTINCT view.country_id AS id FROM datasets_public view'
+        query = 'SELECT DISTINCT t.country_id AS id FROM datasets_public t'
         return self._run_query(query, filters)
 
     def get_categories(self, filters=None):
-        query = 'SELECT view.* FROM categories_public view'
+        query = 'SELECT t.* FROM categories_public t'
         return self._run_query(query, filters)
 
     def get_categories_joined_datasets(self, filters=None):
-        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public view'
-        return self._run_query(query,  filters, ['c.id = view.category_id'])
+        query = 'SELECT DISTINCT c.* FROM categories_public c, datasets_public t'
+        return self._run_query(query,  filters, ['c.id = t.category_id'])
 
     def get_providers(self, filters=None):
-        query = 'SELECT view.* FROM providers_public view'
+        query = 'SELECT t.* FROM providers_public t'
         return self._run_query(query, filters)
 
     def get_variables(self, filters=None):
-        query = 'SELECT view.* FROM variables_public view'
+        query = 'SELECT t.* FROM variables_public t'
         return self._run_query(query, filters)
 
     def get_variables_groups(self, filters=None):
-        query = 'SELECT view.* FROM variables_groups_public view'
+        query = 'SELECT t.* FROM variables_groups_public t'
         return self._run_query(query, filters)
 
     def get_geographies(self, filters=None):
-        query = 'SELECT view.* FROM geographies_public view'
+        query = 'SELECT t.* FROM geographies_public t'
         return self._run_query(query, filters)
 
     def get_geographies_joined_datasets(self, filters=None):
-        query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public view'
-        return self._run_query(query,  filters, ['g.id = view.geography_id'])
+        query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public t'
+        return self._run_query(query,  filters, ['g.id = t.geography_id'])
 
     def get_datasets(self, filters=None):
-        query = 'SELECT view.* FROM datasets_public view'
+        query = 'SELECT t.* FROM datasets_public t'
 
         extra_condition = []
         if self._user_credentials is not None:
-            extra_condition.append('view.id IN ({})'.format(self._get_purchased_dataset_ids()))
+            extra_condition.append('t.id IN ({})'.format(self._get_purchased_dataset_ids()))
 
         return self._run_query(query, filters, extra_condition)
 
@@ -72,9 +71,17 @@ class RepoClient(object):
         conditions = extra_conditions or []
 
         if filters is not None and len(filters) > 0:
-            conditions.extend(["view.{} = '{}'".format(key, value) for key, value in filters.items()])
+            conditions.extend([self._generate_condition(key, value) for key, value in filters.items()])
 
         return conditions
+
+    @staticmethod
+    def _generate_condition(key, value):
+        if type(value) == list:
+            value_list = ','.join(["'" + v + "'" for v in value])
+            return "t.{} IN ({})".format(key, value_list)
+
+        return "t.{} = '{}'".format(key, value)
 
     def _get_purchased_dataset_ids(self):
         purchased_datasets = self._fetch_purchased_datasets()
@@ -92,13 +99,3 @@ class RepoClient(object):
         if not RepoClient.__instance:
             RepoClient.__instance = object.__new__(cls)
         return RepoClient.__instance
-
-    def get_geographies_gdf(self):
-        query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
-        df = Dataset(query, credentials=self._do_credentials).download(decode_geom=True)
-        return gpd.GeoDataFrame(df, geometry='geometry')  
-
-    def get_datasets_for_geographies(self, geographies):
-        ids = "','".join(geographies)
-        query = "select * from datasets_public where geography_id IN ('{ids}') ".format(ids=ids)
-        return self.client.query(query)

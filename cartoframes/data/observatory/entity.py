@@ -37,6 +37,10 @@ class CatalogEntity(ABC):
     def get_all(cls, filters=None):
         return cls.entity_repo.get_all(filters)
 
+    @classmethod
+    def get_list(cls, id_list):
+        return cls.entity_repo.get_by_id_list(id_list)
+
     def to_series(self):
         return pd.Series(self.data)
 
@@ -86,6 +90,10 @@ def _get_credentials(credentials=None):
 
 def _get_bigquery_client(project, credentials):
     return BigQueryClient(project, credentials)
+
+
+def is_slug_value(id_value):
+    return len(id_value.split('.')) == 1
 
 
 class CatalogList(list):

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from .entity import is_slug_value
 from .category import Category
 from .country import Country
 from .geography import Geography
@@ -62,7 +63,7 @@ class Catalog(object):
 
         Args:
             country_id (str):
-              Value for the column 'country_id' to be used when querying the Catalog.
+              Id value of the country to be used for filtering the Catalog.
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
@@ -77,7 +78,7 @@ class Catalog(object):
 
         Args:
             category_id (str):
-              Value for the column 'category_id' to be used when querying the Catalog.
+              Id value of the category to be used for filtering the Catalog.
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
@@ -92,14 +93,20 @@ class Catalog(object):
 
         Args:
             geography_id (str):
-              Value for the column 'geography_id' to be used when querying the Catalog
+              Id or slug value of the geography to be used for filtering the Catalog
 
         Returns:
             :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
 
         """
 
-        self.filters[GEOGRAPHY_FILTER] = geography_id
+        filter_value = geography_id
+
+        if is_slug_value(geography_id):
+            geography = Geography.get(geography_id)
+            filter_value = geography.id
+
+        self.filters[GEOGRAPHY_FILTER] = filter_value
         return self
 
     def clear_filters(self):
