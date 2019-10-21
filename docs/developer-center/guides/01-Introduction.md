@@ -4,8 +4,6 @@ Use these guides to learn about integrating CARTOframes into your data science w
 
 If you're already familiar with Jupyter Notebooks, you can also take a look to our [Notebook Examples]({{ site.url }}/developers/cartoframes/examples) for more detailed use cases.
 
----
-
 ### Content
 
 <div class="doc-guides__cartoframes-row">
