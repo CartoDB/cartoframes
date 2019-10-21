@@ -5,34 +5,34 @@ Use these guides to learn about integrating CARTOframes into your data science w
 If you're already familiar with Jupyter Notebooks, you can also take a look to our [Notebook Examples]({{ site.url }}/developers/cartoframes/examples) for more detailed use cases.
 
 
-<div class="doc-guides__cartoframes">
-
-  <div class="doc-guides__cartoframes-guide">
+<div class="doc-guides__cartoframes-row">
+  <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="{{ site.url }}/developers/cartoframes/guides/Install-CARTOframes-in-your-Notebooks/">Installation</a>
     </span>
-    <p class="doc-guides__title">This guide walks you through the process of installing CARTOframes in a Jupyter Notebook</p>
+    <p class="doc-guides__description">This guide walks you through the process of installing CARTOframes in a Jupyter Notebook</p>
   </div>
 
-  <div class="doc-guides__cartoframes-guide">
+  <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="{{ site.url }}/developers/cartoframes/guides/Login-to-CARTO-Platform/">Login into CARTO</a>
     </span>
-    <p class="doc-guides__title">Learn how to authenticate against CARTO</p>
+    <p class="doc-guides__description">Learn how to authenticate against CARTO</p>
   </div>
+</div>
 
-  <div class="doc-guides__cartoframes-guide">
+<div class="doc-guides__cartoframes-row">
+  <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="{{ site.url }}/developers/cartoframes/guides/Quickstart-Part-1/">Quickstart Part 1</a>
     </span>
-    <p class="doc-guides__title">From import to first visualization</p>
+    <p class="doc-guides__description">From import to first visualization</p>
   </div>
 
-  <div class="doc-guides__cartoframes-guide">
+  <div class="doc-guides__cartoframes-block">
     <span class="doc-guides__title">
       <a href="{{ site.url }}/developers/cartoframes/guides/Quickstart-Part-2/">Quickstart Part 2</a>
     </span>
-    <p class="doc-guides__title">From analysis to share a visualization</p>
+    <p class="doc-guides__description">From analysis to share a visualization</p>
   </div>
-
 </div>
