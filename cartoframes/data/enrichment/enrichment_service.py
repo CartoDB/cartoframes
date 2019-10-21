@@ -123,7 +123,6 @@ def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_
 
 
 def __process_variables(variables, is_polygon_enrichment):
-
     variables_result = list()
     if isinstance(variables, Variable):
         variables_result = [variables]
@@ -133,7 +132,7 @@ def __process_variables(variables, is_polygon_enrichment):
         first_element = variables[0]
 
         if isinstance(first_element, str):
-            variables_result = [Variable.get(variable) for variable in variables]
+            variables_result = Variable.get_list(variables)
         else:
             variables_result = variables
     else:
