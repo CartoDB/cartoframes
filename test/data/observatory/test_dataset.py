@@ -128,7 +128,7 @@ class TestDataset(unittest.TestCase):
         assert update_frequency == db_dataset1['update_frequency']
         assert version == db_dataset1['version']
         assert is_public_data == db_dataset1['is_public_data']
-        assert summary == db_dataset1['summary_jsonb']
+        assert summary == db_dataset1['summary_json']
 
     def test_dataset_is_exported_as_series(self):
         # Given
@@ -144,7 +144,7 @@ class TestDataset(unittest.TestCase):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = CatalogDataset(db_dataset1)
-        expected_dict = {key: value for key, value in db_dataset1.items() if key is not 'summary_jsonb'}
+        expected_dict = {key: value for key, value in db_dataset1.items() if key is not 'summary_json'}
 
         # When
         dataset_dict = dataset.to_dict()

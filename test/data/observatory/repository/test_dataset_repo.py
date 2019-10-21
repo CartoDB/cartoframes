@@ -193,7 +193,7 @@ class TestDatasetRepo(unittest.TestCase):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When
