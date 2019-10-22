@@ -105,7 +105,7 @@ class TestGeography(unittest.TestCase):
         assert update_frequency == db_geography1['update_frequency']
         assert version == db_geography1['version']
         assert is_public_data == db_geography1['is_public_data']
-        assert summary == db_geography1['summary_jsonb']
+        assert summary == db_geography1['summary_json']
 
     def test_geography_is_exported_as_series(self):
         # Given
@@ -121,7 +121,7 @@ class TestGeography(unittest.TestCase):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        expected_dict = {key: value for key, value in db_geography1.items() if key is not 'summary_jsonb'}
+        expected_dict = {key: value for key, value in db_geography1.items() if key is not 'summary_json'}
 
         # When
         geography_dict = geography.to_dict()

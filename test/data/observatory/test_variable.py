@@ -94,7 +94,7 @@ class TestVariable(unittest.TestCase):
         assert agg_method == db_variable1['agg_method']
         assert variable_group == db_variable1['variable_group_id']
         assert starred == db_variable1['starred']
-        assert summary == db_variable1['summary_jsonb']
+        assert summary == db_variable1['summary_json']
 
     def test_variable_is_exported_as_series(self):
         # Given
@@ -110,7 +110,7 @@ class TestVariable(unittest.TestCase):
     def test_variable_is_exported_as_dict(self):
         # Given
         variable = Variable(db_variable1)
-        expected_dict = {key: value for key, value in db_variable1.items() if key is not 'summary_jsonb'}
+        expected_dict = {key: value for key, value in db_variable1.items() if key is not 'summary_json'}
 
         # When
         variable_dict = variable.to_dict()

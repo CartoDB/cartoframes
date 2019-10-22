@@ -167,7 +167,7 @@ class TestVariableRepo(unittest.TestCase):
             'agg_method': None,
             'variable_group_id': None,
             'starred': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When

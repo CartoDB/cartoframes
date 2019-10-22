@@ -58,7 +58,7 @@ class Geography(CatalogEntity):
 
     @property
     def summary(self):
-        return self.data['summary_jsonb']
+        return self.data['summary_json']
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):

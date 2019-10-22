@@ -21,7 +21,7 @@ class CatalogEntity(ABC):
 
     id_field = 'id'
     entity_repo = None
-    export_excluded_fields = ['summary_jsonb']
+    export_excluded_fields = ['summary_json']
 
     def __init__(self, data):
         self.data = data
