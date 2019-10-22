@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from .enrichment_service import enrich
 
 
-def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
+def enrich_polygons(data, variables, agg_operators=dict(), data_geom_column='geometry',
                     filters=dict(), credentials=None):
     """enrich_polygons
 
@@ -61,7 +61,7 @@ def enrich_polygons(data, variables, agg_operators, data_geom_column='geometry',
             filters = {'do_date': '2019-09-01'}
 
             dataset_enrich = enrichment.enrich_polygons(dataset, variables, filters)
-        
+
 
         Enrich a polygons dataset with custom aggregation methods:
 

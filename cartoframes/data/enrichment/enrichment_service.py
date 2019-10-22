@@ -160,11 +160,20 @@ def __process_filters(filters_dict):
 
 
 def __process_agg_operators(agg_operators, variables):
-    agg_operators_result = agg_operators.copy()
+    if isinstance(agg_operators, str):
+        agg_operators_result = dict()
 
-    for variable in variables:
-        if variable.column_name not in agg_operators_result:
-            agg_operators_result[variable.column_name] = variable.agg_method
+        for variable in variables:
+            agg_operators_result[variable.column_name] = agg_operators
+
+    elif isinstance(agg_operators, dict):
+        agg_operators_result = agg_operators.copy()
+
+        for variable in variables:
+            if variable.column_name not in agg_operators_result:
+                agg_operators_result[variable.column_name] = variable.agg_method
+    else:
+        raise EnrichmentException('agg_operators param must be a string or a dict')
 
     return agg_operators_result
 
