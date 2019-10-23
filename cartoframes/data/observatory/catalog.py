@@ -131,7 +131,7 @@ class Catalog(object):
         return Dataset.get_all(self.filters, credentials)
 
     def datasets_filter(self, filter_dataset):
-        """Get all the datasets in the Catalog filtered 
+        """Get all the datasets in the Catalog filtered
         Returns:
             :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
         """

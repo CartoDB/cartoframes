@@ -6,10 +6,10 @@ from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.geography_repo import get_geography_repo
 
-import geopandas as gpd
 import pandas as pd
-from cartoframes.data import Dataset as CFDataset
+import geopandas as gpd
 from shapely import wkt
+from cartoframes.data import Dataset as CFDataset
 
 
 class Dataset(CatalogEntity):
@@ -105,7 +105,7 @@ class Dataset(CatalogEntity):
         user_gdf = user_gdf[[user_gdf.geometry.name]]
         catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
         matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
-        
+
         # Get Dataset objects
         return get_dataset_repo().get_all({'geography_id': matched_geographies_ids})
 
