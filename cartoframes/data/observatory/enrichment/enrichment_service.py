@@ -3,14 +3,13 @@ import geopandas as gpd
 
 from collections import defaultdict
 
-from ...auth import get_default_credentials
-from ...exceptions import EnrichmentException
-from ...utils.geom_utils import (_compute_geometry_from_geom, geojson_to_wkt,
-                                 wkt_to_geojson)
-from ..clients import bigquery_client
-from ..dataset.dataset import Dataset
-from ..observatory import Variable
-from ..observatory import CatalogDataset
+from ..catalog.variable import Variable
+from ..catalog.dataset import CatalogDataset
+from ...dataset.dataset import Dataset
+from ...clients import bigquery_client
+from ....auth import get_default_credentials
+from ....exceptions import EnrichmentException
+from ....utils.geom_utils import _compute_geometry_from_geom, geojson_to_wkt, wkt_to_geojson
 
 
 _ENRICHMENT_ID = 'enrichment_id'

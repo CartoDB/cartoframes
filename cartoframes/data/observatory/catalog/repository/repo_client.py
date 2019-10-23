@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from ...clients import SQLClient
-from ....auth import Credentials
+from ....clients import SQLClient
+from .....auth import Credentials
 from ..subscriptions import get_subscription_ids
 
 

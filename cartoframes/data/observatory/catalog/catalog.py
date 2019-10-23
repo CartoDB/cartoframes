@@ -8,7 +8,7 @@ from .geography import Geography
 from .subscriptions import Subscriptions
 from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
 
-from ...auth import Credentials, defaults
+from ....auth import Credentials, defaults
 
 
 class Catalog(object):

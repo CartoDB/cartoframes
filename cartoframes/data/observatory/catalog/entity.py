@@ -5,8 +5,8 @@ from google.api_core.exceptions import NotFound
 
 from carto.exceptions import CartoException
 
-from ..clients.bigquery_client import BigQueryClient
-from ...auth import Credentials, defaults
+from ...clients.bigquery_client import BigQueryClient
+from ....auth import Credentials, defaults
 
 try:
     from abc import ABC

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo

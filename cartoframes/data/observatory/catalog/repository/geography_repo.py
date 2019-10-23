@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 
 import geopandas as gpd
-from cartoframes.auth import Credentials
 
 from cartoframes.data import Dataset
+from cartoframes.auth import Credentials
+
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER
 from .entity_repo import EntityRepository
 

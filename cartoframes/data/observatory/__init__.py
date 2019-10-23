@@ -1,14 +1,14 @@
 from __future__ import absolute_import
 
-from .catalog import Catalog
-from .category import Category
-from .country import Country
-from .dataset import CatalogDataset
-from .geography import Geography
-from .provider import Provider
-from .variable import Variable
-from .points_enrichment import enrich_points
-from .polygons_enrichment import enrich_polygons
+from .catalog.catalog import Catalog
+from .catalog.category import Category
+from .catalog.country import Country
+from .catalog.dataset import CatalogDataset
+from .catalog.geography import Geography
+from .catalog.provider import Provider
+from .catalog.variable import Variable
+from .enrichment.points_enrichment import enrich_points
+from .enrichment.polygons_enrichment import enrich_polygons
 
 __all__ = [
     'Catalog',

@@ -1,12 +1,10 @@
 from __future__ import absolute_import
 
-from cartoframes.data.observatory.repository.constants import CATEGORY_FILTER
-
-from cartoframes.data.observatory.repository.geography_repo import get_geography_repo
-
 from .entity import CatalogEntity
+from .repository.constants import CATEGORY_FILTER
 from .repository.category_repo import get_category_repo
 from .repository.dataset_repo import get_dataset_repo
+from .repository.geography_repo import get_geography_repo
 
 
 class Category(CatalogEntity):

@@ -1,6 +1,6 @@
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList, is_slug_value
 from .repo_client import RepoClient
+from ..entity import CatalogList, is_slug_value
 
 try:
     from abc import ABC, abstractmethod
