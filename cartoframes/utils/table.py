@@ -1,16 +1,20 @@
-from carto.datasets import DatasetManager
 from carto.auth import APIKeyAuthClient
+from carto.datasets import DatasetManager
 
-from cartoframes.data import Dataset
-from ..__version__ import __version__
+from .. import __version__
+from ..auth import get_default_credentials
+from ..data import Dataset
+
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
-def tables(credentials):
+def tables(credentials=None):
     """List all tables in user's CARTO account
     Returns:
         :obj:`list` of :py:class:`Dataset <cartoframes.data.Dataset>`
     """
-    auth_client = _create_auth_client(credentials)
+    auth_client = _create_auth_client(credentials or get_default_credentials())
     table_names = DatasetManager(auth_client).filter(
         show_table_size_and_row_count='false',
         show_table='false',

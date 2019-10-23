@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from ...lib import context
 from ...auth import get_default_credentials
+from ...lib import context
 
 
 class SQLClient(object):
@@ -11,15 +11,15 @@ class SQLClient(object):
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
-          A :py:class:`Credentials <cartoframes.auth.Credentials>`
-          instance can be used in place of a `username`|`base_url` / `api_key` combination.
+            A :py:class:`Credentials <cartoframes.auth.Credentials>`
+            instance can be used in place of a `username`|`base_url` / `api_key` combination.
 
     Example:
 
         .. code::
 
             from cartoframes.auth import Credentials
-            from cartoframes.client import SQLClient
+            from cartoframes.data.clients import SQLClient
 
             credentials = Credentials(username='<USER NAME>', api_key='<API KEY>')
             sql = SQLClient(credentials)
@@ -97,6 +97,7 @@ class SQLClient(object):
             columns = ['Column name', 'Column type']
             rows = [(key, fields[key]['type']) for key in fields]
             self._print_table(rows, columns=columns, padding=[10, 5])
+            return None
 
     def describe(self, table_name, column_name):
         """Show information about a column in a specific table."""

@@ -1,68 +1,110 @@
-import pandas as pd
+from __future__ import absolute_import
 
-from cartoframes.exceptions import DiscoveryException
+
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.geography_repo import get_geography_repo
+from .repository.constants import GEOGRAPHY_FILTER
+from . import subscription_info
+from . import subscriptions
+from . import utils
 
-_GEOGRAPHY_ID_FIELD = 'id'
+GEOGRAPHY_TYPE = 'geography'
 
 
-class Geography(pd.Series):
+class Geography(CatalogEntity):
+
+    entity_repo = get_geography_repo()
 
     @property
-    def _constructor(self):
-        return Geography
-
-    @property
-    def _constructor_expanddim(self):
-        return Geographies
-
-    @staticmethod
-    def get_by_id(geography_id):
-        return get_geography_repo().get_by_id(geography_id)
-
     def datasets(self):
-        return get_dataset_repo().get_by_geography(self._get_id())
-
-    def _get_id(self):
-        try:
-            return self[_GEOGRAPHY_ID_FIELD]
-        except KeyError:
-            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Geographies '
-                                     'class. You should use `Geographies.get_by_id("geography_id")` to obtain a valid '
-                                     'instance of the Geography class and then attempt this function on it.')
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Geographies(pd.DataFrame):
+        return get_dataset_repo().get_all({GEOGRAPHY_FILTER: self.id})
 
     @property
-    def _constructor(self):
-        return Geographies
+    def name(self):
+        return self.data['name']
 
     @property
-    def _constructor_sliced(self):
-        return Geography
+    def description(self):
+        return self.data['description']
 
-    def __init__(self, data):
-        super(Geographies, self).__init__(data)
-        self.set_index(_GEOGRAPHY_ID_FIELD, inplace=True, drop=False)
+    @property
+    def country(self):
+        return self.data['country_id']
 
-    @staticmethod
-    def get_all():
-        return get_geography_repo().get_all()
+    @property
+    def language(self):
+        return self.data['lang']
 
-    @staticmethod
-    def get_by_id(geography_id):
-        return Geography.get_by_id(geography_id)
+    @property
+    def provider(self):
+        return self.data['provider_id']
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @property
+    def geom_coverage(self):
+        return self.data['geom_coverage']
 
-    def __ne__(self, other):
-        return not self == other
+    @property
+    def update_frequency(self):
+        return self.data['update_frequency']
+
+    @property
+    def version(self):
+        return self.data['version']
+
+    @property
+    def is_public_data(self):
+        return self.data['is_public_data']
+
+    @property
+    def summary(self):
+        return self.data['summary_json']
+
+    @classmethod
+    def get_all(cls, filters=None, credentials=None):
+        return cls.entity_repo.get_all(filters, credentials)
+
+    def download(self, credentials=None):
+        """Download Geography data.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        return self._download(credentials)
+
+    def subscribe(self, credentials=None):
+        """Subscribe to a Geography.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, GEOGRAPHY_TYPE)
+        else:
+            utils.display_subscription_form(self.id, GEOGRAPHY_TYPE, _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Geography.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, GEOGRAPHY_TYPE, _credentials))

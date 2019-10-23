@@ -1,42 +1,34 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .constants import CATEGORY_FILTER
+from .entity_repo import EntityRepository
+
+
+_COUNTRY_ID_FIELD = 'country_id'
+_ALLOWED_FILTERS = [CATEGORY_FILTER]
 
 
 def get_country_repo():
     return _REPO
 
 
-class CountryRepository(object):
+class CountryRepository(EntityRepository):
 
     def __init__(self):
-        self.client = RepoClient()
+        super(CountryRepository, self).__init__(_COUNTRY_ID_FIELD, _ALLOWED_FILTERS)
 
-    def get_all(self):
-        return self._to_countries(self.client.get_countries())
-
-    def get_by_id(self, iso_code3):
-        result = self.client.get_countries('country_iso_code3', iso_code3)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing country in the catalog. '
-                                     'You can check the full list of available countries with Countries.get_all()')
-
-        return self._to_country(result[0])
-
-    @staticmethod
-    def _to_country(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.country import Country
+        return Country
 
-        return Country(result)
+    def _get_rows(self, filters=None):
+        return self.client.get_countries(filters)
 
-    @staticmethod
-    def _to_countries(results):
-        if len(results) == 0:
-            return None
-
-        from cartoframes.data.observatory.country import Countries
-
-        return Countries([CountryRepository._to_country(result) for result in results])
+    def _map_row(self, row):
+        return {
+            'id': self._normalize_field(row, 'id'),
+        }
 
 
 _REPO = CountryRepository()

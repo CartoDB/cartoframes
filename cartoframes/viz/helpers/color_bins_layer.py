@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
+from .. import defaults
+from ..layer import Layer
 from .utils import serialize_palette
 
-from ..layer import Layer
-from .. import defaults
 
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
@@ -85,7 +85,7 @@ def color_bins_layer(
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette, 
+                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
                     opacity or '0.9'),
                 'strokeColor': '{0}'.format(
                     stroke_color or defaults.STYLE['polygon']['strokeColor']),

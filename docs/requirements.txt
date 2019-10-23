@@ -1,3 +1,4 @@
-# documentation requirements
+# documentation requirements	
+
 sphinx>=1.6.5
-sphinxcontrib-napoleon>=0.6.1
+sphinxcontrib-napoleon>=0.7.0

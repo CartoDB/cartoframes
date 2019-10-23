@@ -1,9 +1,9 @@
 from carto.exceptions import CartoException
 
-from .map import Map
-from .html.HTMLLayout import HTMLLayout
-from . import constants
 from ..utils.utils import get_center
+from . import constants
+from .html import HTMLLayout
+from .map import Map
 
 
 class Layout(object):
@@ -94,38 +94,40 @@ class Layout(object):
 
     def __init__(self,
                  maps,
-                 N_SIZE=None,
-                 M_SIZE=None,
+                 n_size=None,
+                 m_size=None,
                  viewport=None,
+                 map_height=250,
                  is_static=True):
         self._layout = _init_layout(maps, is_static, viewport)
-        self._N_SIZE = N_SIZE if N_SIZE is not None else len(self._layout)
-        self._M_SIZE = M_SIZE if M_SIZE is not None else constants.DEFAULT_LAYOUT_M_SIZE
+        self._n_size = n_size if n_size is not None else len(self._layout)
+        self._m_size = m_size if m_size is not None else constants.DEFAULT_LAYOUT_M_SIZE
         self._viewport = viewport
         self._is_static = is_static
+        self._map_height = map_height
 
     def _repr_html_(self):
-        self._htmlLayout = HTMLLayout()
-        self._htmlLayout.set_content(
+        self._html_layout = HTMLLayout()
+        self._html_layout.set_content(
             maps=self._layout,
-            size=['100%', 250 * self._M_SIZE],
-            n=self._N_SIZE,
-            m=self._M_SIZE,
-            is_static=self._is_static
+            size=['100%', self._map_height * self._m_size],
+            n_size=self._n_size,
+            m_size=self._m_size,
+            is_static=self._is_static,
+            map_height=self._map_height
         )
 
-        return self._htmlLayout.html
+        return self._html_layout.html
 
 
 def _init_layout(maps, is_static, viewport):
     layout = []
 
-    for i, viz in enumerate(maps):
+    for _, viz in enumerate(maps):
         if not isinstance(viz, Map):
             raise CartoException('All the elements in the Layout should be an instance of Map')
-        else:
-            map_settings = _get_map_settings(viz, is_static, viewport)
-            layout.append(map_settings)
+        map_settings = _get_map_settings(viz, is_static, viewport)
+        layout.append(map_settings)
 
     return layout
 

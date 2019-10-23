@@ -1,13 +1,14 @@
+from __future__ import absolute_import
+
 import pandas as pd
+from carto.exceptions import CartoException, CartoRateLimitException
 from tqdm import tqdm
 
-from carto.exceptions import CartoException, CartoRateLimitException
-
-from .base_dataset import BaseDataset
 from ....utils.columns import DataframeColumnsInfo, _first_value
-from ....utils.geom_utils import decode_geometry, compute_geodataframe, save_index_as_column
-from ....utils.utils import map_geom_type, load_geojson, is_geojson
-
+from ....utils.geom_utils import (compute_geodataframe, decode_geometry,
+                                  save_index_as_column)
+from ....utils.utils import is_geojson, load_geojson, map_geom_type
+from .base_dataset import BaseDataset
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -51,11 +52,13 @@ class DataFrameDataset(BaseDataset):
     def upload(self, if_exists, with_lnglat):
         self._is_ready_for_upload_validation()
 
+        self._rename_index_for_upload()
+
         dataframe_columns_info = DataframeColumnsInfo(self._df, with_lnglat)
 
-        if if_exists == BaseDataset.REPLACE or not self.exists():
+        if if_exists == BaseDataset.IF_EXISTS_REPLACE or not self.exists():
             self._create_table(dataframe_columns_info.columns)
-        elif if_exists == BaseDataset.FAIL:
+        elif if_exists == BaseDataset.IF_EXISTS_FAIL:
             raise self._already_exists_error()
 
         self._copyfrom(dataframe_columns_info, with_lnglat)
@@ -77,6 +80,10 @@ class DataFrameDataset(BaseDataset):
             columns = list(set(columns) - set(exclude))
 
         return columns
+
+    def get_num_rows(self):
+        """Get the number of rows in the dataframe"""
+        return len(self._df.index)
 
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
         query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
@@ -113,6 +120,22 @@ class DataFrameDataset(BaseDataset):
             geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
                 return map_geom_type(geometry.geom_type)
+        return None
+
+    def _rename_index_for_upload(self):
+        if self._df.index.name != 'cartodb_id':
+            if 'cartodb_id' not in self._df:
+                if _is_valid_index_for_cartodb_id(self._df.index):
+                    # rename a integer unnamed index to cartodb_id
+                    self._df.index.rename('cartodb_id', inplace=True)
+            else:
+                if self._df.index.name is None:
+                    # replace an unnamed index by a cartodb_id column
+                    self._df.set_index('cartodb_id')
+
+
+def _is_valid_index_for_cartodb_id(index):
+    return index.name is None and index.nlevels == 1 and index.dtype == 'int' and index.is_unique
 
 
 def _rows(df, dataframe_columns_info, with_lnglat):
@@ -120,9 +143,13 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe
-            if col not in df.columns:  # we could have filtered columns in the df. See DataframeColumnsInfo
-                continue
-            val = row[col]
+            if col not in df.columns:
+                if col == df.index.name:
+                    val = i
+                else:  # we could have filtered columns in the df. See DataframeColumnsInfo
+                    continue
+            else:
+                val = row[col]
 
             if _is_null(val):
                 val = ''

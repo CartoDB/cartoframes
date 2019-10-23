@@ -42,11 +42,11 @@
   {% for i in range(n) %}
     <div class="layout-map-row">
     {% for j in range(m) %}
-      {% set index = i + j * m if n >= m else j + i * m %}
+      {% set index = i * m + j %}
       {% set title = maps[index]['title'] %}
       {% set has_legends = maps[index]['has_legends'] %}
       
-      <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}">
+      <div class="layout-map-cell {{'layout-map-cell-legend' if has_legends }}" style="height: {{ map_height }}px">
           {% if title %}<p>{{ title }}</p>{% endif %}
           {% if has_legends %}
             {% set layers = maps[index]['layers'] %}

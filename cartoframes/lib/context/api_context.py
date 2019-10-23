@@ -1,12 +1,14 @@
+from __future__ import absolute_import
+
 import time
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
-from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 from carto.exceptions import CartoRateLimitException
+from carto.sql import BatchSQLClient, CopySQLClient, SQLClient
 
+from ... import __version__
 from .base_context import BaseContext
-from ...__version__ import __version__
 
 DEFAULT_RETRY_TIMES = 3
 

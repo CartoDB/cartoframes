@@ -1,42 +1,38 @@
-from cartoframes.exceptions import DiscoveryException
-from .repo_client import RepoClient
+from __future__ import absolute_import
+
+from .constants import COUNTRY_FILTER
+from .entity_repo import EntityRepository
+
+
+_CATEGORY_ID_FIELD = 'id'
+_ALLOWED_FILTERS = [COUNTRY_FILTER]
 
 
 def get_category_repo():
     return _REPO
 
 
-class CategoryRepository(object):
+class CategoryRepository(EntityRepository):
 
     def __init__(self):
-        self.client = RepoClient()
+        super(CategoryRepository, self).__init__(_CATEGORY_ID_FIELD, _ALLOWED_FILTERS)
 
-    def get_all(self):
-        return self._to_categories(self.client.get_categories())
-
-    def get_by_id(self, category_id):
-        result = self.client.get_categories('id', category_id)
-
-        if len(result) == 0:
-            raise DiscoveryException('The id does not correspond with any existing category in the catalog. '
-                                     'You can check the full list of available categories with Categories.get_all()')
-
-        return self._to_category(result[0])
-
-    @staticmethod
-    def _to_category(result):
+    @classmethod
+    def _get_entity_class(cls):
         from cartoframes.data.observatory.category import Category
+        return Category
 
-        return Category(result)
+    def _get_rows(self, filters=None):
+        if filters is not None and COUNTRY_FILTER in filters.keys():
+            return self.client.get_categories_joined_datasets(filters)
 
-    @staticmethod
-    def _to_categories(results):
-        if len(results) == 0:
-            return None
+        return self.client.get_categories(filters)
 
-        from cartoframes.data.observatory.category import Categories
-
-        return Categories([CategoryRepository._to_category(result) for result in results])
+    def _map_row(self, row):
+        return {
+            'id': self._normalize_field(row, self.id_field),
+            'name': self._normalize_field(row, 'name')
+        }
 
 
 _REPO = CategoryRepository()

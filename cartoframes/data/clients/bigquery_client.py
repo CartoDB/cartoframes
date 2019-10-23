@@ -1,21 +1,50 @@
-import datetime
-import pytz
+from __future__ import absolute_import
 
-from ..enrichment import fake_auth
+import os
+import appdirs
+import csv
+import tqdm
+
+from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
+from google.oauth2.credentials import Credentials as GoogleCredentials
 
-# TODO: decorator to authenticate
+from carto.exceptions import CartoException
+from ...auth import get_default_credentials
+
+_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
+
+
+def refresh_client(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except RefreshError:
+            self.client = self._init_client()
+            try:
+                return func(self, *args, **kwargs)
+            except RefreshError:
+                raise CartoException('Something went wrong accessing data. '
+                                     'Please, try again in a few seconds or contact support for help.')
+    return wrapper
 
 
 class BigQueryClient(object):
 
-    def __init__(self, credentials):
-        token = fake_auth.auth(credentials)
+    def __init__(self, project, credentials):
+        self._project = project
+        self._credentials = credentials or get_default_credentials()
+        self.client = self._init_client()
 
-        self.credentials = credentials
-        self.client = bigquery.Client().from_service_account_json(token)  # Change auth method when token received
+    def _init_client(self):
+        google_credentials = GoogleCredentials(self._credentials.get_do_token())
 
-    def upload_dataframe(self, dataframe, schema, tablename, project, dataset, ttl_days=None):
+        return bigquery.Client(
+            project=self._project,
+            credentials=google_credentials)
+
+    @refresh_client
+    def upload_dataframe(self, dataframe, schema, tablename, project, dataset):
         dataset_ref = self.client.dataset(dataset, project=project)
         table_ref = dataset_ref.table(tablename)
 
@@ -27,18 +56,56 @@ class BigQueryClient(object):
         job = self.client.load_table_from_dataframe(dataframe, table_ref, job_config=job_config)
         job.result()
 
-        if ttl_days:
-            table = self.client.get_table(table_ref)
-            expiration = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=ttl_days)
-            table.expires = expiration
-            self.client.update_table(table, ["expires"])
-
+    @refresh_client
     def query(self, query, **kwargs):
-        response = self.client.query(query, **kwargs)
+        return self.client.query(query, **kwargs)
 
-        return response
+    @refresh_client
+    def get_table(self, project, dataset, table):
+        full_table_name = '{}.{}.{}'.format(project, dataset, table)
+        return self.client.get_table(full_table_name)
 
-    def delete_table(self, tablename, project, dataset):
-        dataset_ref = self.client.dataset(dataset, project=project)
-        table_ref = dataset_ref.table(tablename)
-        self.client.delete_table(table_ref)
+    def get_table_column_names(self, project, dataset, table):
+        table_info = self.get_table(project, dataset, table)
+        return [field.name for field in table_info.schema]
+
+    def download_to_file(self, project, dataset, table, limit=None, offset=None,
+                         file_path=None, fail_if_exists=False, progress_bar=True):
+        if not file_path:
+            file_name = '{}.{}.{}.csv'.format(project, dataset, table)
+            file_path = os.path.join(_USER_CONFIG_DIR, file_name)
+
+        if fail_if_exists and os.path.isfile(file_path):
+            raise CartoException('The file `{}` already exists.'.format(file_path))
+
+        column_names = self.get_table_column_names(project, dataset, table)
+
+        query = _download_query(project, dataset, table, limit, offset)
+        rows_iter = self.query(query).result()
+
+        if progress_bar:
+            pb = tqdm.tqdm_notebook(total=rows_iter.total_rows)
+
+        with open(file_path, 'w') as csvfile:
+            csvwriter = csv.writer(csvfile)
+
+            csvwriter.writerow(column_names)
+
+            for row in rows_iter:
+                csvwriter.writerow(row.values())
+                if progress_bar:
+                    pb.update(1)
+
+        return file_path
+
+
+def _download_query(project, dataset, table, limit=None, offset=None):
+    full_table_name = '`{}.{}.{}`'.format(project, dataset, table)
+    query = 'SELECT * FROM {}'.format(full_table_name)
+
+    if limit:
+        query += ' LIMIT {}'.format(limit)
+    if offset:
+        query += ' OFFSET {}'.format(offset)
+
+    return query

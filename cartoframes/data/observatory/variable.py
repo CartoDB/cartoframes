@@ -1,68 +1,107 @@
-import pandas as pd
+from __future__ import absolute_import
 
-from cartoframes.exceptions import DiscoveryException
+from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
 from .repository.variable_repo import get_variable_repo
+from .repository.constants import VARIABLE_FILTER
+from .summary import variable_describe, head, tail, counts, quantiles, top_values, histogram
 
-_VARIABLE_ID_FIELD = 'id'
+
+_DESCRIPTION_LENGTH_LIMIT = 30
 
 
-class Variable(pd.Series):
+class Variable(CatalogEntity):
+
+    entity_repo = get_variable_repo()
 
     @property
-    def _constructor(self):
-        return Variable
-
-    @property
-    def _constructor_expanddim(self):
-        return Variables
-
-    @staticmethod
-    def get_by_id(variable_id):
-        return get_variable_repo().get_by_id(variable_id)
-
     def datasets(self):
-        return get_dataset_repo().get_by_variable(self._get_id())
-
-    def _get_id(self):
-        try:
-            return self[_VARIABLE_ID_FIELD]
-        except KeyError:
-            raise DiscoveryException('Unsupported function: this instance actually represents a subset of Variables '
-                                     'class. You should use `Variables.get_by_id("variable_id")` to obtain a valid '
-                                     'instance of the Variable class and then attempt this function on it.')
-
-    def __eq__(self, other):
-        return self.equals(other)
-
-    def __ne__(self, other):
-        return not self == other
-
-
-class Variables(pd.DataFrame):
+        return get_dataset_repo().get_all({VARIABLE_FILTER: self.id})
 
     @property
-    def _constructor(self):
-        return Variables
+    def name(self):
+        return self.data['name']
 
     @property
-    def _constructor_sliced(self):
-        return Variable
+    def description(self):
+        return self.data['description']
 
-    def __init__(self, data):
-        super(Variables, self).__init__(data)
-        self.set_index(_VARIABLE_ID_FIELD, inplace=True, drop=False)
+    @property
+    def column_name(self):
+        return self.data['column_name']
 
-    @staticmethod
-    def get_all():
-        return get_variable_repo().get_all()
+    @property
+    def db_type(self):
+        return self.data['db_type']
 
-    @staticmethod
-    def get_by_id(variable_id):
-        return Variable.get_by_id(variable_id)
+    @property
+    def dataset(self):
+        return self.data['dataset_id']
 
-    def __eq__(self, other):
-        return self.equals(other)
+    @property
+    def agg_method(self):
+        return self.data['agg_method']
 
-    def __ne__(self, other):
-        return not self == other
+    @property
+    def variable_group(self):
+        return self.data['variable_group_id']
+
+    @property
+    def starred(self):
+        return self.data['starred']
+
+    @property
+    def summary(self):
+        return self.data['summary_json']
+
+    @property
+    def project_name(self):
+        project, _, _, _ = self.id.split('.')
+        return project
+
+    @property
+    def schema_name(self):
+        _, schema, _, _ = self.id.split('.')
+        return schema
+
+    @property
+    def dataset_name(self):
+        _, _, dataset, _ = self.id.split('.')
+        return dataset
+
+    def describe(self):
+        data = self.data['summary_json']
+        return variable_describe(data)
+
+    def head(self):
+        data = self.data['summary_json']
+        return head(self.__class__, data)
+
+    def tail(self):
+        data = self.data['summary_json']
+        return tail(self.__class__, data)
+
+    def counts(self):
+        data = self.data['summary_json']
+        return counts(data)
+
+    def quantiles(self):
+        data = self.data['summary_json']
+        return quantiles(data)
+
+    def top_values(self):
+        data = self.data['summary_json']
+        return top_values(data)
+
+    def histogram(self):
+        data = self.data['summary_json']
+        return histogram(data)
+
+    def __repr__(self):
+        descr = self.description
+
+        if descr and len(descr) > _DESCRIPTION_LENGTH_LIMIT:
+            descr = descr[0:_DESCRIPTION_LENGTH_LIMIT] + '...'
+
+        return "<{classname}('{entity_id}','{descr}')>"\
+               .format(classname=self.__class__.__name__, entity_id=self._get_print_id(), descr=descr)

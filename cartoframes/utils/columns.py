@@ -5,7 +5,7 @@ import sys
 
 from unidecode import unidecode
 
-from .geom_utils import detect_encoding_type, decode_geometry
+from .geom_utils import decode_geometry, detect_encoding_type
 
 
 class Column(object):
@@ -25,6 +25,7 @@ class Column(object):
                       'REFERENCES', 'RIGHT', 'SELECT', 'SESSION_USER', 'SIMILAR', 'SOME', 'SYMMETRIC', 'TABLE', 'THEN',
                       'TO', 'TRAILING', 'TRUE', 'UNION', 'UNIQUE', 'USER', 'USING', 'VERBOSE', 'WHEN', 'WHERE',
                       'XMIN', 'XMAX', 'FORMAT', 'CONTROLLER', 'ACTION', )
+    NORMALIZED_GEOM_COL_NAME = 'the_geom'
 
     @staticmethod
     def from_sql_api_fields(sql_api_fields):
@@ -94,12 +95,12 @@ class DataframeColumnInfo(object):
             self.database_type = self._db_column_type(geom_column, geom_type, dtype)
         else:
             self.dataframe = None
-            self.database = 'the_geom'
+            self.database = Column.NORMALIZED_GEOM_COL_NAME
             self.database_type = 'geometry(Point, 4326)'
 
     def _database_column_name(self, geom_column):
         if geom_column and self.dataframe == geom_column:
-            normalized_name = 'the_geom'
+            normalized_name = Column.NORMALIZED_GEOM_COL_NAME
         else:
             normalized_name = normalize_name(self.dataframe)
 
@@ -116,12 +117,12 @@ class DataframeColumnInfo(object):
     def __eq__(self, obj):
         if isinstance(obj, dict):
             return self.dataframe == obj['dataframe'] and \
-                   self.database == obj['database'] and \
-                   self.database_type == obj['database_type']
+                self.database == obj['database'] and \
+                self.database_type == obj['database_type']
         else:
             return self.dataframe == obj.dataframe and \
-                   self.database == obj.database and \
-                   self.database_type == obj.database_type
+                self.database == obj.database and \
+                self.database_type == obj.database_type
 
 
 class DataframeColumnsInfo(object):
@@ -137,12 +138,17 @@ class DataframeColumnsInfo(object):
         self.columns = self._get_columns_info()
 
     def _get_columns_info(self):
+        df_columns = [(name, self.df.dtypes[name]) for name in self.df.columns]
+        if self.df.index.name is not None and self.df.index.name not in self.df:
+            df_columns.append((self.df.index.name, self.df.index.dtype))
+
         columns = []
-        for c in self.df.columns:
+
+        for c, dtype in df_columns:
             if self._filter_column(c):
                 continue
 
-            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, self.df.dtypes[c]))
+            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, dtype))
 
         if self.with_lnglat:
             columns.append(DataframeColumnInfo(None))
@@ -150,7 +156,16 @@ class DataframeColumnsInfo(object):
         return columns
 
     def _filter_column(self, column):
-        return column.lower() in Column.FORBIDDEN_COLUMN_NAMES or (self.with_lnglat and column == self.geom_column)
+        return (
+            column.lower() in Column.FORBIDDEN_COLUMN_NAMES
+            or (self.with_lnglat and column == self.geom_column)
+            or (
+                # Exclude duplicated geom columns when the geometry column (normalized)
+                # collides when another column named as the normalized geometry.
+                column == Column.NORMALIZED_GEOM_COL_NAME and self.geom_column
+                and self.geom_column != Column.NORMALIZED_GEOM_COL_NAME
+            )
+        )
 
     def _get_geom_col_name(self):
         geom_col = getattr(self.df, '_geometry_column_name', None)
@@ -276,3 +291,4 @@ def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
         return series.iloc[0]
+    return None
