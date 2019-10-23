@@ -18,12 +18,6 @@ class VariableRepository(EntityRepository):
     def __init__(self):
         super(VariableRepository, self).__init__(_VARIABLE_ID_FIELD, _ALLOWED_DATASETS, _VARIABLE_SLUG_FIELD)
 
-    def get_by_dataset(self, dataset_id):
-        return self._get_filtered_entities({DATASET_FILTER: dataset_id})
-
-    def get_by_variable_group(self, variable_group_id):
-        return self._get_filtered_entities({VARIABLE_GROUP_FILTER: variable_group_id})
-
     @classmethod
     def _get_entity_class(cls):
         from cartoframes.data.observatory.variable import Variable
@@ -44,7 +38,7 @@ class VariableRepository(EntityRepository):
             'agg_method': self._normalize_field(row, 'agg_method'),
             'variable_group_id': self._normalize_field(row, 'variable_group_id'),
             'starred': self._normalize_field(row, 'starred'),
-            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
 

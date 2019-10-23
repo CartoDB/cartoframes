@@ -24,8 +24,11 @@ class GeographyRepository(EntityRepository):
     def __init__(self):
         super(GeographyRepository, self).__init__(_GEOGRAPHY_ID_FIELD, _ALLOWED_FILTERS, _GEOGRAPHY_SLUG_FIELD)
 
-    def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
+    def get_all(self, filters=None, credentials=None):
+        self.client.set_user_credentials(credentials)
+        response = self._get_filtered_entities(filters)
+        self.client.set_user_credentials(None)
+        return response
 
     @classmethod
     def _get_entity_class(cls):
@@ -51,7 +54,7 @@ class GeographyRepository(EntityRepository):
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
     def get_geographies_gdf(self):

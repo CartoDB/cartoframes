@@ -1,5 +1,5 @@
 from cartoframes.data.observatory.variable import Variable
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
@@ -37,7 +37,7 @@ db_geography1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_geography2 = {
     'id': 'carto-do-public.tiger.geography_esp_municipalities_2019',
@@ -51,7 +51,7 @@ db_geography2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
@@ -73,7 +73,7 @@ db_dataset1 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_dataset2 = {
     'id': 'carto-do-public.project.basicstats-municipalities',
@@ -91,24 +91,24 @@ db_dataset2 = {
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
-test_dataset1 = Dataset(db_dataset1)
-test_dataset2 = Dataset(db_dataset2)
+test_dataset1 = CatalogDataset(db_dataset1)
+test_dataset2 = CatalogDataset(db_dataset2)
 test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {
     'id': 'carto-do.variable.var1',
     'slug': 'var1',
     'name': 'Population',
-    'description': 'The number of people within each geography',
+    'description': 'Number of people',
     'column_name': 'pop',
     'db_type': 'Numeric',
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_variable2 = {
     'id': 'carto-do.variable.var2',
@@ -121,7 +121,7 @@ db_variable2 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
@@ -156,3 +156,14 @@ db_variable_group2 = {
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)
 test_variables_groups = CatalogList([test_variable_group1, test_variable_group2])
+
+test_subscription_info = {
+    'id': 'id',
+    'estimated_delivery_days': 0,
+    'subscription_list_price': 100,
+    'tos': 'tos',
+    'tos_link': 'tos_link',
+    'licenses': 'licenses',
+    'licenses_link': 'licenses_link',
+    'rights': 'rights'
+}

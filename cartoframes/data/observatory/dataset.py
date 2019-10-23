@@ -1,27 +1,33 @@
 from __future__ import absolute_import
 
-from .entity import CatalogEntity
-from .repository.dataset_repo import get_dataset_repo
-from .repository.variable_repo import get_variable_repo
-from .repository.variable_group_repo import get_variable_group_repo
-from .repository.geography_repo import get_geography_repo
-
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 from cartoframes.data import Dataset as CFDataset
 
+from .entity import CatalogEntity
+from .repository.dataset_repo import get_dataset_repo
+from .repository.geography_repo import get_geography_repo
+from .repository.variable_repo import get_variable_repo
+from .repository.variable_group_repo import get_variable_group_repo
+from .repository.constants import DATASET_FILTER
+from .summary import dataset_describe, head, tail, counts, fields_by_type, geom_coverage
+from . import subscription_info
+from . import subscriptions
+from . import utils
 
-class Dataset(CatalogEntity):
+DATASET_TYPE = 'dataset'
+
+class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 
     @property
     def variables(self):
-        return get_variable_repo().get_by_dataset(self.id)
+        return get_variable_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def variables_groups(self):
-        return get_variable_group_repo().get_by_dataset(self.id)
+        return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def name(self):
@@ -77,7 +83,29 @@ class Dataset(CatalogEntity):
 
     @property
     def summary(self):
-        return self.data['summary_jsonb']
+        return self.data['summary_json']
+
+    def head(self):
+        data = self.data['summary_json']
+        return head(self.__class__, data)
+
+    def tail(self):
+        data = self.data['summary_json']
+        return tail(self.__class__, data)
+
+    def counts(self):
+        data = self.data['summary_json']
+        return counts(data)
+
+    def fields_by_type(self):
+        data = self.data['summary_json']
+        return fields_by_type(data)
+
+    def geom_coverage(self):
+        return geom_coverage(self.geography)
+
+    def describe(self):
+        return dataset_describe(self.variables)
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
@@ -88,10 +116,9 @@ class Dataset(CatalogEntity):
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-              credentials of CARTO user account. If not provided,
-              a default credentials (if set with :py:meth:`set_default_credentials
-              <cartoframes.auth.set_default_credentials>`) will be attempted to be
-              used.
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
         """
 
         return self._download(credentials)
@@ -131,3 +158,35 @@ class Dataset(CatalogEntity):
         join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
         return join_gdf['id'].unique()
 
+    def subscribe(self, credentials=None):
+        """Subscribe to a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+        _subscribed_ids = subscriptions.get_subscription_ids(_credentials)
+
+        if self.id in _subscribed_ids:
+            utils.display_existing_subscription_message(self.id, DATASET_TYPE)
+        else:
+            utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
+
+    def subscription_info(self, credentials=None):
+        """Get the subscription information of a Dataset.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If not provided,
+                a default credentials (if set with :py:meth:`set_default_credentials
+                <cartoframes.auth.set_default_credentials>`) will be used.
+        """
+
+        _credentials = self._get_credentials(credentials)
+
+        return subscription_info.SubscriptionInfo(
+            subscription_info.fetch_subscription_info(self.id, DATASET_TYPE, _credentials))

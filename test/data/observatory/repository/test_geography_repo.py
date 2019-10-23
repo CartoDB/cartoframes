@@ -1,5 +1,6 @@
 import unittest
 
+from cartoframes.auth import Credentials
 from cartoframes.exceptions import DiscoveryException
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.geography import Geography
@@ -8,9 +9,9 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import Mock, patch, call
 except ImportError:
-    from mock import Mock, patch
+    from mock import Mock, patch, call
 
 
 class TestGeographyRepo(unittest.TestCase):
@@ -30,6 +31,23 @@ class TestGeographyRepo(unittest.TestCase):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
+    @patch.object(RepoClient, 'set_user_credentials')
+    def test_get_all_credentials(self, mocked_set_user_credentials, mocked_get_geographies):
+        # Given
+        mocked_get_geographies.return_value = [db_geography1, db_geography2]
+        credentials = Credentials('user', '1234')
+        repo = GeographyRepository()
+
+        # When
+        geographies = repo.get_all(credentials=credentials)
+
+        # Then
+        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
+        mocked_get_geographies.assert_called_once_with(None)
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
+
+    @patch.object(RepoClient, 'get_geographies')
     def test_get_all_when_empty(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
@@ -41,6 +59,32 @@ class TestGeographyRepo(unittest.TestCase):
         # Then
         mocked_repo.assert_called_once_with(None)
         assert geographies is None
+
+    @patch.object(RepoClient, 'get_geographies_joined_datasets')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_geography1, db_geography2]
+        repo = GeographyRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        geographies = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'country_id': 'usa',
+            'category_id': 'demographics'
+        })
+        assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies')
     def test_get_by_id(self, mocked_repo):
@@ -125,21 +169,6 @@ class TestGeographyRepo(unittest.TestCase):
         assert geographies == test_geographies
 
     @patch.object(RepoClient, 'get_geographies_joined_datasets')
-    def test_get_by_country(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_geography1, db_geography2]
-        country_code = 'esp'
-        repo = GeographyRepository()
-
-        # When
-        geographies = repo.get_by_country(country_code)
-
-        # Then
-        mocked_repo.assert_called_once_with({'country_id': country_code})
-        assert isinstance(geographies, CatalogList)
-        assert geographies == test_geographies
-
-    @patch.object(RepoClient, 'get_geographies_joined_datasets')
     def test_get_all_with_join_filters(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_geography1, db_geography2]
@@ -171,7 +200,7 @@ class TestGeographyRepo(unittest.TestCase):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When

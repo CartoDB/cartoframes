@@ -9,6 +9,9 @@ from carto.exceptions import CartoException
 from ...utils.geom_utils import setting_value_exception
 from ...utils.columns import normalize_name
 
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
+
 
 class DatasetInfo(object):
     PRIVACY_PRIVATE = 'PRIVATE'

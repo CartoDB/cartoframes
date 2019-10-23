@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+
 from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
 from .entity_repo import EntityRepository
 from ..entity import CatalogList
@@ -22,27 +23,14 @@ class DatasetRepository(EntityRepository):
 
     def get_all(self, filters=None, credentials=None):
         self.client.set_user_credentials(credentials)
-        return self._get_filtered_entities(filters)
-
-    def get_by_country(self, iso_code3):
-        return self._get_filtered_entities({COUNTRY_FILTER: iso_code3})
-
-    def get_by_category(self, category_id):
-        return self._get_filtered_entities({CATEGORY_FILTER: category_id})
-
-    def get_by_variable(self, variable_id):
-        return self._get_filtered_entities({VARIABLE_FILTER: variable_id})
-
-    def get_by_geography(self, geography_id):
-        return self._get_filtered_entities({GEOGRAPHY_FILTER: geography_id})
-
-    def get_by_provider(self, provider_id):
-        return self._get_filtered_entities({PROVIDER_FILTER: provider_id})
+        response = self._get_filtered_entities(filters)
+        self.client.set_user_credentials(None)
+        return response
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.dataset import Dataset
-        return Dataset
+        from cartoframes.data.observatory.dataset import CatalogDataset
+        return CatalogDataset
 
     def _get_rows(self, filters=None):
         return self.client.get_datasets(filters)
@@ -64,7 +52,7 @@ class DatasetRepository(EntityRepository):
             'update_frequency': self._normalize_field(row, 'update_frequency'),
             'version': self._normalize_field(row, 'version'),
             'is_public_data': self._normalize_field(row, 'is_public_data'),
-            'summary_jsonb': self._normalize_field(row, 'summary_jsonb')
+            'summary_json': self._normalize_field(row, 'summary_json')
         }
 
     def get_datasets_for_geographies(self, geographies):

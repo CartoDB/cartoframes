@@ -1,18 +1,18 @@
 import unittest
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.dataset import Dataset
 
 from cartoframes.exceptions import DiscoveryException
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import Mock, patch, call
 except ImportError:
-    from mock import Mock, patch
+    from mock import Mock, patch, call
 
 
 class TestDatasetRepo(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestDatasetRepo(unittest.TestCase):
         datasets = repo.get_all(credentials=credentials)
 
         # Then
-        mocked_set_user_credentials.assert_called_once_with(credentials)
+        mocked_set_user_credentials.assert_has_calls([call(credentials), call(None)])
         mocked_get_datasets.assert_called_once_with(None)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -62,6 +62,34 @@ class TestDatasetRepo(unittest.TestCase):
         assert datasets is None
 
     @patch.object(RepoClient, 'get_datasets')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_dataset1, db_dataset2]
+        repo = DatasetRepository()
+        filters = {
+            'country_id': 'usa',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        datasets = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'country_id': 'usa',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'provider_id': 'open_data'
+        })
+        assert datasets == test_datasets
+
+    @patch.object(RepoClient, 'get_datasets')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_dataset1]
@@ -69,6 +97,7 @@ class TestDatasetRepo(unittest.TestCase):
         repo = DatasetRepository()
 
         # When
+        print(requested_id)
         dataset = repo.get_by_id(requested_id)
 
         # Then
@@ -143,72 +172,12 @@ class TestDatasetRepo(unittest.TestCase):
         assert datasets == test_datasets
 
     @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_country(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
-        country_code = 'esp'
-        repo = DatasetRepository()
-
-        # When
-        datasets = repo.get_by_country(country_code)
-
-        # Then
-        mocked_repo.assert_called_once_with({'country_id': country_code})
-        assert isinstance(datasets, CatalogList)
-        assert datasets == test_datasets
-
-    @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_category(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
-        category_id = 'cat1'
-        repo = DatasetRepository()
-
-        # When
-        datasets = repo.get_by_category(category_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'category_id': category_id})
-        assert isinstance(datasets, CatalogList)
-        assert datasets == test_datasets
-
-    @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_variable(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
-        variable_id = 'var1'
-        repo = DatasetRepository()
-
-        # When
-        datasets = repo.get_by_variable(variable_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'variable_id': variable_id})
-        assert isinstance(datasets, CatalogList)
-        assert datasets == test_datasets
-
-    @patch.object(RepoClient, 'get_datasets')
-    def test_get_by_geography(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_dataset1, db_dataset2]
-        geography_id = 'geo_id'
-        repo = DatasetRepository()
-
-        # When
-        datasets = repo.get_by_geography(geography_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'geography_id': geography_id})
-        assert isinstance(datasets, CatalogList)
-        assert datasets == test_datasets
-
-    @patch.object(RepoClient, 'get_datasets')
     def test_missing_fields_are_mapped_as_None(self, mocked_repo):
         # Given
         mocked_repo.return_value = [{'id': 'dataset1'}]
         repo = DatasetRepository()
 
-        expected_datasets = CatalogList([Dataset({
+        expected_datasets = CatalogList([CatalogDataset({
             'id': 'dataset1',
             'slug': None,
             'name': None,
@@ -224,7 +193,7 @@ class TestDatasetRepo(unittest.TestCase):
             'update_frequency': None,
             'version': None,
             'is_public_data': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When

@@ -43,6 +43,32 @@ class TestVariableRepo(unittest.TestCase):
         assert variables is None
 
     @patch.object(RepoClient, 'get_variables')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        repo = VariableRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        variables = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'dataset_id': 'carto-do.project.census2011',
+            'variable_group_id': 'var-group'
+        })
+        assert variables == test_variables
+
+    @patch.object(RepoClient, 'get_variables')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable1, db_variable2]
@@ -125,36 +151,6 @@ class TestVariableRepo(unittest.TestCase):
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
-    def test_get_by_dataset(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_variable1, db_variable2]
-        dataset_id = 'dataset1'
-        repo = VariableRepository()
-
-        # When
-        variables = repo.get_by_dataset(dataset_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'dataset_id': dataset_id})
-        assert isinstance(variables, CatalogList)
-        assert variables == test_variables
-
-    @patch.object(RepoClient, 'get_variables')
-    def test_get_by_variable_group(self, mocked_repo):
-        # Given
-        mocked_repo.return_value = [db_variable1, db_variable2]
-        variable_group_id = 'vargroup1'
-        repo = VariableRepository()
-
-        # When
-        variables = repo.get_by_variable_group(variable_group_id)
-
-        # Then
-        mocked_repo.assert_called_once_with({'variable_group_id': variable_group_id})
-        assert isinstance(variables, CatalogList)
-        assert variables == test_variables
-
-    @patch.object(RepoClient, 'get_variables')
     def test_missing_fields_are_mapped_as_None(self, mocked_repo):
         # Given
         mocked_repo.return_value = [{'id': 'variable1'}]
@@ -171,7 +167,7 @@ class TestVariableRepo(unittest.TestCase):
             'agg_method': None,
             'variable_group_id': None,
             'starred': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When
