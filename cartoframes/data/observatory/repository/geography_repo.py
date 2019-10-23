@@ -1,5 +1,9 @@
 from __future__ import absolute_import
 
+import geopandas as gpd
+from cartoframes.auth import Credentials
+
+from cartoframes.data import Dataset
 from .constants import COUNTRY_FILTER, CATEGORY_FILTER
 from .entity_repo import EntityRepository
 
@@ -7,6 +11,8 @@ from .entity_repo import EntityRepository
 _GEOGRAPHY_ID_FIELD = 'id'
 _GEOGRAPHY_SLUG_FIELD = 'slug'
 _ALLOWED_FILTERS = [COUNTRY_FILTER, CATEGORY_FILTER]
+
+_DO_CREDENTIALS = Credentials('do-metadata', 'default_public')
 
 
 def get_geography_repo():
@@ -50,6 +56,12 @@ class GeographyRepository(EntityRepository):
             'is_public_data': self._normalize_field(row, 'is_public_data'),
             'summary_json': self._normalize_field(row, 'summary_json')
         }
+
+    def get_geographies_gdf(self):
+        query = 'select id, geom_coverage as the_geom from geographies_public where geom_coverage is not null'
+        df = Dataset(query, credentials=_DO_CREDENTIALS).download(decode_geom=True)
+
+        return gpd.GeoDataFrame(df, geometry='geometry')
 
 
 _REPO = GeographyRepository()

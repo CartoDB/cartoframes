@@ -3,6 +3,8 @@ from __future__ import absolute_import
 
 from .constants import CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER
 from .entity_repo import EntityRepository
+from ..entity import CatalogList
+
 
 
 _DATASET_ID_FIELD = 'id'
@@ -52,6 +54,11 @@ class DatasetRepository(EntityRepository):
             'is_public_data': self._normalize_field(row, 'is_public_data'),
             'summary_json': self._normalize_field(row, 'summary_json')
         }
+
+    def get_datasets_for_geographies(self, geographies):
+        rows = self.client.get_datasets_for_geographies(geographies)
+        normalized_data = [self._get_entity_class()(self._map_row(row)) for row in rows]
+        return CatalogList(normalized_data)
 
 
 _REPO = DatasetRepository()

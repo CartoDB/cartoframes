@@ -1,6 +1,5 @@
 import pandas as pd
 import geopandas as gpd
-import matplotlib.pyplot as plt
 
 from shapely import wkb
 
@@ -72,6 +71,8 @@ def quantiles(data):
 def top_values(data):
     if not data:
         return
+
+    import matplotlib.pyplot as plt
 
     top_values = pd.DataFrame(data['top_values'])
 
