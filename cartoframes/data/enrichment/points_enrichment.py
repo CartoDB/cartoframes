@@ -12,6 +12,28 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
     your points with our geographies. Extra columns as area and population will be provided
     with the aims of normalize these columns.
 
+    Args:
+        data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
+            a Dataset, DataFrame or GeoDataFrame object to be enriched.
+        variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
+            variable(s), discovered through Catalog, for enriching the `data` argument.
+        data_geom_column (str): string indicating the 4326 geometry column in `data`.
+        filters (dict, optional): dictionary with either a `column` key
+            with the name of the column to filter or a `value` value with the value to filter by.
+            Filters will be used using the `AND` operator
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            credentials of user account. If not provided,
+            a default credentials (if set with :py:meth:`set_default_credentials
+            <cartoframes.auth.set_default_credentials>`) will attempted to be
+            used.
+
+    Returns:
+        A dataframe as the provided one but with the variables to enrich appended to it
+
+        Note that if the geometry of the `data` you provide intersects with more than one geometry
+        in the enrichment dataset, the number of rows of the returned dataframe could be different
+        than the `data` argument number of rows.
+
     Examples:
 
         Enrich a points dataset with Catalog classes:
@@ -55,28 +77,6 @@ def enrich_points(data, variables, data_geom_column='geometry', filters=dict(), 
             variables = Catalog().country('usa').category('demographics').datasets[0].variables
             filters = {'do_date': '2019-09-01'}
             dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
-
-    Args:
-        data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
-            a Dataset, DataFrame or GeoDataFrame object to be enriched.
-        variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
-            variable(s), discovered through Catalog, for enriching the `data` argument.
-        data_geom_column (str): string indicating the 4326 geometry column in `data`.
-        filters (dict, optional): dictionary with either a `column` key
-            with the name of the column to filter or a `value` value with the value to filter by.
-            Filters will be used using the `AND` operator
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-            credentials of user account. If not provided,
-            a default credentials (if set with :py:meth:`set_default_credentials
-            <cartoframes.auth.set_default_credentials>`) will attempted to be
-            used.
-
-    Returns:
-        A dataframe as the provided one but with the variables to enrich appended to it
-
-        Note that if the geometry of the `data` you provide intersects with more than one geometry
-        in the enrichment dataset, the number of rows of the returned dataframe could be different
-        than the `data` argument number of rows.
     """
 
     data_enriched = enrich(_prepare_sql, data=data, variables=variables, data_geom_column=data_geom_column,
