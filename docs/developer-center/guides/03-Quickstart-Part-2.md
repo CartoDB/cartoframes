@@ -16,7 +16,7 @@ set_default_credentials(username='your_username', api_key='your_api_key')
 
 You already know where your company stations are and their activity, now you want to know if they are in optimal locations. You start thinking about which data could be valuable to validate that and decide to check if there can be any correlation with households with no car data. Let's see how CARTOframes can help you finding that data and enrich yours.
 
-First, we will use the CARTO [data observatory](/developers/cartoframes/reference/#heading-Data-Observatory) to discover the data we want, data about **households** with **no cars.**
+First, we will use the CARTO [data observatory](/developers/cartoframes/reference/#heading-Data-Observatory) to discover the data we want, data about **households** with **no cars.** in the **USA**. In this case, we are going to use data from Open Data **provider**.
 
 For this, we'll get the USA datasets:
 
@@ -24,18 +24,18 @@ For this, we'll get the USA datasets:
 from cartoframes.data.observatory.catalog import Catalog
 from cartoframes.data import enrichment
 
-countries = Catalog().countries()
-usa_datasets = countries.get("usa").datasets()
-usa_datasets
+catalog = Catalog().country('usa').provider('open_data')
+
+catalog.datasets
 ```
 
-You'll get something similar to:
+You'll get something similar to this Catalog Dataset list:
 
 ```
-[<CatalogDataset('ags_businesscou_a8310a11')>,
- <CatalogDataset('ags_consumerpro_e8344e2e')>,
- <CatalogDataset('ags_consumerspe_fe5d060a')>,
- <CatalogDataset('ags_crimerisk_9ec89442')>,
+[<CatalogDataset('od_acs_d28e63ff')>,
+ <CatalogDataset('od_acs_91ff81e3')>,
+ <CatalogDataset('od_acs_db9898c5')>,
+ <CatalogDataset('od_acs_4f56aa89')>,
  ...
  <CatalogDataset('od_zillow_a16d6e3e')>,
  <CatalogDataset('od_zillow_2a2349f8')>,
@@ -43,12 +43,12 @@ You'll get something similar to:
  <CatalogDataset('tt_trafficdens_c451dfb9')>]
 ```
 
-In order to get the **households** with **no cars** data, you've look for the USA datasets that contain this particular information, and depending on the data you're looking for you'd have to use one method or another. In this case, we're going to look for the first dataset that has a variable which contains `no_cars` substring in its **id.**
+In order to get the **households** with **no cars** data, you've look for the datasets that contain this particular information, and depending on the data you're looking for you'd have to use one method or another. In this case, we're going to look for the first dataset from **Open Data** that has a variable which contains `no_cars` substring in its **id.**
 
 ```py
 no_cars_variables = None
 
-for dataset in usa_datasets:
+for dataset in catalog.datasets:
     df = dataset.variables.to_dataframe()
     variables = df[df['id'].str.contains('no_cars')]
     
@@ -60,6 +60,8 @@ no_cars_variables
 ```
 
 Now that we have found the data we were looking for, let's filter out our area of intereset, Arlington. To do that, first we need to load Arlington's boundaries (they can be found [here](https://gisdata-arlgis.opendata.arcgis.com/datasets/census-tract-2010-polygons?geometry=-77.761%2C38.787%2C-76.772%2C38.974)):
+
+> **Note:** you can also get the census information from the [Data Observatory boundary functions](https://carto.com/developers/data-observatory/reference/#boundary-functions)
 
 ```py
 census_track = 'census_track.geojson'
@@ -76,8 +78,8 @@ from cartoframes.data import enrichment
 
 arlington_no_car_df = enrichment.enrich_polygons(
     arlington_census_track_df,
-    household_no_cars_variables,
-    agg_operators='SUM'
+    variables=household_no_cars_variables,
+    agg_operators={no_car: 'sum' }
 )
 
 arlington_no_car_df.head()
