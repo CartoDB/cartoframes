@@ -1,5 +1,4 @@
 import pytest
-import unittest
 
 from cartoframes.auth import Credentials
 from cartoframes.data.observatory.dataset import CatalogDataset

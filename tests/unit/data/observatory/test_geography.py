@@ -1,5 +1,4 @@
 import pytest
-import unittest
 import pandas as pd
 
 from google.api_core.exceptions import NotFound
@@ -121,7 +120,7 @@ class TestGeography(object):
     def test_geography_is_exported_as_dict(self):
         # Given
         geography = Geography(db_geography1)
-        expected_dict = {key: value for key, value in db_geography1.items() if key is not 'summary_json'}
+        expected_dict = {key: value for key, value in db_geography1.items() if key != 'summary_json'}
 
         # When
         geography_dict = geography.to_dict()
@@ -302,8 +301,8 @@ class TestGeography(object):
     @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
     @patch('cartoframes.data.observatory.utils.display_subscription_form')
     @patch('cartoframes.auth.defaults.get_default_credentials')
-    def test_geography_subscribe_default_credentials(self, mocked_credentials, mock_display_form,
-        mock_subscription_ids):
+    def test_geography_subscribe_default_credentials(
+      self, mocked_credentials, mock_display_form, mock_subscription_ids):
         # Given
         expected_credentials = Credentials('user', '1234')
         mocked_credentials.return_value = expected_credentials

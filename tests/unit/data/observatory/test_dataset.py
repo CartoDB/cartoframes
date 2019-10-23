@@ -1,5 +1,4 @@
 import pytest
-import unittest
 import pandas as pd
 
 from google.api_core.exceptions import NotFound
@@ -144,7 +143,7 @@ class TestDataset(object):
     def test_dataset_is_exported_as_dict(self):
         # Given
         dataset = CatalogDataset(db_dataset1)
-        expected_dict = {key: value for key, value in db_dataset1.items() if key is not 'summary_json'}
+        expected_dict = {key: value for key, value in db_dataset1.items() if key != 'summary_json'}
 
         # When
         dataset_dict = dataset.to_dict()

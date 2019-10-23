@@ -109,7 +109,7 @@ class TestVariable(object):
     def test_variable_is_exported_as_dict(self):
         # Given
         variable = Variable(db_variable1)
-        expected_dict = {key: value for key, value in db_variable1.items() if key is not 'summary_json'}
+        expected_dict = {key: value for key, value in db_variable1.items() if key != 'summary_json'}
 
         # When
         variable_dict = variable.to_dict()

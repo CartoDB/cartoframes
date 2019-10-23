@@ -6,9 +6,9 @@ from cartoframes.data.observatory.repository.repo_client import RepoClient
 from ..examples import db_dataset1, db_dataset2
 
 try:
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
 except ImportError:
-    from mock import Mock, patch
+    from mock import patch
 
 
 class TestRepoClient(unittest.TestCase):

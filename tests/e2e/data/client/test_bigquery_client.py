@@ -1,15 +1,15 @@
 import os
 import csv
 import json
-
 import pytest
+import unittest
+
 from carto.exceptions import CartoException
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
 
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient, _download_query
-from google.cloud import bigquery
 
 try:
     from unittest.mock import Mock
