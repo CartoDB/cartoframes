@@ -6,7 +6,6 @@ from warnings import warn
 import numpy as np
 from carto.exceptions import CartoException
 
-from ..utils.utils import get_center
 from . import constants
 from .basemaps import Basemaps
 from .html import HTMLMap

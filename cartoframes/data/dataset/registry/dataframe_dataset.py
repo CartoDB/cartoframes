@@ -139,7 +139,7 @@ def _is_valid_index_for_cartodb_id(index):
 
 
 def _rows(df, dataframe_columns_info, with_lnglat):
-    for _, row in df.iterrows():
+    for i, row in df.iterrows():
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe

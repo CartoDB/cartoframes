@@ -1,8 +1,7 @@
 import uuid
-from collections import defaultdict
-
 import geopandas as gpd
-import pandas as pd
+
+from collections import defaultdict
 
 from ...auth import get_default_credentials
 from ...exceptions import EnrichmentException

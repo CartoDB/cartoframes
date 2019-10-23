@@ -9,7 +9,6 @@ import re
 import pandas as pd
 
 from ...data import Dataset
-from ...utils.utils import remove_column_from_dataframe
 from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 

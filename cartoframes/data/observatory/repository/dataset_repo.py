@@ -6,7 +6,6 @@ from .entity_repo import EntityRepository
 from ..entity import CatalogList
 
 
-
 _DATASET_ID_FIELD = 'id'
 _DATASET_SLUG_FIELD = 'slug'
 _ALLOWED_FILTERS = [CATEGORY_FILTER, COUNTRY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER, VARIABLE_FILTER]

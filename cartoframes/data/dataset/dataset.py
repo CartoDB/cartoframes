@@ -6,8 +6,8 @@ from ...auth import get_default_credentials
 from .dataset_info import DatasetInfo
 from .registry.dataframe_dataset import DataFrameDataset
 from .registry.strategies_registry import StrategiesRegistry
-from .registry.table_dataset import TableDataset
 from .registry.base_dataset import BaseDataset
+
 
 class Dataset(object):
     """Generic data class for cartoframes data operations. A `Dataset` instance
