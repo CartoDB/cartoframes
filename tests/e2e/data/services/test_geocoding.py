@@ -13,15 +13,11 @@ from carto.exceptions import CartoException
 
 from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
+from cartoframes.data.clients import SQLClient
+from cartoframes.data.services import Geocoding
 from cartoframes.utils.columns import normalize_name
 
-
-from cartoframes.data.clients import SQLClient
-
-
-from cartoframes.data.services import Geocoding
-
-from test.helpers import _UserUrlLoader, _ReportQuotas
+from ...helpers import _UserUrlLoader, _ReportQuotas
 
 warnings.filterwarnings('ignore')
 
@@ -33,10 +29,10 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         if (os.environ.get('APIKEY') is None or
                 os.environ.get('USERNAME') is None):
             try:
-                creds = json.loads(open('test/secret.json').read())
+                creds = json.loads(open('tests/e2e/secret.json').read())
                 self.apikey = creds['APIKEY']
                 self.username = creds['USERNAME']
-            except:  # noqa: E722
+            except Exception:  # noqa: E722
                 warnings.warn("Skipping Context tests. To test it, "
                               "create a `secret.json` file in test/ by "
                               "renaming `secret.json.sample` to `secret.json` "
@@ -565,5 +561,5 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         status = {'relevance': 'xyz'}
 
         with self.assertRaises(ValueError):
-            gc_df, info = gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=status)
+            gc.geocode(df, street='address', city='city', country={'value': 'Spain'}, status=status)
         self.assertEqual(self.used_quota(gc), quota)

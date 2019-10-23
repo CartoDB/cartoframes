@@ -7,11 +7,3 @@ class BigQueryClientMock(object):
             raise self.response
         else:
             return self.response
-
-
-class CredentialsMock(object):
-    def __init__(self, username):
-        self.username = username
-
-    def get_do_dataset(self):
-        return self.username.replace('-', '_')
