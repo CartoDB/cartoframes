@@ -141,3 +141,11 @@ class Catalog(object):
             CatalogDataset.get_all(_no_filters, _credentials),
             Geography.get_all(_no_filters, _credentials)
         )
+
+    def datasets_filter(self, filter_dataset):
+        """Get all the datasets in the Catalog filtered
+        Returns:
+            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+        """
+
+        return CatalogDataset.get_datasets_spatial_filtered(filter_dataset)

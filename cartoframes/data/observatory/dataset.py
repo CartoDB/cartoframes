@@ -1,8 +1,13 @@
 from __future__ import absolute_import
 
+import pandas as pd
+import geopandas as gpd
+from shapely import wkt
+from cartoframes.data import Dataset as CFDataset
 
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
+from .repository.geography_repo import get_geography_repo
 from .repository.variable_repo import get_variable_repo
 from .repository.variable_group_repo import get_variable_group_repo
 from .repository.constants import DATASET_FILTER
@@ -117,6 +122,41 @@ class CatalogDataset(CatalogEntity):
         """
 
         return self._download(credentials)
+
+    @classmethod
+    def get_datasets_spatial_filtered(cls, filter_dataset):
+        user_gdf = cls._get_user_geodataframe(filter_dataset)
+
+        # TODO: check if the dataframe has a geometry column if not exception
+        # Saving memory
+        user_gdf = user_gdf[[user_gdf.geometry.name]]
+        catalog_geographies_gdf = get_geography_repo().get_geographies_gdf()
+        matched_geographies_ids = cls._join_geographies_geodataframes(catalog_geographies_gdf, user_gdf)
+
+        # Get Dataset objects
+        return get_dataset_repo().get_all({'geography_id': matched_geographies_ids})
+
+    @staticmethod
+    def _get_user_geodataframe(filter_dataset):
+        if isinstance(filter_dataset, gpd.GeoDataFrame):
+            # Geopandas dataframe
+            return filter_dataset
+
+        if isinstance(filter_dataset, CFDataset):
+            # CARTOFrames Dataset
+            user_df = filter_dataset.download(decode_geom=True)
+            return gpd.GeoDataFrame(user_df, geometry='geometry')
+
+        if isinstance(filter_dataset, str):
+            # String WKT
+            df = pd.DataFrame([{'geometry': filter_dataset}])
+            df['geometry'] = df['geometry'].apply(wkt.loads)
+            return gpd.GeoDataFrame(df)
+
+    @staticmethod
+    def _join_geographies_geodataframes(geographies_gdf1, geographies_gdf2):
+        join_gdf = gpd.sjoin(geographies_gdf1, geographies_gdf2, how='inner', op='intersects')
+        return join_gdf['id'].unique()
 
     def subscribe(self, credentials=None):
         """Subscribe to a Dataset.
