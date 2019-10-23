@@ -43,9 +43,7 @@ REQUIRES = [
 EXTRAS_REQUIRES_TESTS = [
     'pytest',
     'pylint',
-    'flake8',
-    'geojson',
-    'geopandas'
+    'flake8'
 ]
 
 
