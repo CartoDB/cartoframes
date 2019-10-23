@@ -2,10 +2,10 @@ import pytest
 
 from cartoframes.auth import Credentials
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.geography import Geography
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.geography import Geography
+from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_geography1, test_geographies, db_geography1, db_geography2
 
 try:

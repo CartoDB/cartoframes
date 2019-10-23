@@ -20,7 +20,7 @@ class VariableRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.variable import Variable
+        from cartoframes.data.observatory.catalog.variable import Variable
         return Variable
 
     def _get_rows(self, filters=None):

@@ -1,10 +1,10 @@
 import pytest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.provider import Provider
-from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.provider import Provider
+from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_provider1, test_providers, db_provider1, db_provider2
 
 try:

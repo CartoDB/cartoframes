@@ -1,9 +1,9 @@
 import pandas as pd
 
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.variable import Variable
-from cartoframes.data.observatory.repository.variable_repo import VariableRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.variable import Variable
+from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from .examples import test_datasets, test_variable1, test_variables, db_variable1, test_variable2, db_variable2
 
 try:

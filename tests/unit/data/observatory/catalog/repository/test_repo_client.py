@@ -1,5 +1,5 @@
 from cartoframes.data.clients import SQLClient
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 
 from ..examples import db_dataset1, db_dataset2
 

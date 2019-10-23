@@ -1,10 +1,10 @@
 import pytest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.country import Country
-from cartoframes.data.observatory.repository.country_repo import CountryRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.country import Country
+from cartoframes.data.observatory.catalog.repository.country_repo import CountryRepository
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_countries, test_country1, db_country1, db_country2
 
 try:

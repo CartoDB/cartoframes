@@ -1,11 +1,11 @@
 import pandas as pd
-from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.country import Country
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.data.observatory.repository.country_repo import CountryRepository
+from cartoframes.data.observatory.catalog.country import Country
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.repository.country_repo import CountryRepository
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.repository.category_repo import CategoryRepository
+from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
     db_country2, test_categories
 

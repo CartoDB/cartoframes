@@ -6,12 +6,12 @@ from google.api_core.exceptions import NotFound
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.dataset import CatalogDataset
-from cartoframes.data.observatory.repository.variable_repo import VariableRepository
-from cartoframes.data.observatory.repository.variable_group_repo import VariableGroupRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.data.observatory.subscription_info import SubscriptionInfo
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.catalog.repository.variable_group_repo import VariableGroupRepository
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
 from .examples import test_dataset1, test_datasets, test_variables, test_variables_groups, db_dataset1, test_dataset2, \
     db_dataset2, test_subscription_info
 from .mocks import BigQueryClientMock
@@ -248,7 +248,7 @@ class TestDataset(object):
         assert sliced_dataset.equals(dataset.to_series())
 
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download(self, mocked_bq_client, mocked_repo):
         # mock dataset
         mocked_repo.return_value = test_dataset1
@@ -267,7 +267,7 @@ class TestDataset(object):
         assert response == file_path
 
     @patch.object(DatasetRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_dataset_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock dataset
         mocked_repo.return_value = test_dataset1
@@ -283,9 +283,9 @@ class TestDataset(object):
         with pytest.raises(CartoException):
             dataset.download(credentials)
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
-    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.utils.display_existing_subscription_message')
     def test_dataset_subscribe(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
         expected_id = db_dataset1['id']
@@ -302,9 +302,9 @@ class TestDataset(object):
         mock_display_form.assert_called_once_with(expected_id, 'dataset', credentials)
         assert not mock_display_message.called
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
-    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.utils.display_existing_subscription_message')
     def test_dataset_subscribe_existing(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
         expected_id = db_dataset1['id']
@@ -321,8 +321,8 @@ class TestDataset(object):
         mock_display_message.assert_called_once_with(expected_id, 'dataset')
         assert not mock_display_form.called
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_dataset_subscribe_default_credentials(self, mocked_credentials, mock_display_form, mock_subscription_ids):
         # Given
@@ -349,7 +349,7 @@ class TestDataset(object):
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
 
-    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_dataset_subscription_info(self, mock_fetch):
         # Given
         mock_fetch.return_value = test_subscription_info
@@ -374,7 +374,7 @@ class TestDataset(object):
                             'subscription_list_price, tos, tos_link, ' + \
                             'licenses, licenses_link, rights'
 
-    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_dataset_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
         # Given

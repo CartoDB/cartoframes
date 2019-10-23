@@ -33,7 +33,7 @@ class GeographyRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.geography import Geography
+        from cartoframes.data.observatory.catalog.geography import Geography
         return Geography
 
     def _get_rows(self, filters=None):

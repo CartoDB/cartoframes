@@ -19,7 +19,7 @@ class CountryRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.country import Country
+        from cartoframes.data.observatory.catalog.country import Country
         return Country
 
     def _get_rows(self, filters=None):

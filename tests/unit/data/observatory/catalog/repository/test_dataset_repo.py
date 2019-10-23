@@ -3,10 +3,10 @@ import pytest
 from cartoframes.auth import Credentials
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.dataset import CatalogDataset
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_dataset1, test_datasets, db_dataset1, db_dataset2
 
 try:

@@ -19,7 +19,7 @@ class CategoryRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.category import Category
+        from cartoframes.data.observatory.catalog.category import Category
         return Category
 
     def _get_rows(self, filters=None):

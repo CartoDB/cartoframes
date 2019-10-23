@@ -1,13 +1,13 @@
 import pytest
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.dataset import CatalogDataset
-from cartoframes.data.observatory.geography import Geography
-from cartoframes.data.observatory.country import Country
-from cartoframes.data.observatory.category import Category
-from cartoframes.data.observatory.catalog import Catalog
-from cartoframes.data.observatory.subscriptions import Subscriptions
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.catalog.dataset import CatalogDataset
+from cartoframes.data.observatory.catalog.geography import Geography
+from cartoframes.data.observatory.catalog.country import Country
+from cartoframes.data.observatory.catalog.category import Category
+from cartoframes.data.observatory.catalog.catalog import Catalog
+from cartoframes.data.observatory.catalog.subscriptions import Subscriptions
+from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
 from .examples import test_country2, test_country1, test_category1, test_category2, test_dataset1, test_dataset2, \
     test_geographies, test_datasets, test_categories, test_countries, test_geography1, test_geography2
 

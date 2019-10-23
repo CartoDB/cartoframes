@@ -6,11 +6,11 @@ from google.api_core.exceptions import NotFound
 from carto.exceptions import CartoException
 
 from cartoframes.auth import Credentials
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.geography import Geography
-from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
-from cartoframes.data.observatory.subscription_info import SubscriptionInfo
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.geography import Geography
+from cartoframes.data.observatory.catalog.repository.geography_repo import GeographyRepository
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.subscription_info import SubscriptionInfo
 from .examples import test_geography1, test_geographies, test_datasets, db_geography1, \
     test_geography2, db_geography2, test_subscription_info
 from .mocks import BigQueryClientMock
@@ -225,7 +225,7 @@ class TestGeography(object):
         assert sliced_geography.equals(geography.to_series())
 
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
@@ -244,7 +244,7 @@ class TestGeography(object):
         assert response == file_path
 
     @patch.object(GeographyRepository, 'get_by_id')
-    @patch('cartoframes.data.observatory.entity._get_bigquery_client')
+    @patch('cartoframes.data.observatory.catalog.entity._get_bigquery_client')
     def test_geography_download_raises_with_nonpurchased(self, mocked_bq_client, mocked_repo):
         # mock geography
         mocked_repo.return_value = test_geography1
@@ -260,9 +260,9 @@ class TestGeography(object):
         with pytest.raises(CartoException):
             geography.download(credentials)
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
-    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.utils.display_existing_subscription_message')
     def test_geography_subscribe(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
         expected_id = db_geography1['id']
@@ -279,9 +279,9 @@ class TestGeography(object):
         mock_display_form.assert_called_once_with(expected_id, 'geography', credentials)
         assert not mock_display_message.called
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
-    @patch('cartoframes.data.observatory.utils.display_existing_subscription_message')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.utils.display_existing_subscription_message')
     def test_geography_subscribe_existing(self, mock_display_message, mock_display_form, mock_subscription_ids):
         # Given
         expected_id = db_geography1['id']
@@ -298,8 +298,8 @@ class TestGeography(object):
         mock_display_message.assert_called_once_with(expected_id, 'geography')
         assert not mock_display_form.called
 
-    @patch('cartoframes.data.observatory.subscriptions.get_subscription_ids')
-    @patch('cartoframes.data.observatory.utils.display_subscription_form')
+    @patch('cartoframes.data.observatory.catalog.subscriptions.get_subscription_ids')
+    @patch('cartoframes.data.observatory.catalog.utils.display_subscription_form')
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_geography_subscribe_default_credentials(
       self, mocked_credentials, mock_display_form, mock_subscription_ids):
@@ -327,7 +327,7 @@ class TestGeography(object):
         # Then
         assert str(e.value) == '`credentials` must be a Credentials class instance'
 
-    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     def test_geography_subscription_info(self, mock_fetch):
         # Given
         mock_fetch.return_value = test_subscription_info
@@ -352,7 +352,7 @@ class TestGeography(object):
                             'subscription_list_price, tos, tos_link, ' + \
                             'licenses, licenses_link, rights'
 
-    @patch('cartoframes.data.observatory.subscription_info.fetch_subscription_info')
+    @patch('cartoframes.data.observatory.catalog.subscription_info.fetch_subscription_info')
     @patch('cartoframes.auth.defaults.get_default_credentials')
     def test_geography_subscription_info_default_credentials(self, mocked_credentials, mock_fetch):
         # Given

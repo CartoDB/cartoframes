@@ -17,7 +17,7 @@ class ProviderRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.provider import Provider
+        from cartoframes.data.observatory.catalog.provider import Provider
         return Provider
 
     def _get_rows(self, filters=None):

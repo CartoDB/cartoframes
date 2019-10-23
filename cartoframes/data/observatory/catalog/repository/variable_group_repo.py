@@ -21,7 +21,7 @@ class VariableGroupRepository(EntityRepository):
 
     @classmethod
     def _get_entity_class(cls):
-        from cartoframes.data.observatory.variable_group import VariableGroup
+        from cartoframes.data.observatory.catalog.variable_group import VariableGroup
         return VariableGroup
 
     def _get_rows(self, filters=None):

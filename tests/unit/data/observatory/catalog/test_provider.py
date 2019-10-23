@@ -1,9 +1,9 @@
 import pandas as pd
 
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.provider import Provider
-from cartoframes.data.observatory.repository.provider_repo import ProviderRepository
-from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.provider import Provider
+from cartoframes.data.observatory.catalog.repository.provider_repo import ProviderRepository
+from cartoframes.data.observatory.catalog.repository.dataset_repo import DatasetRepository
 from .examples import test_datasets, test_provider1, test_providers, db_provider1, test_provider2, db_provider2
 
 try:

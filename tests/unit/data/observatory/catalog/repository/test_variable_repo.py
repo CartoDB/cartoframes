@@ -1,10 +1,10 @@
 import pytest
 
 from cartoframes.exceptions import DiscoveryException
-from cartoframes.data.observatory.entity import CatalogList
-from cartoframes.data.observatory.variable import Variable
-from cartoframes.data.observatory.repository.variable_repo import VariableRepository
-from cartoframes.data.observatory.repository.repo_client import RepoClient
+from cartoframes.data.observatory.catalog.entity import CatalogList
+from cartoframes.data.observatory.catalog.variable import Variable
+from cartoframes.data.observatory.catalog.repository.variable_repo import VariableRepository
+from cartoframes.data.observatory.catalog.repository.repo_client import RepoClient
 from ..examples import test_variable1, test_variables, db_variable1, db_variable2
 
 try:
