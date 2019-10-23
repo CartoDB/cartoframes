@@ -1,4 +1,5 @@
 import pandas as pd
+from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 
 from cartoframes.data.observatory.entity import CatalogList
 from cartoframes.data.observatory.country import Country
@@ -6,7 +7,7 @@ from cartoframes.data.observatory.repository.geography_repo import GeographyRepo
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.repository.country_repo import CountryRepository
 from .examples import test_country1, test_datasets, test_countries, test_geographies, db_country1, test_country2, \
-    db_country2
+    db_country2, test_categories
 
 try:
     from unittest.mock import patch
@@ -29,7 +30,19 @@ class TestCountry(object):
         assert isinstance(country, Country)
         assert country == test_country1
 
-    @patch.object(DatasetRepository, 'get_by_country')
+    def test_get_country_by_id_from_countries_list(self):
+        # Given
+        countries = CatalogList([test_country1, test_country2])
+
+        # When
+        country = countries.get(test_country1.id)
+
+        # Then
+        assert isinstance(country, object)
+        assert isinstance(country, Country)
+        assert country == test_country1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -38,11 +51,12 @@ class TestCountry(object):
         datasets = test_country1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
 
-    @patch.object(GeographyRepository, 'get_by_country')
+    @patch.object(GeographyRepository, 'get_all')
     def test_get_geographies_by_country(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_geographies
@@ -51,9 +65,24 @@ class TestCountry(object):
         geographies = test_country1.geographies
 
         # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
         assert isinstance(geographies, list)
         assert isinstance(geographies, CatalogList)
         assert geographies == test_geographies
+
+    @patch.object(CategoryRepository, 'get_all')
+    def test_get_categories_by_country(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_categories
+
+        # When
+        categories = test_country1.categories
+
+        # Then
+        mocked_repo.assert_called_once_with({'country_id': test_country1.id})
+        assert isinstance(categories, list)
+        assert isinstance(categories, CatalogList)
+        assert categories == test_categories
 
     def test_country_properties(self):
         # Given
@@ -87,7 +116,7 @@ class TestCountry(object):
         assert isinstance(country_dict, dict)
         assert country_dict == db_country1
 
-    def test_country_is_represented_with_id(self):
+    def test_country_is_represented_with_classname_and_id(self):
         # Given
         country = Country(db_country1)
 
@@ -95,7 +124,7 @@ class TestCountry(object):
         country_repr = repr(country)
 
         # Then
-        assert country_repr == 'Country({id})'.format(id=db_country1['id'])
+        assert country_repr == "<Country('{id}')>".format(id=db_country1['id'])
 
     def test_country_is_printed_with_classname(self):
         # Given
@@ -120,7 +149,7 @@ class TestCountry(object):
         assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
-    def test_country_list_is_printed_with_classname(self):
+    def test_country_list_is_printed_with_classname_and_ids(self):
         # Given
         countries = CatalogList([test_country1, test_country2])
 
@@ -128,10 +157,10 @@ class TestCountry(object):
         countries_str = str(countries)
 
         # Then
-        assert countries_str == '[Country({id1}), Country({id2})]' \
+        assert countries_str == "[<Country('{id1}')>, <Country('{id2}')>]" \
                                 .format(id1=db_country1['id'], id2=db_country2['id'])
 
-    def test_country_list_is_represented_with_ids(self):
+    def test_country_list_is_represented_with_classname_and_ids(self):
         # Given
         countries = CatalogList([test_country1, test_country2])
 
@@ -139,7 +168,7 @@ class TestCountry(object):
         countries_repr = repr(countries)
 
         # Then
-        assert countries_repr == '[Country({id1}), Country({id2})]'\
+        assert countries_repr == "[<Country('{id1}')>, <Country('{id2}')>]"\
                                  .format(id1=db_country1['id'], id2=db_country2['id'])
 
     def test_countries_items_are_obtained_as_country(self):

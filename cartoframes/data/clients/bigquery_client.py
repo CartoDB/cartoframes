@@ -1,11 +1,18 @@
 from __future__ import absolute_import
 
-from carto.exceptions import CartoException
+import os
+import appdirs
+import csv
+import tqdm
+
 from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
 
+from carto.exceptions import CartoException
 from ...auth import get_default_credentials
+
+_USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 
 
 def refresh_client(func):
@@ -51,6 +58,54 @@ class BigQueryClient(object):
 
     @refresh_client
     def query(self, query, **kwargs):
-        response = self.client.query(query, **kwargs)
+        return self.client.query(query, **kwargs)
 
-        return response
+    @refresh_client
+    def get_table(self, project, dataset, table):
+        full_table_name = '{}.{}.{}'.format(project, dataset, table)
+        return self.client.get_table(full_table_name)
+
+    def get_table_column_names(self, project, dataset, table):
+        table_info = self.get_table(project, dataset, table)
+        return [field.name for field in table_info.schema]
+
+    def download_to_file(self, project, dataset, table, limit=None, offset=None,
+                         file_path=None, fail_if_exists=False, progress_bar=True):
+        if not file_path:
+            file_name = '{}.{}.{}.csv'.format(project, dataset, table)
+            file_path = os.path.join(_USER_CONFIG_DIR, file_name)
+
+        if fail_if_exists and os.path.isfile(file_path):
+            raise CartoException('The file `{}` already exists.'.format(file_path))
+
+        column_names = self.get_table_column_names(project, dataset, table)
+
+        query = _download_query(project, dataset, table, limit, offset)
+        rows_iter = self.query(query).result()
+
+        if progress_bar:
+            pb = tqdm.tqdm_notebook(total=rows_iter.total_rows)
+
+        with open(file_path, 'w') as csvfile:
+            csvwriter = csv.writer(csvfile)
+
+            csvwriter.writerow(column_names)
+
+            for row in rows_iter:
+                csvwriter.writerow(row.values())
+                if progress_bar:
+                    pb.update(1)
+
+        return file_path
+
+
+def _download_query(project, dataset, table, limit=None, offset=None):
+    full_table_name = '`{}.{}.{}`'.format(project, dataset, table)
+    query = 'SELECT * FROM {}'.format(full_table_name)
+
+    if limit:
+        query += ' LIMIT {}'.format(limit)
+    if offset:
+        query += ' OFFSET {}'.format(offset)
+
+    return query

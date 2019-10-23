@@ -2,11 +2,13 @@
 
 from __future__ import absolute_import
 
-import base64
-import hashlib
 import os
 import re
 import sys
+import json
+import base64
+import decimal
+import hashlib
 import requests
 import geopandas
 import numpy as np
@@ -243,9 +245,16 @@ def get_geodataframe_bounds(data):
     return [[xmin, ymin], [xmax, ymax]]
 
 
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        return super(CustomJSONEncoder, self).default(o)
+
+
 def encode_geodataframe(data):
     filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json()
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder)
     encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
 
     return encoded_data

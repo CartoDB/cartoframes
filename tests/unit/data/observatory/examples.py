@@ -1,5 +1,5 @@
 from cartoframes.data.observatory.variable import Variable
-from cartoframes.data.observatory.dataset import Dataset
+from cartoframes.data.observatory.dataset import CatalogDataset
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.geography import Geography
 from cartoframes.data.observatory.country import Country
@@ -26,87 +26,93 @@ test_category2 = Category(db_category2)
 test_categories = CatalogList([test_category1, test_category2])
 
 db_geography1 = {
-    'id': 'carto-do-public-data.tiger.geography_esp_census_2019',
+    'id': 'carto-do-public.tiger.geography_esp_census_2019',
+    'slug': 'esp_census_2019_4567890d',
     'name': 'ESP - Census',
     'description': 'Geography data for Spanish census',
     'provider_id': 'bbva',
-    'country_iso_code3': 'esp',
-    'language_iso_code3': 'esp',
+    'country_id': 'esp',
+    'lang': 'esp',
     'geom_coverage': '',
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_geography2 = {
-    'id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
+    'id': 'carto-do-public.tiger.geography_esp_municipalities_2019',
+    'slug': 'esp_municipalities_2019_3456789c',
     'name': 'ESP - Municipalities',
     'description': 'Geography data for Spanish municipalities',
     'provider_id': 'bbva',
-    'country_iso_code3': 'esp',
-    'language_iso_code3': 'esp',
+    'country_id': 'esp',
+    'lang': 'esp',
     'geom_coverage': '',
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_geography1 = Geography(db_geography1)
 test_geography2 = Geography(db_geography2)
 test_geographies = CatalogList([test_geography1, test_geography2])
 
 db_dataset1 = {
-    'id': 'basicstats-census',
+    'id': 'carto-do-public.project.basicstats-census',
+    'slug': 'basicstats_census_1234567a',
     'name': 'Basic Stats - Census',
     'description': 'Basic stats on 2019 Spanish census',
     'provider_id': 'bbva',
     'category_id': 'demographics',
     'data_source_id': 'basicstats',
-    'country_iso_code3': 'esp',
-    'language_iso_code3': 'esp',
+    'country_id': 'esp',
+    'lang': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_census_2019',
     'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_dataset2 = {
-    'id': 'basicstats-municipalities',
+    'id': 'carto-do-public.project.basicstats-municipalities',
+    'slug': 'basicstats_municipalities_2345678b',
     'name': 'Basic Stats - Municipalities',
     'description': 'Basic stats on 2019 Spanish municipalities',
     'provider_id': 'bbva',
     'category_id': 'demographics',
     'data_source_id': 'basicstats',
-    'country_iso_code3': 'esp',
-    'language_iso_code3': 'esp',
+    'country_id': 'esp',
+    'lang': 'esp',
     'geography_id': 'carto-do-public-data.tiger.geography_esp_municipalities_2019',
     'temporal_aggregation': '5yrs',
     'time_coverage': ['2006-01-01', '2010-01-01'],
     'update_frequency': 'monthly',
     'version': '20190203',
     'is_public_data': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
-test_dataset1 = Dataset(db_dataset1)
-test_dataset2 = Dataset(db_dataset2)
+test_dataset1 = CatalogDataset(db_dataset1)
+test_dataset2 = CatalogDataset(db_dataset2)
 test_datasets = CatalogList([test_dataset1, test_dataset2])
 
 db_variable1 = {
-    'id': 'var1',
+    'id': 'carto-do.variable.var1',
+    'slug': 'var1',
     'name': 'Population',
-    'description': 'The number of people within each geography',
+    'description': 'Number of people',
     'column_name': 'pop',
     'db_type': 'Numeric',
     'dataset_id': 'dataset1',
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': True,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 db_variable2 = {
-    'id': 'var2',
+    'id': 'carto-do.variable.var2',
+    'slug': 'var2',
     'name': 'Date',
     'description': 'The date the data refers to (YYYY-MM format for month and YYYY-MM-DD for day).',
     'column_name': 'Date',
@@ -115,7 +121,7 @@ db_variable2 = {
     'agg_method': '',
     'variable_group_id': 'vargroup1',
     'starred': False,
-    'summary_jsonb': {}
+    'summary_json': {}
 }
 test_variable1 = Variable(db_variable1)
 test_variable2 = Variable(db_variable2)
@@ -134,13 +140,15 @@ test_provider2 = Provider(db_provider2)
 test_providers = CatalogList([test_provider1, test_provider2])
 
 db_variable_group1 = {
-    'id': 'vargroup1',
+    'id': 'carto-do.variable_group.vargroup1',
+    'slug': 'vargroup1',
     'name': 'Population',
     'dataset_id': 'dataset1',
     'starred': True
 }
 db_variable_group2 = {
-    'id': 'vargroup2',
+    'id': 'carto-do.variable_group.vargroup2',
+    'slug': 'vargroup2',
     'name': 'Date',
     'dataset_id': 'dataset1',
     'starred': False
@@ -148,3 +156,14 @@ db_variable_group2 = {
 test_variable_group1 = VariableGroup(db_variable_group1)
 test_variable_group2 = VariableGroup(db_variable_group2)
 test_variables_groups = CatalogList([test_variable_group1, test_variable_group2])
+
+test_subscription_info = {
+    'id': 'id',
+    'estimated_delivery_days': 0,
+    'subscription_list_price': 100,
+    'tos': 'tos',
+    'tos_link': 'tos_link',
+    'licenses': 'licenses',
+    'licenses_link': 'licenses_link',
+    'rights': 'rights'
+}

@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from . import defaults
 from ..data import Dataset
+from ..data.dataset.registry.base_dataset import BaseDataset
 from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
 
 
@@ -109,7 +110,7 @@ class Source(object):
         self._init_source_dataset(bounds)
 
     def get_geom_type(self):
-        return self.dataset.compute_geom_type() or Dataset.GEOM_TYPE_POINT
+        return self.dataset.compute_geom_type() or BaseDataset.GEOM_TYPE_POINT
 
     def get_credentials(self):
         credentials = self.dataset.credentials

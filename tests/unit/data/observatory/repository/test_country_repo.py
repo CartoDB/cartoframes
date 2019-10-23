@@ -25,7 +25,7 @@ class TestCountryRepo(object):
         countries = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(countries, CatalogList)
         assert countries == test_countries
 
@@ -42,6 +42,30 @@ class TestCountryRepo(object):
         assert countries is None
 
     @patch.object(RepoClient, 'get_countries')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_country1, db_country2]
+        repo = CountryRepository()
+        filters = {
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        countries = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'category_id': 'demographics'
+        })
+        assert countries == test_countries
+
+    @patch.object(RepoClient, 'get_countries')
     def test_get_by_id(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_country1, db_country2]
@@ -52,12 +76,12 @@ class TestCountryRepo(object):
         country = repo.get_by_id(requested_iso_code)
 
         # Then
-        mocked_repo.assert_called_once_with('country_iso_code3', requested_iso_code)
+        mocked_repo.assert_called_once_with({'country_id': requested_iso_code})
         assert isinstance(country, Country)
         assert country == test_country1
 
     @patch.object(RepoClient, 'get_countries')
-    def test_get_by_iso_code_unknown_fails(self, mocked_repo):
+    def test_get_by_id_unknown_fails(self, mocked_repo):
         # Given
         mocked_repo.return_value = []
         requested_iso_code = 'fra'
@@ -66,6 +90,20 @@ class TestCountryRepo(object):
         # Then
         with pytest.raises(DiscoveryException):
             repo.get_by_id(requested_iso_code)
+
+    @patch.object(RepoClient, 'get_countries')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_country1, db_country2]
+        repo = CountryRepository()
+
+        # When
+        countries = repo.get_by_id_list([db_country1['id'], db_country2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'country_id': [db_country1['id'], db_country2['id']]})
+        assert isinstance(countries, CatalogList)
+        assert countries == test_countries
 
     @patch.object(RepoClient, 'get_countries')
     def test_missing_fields_are_mapped_as_None(self, mocked_repo):

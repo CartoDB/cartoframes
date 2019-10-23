@@ -1,15 +1,22 @@
 import pytest
+import unittest
 from carto.exceptions import CartoException
 
+from cartoframes.lib import context
+from cartoframes.viz import Map, Layer, Source, constants
+from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
+from cartoframes.data import Dataset, StrategiesRegistry
 from cartoframes.auth import Credentials
-from cartoframes.data import StrategiesRegistry
-from cartoframes.viz import Layer, Map, Source, constants
-from tests.unit.mocks import mock_dataset
-from tests.unit.mocks.kuviz_mock import (PRIVACY_PASSWORD, PRIVACY_PUBLIC,
-                                         KuvizPublisherMock)
-from tests.unit.mocks.map_mock import MapMock
 
 from .utils import build_geojson
+
+from ..mocks.context_mock import ContextMock
+from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
+
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 
 class TestMap(object):
@@ -170,8 +177,23 @@ class TestMapDevelopmentPath(object):
         assert _airship_path + constants.AIRSHIP_ICONS_DEV in template
 
 
-class TestMapPublication(object):
-    def setup_method(self):
+class KuvizPublisherMock(KuvizPublisher):
+    def __init__(self):
+        pass
+
+    def get_layers(self):
+        return []
+
+    def set_layers(self, _1, _2, _3):
+        pass
+
+    def publish(self, _1, name, password):
+        self.kuviz = CartoKuvizMock(name, password=password)
+        return kuviz_to_dict(self.kuviz)
+
+
+class TestMapPublication(unittest.TestCase):
+    def setUp(self):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
@@ -193,16 +215,19 @@ class TestMapPublication(object):
             ]
         }
 
-        self.html = '<html><body><h1>Hi Kuviz yeee</h1></body></html>'
+        # Mock create_context method
+        self.original_create_context = context.create_context
+        context.create_context = lambda c: self._context_mock
 
-    def teardown_method(self):
+    def tearDown(self):
+        context.create_context = self.original_create_context
         StrategiesRegistry.instance = None
 
-    def assert_kuviz(self, kuviz, name, privacy):
-        assert kuviz.id is not None
-        assert kuviz.url is not None
-        assert kuviz.name == name
-        assert kuviz.privacy == privacy
+    # def assert_kuviz(self, kuviz, name, privacy):
+    #     self.assertIsNotNone(kuviz.id)
+    #     self.assertIsNotNone(kuviz.url)
+    #     self.assertEqual(kuviz.name, name)
+    #     self.assertEqual(kuviz.privacy, privacy)
 
     def assert_kuviz_dict(self, kuviz_dict, name, privacy):
         assert kuviz_dict['id'] is not None
@@ -210,92 +235,65 @@ class TestMapPublication(object):
         assert kuviz_dict['name'] == name
         assert kuviz_dict['privacy'] == privacy
 
-    def test_map_publish_remote(self, mocker):
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_remote(self, _get_publisher):
+        _get_publisher.return_value = KuvizPublisherMock()
+
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        vmap = Map(Layer(dataset))
 
         name = 'cf_publish'
-        kuviz_dict = map.publish(name, credentials=self.credentials)
+        kuviz_dict = vmap.publish(name)
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
-        self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
 
-    def test_map_publish_unsync_fails(self, mocker):
-        dataset = mock_dataset(mocker, self.test_geojson)
-        map = MapMock(Layer(Source(dataset)))
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_with_password(self, _get_publisher):
+        _get_publisher.return_value = KuvizPublisherMock()
 
-        msg = 'The map layers are not synchronized with CARTO. ' + \
-            'Please, use the `sync_data` method before publishing the map'
-        with pytest.raises(CartoException) as e:
-            map.publish('test', credentials=self.credentials)
-        assert str(e.value) == msg
-
-    def test_map_publish_unsync_sync_data_and_publish(self, mocker):
-        dataset = mock_dataset(mocker, self.test_geojson)
-        map = MapMock(Layer(Source(dataset)))
-
-        map.sync_data(table_name='fake_table', credentials=self.credentials)
-
-        name = 'cf_publish'
-        kuviz_dict = map.publish(name, credentials=self.credentials)
-        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
-        self.assert_kuviz(map._kuviz, name, PRIVACY_PUBLIC)
-
-    def test_map_publish_with_password(self, mocker):
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(dataset)))
 
         name = 'cf_publish'
         kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
-        self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
 
-    def test_map_publish_deletion(self, mocker):
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_deletion(self, _get_publisher):
+        _get_publisher.return_value = KuvizPublisherMock()
 
-        name = 'cf_publish'
-        map.publish(name, credentials=self.credentials)
-        map.delete_publication()
-        assert map._kuviz is None
-
-    def test_map_publish_update_name(self, mocker):
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(dataset)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
+        response = map.delete_publication()
+
+        self.assertTrue(response)
+
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_update_name(self, _get_publisher):
+        _get_publisher.return_value = KuvizPublisherMock()
+
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(dataset)))
+
+        name = 'cf_publish'
+        map.publish(name, credentials=self.credentials)
+
         new_name = 'cf_update'
         kuviz_dict = map.update_publication(new_name, password=None)
-        self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
-        self.assert_kuviz(map._kuviz, new_name, PRIVACY_PUBLIC)
 
-    def test_map_publish_update_password(self, mocker):
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
+        self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
+
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_update_password(self, _get_publisher):
+        _get_publisher.return_value = KuvizPublisherMock()
+
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(dataset)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
         kuviz_dict = map.update_publication(name, password="1234")
+
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
-        self.assert_kuviz(map._kuviz, name, PRIVACY_PASSWORD)
-
-    def test_map_publish_private_ds_with_public_apikey_fails(self, mocker):
-        is_public = KuvizPublisherMock.is_public
-
-        def is_not_public(self):
-            return False
-
-        KuvizPublisherMock.is_public = is_not_public
-
-        dataset = mock_dataset(mocker, 'fake_table', self.credentials)
-        map = MapMock(Layer(Source(dataset)))
-
-        msg = ('The datasets used in your map are not public. '
-               'You need add new Regular API key with permissions to Maps API and the datasets. '
-               'You can do it from your CARTO dashboard or using the Auth API. You can get more '
-               'info at https://carto.com/developers/auth-api/guides/types-of-API-Keys/')
-        with pytest.raises(CartoException) as e:
-            map.publish('test', credentials=self.credentials)
-        assert str(e.value) == msg
-
-        KuvizPublisherMock.is_public = is_public

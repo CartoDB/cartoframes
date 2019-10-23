@@ -5,6 +5,9 @@ from .. import __version__
 from ..auth import get_default_credentials
 from ..data import Dataset
 
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
+
 
 def tables(credentials=None):
     """List all tables in user's CARTO account

@@ -1,10 +1,12 @@
 import pandas as pd
+from cartoframes.data.observatory.repository.geography_repo import GeographyRepository
 
 from cartoframes.data.observatory.category import Category
 from cartoframes.data.observatory.repository.category_repo import CategoryRepository
 from cartoframes.data.observatory.repository.dataset_repo import DatasetRepository
 from cartoframes.data.observatory.entity import CatalogList
-from .examples import test_category1, test_datasets, test_categories, db_category1, test_category2, db_category2
+from .examples import test_category1, test_datasets, test_categories, db_category1, test_category2, db_category2, \
+    test_geographies
 
 try:
     from unittest.mock import patch
@@ -27,7 +29,19 @@ class TestCategory(object):
         assert isinstance(category, Category)
         assert category == test_category1
 
-    @patch.object(DatasetRepository, 'get_by_category')
+    def test_get_category_by_id_from_categories_list(self):
+        # Given
+        categories = CatalogList([test_category1, test_category2])
+
+        # When
+        category = categories.get(test_category1.id)
+
+        # Then
+        assert isinstance(category, object)
+        assert isinstance(category, Category)
+        assert category == test_category1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_category(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -36,9 +50,24 @@ class TestCategory(object):
         datasets = test_category1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'category_id': test_category1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
+
+    @patch.object(GeographyRepository, 'get_all')
+    def test_get_geographies_by_category(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = test_geographies
+
+        # When
+        geographies = test_category1.geographies
+
+        # Then
+        mocked_repo.assert_called_once_with({'category_id': test_category1.id})
+        assert isinstance(geographies, list)
+        assert isinstance(geographies, CatalogList)
+        assert geographies == test_geographies
 
     def test_category_properties(self):
         # Given
@@ -74,7 +103,7 @@ class TestCategory(object):
         assert isinstance(category_dict, dict)
         assert category_dict == db_category1
 
-    def test_category_is_represented_with_id(self):
+    def test_category_is_represented_with_classname_and_id(self):
         # Given
         category = Category(db_category1)
 
@@ -82,7 +111,7 @@ class TestCategory(object):
         category_repr = repr(category)
 
         # Then
-        assert category_repr == 'Category({id})'.format(id=db_category1['id'])
+        assert category_repr == "<Category('{id}')>".format(id=db_category1['id'])
 
     def test_category_is_printed_with_classname(self):
         # Given
@@ -92,7 +121,7 @@ class TestCategory(object):
         category_str = str(category)
 
         # Then
-        assert category_str == 'Category({dict_str})'.format(dict_str=str(db_category1))
+        assert category_str == "Category({dict_str})".format(dict_str=str(db_category1))
 
     @patch.object(CategoryRepository, 'get_all')
     def test_get_all(self, mocked_repo):
@@ -107,7 +136,7 @@ class TestCategory(object):
         assert isinstance(categories, CatalogList)
         assert categories == test_categories
 
-    def test_category_list_is_printed_with_classname(self):
+    def test_category_list_is_printed_with_classname_and_ids(self):
         # Given
         categories = CatalogList([test_category1, test_category2])
 
@@ -115,10 +144,10 @@ class TestCategory(object):
         categories_str = str(categories)
 
         # Then
-        assert categories_str == '[Category({id1}), Category({id2})]' \
+        assert categories_str == "[<Category('{id1}')>, <Category('{id2}')>]" \
                                  .format(id1=db_category1['id'], id2=db_category2['id'])
 
-    def test_category_list_is_represented_with_ids(self):
+    def test_category_list_is_represented_with_classname_and_ids(self):
         # Given
         categories = CatalogList([test_category1, test_category2])
 
@@ -126,7 +155,7 @@ class TestCategory(object):
         categories_repr = repr(categories)
 
         # Then
-        assert categories_repr == '[Category({id1}), Category({id2})]'\
+        assert categories_repr == "[<Category('{id1}')>, <Category('{id2}')>]"\
                                   .format(id1=db_category1['id'], id2=db_category2['id'])
 
     def test_categories_items_are_obtained_as_category(self):

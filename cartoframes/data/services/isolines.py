@@ -4,6 +4,7 @@ import pandas as pd
 
 from ...data import Dataset
 from ...utils.utils import remove_column_from_dataframe
+from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 
 QUOTA_SERVICE = 'isolines'
@@ -16,7 +17,7 @@ class Isolines(Service):
     def __init__(self, credentials=None):
         super(Isolines, self).__init__(credentials, quota_service=QUOTA_SERVICE)
 
-    def isochrones(self, source, range, **args):
+    def isochrones(self, source, ranges, **args):
         """isochrone areas
 
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
@@ -59,9 +60,9 @@ class Isolines(Service):
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
         """
-        return self._iso_areas(source, range, function='isochrone', **args)
+        return self._iso_areas(source, ranges, function='isochrone', **args)
 
-    def isodistances(self, source, range, **args):
+    def isodistances(self, source, ranges, **args):
         """isodistance areas
 
         This method computes areas delimited by isodistance lines (lines of constant travel distance) based upon public
@@ -71,8 +72,6 @@ class Isolines(Service):
             source (Dataset, Dataframe): containing the source points for the isochrones:
                 travel routes from the source points are computed to determine areas within
                 specified travel distances.
-            range (list): travel distance values in meters; for each value and source point
-                a distinct area are will be computed.
             ranges (list): travel distance values in meters; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
@@ -107,11 +106,11 @@ class Isolines(Service):
             that identifies the source point corresponding to each area if the source has a
             ``cartodb_id`` column.
         """
-        return self._iso_areas(source, range, function='isodistance', **args)
+        return self._iso_areas(source, ranges, function='isodistance', **args)
 
     def _iso_areas(self,
                    source,
-                   range,
+                   ranges,
                    dry_run=False,
                    table_name=None,
                    if_exists=None,
@@ -131,13 +130,13 @@ class Isolines(Service):
             input_dataframe = source
             source = Dataset(input_dataframe)
 
+        num_rows = source.get_num_rows()
+        metadata['required_quota'] = num_rows * len(ranges)
+
         if dry_run:
-            num_rows = source.get_num_rows()
-            metadata['required_quota'] = num_rows * len(range)
             return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
-        source_has_id = 'cartodb_id' in source_columns
 
         temporary_table_name = False
 
@@ -150,6 +149,9 @@ class Isolines(Service):
             temporary_table_name = self._new_temporary_table_name()
             source.upload(table_name=temporary_table_name, credentials=self._credentials)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
+            source_columns = source.get_column_names()
+
+        source_has_id = 'cartodb_id' in source_columns
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
         # TODO: use **options argument?
@@ -161,9 +163,9 @@ class Isolines(Service):
             'maxpoints': maxpoints,
             'quality': quality
         }
-        iso_options = [str(k)+'='+str(v) for k, v in options.items() if v is not None]
+        iso_options = ["'{}={}'".format(k, v) for k, v in options.items() if v is not None]
         iso_options = "ARRAY[{opts}]".format(opts=','.join(iso_options))
-        iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in range]))
+        iso_ranges = 'ARRAY[{ranges}]'.format(ranges=','.join([str(r) for r in ranges]))
 
         sql = _areas_query(
             source_query, source_columns, iso_function, mode, iso_ranges, iso_options, source_has_id or exclusive)
@@ -175,18 +177,16 @@ class Isolines(Service):
             dataset.upload(table_name=table_name, if_exists=if_exists)
             result = Dataset(table_name, credentials=self._credentials)
             if input_dataframe is not None:
-                result = result.download()
+                result = geodataframe_from_dataframe(result.download())
         else:
-            result = dataset.download()
-            if not dry_run and not source_has_id:
-                remove_column_from_dataframe(result, 'cartodb_id')
+            result = geodataframe_from_dataframe(dataset.download())
             if input_dataframe is None:
                 result = Dataset(result, credentials=self._credentials)
 
         if temporary_table_name:
             Dataset(temporary_table_name, credentials=self._credentials).delete()
 
-        return self.result(result)
+        return self.result(data=result, metadata=metadata)
 
 
 def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id):

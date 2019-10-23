@@ -27,7 +27,19 @@ class TestProvider(object):
         assert isinstance(provider, Provider)
         assert provider == test_provider1
 
-    @patch.object(DatasetRepository, 'get_by_provider')
+    def test_get_provider_by_id_from_providers_list(self):
+        # Given
+        providers = CatalogList([test_provider1, test_provider2])
+
+        # When
+        provider = providers.get(test_provider1.id)
+
+        # Then
+        assert isinstance(provider, object)
+        assert isinstance(provider, Provider)
+        assert provider == test_provider1
+
+    @patch.object(DatasetRepository, 'get_all')
     def test_get_datasets_by_provider(self, mocked_repo):
         # Given
         mocked_repo.return_value = test_datasets
@@ -36,6 +48,7 @@ class TestProvider(object):
         datasets = test_provider1.datasets
 
         # Then
+        mocked_repo.assert_called_once_with({'provider_id': test_provider1.id})
         assert isinstance(datasets, list)
         assert isinstance(datasets, CatalogList)
         assert datasets == test_datasets
@@ -74,7 +87,7 @@ class TestProvider(object):
         assert isinstance(provider_dict, dict)
         assert provider_dict == db_provider1
 
-    def test_provider_is_represented_with_id(self):
+    def test_provider_is_represented_with_classname_and_id(self):
         # Given
         provider = Provider(db_provider1)
 
@@ -82,7 +95,7 @@ class TestProvider(object):
         provider_repr = repr(provider)
 
         # Then
-        assert provider_repr == 'Provider({id})'.format(id=db_provider1['id'])
+        assert provider_repr == "<Provider('{id}')>".format(id=db_provider1['id'])
 
     def test_provider_is_printed_with_classname(self):
         # Given
@@ -107,7 +120,7 @@ class TestProvider(object):
         assert isinstance(providers, CatalogList)
         assert providers == test_providers
 
-    def test_provider_list_is_printed_with_classname(self):
+    def test_provider_list_is_printed_with_classname_and_ids(self):
         # Given
         providers = CatalogList([test_provider1, test_provider2])
 
@@ -115,10 +128,10 @@ class TestProvider(object):
         providers_str = str(providers)
 
         # Then
-        assert providers_str == '[Provider({id1}), Provider({id2})]' \
+        assert providers_str == "[<Provider('{id1}')>, <Provider('{id2}')>]" \
                                 .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
-    def test_provider_list_is_represented_with_ids(self):
+    def test_provider_list_is_represented_with_classname_and_ids(self):
         # Given
         providers = CatalogList([test_provider1, test_provider2])
 
@@ -126,7 +139,7 @@ class TestProvider(object):
         providers_repr = repr(providers)
 
         # Then
-        assert providers_repr == '[Provider({id1}), Provider({id2})]'\
+        assert providers_repr == "[<Provider('{id1}')>, <Provider('{id2}')>]"\
                                  .format(id1=db_provider1['id'], id2=db_provider2['id'])
 
     def test_providers_items_are_obtained_as_provider(self):

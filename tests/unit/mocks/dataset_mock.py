@@ -8,11 +8,12 @@ from cartoframes.data.dataset.registry.dataframe_dataset import \
     DataFrameDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
 from cartoframes.data.dataset.registry.table_dataset import TableDataset
+from cartoframes.data.dataset.registry.base_dataset import BaseDataset
 
 
 class MetadataMock():
     def __init__(self):
-        self.privacy = DatasetInfo.PRIVATE
+        self.privacy = Dataset.PRIVACY_PRIVATE
         self.name = None
 
 
@@ -41,7 +42,7 @@ class DataFrameDatasetMock(DataFrameDataset):
         return True
 
     def compute_geom_type(self):
-        return Dataset.GEOM_TYPE_POINT
+        return BaseDataset.GEOM_TYPE_POINT
 
 
 class QueryDatasetMock(QueryDataset):
@@ -62,7 +63,7 @@ class QueryDatasetMock(QueryDataset):
         return True
 
     def compute_geom_type(self):
-        return Dataset.GEOM_TYPE_POINT
+        return BaseDataset.GEOM_TYPE_POINT
 
     def _get_read_query(self, table_columns, limit=None):
         return self._query
@@ -89,7 +90,7 @@ class TableDatasetMock(TableDataset):
         return True
 
     def compute_geom_type(self):
-        return Dataset.GEOM_TYPE_POINT
+        return BaseDataset.GEOM_TYPE_POINT
 
 
 class StrategiesRegistryMock(StrategiesRegistry):
@@ -102,4 +103,4 @@ class DatasetMock(Dataset):
         return StrategiesRegistryMock()
 
     def compute_geom_type(self):
-        return Dataset.GEOM_TYPE_POINT
+        return BaseDataset.GEOM_TYPE_POINT

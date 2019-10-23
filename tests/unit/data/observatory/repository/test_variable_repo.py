@@ -25,7 +25,7 @@ class TestVariableRepo(object):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
@@ -39,8 +39,34 @@ class TestVariableRepo(object):
         variables = repo.get_all()
 
         # Then
-        mocked_repo.assert_called_once_with(None, None)
+        mocked_repo.assert_called_once_with(None)
         assert variables is None
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_get_all_only_uses_allowed_filters(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        repo = VariableRepository()
+        filters = {
+            'country_id': 'usa',
+            'dataset_id': 'carto-do.project.census2011',
+            'category_id': 'demographics',
+            'variable_id': 'population',
+            'geography_id': 'census-geo',
+            'variable_group_id': 'var-group',
+            'provider_id': 'open_data',
+            'fake_field_id': 'fake_value'
+        }
+
+        # When
+        variables = repo.get_all(filters)
+
+        # Then
+        mocked_repo.assert_called_once_with({
+            'dataset_id': 'carto-do.project.census2011',
+            'variable_group_id': 'var-group'
+        })
+        assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
     def test_get_by_id(self, mocked_repo):
@@ -53,7 +79,7 @@ class TestVariableRepo(object):
         variable = repo.get_by_id(requested_id)
 
         # Then
-        mocked_repo.assert_called_once_with('id', requested_id)
+        mocked_repo.assert_called_once_with({'id': requested_id})
         assert isinstance(variable, Variable)
         assert variable == test_variable1
 
@@ -69,32 +95,58 @@ class TestVariableRepo(object):
             repo.get_by_id(requested_id)
 
     @patch.object(RepoClient, 'get_variables')
-    def test_get_by_dataset(self, mocked_repo):
+    def test_get_by_slug(self, mocked_repo):
         # Given
-        mocked_repo.return_value = [db_variable1, db_variable2]
-        dataset_id = 'dataset1'
+        mocked_repo.return_value = [db_variable1]
+        requested_slug = db_variable1['slug']
         repo = VariableRepository()
 
         # When
-        variables = repo.get_by_dataset(dataset_id)
+        variable = repo.get_by_id(requested_slug)
 
         # Then
-        mocked_repo.assert_called_once_with('dataset_id', dataset_id)
+        mocked_repo.assert_called_once_with({'slug': requested_slug})
+        assert variable == test_variable1
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_get_by_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        repo = VariableRepository()
+
+        # When
+        variables = repo.get_by_id_list([db_variable1['id'], db_variable2['id']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_variable1['id'], db_variable2['id']]})
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
     @patch.object(RepoClient, 'get_variables')
-    def test_get_by_variable_group(self, mocked_repo):
+    def test_get_by_slug_list(self, mocked_repo):
         # Given
         mocked_repo.return_value = [db_variable1, db_variable2]
-        variable_group_id = 'vargroup1'
         repo = VariableRepository()
 
         # When
-        variables = repo.get_by_variable_group(variable_group_id)
+        variables = repo.get_by_id_list([db_variable1['slug'], db_variable2['slug']])
 
         # Then
-        mocked_repo.assert_called_once_with('variable_group_id', variable_group_id)
+        mocked_repo.assert_called_once_with({'slug': [db_variable1['slug'], db_variable2['slug']]})
+        assert isinstance(variables, CatalogList)
+        assert variables == test_variables
+
+    @patch.object(RepoClient, 'get_variables')
+    def test_get_by_slug_and_id_list(self, mocked_repo):
+        # Given
+        mocked_repo.return_value = [db_variable1, db_variable2]
+        repo = VariableRepository()
+
+        # When
+        variables = repo.get_by_id_list([db_variable1['id'], db_variable2['slug']])
+
+        # Then
+        mocked_repo.assert_called_once_with({'id': [db_variable1['id']], 'slug': [db_variable2['slug']]})
         assert isinstance(variables, CatalogList)
         assert variables == test_variables
 
@@ -106,6 +158,7 @@ class TestVariableRepo(object):
 
         expected_variables = CatalogList([Variable({
             'id': 'variable1',
+            'slug': None,
             'name': None,
             'description': None,
             'column_name': None,
@@ -114,7 +167,7 @@ class TestVariableRepo(object):
             'agg_method': None,
             'variable_group_id': None,
             'starred': None,
-            'summary_jsonb': None
+            'summary_json': None
         })])
 
         # When

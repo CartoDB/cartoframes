@@ -1,10 +1,12 @@
-import binascii as ba
 import re
 import sys
 import geojson
 import geopandas
+import binascii as ba
+
 from copy import deepcopy
 from warnings import warn
+from shapely import wkb, wkt, geometry, geos
 
 from carto.exceptions import CartoException
 
@@ -54,21 +56,24 @@ def compute_query(dataset):
 
 
 def compute_geodataframe(dataset):
-    if dataset.dataframe is not None:
-        if isinstance(dataset.dataframe, geopandas.GeoDataFrame):
-            return dataset.dataframe
+    return geodataframe_from_dataframe(dataset.dataframe)
 
-        df = dataset.dataframe
-        geom_column = _get_column(df, GEOM_COLUMN_NAMES)
+
+def geodataframe_from_dataframe(dataframe):
+    if dataframe is not None:
+        if isinstance(dataframe, geopandas.GeoDataFrame):
+            return dataframe
+
+        geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
         if geom_column is not None:
-            df['geometry'] = _compute_geometry_from_geom(geom_column)
-            _warn_new_geometry_column(df)
+            dataframe['geometry'] = _compute_geometry_from_geom(geom_column)
+            _warn_new_geometry_column(dataframe)
         else:
-            lat_column = _get_column(df, LAT_COLUMN_NAMES)
-            lng_column = _get_column(df, LNG_COLUMN_NAMES)
+            lat_column = _get_column(dataframe, LAT_COLUMN_NAMES)
+            lng_column = _get_column(dataframe, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
-                df['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
-                _warn_new_geometry_column(df)
+                dataframe['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
+                _warn_new_geometry_column(dataframe)
             else:
                 raise ValueError('''No geographic data found. '''
                                  '''If a geometry exists, change the column name ({0}) or '''
@@ -78,7 +83,7 @@ def compute_geodataframe(dataset):
                                      ', '.join(LAT_COLUMN_NAMES),
                                      ', '.join(LNG_COLUMN_NAMES)
                                  ))
-        return geopandas.GeoDataFrame(df)
+        return geopandas.GeoDataFrame(dataframe)
     return None
 
 
@@ -101,7 +106,6 @@ def _compute_geometry_from_geom(geom_column):
 
 
 def _compute_geometry_from_latlng(lat, lng):
-    from shapely import geometry
     return [geometry.Point(xy) for xy in zip(lng, lat)]
 
 
@@ -147,9 +151,7 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
-    from shapely.geometry.base import BaseGeometry
-
-    if isinstance(input_geom, BaseGeometry):
+    if isinstance(input_geom, geometry.base.BaseGeometry):
         return ENC_SHAPELY
 
     if isinstance(input_geom, str):
@@ -181,28 +183,24 @@ def detect_encoding_type(input_geom):
 
 def _load_wkb(geom):
     """Load WKB or EWKB geometry."""
-    from shapely.wkb import loads
-    return loads(geom)
+    return wkb.loads(geom)
 
 
 def _load_wkb_hex(geom):
     """Load WKB_HEX or EWKB_HEX geometry."""
-    from shapely.wkb import loads
-    return loads(geom, hex=True)
+    return wkb.loads(geom, hex=True)
 
 
 def _load_wkb_bhex(geom):
     """Load WKB_BHEX or EWKB_BHEX geometry.
     The geom must be converted to WKB/EWKB before loading.
     """
-    from shapely.wkb import loads
-    return loads(ba.unhexlify(geom))
+    return wkb.loads(ba.unhexlify(geom))
 
 
 def _load_wkt(geom):
     """Load WKT geometry."""
-    from shapely.wkt import loads
-    return loads(geom)
+    return wkt.loads(geom)
 
 
 def _load_ewkt(egeom):
@@ -212,8 +210,7 @@ def _load_ewkt(egeom):
     srid, geom = _extract_srid(egeom)
     ogeom = _load_wkt(geom)
     if srid:
-        from shapely.geos import lgeos
-        lgeos.GEOSSetSRID(ogeom._geom, int(srid))
+        geos.lgeos.GEOSSetSRID(ogeom._geom, int(srid))
     return ogeom
 
 
@@ -229,17 +226,16 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-def wkt_to_geojson(wkt):
-    shapely_geom = _load_wkt(wkt)
+def wkt_to_geojson(wkt_input):
+    shapely_geom = _load_wkt(wkt_input)
     geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
 
     return str(geojson_geometry.geometry)
 
 
 def geojson_to_wkt(geojson_str):
-    from shapely.geometry import shape
     geojson_geom = geojson.loads(geojson_str)
-    wkt_geometry = shape(geojson_geom)
+    wkt_geometry = geometry.shape(geojson_geom)
 
     shapely_geom = _load_wkt(wkt_geometry.wkt)
 
