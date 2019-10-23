@@ -115,14 +115,14 @@ class Legend(object):
         if _type and _type not in constants.LEGEND_TYPES:
             raise ValueError(
                 'Legend type "{}" is not valid. Valid legend types are: {}.'.format(
-                    ', '.join(_type, constants.LEGEND_TYPES)
+                    _type, ', '.join(constants.LEGEND_TYPES)
                 ))
 
     def _check_prop(self, _prop):
         if _prop and _prop not in constants.LEGEND_PROPERTIES:
             raise ValueError(
                 'Legend property "{}" is not valid. Valid legend properties are: {}.'.format(
-                    ', '.join(_prop, constants.LEGEND_PROPERTIES)
+                    _prop, ', '.join(constants.LEGEND_PROPERTIES)
                 ))
 
     def _infer_prop(self, _type):

@@ -14,6 +14,32 @@ def enrich_polygons(data, variables, agg_operators=dict(), data_geom_column='geo
     dataset, the proportional part of the intersection will be used to interpolate the quantity of the
     polygon value intersected, aggregating them with the operator provided by `agg_operators` argument.
 
+    Args:
+        data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
+        variables (Variable, CatalogList, list, str): variable(s), discovered through Catalog,
+            for enriching the `data` argument.
+        agg_operators (dict, str, None, optional): dictionary with either a `column` key
+            with the name of the column to aggregate or a `operator` value with the operator to group by.
+            If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
+            will be retrieved from metadata column.
+            If `agg_operators` is a string then all columns will be aggregated by this operator.
+            If `agg_operators` is `None` then no aggregations will be computed. All the values which
+            data geometry intersects with will be returned.
+        data_geom_column (str): string indicating the 4326 geometry column in `data`.
+        filters (dict, optional): dictionary with either a `column` key
+            with the name of the column to filter or a `value` value with the value to filter by.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            credentials of user account. If not provided,
+            a default credentials (if set with :py:meth:`set_default_credentials
+            <cartoframes.auth.set_default_credentials>`) will attempted to be
+            used.
+
+    Returns:
+        A dataframe as the provided one but with the variables to enrich appended to it
+
+        Note that if the geometry of the `data` you provide intersects with more than one geometry
+        in the enrichment dataset, the number of rows of the returned dataframe could be different
+        than the `data` argument number of rows.
 
     Examples:
 
@@ -96,34 +122,6 @@ def enrich_polygons(data, variables, agg_operators=dict(), data_geom_column='geo
 
             agg_operators = None
             dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
-
-
-    Args:
-        data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
-        variables (Variable, CatalogList, list, str): variable(s), discovered through Catalog,
-            for enriching the `data` argument.
-        agg_operators (dict, str, None, optional): dictionary with either a `column` key
-            with the name of the column to aggregate or a `operator` value with the operator to group by.
-            If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
-            will be retrieved from metadata column.
-            If `agg_operators` is a string then all columns will be aggregated by this operator.
-            If `agg_operators` is `None` then no aggregations will be computed. All the values which
-            data geometry intersects with will be returned.
-        data_geom_column (str): string indicating the 4326 geometry column in `data`.
-        filters (dict, optional): dictionary with either a `column` key
-            with the name of the column to filter or a `value` value with the value to filter by.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-            credentials of user account. If not provided,
-            a default credentials (if set with :py:meth:`set_default_credentials
-            <cartoframes.auth.set_default_credentials>`) will attempted to be
-            used.
-
-    Returns:
-        A dataframe as the provided one but with the variables to enrich appended to it
-
-        Note that if the geometry of the `data` you provide intersects with more than one geometry
-        in the enrichment dataset, the number of rows of the returned dataframe could be different
-        than the `data` argument number of rows.
     """
 
     data_enriched = enrich(_prepare_sql, data=data, variables=variables, agg_operators=agg_operators,
