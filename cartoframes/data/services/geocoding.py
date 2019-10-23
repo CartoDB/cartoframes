@@ -2,13 +2,13 @@
 
 from __future__ import absolute_import
 
-import re
 import hashlib
 import logging
+import re
+
 import pandas as pd
 
 from ...data import Dataset
-from ...utils.utils import remove_column_from_dataframe
 from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
 
@@ -24,12 +24,12 @@ def _lock(context, lock_id):
     sql = 'select pg_try_advisory_lock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
     locked = result and result.get('rows', [])[0].get('pg_try_advisory_lock')
-    logging.debug('LOCK %s : %s' % (lock_id, locked))
+    logging.debug('LOCK %s : %s', lock_id, locked)
     return locked
 
 
 def _unlock(context, lock_id):
-    logging.debug('UNLOCK %s' % lock_id)
+    logging.debug('UNLOCK %s', lock_id)
     sql = 'select pg_advisory_unlock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
     return result and result.get('rows', [])[0].get('pg_advisory_unlock')
@@ -112,7 +112,6 @@ def _prior_summary_query(table, street, city, state, country):
 
 
 def _first_time_summary_query(table, street, city, state, country):
-    hash_expression = _hash_expr(street, city, state, country)
     return """
       SELECT
         CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END AS gc_state,
@@ -120,9 +119,7 @@ def _first_time_summary_query(table, street, city, state, country):
       FROM {table}
       GROUP BY gc_state
     """.format(
-        table=table,
-        hash_expression=hash_expression,
-        hash_column=HASH_COLUMN
+        table=table
     )
 
 
@@ -505,13 +502,13 @@ class Geocoding(Service):
         # Internal Geocoding implementation.
         # Geocode a table's rows not already geocoded in a dataset'
 
-        logging.info('table_name = "%s"' % table_name)
-        logging.info('street = "%s"' % street)
-        logging.info('city = "%s"' % city)
-        logging.info('state = "%s"' % state)
-        logging.info('country = "%s"' % country)
-        logging.info('status = "%s"' % status)
-        logging.info('dry_run = "%s"' % dry_run)
+        logging.info('table_name = "%s"', table_name)
+        logging.info('street = "%s"', street)
+        logging.info('city = "%s"', city)
+        logging.info('state = "%s"', state)
+        logging.info('country = "%s"', country)
+        logging.info('status = "%s"', status)
+        logging.info('dry_run = "%s"', dry_run)
 
         output = {}
 
@@ -548,14 +545,14 @@ class Geocoding(Service):
 
                     add_columns += [(HASH_COLUMN, 'text')]
 
-                    logging.info("Adding columns {} if needed".format(', '.join([c[0] for c in add_columns])))
+                    logging.info("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
                         table=table_name,
                         add_columns=','.join([
                             'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
                     self._execute_query(alter_sql)
 
-                    logging.debug("Executing query: %s" % sql)
+                    logging.debug("Executing query: %s", sql)
                     result = None
                     try:
                         result = self._execute_long_running_query(sql)
@@ -585,7 +582,7 @@ class Geocoding(Service):
 
             if not aborted:
                 sql = _posterior_summary_query(table_name)
-                logging.debug("Executing result summary query: %s" % sql)
+                logging.debug("Executing result summary query: %s", sql)
                 result = self._context.execute_query(sql)
                 _set_post_summary_info(summary, result, output)
 
@@ -598,12 +595,12 @@ class Geocoding(Service):
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
         sql = _exists_column_query(dataset_name, HASH_COLUMN)
-        logging.debug("Executing check first time query: %s" % sql)
+        logging.debug("Executing check first time query: %s", sql)
         result = self._execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
             sql = _first_time_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing first time summary query: %s" % sql)
+            logging.debug("Executing first time summary query: %s", sql)
         else:
             sql = _prior_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing summary query: %s" % sql)
+            logging.debug("Executing summary query: %s", sql)
         return self._execute_query(sql)

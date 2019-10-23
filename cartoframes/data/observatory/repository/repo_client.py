@@ -56,7 +56,7 @@ class RepoClient(object):
 
     def get_geographies_joined_datasets(self, filters=None):
         query = 'SELECT DISTINCT g.* FROM geographies_public g, datasets_public t'
-        return self._run_query(query,  filters, ['g.id = t.geography_id'])
+        return self._run_query(query, filters, ['g.id = t.geography_id'])
 
     def get_datasets(self, filters=None):
         query = 'SELECT t.* FROM datasets_public t'
@@ -90,7 +90,7 @@ class RepoClient(object):
 
     @staticmethod
     def _generate_condition(key, value):
-        if type(value) == list:
+        if isinstance(value, list):
             value_list = ','.join(["'" + v + "'" for v in value])
             return "t.{} IN ({})".format(key, value_list)
 

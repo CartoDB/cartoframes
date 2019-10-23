@@ -9,9 +9,9 @@ from ..clients.bigquery_client import BigQueryClient
 from ...auth import Credentials, defaults
 
 try:
-    from abc import ABC, abstractmethod
+    from abc import ABC
 except ImportError:
-    from abc import ABCMeta, abstractmethod
+    from abc import ABCMeta
     ABC = ABCMeta('ABC', (object,), {'__slots__': ()})
 
 _WORKING_PROJECT = 'carto-do-customers'

@@ -3,14 +3,14 @@ from __future__ import absolute_import
 import pandas
 import geopandas
 
-from .source import Source
-from .style import Style
-from .popup import Popup
-from .legend import Legend
-from .widget_list import WidgetList
-from .legend_list import LegendList
 from ..data import Dataset
 from ..utils.utils import merge_dicts
+from .legend import Legend
+from .legend_list import LegendList
+from .popup import Popup
+from .source import Source
+from .style import Style
+from .widget_list import WidgetList
 
 
 class Layer(object):
@@ -189,6 +189,7 @@ def _set_popup(popup):
     else:
         return Popup()
 
+
 def _set_legend(legend):
     if isinstance(legend, (Legend, LegendList)):
         return legend
@@ -198,6 +199,7 @@ def _set_legend(legend):
         return LegendList(legend)
     else:
         return Legend('')
+
 
 def _set_widgets(widgets):
     if isinstance(widgets, (dict, list)):

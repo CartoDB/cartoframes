@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 
 import collections
-import numpy as np
 from warnings import warn
 
+import numpy as np
 from carto.exceptions import CartoException
 
 from . import constants
 from .basemaps import Basemaps
+from .html import HTMLMap
 from .kuviz import KuvizPublisher
-from .html.HTMLMap import HTMLMap
 from ..utils.utils import get_center
 
 WORLD_BOUNDS = [[-180, -90], [180, 90]]
@@ -226,13 +226,12 @@ class Map(object):
             }
 
     def _repr_html_(self):
-        self._htmlMap = HTMLMap()
+        self._html_map = HTMLMap()
 
-        self._htmlMap.set_content(
+        self._html_map.set_content(
             layers=self.layer_defs,
             bounds=self.bounds,
             size=self.size,
-            viewport=self.viewport,
             camera=self.camera,
             basemap=self.basemap,
             default_legend=self.default_legend,
@@ -244,7 +243,7 @@ class Map(object):
             _carto_vl_path=self._carto_vl_path,
             _airship_path=self._airship_path)
 
-        return self._htmlMap.html
+        return self._html_map.html
 
     def get_content(self):
         has_legends = any(layer['legend'] for layer in self.layer_defs) or self.default_legend
@@ -340,7 +339,6 @@ class Map(object):
             layers=_get_layer_defs(self._publisher.get_layers()),
             bounds=self.bounds,
             size=None,
-            viewport=self.viewport,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=False,

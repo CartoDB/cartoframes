@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
+from .. import defaults
 from ..layer import Layer
 
-from .. import defaults
 
 def size_category_layer(
         source, value, title='', top=5, cat=None,

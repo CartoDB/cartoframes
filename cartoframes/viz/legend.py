@@ -52,7 +52,7 @@ class Legend(object):
         if isinstance(f_arg, str):
             self._init_legend(kwargs, f_arg)
         elif f_arg is None:
-            self._init_legend()
+            self._init_legend(None)
         elif isinstance(f_arg, dict):
             self._init_legend(f_arg)
         else:
@@ -130,3 +130,5 @@ class Legend(object):
             return 'color'
         elif _type.startswith('size'):
             return 'width'
+        else:
+            return None

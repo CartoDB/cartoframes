@@ -8,7 +8,6 @@ from .geography import Geography
 from .provider import Provider
 from .variable import Variable
 
-
 __all__ = [
     'Catalog',
     'Category',

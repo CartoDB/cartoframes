@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from .credentials import Credentials
 import re
 
+from .credentials import Credentials
 
 _default_credentials = None
 

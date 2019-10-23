@@ -1,8 +1,8 @@
 import re
 import sys
-import binascii as ba
 import geojson
 import geopandas
+import binascii as ba
 
 from copy import deepcopy
 from warnings import warn
@@ -42,7 +42,7 @@ ENC_WKB_BHEX = 'wkb-bhex'
 ENC_WKT = 'wkt'
 ENC_EWKT = 'ewkt'
 
-if (sys.version_info < (3, 0)):
+if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
 
@@ -52,6 +52,7 @@ def compute_query(dataset):
             schema=dataset.schema or dataset._get_schema() or 'public',
             table=dataset.table_name
         )
+    return ''
 
 
 def compute_geodataframe(dataset):
@@ -83,12 +84,14 @@ def geodataframe_from_dataframe(dataframe):
                                      ', '.join(LNG_COLUMN_NAMES)
                                  ))
         return geopandas.GeoDataFrame(dataframe)
+    return None
 
 
 def _get_column(df, options):
     for name in options:
         if name in df:
             return df[name]
+    return None
 
 
 def _warn_new_geometry_column(df):
@@ -157,7 +160,7 @@ def detect_encoding_type(input_geom):
         else:
             srid, geom = _extract_srid(input_geom)
             if not geom:
-                return
+                return None
             if srid:
                 return ENC_EWKT
             else:
@@ -174,6 +177,8 @@ def detect_encoding_type(input_geom):
             return ENC_WKB_BHEX
         except Exception:
             return ENC_WKB
+
+    return None
 
 
 def _load_wkb(geom):
@@ -221,8 +226,8 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-def wkt_to_geojson(wkt):
-    shapely_geom = _load_wkt(wkt)
+def wkt_to_geojson(wkt_input):
+    shapely_geom = _load_wkt(wkt_input)
     geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
 
     return str(geojson_geometry.geometry)

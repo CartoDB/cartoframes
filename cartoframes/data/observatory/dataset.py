@@ -18,6 +18,7 @@ from . import utils
 
 DATASET_TYPE = 'dataset'
 
+
 class CatalogDataset(CatalogEntity):
     entity_repo = get_dataset_repo()
 

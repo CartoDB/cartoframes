@@ -31,7 +31,7 @@ class LegendList(object):
             return legend_list
         if isinstance(legends, dict):
             return [Legend(legends)]
-        elif isinstance(legends, legend):
+        elif isinstance(legends, Legend):
             return [legends]
         else:
             return []

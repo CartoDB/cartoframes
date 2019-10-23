@@ -1,4 +1,0 @@
-pytest
-matplotlib
-coveralls
-mock

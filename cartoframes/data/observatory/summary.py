@@ -69,10 +69,10 @@ def quantiles(data):
 
 
 def top_values(data):
+    import matplotlib.pyplot as plt
+
     if not data:
         return
-
-    import matplotlib.pyplot as plt
 
     top_values = pd.DataFrame(data['top_values'])
 
@@ -105,6 +105,7 @@ def geom_coverage(geography_id):
 
 
 def histogram(data):
+    import matplotlib.pyplot as plt
 
     range_element = [round(element['min_range'], 2) for element in data['histogram']]
     count = [element['count'] for element in data['histogram']]

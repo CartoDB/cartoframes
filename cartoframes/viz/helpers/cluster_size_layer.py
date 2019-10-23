@@ -1,10 +1,10 @@
-from __future__ import absolute_import
-from __future__ import division
+from __future__ import absolute_import, division
 
 from carto.exceptions import CartoException
-from ..constants import CLUSTER_OPERATIONS
-from ..layer import Layer
+
 from .. import defaults
+from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
+from ..layer import Layer
 
 
 def cluster_size_layer(
@@ -54,8 +54,8 @@ def cluster_size_layer(
         source,
         style={
             'point': {
-                'width': 'ramp(linear({0}, viewportMIN({1}), viewportMAX({2})), [{3}])'.format(
-                    cluster_operation, cluster_operation, cluster_operation, breakpoints),
+                'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
+                    cluster_operation, breakpoints),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#FFB927', opacity or '0.8'),
                 'strokeWidth': '{0}'.format(
@@ -124,7 +124,7 @@ def _get_cluster_operation(operation, value):
 
 
 def _check_valid_operation(operation):
-    valid_operations = CLUSTER_OPERATIONS.keys()
+    valid_operations = CLUSTER_KEYS
 
     if operation not in valid_operations:
         err = '"{0}" is not a valid operation. Valid operations are {1}'
