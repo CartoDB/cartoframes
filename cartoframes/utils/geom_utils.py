@@ -1,10 +1,12 @@
 import re
 import sys
 import binascii as ba
-from warnings import warn
-from copy import deepcopy
 import geojson
 import geopandas
+
+from copy import deepcopy
+from warnings import warn
+from shapely import wkb, wkt, geometry, geos
 
 from carto.exceptions import CartoException
 
@@ -101,7 +103,6 @@ def _compute_geometry_from_geom(geom_column):
 
 
 def _compute_geometry_from_latlng(lat, lng):
-    from shapely import geometry
     return [geometry.Point(xy) for xy in zip(lng, lat)]
 
 
@@ -147,9 +148,7 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
-    from shapely.geometry.base import BaseGeometry
-
-    if isinstance(input_geom, BaseGeometry):
+    if isinstance(input_geom, geometry.base.BaseGeometry):
         return ENC_SHAPELY
 
     if isinstance(input_geom, str):
@@ -179,28 +178,24 @@ def detect_encoding_type(input_geom):
 
 def _load_wkb(geom):
     """Load WKB or EWKB geometry."""
-    from shapely.wkb import loads
-    return loads(geom)
+    return wkb.loads(geom)
 
 
 def _load_wkb_hex(geom):
     """Load WKB_HEX or EWKB_HEX geometry."""
-    from shapely.wkb import loads
-    return loads(geom, hex=True)
+    return wkb.loads(geom, hex=True)
 
 
 def _load_wkb_bhex(geom):
     """Load WKB_BHEX or EWKB_BHEX geometry.
     The geom must be converted to WKB/EWKB before loading.
     """
-    from shapely.wkb import loads
-    return loads(ba.unhexlify(geom))
+    return wkb.loads(ba.unhexlify(geom))
 
 
 def _load_wkt(geom):
     """Load WKT geometry."""
-    from shapely.wkt import loads
-    return loads(geom)
+    return wkt.loads(geom)
 
 
 def _load_ewkt(egeom):
@@ -210,8 +205,7 @@ def _load_ewkt(egeom):
     srid, geom = _extract_srid(egeom)
     ogeom = _load_wkt(geom)
     if srid:
-        from shapely.geos import lgeos
-        lgeos.GEOSSetSRID(ogeom._geom, int(srid))
+        geos.lgeos.GEOSSetSRID(ogeom._geom, int(srid))
     return ogeom
 
 
@@ -235,9 +229,8 @@ def wkt_to_geojson(wkt):
 
 
 def geojson_to_wkt(geojson_str):
-    from shapely.geometry import shape
     geojson_geom = geojson.loads(geojson_str)
-    wkt_geometry = shape(geojson_geom)
+    wkt_geometry = geometry.shape(geojson_geom)
 
     shapely_geom = _load_wkt(wkt_geometry.wkt)
 
