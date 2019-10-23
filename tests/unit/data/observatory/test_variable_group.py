@@ -13,7 +13,7 @@ except ImportError:
     from mock import patch
 
 
-class TestVariableGroup():
+class TestVariableGroup(object):
 
     @patch.object(VariableGroupRepository, 'get_by_id')
     def test_get_variable_group_by_id(self, mocked_repo):

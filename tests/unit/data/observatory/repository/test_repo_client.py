@@ -1,5 +1,3 @@
-import unittest
-
 from cartoframes.data.clients import SQLClient
 from cartoframes.data.observatory.repository.repo_client import RepoClient
 
@@ -11,7 +9,7 @@ except ImportError:
     from mock import patch
 
 
-class TestRepoClient(unittest.TestCase):
+class TestRepoClient(object):
 
     @patch.object(SQLClient, 'query')
     def test_run_query_with_one_filter(self, mocked_client):

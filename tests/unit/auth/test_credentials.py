@@ -1,6 +1,5 @@
 """Unit tests for cartoframes.keys"""
 import os
-
 import pytest
 
 from cartoframes.auth import Credentials

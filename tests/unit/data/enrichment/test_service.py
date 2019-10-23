@@ -14,7 +14,7 @@ except ImportError:
     from mock import Mock
 
 
-class TestEnrichmentService():
+class TestEnrichmentService(object):
     def setup_method(self):
         self.original_init_client = BigQueryClient._init_client
         BigQueryClient._init_client = Mock(return_value=True)

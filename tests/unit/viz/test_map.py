@@ -10,6 +10,7 @@ from cartoframes.auth import Credentials
 
 from .utils import build_geojson
 
+from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
 try:
@@ -196,6 +197,7 @@ class TestMapPublication(unittest.TestCase):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
+        self._context_mock = ContextMock()
 
         self.test_geojson = {
             "type": "FeatureCollection",

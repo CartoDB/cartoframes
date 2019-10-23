@@ -1,7 +1,5 @@
-import unittest
-
-from cartoframes.data.clients.auth_api_client import AuthAPIClient
 from cartoframes.data import Dataset
+from cartoframes.data.clients.auth_api_client import AuthAPIClient
 
 
 try:
@@ -27,7 +25,7 @@ class APIKeyManagerMock():
         return APIKeyMock(name)
 
 
-class TestSQLClient(unittest.TestCase):
+class TestSQLClient(object):
     @patch('cartoframes.data.clients.auth_api_client._get_api_key_manager')
     def test_instantiation(self, get_api_key_manager_mock):
         get_api_key_manager_mock.return_value = APIKeyManagerMock()

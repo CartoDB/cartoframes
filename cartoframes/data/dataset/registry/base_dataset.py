@@ -34,7 +34,6 @@ class BaseDataset():
         self._table_name = None
         self._schema = None
         self._dataset_info = None
-        self._query = None
 
     @staticmethod
     @abstractmethod

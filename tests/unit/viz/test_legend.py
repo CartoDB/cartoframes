@@ -87,20 +87,21 @@ class TestLegend(object):
 
     def test_wrong_type(self):
         """Legend should raise an error if legend type is not valid"""
-        msg = 'Legend type "xxx" is not valid. Valid legend types are: default, color-bins, '
-        'color-bins-line, color-bins-point, color-bins-polygon, color-category, '
-        'color-category-line, color-category-point, color-category-polygon, '
-        'color-continuous, color-continuous-line, color-continuous-point, '
-        'color-continuous-polygon, size-bins, size-bins-point, size-continuous, '
-        'size-continuous-point.'
+        msg = 'Legend type "xxx" is not valid. Valid legend types are: default, ' +\
+            'color-bins, color-bins-line, color-bins-point, color-bins-polygon, ' + \
+            'color-category, color-category-line, color-category-point, color-category-polygon, ' + \
+            'color-continuous, color-continuous-line, color-continuous-point, color-continuous-polygon, ' + \
+            'size-bins, size-bins-line, size-bins-point, ' + \
+            'size-category, size-category-line, size-category-point, ' + \
+            'size-continuous, size-continuous-line, size-continuous-point.'
         with pytest.raises(ValueError) as e:
             Legend({'type': 'xxx'}).get_info()
         assert str(e.value) == msg
 
     def test_wrong_prop(self):
         """Legend should raise an error if legend prop is not valid"""
-        msg = 'Legend property "xxx" is not valid. Valid legend properties are: '
-        'color, strokeColor, width, strokeWidth.'
+        msg = 'Legend property "xxx" is not valid. Valid legend properties are: ' + \
+            'color, strokeColor, width, strokeWidth.'
         with pytest.raises(ValueError) as e:
             Legend({'type': 'color-category', 'prop': 'xxx'}).get_info()
         assert str(e.value) == msg
