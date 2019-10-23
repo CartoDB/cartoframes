@@ -72,7 +72,7 @@ def set_default_credentials(
 
             # set default credentials from file
             set_default_credentials(Credentials.from_file())
-  
+
 
     Example:
 
