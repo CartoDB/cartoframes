@@ -5,14 +5,17 @@ from __future__ import absolute_import
 import os
 import re
 import sys
+import json
 import base64
+import decimal
 import hashlib
 import requests
 import geopandas
 import numpy as np
 
 from functools import wraps
-from warnings import filterwarnings, catch_warnings
+from warnings import catch_warnings, filterwarnings
+
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -81,6 +84,7 @@ def minify_sql(lines):
 def pgquote(string):
     """single-quotes a string if not None, else returns null"""
     return '\'{}\''.format(string) if string else 'null'
+
 
 def temp_ignore_warnings(func):
     """Temporarily ignores warnings like those emitted by the carto python sdk
@@ -159,8 +163,8 @@ def debug_print(verbose=0, **kwargs):
         if isinstance(value, requests.Response):
             str_value = ("status_code: {status_code}, "
                          "content: {content}").format(
-                status_code=value.status_code,
-                content=value.content)
+                             status_code=value.status_code,
+                             content=value.content)
         else:
             str_value = str(value)
         if verbose < 2 and len(str_value) > 300:
@@ -180,6 +184,7 @@ def get_query_geom_type(context, query):
         st_geom_type = response.get('rows')[0].get('geom_type')
         if st_geom_type:
             return map_geom_type(st_geom_type[3:])
+    return None
 
 
 def get_query_bounds(context, query):
@@ -195,6 +200,7 @@ def get_query_bounds(context, query):
     response = context.execute_query(extent_query, do_post=False)
     if response and response.get('rows') and len(response.get('rows')) > 0:
         return response.get('rows')[0].get('bounds')
+    return None
 
 
 def load_geojson(input_data):
@@ -239,9 +245,16 @@ def get_geodataframe_bounds(data):
     return [[xmin, ymin], [xmax, ymax]]
 
 
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        return super(CustomJSONEncoder, self).default(o)
+
+
 def encode_geodataframe(data):
     filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json()
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder)
     encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
 
     return encoded_data

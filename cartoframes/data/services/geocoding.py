@@ -2,15 +2,16 @@
 
 from __future__ import absolute_import
 
-import re
 import hashlib
 import logging
+import re
+
 import pandas as pd
 
 from ...data import Dataset
-from ...utils.utils import remove_column_from_dataframe
 from ...utils.geom_utils import geodataframe_from_dataframe
 from .service import Service
+from ...data.clients import SQLClient
 
 HASH_COLUMN = 'carto_geocode_hash'
 BATCH_SIZE = 200
@@ -24,12 +25,12 @@ def _lock(context, lock_id):
     sql = 'select pg_try_advisory_lock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
     locked = result and result.get('rows', [])[0].get('pg_try_advisory_lock')
-    logging.debug('LOCK %s : %s' % (lock_id, locked))
+    logging.debug('LOCK %s : %s', lock_id, locked)
     return locked
 
 
 def _unlock(context, lock_id):
-    logging.debug('UNLOCK %s' % lock_id)
+    logging.debug('UNLOCK %s', lock_id)
     sql = 'select pg_advisory_unlock({id})'.format(id=lock_id)
     result = context.execute_query(sql)
     return result and result.get('rows', [])[0].get('pg_advisory_unlock')
@@ -58,7 +59,14 @@ def _column_name(col):
         return 'NULL'
 
 
-def _hash_expr(street, city, state, country):
+def _prefixed_column_or_value(attr, prefix):
+    if prefix and attr is not None and attr[0] != "'":
+        return "{}.{}".format(prefix, attr)
+    return attr
+
+
+def _hash_expr(street, city, state, country, table_prefix=None):
+    street, city, state, country = (_prefixed_column_or_value(v, table_prefix) for v in (street, city, state, country))
     hashed_expr = " || '<>' || ".join([street, city or "''", state or "''", country or "''"])
     return "md5({hashed_expr})".format(hashed_expr=hashed_expr)
 
@@ -112,7 +120,6 @@ def _prior_summary_query(table, street, city, state, country):
 
 
 def _first_time_summary_query(table, street, city, state, country):
-    hash_expression = _hash_expr(street, city, state, country)
     return """
       SELECT
         CASE WHEN the_geom IS NULL THEN 'new_nongeocoded' ELSE 'new_geocoded' END AS gc_state,
@@ -120,9 +127,7 @@ def _first_time_summary_query(table, street, city, state, country):
       FROM {table}
       GROUP BY gc_state
     """.format(
-        table=table,
-        hash_expression=hash_expression,
-        hash_column=HASH_COLUMN
+        table=table
     )
 
 
@@ -376,15 +381,15 @@ class Geocoding(Service):
     def __init__(self, credentials=None):
         super(Geocoding, self).__init__(credentials=credentials, quota_service=QUOTA_SERVICE)
 
-    def geocode(self, dataset, street,
+    def geocode(self, input_data, street,
                 city=None, state=None, country=None,
                 status=DEFAULT_STATUS,
                 table_name=None, if_exists=Dataset.IF_EXISTS_FAIL,
-                dry_run=False):
+                dry_run=False, cached=None):
         """Geocode a dataset
 
         Args:
-            dataset (Dataset, DataFrame): a Dataset or DataFrame object to be geocoded.
+            input_data (Dataset, DataFrame): a Dataset or DataFrame object to be geocoded.
             street (str): name of the column containing postal addresses
             city (dict, optional): dictionary with either a `column` key
                 with the name of a column containing the addresses' city names or
@@ -410,6 +415,9 @@ class Geocoding(Service):
             if_exists (str, optional): Behavior for creating new datasets, only applicable
                 if table_name isn't None;
                 Options are 'fail', 'replace', or 'append'. Defaults to 'fail'.
+            cached (str, optional): name of a table used cache geocoding results. Can only
+                be used with DataFrames or queries. This parameter is not compatbile
+                with table_name.
             dry_run (bool, optional): no actual geocoding will be performed (useful to
                 check the needed quota)
 
@@ -423,12 +431,22 @@ class Geocoding(Service):
             unchanged data in future calls to geocode.
         """
 
-        input_dataframe = None
-        if isinstance(dataset, pd.DataFrame):
-            input_dataframe = dataset
-            dataset = Dataset(input_dataframe)
+        is_dataframe = False
+        if isinstance(input_data, pd.DataFrame):
+            is_dataframe = True
+            dataset = Dataset(input_data)
+        elif isinstance(input_data, Dataset):
+            dataset = input_data
+        else:
+            raise ValueError('Invalid input data type')
 
         self.columns = dataset.get_column_names()
+
+        if cached:
+            if table_name:
+                raise ValueError('tablecached geocoding is not compatible with parameters "table_name"')
+            return self._cached_geocode(
+                input_data, cached, street, city=city, state=state, country=country, dry_run=dry_run)
 
         city, state, country = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
 
@@ -447,11 +465,11 @@ class Geocoding(Service):
         self._cleanup_geocoded_table(input_table_name, is_temporary)
 
         result = result_dataset
-        if input_dataframe is not None:
+        if is_dataframe:
             # Note that we return a dataframe whenever the input is dataframe,
             # even if we have uploaded it to a table (table_name is not None).
             if dry_run:
-                result = input_dataframe
+                result = input_data
             else:
                 result = result_dataset.dataframe  # if temporary it should have been downloaded
                 if result is None:
@@ -460,6 +478,60 @@ class Geocoding(Service):
                 result = geodataframe_from_dataframe(result)
 
         return self.result(result, metadata=result_info)
+
+    def _cached_geocode(self, input_data, table_name, street, city=None, state=None, country=None, dry_run=False):
+        """
+        Geocode a dataframe caching results into a table.
+        If the same dataframe if geocoded repeatedly no credits will be spent.
+        But note there is a time overhead related to uploading the dataframe to a
+        temporary table for checking for changes.
+        """
+        dataset_cache = Dataset(table_name, credentials=self._credentials)
+
+        if dataset_cache.exists():
+            if HASH_COLUMN not in dataset_cache.get_column_names():
+                raise ValueError('Cache table {} exists but is not a valid geocode table'.format(table_name))
+
+        if HASH_COLUMN in self.columns or not dataset_cache.exists():
+            return self.geocode(
+                input_data, street=street, city=city, state=state,
+                country=country, table_name=table_name, dry_run=dry_run, if_exists=Dataset.IF_EXISTS_REPLACE)
+
+        tmp_table_name = self._new_temporary_table_name()
+        input_dataframe = False
+        if isinstance(input_data, pd.DataFrame):
+            input_dataframe = True
+            input_data = Dataset(input_data)
+        else:
+            if input_data.is_remote() and input_data.table_name:
+                raise ValueError('cached geocoding cannot be used with tables')
+        input_data.upload(table_name=tmp_table_name, credentials=self._credentials)
+
+        self._execute_query(
+            """
+            ALTER TABLE {tmp_table} ADD COLUMN IF NOT EXISTS {hash} text
+            """.format(tmp_table=tmp_table_name, hash=HASH_COLUMN))
+
+        hcity, hstate, hcountry = [_column_or_value_arg(arg, self.columns) for arg in [city, state, country]]
+        hash_expr = _hash_expr(street, hcity, hstate, hcountry, table_prefix=tmp_table_name)
+        self._execute_query(
+            """
+            UPDATE {tmp_table} SET {hash}={table}.{hash}, the_geom={table}.the_geom
+            FROM {table} WHERE {hash_expr}={table}.{hash}
+            """.format(tmp_table=tmp_table_name, table=table_name, hash=HASH_COLUMN, hash_expr=hash_expr))
+
+        sql_client = SQLClient(self._credentials)
+        sql_client.drop_table(table_name)
+        sql_client.rename_table(tmp_table_name, table_name)
+        # TODO: should remove the cartodb_id column from the result
+        # TODO: refactor to share code with geocode() and call self._geocode() here instead
+        # actually to keep hashing knowledge encapsulated (AFW) this should be handled by
+        # _geocode using an additional parameter for an input table
+        dataset = Dataset(table_name, credentials=self._credentials)
+        result, meta = self.geocode(dataset, street=street, city=city, state=state, country=country, dry_run=dry_run)
+        if input_dataframe:
+            result = geodataframe_from_dataframe(result.download())
+        return self.result(result, metadata=meta)
 
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
@@ -505,13 +577,13 @@ class Geocoding(Service):
         # Internal Geocoding implementation.
         # Geocode a table's rows not already geocoded in a dataset'
 
-        logging.info('table_name = "%s"' % table_name)
-        logging.info('street = "%s"' % street)
-        logging.info('city = "%s"' % city)
-        logging.info('state = "%s"' % state)
-        logging.info('country = "%s"' % country)
-        logging.info('status = "%s"' % status)
-        logging.info('dry_run = "%s"' % dry_run)
+        logging.info('table_name = "%s"', table_name)
+        logging.info('street = "%s"', street)
+        logging.info('city = "%s"', city)
+        logging.info('state = "%s"', state)
+        logging.info('country = "%s"', country)
+        logging.info('status = "%s"', status)
+        logging.info('dry_run = "%s"', dry_run)
 
         output = {}
 
@@ -548,14 +620,14 @@ class Geocoding(Service):
 
                     add_columns += [(HASH_COLUMN, 'text')]
 
-                    logging.info("Adding columns {} if needed".format(', '.join([c[0] for c in add_columns])))
+                    logging.info("Adding columns %s if needed", ', '.join([c[0] for c in add_columns]))
                     alter_sql = "ALTER TABLE {table} {add_columns};".format(
                         table=table_name,
                         add_columns=','.join([
                             'ADD COLUMN IF NOT EXISTS {} {}'.format(name, type) for name, type in add_columns]))
                     self._execute_query(alter_sql)
 
-                    logging.debug("Executing query: %s" % sql)
+                    logging.debug("Executing query: %s", sql)
                     result = None
                     try:
                         result = self._execute_long_running_query(sql)
@@ -585,7 +657,7 @@ class Geocoding(Service):
 
             if not aborted:
                 sql = _posterior_summary_query(table_name)
-                logging.debug("Executing result summary query: %s" % sql)
+                logging.debug("Executing result summary query: %s", sql)
                 result = self._context.execute_query(sql)
                 _set_post_summary_info(summary, result, output)
 
@@ -598,12 +670,12 @@ class Geocoding(Service):
 
     def _execute_prior_summary(self, dataset_name, street, city, state, country):
         sql = _exists_column_query(dataset_name, HASH_COLUMN)
-        logging.debug("Executing check first time query: %s" % sql)
+        logging.debug("Executing check first time query: %s", sql)
         result = self._execute_query(sql)
         if not result or result.get('total_rows', 0) == 0:
             sql = _first_time_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing first time summary query: %s" % sql)
+            logging.debug("Executing first time summary query: %s", sql)
         else:
             sql = _prior_summary_query(dataset_name, street, city, state, country)
-            logging.debug("Executing summary query: %s" % sql)
+            logging.debug("Executing summary query: %s", sql)
         return self._execute_query(sql)

@@ -1,9 +1,12 @@
-from carto.datasets import DatasetManager
 from carto.auth import APIKeyAuthClient
+from carto.datasets import DatasetManager
 
-from ..data import Dataset
+from .. import __version__
 from ..auth import get_default_credentials
-from ..__version__ import __version__
+from ..data import Dataset
+
+from warnings import filterwarnings
+filterwarnings("ignore", category=FutureWarning, module="carto")
 
 
 def tables(credentials=None):

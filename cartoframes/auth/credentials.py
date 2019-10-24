@@ -1,16 +1,16 @@
 """Credentials management for CARTOframes usage."""
 
+import json
 import os
 import sys
-import json
-import appdirs
 import warnings
 
-from carto.exceptions import CartoException
+import appdirs
 from carto.auth import APIKeyAuthClient
 from carto.do_token import DoTokenManager
+from carto.exceptions import CartoException
 
-from ..__version__ import __version__
+from .. import __version__
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
@@ -171,15 +171,15 @@ class Credentials(object):
         if config_file is None:
             config_file = _DEFAULT_PATH
 
-            """create directory if not exists"""
+            # create directory if not exists
             if not os.path.exists(_USER_CONFIG_DIR):
                 os.makedirs(_USER_CONFIG_DIR)
 
-        with open(config_file, 'w') as f:
-            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, f)
+        with open(config_file, 'w') as _file:
+            json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
 
     @classmethod
-    def delete(self, config_file=None):
+    def delete(cls, config_file=None):
         """Deletes the credentials file specified in `config_file`. If no
         file is specified, it deletes the default user credential file
         (`cartocreds.json`)

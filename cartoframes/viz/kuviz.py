@@ -1,16 +1,17 @@
-from copy import deepcopy
-from warnings import warn
+from __future__ import absolute_import
+
 import time
+from copy import deepcopy
+from warnings import filterwarnings, warn
 
 from carto.kuvizs import KuvizManager
 from carto.exceptions import CartoException
 
-from ..auth import get_default_credentials
 from .source import Source
+from ..auth import get_default_credentials
 from ..utils.columns import normalize_name
 from ..data.clients.auth_api_client import AuthAPIClient
 
-from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
 
 DEFAULT_PUBLIC = 'default_public'
@@ -28,8 +29,8 @@ class KuvizPublisher(object):
     @staticmethod
     def all(credentials=None):
         auth_client = _create_auth_client(credentials or get_default_credentials())
-        km = _get_kuviz_manager(auth_client)
-        kuvizs = km.all()
+        kmanager = _get_kuviz_manager(auth_client)
+        kuvizs = kmanager.all()
         return [kuviz_to_dict(kuviz) for kuviz in kuvizs]
 
     def get_layers(self):
@@ -93,15 +94,17 @@ class KuvizPublisher(object):
     def _add_layers_credentials(self):
         for layer in self._layers:
             layer.credentials = {
-                'username': layer.source.dataset.credentials.username,
+                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                # That's why 'user' is used by default if username is empty.
+                'username': layer.source.dataset.credentials.username or 'user',
                 'api_key': self._maps_api_key,
                 'base_url': layer.source.dataset.credentials.base_url
             }
 
 
 def _create_kuviz(html, name, auth_client, password=None):
-    km = _get_kuviz_manager(auth_client)
-    return km.create(html=html, name=name, password=password)
+    kmanager = _get_kuviz_manager(auth_client)
+    return kmanager.create(html=html, name=name, password=password)
 
 
 def _create_auth_client(credentials):
