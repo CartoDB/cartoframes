@@ -44,6 +44,6 @@ Cool! Now that you have a small dashboard to play with, let's publish it to CART
 final_map.publish('arlington_bikeshare_spots')
 ```
 
-![Bikeshare data](../../img/guides/quickstart/share_output.png)
+![Share output information](../../img/guides/quickstart/share_output.png)
 
 Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific guides, check the [reference](/developers/cartoframes/reference/) to know everything about a class or a method or check the notebook [examples](/developers/cartoframes/examples/).
