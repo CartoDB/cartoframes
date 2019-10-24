@@ -24,7 +24,7 @@ def set_default_credentials(
           instance can be used in place of a `username | base_url`/`api_key` combination.
         base_url (str, optional): Base URL of CARTO user account. Cloud-based accounts
           should use the form ``https://{username}.carto.com`` (e.g.,
-          https://eschbacher.carto.com for user ``eschbacher``) whether on
+          https://johnsmith.carto.com for user ``johnsmith``) whether on
           a personal or multi-user account. On-premises installation users
           should ask their admin.
         api_key (str, optional): CARTO API key. Depending on the application,
@@ -83,14 +83,14 @@ def set_default_credentials(
             from cartoframes.auth import set_default_credentials
 
             set_default_credentials(
-                username='your_user_name',
+                username='johnsmith',
                 api_key='your api key'
             )
 
             # or
 
             set_default_credentials(
-                'your_user_name',
+                'johnsmith',
                 'your api key'
             )
 
@@ -104,7 +104,7 @@ def set_default_credentials(
         .. code::
 
             from cartoframes.auth import set_default_credentials
-            set_default_credentials('your_user_name')
+            set_default_credentials('johnsmith')
 
         From a pair ``base_url``, ``api_key``.
 
@@ -112,12 +112,12 @@ def set_default_credentials(
 
             from cartoframes.auth import set_default_credentials
             set_default_credentials(
-                base_url='https://your_user_name.carto.com',
+                base_url='https://johnsmith.carto.com',
                 api_key='your api key'
             )
             # or
             set_default_credentials(
-                'https://your_user_name.carto.com',
+                'https://johnsmith.carto.com',
                 'your api key'
             )
 
@@ -127,7 +127,7 @@ def set_default_credentials(
         .. code::
 
             from cartoframes.auth import set_default_credentials
-            set_default_credentials('https://your_user_name.carto.com')
+            set_default_credentials('https://johnsmith.carto.com')
 
         From a :py:class:`Credentials <cartoframes.auth.Credentials>` class.
 
@@ -135,7 +135,7 @@ def set_default_credentials(
 
             from cartoframes.auth import Credentials, set_default_credentials
             credentials = Credentials(
-                base_url='https://your_user_name.carto.com',
+                base_url='https://johnsmith.carto.com',
                 api_key='your api key'
             )
             set_default_credentials(credentials)
