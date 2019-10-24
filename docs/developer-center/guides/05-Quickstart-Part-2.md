@@ -21,7 +21,7 @@ First, you have to upload the data used by your maps to CARTO using the `Dataset
 ```py
 from cartoframes.data import Dataset
 
-Dataset(bikeshare_df).upload(table_name='arlington_bikeshare', credentials=creds, if_exists='replace')
+Dataset(bikeshare_df).upload(table_name='arlington_bikeshare', if_exists='replace')
 Dataset(census_track_df).upload(table_name='arlington_census_track', credentials=creds, if_exists='replace')
 ```
 
