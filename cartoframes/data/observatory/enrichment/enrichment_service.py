@@ -123,7 +123,7 @@ class EnrichmentService(object):
         return agg_operators_result
 
     def _get_tables_meta(self, variables):
-        tables_meta = defaultdict(defaultdict(list))
+        tables_meta = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
             variable_name = variable.column_name
