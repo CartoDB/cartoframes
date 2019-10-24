@@ -4,5 +4,5 @@ Auth
 .. automodule:: cartoframes.auth
     :members:
     :member-order: bysource
-    :undoc-members:
+    :no-undoc-members:
     :show-inheritance:

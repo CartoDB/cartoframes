@@ -6,7 +6,7 @@ from .category import Category
 from .country import Country
 from .geography import Geography
 from .subscriptions import Subscriptions
-from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER
+from .repository.constants import COUNTRY_FILTER, CATEGORY_FILTER, GEOGRAPHY_FILTER, PROVIDER_FILTER
 
 from ....auth import Credentials, defaults
 
@@ -110,6 +110,21 @@ class Catalog(object):
             filter_value = geography.id
 
         self.filters[GEOGRAPHY_FILTER] = filter_value
+        return self
+
+    def provider(self, provider_id):
+        """Add a provider filter to the current Catalog instance
+
+        Args:
+            provider_id (str):
+              Id value of the provider to be used for filtering the Catalog.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
+
+        """
+
+        self.filters[PROVIDER_FILTER] = provider_id
         return self
 
     def clear_filters(self):
