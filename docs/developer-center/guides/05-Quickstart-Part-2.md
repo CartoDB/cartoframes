@@ -36,7 +36,7 @@ final_map = Map([
 final_map
 ```
 
-![Combine Layers with Widget](../img/guides/quickstart/combine_layers_widget.png)
+![Combine Layers with Widget](../../img/guides/quickstart/combine_layers_widget.png)
 
 Cool! Now that you have a small dashboard to play with, let's publish it to CARTO so you are able to share it with anyone. To do this, you just need to call the [publish](/developers/cartoframes/examples/#example-publish-public-visualization) method from the `Map` class:
 
@@ -44,6 +44,6 @@ Cool! Now that you have a small dashboard to play with, let's publish it to CART
 final_map.publish('arlington_bikeshare_spots')
 ```
 
-![Bikeshare data](../img/guides/quickstart/share_output.png)
+![Bikeshare data](../../img/guides/quickstart/share_output.png)
 
 Congratulations! You have finished this guide and have a sense about how CARTOframes can speed up your workflow. To continue learning, you can check the specific guides, check the [reference](/developers/cartoframes/reference/) to know everything about a class or a method or check the notebook [examples](/developers/cartoframes/examples/).

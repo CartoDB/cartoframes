@@ -91,7 +91,7 @@ from cartoframes.viz import Map, Layer
 Map(Layer(bikeshare_df))
 ```
 
-![Explore Points Layer - Bikeshare Data](../img/guides/quickstart/explore_points_layer.png)
+![Explore Points Layer - Bikeshare Data](../../img/guides/quickstart/explore_points_layer.png)
 
 Great! We have a map!
 
@@ -103,7 +103,7 @@ from cartoframes.viz.helpers import size_continuous_layer
 Map(size_continuous_layer(bikeshare_df, 'total_events'))
 ```
 
-![Explore Helper Method](../img/guides/quickstart/explore_helper.png)
+![Explore Helper Method](../../img/guides/quickstart/explore_helper.png)
 
 Good job! Now, just taking a look, you can see where are the stations with more activity. Also, thanks to be using a helper, we get a legend out of it.
 
@@ -162,4 +162,4 @@ Map([
 ])
 ```
 
-![Combine Layers](../img/guides/quickstart/combine_layers.png)
+![Combine Layers](../../img/guides/quickstart/combine_layers.png)
