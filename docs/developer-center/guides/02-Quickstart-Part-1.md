@@ -63,3 +63,21 @@ Map(size_continuous_layer(bikeshare_df, 'total_events'))
 Good job! Now, just taking a look, you can see where are the stations with more activity. Also, thanks to be using a helper, we get a legend out of it.
 
 To learn more about visualizating your data, about how to add legends, pop-ups, widgets and how to do it faster thanks to helpers, check the [visualization examples](/developers/cartoframes/examples/#example-add-default-widget).
+
+Now, let's add another legend with the census polygons:
+
+```py
+census_track = 'census_track.geojson'
+census_track_df = gpd.read_file(census_track)
+
+Map(Layer(census_track_df))
+```
+
+And finally, let's combine both layers in the same visualization:
+
+```py
+Map([
+    Layer(census_track_df),
+    size_continuous_layer(bikeshare_df, 'total_events', widget=True)
+])
+```
