@@ -523,7 +523,6 @@ class Geocoding(Service):
             result = geodataframe_from_dataframe(result.download())
         return self.result(result, metadata=meta)
 
-
     def _table_for_geocoding(self, dataset, table_name, if_exists):
         temporary_table = False
         input_dataset = dataset
