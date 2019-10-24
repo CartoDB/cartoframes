@@ -592,6 +592,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         # self.assertFalse('cartodb_id' in gc_df)
         # self.assertNotEqual(gc_df.index.name, 'cartodb_id')
 
+        sgc_df = gc_df
+
         # Preview, Geocode again (should do nothing)
         info = gc.geocode(
             df, cached=table_name, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
@@ -615,4 +617,16 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertEqual(info.get('required_quota'), 1)
         quota += 1
+        self.assertEqual(self.used_quota(gc), quota)
+
+        # Geocode unmodified geocoded gdf not using cache, because it has the hash column
+        info = gc.geocode(
+            sgc_df, cached=table_name, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
+        self.assertEqual(info.get('required_quota'), 0)
+        self.assertEqual(self.used_quota(gc), quota)
+        gc_df, info = gc.geocode(
+            sgc_df, cached=table_name, street='address', city={'column': 'city'}, country={'value': 'Spain'})
+        self.assertTrue(isinstance(gc_df, gpd.GeoDataFrame))
+        self.assertIsNotNone(gc_df.the_geom)
+        self.assertEqual(info.get('required_quota'), 0)
         self.assertEqual(self.used_quota(gc), quota)
