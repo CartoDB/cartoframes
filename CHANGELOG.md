@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filter datasets by geometry (#1031)
 - Improve testing framework (#1060)
 - Update data.observatory namespace (#1119)
+- Improve guides (#1053)
 
 ### Removed
 - Remove webcolors dependency (#933)

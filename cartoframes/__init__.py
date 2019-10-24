@@ -1,6 +1,6 @@
 __title__ = 'cartoframes'
 __description__ = 'CARTO Python package for data scientists'
-__version__ = '1.0b3'
+__version__ = '1.0b4'
 __url__ = 'https://github.com/CartoDB/cartoframes'
 __author__ = 'Andy Eschbacher'
 __email__ = 'andy@carto.com'
