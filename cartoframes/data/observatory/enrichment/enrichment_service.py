@@ -19,6 +19,7 @@ _PUBLIC_DATASET = 'open_data'
 
 
 class EnrichmentService(object):
+    """Base class for the Enrichment utility with commons auxiliary methods"""
 
     def __init__(self, credentials=None):
         self.credentials = credentials = credentials or get_default_credentials()
@@ -29,26 +30,22 @@ class EnrichmentService(object):
         self.public_project = _PUBLIC_PROJECT
         self.public_dataset = _PUBLIC_DATASET
 
-
-    def _enrich(queries, data, data_geom_column=''):
+    def _enrich(self, queries, data, data_geom_column=''):
         data_enriched = self._execute_enrichment(queries, data, data_geom_column)
         data_enriched[data_geom_column] = _compute_geometry_from_geom(data_enriched[data_geom_column])
 
         return data_enriched
-
 
     def _prepare_data(self, data, data_geom_column):
         data_copy = self.__copy_data_and_generate_enrichment_id(data, data_geom_column)
         data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
         return data_copy
 
-
-    def _get_temp_tablename(self)
+    def _get_temp_tablename(self):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
 
-
-    def _upload_dataframe(tablename, data_copy, data_geom_column):
+    def _upload_dataframe(self, tablename, data_copy, data_geom_column):
         data_geometry_id_copy = data_copy[[data_geom_column, self.enrichment_id]]
         schema = {data_geom_column: 'GEOGRAPHY', self.enrichment_id: 'INTEGER'}
 
@@ -59,7 +56,6 @@ class EnrichmentService(object):
             project=self.working_project,
             dataset=self.user_dataset
         )
-
 
     def _execute_enrichment(self, queries, data_copy, data_geom_column):
         dfs_enriched = list()
@@ -76,6 +72,117 @@ class EnrichmentService(object):
 
         return data_copy
 
+    def _prepare_variables(self, variables, agg_operators=None):
+        variables_result = list()
+        if isinstance(variables, Variable):
+            variables_result = [variables]
+        elif isinstance(variables, str):
+            variables_result = [Variable.get(variables)]
+        elif isinstance(variables, list):
+            first_element = variables[0]
+
+            if isinstance(first_element, str):
+                variables_result = Variable.get_list(variables)
+            else:
+                variables_result = variables
+        else:
+            raise EnrichmentException(
+                'Variable(s) to enrich should be an instance of Variable / CatalogList / str / list'
+            )
+
+        if agg_operators is not None:
+            variables_result = [variable for variable in variables_result if variable.agg_method is not None]
+
+        return variables_result
+
+    def _process_filters(self, filters_dict):
+        filters = ''
+        # TODO: Add data table ref in fields of filters
+        if filters_dict:
+            filters_list = list()
+
+            for key, value in filters_dict.items():
+                filters_list.append('='.join(["{}".format(key), "'{}'".format(value)]))
+
+            filters = ' AND '.join(filters_list)
+            filters = 'WHERE {filters}'.format(filters=filters)
+
+        return filters
+
+    def _process_agg_operators(self, agg_operators, variables):
+        agg_operators_result = None
+        if isinstance(agg_operators, str):
+            agg_operators_result = dict()
+
+            for variable in variables:
+                agg_operators_result[variable.column_name] = agg_operators
+
+        elif isinstance(agg_operators, dict):
+            agg_operators_result = agg_operators.copy()
+
+            for variable in variables:
+                if variable.column_name not in agg_operators_result:
+                    agg_operators_result[variable.column_name] = variable.agg_method
+
+        return agg_operators_result
+
+    def _get_tables_meta(self, variables):
+        tables_meta = defaultdict(defaultdict(list))
+
+        for variable in variables:
+            variable_name = variable.column_name
+            table_name = self._get_enrichment_table(variable)
+
+            tables_meta[table_name]['variables'].append(variable_name)
+
+            if 'dataset' not in tables_meta[table_name].keys():
+                tables_meta[table_name]['dataset'] = self.__get_dataset(variable)
+
+            if 'geotable' not in tables_meta[table_name].keys():
+                tables_meta[table_name]['geotable'] = self.__get_geotable(variable)
+
+            if 'project' not in tables_meta[table_name].keys():
+                tables_meta[table_name]['project'] = self.__get_project(variable)
+
+        return tables_meta
+
+    def __get_enrichment_table(self, variable):
+        enrichment_table = variable.dataset_name
+
+        if variable.project_name != self.public_project:
+            enrichment_table = 'view_{dataset}_{table}'.format(
+                dataset=variable.schema_name,
+                table=variable.dataset_name
+            )
+
+        return enrichment_table
+
+    def __get_dataset(self, variable):
+        dataset = self.public_dataset
+        if variable.project_name != self.public_project:
+            dataset = self.user_dataset
+
+        return dataset
+
+    def __get_geotable(self, variable):
+        geography_id = CatalogDataset.get(variable.dataset).geography
+        _, dataset_geotable, geotable = geography_id.split('.')
+
+        if variable.project_name != self.public_project:
+            geotable = 'view_{dataset}_{geotable}'.format(
+                dataset=dataset_geotable,
+                geotable=geotable
+            )
+
+        return geotable
+
+    def __get_project(self, variable):
+        project = self.public_project
+
+        if variable.project_name != self.public_project:
+            project = self.working_project
+
+        return project
 
     def __copy_data_and_generate_enrichment_id(self, data, geometry_column):
         has_to_decode_geom = True
@@ -100,122 +207,3 @@ class EnrichmentService(object):
         data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
         return data_copy
-
-
-    def __process_variables(self, variables, agg_operators):
-        variables_result = list()
-        if isinstance(variables, Variable):
-            variables_result = [variables]
-        elif isinstance(variables, str):
-            variables_result = [Variable.get(variables)]
-        elif isinstance(variables, list):
-            first_element = variables[0]
-
-            if isinstance(first_element, str):
-                variables_result = Variable.get_list(variables)
-            else:
-                variables_result = variables
-        else:
-            raise EnrichmentException('Variable(s) to enrich should be an instance of Variable / CatalogList / str / list')
-
-        if agg_operators is not None:
-            variables_result = [variable for variable in variables_result if variable.agg_method is not None]
-
-        return variables_result
-
-
-    def __process_filters(self, filters_dict):
-        filters = ''
-        # TODO: Add data table ref in fields of filters
-        if filters_dict:
-            filters_list = list()
-
-            for key, value in filters_dict.items():
-                filters_list.append('='.join(["{}".format(key), "'{}'".format(value)]))
-
-            filters = ' AND '.join(filters_list)
-            filters = 'WHERE {filters}'.format(filters=filters)
-
-        return filters
-
-
-    def __process_agg_operators(self, agg_operators, variables):
-        agg_operators_result = None
-        if isinstance(agg_operators, str):
-            agg_operators_result = dict()
-
-            for variable in variables:
-                agg_operators_result[variable.column_name] = agg_operators
-
-        elif isinstance(agg_operators, dict):
-            agg_operators_result = agg_operators.copy()
-
-            for variable in variables:
-                if variable.column_name not in agg_operators_result:
-                    agg_operators_result[variable.column_name] = variable.agg_method
-
-        return agg_operators_result
-
-
-    def __get_tables_meta(self, variables):
-        tables_meta = defaultdict(defaultdict(list))
-
-        for variable in variables:
-            variable_name = variable.column_name
-            table_name = self._get_enrichment_table(variable)
-            table_to_variables[table_name].append(variable_name)
-
-            tables_meta[table_name]['variables'].append(variable_name)
-
-            if 'dataset' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['dataset'] = self._get_dataset(variable)
-
-            if 'geotable' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['geotable'] = self._get_geotable(variable)
-
-            if 'project' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['project'] = self._get_project(variable)
-
-        return tables_meta
-
-
-    def _get_enrichment_table(self, variable):
-        enrichment_table = variable.dataset_name
-
-        if variable.project_name != self.public_project:
-            enrichment_table = 'view_{dataset}_{table}'.format(
-                dataset=variable.schema_name,
-                table=variable.dataset_name
-            )
-
-        return enrichment_table
-
-
-    def _get_dataset(self, variable):
-        dataset = self.public_dataset
-        if variable.project_name != self.public_project:
-            dataset = self.user_dataset
-
-        return dataset
-
-
-    def _get_geotable(self, variable):
-        geography_id = CatalogDataset.get(variable.dataset).geography
-        _, dataset_geotable, geotable = geography_id.split('.')
-
-        if variable.project_name != self.public_project:
-            geotable = 'view_{dataset}_{geotable}'.format(
-                dataset=dataset_geotable,
-                geotable=geotable
-            )
-
-        return geotable
-
-
-    def _get_project(self, variable):
-        project = self.public_project
-
-        if project_name != self.public_project:
-            project = self.working_project
-
-        return project
