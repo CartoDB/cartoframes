@@ -1,15 +1,14 @@
 from __future__ import absolute_import
 
 import pandas as pd
+from carto.exceptions import CartoException, CartoRateLimitException
 from tqdm import tqdm
 
-from carto.exceptions import CartoException, CartoRateLimitException
-
-from .base_dataset import BaseDataset
 from ....utils.columns import DataframeColumnsInfo, _first_value
-from ....utils.geom_utils import decode_geometry, compute_geodataframe, save_index_as_column
-from ....utils.utils import map_geom_type, load_geojson, is_geojson
-
+from ....utils.geom_utils import (compute_geodataframe, decode_geometry,
+                                  save_index_as_column)
+from ....utils.utils import is_geojson, load_geojson, map_geom_type
+from .base_dataset import BaseDataset
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
 tqdm(disable=True, total=0)  # initialise internal lock
@@ -121,6 +120,7 @@ class DataFrameDataset(BaseDataset):
             geometry = _first_value(self._df.geometry)
             if geometry and geometry.geom_type:
                 return map_geom_type(geometry.geom_type)
+        return None
 
     def _rename_index_for_upload(self):
         if self._df.index.name != 'cartodb_id':

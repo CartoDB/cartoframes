@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
-from ...data import Dataset
-from ...utils.utils import remove_column_from_dataframe
-from ...utils.geom_utils import geodataframe_from_dataframe
-from .service import Service
 import pandas as pd
 
+from ...data import Dataset
+from ...utils.geom_utils import geodataframe_from_dataframe
+from .service import Service
 
 QUOTA_SERVICE = 'isolines'
 
@@ -218,14 +217,14 @@ def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, i
           (_area).the_geom
         FROM _iso_areas
     """.format(
-            iso_function=iso_function,
-            source_query=source_query,
-            source_id=source_id,
-            select_source_id=select_source_id,
-            mode=mode,
-            iso_ranges=iso_ranges,
-            iso_options=iso_options
-        )
+        iso_function=iso_function,
+        source_query=source_query,
+        source_id=source_id,
+        select_source_id=select_source_id,
+        mode=mode,
+        iso_ranges=iso_ranges,
+        iso_options=iso_options
+    )
 
 
 def _rings_query(areas_query, with_source_id):

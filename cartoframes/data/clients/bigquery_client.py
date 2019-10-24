@@ -5,12 +5,11 @@ import appdirs
 import csv
 import tqdm
 
+from google.auth.exceptions import RefreshError
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials as GoogleCredentials
-from google.auth.exceptions import RefreshError
 
 from carto.exceptions import CartoException
-
 from ...auth import get_default_credentials
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')

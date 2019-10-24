@@ -5,7 +5,7 @@ import sys
 
 from unidecode import unidecode
 
-from .geom_utils import detect_encoding_type, decode_geometry
+from .geom_utils import decode_geometry, detect_encoding_type
 
 
 class Column(object):
@@ -117,12 +117,12 @@ class DataframeColumnInfo(object):
     def __eq__(self, obj):
         if isinstance(obj, dict):
             return self.dataframe == obj['dataframe'] and \
-                   self.database == obj['database'] and \
-                   self.database_type == obj['database_type']
+                self.database == obj['database'] and \
+                self.database_type == obj['database_type']
         else:
             return self.dataframe == obj.dataframe and \
-                   self.database == obj.database and \
-                   self.database_type == obj.database_type
+                self.database == obj.database and \
+                self.database_type == obj.database_type
 
 
 class DataframeColumnsInfo(object):
@@ -291,3 +291,4 @@ def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
         return series.iloc[0]
+    return None
