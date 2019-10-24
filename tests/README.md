@@ -35,7 +35,7 @@ tox -e e2e
 
 ### Linter
 
-We use `flake8` in CI because it's standard, fast and compatible with GitHub tools like Hound. However, we use also `pylint`for a deeper lint analysis with `tox -e pylint`.
+We use `flake8` in CI because it's standard, fast and compatible with GitHub tools like Hound. However, we use also `pylint`for a deeper lint analysis with `tox -e lint`.
 
 ### Testing
 
