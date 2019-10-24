@@ -96,7 +96,7 @@ class Enrichment(EnrichmentService):
 
         queries = self._prepare_points_enrichment_sql(tablename, data_geom_column, variables, filters)
 
-        return self._enrich(queries, data_copy, data_geom_column)
+        return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def enrich_polygons(self, data, variables, data_geom_column='geometry', filters={}, agg_operators={}, **kwargs):
         """enrich
@@ -220,7 +220,7 @@ class Enrichment(EnrichmentService):
             tablename, data_geom_column, variables, agg_operators, filters
         )
 
-        return self._enrich(queries, data_copy, data_geom_column)
+        return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def _prepare_points_enrichment_sql(self, tablename, data_geom_column, variables, filters):
         filters_str = self._process_filters(filters)

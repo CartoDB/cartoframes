@@ -30,11 +30,22 @@ class EnrichmentService(object):
         self.public_project = _PUBLIC_PROJECT
         self.public_dataset = _PUBLIC_DATASET
 
-    def _enrich(self, queries, data, data_geom_column=''):
-        data_enriched = self._execute_enrichment(queries, data, data_geom_column)
-        data_enriched[data_geom_column] = _compute_geometry_from_geom(data_enriched[data_geom_column])
+    def _execute_enrichment(self, queries, data, data_geom_column):
+        dfs_enriched = list()
 
-        return data_enriched
+        for query in queries:
+            df_enriched = self.bq_client.query(query).to_dataframe()
+            dfs_enriched.append(df_enriched)
+
+        for df in dfs_enriched:
+            data = data.merge(df, on=self.enrichment_id, how='left')
+
+        data.drop(self.enrichment_id, axis=1, inplace=True)
+        data[data_geom_column] = data[data_geom_column].apply(geojson_to_wkt)
+
+        data[data_geom_column] = _compute_geometry_from_geom(data[data_geom_column])
+
+        return data
 
     def _prepare_data(self, data, data_geom_column):
         data_copy = self.__copy_data_and_generate_enrichment_id(data, data_geom_column)
@@ -56,21 +67,6 @@ class EnrichmentService(object):
             project=self.working_project,
             dataset=self.user_dataset
         )
-
-    def _execute_enrichment(self, queries, data_copy, data_geom_column):
-        dfs_enriched = list()
-
-        for query in queries:
-            df_enriched = self.bq_client.query(query).to_dataframe()
-            dfs_enriched.append(df_enriched)
-
-        for df in dfs_enriched:
-            data_copy = data_copy.merge(df, on=self.enrichment_id, how='left')
-
-        data_copy.drop(self.enrichment_id, axis=1, inplace=True)
-        data_copy[data_geom_column] = data_copy[data_geom_column].apply(geojson_to_wkt)
-
-        return data_copy
 
     def _prepare_variables(self, variables, agg_operators=None):
         variables_result = list()
@@ -131,7 +127,7 @@ class EnrichmentService(object):
 
         for variable in variables:
             variable_name = variable.column_name
-            table_name = self._get_enrichment_table(variable)
+            table_name = self.__get_enrichment_table(variable)
 
             tables_meta[table_name]['variables'].append(variable_name)
 
