@@ -94,7 +94,9 @@ class KuvizPublisher(object):
     def _add_layers_credentials(self):
         for layer in self._layers:
             layer.credentials = {
-                'username': layer.source.dataset.credentials.username,
+                # CARTO VL requires a username but CARTOframes allows passing only the base_url.
+                # That's why 'user' is used by default if username is empty.
+                'username': layer.source.dataset.credentials.username or 'user',
                 'api_key': self._maps_api_key,
                 'base_url': layer.source.dataset.credentials.base_url
             }
