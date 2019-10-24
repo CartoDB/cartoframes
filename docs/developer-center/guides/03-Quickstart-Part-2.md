@@ -36,7 +36,7 @@ final_map = Map([
 final_map
 ```
 
-![Bikeshare data](../img/guides/quickstart/share_helper.png)
+![Combine Layers with Widget](../img/guides/quickstart/combine_layers_widget.png)
 
 Cool! Now that you have a small dashboard to play with, let's publish it to CARTO so you are able to share it with anyone. To do this, you just need to call the [publish](/developers/cartoframes/examples/#example-publish-public-visualization) method from the `Map` class:
 

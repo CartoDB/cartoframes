@@ -32,7 +32,52 @@ bikeshare_df = gpd.read_file(arlington_file)
 bikeshare_df.head(3)
 ```
 
-![Bikeshare data](../img/guides/quickstart/initial_dataframe.png)
+<table class="dataframe" border="1">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>num_bike_dropoffs</th>
+      <th>num_bike_pickups</th>
+      <th>total_events</th>
+      <th>station_id</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>178</td>
+      <td>204</td>
+      <td>382</td>
+      <td>31000</td>
+      <td>-77.053144</td>
+      <td>38.858726</td>
+      <td>POINT (-77.05314 38.85873)</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>222</td>
+      <td>276</td>
+      <td>498</td>
+      <td>31001</td>
+      <td>-77.053738</td>
+      <td>38.857216</td>
+      <td>POINT (-77.05374 38.85722)</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>839</td>
+      <td>710</td>
+      <td>1549</td>
+      <td>31002</td>
+      <td>-77.049218</td>
+      <td>38.856372</td>
+      <td>POINT (-77.04922 38.85637)</td>
+    </tr>
+  </tbody>
+</table>
 
 By only reading the data into a geodataframe you aren't able to see at a glance where the stations are. So let's visualize it in a map!
 
@@ -46,7 +91,7 @@ from cartoframes.viz import Map, Layer
 Map(Layer(bikeshare_df))
 ```
 
-![Bikeshare data](../img/guides/quickstart/explore_layer.png)
+![Explore Points Layer - Bikeshare Data](../img/guides/quickstart/explore_points_layer.png)
 
 Great! We have a map!
 
@@ -58,7 +103,7 @@ from cartoframes.viz.helpers import size_continuous_layer
 Map(size_continuous_layer(bikeshare_df, 'total_events'))
 ```
 
-![Bikeshare data](../img/guides/quickstart/explore_helper.png)
+![Explore Helper Method](../img/guides/quickstart/explore_helper.png)
 
 Good job! Now, just taking a look, you can see where are the stations with more activity. Also, thanks to be using a helper, we get a legend out of it.
 
@@ -73,11 +118,48 @@ census_track_df = gpd.read_file(census_track)
 Map(Layer(census_track_df))
 ```
 
+<table class="dataframe" border="1">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>OBJECTID</th>
+      <th>FULLTRACTID</th>
+      <th>TRACTID</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>1</td>
+      <td>51013102901</td>
+      <td>102901</td>
+      <td>POLYGON ((-77.09099 38.84516, -77.08957 38.844...</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2</td>
+      <td>51013103000</td>
+      <td>103000</td>
+      <td>POLYGON ((-77.08558 38.82992, -77.08625 38.828...</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>3</td>
+      <td>51013102902</td>
+      <td>102902</td>
+      <td>POLYGON ((-77.09520 38.84499, -77.09442 38.844...</td>
+    </tr>
+  </tbody>
+</table>
+
 And finally, let's combine both layers in the same visualization:
 
 ```py
 Map([
     Layer(census_track_df),
-    size_continuous_layer(bikeshare_df, 'total_events', widget=True)
+    size_continuous_layer(bikeshare_df, 'total_events')
 ])
 ```
+
+![Combine Layers](../img/guides/quickstart/combine_layers.png)
