@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add nested filters for catalog search (#1038, #1069)
 - Get list of catalog entities by list of ids or slugs (#1089)
 - Add describe methods for CatalogDataset and Variable (#1107)
+- Add cached geocoding (#1066)
 
 ## Changed
 - Remove pandas extension in catalog classes (#1038, #1044)
