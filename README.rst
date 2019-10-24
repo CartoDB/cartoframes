@@ -177,6 +177,7 @@ Get table from CARTO, make changes in pandas, sync updates with CARTO:
         if_exists='replace'
     )
 
+.. image:: https://raw.githubusercontent.com/CartoDB/cartoframes/develop/docs/img/data-workflow.gif
 
 Map workflow
 ------------
