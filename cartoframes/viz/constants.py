@@ -69,27 +69,35 @@ WIDGET_TYPES = [
 ]
 
 FORMULA_OPERATIONS_VIEWPORT = {
-  'count': 'viewportCount',
-  'avg': 'viewportAvg',
-  'min': 'viewportMin',
-  'max': 'viewportMax',
-  'sum': 'viewportSum'
+    'count': 'viewportCount',
+    'avg': 'viewportAvg',
+    'min': 'viewportMin',
+    'max': 'viewportMax',
+    'sum': 'viewportSum'
 }
 
 FORMULA_OPERATIONS_GLOBAL = {
-  'count': 'globalCount',
-  'avg': 'globalAvg',
-  'min': 'globalMin',
-  'max': 'globalMax',
-  'sum': 'globalSum'
+    'count': 'globalCount',
+    'avg': 'globalAvg',
+    'min': 'globalMin',
+    'max': 'globalMax',
+    'sum': 'globalSum'
 }
 
+CLUSTER_KEYS = [
+    'count',
+    'avg',
+    'min',
+    'max',
+    'sum'
+]
+
 CLUSTER_OPERATIONS = {
-  'count': 'clusterCount',
-  'avg': 'clusterAvg',
-  'min': 'clusterMin',
-  'max': 'clusterMax',
-  'sum': 'clusterSum'
+    'count': 'clusterCount',
+    'avg': 'clusterAvg',
+    'min': 'clusterMin',
+    'max': 'clusterMax',
+    'sum': 'clusterSum'
 }
 
 THEMES = ['dark', 'light']

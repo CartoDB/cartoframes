@@ -40,7 +40,7 @@ Features
 - Create customizable, interactive CARTO maps in a Jupyter notebook using DataFrames or hosted data
 - Augment your data with CARTO's Data Observatory
 - Use CARTO for cloud-based analysis
-- Try it out without needing a CARTO account by using the `Examples functionality <https://cartoframes.readthedocs.io/en/latest/examples.html>`__
+- Try it out without needing a CARTO account by using the `Examples functionality <https://carto.com/developers/cartoframes/examples/>`__
 
 Common Uses
 ===========

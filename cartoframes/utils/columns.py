@@ -5,7 +5,7 @@ import sys
 
 from unidecode import unidecode
 
-from .geom_utils import detect_encoding_type, decode_geometry
+from .geom_utils import decode_geometry, detect_encoding_type
 
 
 class Column(object):
@@ -117,12 +117,12 @@ class DataframeColumnInfo(object):
     def __eq__(self, obj):
         if isinstance(obj, dict):
             return self.dataframe == obj['dataframe'] and \
-                   self.database == obj['database'] and \
-                   self.database_type == obj['database_type']
+                self.database == obj['database'] and \
+                self.database_type == obj['database_type']
         else:
             return self.dataframe == obj.dataframe and \
-                   self.database == obj.database and \
-                   self.database_type == obj.database_type
+                self.database == obj.database and \
+                self.database_type == obj.database_type
 
 
 class DataframeColumnsInfo(object):
@@ -138,12 +138,17 @@ class DataframeColumnsInfo(object):
         self.columns = self._get_columns_info()
 
     def _get_columns_info(self):
+        df_columns = [(name, self.df.dtypes[name]) for name in self.df.columns]
+        if self.df.index.name is not None and self.df.index.name not in self.df:
+            df_columns.append((self.df.index.name, self.df.index.dtype))
+
         columns = []
-        for c in self.df.columns:
+
+        for c, dtype in df_columns:
             if self._filter_column(c):
                 continue
 
-            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, self.df.dtypes[c]))
+            columns.append(DataframeColumnInfo(c, self.geom_column, self.geom_type, dtype))
 
         if self.with_lnglat:
             columns.append(DataframeColumnInfo(None))
@@ -286,3 +291,4 @@ def _first_value(series):
     series = series.loc[~series.isnull()]  # Remove null values
     if len(series) > 0:
         return series.iloc[0]
+    return None

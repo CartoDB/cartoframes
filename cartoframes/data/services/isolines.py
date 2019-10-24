@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from ...data import Dataset
-from ...utils.utils import remove_column_from_dataframe
-from .service import Service
 import pandas as pd
 
+from ...data import Dataset
+from ...utils.geom_utils import geodataframe_from_dataframe
+from .service import Service
 
 QUOTA_SERVICE = 'isolines'
 
@@ -136,7 +136,6 @@ class Isolines(Service):
             return self.result(data=None, metadata=metadata)
 
         source_columns = source.get_column_names()
-        source_has_id = 'cartodb_id' in source_columns
 
         temporary_table_name = False
 
@@ -149,6 +148,9 @@ class Isolines(Service):
             temporary_table_name = self._new_temporary_table_name()
             source.upload(table_name=temporary_table_name, credentials=self._credentials)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
+            source_columns = source.get_column_names()
+
+        source_has_id = 'cartodb_id' in source_columns
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
         # TODO: use **options argument?
@@ -174,11 +176,9 @@ class Isolines(Service):
             dataset.upload(table_name=table_name, if_exists=if_exists)
             result = Dataset(table_name, credentials=self._credentials)
             if input_dataframe is not None:
-                result = result.download()
+                result = geodataframe_from_dataframe(result.download())
         else:
-            result = dataset.download()
-            if not dry_run and not source_has_id:
-                remove_column_from_dataframe(result, 'cartodb_id')
+            result = geodataframe_from_dataframe(dataset.download())
             if input_dataframe is None:
                 result = Dataset(result, credentials=self._credentials)
 
@@ -217,14 +217,14 @@ def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, i
           (_area).the_geom
         FROM _iso_areas
     """.format(
-            iso_function=iso_function,
-            source_query=source_query,
-            source_id=source_id,
-            select_source_id=select_source_id,
-            mode=mode,
-            iso_ranges=iso_ranges,
-            iso_options=iso_options
-        )
+        iso_function=iso_function,
+        source_query=source_query,
+        source_id=source_id,
+        select_source_id=select_source_id,
+        mode=mode,
+        iso_ranges=iso_ranges,
+        iso_options=iso_options
+    )
 
 
 def _rings_query(areas_query, with_source_id):

@@ -1,16 +1,18 @@
 from __future__ import absolute_import
 
 from abc import ABCMeta, abstractmethod
-import pandas as pd
 
+import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ..dataset_info import DatasetInfo
-from ....utils.geom_utils import decode_geometry, compute_query, convert_bool, \
-    get_context_with_public_creds, ENC_WKB_BHEX
-from ....utils import utils
 from ....lib import context
-from ....utils.columns import Column, normalize_name, dtypes, date_columns_names, bool_columns_names
+from ....utils import utils
+from ....utils.columns import (Column, bool_columns_names, date_columns_names,
+                               dtypes, normalize_name)
+from ....utils.geom_utils import (ENC_WKB_BHEX, compute_query, convert_bool,
+                                  decode_geometry,
+                                  get_context_with_public_creds)
+from ..dataset_info import DatasetInfo
 
 
 class BaseDataset():
@@ -139,6 +141,7 @@ class BaseDataset():
     def _create_context(self):
         if self._credentials:
             return context.create_context(self._credentials)
+        return None
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
@@ -173,7 +176,7 @@ class BaseDataset():
 
         converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
         for bool_column_name in bool_column_names:
-            converters[bool_column_name] = lambda x: convert_bool(x)
+            converters[bool_column_name] = convert_bool
 
         df = pd.read_csv(raw_result, dtype=df_types,
                          parse_dates=date_column_names,

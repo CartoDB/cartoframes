@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from ...lib import context
-from ...auth import get_default_credentials
 import uuid
 from collections import namedtuple
 
+from ...auth import get_default_credentials
+from ...lib import context
 
 SERVICE_KEYS = ('hires_geocoder', 'isolines')
 QUOTA_INFO_KEYS = ('monthly_quota', 'used_quota', 'soft_limit', 'provider')
