@@ -118,8 +118,9 @@ class Enrichment(EnrichmentService):
                 If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
                 will be retrieved from metadata column.
                 If `agg_operators` is a string then all columns will be aggregated by this operator.
-                If `agg_operators` is `None` then no aggregations will be computed. All the values which
-                data geometry intersects with will be returned.
+                If `agg_operators` is `None` then the default `array_agg` function will be used. Since we're
+                using a `group by` clause, all the values which data geometry intersects with will be returned
+                in the array.
 
         Returns:
             A dataframe as the provided one but with the variables to enrich appended to it
@@ -257,7 +258,7 @@ class Enrichment(EnrichmentService):
 
     def _prepare_polygon_enrichment_sql(self, tablename, data_geom_column, variables, agg_operators, filters):
         filters_str = self._process_filters(filters)
-        agg_operators = self._process_agg_operators(agg_operators, variables)
+        agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
         tables_meta_data = self._get_tables_meta(variables)
 
         grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
@@ -276,7 +277,7 @@ class Enrichment(EnrichmentService):
                     / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
                         variable=variable,
                         data_geom_column=data_geom_column,
-                        operator=agg_operators[variable]
+                        operator=agg_operators.get(variable)
                     ) for variable in variables_list
                 ]
 

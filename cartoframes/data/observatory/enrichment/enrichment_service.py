@@ -1,4 +1,5 @@
 import uuid
+import logging
 import geopandas as gpd
 
 from collections import defaultdict
@@ -68,7 +69,7 @@ class EnrichmentService(object):
             dataset=self.user_dataset
         )
 
-    def _prepare_variables(self, variables, agg_operators=None):
+    def _prepare_variables(self, variables):
         variables_result = list()
         if isinstance(variables, Variable):
             variables_result = [variables]
@@ -86,9 +87,6 @@ class EnrichmentService(object):
                 'Variable(s) to enrich should be an instance of Variable / CatalogList / str / list'
             )
 
-        if agg_operators is not None:
-            variables_result = [variable for variable in variables_result if variable.agg_method is not None]
-
         return variables_result
 
     def _process_filters(self, filters_dict):
@@ -105,7 +103,7 @@ class EnrichmentService(object):
 
         return filters
 
-    def _process_agg_operators(self, agg_operators, variables):
+    def _process_agg_operators(self, agg_operators, variables, default_agg):
         agg_operators_result = None
         if isinstance(agg_operators, str):
             agg_operators_result = dict()
@@ -116,9 +114,16 @@ class EnrichmentService(object):
         elif isinstance(agg_operators, dict):
             agg_operators_result = agg_operators.copy()
 
-            for variable in variables:
-                if variable.column_name not in agg_operators_result:
-                    agg_operators_result[variable.column_name] = variable.agg_method
+        for variable in variables:
+            if variable.column_name not in agg_operators_result.keys():
+                agg_operators_result[variable.column_name] = variable.agg_method or default_agg
+                if not variable.agg_method:
+                    logging.warning(
+                        "Variable '{}' doesn't have defined agg_method.".format(variable.column_name) +
+                        "Default one will be used: '{}' \n".format(default_agg) +
+                        "You can change this by using the 'agg_operators' parameter." +
+                        "See docs for further details and examples."
+                    )
 
         return agg_operators_result
 
