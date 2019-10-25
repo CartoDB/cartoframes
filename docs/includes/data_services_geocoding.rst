@@ -1,7 +1,7 @@
 Geocoding
 ^^^^^^^^^
 
-The ``cartoframes.data.dataservices.Geocoding`` class provides geocoding using
+The ``cartoframes.data.services.Geocoding`` class provides geocoding using
 `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 This process requires you to have a CARTO account with a geocoding provider and geocoding quota assigned,
 and its use will incur in the expense of geocoding credits.
@@ -59,7 +59,7 @@ To find out the number of quota credits that will be spent when geocoding a data
     gc = Geocoding()
 
     dataset = Dataset('YOUR_DATA')
-    nfo = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
+    info = gc.geocode(dataset, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
     print(info.get('required_quota'))
 
 When ``dry_run`` is True no changes will be made to the data and no quota will be consumed.

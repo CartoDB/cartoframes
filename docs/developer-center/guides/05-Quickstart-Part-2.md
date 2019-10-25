@@ -1,6 +1,6 @@
 ## Quickstart Part 2
 
-This is the second part of the [Quickstart Guide](/developers/cartoframes/guides/#Quickstart-Part-1), where you've learned how to import data and visualize it with CARTOframes. Now, let's share and publish your data.
+This is the second part of the [Quickstart Guide](/developers/cartoframes/guides/Quickstart-Part-1/), where you've learned how to import data and visualize it with CARTOframes. Now, let's share and publish your data.
 
 To be able to do so, you have to log in to CARTO. You will need to create an API key and use the method `set_default_credentials` to create a session. If you haven't created an API key yet, check the [authentication reference](/developers/cartoframes/reference/#heading-Authentication) to learn how to get it.
 

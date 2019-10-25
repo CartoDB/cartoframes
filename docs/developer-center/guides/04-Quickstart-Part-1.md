@@ -22,7 +22,7 @@ Let's get started!
 
 ### Explore your company's data
 
-You will be using [this dataset](https://github.com/CartoDB/cartoframes/tree/develop/docs/developer-center/guides/quickstart/arlington_bikeshare_july_agg.geojson) in [GeoJSON](https://geojson.org) format to start your exploration. It contains information about the bike stations around the city of Arlington. As a first exploratory step, you read it into a Jupyter Notebook using a [Geopandas GeoDataframe](http://geopandas.org/reference/geopandas.GeoDataFrame.html).
+You will be using [this dataset](https://github.com/CartoDB/cartoframes/tree/develop/docs/developer-center/guides/data/arlington_bikeshare_july_agg.geojson) in [GeoJSON](https://geojson.org) format to start your exploration. It contains information about the bike stations around the city of Arlington. As a first exploratory step, you read it into a Jupyter Notebook using a [Geopandas GeoDataframe](http://geopandas.org/reference/geopandas.GeoDataFrame.html).
 
 ```py
 import geopandas as gpd

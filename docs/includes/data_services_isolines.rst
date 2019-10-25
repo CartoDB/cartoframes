@@ -1,7 +1,7 @@
 Isolines
 ^^^^^^^^
 
-The ``cartoframes.data.dataservices.Isolines`` class provides `time and distance isolines <https://carto.com/location-data-services/isolines/>`_
+The ``cartoframes.data.services.Isolines`` class provides `time and distance isolines <https://carto.com/location-data-services/isolines/>`_
 using  `CARTO Location Data Services (LDS) <https://carto.com/location-data-services/>`_
 
 This use these functions a CARTO account is required with a geocoding provider and geocoding quota assigned.
