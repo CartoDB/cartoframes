@@ -6,7 +6,7 @@ Feeling stuck? There are many ways to find help.
 * [Report an issue](https://github.com/CartoDB/cartoframes/issues/new) in Github.
 * Engine Plan customers have additional access to enterprise-level support through CARTO's support representatives.
 
-If you just want to describe an issue or share an idea, just <a class="typeform-share" href="https://cartohq.typeform.com/to/mH6RRl" data-mode="popup" target="_blank">send your feedback</a>
+If you just want to describe an issue or share an idea, just <a class="typeform-share" href="https://cartohq.typeform.com/to/mH6RRl" data-mode="popup" target="_blank">send your feedback</a>.
 
 ### Issues on GitHub
 
