@@ -75,10 +75,15 @@
           "desc":  "Add basic style to a layer",
           "file": "add_style_layer",
           "path": "layers"
-          }, {
+        }, {
           "title": "Add Data Driven Style",
           "desc":  "Add a data driven style to a layer",
           "file": "add_data_driven_style_layer",
+          "path": "layers"
+        } , {
+          "title": "Add Multiple Layers",
+          "desc": "Add multiple Layers",
+          "file": "add_multiple_layers",
           "path": "layers"
         }
       ]
