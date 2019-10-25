@@ -196,8 +196,7 @@ class Credentials(object):
 
                 >>> credentials = Credentials.from_file()
                 >>> print(credentials)
-                Credentials(username='johnsmith', api_key='abcdefg',
-                    base_url='https://johnsmith.carto.com/')
+                Credentials(username='johnsmith', api_key='abcdefg', base_url='https://johnsmith.carto.com/')
 
         """
 

@@ -5,19 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-## Added
+## [1.0b4] - 2019-10-25
+### Added
+- Add support for variable groups in the catalog (#983)
+- Add DO token in enrichment (#1020)
+- Add Isolines Analysis (#889, #1076, #1070, #1078)
+- Add GeoPandas as a dependency (#1047)
+- Add subscription for Datasets/Geographies (#1071, #1079)
 - Add nested filters for catalog search (#1038, #1069)
-- Get list of catalog entities by list of ids or slugs (#1089)
-- Add describe methods for CatalogDataset and Variable (#1107)
+- Add list of catalog entities by list of ids or slugs (#1089)
+- Download dataset and geographies (#1050)
+- Create Maps API key automagically for published maps (#731)
+- Add describe methods for CatalogDataset and Variable (#977)
+- Add more examples (#1068, #1030, #1115)
 - Add cached geocoding (#1066)
 
-## Changed
-- Remove pandas extension in catalog classes (#1038, #1044)
-- Download dataset and geographies (#1050)
+### Changed
+- Improve reference docs (#841, #1052, #1061, #1024)
+- Refactor enrichment functions (#1034, #1043, #1056, #1062, #1085, #1083)
+- Use public DO views (#1049)
+- Use DataFrame index as cartodb_id (#1072)
+- Refactor Catalog using classes (#1044, #1069, #1086, #1093, #1073)
+- Rename Geocode class to Geocoding class (#1051)
+- Return geocoded dataframes/isolines as geodataframes (#1088, #1092)
 - Rename catalog's Dataset to CatalogDataset (#1100)
+- Filter datasets by geometry (#1031)
+- Improve testing framework (#1060)
+- Update data.observatory namespace (#1119)
+- Improve guides (#1053)
 
-## [1.0b3] - 2019-08-27
+### Removed
+- Remove webcolors dependency (#933)
+- Remove carto-python warnings (#1090)
+- Remove pandas extension in catalog classes (#1038, #1044)
+
+### Fixed
+- Fix popups when using dark basemap (#1099)
+- Fix publication using only base_url (#973)
+
+## [1.0b3] - 2019-09-27
 ### Added
 - Add cluster_size_legend helper method (#654)
 - Add Layout class to support multiple maps (#892, #953, #919)

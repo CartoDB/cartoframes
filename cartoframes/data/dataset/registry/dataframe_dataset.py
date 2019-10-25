@@ -144,7 +144,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         for c in dataframe_columns_info.columns:
             col = c.dataframe
             if col not in df.columns:
-                if col == df.index.name:
+                if df.index.name and col == df.index.name:
                     val = i
                 else:  # we could have filtered columns in the df. See DataframeColumnsInfo
                     continue
@@ -160,6 +160,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                     val = 'SRID=4326;{}'.format(geom.wkt)
                 else:
                     val = ''
+
             row_data.append(_encoded(val))
 
         if with_lnglat:

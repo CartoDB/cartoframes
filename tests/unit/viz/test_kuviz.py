@@ -6,10 +6,11 @@ from carto.exceptions import CartoException
 
 from cartoframes.lib import context
 from cartoframes.viz import Map, Layer, Source
-from cartoframes.data import Dataset, StrategiesRegistry
+from cartoframes.data import Dataset
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
+from cartoframes.data.dataset.registry.strategies_registry import StrategiesRegistry
 
 from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock
