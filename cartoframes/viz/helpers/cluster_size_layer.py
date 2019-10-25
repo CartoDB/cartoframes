@@ -19,9 +19,9 @@ def cluster_size_layer(
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
         value (str): Numeric column to aggregate.
-        operation (str): Cluster operation, defaults to 'count'. Other options
+        operation (str, optional): Cluster operation, defaults to 'count'. Other options
           available are 'avg', 'min', 'max', and 'sum'.
-        resolution (int): Resolution of aggregation grid cell. Set to 32 by default.
+        resolution (int, optional): Resolution of aggregation grid cell. Set to 32 by default.
         title (str, optional): Title of legend and hover.
         color (str, optional): Hex value, rgb expression, or other valid
           CARTO VL color. Defaults is '#FFB927' for point geometries.
