@@ -6,23 +6,23 @@
     {
       "title": "Data Workflows",
       "samples": [{
-          "title": "Create Dataset from .csv",
-          "desc": "Create a dataset from a .csv file",
+          "title": "Create Dataset from CSV",
+          "desc": "Create a dataset from a CSV file",
           "file": "create_dataset_from_csv",
           "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from .json",
-          "desc": "Create a dataset from a .json file",
+          "title": "Create Dataset from JSON",
+          "desc": "Create a dataset from a JSON file",
           "file": "create_dataset_from_json",
           "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from .geojson",
-          "desc": "Create a dataset from a .geojson file",
+          "title": "Create Dataset from GeoJSON",
+          "desc": "Create a dataset from a GeoJSON file",
           "file": "create_dataset_from_geojson",
           "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from Query",
-          "desc": "Create a dataset from a query",
+          "title": "Create Dataset from SQL Query",
+          "desc": "Create a dataset from a SQL query",
           "file": "create_dataset_from_query",
           "path": "downloading_and_uploading_data"
         }, {
