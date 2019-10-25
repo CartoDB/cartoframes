@@ -98,6 +98,13 @@ class DataframeColumnInfo(object):
             self.database = Column.NORMALIZED_GEOM_COL_NAME
             self.database_type = 'geometry(Point, 4326)'
 
+    def __repr__(self):
+        return "DataframeColumnInfo<{}, {}, {}>".format(
+            self.dataframe,
+            self.database,
+            self.database_type
+        )
+
     def _database_column_name(self, geom_column):
         if geom_column and self.dataframe == geom_column:
             normalized_name = Column.NORMALIZED_GEOM_COL_NAME
@@ -136,6 +143,9 @@ class DataframeColumnsInfo(object):
         self.enc_type = enc_type
 
         self.columns = self._get_columns_info()
+
+    def __repr__(self):
+        return str(self.columns)
 
     def _get_columns_info(self):
         df_columns = [(name, self.df.dtypes[name]) for name in self.df.columns]
