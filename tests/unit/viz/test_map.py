@@ -5,8 +5,9 @@ from carto.exceptions import CartoException
 from cartoframes.lib import context
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
-from cartoframes.data import Dataset, StrategiesRegistry
 from cartoframes.auth import Credentials
+from cartoframes.data import Dataset
+from cartoframes.data.dataset.registry.strategies_registry import StrategiesRegistry
 
 from .utils import build_geojson
 

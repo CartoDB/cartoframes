@@ -6,7 +6,7 @@ import unittest
 import pandas as pd
 
 from cartoframes.auth import Credentials
-from cartoframes.data import StrategiesRegistry
+from cartoframes.data.dataset.registry.strategies_registry import StrategiesRegistry
 from cartoframes.data.dataset.registry.dataframe_dataset import \
     DataFrameDataset
 from cartoframes.data.dataset.registry.query_dataset import QueryDataset
