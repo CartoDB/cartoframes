@@ -4,7 +4,7 @@ from shapely.geometry.point import Point
 from cartoframes.data import Dataset
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService
-from cartoframes.data.observatory.catalog import _get_bigquery_client
+from cartoframes.data.observatory.catalog.entity import CatalogEntity
 
 try:
     from unittest.mock import Mock
@@ -56,7 +56,7 @@ class TestEnrichmentService(object):
         original = BigQueryClient.upload_dataframe
         BigQueryClient.upload_dataframe = assert_upload_dataframe
 
-        bq_client = _get_bigquery_client(expected_project, credentials)
+        bq_client = CatalogEntity()._get_bigquery_client(expected_project, credentials)
         enrichment_service._upload_dataframe(bq_client, user_dataset, data_copy, geom_column)
 
         BigQueryClient.upload_dataframe = original
@@ -65,7 +65,7 @@ class TestEnrichmentService(object):
         expected_project = 'carto-do-customers'
         credentials = True
         geom_column = 'the_geom'
-        bq_client = _get_bigquery_client(expected_project, credentials)
+        bq_client = CatalogEntity()._get_bigquery_client(expected_project, credentials)
 
         df = pd.DataFrame([['{"coordinates": [1.0, 1.0], "type": "Point"}', 0]],
                           columns=[geom_column, 'enrichment_id'])
