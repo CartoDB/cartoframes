@@ -6,7 +6,7 @@ class Enrichment(EnrichmentService):
 
     def __init__(self, credentials=None):
         """
-        Enrichment datasets with DO data
+        Dataset enrichment with `Data Observatory <https://carto.com/platform/location-data-streams/>` data
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -14,18 +14,14 @@ class Enrichment(EnrichmentService):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will attempted to be
                 used.
-
-        Returns:
-            Instance of PointsEnrichment.
         """
+
         super(Enrichment, self).__init__(credentials)
 
     def enrich_points(self, data, variables, data_geom_column='geometry', filters={}, **kwargs):
-        """enrich
-
-        This method allows you to enrich your dataset with columns from our data, intersecting
-        your points with our geographies. Extra columns as area and population will be provided
-        with the aims of normalize these columns.
+        """Enrich your dataset with columns from our data, intersecting your points with our
+        geographies. Extra columns as area and population will be provided with the aims of normalize
+        these columns.
 
         Args:
             data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
@@ -38,10 +34,10 @@ class Enrichment(EnrichmentService):
                 Filters will be used using the `AND` operator
 
         Returns:
-            A dataframe as the provided one but with the variables to enrich appended to it
+            A DataFrame as the provided one, but with the variables to enrich appended to it.
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
-            in the enrichment dataset, the number of rows of the returned dataframe could be different
+            in the enrichment dataset, the number of rows of the returned DataFrame could be different
             than the `data` argument number of rows.
 
         Examples:
@@ -52,10 +48,14 @@ class Enrichment(EnrichmentService):
 
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
+
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
-                variables = Catalog().country('usa').category('demographics').datasets[0].variables
-                dataset_enrich = Enrichment().enrich_points(dataset, variables)
+                catalog = Catalog()
+                enrichment = Enrichment()
+
+                variables = catalog.country('usa').category('demographics').datasets[0].variables
+                dataset_enrich = enrichment.enrich_points(dataset, variables)
 
 
             Enrich a points dataset with list of ids:
@@ -67,12 +67,14 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
+                enrichment = Enrichment()
+
                 variables = [
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
-                dataset_enrich = Enrichment().enrich_points(dataset, variables)
+                dataset_enrich = enrichment.enrich_points(dataset, variables)
 
 
             Enrich a points dataset filtering our data:
@@ -84,10 +86,14 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
-                variables = Catalog().country('usa').category('demographics').datasets[0].variables
+                catalog = Catalog()
+                enrichment = Enrichment()
+
+                variables = catalog.country('usa').category('demographics').datasets[0].variables
                 filters = {'do_date': '2019-09-01'}
-                dataset_enrich = Enrichment().enrich_points(dataset, variables, filters)
+                dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
         """
+
         variables = self._prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
@@ -99,12 +105,10 @@ class Enrichment(EnrichmentService):
         return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def enrich_polygons(self, data, variables, data_geom_column='geometry', filters={}, agg_operators={}, **kwargs):
-        """enrich
-
-        This method allows you to enrich your dataset with columns from our data, intersecting
-        your polygons with our geographies. When a polygon intersects with multiple geographies of our
-        dataset, the proportional part of the intersection will be used to interpolate the quantity of the
-        polygon value intersected, aggregating them with the operator provided by `agg_operators` argument.
+        """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
+        When a polygon intersects with multiple geographies of our dataset, the proportional part of the
+        intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
+        with the operator provided by `agg_operators` argument.
 
         Args:
             data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
@@ -123,10 +127,10 @@ class Enrichment(EnrichmentService):
                 in the array.
 
         Returns:
-            A dataframe as the provided one but with the variables to enrich appended to it
+            A DataFrame as the provided one but with the variables to enrich appended to it
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
-            in the enrichment dataset, the number of rows of the returned dataframe could be different
+            in the enrichment dataset, the number of rows of the returned DataFrame could be different
             than the `data` argument number of rows.
 
         Examples:
@@ -140,9 +144,11 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
-                variables = Catalog().country('usa').category('demographics').datasets[0].variables
+                catalog = Catalog()
+                enrichment = Enrichment()
 
-                dataset_enrich = Enrichment().enrich_polygons(dataset, variables)
+                variables = catalog.country('usa').category('demographics').datasets[0].variables
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
 
 
             Enrich a polygons dataset with list of ids:
@@ -154,12 +160,14 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
+                enrichment = Enrichment()
+
                 variables = [
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
-                dataset_enrich = Enrichment().enrich_polygons(dataset, variables)
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
 
 
             Enrich a polygons dataset filtering our data:
@@ -171,10 +179,13 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
-                variables = Catalog().country('usa').category('demographics').datasets[0].variables
+                catalog = Catalog()
+                enrichment = Enrichment()
+
+                variables = catalog.country('usa').category('demographics').datasets[0].variables
                 filters = {'do_date': '2019-09-01'}
 
-                dataset_enrich = Enrichment().enrich_polygons(dataset, variables, filters)
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables, filters)
 
 
             Enrich a polygons dataset with custom aggregation methods:
@@ -186,13 +197,15 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
+                enrichment = Enrichment()
+
                 variables = [
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
                 agg_operators = {'in_grades_1_to_4_quantile': 'SUM', 'in_school_quantile': 'AVG'}
-                dataset_enrich = Enrichment().enrich_polygons(dataset, variables, agg_operators=agg_operators)
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
 
             Enrich a polygons dataset with no aggregation methods:
 
@@ -203,14 +216,17 @@ class Enrichment(EnrichmentService):
 
                 set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
 
+                enrichment = Enrichment()
+
                 variables = [
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
                 agg_operators = None
-                dataset_enrich = Enrichment().enrich_polygons(dataset, variables, agg_operators=agg_operators)
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
         """
+
         variables = self._prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
@@ -233,6 +249,7 @@ class Enrichment(EnrichmentService):
             geotable = table_meta['geotable']
             project = table_meta['project']
             dataset = table_meta['dataset']
+
             sql = '''
                 SELECT data_table.{enrichment_id},
                     {variables},
@@ -244,12 +261,17 @@ class Enrichment(EnrichmentService):
                         ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
                 {filters};
             '''.format(
-                enrichment_id=self.enrichment_id, enrichment_table=table,
-                enrichment_geo_table=geotable, user_dataset=self.user_dataset,
-                working_project=self.working_project, data_table=tablename,
-                data_geom_column=data_geom_column, filters=filters_str,
-                project=project, dataset=dataset,
-                variables=', '.join(['enrichment_table.{}'.format(variable) for variable in variables_list])
+                data_geom_column=data_geom_column,
+                data_table=tablename,
+                dataset=dataset,
+                enrichment_geo_table=geotable,
+                enrichment_id=self.enrichment_id,
+                enrichment_table=table,
+                filters=filters_str,
+                project=project,
+                user_dataset=self.user_dataset,
+                variables=', '.join(['enrichment_table.{}'.format(variable) for variable in variables_list]),
+                working_project=self.working_project
             )
 
             sqls.append(sql)
@@ -300,12 +322,19 @@ class Enrichment(EnrichmentService):
                 {filters}
                 {grouper};
             '''.format(
-                    enrichment_id=self.enrichment_id, variables=', '.join(variables_sql),
-                    enrichment_table=table, enrichment_geo_table=geotable,
-                    user_dataset=self.user_dataset, working_project=self.working_project,
-                    data_table=tablename, data_geom_column=data_geom_column,
-                    filters=filters_str, grouper=grouper, project=project,
-                    dataset=dataset)
+                    data_geom_column=data_geom_column,
+                    data_table=tablename,
+                    dataset=dataset,
+                    enrichment_geo_table=geotable,
+                    enrichment_id=self.enrichment_id,
+                    enrichment_table=table,
+                    filters=filters_str,
+                    grouper=grouper,
+                    project=project,
+                    user_dataset=self.user_dataset,
+                    variables=', '.join(variables_sql),
+                    working_project=self.working_project
+                )
 
             sqls.append(sql)
 
