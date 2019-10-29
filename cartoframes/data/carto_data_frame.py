@@ -18,15 +18,13 @@ DOWNLOAD_RETRY_TIMES = 3
 class CartoDataFrame(GeoDataFrame):
 
     def __init__(self, *args, **kwargs):
-        data, args, kwargs = _extract_data_arg(args, kwargs)
         schema = kwargs.pop('schema', None)
-        credentials = kwargs.pop('credentials', None) or get_default_credentials()
+        credentials = kwargs.pop('credentials', None)
+        data, args, kwargs = _extract_data_arg(args, kwargs)
 
         super(CartoDataFrame, self).__init__(*args, **kwargs)
 
-        self._schema = schema
-        self._credentials = credentials
-        self._strategy = self._create_strategy(data)
+        self._strategy = self._create_strategy(data, schema, credentials)
 
     @classmethod
     def from_table(cls, table_name, schema=None, credentials=None):
@@ -46,9 +44,9 @@ class CartoDataFrame(GeoDataFrame):
         gdf = GeoDataFrame.from_features(features, crs, columns)
         return cls(gdf)
 
-    def download(self, limit=None, decode_geom=None,
-                 retry_times=DOWNLOAD_RETRY_TIMES, credentials=None):
-        self._strategy.credentials = credentials or self._credentials
+    def download(self, limit=None, decode_geom=None, retry_times=DOWNLOAD_RETRY_TIMES,
+                 table_name=None, schema=None, credentials=None):
+        self._update_strategy(table_name, schema, credentials)
         df = self._strategy.download(limit, decode_geom, retry_times)
         if df is not None:
             object.__setattr__(self, '_data', df._data)
@@ -56,11 +54,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def upload(self, table_name=None, schema=None, with_lnglat=False,
                if_exists=BaseDataset.IF_EXISTS_FAIL, credentials=None):
-        if table_name:
-            self._strategy.table_name = table_name
-        if schema:
-            self._strategy.schema = schema
-        self._strategy.credentials = credentials or self._credentials
+        self._update_strategy(table_name, schema, credentials)
         self._strategy.upload(if_exists, with_lnglat)
         print('Data uploaded successfully!')
 
@@ -85,13 +79,25 @@ class CartoDataFrame(GeoDataFrame):
     def update_info(self, privacy=None, table_name=None):
         return self._strategy.update_dataset_info(privacy, table_name)
 
-    def _create_strategy(self, data):
+    def _create_strategy(self, data, schema, credentials):
         if data is not None:
             if is_sql_query(data):
-                return QueryDataset.create(data, self._credentials)
+                return QueryDataset.create(data, credentials)
             elif is_table_name(data):
-                return TableDataset.create(data, self._credentials, self._schema)
-        return DataFrameDataset.create(self, self._credentials)
+                return TableDataset.create(data, credentials, schema)
+        return DataFrameDataset.create(self, credentials)
+
+    def _update_strategy(self, table_name, schema, credentials):
+        if table_name is not None:
+            self._strategy.table_name = table_name
+        if schema is not None:
+            self._strategy.schema = schema
+        if credentials is not None:
+            self._strategy.credentials = credentials
+
+        if self._strategy.credentials is None:
+            # Apply default credentials
+            self._strategy.credentials = get_default_credentials()
 
 
 def _extract_data_arg(args, kwargs):
