@@ -55,7 +55,10 @@ class TestPolygonEnrichment(object):
             '''.format(username=username, tablename=tablename, data_geom_column=data_geom_column)
         ]
 
-        _assert_queries(actual_queries, expected_queries)
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
 
     def test_enrichment_query_by_polygons_two_variables(self):
         enrichment = Enrichment(credentials=self.credentials)
@@ -105,7 +108,10 @@ class TestPolygonEnrichment(object):
           '''.format(username=username, tablename=tablename, data_geom_column=data_geom_column)
         ]
 
-        _assert_queries(actual_queries, expected_queries)
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
 
 
 def _clean_queries(queries):
@@ -114,7 +120,3 @@ def _clean_queries(queries):
 
 def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
-
-
-def _assert_queries(actual_queries, expected_queries):
-    assert sorted(_clean_queries(actual_queries)) == sorted(_clean_queries(expected_queries))
