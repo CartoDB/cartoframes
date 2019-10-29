@@ -148,7 +148,7 @@ class Layer(object):
         variables = merge_dicts(popup_variables, widget_variables)
 
         self.bounds = self.source.bounds
-        self.orig_query = self.source.query
+        self.orig_data = self.source.data
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
         self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None

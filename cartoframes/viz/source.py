@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
 from . import defaults
-from ..data import Dataset
-from ..data.dataset.registry.base_dataset import BaseDataset
+from ..data import CartoDataFrame
+from ..utils.geom_utils import geodataframe_from_dataframe
 from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
 
 
@@ -15,9 +15,9 @@ class Source(object):
     """Source
 
     Args:
-        data (str, geopandas.GeoDataFrame, pandas.DataFrame,
-          :py:class:`Dataset <cartoframes.data.Dataset>` ): a table name,
-          SQL query, GeoJSON file, GeoDataFrame, DataFrame, or Dataset object.
+        data (str, pandas.DataFrame, geopandas.GeoDataFrame,
+          :py:class:`CartoDataFrame <cartoframes.data.CartoDataFrame>` ): a table name,
+          SQL query, DataFrame, GeoDataFrame or CartoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. If not provided, the credentials will be automatically
           obtained from the default credentials if available.
@@ -50,26 +50,18 @@ class Source(object):
 
             Source('SELECT * FROM table_name')
 
-        GeoJSON file.
+        CartoDataFrame object.
 
         .. code::
 
             from cartoframes.viz import Source
-
-            Source('path/to/file.geojson')
-
-        Dataset object.
-
-        .. code::
-
-            from cartoframes.viz import Source
-            from cartoframes.data import Dataset
+            from cartoframes.data import CartoDataFrame
 
             set_default_credentials('your_user_name', 'your api key')
 
-            ds = Dataset('table_name')
+            cdf = CartoDataFrame('table_name')
 
-            Source(ds)
+            Source(cdf)
 
         Setting the credentials.
 
@@ -102,18 +94,18 @@ class Source(object):
     """
 
     def __init__(self, data, credentials=None, bounds=None, schema=None):
-        if isinstance(data, Dataset):
-            self.dataset = data
+        if isinstance(data, CartoDataFrame):
+            self.cdf = data
         else:
-            self.dataset = Dataset(data, credentials, schema)
+            self.cdf = CartoDataFrame(data, credentials=credentials, schema=schema)
 
-        self._init_source_dataset(bounds)
+        self._init_source_cdf(bounds)
 
     def get_geom_type(self):
-        return self.dataset.compute_geom_type() or BaseDataset.GEOM_TYPE_POINT
+        return self.cdf.geom_type() or 'point'
 
     def get_credentials(self):
-        credentials = self.dataset.credentials
+        credentials = self.cdf._strategy.credentials
         if credentials:
             return {
                 # CARTO VL requires a username but CARTOframes allows passing only the base_url.
@@ -125,20 +117,20 @@ class Source(object):
         else:
             return defaults.CREDENTIALS
 
-    def _init_source_dataset(self, bounds):
-        if self.dataset.is_local():
-            gdf = self.dataset.get_geodataframe()
+    def _init_source_cdf(self, bounds):
+        if self.cdf.is_local():
+            gdf = geodataframe_from_dataframe(self.cdf)
             self.type = SourceType.GEOJSON
-            self.query = encode_geodataframe(gdf)
+            self.data = encode_geodataframe(gdf)
             self.bounds = bounds or self._compute_geojson_bounds(gdf)
         else:
             self.type = SourceType.QUERY
-            self.query = self.dataset.get_query()
+            self.data = self.cdf.get_query()
             self.bounds = bounds or self._compute_query_bounds()
-
-    def _compute_query_bounds(self):
-        context = self.dataset._strategy._context
-        return get_query_bounds(context, self.query)
 
     def _compute_geojson_bounds(self, gdf):
         return get_geodataframe_bounds(gdf)
+
+    def _compute_query_bounds(self):
+        context = self.cdf._strategy._context
+        return get_query_bounds(context, self.data)

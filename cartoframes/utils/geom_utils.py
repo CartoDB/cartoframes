@@ -61,6 +61,7 @@ def compute_geodataframe(dataset):
 
 def geodataframe_from_dataframe(dataframe):
     if dataframe is not None:
+        dataframe = dataframe.copy()
         geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             dataframe['geometry'] = _compute_geometry_from_geom(geom_column)

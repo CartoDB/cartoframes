@@ -390,7 +390,7 @@ def _get_layer_def(layer):
         'legend': layer.legend_info,
         'has_legend_list': layer.has_legend_list,
         'widgets': layer.widgets_info,
-        'query': layer.source.query,
+        'data': layer.source.data,
         'type': layer.source.type,
         'viz': layer.viz
     }

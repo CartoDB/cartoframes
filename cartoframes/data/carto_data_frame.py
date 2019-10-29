@@ -5,7 +5,6 @@ from .dataset.registry.table_dataset import TableDataset
 from .dataset.registry.query_dataset import QueryDataset
 from .dataset.registry.dataframe_dataset import DataFrameDataset
 
-from ..viz import Map, Layer
 from ..auth.defaults import get_default_credentials
 from ..utils.utils import is_sql_query, is_table_name
 
@@ -54,7 +53,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def __init__(self, *args, **kwargs):
         schema = kwargs.pop('schema', None)
-        credentials = kwargs.pop('credentials', None)
+        credentials = kwargs.pop('credentials', None) or get_default_credentials()
         data, args, kwargs = _extract_data_arg(args, kwargs)
 
         super(CartoDataFrame, self).__init__(*args, **kwargs)
@@ -277,7 +276,14 @@ class CartoDataFrame(GeoDataFrame):
          Returns:
             :py:class:`Map <cartoframes.viz.Map>`
         """
+        from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
+
+    def is_local(self):
+        return isinstance(self._strategy, DataFrameDataset)
+
+    def get_query(self):
+        return self._strategy.get_query()
 
     def _create_strategy(self, data, schema, credentials):
         if data is not None:
