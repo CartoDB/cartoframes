@@ -9,31 +9,32 @@ from ..viz import Map, Layer
 from ..auth.defaults import get_default_credentials
 from ..utils.utils import is_sql_query, is_table_name
 
+# TODO: This class reuses existing classes from the dataset registry.
+# The implementation is temporary and will be refactored when the Dataset is removed.
+
+DOWNLOAD_RETRY_TIMES = 3
+
 
 class CartoDataFrame(GeoDataFrame):
 
-    DOWNLOAD_RETRY_TIMES = 3
-
     def __init__(self, *args, **kwargs):
         data, args, kwargs = _extract_data_arg(args, kwargs)
+        schema = kwargs.pop('schema', None)
         credentials = kwargs.pop('credentials', None) or get_default_credentials()
 
         super(CartoDataFrame, self).__init__(*args, **kwargs)
 
-        self.credentials = credentials
+        self._schema = schema
+        self._credentials = credentials
         self._strategy = self._create_strategy(data)
 
     @classmethod
-    def from_table(cls, table_name, schema='', credentials=None):
-        cdf = cls(credentials=credentials)
-        cdf._strategy = TableDataset.create(table_name, cdf.credentials, schema)
-        return cdf
+    def from_table(cls, table_name, schema=None, credentials=None):
+        return cls(table_name, schema=schema, credentials=credentials)
 
     @classmethod
     def from_query(cls, query, credentials=None):
-        cdf = cls(credentials=credentials)
-        cdf._strategy = QueryDataset.create(query, cdf.credentials)
-        return cdf
+        return cls(query, credentials=credentials)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -47,7 +48,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def download(self, limit=None, decode_geom=None,
                  retry_times=DOWNLOAD_RETRY_TIMES, credentials=None):
-        self._strategy.credentials = credentials or self.credentials
+        self._strategy.credentials = credentials or self._credentials
         df = self._strategy.download(limit, decode_geom, retry_times)
         if df is not None:
             object.__setattr__(self, '_data', df._data)
@@ -59,7 +60,7 @@ class CartoDataFrame(GeoDataFrame):
             self._strategy.table_name = table_name
         if schema:
             self._strategy.schema = schema
-        self._strategy.credentials = credentials or self.credentials
+        self._strategy.credentials = credentials or self._credentials
         self._strategy.upload(if_exists, with_lnglat)
         print('Data uploaded successfully!')
 
@@ -87,10 +88,10 @@ class CartoDataFrame(GeoDataFrame):
     def _create_strategy(self, data):
         if data is not None:
             if is_sql_query(data):
-                return QueryDataset.create(data, self.credentials)
+                return QueryDataset.create(data, self._credentials)
             elif is_table_name(data):
-                return TableDataset.create(data, self.credentials)
-        return DataFrameDataset.create(self, self.credentials)
+                return TableDataset.create(data, self._credentials, self._schema)
+        return DataFrameDataset.create(self, self._credentials)
 
 
 def _extract_data_arg(args, kwargs):
