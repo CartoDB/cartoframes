@@ -189,7 +189,7 @@ class DataframeColumnsInfo(object):
         return geom_col
 
     def _get_geometry_type(self):
-        if self.geom_column is not None:
+        if self.geom_column in self.df:
             first_geom = _first_value(self.df[self.geom_column])
             if first_geom:
                 enc_type = detect_encoding_type(first_geom)
