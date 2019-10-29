@@ -282,6 +282,9 @@ class CartoDataFrame(GeoDataFrame):
     def is_local(self):
         return isinstance(self._strategy, DataFrameDataset)
 
+    def is_remote(self):
+        return not self.is_local()
+
     def get_query(self):
         return self._strategy.get_query()
 
