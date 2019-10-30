@@ -268,7 +268,8 @@ class Enrichment(EnrichmentService):
         return sqls
 
     def _build_points_query(self, table, metadata, temp_table_name, data_geom_column, filters):
-        variables = ', '.join(metadata['variables'])
+        variables = ', '.join(
+            ['enrichment_table.{}'.format(variable) for variable in metadata['variables']])
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -281,9 +282,9 @@ class Enrichment(EnrichmentService):
             SELECT data_table.{enrichment_id},
                 {variables},
                 ST_Area(enrichment_geo_table.geom) AS {table}_area
-            FROM `{enrichment_dataset}` table
+            FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
-                    ON table.geoid = enrichment_geo_table.geoid
+                    ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
                     ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
             {filters};
@@ -338,12 +339,12 @@ class Enrichment(EnrichmentService):
         if agg_operators is not None:
             sql_variables = ['{operator}(enrichment_table.{variable} * \
                 (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
+                / ST_area(data_table.{data_geom_column}))) AS {variable}'.format(
                     variable=variable,
                     data_geom_column=data_geom_column,
                     operator=agg_operators.get(variable)) for variable in variables]
         else:
-            sql_variables = ['enrichment_geo_table.{}'.format(variable) for variable in variables] + \
+            sql_variables = ['enrichment_table.{}'.format(variable) for variable in variables] + \
                 ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                     / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
                         data_geom_column=data_geom_column)]

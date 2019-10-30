@@ -153,10 +153,7 @@ class EnrichmentService(object):
                 table=variable.dataset_name
             )
         else:
-            return '{dataset}_{table}'.format(
-                dataset=variable.schema_name,
-                table=variable.dataset_name
-            )
+            return variable.dataset_name
 
     def __get_dataset(self, variable, table_name):
         if variable.project_name != self.public_project:
