@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from pandas import DataFrame
+
 from . import color_category_layer
 from ...data.dataset.dataset import Dataset
 
@@ -14,8 +16,7 @@ def isolines_layer(source, value='data_range', **kwargs):
         title (str, optional): Title of legend.
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
-        cat (str, optional): Category list. Must be a valid CARTO VL category
-          list.
+        cat (list<str>, optional): Category list. Must be a valid list of categories.
         palette (str, optional): Palette that can be a named CARTOColor palette
           or other valid CARTO VL palette expression. Default is `bold`.
         size (int, optional): Size of point or line features.
@@ -44,21 +45,27 @@ def isolines_layer(source, value='data_range', **kwargs):
 
             [...]
 
-            isochrones = Isolines().isodistances(df, [1200, 2400, 3600], exclusive=True)
+            isodistances = Isolines().isodistances(df, [1200, 2400, 3600], exclusive=True)
 
-            isolines_layer(isochrones.data, palette='purpor')
+            isolines_layer(isodistances, palette='purpor')
 
     Returns:
-        cartoframes.viz.Layer: Layer styled by `value`.
+        :py:class:`cartoframes.viz.Layer`: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
-    df = source
-    if isinstance(source, Dataset):
+
+    if isinstance(source, DataFrame):
+        df = source
+    elif isinstance(source, Dataset):
         df = source.dataframe
+    elif isinstance(source, tuple) and hasattr(source, 'data'):
+        df = source.data
+    else:
+        raise ValueError('Invalid input source. It must be a DataFrame, Dataset or a namedtuple with data.')
 
     df = df.copy()
     if value not in df:
-        raise ValueError('Input source must contain a "{}" column'.format(value))
+        raise ValueError('Input DataFrame source must contain a "{}" column'.format(value))
 
     RANGE_LABEL_KEY = 'range_label'
     df[RANGE_LABEL_KEY] = df.apply(
