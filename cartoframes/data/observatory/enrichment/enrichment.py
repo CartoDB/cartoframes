@@ -246,73 +246,28 @@ class Enrichment(EnrichmentService):
         sqls = list()
 
         for table, metadata in tables_metadata:
-            sqls.append(self._build_query(table, metadata, temp_table_name, data_geom_column, filters))
+            sqls.append(self._build_points_query(table, metadata, temp_table_name, data_geom_column, filters))
 
         return sqls
 
     def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, agg_operators, filters):
         filters_str = self._process_filters(filters)
         agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
-        tables_metadata = self._get_tables_metadata(variables)
+        tables_metadata = self._get_tables_metadata(variables).items()
 
-        grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
+        if agg_operators:
+            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
 
         sqls = list()
 
-        for table, table_meta in tables_metadata.items():
-            variables_list = table_meta['variables']
-            geotable = table_meta['geotable']
-            project = table_meta['project']
-            dataset = table_meta['dataset']
-
-            if agg_operators is not None:
-                variables_sql = ['{operator}(enrichment_table.{variable} * \
-                    (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                    / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
-                        variable=variable,
-                        data_geom_column=data_geom_column,
-                        operator=agg_operators.get(variable)
-                    ) for variable in variables_list
-                ]
-
-            else:
-                variables_sql = ['enrichment_geo_table.{}'.format(variable) for variable in variables] + \
-                    ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                        / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
-                            data_geom_column=data_geom_column
-                        )]
-
-                grouper = ''
-
-            sql = '''
-                SELECT data_table.{enrichment_id}, {variables}
-                FROM `{project}.{dataset}.{enrichment_table}` enrichment_table
-                    JOIN `{project}.{dataset}.{enrichment_geo_table}` enrichment_geo_table
-                        ON enrichment_table.geoid = enrichment_geo_table.geoid
-                    JOIN `{working_project}.{user_dataset}.{temp_table_name}` data_table
-                        ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
-                {filters}
-                {grouper};
-            '''.format(
-                    data_geom_column=data_geom_column,
-                    temp_table_name=temp_table_name,
-                    dataset=dataset,
-                    enrichment_geo_table=geotable,
-                    enrichment_id=self.enrichment_id,
-                    enrichment_table=table,
-                    filters=filters_str,
-                    grouper=grouper,
-                    project=project,
-                    user_dataset=self.user_dataset,
-                    variables=', '.join(variables_sql),
-                    working_project=self.working_project
-                )
-
-            sqls.append(sql)
+        for table, metadata in tables_metadata:
+            sqls.append(self._build_polygons_query(
+                table, metadata, temp_table_name, data_geom_column, agg_operators, filters_str, grouper)
+            )
 
         return sqls
 
-    def _build_query(self, table, metadata, temp_table_name, data_geom_column, filters):
+    def _build_points_query(self, table, metadata, temp_table_name, data_geom_column, filters):
         variables = ', '.join(metadata['variables'])
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
@@ -342,3 +297,55 @@ class Enrichment(EnrichmentService):
             table=table,
             variables=variables
         )
+
+    def _build_polygons_query(self, table, metadata, temp_table_name, data_geom_column, agg_operators,
+                              filters, grouper):
+        variables_list = metadata['variables']
+        enrichment_dataset = metadata['dataset']
+        enrichment_geo_table = metadata['geo_table']
+        data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
+            project=self.working_project,
+            user_dataset=self.user_dataset,
+            temp_table_name=temp_table_name
+        )
+
+        variables = self._build_query_variables(agg_operators, variables_list, data_geom_column)
+
+        return '''
+            SELECT data_table.{enrichment_id},
+                {variables}
+            FROM `{enrichment_dataset}` enrichment_table
+                JOIN `{enrichment_geo_table}` enrichment_geo_table
+                    ON enrichment_table.geoid = enrichment_geo_table.geoid
+                JOIN `{data_table}` data_table
+                    ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
+            {filters}
+            {grouper};
+        '''.format(
+                data_geom_column=data_geom_column,
+                enrichment_dataset=enrichment_dataset,
+                enrichment_geo_table=enrichment_geo_table,
+                enrichment_id=self.enrichment_id,
+                filters=filters,
+                data_table=data_table,
+                grouper=grouper or '',
+                variables=variables
+            )
+
+    def _build_query_variables(self, agg_operators, variables, data_geom_column):
+        sql_variables = []
+
+        if agg_operators is not None:
+            sql_variables = ['{operator}(enrichment_table.{variable} * \
+                (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
+                / ST_area(data_table.{data_geom_column}))) as {variable}'.format(
+                    variable=variable,
+                    data_geom_column=data_geom_column,
+                    operator=agg_operators.get(variable)) for variable in variables]
+        else:
+            sql_variables = ['enrichment_geo_table.{}'.format(variable) for variable in variables] + \
+                ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
+                    / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
+                        data_geom_column=data_geom_column)]
+
+        return ', '.join(sql_variables)
