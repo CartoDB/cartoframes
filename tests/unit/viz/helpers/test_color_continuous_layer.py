@@ -18,11 +18,11 @@ class TestColorContinuousLayerHelper(object):
 
         assert layer.style is not None
         assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), bluyl),1)'
+            'globalMIN($name), globalMAX($name)), bluyl), 1)'
         assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), bluyl),1)'
+            'globalMIN($name), globalMAX($name)), bluyl), 1)'
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), bluyl), 0.9)'
+            'globalMIN($name), globalMAX($name)), bluyl), 0.9)'
         assert layer.popup, None
         assert layer.popup._hover == [{
             'title': 'name',
@@ -48,7 +48,7 @@ class TestColorContinuousLayerHelper(object):
         )
 
         assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), prism),1)'
+            'globalMIN($name), globalMAX($name)), prism), 1)'
 
     def test_color_continuous_layer_line(self, mocker):
         "should create a line type layer"
@@ -61,7 +61,7 @@ class TestColorContinuousLayerHelper(object):
         )
 
         assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), [blue,#F00]),1)'
+            'globalMIN($name), globalMAX($name)), [blue,#F00]), 1)'
 
     def test_color_continuous_layer_polygon(self, mocker):
         "should create a polygon type layer"
@@ -74,7 +74,7 @@ class TestColorContinuousLayerHelper(object):
         )
 
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name, ' + \
-            'globalMIN($name),globalMAX($name)), [blue,#F00]), 0.9)'
+            'globalMIN($name), globalMAX($name)), [blue,#F00]), 0.9)'
 
     def test_color_continuous_layer_legend(self, mocker):
         "should show/hide the legend"

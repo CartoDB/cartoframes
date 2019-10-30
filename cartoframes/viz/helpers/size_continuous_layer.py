@@ -48,14 +48,20 @@ def size_continuous_layer(
     global_max = 'globalMAX(${0})'.format(value)
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
+    if range_min is None:
+        range_min = global_min
+
+    if range_max is None:
+        range_max = global_max
+
     return Layer(
         source,
         style={
             'point': {
                 '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min or global_min, range_max or global_max, size or [2, 40]),
+                    value, range_min, range_max, size or [2, 40]),
                 'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
-                    value, range_min or global_min, range_max or global_max, size or [2, 40]),
+                    value, range_min, range_max, size or [2, 40]),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#FFB927', opacity or '0.8'),
                 'strokeWidth': '{0}'.format(
@@ -66,9 +72,9 @@ def size_continuous_layer(
             },
             'line': {
                 '@width_value': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min or global_min, range_max or global_max, size or [1, 10]),
+                    value, range_min, range_max, size or [1, 10]),
                 'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
-                    value, range_min or global_min, range_max or global_max, size or [1, 10]),
+                    value, range_min, range_max, size or [1, 10]),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#4CC8A3', opacity or '0.8'),
                 'filter': animation_filter

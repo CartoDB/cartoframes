@@ -53,7 +53,7 @@ def color_continuous_layer(
         source,
         style={
             'point': {
-                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}),{4})'.format(
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min or global_min, range_max or global_max,
                     serialize_palette(palette) or default_palette, opacity or '1'),
                 'width': '{0}'.format(
@@ -65,7 +65,7 @@ def color_continuous_layer(
                 'filter': animation_filter
             },
             'line': {
-                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}),{4})'.format(
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min or global_min, range_max or global_max,
                     serialize_palette(palette) or default_palette, opacity or '1'),
                 'width': '{0}'.format(
@@ -73,7 +73,7 @@ def color_continuous_layer(
                 'filter': animation_filter
             },
             'polygon': {
-               'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}),{4})'.format(
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min or global_min, range_max or global_max,
                     serialize_palette(palette) or default_palette, opacity or '0.9'),
                 'strokeColor': '{0}'.format(
