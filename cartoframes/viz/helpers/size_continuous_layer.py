@@ -44,15 +44,13 @@ def size_continuous_layer(
         cartoframes.viz.Layer: Layer styled by `value`.
         Includes a legend, popup and widget on `value`.
     """
-    global_min = 'globalMIN(${0})'.format(value)
-    global_max = 'globalMAX(${0})'.format(value)
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     if range_min is None:
-        range_min = global_min
+        range_min = 'globalMIN(${0})'.format(value)
 
     if range_max is None:
-        range_max = global_max
+        range_max = 'globalMAX(${0})'.format(value)
 
     return Layer(
         source,

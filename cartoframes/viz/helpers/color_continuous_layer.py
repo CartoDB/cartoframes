@@ -45,16 +45,20 @@ def color_continuous_layer(
         Includes a legend, popup and widget on `value`.
     """
     default_palette = 'bluyl'
-    global_min = 'globalMIN(${0})'.format(value)
-    global_max = 'globalMAX(${0})'.format(value)
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
+
+    if range_min is None:
+        range_min = 'globalMIN(${0})'.format(value)
+
+    if range_max is None:
+        range_max = 'globalMAX(${0})'.format(value)
 
     return Layer(
         source,
         style={
             'point': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
-                    value, range_min or global_min, range_max or global_max,
+                    value, range_min, range_max,
                     serialize_palette(palette) or default_palette, opacity or '1'),
                 'width': '{0}'.format(
                     size or defaults.STYLE['point']['width']),
@@ -66,7 +70,7 @@ def color_continuous_layer(
             },
             'line': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
-                    value, range_min or global_min, range_max or global_max,
+                    value, range_min, range_max,
                     serialize_palette(palette) or default_palette, opacity or '1'),
                 'width': '{0}'.format(
                     size or defaults.STYLE['line']['width']),
@@ -74,7 +78,7 @@ def color_continuous_layer(
             },
             'polygon': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
-                    value, range_min or global_min, range_max or global_max,
+                    value, range_min, range_max,
                     serialize_palette(palette) or default_palette, opacity or '0.9'),
                 'strokeColor': '{0}'.format(
                     stroke_color or defaults.STYLE['polygon']['strokeColor']),
