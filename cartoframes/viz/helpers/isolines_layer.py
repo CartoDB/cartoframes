@@ -77,6 +77,9 @@ def isolines_layer(source, value='data_range', **kwargs):
     if 'stroke_color' not in kwargs:
         kwargs['stroke_color'] = 'rgba(150,150,150,0.4)'
 
+    if 'opacity' not in kwargs:
+        kwargs['opacity'] = '0.8'
+
     if 'title' not in kwargs:
         kwargs['title'] = 'Isolines Areas'
 
