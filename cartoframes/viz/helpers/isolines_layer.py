@@ -72,7 +72,7 @@ def isolines_layer(source, value='data_range', **kwargs):
         lambda r: '%.0f min.' % (r[value]/60), axis=1)
 
     if 'palette' not in kwargs:
-        kwargs['palette'] = 'purpor'
+        kwargs['palette'] = 'pinkyl'
 
     if 'title' not in kwargs:
         kwargs['title'] = 'Isolines Areas'
