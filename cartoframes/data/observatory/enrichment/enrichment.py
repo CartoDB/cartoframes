@@ -240,54 +240,26 @@ class Enrichment(EnrichmentService):
         return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def _prepare_points_enrichment_sql(self, tablename, data_geom_column, variables, filters):
-        filters_str = self._process_filters(filters)
-        tables_meta_data = self._get_tables_meta(variables)
+        filters = self._process_filters(filters)
+        tables_metadata = self._get_tables_metadata(variables).items()
 
         sqls = list()
-        for table, table_meta in tables_meta_data.items():
-            variables_list = table_meta['variables']
-            geotable = table_meta['geotable']
-            project = table_meta['project']
-            dataset = table_meta['dataset']
 
-            sql = '''
-                SELECT data_table.{enrichment_id},
-                    {variables},
-                    ST_Area(enrichment_geo_table.geom) AS {enrichment_table}_area
-                FROM `{project}.{dataset}.{enrichment_table}` enrichment_table
-                    JOIN `{project}.{dataset}.{enrichment_geo_table}` enrichment_geo_table
-                        ON enrichment_table.geoid = enrichment_geo_table.geoid
-                    JOIN `{working_project}.{user_dataset}.{data_table}` data_table
-                        ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-                {filters};
-            '''.format(
-                data_geom_column=data_geom_column,
-                data_table=tablename,
-                dataset=dataset,
-                enrichment_geo_table=geotable,
-                enrichment_id=self.enrichment_id,
-                enrichment_table=table,
-                filters=filters_str,
-                project=project,
-                user_dataset=self.user_dataset,
-                variables=', '.join(['enrichment_table.{}'.format(variable) for variable in variables_list]),
-                working_project=self.working_project
-            )
-
-            sqls.append(sql)
+        for table, metadata in tables_metadata:
+            sqls.append(self._build_query(table, metadata, tablename, data_geom_column, filters))
 
         return sqls
 
     def _prepare_polygon_enrichment_sql(self, tablename, data_geom_column, variables, agg_operators, filters):
         filters_str = self._process_filters(filters)
         agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
-        tables_meta_data = self._get_tables_meta(variables)
+        tables_metadata = self._get_tables_metadata(variables)
 
         grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
 
         sqls = list()
 
-        for table, table_meta in tables_meta_data.items():
+        for table, table_meta in tables_metadata.items():
             variables_list = table_meta['variables']
             geotable = table_meta['geotable']
             project = table_meta['project']
@@ -304,7 +276,7 @@ class Enrichment(EnrichmentService):
                 ]
 
             else:
-                variables_sql = ['enrichment_table.{}'.format(variable) for variable in variables] + \
+                variables_sql = ['enrichment_geo_table.{}'.format(variable) for variable in variables] + \
                     ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                         / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
                             data_geom_column=data_geom_column
@@ -339,3 +311,33 @@ class Enrichment(EnrichmentService):
             sqls.append(sql)
 
         return sqls
+
+    def _build_query(self, table, metadata, tablename, data_geom_column, filters):
+        variables = ', '.join(metadata['variables'])
+        enrichment_geo_table = metadata['geotable']
+        enrichment_project = metadata['project']
+        enrichment_dataset = metadata['dataset']
+
+        return '''
+            SELECT data_table.{enrichment_id},
+                {variables},
+                ST_Area(enrichment_geo_table.geom) AS {table}_area
+            FROM `{enrichment_project}.{enrichment_dataset}.{table}` table
+                JOIN `{enrichment_project}.{enrichment_dataset}.{enrichment_geo_table}` enrichment_geo_table
+                    ON table.geoid = enrichment_geo_table.geoid
+                JOIN `{working_project}.{dataset}.{tablename}` data_table
+                    ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
+            {filters};
+        '''.format(
+            data_geom_column=data_geom_column,
+            tablename=tablename,
+            enrichment_dataset=enrichment_dataset,
+            enrichment_geo_table=enrichment_geo_table,
+            enrichment_id=self.enrichment_id,
+            enrichment_project=enrichment_project,
+            filters=filters,
+            table=table,
+            dataset=self.user_dataset,
+            variables=variables,
+            working_project=self.working_project
+        )

@@ -14,9 +14,9 @@ from ....utils.geom_utils import _compute_geometry_from_geom, geojson_to_wkt, wk
 
 
 _ENRICHMENT_ID = 'enrichment_id'
+_DEFAULT_PROJECT = 'carto-do'
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
-_PUBLIC_DATASET = 'open_data'
 
 
 class EnrichmentService(object):
@@ -24,12 +24,11 @@ class EnrichmentService(object):
 
     def __init__(self, credentials=None):
         self.credentials = credentials = credentials or get_default_credentials()
-        self.user_dataset = self.credentials.get_do_dataset()
+        self.user_dataset = self.credentials.get_do_user_dataset()
         self.bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
         self.working_project = _WORKING_PROJECT
         self.enrichment_id = _ENRICHMENT_ID
         self.public_project = _PUBLIC_PROJECT
-        self.public_dataset = _PUBLIC_DATASET
 
     def _execute_enrichment(self, queries, data, data_geom_column):
         dfs_enriched = list()
@@ -127,25 +126,25 @@ class EnrichmentService(object):
 
         return agg_operators_result
 
-    def _get_tables_meta(self, variables):
-        tables_meta = defaultdict(lambda: defaultdict(list))
+    def _get_tables_metadata(self, variables):
+        tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
             variable_name = variable.column_name
             table_name = self.__get_enrichment_table(variable)
 
-            tables_meta[table_name]['variables'].append(variable_name)
+            tables_metadata[table_name]['variables'].append(variable_name)
 
-            if 'dataset' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['dataset'] = self.__get_dataset(variable)
+            if 'dataset' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable)
 
-            if 'geotable' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['geotable'] = self.__get_geotable(variable)
+            if 'geotable' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['geotable'] = self.__get_geotable(variable)
 
-            if 'project' not in tables_meta[table_name].keys():
-                tables_meta[table_name]['project'] = self.__get_project(variable)
+            if 'project' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['project'] = self.__get_project(variable)
 
-        return tables_meta
+        return tables_metadata
 
     def __get_enrichment_table(self, variable):
         enrichment_table = variable.dataset_name
@@ -159,11 +158,8 @@ class EnrichmentService(object):
         return enrichment_table
 
     def __get_dataset(self, variable):
-        dataset = self.public_dataset
-        if variable.project_name != self.public_project:
-            dataset = self.user_dataset
-
-        return dataset
+        # TODO how to check if the dataset is public
+        return self.user_dataset
 
     def __get_geotable(self, variable):
         geography_id = CatalogDataset.get(variable.dataset).geography
