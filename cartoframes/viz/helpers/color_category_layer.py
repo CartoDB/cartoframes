@@ -19,8 +19,7 @@ def color_category_layer(
         title (str, optional): Title of legend.
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
-        cat (str, optional): Category list. Must be a valid CARTO VL category
-          list.
+        cat (list<str>, optional): Category list. Must be a valid list of categories.
         palette (str, optional): Palette that can be a named CARTOColor palette
           or other valid CARTO VL palette expression. Default is `bold`.
         size (int, optional): Size of point or line features.
