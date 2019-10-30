@@ -52,7 +52,7 @@ class EnrichmentService(object):
         data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
         return data_copy
 
-    def _get_temp_tablename(self):
+    def _get_temp_table_name(self):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
 
@@ -136,10 +136,10 @@ class EnrichmentService(object):
             tables_metadata[table_name]['variables'].append(variable_name)
 
             if 'dataset' not in tables_metadata[table_name].keys():
-                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable)
+                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
 
-            if 'geotable' not in tables_metadata[table_name].keys():
-                tables_metadata[table_name]['geotable'] = self.__get_geotable(variable)
+            if 'geo_table' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
 
             if 'project' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['project'] = self.__get_project(variable)
@@ -147,31 +147,44 @@ class EnrichmentService(object):
         return tables_metadata
 
     def __get_enrichment_table(self, variable):
-        enrichment_table = variable.dataset_name
-
         if variable.project_name != self.public_project:
-            enrichment_table = 'view_{dataset}_{table}'.format(
+            return 'view_{dataset}_{table}'.format(
+                dataset=variable.schema_name,
+                table=variable.dataset_name
+            )
+        else:
+            return '{dataset}_{table}'.format(
                 dataset=variable.schema_name,
                 table=variable.dataset_name
             )
 
-        return enrichment_table
+    def __get_dataset(self, variable, table_name):
+        if variable.project_name != self.public_project:
+            return '{project}.{dataset}.{table_name}'.format(
+                project=self.working_project,
+                dataset=self.user_dataset,
+                table_name=table_name
+            )
+        else:
+            return variable.dataset
 
-    def __get_dataset(self, variable):
-        # TODO how to check if the dataset is public
-        return self.user_dataset
-
-    def __get_geotable(self, variable):
+    def __get_geo_table(self, variable):
         geography_id = CatalogDataset.get(variable.dataset).geography
-        _, dataset_geotable, geotable = geography_id.split('.')
+        _, dataset_geo_table, geo_table = geography_id.split('.')
 
         if variable.project_name != self.public_project:
-            geotable = 'view_{dataset}_{geotable}'.format(
-                dataset=dataset_geotable,
-                geotable=geotable
+            return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
+                project=self.working_project,
+                dataset=self.user_dataset,
+                dataset_geo_table=dataset_geo_table,
+                geo_table=geo_table
             )
-
-        return geotable
+        else:
+            return '{project}.{dataset}.{geo_table}'.format(
+                project=self.public_project,
+                dataset=dataset_geo_table,
+                geo_table=geo_table
+            )
 
     def __get_project(self, variable):
         project = self.public_project
