@@ -53,19 +53,26 @@ def color_continuous_layer(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
+    if stroke_width is None:
+        stroke_width = '{0}'.format(stroke_width or defaults.STYLE['point']['strokeWidth'])
+
+    if size is None:
+        size = '{0}'.format(size or defaults.STYLE['point']['width'])
+
+    if opacity is None:
+        opacity = '{0}'.format(opacity or '1')
+
     return Layer(
         source,
         style={
             'point': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min, range_max,
-                    serialize_palette(palette) or default_palette, opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
+                    serialize_palette(palette) or default_palette, opacity),
+                'width': size,
                 'strokeColor': '{0}'.format(
                     stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
+                'strokeWidth': stroke_width,
                 'filter': animation_filter
             },
             'line': {
