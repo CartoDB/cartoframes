@@ -53,6 +53,7 @@ class CartoDataFrame(GeoDataFrame):
 
     def __init__(self, *args, **kwargs):
         schema = kwargs.pop('schema', None)
+        download = kwargs.pop('download', True)
         credentials = kwargs.pop('credentials', None) or get_default_credentials()
         data, args, kwargs = _extract_data_arg(args, kwargs)
 
@@ -60,8 +61,11 @@ class CartoDataFrame(GeoDataFrame):
 
         self._strategy = self._create_strategy(data, schema, credentials)
 
+        if download and not isinstance(self._strategy, DataFrameDataset):
+            self.download()
+
     @classmethod
-    def from_table(cls, table_name, schema=None, credentials=None):
+    def from_table(cls, table_name, schema=None, credentials=None, download=True):
         """Create a CartoDataFrame from a table.
 
         Args:
@@ -76,10 +80,10 @@ class CartoDataFrame(GeoDataFrame):
             :py:class:`CartoDataFrame <cartoframes.data.CartoDataFrame>`
 
         """
-        return cls(table_name, schema=schema, credentials=credentials)
+        return cls(table_name, schema=schema, credentials=credentials, download=download)
 
     @classmethod
-    def from_query(cls, query, credentials=None):
+    def from_query(cls, query, credentials=None, download=True):
         """Create a CartoDataFrame from a SQL query.
 
         Args:
@@ -93,7 +97,7 @@ class CartoDataFrame(GeoDataFrame):
             :py:class:`CartoDataFrame <cartoframes.data.CartoDataFrame>`
 
         """
-        return cls(query, credentials=credentials)
+        return cls(query, credentials=credentials, download=download)
 
     @classmethod
     def from_file(cls, filename, **kwargs):
@@ -270,7 +274,7 @@ class CartoDataFrame(GeoDataFrame):
         """Computes the geometry type of the CartoDataFrame."""
         return self._strategy.compute_geom_type()
 
-    def plot(self, *args, ** kwargs):
+    def map(self, *args, ** kwargs):
         """Renders the data in a CARTO map.
 
          Returns:
