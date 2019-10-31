@@ -323,4 +323,4 @@ def encode_row(row):
         # - cover the row with "..."
         row = '"{}"'.format(row.replace('"', '""'))
 
-    return u'{}'.format(row).encode('utf-8')
+    return '{}'.format(row).encode('utf-8')

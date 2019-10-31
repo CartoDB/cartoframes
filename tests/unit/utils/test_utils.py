@@ -8,7 +8,7 @@ import requests
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
                                      dict_items, importify_params,
-                                     snake_to_camel)
+                                     snake_to_camel, encode_row)
 
 
 class TestUtils(unittest.TestCase):
@@ -175,3 +175,15 @@ class TestUtils(unittest.TestCase):
         # verbose = False
         verbose = 0
         self.assertIsNone(debug_print(verbose, resp=test_str))
+
+    def test_encode_row(self):
+        assert encode_row('Hello') == b'Hello'
+        assert encode_row('Hello \'world\'') == b'Hello \'world\''
+        assert encode_row('Hello "world"') == b'"Hello ""world"""'
+        assert encode_row('Hello | world') == b'"Hello | world"'
+        assert encode_row('Hello \n world') == b'"Hello \n world"'
+        assert encode_row(b'Hello') == b'Hello'
+        assert encode_row(b'Hello \'world\'') == b'Hello \'world\''
+        assert encode_row(b'Hello "world"') == b'"Hello ""world"""'
+        assert encode_row(b'Hello | world') == b'"Hello | world"'
+        assert encode_row(b'Hello \n world') == b'"Hello \n world"'
