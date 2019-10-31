@@ -16,6 +16,11 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
@@ -317,7 +322,7 @@ def encode_row(row):
         row = row.decode('utf-8')
 
     special_keys = ['"', '|', '\n']
-    if isinstance(row, str) and any(key in row for key in special_keys):
+    if isinstance(row, basestring) and any(key in row for key in special_keys):
         # If the input contains any special key:
         # - replace " by ""
         # - cover the row with "..."
