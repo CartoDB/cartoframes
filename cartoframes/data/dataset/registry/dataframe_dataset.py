@@ -161,7 +161,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 else:
                     val = ''
 
-            row_data.append(_encoded(val))
+            row_data.append(_encode(val))
 
         if with_lnglat:
             lng_val = row[with_lnglat[0]]
@@ -170,21 +170,27 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
                 val = ''
-            row_data.append(_encoded(val))
+            row_data.append(_encode(val))
 
-        csv_row = _encoded('|').join(row_data)
-        csv_row += _encoded('\n')
+        csv_row = _encode('|').join(row_data)
+        csv_row += _encode('\n')
 
         yield csv_row
 
 
-def _encoded(val):
-    if isinstance(val, type(u'')):
-        return val.encode('utf-8')
-    elif isinstance(val, type(b'')):
-        return val
-    else:
-        return u'{}'.format(val).encode('utf-8')
+def _encode(val):
+    if isinstance(val, type(b'')):
+        # Decode the input if it's a bytestring
+        val = val.decode('utf-8')
+
+    reserved_keys = ['|', '\n']
+    if isinstance(val, str) and val not in reserved_keys:
+        # If the input is a string, not reserved:
+        # - replace " by ""
+        # - cover the value with "..."
+        val = '"{}"'.format(val.replace('"', '""'))
+
+    return u'{}'.format(val).encode('utf-8')
 
 
 def _is_null(val):
