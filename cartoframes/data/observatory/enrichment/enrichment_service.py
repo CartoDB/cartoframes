@@ -90,12 +90,11 @@ class EnrichmentService(object):
 
     def _process_filters(self, filters_dict):
         filters = ''
-        # TODO: Add data table ref in fields of filters
         if filters_dict:
             filters_list = list()
 
             for key, value in filters_dict.items():
-                filters_list.append('='.join(["{}".format(key), "'{}'".format(value)]))
+                filters_list.append('='.join(["enrichment_table.{}".format(key), "'{}'".format(value)]))
 
             filters = ' AND '.join(filters_list)
             filters = 'WHERE {filters}'.format(filters=filters)

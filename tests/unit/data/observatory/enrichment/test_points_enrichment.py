@@ -49,7 +49,7 @@ class TestPointsEnrichment(object):
             ON enrichment_table.geoid = enrichment_geo_table.geoid
             JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
             ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-            WHERE a='b';
+            WHERE enrichment_table.a='b';
             '''.format(username=username, temp_table_name=temp_table_name, data_geom_column=data_geom_column),
         ]
 
@@ -86,7 +86,7 @@ class TestPointsEnrichment(object):
             ON enrichment_table.geoid = enrichment_geo_table.geoid
             JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
             ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-            WHERE a='b';
+            WHERE enrichment_table.a='b';
             '''.format(username=username, temp_table_name=temp_table_name, data_geom_column=data_geom_column),
             '''
             SELECT data_table.enrichment_id,
@@ -100,7 +100,7 @@ class TestPointsEnrichment(object):
             ON enrichment_table.geoid = enrichment_geo_table.geoid
             JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
             ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-            WHERE a='b';
+            WHERE enrichment_table.a='b';
             '''.format(username=username, temp_table_name=temp_table_name, data_geom_column=data_geom_column),
         ]
 
