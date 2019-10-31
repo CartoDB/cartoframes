@@ -1,400 +1,407 @@
 {
-  "main": {
-    "file": "introduction.md"
-  },
-  "categories": [
-    {
-      "title": "Data Workflows",
-      "samples": [{
-          "title": "Create Dataset from CSV",
-          "desc": "Create a dataset from a CSV file",
-          "file": "create_dataset_from_csv",
-          "path": "downloading_and_uploading_data"
+    "main": {
+        "file": "introduction.md"
+    },
+    "categories": [{
+        "title": "Data Workflows",
+        "samples": [{
+            "title": "Create Dataset from CSV",
+            "desc": "Create a dataset from a CSV file",
+            "file": "create_dataset_from_csv",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from JSON",
-          "desc": "Create a dataset from a JSON file",
-          "file": "create_dataset_from_json",
-          "path": "downloading_and_uploading_data"
+            "title": "Create Dataset from JSON",
+            "desc": "Create a dataset from a JSON file",
+            "file": "create_dataset_from_json",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from GeoJSON",
-          "desc": "Create a dataset from a GeoJSON file",
-          "file": "create_dataset_from_geojson",
-          "path": "downloading_and_uploading_data"
+            "title": "Create Dataset from GeoJSON",
+            "desc": "Create a dataset from a GeoJSON file",
+            "file": "create_dataset_from_geojson",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Create Dataset from SQL Query",
-          "desc": "Create a dataset from a SQL query",
-          "file": "create_dataset_from_query",
-          "path": "downloading_and_uploading_data"
+            "title": "Create Dataset from SQL Query",
+            "desc": "Create a dataset from a SQL query",
+            "file": "create_dataset_from_query",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Download Dataset from CARTO",
-          "desc": "Download a dataset from CARTO",
-          "file": "download_dataset_from_carto",
-          "path": "downloading_and_uploading_data"
+            "title": "Download Dataset from CARTO",
+            "desc": "Download a dataset from CARTO",
+            "file": "download_dataset_from_carto",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Upload Dataset to CARTO",
-          "desc": "Upload a dataset to CARTO",
-          "file": "upload_dataset_to_carto",
-          "path": "downloading_and_uploading_data"
+            "title": "Upload Dataset to CARTO",
+            "desc": "Upload a dataset to CARTO",
+            "file": "upload_dataset_to_carto",
+            "path": "downloading_and_uploading_data"
         }, {
-          "title": "Change Dataset Privacy",
-          "desc": "Change dataset privacy",
-          "file": "change_dataset_privacy",
-          "path": "downloading_and_uploading_data"
-        }
-      ]
+            "title": "Change Dataset Privacy",
+            "desc": "Change dataset privacy",
+            "file": "change_dataset_privacy",
+            "path": "downloading_and_uploading_data"
+        }]
     }, {
-      "title": "Layers",
-      "samples": [
-        {
-          "title": "Add Layer",
-          "desc":  "Add a Layer",
-          "file": "add_layer",
-          "path": "layers"
+        "title": "Data Enrichment",
+        "samples": [{
+            "title": "Points Enrichment - Public Dataset",
+            "desc": "Points Enrichment - Public Dataset",
+            "file": "points_enrichment_public_dataset",
+            "path": "data_enrichment"
         }, {
-          "title": "Add Default Widget",
-          "desc":  "Add a default Widget",
-          "file": "add_default_widget_layer",
-          "path": "layers"
+            "title": "Polygon Enrichment - Public Dataset",
+            "desc": "Polygon Enrichment - Public Dataset",
+            "file": "polygon_enrichment_public_dataset",
+            "path": "data_enrichment"
         }, {
-          "title": "Add Default Legend",
-          "desc":  "Add a default Legend",
-          "file": "add_default_legend_layer",
-          "path": "layers"
+            "title": "Points Enrichment - Private Dataset",
+            "desc": "Points Enrichment - Private Dataset",
+            "file": "points_enrichment_private_dataset",
+            "path": "data_enrichment"
         }, {
-          "title": "Add Popup on Click",
-          "desc":  "Add popup on click to layer",
-          "file": "add_popup_click_layer",
-          "path": "layers"
+            "title": "Polygon Enrichment - Private Dataset",
+            "desc": "Polygon Enrichment - Private Dataset",
+            "file": "polygon_enrichment_private_dataset",
+            "path": "data_enrichment"
         }, {
-          "title": "Add Popup on Hover",
-          "desc":  "Add popup on hover to layer",
-          "file": "add_popup_hover_layer",
-          "path": "layers"
-        }, {
-          "title": "Add Basic Style",
-          "desc":  "Add basic style to a layer",
-          "file": "add_style_layer",
-          "path": "layers"
-        }, {
-          "title": "Add Data Driven Style",
-          "desc":  "Add a data driven style to a layer",
-          "file": "add_data_driven_style_layer",
-          "path": "layers"
-        } , {
-          "title": "Add Multiple Layers",
-          "desc": "Add multiple Layers",
-          "file": "add_multiple_layers",
-          "path": "layers"
-        }
-      ]
+            "title": "Enrichment Subscription Workflow",
+            "desc": "Enrichment Subscription Workflow",
+            "file": "enrichment_subscription_workflow",
+            "path": "data_enrichment"
+        }]
     }, {
-      "title": "Map Configuration",
-      "samples": [
-        {
-          "title": "Change Default Basemap",
-          "desc": "Change the default CARTO basemap",
-          "file": "change_default_carto_basemap",
-          "path": "map_configuration"
+        "title": "Layers",
+        "samples": [{
+            "title": "Add Layer",
+            "desc": "Add a Layer",
+            "file": "add_layer",
+            "path": "layers"
         }, {
-          "title": "Set Custom Viewport",
-          "desc": "Set a custom viewport",
-          "file": "custom_viewport",
-          "path": "map_configuration"
+            "title": "Add Default Widget",
+            "desc": "Add a default Widget",
+            "file": "add_default_widget_layer",
+            "path": "layers"
         }, {
-          "title": "Set Background Color",
-          "desc": "Set a background color",
-          "file": "solid_color_background",
-          "path": "map_configuration"
+            "title": "Add Default Legend",
+            "desc": "Add a default Legend",
+            "file": "add_default_legend_layer",
+            "path": "layers"
         }, {
-          "title": "Switch to Dark Theme",
-          "desc": "Switch to the dark theme",
-          "file": "dark_theme",
-          "path": "map_configuration"
-        }
-      ]
+            "title": "Add Popup on Click",
+            "desc": "Add popup on click to layer",
+            "file": "add_popup_click_layer",
+            "path": "layers"
+        }, {
+            "title": "Add Popup on Hover",
+            "desc": "Add popup on hover to layer",
+            "file": "add_popup_hover_layer",
+            "path": "layers"
+        }, {
+            "title": "Add Basic Style",
+            "desc": "Add basic style to a layer",
+            "file": "add_style_layer",
+            "path": "layers"
+        }, {
+            "title": "Add Data Driven Style",
+            "desc": "Add a data driven style to a layer",
+            "file": "add_data_driven_style_layer",
+            "path": "layers"
+        }, {
+            "title": "Add Multiple Layers",
+            "desc": "Add multiple Layers",
+            "file": "add_multiple_layers",
+            "path": "layers"
+        }]
     }, {
-      "title": "Visualization Layer Helpers",
-      "samples": [
-        {
-          "title": "Color Category Layer",
-          "desc":  "Color Category Layer",
-          "file": "color_category_layer",
-          "path": "visualization_layers"
+        "title": "Map Configuration",
+        "samples": [{
+            "title": "Change Default Basemap",
+            "desc": "Change the default CARTO basemap",
+            "file": "change_default_carto_basemap",
+            "path": "map_configuration"
         }, {
-          "title": "Color Continuous Layer",
-          "desc":  "Color Continuous Layer",
-          "file": "color_continuous_layer",
-          "path": "visualization_layers"
+            "title": "Set Custom Viewport",
+            "desc": "Set a custom viewport",
+            "file": "custom_viewport",
+            "path": "map_configuration"
         }, {
-          "title": "Color Bins Layer",
-          "desc":  "Color Bins Layer",
-          "file": "color_bins_layer",
-          "path": "visualization_layers"
+            "title": "Set Background Color",
+            "desc": "Set a background color",
+            "file": "solid_color_background",
+            "path": "map_configuration"
         }, {
-          "title": "Size Category Layer",
-          "desc":  "Size Category Layer",
-          "file": "size_category_layer",
-          "path": "visualization_layers"
-        }, {
-          "title": "Size Continuous Layer",
-          "desc":  "Size Continuous Layer",
-          "file": "size_continuous_layer",
-          "path": "visualization_layers"
-        }, {
-          "title": "Size Bins Layer",
-          "desc":  "Size Bins Layer",
-          "file": "size_bins_layer",
-          "path": "visualization_layers"
-        }, {
-          "title": "Cluster Size Layer",
-          "desc":  "Cluster Size Layer",
-          "file": "cluster_size_layer",
-          "path": "visualization_layers"
-        }, {
-          "title": "Animation Layer",
-          "desc":  "Animation Layer",
-          "file": "animation_layer",
-          "path": "visualization_layers"
-        }, {
-          "title": "Combine Visualization Layers",
-          "desc":  "Combine visualization layers",
-          "file": "combine_visualization_layers",
-          "path": "visualization_layers"
-        }
-      ]
+            "title": "Switch to Dark Theme",
+            "desc": "Switch to the dark theme",
+            "file": "dark_theme",
+            "path": "map_configuration"
+        }]
     }, {
-      "title": "Legends",
-      "samples": [
-        {
-          "title": "Default Legend",
-          "desc": "Default Legend",
-          "file": "default_legend",
-          "path": "legends"
+        "title": "Visualization Layer Helpers",
+        "samples": [{
+            "title": "Color Category Layer",
+            "desc": "Color Category Layer",
+            "file": "color_category_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Color Category Legend",
-          "desc": "Color Category Legend",
-          "file": "color_category_legend",
-          "path": "legends"
+            "title": "Color Continuous Layer",
+            "desc": "Color Continuous Layer",
+            "file": "color_continuous_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Color Bins Legend",
-          "desc": "Color Bins Legend",
-          "file": "color_bins_legend",
-          "path": "legends"
+            "title": "Color Bins Layer",
+            "desc": "Color Bins Layer",
+            "file": "color_bins_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Color Continuous Legend",
-          "desc": "Color Continuous Legend",
-          "file": "color_continuous_legend",
-          "path": "legends"
+            "title": "Size Category Layer",
+            "desc": "Size Category Layer",
+            "file": "size_category_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Size Category Legend",
-          "desc": "Size category legend",
-          "file": "size_category_legend",
-          "path": "legends"
+            "title": "Size Continuous Layer",
+            "desc": "Size Continuous Layer",
+            "file": "size_continuous_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Size Bins Legend",
-          "desc": "Size Bins Legend",
-          "file": "size_bins_legend",
-          "path": "legends"
+            "title": "Size Bins Layer",
+            "desc": "Size Bins Layer",
+            "file": "size_bins_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Size Continuous Legend",
-          "desc": "Size Continuous Legend",
-          "file": "size_continuous_legend",
-          "path": "legends"
+            "title": "Cluster Size Layer",
+            "desc": "Cluster Size Layer",
+            "file": "cluster_size_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Multiple Legends",
-          "desc": "Multiple Legends",
-          "file": "multiple_legends",
-          "path": "legends"
+            "title": "Animation Layer",
+            "desc": "Animation Layer",
+            "file": "animation_layer",
+            "path": "visualization_layers"
         }, {
-          "title": "Legend Subtypes",
-          "desc": "Legend Subtypes",
-          "file": "legend_subtype",
-          "path": "legends"
-        }, {
-          "title": "Use Stroke Color in Legend",
-          "desc": "Use stroke color in legend",
-          "file": "stroke_color_legend",
-          "path": "legends"
-        }, {
-          "title": "Use Opacity in Legend",
-          "desc": "Use opacity in legend",
-          "file": "opacity_in_legend",
-          "path": "legends"
-        }
-      ]
+            "title": "Combine Visualization Layers",
+            "desc": "Combine visualization layers",
+            "file": "combine_visualization_layers",
+            "path": "visualization_layers"
+        }]
     }, {
-      "title": "Widgets",
-      "samples": [
-        {
-          "title": "Default Widget",
-          "desc":  "Default Widget",
-          "file": "default_widget",
-          "path": "widgets"
+        "title": "Legends",
+        "samples": [{
+            "title": "Default Legend",
+            "desc": "Default Legend",
+            "file": "default_legend",
+            "path": "legends"
         }, {
-          "title": "Category Widget",
-          "desc":  "Category Widget",
-          "file": "category_widget",
-          "path": "widgets"
+            "title": "Color Category Legend",
+            "desc": "Color Category Legend",
+            "file": "color_category_legend",
+            "path": "legends"
         }, {
-          "title": "Histogram Widget",
-          "desc":  "Histogram Widget",
-          "file": "histogram_widget",
-          "path": "widgets"
+            "title": "Color Bins Legend",
+            "desc": "Color Bins Legend",
+            "file": "color_bins_legend",
+            "path": "legends"
         }, {
-          "title": "Formula Widget",
-          "desc":  "Formula Widget",
-          "file": "formula_widget",
-          "path": "widgets"
+            "title": "Color Continuous Legend",
+            "desc": "Color Continuous Legend",
+            "file": "color_continuous_legend",
+            "path": "legends"
         }, {
-          "title": "Animation Widget",
-          "desc":  "Animation Widget",
-          "file": "animation_widget",
-          "path": "widgets"
+            "title": "Size Category Legend",
+            "desc": "Size category legend",
+            "file": "size_category_legend",
+            "path": "legends"
         }, {
-          "title": "Time Series Widget",
-          "desc":  "Time Series Widget",
-          "file": "time_series_widget",
-          "path": "widgets"
+            "title": "Size Bins Legend",
+            "desc": "Size Bins Legend",
+            "file": "size_bins_legend",
+            "path": "legends"
         }, {
-          "title": "Animation Widget to Style Property",
-          "desc":  "Animation Widget to Style Property",
-          "file": "animation_widget_style_property",
-          "path": "widgets"
+            "title": "Size Continuous Legend",
+            "desc": "Size Continuous Legend",
+            "file": "size_continuous_legend",
+            "path": "legends"
         }, {
-          "title": "Multiple Widgets",
-          "desc":  "Multiple Widgets",
-          "file": "multiple_widgets",
-          "path": "widgets"
-        }
-      ]
+            "title": "Multiple Legends",
+            "desc": "Multiple Legends",
+            "file": "multiple_legends",
+            "path": "legends"
+        }, {
+            "title": "Legend Subtypes",
+            "desc": "Legend Subtypes",
+            "file": "legend_subtype",
+            "path": "legends"
+        }, {
+            "title": "Use Stroke Color in Legend",
+            "desc": "Use stroke color in legend",
+            "file": "stroke_color_legend",
+            "path": "legends"
+        }, {
+            "title": "Use Opacity in Legend",
+            "desc": "Use opacity in legend",
+            "file": "opacity_in_legend",
+            "path": "legends"
+        }]
     }, {
-      "title": "Popups",
-      "samples": [
-        {
-          "title": "Popup on Click",
-          "desc":  "Popup on Click",
-          "file": "popup_on_click",
-          "path": "popups"
+        "title": "Widgets",
+        "samples": [{
+            "title": "Default Widget",
+            "desc": "Default Widget",
+            "file": "default_widget",
+            "path": "widgets"
         }, {
-          "title": "Popup on Hover",
-          "desc":  "Popup on Hover",
-          "file": "popup_on_hover",
-          "path": "popups"
+            "title": "Category Widget",
+            "desc": "Category Widget",
+            "file": "category_widget",
+            "path": "widgets"
         }, {
-          "title": "Popup Titles",
-          "desc":  "Popup Titles",
-          "file": "popup_titles",
-          "path": "popups"
+            "title": "Histogram Widget",
+            "desc": "Histogram Widget",
+            "file": "histogram_widget",
+            "path": "widgets"
         }, {
-          "title": "Multiple Popup Events",
-          "desc":  "Multiple Popup Events",
-          "file": "multiple_popup_events",
-          "path": "popups"
+            "title": "Formula Widget",
+            "desc": "Formula Widget",
+            "file": "formula_widget",
+            "path": "widgets"
         }, {
-          "title": "Popup Expressions",
-          "desc":  "Popups with Expressions",
-          "file": "popup_expressions",
-          "path": "popups"
-        }
-      ]
+            "title": "Animation Widget",
+            "desc": "Animation Widget",
+            "file": "animation_widget",
+            "path": "widgets"
+        }, {
+            "title": "Time Series Widget",
+            "desc": "Time Series Widget",
+            "file": "time_series_widget",
+            "path": "widgets"
+        }, {
+            "title": "Animation Widget to Style Property",
+            "desc": "Animation Widget to Style Property",
+            "file": "animation_widget_style_property",
+            "path": "widgets"
+        }, {
+            "title": "Multiple Widgets",
+            "desc": "Multiple Widgets",
+            "file": "multiple_widgets",
+            "path": "widgets"
+        }]
     }, {
-      "title": "Map Layout",
-      "samples": [
-        {
-          "title": "Default Layout",
-          "desc":  "Default Layout",
-          "file": "default_layout",
-          "path": "map_layout"
+        "title": "Popups",
+        "samples": [{
+            "title": "Popup on Click",
+            "desc": "Popup on Click",
+            "file": "popup_on_click",
+            "path": "popups"
         }, {
-          "title": "Custom Layout",
-          "desc":  "Custom Layout",
-          "file": "custom_layout",
-          "path": "map_layout"
+            "title": "Popup on Hover",
+            "desc": "Popup on Hover",
+            "file": "popup_on_hover",
+            "path": "popups"
         }, {
-          "title": "Layout Titles",
-          "desc":  "Layout Titles",
-          "file": "layout_titles",
-          "path": "map_layout"
+            "title": "Popup Titles",
+            "desc": "Popup Titles",
+            "file": "popup_titles",
+            "path": "popups"
         }, {
-          "title": "Layout Viewport",
-          "desc":  "Layout Viewport",
-          "file": "layout_viewport",
-          "path": "map_layout"
+            "title": "Multiple Popup Events",
+            "desc": "Multiple Popup Events",
+            "file": "multiple_popup_events",
+            "path": "popups"
         }, {
-          "title": "Interactive Layout",
-          "desc":  "Interactive Layout",
-          "file": "interactive_layout",
-          "path": "map_layout"
-        }
-      ]
+            "title": "Popup Expressions",
+            "desc": "Popups with Expressions",
+            "file": "popup_expressions",
+            "path": "popups"
+        }]
     }, {
-      "title": "Geocoding and Isolines",
-      "samples": [
-        {
-          "title": "Geocode a Dataframe",
-          "desc": "Using the Geocoding Services to geocode a Dataframe",
-          "file": "geocoding_dataframe",
-          "path": "data_services"
+        "title": "Map Layout",
+        "samples": [{
+            "title": "Default Layout",
+            "desc": "Default Layout",
+            "file": "default_layout",
+            "path": "map_layout"
         }, {
-          "title": "Calculate Isochrones",
-          "desc": "Using the Isolines Services to calculate isochrones",
-          "file": "isochrones",
-          "path": "data_services"
+            "title": "Custom Layout",
+            "desc": "Custom Layout",
+            "file": "custom_layout",
+            "path": "map_layout"
         }, {
-          "title": "Calculate Isodistances",
-          "desc": "Using the Isolines Services to calculate isodistances",
-          "file": "isodistances",
-          "path": "data_services"
-        },{
-          "title": "Use Geocoding and Isoline Services",
-          "desc": "Use both Geocoding and Isolines services",
-          "file": "geocoding_and_isolines",
-          "path": "data_services"
-        }
-      ]
+            "title": "Layout Titles",
+            "desc": "Layout Titles",
+            "file": "layout_titles",
+            "path": "map_layout"
+        }, {
+            "title": "Layout Viewport",
+            "desc": "Layout Viewport",
+            "file": "layout_viewport",
+            "path": "map_layout"
+        }, {
+            "title": "Interactive Layout",
+            "desc": "Interactive Layout",
+            "file": "interactive_layout",
+            "path": "map_layout"
+        }]
     }, {
-      "title": "Publish and Share",
-      "samples": [{
-          "title": "Publish Public Visualization",
-          "desc": "Publish a public visualization",
-          "file": "publish_a_public_visualization",
-          "path": "publish_and_share"
-        },{
-          "title": "Publish Private Visualization",
-          "desc": "Publish a private visualization",
-          "file": "publish_a_private_visualization",
-          "path": "publish_and_share"
-        }
-      ]
+        "title": "Geocoding and Isolines",
+        "samples": [{
+            "title": "Geocode a Dataframe",
+            "desc": "Using the Geocoding Services to geocode a Dataframe",
+            "file": "geocoding_dataframe",
+            "path": "data_services"
+        }, {
+            "title": "Calculate Isochrones",
+            "desc": "Using the Isolines Services to calculate isochrones",
+            "file": "isochrones",
+            "path": "data_services"
+        }, {
+            "title": "Calculate Isodistances",
+            "desc": "Using the Isolines Services to calculate isodistances",
+            "file": "isodistances",
+            "path": "data_services"
+        }, {
+            "title": "Use Geocoding and Isoline Services",
+            "desc": "Use both Geocoding and Isolines services",
+            "file": "geocoding_and_isolines",
+            "path": "data_services"
+        }]
     }, {
-      "title": "Use Cases",
-      "samples": [{
-          "title": "Visualize Temperatures",
-          "desc": "Visualize warm temperatures",
-          "file": "visualize_temperatures",
-          "path": "real_use_cases"
+        "title": "Publish and Share",
+        "samples": [{
+            "title": "Publish Public Visualization",
+            "desc": "Publish a public visualization",
+            "file": "publish_a_public_visualization",
+            "path": "publish_and_share"
         }, {
-          "title": "Paris WiFi Services",
-          "desc": "Download data in json format",
-          "file": "paris_wifi_services",
-          "path": "real_use_cases"
+            "title": "Publish Private Visualization",
+            "desc": "Publish a private visualization",
+            "file": "publish_a_private_visualization",
+            "path": "publish_and_share"
+        }]
+    }, {
+        "title": "Use Cases",
+        "samples": [{
+            "title": "Visualize Temperatures",
+            "desc": "Visualize warm temperatures",
+            "file": "visualize_temperatures",
+            "path": "real_use_cases"
         }, {
-          "title": "Paris Remarkable Trees",
-          "desc": "Transform and visualize data from a .json file",
-          "file": "paris_remarkable_trees",
-          "path": "real_use_cases"
+            "title": "Paris WiFi Services",
+            "desc": "Download data in json format",
+            "file": "paris_wifi_services",
+            "path": "real_use_cases"
         }, {
-          "title": "Police Department Incident Reports in San Francisco",
-          "desc": "Use and analyze datasets from different sources",
-          "file": "police_department_incident_reports",
-          "path": "real_use_cases"
+            "title": "Paris Remarkable Trees",
+            "desc": "Transform and visualize data from a .json file",
+            "file": "paris_remarkable_trees",
+            "path": "real_use_cases"
         }, {
-          "title": "Geocode London Stations",
-          "desc": "Geocode a dataset in xls format",
-          "file": "geocoding_london_stations",
-          "path": "real_use_cases"
-        }
-      ]
-    }
-  ]
+            "title": "Police Department Incident Reports in San Francisco",
+            "desc": "Use and analyze datasets from different sources",
+            "file": "police_department_incident_reports",
+            "path": "real_use_cases"
+        }, {
+            "title": "Geocode London Stations",
+            "desc": "Geocode a dataset in xls format",
+            "file": "geocoding_london_stations",
+            "path": "real_use_cases"
+        }]
+    }]
 }
