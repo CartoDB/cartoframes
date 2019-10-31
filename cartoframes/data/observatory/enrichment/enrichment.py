@@ -234,7 +234,7 @@ class Enrichment(EnrichmentService):
         self._upload_dataframe(temp_table_name, data_copy, data_geom_column)
 
         queries = self._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, agg_operators, filters
+            temp_table_name, data_geom_column, variables, filters, agg_operators
         )
 
         return self._execute_enrichment(queries, data_copy, data_geom_column)
@@ -250,7 +250,7 @@ class Enrichment(EnrichmentService):
 
         return sqls
 
-    def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, agg_operators, filters):
+    def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters, agg_operators):
         filters_str = self._process_filters(filters)
         agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
         tables_metadata = self._get_tables_metadata(variables).items()
