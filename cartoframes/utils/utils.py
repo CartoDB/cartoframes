@@ -309,3 +309,18 @@ def remove_column_from_dataframe(dataframe, name):
     if dataframe.index.name == name:
         dataframe.reset_index(inplace=True)
         del dataframe[name]
+
+
+def encode_row(row):
+    if isinstance(row, type(b'')):
+        # Decode the input if it's a bytestring
+        row = row.decode('utf-8')
+
+    special_keys = ['"', '|', '\n']
+    if isinstance(row, str) and any(key in row for key in special_keys):
+        # If the input contains any special key:
+        # - replace " by ""
+        # - cover the row with "..."
+        row = '"{}"'.format(row.replace('"', '""'))
+
+    return u'{}'.format(row).encode('utf-8')
