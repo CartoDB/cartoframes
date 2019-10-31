@@ -172,8 +172,8 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 val = ''
             row_data.append(_encode(val))
 
-        csv_row = _encode('|').join(row_data)
-        csv_row += _encode('\n')
+        csv_row = b'|'.join(row_data)
+        csv_row += b'\n'
 
         yield csv_row
 
@@ -183,9 +183,9 @@ def _encode(val):
         # Decode the input if it's a bytestring
         val = val.decode('utf-8')
 
-    reserved_keys = ['|', '\n']
-    if isinstance(val, str) and val not in reserved_keys:
-        # If the input is a string, not reserved:
+    special_keys = ['"', '|', '\n']
+    if isinstance(val, str) and any(key in val for key in special_keys):
+        # If the input contains any special key:
         # - replace " by ""
         # - cover the value with "..."
         val = '"{}"'.format(val.replace('"', '""'))
