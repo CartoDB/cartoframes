@@ -54,7 +54,7 @@ def color_continuous_layer(
         range_max = 'globalMAX(${0})'.format(value)
 
     if stroke_width is None:
-        stroke_width = '{0}'.format(stroke_width or defaults.STYLE['point']['strokeWidth'])
+        stroke_width = defaults.STYLE['point']['strokeWidth']
 
     if size is None:
         size = '{0}'.format(size or defaults.STYLE['point']['width'])
