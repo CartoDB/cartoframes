@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-from .utils import serialize_palette
+from .utils import serialize_palette, get_value
 
 from ..layer import Layer
-from .. import defaults
 
 
 def color_continuous_layer(
@@ -53,44 +52,37 @@ def color_continuous_layer(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
-    if stroke_width is None:
-        stroke_width = defaults.STYLE['point']['strokeWidth']
-
-    if size is None:
-        size = defaults.STYLE['point']['width']
-
-    if opacity is None:
-        opacity = '1'
-
     return Layer(
         source,
         style={
             'point': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min, range_max,
-                    serialize_palette(palette) or default_palette, opacity),
-                'width': size,
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': stroke_width,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'point', 'opacity')
+                ),
+                'width': get_value(size, 'point', 'width'),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min, range_max,
-                    serialize_palette(palette) or default_palette, opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'line', 'opacity')
+                ),
+                'width': get_value(size, 'line', 'width'),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
                     value, range_min, range_max,
-                    serialize_palette(palette) or default_palette, opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'polygon', 'opacity')
+                ),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': animation_filter
             }
         },
