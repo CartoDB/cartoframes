@@ -51,7 +51,7 @@ def size_continuous_layer(
 
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
-    
+
     if opacity is None:
         opacity = '{0}'.format(opacity or '0.8')
 
