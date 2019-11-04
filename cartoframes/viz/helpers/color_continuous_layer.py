@@ -60,7 +60,7 @@ def color_continuous_layer(
         size = defaults.STYLE['point']['width']
 
     if opacity is None:
-        opacity = '{0}'.format(opacity or '1')
+        opacity = '1'
 
     return Layer(
         source,
