@@ -7,7 +7,7 @@ from tqdm import tqdm
 from ....utils.columns import DataframeColumnsInfo, _first_value
 from ....utils.geom_utils import (compute_geodataframe, decode_geometry,
                                   save_index_as_column)
-from ....utils.utils import is_geojson, load_geojson, map_geom_type
+from ....utils.utils import is_geojson, load_geojson, map_geom_type, encode_row
 from .base_dataset import BaseDataset
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
@@ -161,7 +161,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 else:
                     val = ''
 
-            row_data.append(_encoded(val))
+            row_data.append(encode_row(val))
 
         if with_lnglat:
             lng_val = row[with_lnglat[0]]
@@ -170,21 +170,12 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
                 val = ''
-            row_data.append(_encoded(val))
+            row_data.append(encode_row(val))
 
-        csv_row = _encoded('|').join(row_data)
-        csv_row += _encoded('\n')
+        csv_row = b'|'.join(row_data)
+        csv_row += b'\n'
 
         yield csv_row
-
-
-def _encoded(val):
-    if isinstance(val, type(u'')):
-        return val.encode('utf-8')
-    elif isinstance(val, type(b'')):
-        return val
-    else:
-        return u'{}'.format(val).encode('utf-8')
 
 
 def _is_null(val):
