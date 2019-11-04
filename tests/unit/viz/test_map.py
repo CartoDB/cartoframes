@@ -6,8 +6,7 @@ from cartoframes.lib import context
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
 from cartoframes.auth import Credentials
-from cartoframes.data import Dataset
-from cartoframes.data.dataset.registry.strategies_registry import StrategiesRegistry
+from cartoframes.data import CartoDataFrame
 
 from .utils import build_geojson
 
@@ -79,7 +78,7 @@ class TestMapLayer(object):
         assert map.layer_defs[0].get('interactivity') == []
         assert map.layer_defs[0].get('credentials') is not None
         assert map.layer_defs[0].get('legend') is not None
-        assert map.layer_defs[0].get('query') is not None
+        assert map.layer_defs[0].get('data') is not None
         assert map.layer_defs[0].get('type') == 'GeoJSON'
         assert map.layer_defs[0].get('viz') is not None
 
@@ -223,7 +222,6 @@ class TestMapPublication(unittest.TestCase):
 
     def tearDown(self):
         context.create_context = self.original_create_context
-        StrategiesRegistry.instance = None
 
     # def assert_kuviz(self, kuviz, name, privacy):
     #     self.assertIsNotNone(kuviz.id)
@@ -241,8 +239,8 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_remote(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        dataset = Dataset('fake_table', credentials=self.credentials)
-        vmap = Map(Layer(dataset))
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        vmap = Map(Layer(cdf))
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name)
@@ -252,8 +250,8 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_with_password(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        dataset = Dataset('fake_table', credentials=self.credentials)
-        map = Map(Layer(Source(dataset)))
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
         kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
@@ -263,8 +261,8 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_deletion(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        dataset = Dataset('fake_table', credentials=self.credentials)
-        map = Map(Layer(Source(dataset)))
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
@@ -276,8 +274,8 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_update_name(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        dataset = Dataset('fake_table', credentials=self.credentials)
-        map = Map(Layer(Source(dataset)))
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
@@ -291,8 +289,8 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_update_password(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        dataset = Dataset('fake_table', credentials=self.credentials)
-        map = Map(Layer(Source(dataset)))
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)

@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import time
-from copy import deepcopy
 from warnings import filterwarnings, warn
 
 from carto.kuvizs import KuvizManager
@@ -68,37 +67,42 @@ class KuvizPublisher(object):
 
     def _sync_layers(self, layers, table_name=None):
         for idx, layer in enumerate(layers):
-            if layer.source.dataset.is_local():
+            if layer.source.cdf.is_local():
                 table_name = normalize_name("{name}_{idx}".format(name=table_name, idx=idx))
                 layer = self._sync_layer(layer, table_name)
             else:
-                layer = deepcopy(layer)
+                layer = self._clone_layer(layer)
             self._layers.append(layer)
 
     def _sync_layer(self, layer, table_name):
-        layer.source.dataset.upload(table_name=table_name, credentials=self._credentials)
+        layer.source.cdf.upload(table_name=table_name, credentials=self._credentials)
         layer.source = Source(table_name, credentials=self._credentials)
 
         return layer
 
-    def _manage_maps_api_key(self, name):
-        non_public_datasets = [layer.source.dataset
-                               for layer in self._layers
-                               if not layer.source.dataset.is_public()]
+    def _clone_layer(self, layer):
+        layer.source = Source(layer.source.cdf, credentials=self._credentials)
 
-        if len(non_public_datasets) > 0:
+        return layer
+
+    def _manage_maps_api_key(self, name):
+        non_public_cdfs = [layer.source.cdf
+                           for layer in self._layers
+                           if not layer.source.cdf.is_public()]
+
+        if len(non_public_cdfs) > 0:
             api_key_name = '{}_{}_api_key'.format(name, int(time.time() * 1000))
             auth_api_client = AuthAPIClient(self._credentials)
-            self._maps_api_key = auth_api_client.create_api_key(non_public_datasets, api_key_name, ['maps'])
+            self._maps_api_key = auth_api_client.create_api_key(non_public_cdfs, api_key_name, ['maps'])
 
     def _add_layers_credentials(self):
         for layer in self._layers:
             layer.credentials = {
                 # CARTO VL requires a username but CARTOframes allows passing only the base_url.
                 # That's why 'user' is used by default if username is empty.
-                'username': layer.source.dataset.credentials.username or 'user',
+                'username': layer.source.cdf._strategy.credentials.username or 'user',
                 'api_key': self._maps_api_key,
-                'base_url': layer.source.dataset.credentials.base_url
+                'base_url': layer.source.cdf._strategy.credentials.base_url
             }
 
 
