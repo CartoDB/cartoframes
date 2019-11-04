@@ -65,7 +65,7 @@ def color_bins_layer(
         style={
             'point': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, 
+                    func, value, breaks or bins,
                     serialize_palette(palette) or default_palette,
                     get_value(opacity, 'point', 'opacity')
                 ),
@@ -76,7 +76,7 @@ def color_bins_layer(
             },
             'line': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, 
+                    func, value, breaks or bins,
                     serialize_palette(palette) or default_palette,
                     get_value(opacity, 'line', 'opacity')
                 ),
@@ -85,7 +85,7 @@ def color_bins_layer(
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, breaks or bins, 
+                    func, value, breaks or bins,
                     serialize_palette(palette) or default_palette,
                     get_value(opacity, 'polygon', 'opacity')
                 ),
