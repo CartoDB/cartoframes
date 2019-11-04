@@ -62,7 +62,7 @@ class TestKuvizPublisher():
     def test_kuviz_publisher_set_layers(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
         source_1 = Source(build_geojson([-10, 0], [-10, 0]))
         source_2 = Source(build_geojson([0, 10], [10, 0]))
@@ -85,9 +85,9 @@ class TestKuvizPublisher():
     def test_kuviz_publisher_has_layers_copy(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
-        source_1 = Source(CartoDataFrame('fake_table_2', credentials=self.credentials))
+        source_1 = Source(CartoDataFrame('fake_table_2', credentials=self.credentials, download=False))
         layer_1 = Layer(source_1)
         vmap = Map([layer_1])
 
@@ -107,7 +107,7 @@ class TestKuvizPublisher():
     def test_kuviz_publisher_from_local_is_sync(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
         source_1 = Source(build_geojson([-10, 0], [-10, 0]))
         layer_1 = Layer(source_1)
@@ -127,9 +127,9 @@ class TestKuvizPublisher():
     def test_kuviz_publisher_use_defaul_public(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         kuviz_publisher = KuvizPublisher(None)
@@ -150,9 +150,10 @@ class TestKuvizPublisher():
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
         _base_url_credentials = Credentials(base_url='https://fakeuser.carto.com')
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=_base_url_credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame(
+            'fake_table', credentials=_base_url_credentials, download=False))
 
-        cdf = CartoDataFrame('fake_table', credentials=_base_url_credentials)
+        cdf = CartoDataFrame('fake_table', credentials=_base_url_credentials, download=False)
         vmap = Map(Layer(cdf))
 
         kuviz_publisher = KuvizPublisher(None)
@@ -179,7 +180,7 @@ class TestKuvizPublisher():
         _get_api_key_manager.return_value = None
         is_public.return_value = False
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         layers = [Layer(cdf)]
 
         kuviz_publisher = KuvizPublisher(None)
@@ -199,10 +200,10 @@ class TestKuvizPublisher():
 
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
         _create_kuviz.return_value = kuviz
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         html = 'fake_html'
@@ -221,9 +222,9 @@ class TestKuvizPublisher():
     def test_kuviz_publisher_update_fail(self, _create_auth_client_mock, _get_kuviz_manager_mock, _sync_layer):
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         html = 'fake_html'
@@ -245,10 +246,10 @@ class TestKuvizPublisher():
 
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
         _create_kuviz.return_value = kuviz
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         html = 'fake_html'
@@ -275,10 +276,10 @@ class TestKuvizPublisher():
 
         _create_auth_client_mock.return_value = None
         _get_kuviz_manager_mock.return_value = None
-        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials))
+        _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
         _create_kuviz.return_value = kuviz
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         html = 'fake_html'

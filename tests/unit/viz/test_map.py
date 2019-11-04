@@ -239,7 +239,7 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_remote(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(Layer(cdf))
 
         name = 'cf_publish'
@@ -250,7 +250,7 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_with_password(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
@@ -261,7 +261,7 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_deletion(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
@@ -274,7 +274,7 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_update_name(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'
@@ -289,7 +289,7 @@ class TestMapPublication(unittest.TestCase):
     def test_map_publish_update_password(self, _get_publisher):
         _get_publisher.return_value = KuvizPublisherMock()
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials)
+        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         map = Map(Layer(Source(cdf)))
 
         name = 'cf_publish'

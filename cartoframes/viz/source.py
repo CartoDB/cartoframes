@@ -97,7 +97,7 @@ class Source(object):
         if isinstance(data, CartoDataFrame):
             self.cdf = data
         else:
-            self.cdf = CartoDataFrame(data, credentials=credentials, schema=schema)
+            self.cdf = CartoDataFrame(data, credentials=credentials, schema=schema, download=False)
 
         self._init_source_cdf(bounds)
 
