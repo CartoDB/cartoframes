@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import serialize_palette, get_value
+
 from ..layer import Layer
-from .utils import serialize_palette
 
 
 def color_bins_layer(
@@ -65,32 +65,32 @@ def color_bins_layer(
         style={
             'point': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
+                    func, value, breaks or bins, 
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'point', 'opacity')
+                ),
+                'width': get_value(size, 'point', 'width'),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                    func, value, breaks or bins, 
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'line', 'opacity')
+                ),
+                'width': get_value(size, 'line', 'width'),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                    func, value, breaks or bins, 
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'polygon', 'opacity')
+                ),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': animation_filter
             }
         },
