@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 from carto.exceptions import CartoException
 
-from .. import defaults
+from .utils import get_value
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
 
@@ -58,10 +58,8 @@ def cluster_size_layer(
                     cluster_operation, breakpoints),
                 'color': 'opacity({0}, {1})'.format(
                     color or '#FFB927', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter,
                 'resolution': '{0}'.format(resolution)
             }
