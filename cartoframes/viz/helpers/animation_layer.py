@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .utils import serialize_palette, get_value
+from .utils import get_value
 
 from ..layer import Layer
 
