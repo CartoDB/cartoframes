@@ -57,7 +57,7 @@ def color_continuous_layer(
         stroke_width = defaults.STYLE['point']['strokeWidth']
 
     if size is None:
-        size = '{0}'.format(size or defaults.STYLE['point']['width'])
+        size = defaults.STYLE['point']['width']
 
     if opacity is None:
         opacity = '{0}'.format(opacity or '1')
