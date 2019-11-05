@@ -109,7 +109,7 @@ Good job! Now, just taking a look, you can see where are the stations with more 
 
 To learn more about visualizating your data, about how to add legends, pop-ups, widgets and how to do it faster thanks to helpers, check the [visualization examples](/developers/cartoframes/examples/#example-add-default-widget).
 
-Now, let's add another legend with the census polygons from [this dataset](https://github.com/CartoDB/cartoframes/tree/develop/docs/developer-center/guides/data/arlington_bikeshare_july_agg.geojson):
+Now, let's add another legend with the census polygons from [this dataset](https://github.com/CartoDB/cartoframes/tree/develop/docs/developer-center/guides/data/census_track.geojson):
 
 ```py
 census_track = 'census_track.geojson'
