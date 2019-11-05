@@ -20,7 +20,7 @@ def size_bins_layer(
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
-        breaks (int[], optional): Assign manual class break values.
+        breaks (list<int>, optional): Assign manual class break values.
         size (int, optiona): Min/max size array in CARTO VL syntax. Default is
           '[2, 14]' for point geometries and '[1, 10]' for lines.
         color (str, optional): Hex value, rgb expression, or other valid
@@ -48,11 +48,15 @@ def size_bins_layer(
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
-    func = 'buckets' if breaks else {
-        'quantiles': 'globalQuantiles',
-        'equal': 'globalEqIntervals',
-        'stdev': 'globalStandardDev'
-    }.get(method)
+    if breaks is None:
+        func = {
+            'quantiles': 'globalQuantiles',
+            'equal': 'globalEqIntervals',
+            'stdev': 'globalStandardDev'
+        }.get(method)
+    else:
+        func = 'buckets'
+        breaks = list(breaks)
 
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 

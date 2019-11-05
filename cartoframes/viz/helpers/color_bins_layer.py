@@ -20,7 +20,7 @@ def color_bins_layer(
         method (str, optional): Classification method of data: "quantiles", "equal", "stdev".
           Default is "quantiles".
         bins (int, optional): Number of size classes (bins) for map. Default is 5.
-        breaks (int[], optional): Assign manual class break values.
+        breaks (list<int>, optional): Assign manual class break values.
         palette (str, optional): Palette that can be a named cartocolor palette
           or other valid CARTO VL palette expression. Default is `purpor`.
         size (int, optional): Size of point or line features.
@@ -46,17 +46,21 @@ def color_bins_layer(
     if method not in ('quantiles', 'equal', 'stdev'):
         raise ValueError('Available methods are: "quantiles", "equal", "stdev".')
 
-    func = 'buckets' if breaks else {
-        'quantiles': 'globalQuantiles',
-        'equal': 'globalEqIntervals',
-        'stdev': 'globalStandardDev'
-    }.get(method)
-
-    default_palette = 'purpor' if breaks else {
-        'quantiles': 'purpor',
-        'equal': 'purpor',
-        'stdev': 'temps'
-    }.get(method)
+    if breaks is None:
+        func = {
+            'quantiles': 'globalQuantiles',
+            'equal': 'globalEqIntervals',
+            'stdev': 'globalStandardDev'
+        }.get(method)
+        default_palette = {
+            'quantiles': 'purpor',
+            'equal': 'purpor',
+            'stdev': 'temps'
+        }.get(method)
+    else:
+        func = 'buckets'
+        default_palette = 'purpor'
+        breaks = list(breaks)
 
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
