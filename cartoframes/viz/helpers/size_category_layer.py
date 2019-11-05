@@ -18,7 +18,7 @@ def size_category_layer(
         title (str, optional): Title of legend.
         top (int, optional): Number of size categories for layer. Default is
           5. Valid values range from 1 to 16.
-        cat (str, optional): Category list. Must be a valid CARTO VL category
+        cat (list<str>, optional): Category list. Must be a valid CARTO VL category
           list.
         size (str, optiona): Min/max size array in CARTO VL syntax. Default is
           '[2, 20]' for point geometries and '[1, 10]' for lines.
