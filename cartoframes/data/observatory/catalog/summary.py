@@ -95,7 +95,7 @@ def fields_by_type(data):
 
 def geom_coverage(geography_id):
     from .geography import Geography
-    from ...viz import Map, Layer
+    from ....viz import Map, Layer
 
     geography = Geography.get(geography_id)
     geom_coverage = wkb.loads(geography.geom_coverage, hex=True)
