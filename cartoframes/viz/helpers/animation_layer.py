@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import get_value
+
 from ..layer import Layer
 
 
@@ -33,36 +34,32 @@ def animation_layer(
         cartoframes.viz.Layer: Layer styled by `value`. Includes Widget `value`.
     """
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
             'point': {
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
+                'width': get_value(size, 'point', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#EE4D5A', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                    color or '#EE4D5A', opacity),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             },
             'line': {
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                'width': get_value(size, 'line', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity or '0.8'),
+                    color or '#4CC8A3', opacity),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             },
             'polygon': {
-                'color': 'opacity({0}, {1})'.format(
-                    color or defaults.STYLE['polygon']['color'], opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                'color': get_value(color, 'polygon', 'color'),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             }
