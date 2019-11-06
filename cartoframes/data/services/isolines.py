@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import pandas as pd
 
 from ...data import Dataset
-from ...utils.geom_utils import geodataframe_from_dataframe
+from ...utils.geom_utils import compute_geodataframe, geodataframe_from_dataframe
 from .service import Service
 
 QUOTA_SERVICE = 'isolines'
@@ -146,6 +146,7 @@ class Isolines(Service):
         else:  # source.is_local()
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
+            compute_geodataframe(source)
             source.upload(table_name=temporary_table_name, credentials=self._credentials)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
             source_columns = source.get_column_names()
