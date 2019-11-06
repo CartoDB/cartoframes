@@ -72,6 +72,11 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
             ['b', '0101000020E610000036B05582C5A10DC0A032FE7DC6354440'],
             ['c', '0101000020E6100000912C6002B7EE17C0C45A7C0A80AD4240']
         ]
+        self.point_lnglat = [
+            ['a', 0, 10],
+            ['b', 1, 11],
+            ['c', 2, 12]
+        ]
         self.tearDown()
 
     def skip(self, if_no_credits=False, if_no_credentials=False):
@@ -285,6 +290,33 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(result.get_num_rows(), 6)
         self.assertTrue('cartodb_id' in result_columns)
         self.assertTrue('source_id' in result_columns)
+
+    def test_isochrones_from_dataframe_lnglat_geometry(self):
+        self.skip(if_no_credits=True, if_no_credentials=True)
+        iso = Isolines(credentials=self.credentials)
+
+        df = pd.DataFrame(self.point_lnglat, columns=['name', 'lng', 'lat'])
+
+        quota = self.used_quota(iso)
+
+        # Preview
+        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True).metadata
+        self.assertEqual(result.get('required_quota'), 6)
+        self.assertEqual(self.used_quota(iso), quota)
+
+        # Isochrones
+        result = iso.isochrones(df, [100, 1000], mode='car').data
+        self.assertTrue(isinstance(result, gpd.GeoDataFrame))
+        quota += 6
+        self.assertEqual(self.used_quota(iso), quota)
+        self.assertTrue('the_geom' in result)
+        self.assertTrue('data_range' in result)
+        self.assertEqual(len(result.index), 6)
+        result_columns = Dataset(result).get_column_names()
+        self.assertTrue('cartodb_id' in result_columns)
+        self.assertTrue('source_id' in result_columns)
+        self.assertEqual(result['source_id'].min(), df.index.min())
+        self.assertEqual(result['source_id'].max(), df.index.max())
 
     def test_isochrones_from_query_dataset(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
