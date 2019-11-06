@@ -57,7 +57,7 @@ def size_bins_layer(
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
     if opacity is None:
-        opacity = '{0}'.format(opacity or '0.8')
+        opacity = '0.8'
 
     return Layer(
         source,

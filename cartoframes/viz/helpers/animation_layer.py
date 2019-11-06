@@ -34,13 +34,16 @@ def animation_layer(
         cartoframes.viz.Layer: Layer styled by `value`. Includes Widget `value`.
     """
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
             'point': {
                 'width': get_value(size, 'point', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#EE4D5A', opacity or '0.8'),
+                    color or '#EE4D5A', opacity),
                 'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
                 'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
@@ -49,7 +52,7 @@ def animation_layer(
             'line': {
                 'width': get_value(size, 'line', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity or '0.8'),
+                    color or '#4CC8A3', opacity),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             },

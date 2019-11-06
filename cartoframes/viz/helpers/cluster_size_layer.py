@@ -51,7 +51,7 @@ def cluster_size_layer(
     animation_filter = _get_animation(animate, cluster_operation)
 
     if opacity is None:
-        opacity = '{0}'.format(opacity or '0.8')
+        opacity = '0.8'
 
     return Layer(
         source,
