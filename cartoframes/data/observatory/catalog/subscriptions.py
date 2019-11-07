@@ -8,6 +8,12 @@ class Subscriptions(object):
         self._subscriptions_datasets = datasets
         self._subscriptions_geographies = geographies
 
+    def __repr__(self):
+        return 'Datasets: {0}\nGeographies: {1}'.format(
+            self._subscriptions_datasets,
+            self._subscriptions_geographies
+        )
+
     @property
     def datasets(self):
         return self._subscriptions_datasets

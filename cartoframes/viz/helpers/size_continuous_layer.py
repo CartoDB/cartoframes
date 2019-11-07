@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import get_value
 from ..layer import Layer
 
 
@@ -52,6 +52,9 @@ def size_continuous_layer(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
@@ -61,11 +64,9 @@ def size_continuous_layer(
                 'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
                     value, range_min, range_max, size or [2, 40]),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                    color or '#FFB927', opacity),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
@@ -74,7 +75,7 @@ def size_continuous_layer(
                 'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                     value, range_min, range_max, size or [1, 10]),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity or '0.8'),
+                    color or '#4CC8A3', opacity),
                 'filter': animation_filter
             }
         },

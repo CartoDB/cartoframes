@@ -2,7 +2,7 @@ from __future__ import absolute_import, division
 
 from carto.exceptions import CartoException
 
-from .. import defaults
+from .utils import get_value
 from ..constants import CLUSTER_KEYS, CLUSTER_OPERATIONS
 from ..layer import Layer
 
@@ -50,6 +50,9 @@ def cluster_size_layer(
     breakpoints = _get_breakpoints(resolution)
     animation_filter = _get_animation(animate, cluster_operation)
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
@@ -57,11 +60,9 @@ def cluster_size_layer(
                 'width': 'ramp(linear({0}, viewportMIN({0}), viewportMAX({0})), [{1}])'.format(
                     cluster_operation, breakpoints),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                    color or '#FFB927', opacity),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter,
                 'resolution': '{0}'.format(resolution)
             }
