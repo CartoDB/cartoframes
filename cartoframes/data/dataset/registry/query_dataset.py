@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ....utils.utils import is_sql_query
+from ....utils.utils import is_sql_query, check_credentials
 from .base_dataset import BaseDataset
 
 
@@ -13,7 +13,8 @@ class QueryDataset(BaseDataset):
         self._query = data
 
     @staticmethod
-    def can_work_with(data):
+    def can_work_with(data, credentials):
+        check_credentials(credentials)
         return is_sql_query(data)
 
     @classmethod
