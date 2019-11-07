@@ -8,7 +8,7 @@ _default_credentials = None
 
 
 def set_default_credentials(
-        first=None, second=None, credentials=None,
+        first=None, second=None, credentials=None, filepath=None,
         username=None, base_url=None, api_key=None, session=None):
     """Set default credentials for all operations that require authentication
     against a CARTO account. CARTOframes methods
@@ -30,6 +30,7 @@ def set_default_credentials(
         api_key (str, optional): CARTO API key. Depending on the application,
           this can be a project API key or the account master API key.
         username (str, optional): CARTO user name of the account.
+        filepath (str, optional): Location where credentials are stored as a JSON file.
         session (requests.Session, optional): requests session. See `requests
           documentation
           <https://2.python-requests.org/en/master/user/advanced/#session-objects>`__
@@ -66,12 +67,14 @@ def set_default_credentials(
 
             # attempts to read file from default location if it exists
             creds = Credentials.from_file()
+            set_default_credentials(creds)
 
             # read credentials from specified location
             creds = Credentials.from_file('./carto-project-credentials.json')
+            set_default_credentials(creds)
 
-            # set default credentials from file
-            set_default_credentials(Credentials.from_file())
+            # in this case, there is a short way to load a credentials file by default
+            set_default_credentials('./carto-project-credentials.json')
 
 
     Example:
@@ -146,11 +149,16 @@ def set_default_credentials(
 
     _base_url = base_url if first is None else first
     _username = username if first is None else first
+    _filepath = filepath if first is None else first
     _api_key = (api_key if second is None else second) or 'default_public'
     _credentials = credentials if first is None else first
 
     if isinstance(_credentials, Credentials):
         _default_credentials = _credentials
+
+    elif isinstance(_filepath, str):
+        if _is_json_filepath(_filepath):
+            _default_credentials = Credentials.from_file(_filepath)
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
         if _base_url and _is_url(_base_url):
@@ -194,3 +202,7 @@ def get_default_credentials():
 
 def _is_url(text):
     return re.match(r'^https?://.*$', text)
+
+
+def _is_json_filepath(text):
+    return re.match(r'^.*\.json\s*$', text, re.IGNORECASE)
