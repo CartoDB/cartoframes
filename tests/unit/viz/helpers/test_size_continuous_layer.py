@@ -17,7 +17,7 @@ class TestSizeContinuousLayerHelper(object):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            source=self.source,
+            source='SELECT * FROM faketable',
             value='name',
             credentials=Credentials('fakeuser')
         )

@@ -1,11 +1,16 @@
 import pytest
 
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
 class TestSizeBinsLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe()
+
     def test_helpers(self):
         "should be defined"
         assert helpers.size_bins_layer is not None
@@ -14,8 +19,9 @@ class TestSizeBinsLayerHelper(object):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            source='sf_neighborhoods',
-            value='name'
+            source='SELECT * FROM faketable',
+            value='name',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
@@ -41,7 +47,7 @@ class TestSizeBinsLayerHelper(object):
         "should create a point type layer"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             bins=3,
@@ -56,7 +62,7 @@ class TestSizeBinsLayerHelper(object):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             bins=3,
@@ -71,7 +77,7 @@ class TestSizeBinsLayerHelper(object):
         "should apply the classification method"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             method='quantiles'
         )
@@ -80,7 +86,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.style._style['line']['width'] == 'ramp(globalQuantiles($name, 5), [1, 10])'
 
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             method='equal'
         )
@@ -89,7 +95,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.style._style['line']['width'] == 'ramp(globalEqIntervals($name, 5), [1, 10])'
 
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             method='stdev'
         )
@@ -100,7 +106,7 @@ class TestSizeBinsLayerHelper(object):
         msg = 'Available methods are: "quantiles", "equal", "stdev".'
         with pytest.raises(ValueError) as e:
             helpers.size_bins_layer(
-                'sf_neighborhoods',
+                self.source,
                 'name',
                 method='wrong'
             )
@@ -110,7 +116,7 @@ class TestSizeBinsLayerHelper(object):
         "should apply buckets if breaks are passed"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             breaks=[0, 1, 2]
         )
@@ -122,7 +128,7 @@ class TestSizeBinsLayerHelper(object):
         "should show/hide the legend"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=False
         )
@@ -131,7 +137,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.legend._title == ''
 
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=True
         )
@@ -147,7 +153,7 @@ class TestSizeBinsLayerHelper(object):
         "should show/hide the popup"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=False
         )
@@ -155,7 +161,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.popup._hover == []
 
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=True
         )
@@ -169,7 +175,7 @@ class TestSizeBinsLayerHelper(object):
         "should show/hide the widget"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=False
         )
@@ -177,7 +183,7 @@ class TestSizeBinsLayerHelper(object):
         assert layer.widgets._widgets == []
 
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=True
         )
@@ -189,7 +195,7 @@ class TestSizeBinsLayerHelper(object):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
         layer = helpers.size_bins_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             animate='time'
         )
