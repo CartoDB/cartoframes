@@ -37,10 +37,10 @@ class Layer(object):
           "title", "description" and "footer". See :py:class:`Legend
           <cartoframes.viz.Legend>` for more information.
         widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
-           Widget or list of widgets for a layer. It contains the information to display
-           different widget types on the top right of the map. See
-           :py:class:`WidgetList` for more information.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          Widget or list of widgets for a layer. It contains the information to display
+          different widget types on the top right of the map. See
+          :py:class:`WidgetList` for more information.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           these credentials is simply ignored. If not provided the credentials will be

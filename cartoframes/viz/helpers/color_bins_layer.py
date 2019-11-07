@@ -9,7 +9,7 @@ def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, size=None, opacity=None,
         stroke_color=None, stroke_width=None, description='',
-        footer='', legend=True, popup=True, widget=False, animate=None):
+        footer='', legend=True, popup=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a classed color map.
 
     Args:
@@ -38,6 +38,11 @@ def color_bins_layer(
         widget (bool, optional): Display a widget for mapped data: "True" or "False".
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -125,5 +130,6 @@ def color_bins_layer(
                 'value': value,
                 'title': 'Distribution'
             }
-        ]
+        ],
+        credentials=credentials
     )

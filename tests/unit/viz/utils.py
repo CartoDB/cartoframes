@@ -14,3 +14,7 @@ def build_geojson(lats, lngs):
     dataframe['Coordinates'] = dataframe['Coordinates'].apply(Point)
 
     return GeoDataFrame(dataframe, geometry='Coordinates')
+
+
+def simple_dataframe():
+    return DataFrame({'lat': [0], 'lng': [0]})

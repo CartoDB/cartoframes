@@ -9,7 +9,7 @@ def color_category_layer(
         source, value, title='', top=11, cat=None, palette=None,
         size=None, opacity=None, stroke_color=None, stroke_width=None,
         description='', footer='', legend=True, popup=True,
-        widget=False, animate=None):
+        widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a category color map.
 
     Args:
@@ -37,6 +37,11 @@ def color_category_layer(
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -107,5 +112,6 @@ def color_category_layer(
                 'value': value,
                 'title': 'Categories'
             }
-        ]
+        ],
+        credentials=credentials
     )
