@@ -66,14 +66,9 @@ def set_default_credentials(
             from cartoframes.auth import Credentials, set_default_credentials
 
             # attempts to read file from default location if it exists
-            creds = Credentials.from_file()
-            set_default_credentials(creds)
+            set_default_credentials()
 
             # read credentials from specified location
-            creds = Credentials.from_file('./carto-project-credentials.json')
-            set_default_credentials(creds)
-
-            # in this case, there is a short way to load a credentials file by default
             set_default_credentials('./carto-project-credentials.json')
 
 
@@ -167,8 +162,11 @@ def set_default_credentials(
             _default_credentials = Credentials(username=_username, api_key=_api_key)
 
     else:
-        raise ValueError(
-            'Invalid inputs. Pass a Credentials object, a username and api_key pair or a base_url and api_key pair.')
+        try:
+            _default_credentials = Credentials.from_file()
+        except Exception:
+            raise Exception('There is no default credentials file. '
+                            'Run `Credentials(...).save()` to create a credentials file.')
 
     if session:
         _default_credentials.session = session
@@ -186,7 +184,7 @@ def get_default_credentials():
 
             from cartoframes.auth import set_default_credentials, get_default_credentials
 
-            set_default_credentials(Credentials.from_file())
+            set_default_credentials()
 
             current_creds = get_default_credentials()
 
