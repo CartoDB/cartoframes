@@ -218,7 +218,7 @@ class Credentials(object):
 
         return token.access_token
 
-    def get_do_dataset(self):
+    def get_do_user_dataset(self):
         return self._username.replace('-', '_')
 
     def get_api_key_auth_client(self):
