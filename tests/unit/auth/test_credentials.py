@@ -174,11 +174,13 @@ class TestCredentialsFromFile(object):
 
     def test_credentials_without_file(self):
         credentials1 = Credentials(self.username, self.api_key)
-        credentials1.save()
+        output = credentials1.save()
 
         credentials2 = Credentials.from_file()
 
         assert credentials1 == credentials2
+        assert output == 'User credentials for `{0}` were successfully saved to `{1}`'.format(
+            self.username, _DEFAULT_PATH)
 
         credentials1.delete()
 
@@ -188,11 +190,13 @@ class TestCredentialsFromFile(object):
     def test_credentials_with_file(self):
         file = '/tmp/credentials.json'
         credentials1 = Credentials(self.username, self.api_key)
-        credentials1.save(file)
+        output = credentials1.save(file)
 
         credentials2 = Credentials.from_file(file)
 
         assert credentials1 == credentials2
+        assert output == 'User credentials for `{0}` were successfully saved to `{1}`'.format(
+            self.username, file)
 
         credentials1.delete(file)
 

@@ -177,6 +177,8 @@ class Credentials(object):
 
         with open(config_file, 'w') as _file:
             json.dump({'username': self._username, 'api_key': self._api_key, 'base_url': self._base_url}, _file)
+            return 'User credentials for `{0}` were successfully saved to `{1}`'.format(
+                self._username or self._base_url, config_file)
 
     @classmethod
     def delete(cls, config_file=None):
