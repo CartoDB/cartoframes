@@ -2,6 +2,8 @@
 import os
 import pytest
 
+from io import StringIO
+
 from cartoframes.auth import Credentials
 from cartoframes.auth.credentials import _DEFAULT_PATH, _USER_CONFIG_DIR
 
@@ -169,17 +171,22 @@ class TestCredentialsFromFile(object):
         self.username = 'fake_user'
 
     def teardown_method(self, method):
+        if os.path.exists(_DEFAULT_PATH):
+            os.remove(_DEFAULT_PATH)
+
         if os.path.exists(_USER_CONFIG_DIR):
             os.rmdir(_USER_CONFIG_DIR)
 
-    def test_credentials_without_file(self):
+    def test_credentials_without_file(self, mocker):
+        mocker_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+
         credentials1 = Credentials(self.username, self.api_key)
-        output = credentials1.save()
+        credentials1.save()
 
         credentials2 = Credentials.from_file()
 
         assert credentials1 == credentials2
-        assert output == 'User credentials for `{0}` were successfully saved to `{1}`'.format(
+        assert mocker_stdout.getvalue() == 'User credentials for `{0}` were successfully saved to `{1}`\n'.format(
             self.username, _DEFAULT_PATH)
 
         credentials1.delete()
@@ -187,15 +194,17 @@ class TestCredentialsFromFile(object):
         with pytest.raises(FileNotFoundError):
             Credentials.from_file()
 
-    def test_credentials_with_file(self):
+    def test_credentials_with_file(self, mocker):
+        mocker_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
+
         file = '/tmp/credentials.json'
         credentials1 = Credentials(self.username, self.api_key)
-        output = credentials1.save(file)
+        credentials1.save(file)
 
         credentials2 = Credentials.from_file(file)
 
         assert credentials1 == credentials2
-        assert output == 'User credentials for `{0}` were successfully saved to `{1}`'.format(
+        assert mocker_stdout.getvalue() == 'User credentials for `{0}` were successfully saved to `{1}`\n'.format(
             self.username, file)
 
         credentials1.delete(file)
