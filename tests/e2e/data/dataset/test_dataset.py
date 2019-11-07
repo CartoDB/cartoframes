@@ -611,11 +611,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_creation_from_valid_localgeojson(self):
         self.assertIsDataFrameDatasetInstance(self.test_geojson)
 
-    def test_creation_from_invalid_localgeojson(self):
-        geojson = object
-        with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
-            self.assertIsDataFrameDatasetInstance(geojson)
-
     def test_creation_from_valid_geojson_file_path(self):
         paths = [os.path.abspath('tests/e2e/data/dataset/fixtures/valid.geojson'),
                  os.path.abspath('tests/e2e/data/dataset/fixtures/validgeo.json')]
@@ -676,6 +671,22 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset.credentials)
+
+    def test_dataset_from_table_without_credentials(self):
+        table_name = 'fake_table'
+        error_msg = ('Credentials attribute is required. '
+                     'Please pass a `Credentials` instante to the Dataset '
+                     'or use the `set_default_credentials` function.')
+        with self.assertRaises(AttributeError, msg=error_msg):
+            Dataset(table_name)
+
+    def test_dataset_from_query_without_credentials(self):
+        query = 'SELECT * FROM fake_table'
+        error_msg = ('Credentials attribute is required. '
+                     'Please pass a `Credentials` instante to the Dataset '
+                     'or use the `set_default_credentials` function.')
+        with self.assertRaises(AttributeError, msg=error_msg):
+            Dataset(query)
 
     def test_dataset_get_table_names_from_table(self):
         table_name = 'fake_table'
