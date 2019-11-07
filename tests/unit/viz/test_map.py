@@ -36,6 +36,7 @@ class TestMapInitialization(object):
         """Map should return a valid template"""
         map = Map()
         map._repr_html_()
+        assert map.bounds is not None
         assert map._html_map is not None
 
     def test_bounds(self):
