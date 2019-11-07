@@ -8,7 +8,7 @@ from ..layer import Layer
 def animation_layer(
         source, value, title='', duration=None, fade=None, size=None,
         color=None, opacity=None, stroke_color=None, stroke_width=None,
-        widget_type='time-series', description=''):
+        widget_type='time-series', description='', credentials=None):
     """Helper function for quickly creating an animated map.
 
     Args:
@@ -29,6 +29,11 @@ def animation_layer(
           The default is "time-series".
         description (str, optional): Description text placed under the widget title.
         fade (string, optional): Animation fade with the format: "(fade in, fade out)". Default is (1, 1).
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Widget `value`.
@@ -69,5 +74,6 @@ def animation_layer(
             'value': value,
             'title': title,
             'description': description
-        }]
+        }],
+        credentials=credentials
     )

@@ -1,9 +1,12 @@
 from cartoframes.viz import Layer, Legend, Popup, Source, Style
+from cartoframes.lib.context.api_context import APIContext
+from cartoframes.auth import Credentials
 
 
 def setup_mocks(mocker):
     mocker.patch.object(Source, 'get_geom_type', return_value='point')
     mocker.patch.object(Source, '_compute_query_bounds')
+    mocker.patch.object(APIContext, 'get_schema', return_value='public')
 
 
 class TestLayer(object):
@@ -14,7 +17,7 @@ class TestLayer(object):
     def test_initialization_objects(self, mocker):
         """Layer should initialize layer attributes"""
         setup_mocks(mocker)
-        layer = Layer(Source('layer_source'))
+        layer = Layer(Source('layer_source', credentials=Credentials('fakeuser')))
 
         assert layer.is_basemap is False
         assert layer.orig_query == 'SELECT * FROM "public"."layer_source"'
@@ -27,7 +30,7 @@ class TestLayer(object):
     def test_initialization_simple(self, mocker):
         """Layer should initialize layer attributes"""
         setup_mocks(mocker)
-        layer = Layer('layer_source', '')
+        layer = Layer('layer_source', '', credentials=Credentials('fakeuser'))
 
         assert layer.is_basemap is False
         assert layer.orig_query == 'SELECT * FROM "public"."layer_source"'
@@ -53,7 +56,8 @@ class TestLayerStyle(object):
                 'width': 10,
                 'strokeColor': 'black',
                 'strokeWidth': 1
-            }
+            },
+            credentials=Credentials('fakeuser')
         )
 
         assert isinstance(layer.style, Style)
@@ -74,7 +78,8 @@ class TestLayerStyle(object):
                 width: 10
                 strokeColor: black
                 strokeWidth: 1
-            """
+            """,
+            credentials=Credentials('fakeuser')
         )
 
         assert isinstance(layer.style, Style)

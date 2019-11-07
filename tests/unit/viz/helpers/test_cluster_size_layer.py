@@ -1,12 +1,18 @@
 import pytest
+
 from carto.exceptions import CartoException
 
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
 class TestClusterSizeLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe()
+
     def test_helpers(self):
         "should be defined"
         assert helpers.cluster_size_layer is not None
@@ -16,8 +22,9 @@ class TestClusterSizeLayerHelper(object):
         setup_mocks(mocker)
 
         layer = helpers.cluster_size_layer(
-            source='sf_neighborhoods',
-            value='name'
+            source='SELECT * FROM faketable',
+            value='name',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
@@ -46,7 +53,7 @@ class TestClusterSizeLayerHelper(object):
         msg = '"invalid" is not a valid operation. Valid operations are count, avg, min, max, sum'
         with pytest.raises(CartoException) as e:
             helpers.cluster_size_layer(
-                source='sf_neighborhoods',
+                source=self.source,
                 value='name',
                 operation='invalid'
             )

@@ -5,7 +5,7 @@ from warnings import warn
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ....utils.columns import Column, normalize_name
-from ....utils.utils import is_table_name
+from ....utils.utils import is_table_name, check_credentials
 from .base_dataset import BaseDataset
 
 
@@ -20,7 +20,8 @@ class TableDataset(BaseDataset):
             warn('Table will be named `{}`'.format(self._table_name))
 
     @staticmethod
-    def can_work_with(data):
+    def can_work_with(data, credentials):
+        check_credentials(credentials)
         return is_table_name(data)
 
     @classmethod
