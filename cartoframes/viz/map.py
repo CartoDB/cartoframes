@@ -339,16 +339,17 @@ class Map(object):
             layers=_get_layer_defs(self._publisher.get_layers()),
             bounds=self.bounds,
             size=None,
+            camera=self.camera,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=False,
             theme=self.theme,
-            _carto_vl_path=self._carto_vl_path,
-            _airship_path=self._airship_path,
             title=name,
             description=self.description,
+            is_static=self.is_static,
             is_embed=True,
-            is_static=self.is_static)
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
 
         return html_map.html
 
