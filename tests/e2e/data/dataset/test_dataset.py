@@ -675,7 +675,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_dataset_from_table_without_credentials(self):
         table_name = 'fake_table'
         error_msg = ('Credentials attribute is required. '
-                     'Please pass a `Credentials` instante to the Dataset '
+                     'Please pass a `Credentials` instance '
                      'or use the `set_default_credentials` function.')
         with self.assertRaises(AttributeError, msg=error_msg):
             Dataset(table_name)
@@ -683,7 +683,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_dataset_from_query_without_credentials(self):
         query = 'SELECT * FROM fake_table'
         error_msg = ('Credentials attribute is required. '
-                     'Please pass a `Credentials` instante to the Dataset '
+                     'Please pass a `Credentials` instance '
                      'or use the `set_default_credentials` function.')
         with self.assertRaises(AttributeError, msg=error_msg):
             Dataset(query)
