@@ -1,11 +1,12 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment
+from cartoframes.data.observatory import Enrichment, Variable
+from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService
 
 try:
-    from unittest.mock import Mock
+    from unittest.mock import Mock, patch
 except ImportError:
-    from mock import Mock
+    from mock import Mock, patch
 
 
 class TestPolygonEnrichment(object):
@@ -20,36 +21,74 @@ class TestPolygonEnrichment(object):
         self.credentials = None
         BigQueryClient._init_client = self.original_init_client
 
-    def test_enrichment_query_by_polygons_one_variable(self):
+    @patch.object(EnrichmentService, '_get_tables_metadata')
+    def test_enrichment_query_by_polygons_one_variable(self, _get_tables_metadata_mock):
         enrichment = Enrichment(credentials=self.credentials)
         username = self.username
         temp_table_name = 'test_table'
         data_geom_column = 'the_geom'
-        agg_operators = {'var1': 'AVG'}
-        variables = enrichment._prepare_variables(
-          'carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG'
-        )
+        agg_operators = {'column1': 'AVG'}
+
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        geo_table = 'geo_table'
+        variable_name = 'variable1'
+        column_name = 'column1'
+
+        variable = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
+            'slug': variable_name,
+            'name': 'Population',
+            'description': 'Number of people',
+            'column_name': column_name,
+            'db_type': 'Numeric',
+            'dataset_id': '{}.{}.{}'.format(project, dataset, table),
+            'agg_method': '',
+            'variable_group_id': 'vargroup1',
+            'starred': True,
+            'summary_json': {}
+        })
+        variables = [variable]
+
+        view_name = 'view_{}_{}'.format(dataset, table)
+        tables_metadata = {}
+        tables_metadata[view_name] = {
+            'variables': [column_name],
+            'dataset': 'carto-do-customers.{}.{}'.format(self.username, view_name),
+            'geo_table': 'carto-do-customers.{}.{}'.format(self.username, geo_table),
+            'project': 'carto-do-customers'
+        }
+
+        _get_tables_metadata_mock.return_value = tables_metadata
+
         filters = {'a': 'b'}
 
-        actual_queries = enrichment. _prepare_polygon_enrichment_sql(
+        actual_queries = enrichment._prepare_polygon_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters, agg_operators
         )
 
         expected_queries = [
             '''
-            SELECT data_table.enrichment_id, avg(enrichment_table.CRMCYBURG *\
+            SELECT data_table.enrichment_id, AVG(enrichment_table.{column} *\
                 (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                 / ST_area(data_table.{data_geom_column})))
-                AS CRMCYBURG
-            FROM `carto-do-customers.{username}.view_ags_demographics_crimerisk_usa_blockgroup_2015_yearly_2018`\
+                AS {column}
+            FROM `carto-do-customers.{username}.{view}`\
                 enrichment_table
-            JOIN `carto-do-customers.{username}.view_ags_geography_usa_blockgroup_2015` enrichment_geo_table
+            JOIN `carto-do-customers.{username}.{geo_table}` enrichment_geo_table
             ON enrichment_table.geoid = enrichment_geo_table.geoid
             JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
             ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
             WHERE enrichment_table.a='b'
             group by data_table.enrichment_id;
-            '''.format(username=username, temp_table_name=temp_table_name, data_geom_column=data_geom_column)
+            '''.format(
+                column=column_name,
+                username=username,
+                view=view_name,
+                geo_table=geo_table,
+                temp_table_name=temp_table_name,
+                data_geom_column=data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -63,13 +102,13 @@ class TestPolygonEnrichment(object):
         temp_table_name = 'test_table'
         data_geom_column = 'the_geom'
         agg_operators = {'var1': 'AVG'}
-        variables = enrichment._prepare_variables([
-            'carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG',
-            'carto-do.mastercard.financial_mrli_usa_blockgroup_2019_monthly_2019.ticket_size_score'
-        ])
+        variables = [
+            Variable({id: 'carto-do.ags.demographics_crimerisk_usa_blockgroup_2015_yearly_2018.CRMCYBURG'}),
+            Variable({id: 'carto-do.mastercard.financial_mrli_usa_blockgroup_2019_monthly_2019.ticket_size_score'})
+        ]
         filters = {'a': 'b'}
 
-        actual_queries = enrichment. _prepare_polygon_enrichment_sql(
+        actual_queries = enrichment._prepare_polygon_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters, agg_operators
         )
 
