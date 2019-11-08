@@ -120,11 +120,11 @@ class Enrichment(EnrichmentService):
             agg_operators (dict, str, None, optional): dictionary with either a `column` key
                 with the name of the column to aggregate or a `operator` value with the operator to group by.
                 If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
-                will be retrieved from metadata column.
+                will be retrieved from `agg_method` column of the catalog entity. If the `agg_method` column
+                is empty too, default `array_agg` function will be used.
                 If `agg_operators` is a string then all columns will be aggregated by this operator.
-                If `agg_operators` is `None` then the default `array_agg` function will be used. Since we're
-                using a `group by` clause, all the values which data geometry intersects with will be returned
-                in the array.
+                Since we're using a `group by` clause, all the values which data geometry intersects with will be
+                returned in the array.
 
         Returns:
             A DataFrame as the provided one but with the variables to enrich appended to it
