@@ -21,7 +21,7 @@ class DataFrameDataset(BaseDataset):
         self._df = data
 
     @staticmethod
-    def can_work_with(data):
+    def can_work_with(data, credentials):
         return isinstance(data, pd.DataFrame) or is_geojson(data)
 
     @classmethod

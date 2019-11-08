@@ -177,6 +177,11 @@
             "file": "animation_layer",
             "path": "visualization_layers"
         }, {
+            "title": "Isolines Layer",
+            "desc": "Isolines Layer",
+            "file": "isolines_layer",
+            "path": "visualization_layers"
+        }, {
             "title": "Combine Visualization Layers",
             "desc": "Combine visualization layers",
             "file": "combine_visualization_layers",

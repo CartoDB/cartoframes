@@ -452,10 +452,11 @@ def _conv2nan(val):
 
 
 def _compute_bounds(layers):
-    if layers is None or len(layers) == 0:
-        return None
+    init_bounds = None
+    if layers is not None and len(layers) > 0:
+        init_bounds = layers[0].bounds
 
-    bounds = _format_bounds(layers[0].bounds)
+    bounds = _format_bounds(init_bounds)
 
     for layer in layers[1:]:
         layer_bounds = _format_bounds(layer.bounds)

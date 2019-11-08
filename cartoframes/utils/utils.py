@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import os
 import re
 import sys
 import json
@@ -232,6 +231,8 @@ def load_geojson(input_data):
                 'properties': {},
                 'geometry': input_data
             }])
+        else:
+            data = geopandas.GeoDataFrame()
 
     else:
         raise ValueError(
@@ -287,7 +288,7 @@ def is_geojson_file(data):
 
 
 def is_geojson_file_path(data):
-    return is_geojson_file(data) and os.path.exists(data)
+    return is_geojson_file(data)
 
 
 def is_geojson(data):
@@ -298,6 +299,13 @@ def is_table_name(data):
     # avoid circular dependecies
     from .columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
+
+
+def check_credentials(credentials):
+    if credentials is None:
+        raise AttributeError('Credentials attribute is required. '
+                             'Please pass a `Credentials` instance '
+                             'or use the `set_default_credentials` function.')
 
 
 def get_center(center):
