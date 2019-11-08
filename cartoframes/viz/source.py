@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-from . import defaults
 from ..data import Dataset
 from ..data.dataset.registry.base_dataset import BaseDataset
 from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
@@ -123,8 +122,6 @@ class Source(object):
                 'api_key': credentials.api_key,
                 'base_url': credentials.base_url
             }
-        else:
-            return defaults.CREDENTIALS
 
     def _init_source_dataset(self, bounds):
         if self.dataset.is_local():
