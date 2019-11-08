@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import get_value
+
 from ..layer import Layer
 
 
 def animation_layer(
         source, value, title='', duration=None, fade=None, size=None,
         color=None, opacity=None, stroke_color=None, stroke_width=None,
-        widget_type='time-series', description=''):
+        widget_type='time-series', description='', credentials=None):
     """Helper function for quickly creating an animated map.
 
     Args:
@@ -28,41 +29,42 @@ def animation_layer(
           The default is "time-series".
         description (str, optional): Description text placed under the widget title.
         fade (string, optional): Animation fade with the format: "(fade in, fade out)". Default is (1, 1).
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`. Includes Widget `value`.
     """
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
             'point': {
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
+                'width': get_value(size, 'point', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#EE4D5A', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                    color or '#EE4D5A', opacity),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             },
             'line': {
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                'width': get_value(size, 'line', 'width'),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity or '0.8'),
+                    color or '#4CC8A3', opacity),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             },
             'polygon': {
-                'color': 'opacity({0}, {1})'.format(
-                    color or defaults.STYLE['polygon']['color'], opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                'color': get_value(color, 'polygon', 'color'),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': 'animation(linear(${0}), {1}, fade{2})'.format(
                     value, duration or 20, fade or '(1, 1)')
             }
@@ -72,5 +74,6 @@ def animation_layer(
             'value': value,
             'title': title,
             'description': description
-        }]
+        }],
+        credentials=credentials
     )

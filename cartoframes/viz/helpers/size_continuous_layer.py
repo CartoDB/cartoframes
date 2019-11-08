@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import get_value
 from ..layer import Layer
 
 
 def size_continuous_layer(
         source, value, title='', range_min=None, range_max=None, size=None, color=None,
         opacity=None, stroke_width=None, stroke_color=None, description='', footer='',
-        legend=True, popup=True, widget=False, animate=None):
+        legend=True, popup=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a size symbol map with
     continuous size scaled by `value`.
 
@@ -39,6 +39,11 @@ def size_continuous_layer(
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -52,6 +57,9 @@ def size_continuous_layer(
     if range_max is None:
         range_max = 'globalMAX(${0})'.format(value)
 
+    if opacity is None:
+        opacity = '0.8'
+
     return Layer(
         source,
         style={
@@ -61,11 +69,9 @@ def size_continuous_layer(
                 'width': 'ramp(linear(sqrt(${0}), sqrt({1}), sqrt({2})), {3})'.format(
                     value, range_min, range_max, size or [2, 40]),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#FFB927', opacity or '0.8'),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
+                    color or '#FFB927', opacity),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
@@ -74,7 +80,7 @@ def size_continuous_layer(
                 'width': 'ramp(linear(${0}, {1}, {2}), {3})'.format(
                     value, range_min, range_max, size or [1, 10]),
                 'color': 'opacity({0}, {1})'.format(
-                    color or '#4CC8A3', opacity or '0.8'),
+                    color or '#4CC8A3', opacity),
                 'filter': animation_filter
             }
         },
@@ -106,5 +112,6 @@ def size_continuous_layer(
                 'value': value,
                 'title': 'Distribution'
             }
-        ]
+        ],
+        credentials=credentials
     )

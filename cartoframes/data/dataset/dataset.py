@@ -463,7 +463,7 @@ class Dataset(object):
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or get_default_credentials()
         for strategy in self._registry.get_strategies():
-            if strategy.can_work_with(data):
+            if strategy.can_work_with(data, credentials):
                 return strategy.create(data, credentials, schema)
 
         raise ValueError('We can not detect the Dataset type')

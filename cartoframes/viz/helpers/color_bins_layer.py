@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import serialize_palette, get_value
+
 from ..layer import Layer
-from .utils import serialize_palette
 
 
 def color_bins_layer(
         source, value, title='', method='quantiles', bins=5,
         breaks=None, palette=None, size=None, opacity=None,
         stroke_color=None, stroke_width=None, description='',
-        footer='', legend=True, popup=True, widget=False, animate=None):
+        footer='', legend=True, popup=True, widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a classed color map.
 
     Args:
@@ -38,6 +38,11 @@ def color_bins_layer(
         widget (bool, optional): Display a widget for mapped data: "True" or "False".
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -69,32 +74,32 @@ def color_bins_layer(
         style={
             'point': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
+                    func, value, breaks or bins,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'point', 'opacity')
+                ),
+                'width': get_value(size, 'point', 'width'),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                    func, value, breaks or bins,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'line', 'opacity')
+                ),
+                'width': get_value(size, 'line', 'width'),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, breaks or bins, serialize_palette(palette) or default_palette,
-                    opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                    func, value, breaks or bins,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'polygon', 'opacity')
+                ),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': animation_filter
             }
         },
@@ -125,5 +130,6 @@ def color_bins_layer(
                 'value': value,
                 'title': 'Distribution'
             }
-        ]
+        ],
+        credentials=credentials
     )

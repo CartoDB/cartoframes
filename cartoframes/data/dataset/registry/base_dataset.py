@@ -37,7 +37,7 @@ class BaseDataset():
 
     @staticmethod
     @abstractmethod
-    def can_work_with():
+    def can_work_with(data, credentials):
         pass
 
     @classmethod

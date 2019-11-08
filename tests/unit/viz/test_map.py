@@ -9,7 +9,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data import Dataset
 from cartoframes.data.dataset.registry.strategies_registry import StrategiesRegistry
 
-from .utils import build_geojson
+from .utils import build_geodataframe
 
 from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
@@ -36,6 +36,7 @@ class TestMapInitialization(object):
         """Map should return a valid template"""
         map = Map()
         map._repr_html_()
+        assert map.bounds is not None
         assert map._html_map is not None
 
     def test_bounds(self):
@@ -70,7 +71,7 @@ class TestMapInitialization(object):
 class TestMapLayer(object):
     def test_one_layer(self):
         """Map layer should be able to initialize one layer"""
-        source = Source(build_geojson([-10, 0], [-10, 0]))
+        source = Source(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(source)
         map = Map(layer)
 
@@ -85,8 +86,8 @@ class TestMapLayer(object):
 
     def test_two_layers(self):
         """Map layer should be able to initialize two layers in the correct order"""
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
-        source_2 = Source(build_geojson([0, 10], [10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         map = Map([layer_1, layer_2])
@@ -96,7 +97,7 @@ class TestMapLayer(object):
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(
             source_1,
             popup={
@@ -128,7 +129,7 @@ class TestMapLayer(object):
 
     def test_default_interactive_layer(self):
         """Map layer should get the default event if the interactivity is set to []"""
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
         layer = Layer(
             source_1,
             popup={}
