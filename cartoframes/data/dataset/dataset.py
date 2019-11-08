@@ -156,7 +156,6 @@ class Dataset(object):
 
     def get_query(self):
         """Get the computed query"""
-
         return self._strategy.get_query()
 
     def get_geodataframe(self):
