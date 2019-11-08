@@ -238,8 +238,9 @@ class TestMapPublication(unittest.TestCase):
         assert kuviz_dict['name'] == name
         assert kuviz_dict['privacy'] == privacy
 
+    @patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
     @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_remote(self, _get_publisher):
+    def test_map_publish_remote_default(self, _get_publisher, mock_set_content):
         _get_publisher.return_value = KuvizPublisherMock()
 
         dataset = Dataset('fake_table', credentials=self.credentials)
@@ -248,6 +249,60 @@ class TestMapPublication(unittest.TestCase):
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name)
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        mock_set_content.assert_called_once_with(
+            _airship_path=None,
+            _carto_vl_path=None,
+            basemap='Positron',
+            bounds=[[-180, -90], [180, 90]],
+            camera=None,
+            default_legend=False,
+            description=None,
+            is_embed=True,
+            is_static=None,
+            layers=[],
+            show_info=False,
+            size=None,
+            theme=None,
+            title='cf_publish'
+        )
+
+    @patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
+    @patch('cartoframes.viz.map._get_publisher')
+    def test_map_publish_remote_params(self, _get_publisher, mock_set_content):
+        _get_publisher.return_value = KuvizPublisherMock()
+
+        dataset = Dataset('fake_table', credentials=self.credentials)
+        vmap = Map(
+            Layer(dataset),
+            basemap='yellow',
+            bounds={'west': 1, 'east': 2, 'north': 3, 'south': 4},
+            viewport={'zoom': 5, 'lat': 50, 'lng': -10},
+            default_legend=True,
+            is_static=True,
+            theme='dark',
+            title='title',
+            description='description'
+        )
+
+        name = 'cf_publish'
+        kuviz_dict = vmap.publish(name)
+        self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PUBLIC)
+        mock_set_content.assert_called_once_with(
+            _airship_path=None,
+            _carto_vl_path=None,
+            basemap='yellow',
+            bounds=[[1, 2], [4, 3]],
+            camera={'bearing': None, 'center': [-10, 50], 'pitch': None, 'zoom': 5},
+            default_legend=True,
+            description='description',
+            is_embed=True,
+            is_static=True,
+            layers=[],
+            show_info=False,
+            size=None,
+            theme='dark',
+            title='cf_publish'
+        )
 
     @patch('cartoframes.viz.map._get_publisher')
     def test_map_publish_with_password(self, _get_publisher):
