@@ -31,7 +31,7 @@ class TestDataUtils(object):
             Point([0, 0]),
             Point([10, 15]),
             Point([20, 30])
-        ], name='geometry')
+        ], name='__cartoframes_geometry')
         self.msg = 'No geographic data found. ' + \
             'If a geometry exists, change the column name ' + \
             '(geometry, the_geom, wkt_geometry, wkb_geometry, geom, wkt, wkb) ' + \
