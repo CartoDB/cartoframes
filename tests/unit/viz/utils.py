@@ -1,19 +1,17 @@
-from geopandas import GeoDataFrame
 from pandas import DataFrame
-from shapely.geometry import Point
+
+from cartoframes.utils.geom_utils import geodataframe_from_dataframe
 
 
-def build_geojson(lats, lngs):
+def build_geodataframe(lats, lngs):
     coordinates = {
-        'Latitude': lats,
-        'Longitude': lngs
+        'latitude': lats,
+        'longitude': lngs
     }
 
     dataframe = DataFrame(coordinates)
-    dataframe['Coordinates'] = list(zip(dataframe.Longitude, dataframe.Latitude))
-    dataframe['Coordinates'] = dataframe['Coordinates'].apply(Point)
 
-    return GeoDataFrame(dataframe, geometry='Coordinates')
+    return geodataframe_from_dataframe(dataframe)
 
 
 def simple_dataframe():

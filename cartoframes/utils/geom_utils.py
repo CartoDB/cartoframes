@@ -5,7 +5,6 @@ import geopandas
 import binascii as ba
 
 from copy import deepcopy
-from warnings import warn
 from shapely import wkb, wkt, geometry, geos
 
 from carto.exceptions import CartoException
@@ -45,6 +44,8 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
+RESERVED_GEO_COLUMN_NAME = '__cartoframes_geometry'
+
 
 def compute_query(dataset):
     if dataset.table_name:
@@ -60,31 +61,29 @@ def compute_geodataframe(dataset):
 
 
 def geodataframe_from_dataframe(dataframe):
-    if dataframe is not None:
-        if isinstance(dataframe, geopandas.GeoDataFrame):
-            return dataframe
+    if dataframe is None:
+        return None
 
+    if RESERVED_GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
         if geom_column is not None:
-            dataframe['geometry'] = _compute_geometry_from_geom(geom_column)
-            _warn_new_geometry_column(dataframe)
+            dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
         else:
             lat_column = _get_column(dataframe, LAT_COLUMN_NAMES)
             lng_column = _get_column(dataframe, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
-                dataframe['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
-                _warn_new_geometry_column(dataframe)
+                dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_latlng(lat_column, lng_column)
             else:
                 raise ValueError('''No geographic data found. '''
                                  '''If a geometry exists, change the column name ({0}) or '''
                                  '''ensure it is a DataFrame with a valid geometry. '''
                                  '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
-                                     ', '.join(GEOM_COLUMN_NAMES),
-                                     ', '.join(LAT_COLUMN_NAMES),
-                                     ', '.join(LNG_COLUMN_NAMES)
+                                    ', '.join(GEOM_COLUMN_NAMES),
+                                    ', '.join(LAT_COLUMN_NAMES),
+                                    ', '.join(LNG_COLUMN_NAMES)
                                  ))
-        return geopandas.GeoDataFrame(dataframe)
-    return None
+
+    return geopandas.GeoDataFrame(dataframe, geometry=RESERVED_GEO_COLUMN_NAME)
 
 
 def _get_column(df, options):
@@ -94,15 +93,13 @@ def _get_column(df, options):
     return None
 
 
-def _warn_new_geometry_column(df):
-    if 'geometry' not in df:
-        warn('A new "geometry" column has been added to the original dataframe.')
-
-
 def _compute_geometry_from_geom(geom_column):
-    first_geom = next(item for item in geom_column if item is not None)
-    enc_type = detect_encoding_type(first_geom)
-    return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+    if geom_column.size > 0:
+        first_geom = next(item for item in geom_column if item is not None)
+        enc_type = detect_encoding_type(first_geom)
+        return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+    else:
+        return geom_column
 
 
 def _compute_geometry_from_latlng(lat, lng):
@@ -136,7 +133,7 @@ def decode_geometry(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return ''
+    return geometry.base.BaseGeometry()
 
 
 def detect_encoding_type(input_geom):
