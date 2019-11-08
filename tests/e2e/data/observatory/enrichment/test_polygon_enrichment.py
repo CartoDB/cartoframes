@@ -24,34 +24,27 @@ class TestPolygonEnrichment(object):
     @patch.object(EnrichmentService, '_get_tables_metadata')
     def test_enrichment_query_by_polygons_one_variable(self, _get_tables_metadata_mock):
         enrichment = Enrichment(credentials=self.credentials)
-        username = self.username
+
         temp_table_name = 'test_table'
         data_geom_column = 'the_geom'
-        agg_operators = {'column1': 'AVG'}
-
         project = 'project'
         dataset = 'dataset'
         table = 'table'
-        geo_table = 'geo_table'
         variable_name = 'variable1'
         column_name = 'column1'
+        geo_table = 'geo_table'
+        view_name = 'view_{}_{}'.format(dataset, table)
+        agg = 'AVG'
+        agg_operators = {}
+        agg_operators[column_name] = agg
+        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
-            'slug': variable_name,
-            'name': 'Population',
-            'description': 'Number of people',
-            'column_name': column_name,
-            'db_type': 'Numeric',
-            'dataset_id': '{}.{}.{}'.format(project, dataset, table),
-            'agg_method': '',
-            'variable_group_id': 'vargroup1',
-            'starred': True,
-            'summary_json': {}
+            'column_name': column_name
         })
         variables = [variable]
 
-        view_name = 'view_{}_{}'.format(dataset, table)
         tables_metadata = {}
         tables_metadata[view_name] = {
             'variables': [column_name],
@@ -59,10 +52,7 @@ class TestPolygonEnrichment(object):
             'geo_table': 'carto-do-customers.{}.{}'.format(self.username, geo_table),
             'project': 'carto-do-customers'
         }
-
         _get_tables_metadata_mock.return_value = tables_metadata
-
-        filters = {'a': 'b'}
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters, agg_operators
@@ -70,7 +60,7 @@ class TestPolygonEnrichment(object):
 
         expected_queries = [
             '''
-            SELECT data_table.enrichment_id, AVG(enrichment_table.{column} *\
+            SELECT data_table.enrichment_id, {agg}(enrichment_table.{column} *\
                 (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
                 / ST_area(data_table.{data_geom_column})))
                 AS {column}
@@ -83,8 +73,9 @@ class TestPolygonEnrichment(object):
             WHERE enrichment_table.a='b'
             group by data_table.enrichment_id;
             '''.format(
+                agg=agg,
                 column=column_name,
-                username=username,
+                username=self.username,
                 view=view_name,
                 geo_table=geo_table,
                 temp_table_name=temp_table_name,
