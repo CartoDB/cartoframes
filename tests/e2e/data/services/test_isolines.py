@@ -73,9 +73,9 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
             ['c', '0101000020E6100000912C6002B7EE17C0C45A7C0A80AD4240']
         ]
         self.point_lnglat = [
-            ['a', 0, 10],
-            ['b', 1, 11],
-            ['c', 2, 12]
+            ['a', -73.99239, 40.74497],
+            ['b', -3.70399, 40.42012],
+            ['c', -5.98312, 37.35547]
         ]
         self.tearDown()
 
@@ -291,7 +291,7 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertTrue('cartodb_id' in result_columns)
         self.assertTrue('source_id' in result_columns)
 
-    def test_isochrones_from_dataframe_lnglat_geometry(self):
+    def test_isochrones_from_dataframe_with_lnglat(self):
         self.skip(if_no_credits=True, if_no_credentials=True)
         iso = Isolines(credentials=self.credentials)
 
@@ -300,12 +300,12 @@ class TestIsolines(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota = self.used_quota(iso)
 
         # Preview
-        result = iso.isochrones(df, [100, 1000], mode='car', dry_run=True).metadata
+        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat'), dry_run=True).metadata
         self.assertEqual(result.get('required_quota'), 6)
         self.assertEqual(self.used_quota(iso), quota)
 
         # Isochrones
-        result = iso.isochrones(df, [100, 1000], mode='car').data
+        result = iso.isochrones(df, [100, 1000], mode='car', with_lnglat=('lng', 'lat')).data
         self.assertTrue(isinstance(result, gpd.GeoDataFrame))
         quota += 6
         self.assertEqual(self.used_quota(iso), quota)

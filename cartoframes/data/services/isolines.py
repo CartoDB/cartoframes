@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import pandas as pd
 
+from ...utils.geom_utils import geodataframe_from_dataframe
 from ...data import Dataset
-from ...utils.geom_utils import compute_geodataframe, geodataframe_from_dataframe
 from .service import Service
 
 QUOTA_SERVICE = 'isolines'
@@ -49,6 +49,10 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
+            with_lnglat (tuple, optional): Two columns that have the longitude
+                and latitude information. If used, a point geometry will be
+                created upon upload to CARTO. Example input: `('long', 'lat')`.
+                Defaults to `None`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
@@ -95,6 +99,10 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
+            with_lnglat (tuple, optional): Two columns that have the longitude
+                and latitude information. If used, a point geometry will be
+                created upon upload to CARTO. Example input: `('long', 'lat')`.
+                Defaults to `None`.
 
         Returns:
             A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
@@ -121,6 +129,7 @@ class Isolines(Service):
                    maxpoints=None,
                    quality=None,
                    exclusive=False,
+                   with_lnglat=None,
                    function=None):
         metadata = {}
 
@@ -146,8 +155,7 @@ class Isolines(Service):
         else:  # source.is_local()
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            compute_geodataframe(source)
-            source.upload(table_name=temporary_table_name, credentials=self._credentials)
+            source.upload(table_name=temporary_table_name, credentials=self._credentials, with_lnglat=with_lnglat)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
             source_columns = source.get_column_names()
 
