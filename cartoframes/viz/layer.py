@@ -12,7 +12,7 @@ from .source import Source
 from .style import Style
 from .widget_list import WidgetList
 
-from ..utils.geom_utils import RESERVED_GEO_COLUMN_NAME
+from ..utils.geom_utils import extract_viz_columns
 
 
 class Layer(object):
@@ -148,9 +148,9 @@ class Layer(object):
         widget_variables = self.widgets.get_variables()
         external_variables = merge_dicts(popup_variables, widget_variables)
         self.viz = self.style.compute_viz(geom_type, external_variables)
-        columns = extract_columns(self.viz)
+        viz_columns = extract_viz_columns(self.viz)
 
-        self.source.compute_metadata(columns)
+        self.source.compute_metadata(viz_columns)
         self.source_type = self.source.type
         self.source_data = self.source.data
         self.bounds = bounds or self.source.bounds
@@ -163,10 +163,6 @@ class Layer(object):
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
-
-
-def extract_columns(viz):
-    return [RESERVED_GEO_COLUMN_NAME]
 
 
 def _set_source(source, credentials):

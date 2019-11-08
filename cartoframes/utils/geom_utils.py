@@ -267,3 +267,11 @@ def save_index_as_column(df):
         if index_name not in df.columns:
             df.reset_index(inplace=True)
             df.set_index(index_name, drop=False, inplace=True)
+
+
+def extract_viz_columns(viz):
+    columns = [RESERVED_GEO_COLUMN_NAME]
+    viz_columns = re.search(r'\$([a-z_]+)', viz)
+    if viz_columns is not None:
+        columns += list(viz_columns.groups())
+    return columns
