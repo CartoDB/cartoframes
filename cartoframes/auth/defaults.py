@@ -151,9 +151,8 @@ def set_default_credentials(
     if isinstance(_credentials, Credentials):
         _default_credentials = _credentials
 
-    elif isinstance(_filepath, str):
-        if _is_json_filepath(_filepath):
-            _default_credentials = Credentials.from_file(_filepath)
+    elif isinstance(_filepath, str) and _is_json_filepath(_filepath):
+        _default_credentials = Credentials.from_file(_filepath)
 
     elif isinstance(_base_url or _username, str) and isinstance(_api_key, str):
         if _base_url and _is_url(_base_url):
