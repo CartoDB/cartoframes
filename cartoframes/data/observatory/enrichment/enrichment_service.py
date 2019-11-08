@@ -129,10 +129,9 @@ class EnrichmentService(object):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            variable_name = variable.column_name
             table_name = self.__get_enrichment_table(variable)
 
-            tables_metadata[table_name]['variables'].append(variable_name)
+            tables_metadata[table_name]['variables'].append(variable.column_name)
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
