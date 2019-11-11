@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from . import defaults
 from ..data import Dataset
 from ..data.dataset.registry.base_dataset import BaseDataset
 from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
+from ..utils.geom_utils import compute_geodataframe, reset_geodataframe
 
 
 class SourceType:
@@ -102,16 +102,15 @@ class Source(object):
                 'api_key': credentials.api_key,
                 'base_url': credentials.base_url
             }
-        else:
-            return defaults.CREDENTIALS
 
     def compute_metadata(self, columns=None):
         if self.dataset.is_local():
-            gdf = self.dataset.get_geodataframe()
+            gdf = compute_geodataframe(self.dataset)
             gdf = gdf[columns] if columns is not None else gdf
             self.type = SourceType.GEOJSON
             self.data = self._compute_geojson_data(gdf)
             self.bounds = self._compute_geojson_bounds(gdf)
+            reset_geodataframe(self.dataset)
         else:
             self.type = SourceType.QUERY
             self.data = self._compute_query_data()

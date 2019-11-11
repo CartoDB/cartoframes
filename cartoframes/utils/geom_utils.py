@@ -60,6 +60,11 @@ def compute_geodataframe(dataset):
     return geodataframe_from_dataframe(dataset.dataframe)
 
 
+def reset_geodataframe(dataset):
+    if dataset.dataframe is not None and RESERVED_GEO_COLUMN_NAME in dataset.dataframe:
+        del dataset.dataframe[RESERVED_GEO_COLUMN_NAME]
+
+
 def geodataframe_from_dataframe(dataframe):
     if dataframe is None:
         return None
