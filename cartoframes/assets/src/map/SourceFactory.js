@@ -27,6 +27,21 @@ function MVT(layer) {
   return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
 }
 
-function _decodeJSONData(data) {
-  return JSON.parse(Base64.decode(data.replace(/b\'/, '\'')));
+function _decodeJSONData(b64Data) {
+  // Decode base64 (convert ascii to binary)
+  var strData = atob(b64Data);
+
+  // Convert binary string to character-number array
+  var charData = strData.split('').map((x) => { return x.charCodeAt(0); });
+
+  // Turn number array into byte-array
+  var binData = new Uint8Array(charData);
+
+  // Pako magic
+  var data = pako.inflate(binData);
+
+  // Convert gunzipped byteArray back to ascii string:
+  var strData = String.fromCharCode.apply(null, new Uint16Array(data));
+
+  return JSON.parse(strData);
 }
