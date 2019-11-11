@@ -116,7 +116,7 @@ class Enrichment(EnrichmentService):
             data_geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (dict, optional): dictionary with either a `column` key
                 with the name of the column to filter or a `value` value with the value to filter by.
-            agg_operators (dict, str, None, optional): dictionary with either a `column` key
+            agg_operators (dict, str, optional): dictionary with either a `column` key
                 with the name of the column to aggregate or a `operator` value with the operator to group by.
                 If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
                 will be retrieved from `agg_method` column of the catalog entity. If the `agg_method` column
@@ -222,7 +222,7 @@ class Enrichment(EnrichmentService):
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
-                agg_operators = None
+                agg_operators = {}
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
         """
 
