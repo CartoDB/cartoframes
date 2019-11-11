@@ -456,8 +456,9 @@ var init = (function () {
     return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
   }
 
-  function _decodeJSONData(data) {
-    return JSON.parse(Base64.decode(data.replace(/b\'/, '\'')));
+  function _decodeJSONData(b64Data) {
+    const data = atob(b64Data).split('').map((x) => x.charCodeAt(0));
+    return geobuf.decode(new Pbf(data));
   }
 
   const factory = new SourceFactory();

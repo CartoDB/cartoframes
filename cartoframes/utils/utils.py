@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import re
 import sys
 import json
+import geobuf
 import base64
 import decimal
 import hashlib
@@ -260,10 +261,9 @@ class CustomJSONEncoder(json.JSONEncoder):
 
 def encode_geodataframe(data):
     filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder)
-    encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
-
-    return encoded_data
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
+    compressed_data = geobuf.encode(json.loads(data))
+    return base64.b64encode(compressed_data).decode('utf-8')
 
 
 def _filter_null_geometries(data):
