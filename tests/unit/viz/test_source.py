@@ -42,7 +42,7 @@ class TestSource(object):
         assert credentials['api_key'] == 'default_public'
         assert credentials['base_url'] == 'https://fakeuser.carto.com'
 
-    def test_source_no_credentials(self, mocker):
+    def test_source_no_credentials(self):
         """Source should raise an exception if there are no credentials"""
         with pytest.raises(AttributeError) as e:
             Source('faketable')
@@ -51,7 +51,7 @@ class TestSource(object):
                                 'Please pass a `Credentials` instance or use '
                                 'the `set_default_credentials` function.')
 
-    def test_source_not_change_dataframe(self, mocker):
+    def test_source_not_change_dataframe(self):
         """Source should return the correct credentials when username is provided"""
         df = simple_dataframe()
         source = Source(df.copy())
