@@ -158,24 +158,22 @@ class EnrichmentService(object):
 
 
 def prepare_variables(variables):
-    variables_result = list()
-    if isinstance(variables, Variable):
-        variables_result = [variables]
-    elif isinstance(variables, str):
-        variables_result = [Variable.get(variables)]
-    elif isinstance(variables, list):
-        first_element = variables[0]
-
-        if isinstance(first_element, str):
-            variables_result = Variable.get_list(variables)
-        else:
-            variables_result = variables
+    if isinstance(variables, list):
+        return [__prepare_variable(var) for var in variables]
     else:
+        return [__prepare_variable(variables)]
+
+
+def __prepare_variable(variable):
+    if isinstance(variable, str):
+        variable = Variable.get(variable)
+
+    if not isinstance(variable, Variable):
         raise EnrichmentException(
             'Variable(s) to enrich should be an instance of Variable / CatalogList / str / list'
         )
 
-    return variables_result
+    return variable
 
 
 def process_filters(filters_dict):
