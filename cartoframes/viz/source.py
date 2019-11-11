@@ -121,7 +121,7 @@ class Source(object):
 
     def _compute_query_bounds(self):
         context = self.dataset._strategy._context
-        return get_query_bounds(context, self.query)
+        return get_query_bounds(context, self.data)
 
     def _compute_geojson_data(self, gdf):
         return encode_geodataframe(gdf)

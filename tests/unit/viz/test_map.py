@@ -97,7 +97,7 @@ class TestMapLayer(object):
 
     def test_interactive_layer(self):
         """Map layer should indicate if the layer has interactivity configured"""
-        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0], ['pop', 'name']))
         layer = Layer(
             source_1,
             popup={
