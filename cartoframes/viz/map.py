@@ -391,7 +391,7 @@ def _get_layer_def(layer):
         'legend': layer.legend_info,
         'has_legend_list': layer.has_legend_list,
         'widgets': layer.widgets_info,
-        'query': layer.source_data,
+        'data': layer.source_data,
         'type': layer.source_type,
         'viz': layer.viz
     }

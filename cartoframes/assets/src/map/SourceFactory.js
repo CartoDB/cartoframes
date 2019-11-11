@@ -7,7 +7,7 @@ export default function SourceFactory() {
 }
 
 function GeoJSON(layer) {
-  return new carto.source.GeoJSON(_decodeJSONQuery(layer.query));
+  return new carto.source.GeoJSON(_decodeJSONData(layer.data));
 }
 
 function Query(layer) {
@@ -20,13 +20,13 @@ function Query(layer) {
     serverURL: layer.credentials.base_url || `https://${layer.credentials.username}.carto.com/`
   };
 
-  return new carto.source.SQL(layer.query, auth, config);
+  return new carto.source.SQL(layer.data, auth, config);
 }
 
 function MVT(layer) {
-  return new carto.source.MVT(layer.query.file, JSON.parse(layer.query.metadata));
+  return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
 }
 
-function _decodeJSONQuery(query) {
-  return JSON.parse(Base64.decode(query.replace(/b\'/, '\'')));
+function _decodeJSONData(data) {
+  return JSON.parse(Base64.decode(data.replace(/b\'/, '\'')));
 }

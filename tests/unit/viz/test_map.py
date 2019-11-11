@@ -80,7 +80,7 @@ class TestMapLayer(object):
         assert map.layer_defs[0].get('interactivity') == []
         assert map.layer_defs[0].get('credentials') is None
         assert map.layer_defs[0].get('legend') is not None
-        assert map.layer_defs[0].get('query') is not None
+        assert map.layer_defs[0].get('data') is not None
         assert map.layer_defs[0].get('type') == 'GeoJSON'
         assert map.layer_defs[0].get('viz') is not None
 
