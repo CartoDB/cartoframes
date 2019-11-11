@@ -179,15 +179,14 @@ def __prepare_variable(variable):
 def process_filters(filters_dict):
     filters = ''
     if filters_dict:
-        filters_list = list()
-
-        for key, value in filters_dict.items():
-            filters_list.append('='.join(["enrichment_table.{}".format(key), "'{}'".format(value)]))
-
-        filters = ' AND '.join(filters_list)
+        filters = ' AND '.join([__format_filter(key, value) for key, value in filters_dict.items()])
         filters = 'WHERE {filters}'.format(filters=filters)
 
     return filters
+
+
+def __format_filter(key, value):
+    return "enrichment_table.{0}='{1}'".format(key, value)
 
 
 def process_agg_operators(agg_operators, variables, default_agg):
@@ -202,7 +201,7 @@ def process_agg_operators(agg_operators, variables, default_agg):
         agg_operators_result = agg_operators.copy()
 
     for variable in variables:
-        if variable.column_name not in agg_operators_result.keys():
+        if variable.column_name not in agg_operators_result:
             agg_operators_result[variable.column_name] = variable.agg_method or default_agg
             if not variable.agg_method:
                 logging.warning(
