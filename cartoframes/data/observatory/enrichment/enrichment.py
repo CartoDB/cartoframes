@@ -1,5 +1,4 @@
-
-from .enrichment_service import EnrichmentService
+from .enrichment_service import EnrichmentService, prepare_variables, process_filters, process_agg_operators
 
 
 class Enrichment(EnrichmentService):
@@ -94,7 +93,7 @@ class Enrichment(EnrichmentService):
                 dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
         """
 
-        variables = self._prepare_variables(variables)
+        variables = prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
         temp_table_name = self._get_temp_table_name()
@@ -227,7 +226,7 @@ class Enrichment(EnrichmentService):
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
         """
 
-        variables = self._prepare_variables(variables)
+        variables = prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
         temp_table_name = self._get_temp_table_name()
@@ -240,7 +239,7 @@ class Enrichment(EnrichmentService):
         return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def _prepare_points_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters):
-        filters = self._process_filters(filters)
+        filters = process_filters(filters)
         tables_metadata = self._get_tables_metadata(variables).items()
 
         sqls = list()
@@ -251,8 +250,8 @@ class Enrichment(EnrichmentService):
         return sqls
 
     def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters, agg_operators):
-        filters_str = self._process_filters(filters)
-        agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
+        filters_str = process_filters(filters)
+        agg_operators = process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
         tables_metadata = self._get_tables_metadata(variables).items()
 
         if agg_operators:
