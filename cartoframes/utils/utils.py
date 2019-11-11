@@ -21,6 +21,18 @@ try:
 except NameError:
     basestring = str
 
+if sys.version_info < (3, 0):
+    from io import BytesIO
+    from gzip import GzipFile
+
+    def compress(data):
+        buf = BytesIO()
+        with GzipFile(fileobj=buf, mode='wb') as f:
+            f.write(data)
+        return buf.getvalue()
+
+    gzip.compress = compress
+
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
