@@ -1,6 +1,7 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
 from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset
+from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT
 
 try:
     from unittest.mock import Mock, patch
@@ -59,7 +60,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -109,7 +110,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column1, column2], self.username, view, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -161,8 +162,8 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column1], self.username, view1, geo_view, temp_table_name, data_geom_column),
-            get_query(agg, [column2], self.username, view2, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column1], self.username, view1, geo_view, temp_table_name, data_geom_column),
+            _get_query(agg, [column2], self.username, view2, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -215,8 +216,8 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column1], self.username, view1, geo_view, temp_table_name, data_geom_column),
-            get_query(agg, [column2], self.username, view2, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column1], self.username, view1, geo_view, temp_table_name, data_geom_column),
+            _get_query(agg, [column2], self.username, view2, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -258,7 +259,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -299,7 +300,7 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -341,7 +342,48 @@ class TestPolygonEnrichment(object):
         )
 
         expected_queries = [
-            get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
+            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch.object(CatalogDataset, 'get')
+    def test_enrichment_query_using_public_project(self, dataset_get_mock):
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        data_geom_column = 'the_geom'
+        project = _PUBLIC_PROJECT
+        dataset = 'dataset'
+        table = 'table'
+        variable_name = 'variable1'
+        column = 'column1'
+        geo_table = 'geo_table'
+        agg = 'AVG'
+        agg_operators = {}
+        agg_operators[column] = agg
+        filters = {'a': 'b'}
+
+        variable = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
+            'column_name': column,
+            'dataset_id': '{}.{}.{}'.format(project, dataset, table)
+        })
+        variables = [variable]
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._prepare_polygon_enrichment_sql(
+            temp_table_name, data_geom_column, variables, filters, agg_operators
+        )
+
+        expected_queries = [
+            _get_public_query(agg, [column], self.username, dataset, table, geo_table,
+                              temp_table_name, data_geom_column)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -358,20 +400,21 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def get_query(agg, columns, username, view, geo_table, temp_table_name, data_geom_column):
-    columns = ', '.join(get_column_sql(agg, column, data_geom_column) for column in columns)
+def _get_query(agg, columns, username, view, geo_table, temp_table_name, data_geom_column):
+    columns = ', '.join(_get_column_sql(agg, column, data_geom_column) for column in columns)
 
     return '''
         SELECT data_table.enrichment_id, {columns}
-        FROM `carto-do-customers.{username}.{view}` enrichment_table
-        JOIN `carto-do-customers.{username}.{geo_table}` enrichment_geo_table
+        FROM `{project}.{username}.{view}` enrichment_table
+        JOIN `{project}.{username}.{geo_table}` enrichment_geo_table
         ON enrichment_table.geoid = enrichment_geo_table.geoid
-        JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
+        JOIN `{project}.{username}.{temp_table_name}` data_table
         ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
         WHERE enrichment_table.a='b'
         group by data_table.enrichment_id;
         '''.format(
             columns=columns,
+            project=_WORKING_PROJECT,
             username=username,
             view=view,
             geo_table=geo_table,
@@ -379,7 +422,31 @@ def get_query(agg, columns, username, view, geo_table, temp_table_name, data_geo
             data_geom_column=data_geom_column)
 
 
-def get_column_sql(agg, column, data_geom_column):
+def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, data_geom_column):
+    columns = ', '.join(_get_column_sql(agg, column, data_geom_column) for column in columns)
+
+    return '''
+        SELECT data_table.enrichment_id, {columns}
+        FROM `{public_project}.{dataset}.{table}` enrichment_table
+        JOIN `{public_project}.{dataset}.{geo_table}` enrichment_geo_table
+        ON enrichment_table.geoid = enrichment_geo_table.geoid
+        JOIN `{project}.{username}.{temp_table_name}` data_table
+        ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
+        WHERE enrichment_table.a='b'
+        group by data_table.enrichment_id;
+        '''.format(
+            columns=columns,
+            public_project=_PUBLIC_PROJECT,
+            project=_WORKING_PROJECT,
+            dataset=dataset,
+            username=username,
+            table=table,
+            geo_table=geo_table,
+            temp_table_name=temp_table_name,
+            data_geom_column=data_geom_column)
+
+
+def _get_column_sql(agg, column, data_geom_column):
     return '''
         {agg}(enrichment_table.{column} *
         (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column})) /
