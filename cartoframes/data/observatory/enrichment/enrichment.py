@@ -1,5 +1,4 @@
-
-from .enrichment_service import EnrichmentService
+from .enrichment_service import EnrichmentService, prepare_variables, process_filters, process_agg_operators
 
 
 class Enrichment(EnrichmentService):
@@ -94,7 +93,7 @@ class Enrichment(EnrichmentService):
                 dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
         """
 
-        variables = self._prepare_variables(variables)
+        variables = prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
         temp_table_name = self._get_temp_table_name()
@@ -117,14 +116,14 @@ class Enrichment(EnrichmentService):
             data_geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (dict, optional): dictionary with either a `column` key
                 with the name of the column to filter or a `value` value with the value to filter by.
-            agg_operators (dict, str, None, optional): dictionary with either a `column` key
+            agg_operators (dict, str, optional): dictionary with either a `column` key
                 with the name of the column to aggregate or a `operator` value with the operator to group by.
                 If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
-                will be retrieved from metadata column.
+                will be retrieved from `agg_method` column of the catalog entity. If the `agg_method` column
+                is empty too, default `array_agg` function will be used.
                 If `agg_operators` is a string then all columns will be aggregated by this operator.
-                If `agg_operators` is `None` then the default `array_agg` function will be used. Since we're
-                using a `group by` clause, all the values which data geometry intersects with will be returned
-                in the array.
+                Since we're using a `group by` clause, all the values which data geometry intersects with will be
+                returned in the array.
 
         Returns:
             A DataFrame as the provided one but with the variables to enrich appended to it
@@ -223,11 +222,11 @@ class Enrichment(EnrichmentService):
                     'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
                 ]
 
-                agg_operators = None
+                agg_operators = {}
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
         """
 
-        variables = self._prepare_variables(variables)
+        variables = prepare_variables(variables)
         data_copy = self._prepare_data(data, data_geom_column)
 
         temp_table_name = self._get_temp_table_name()
@@ -240,7 +239,7 @@ class Enrichment(EnrichmentService):
         return self._execute_enrichment(queries, data_copy, data_geom_column)
 
     def _prepare_points_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters):
-        filters = self._process_filters(filters)
+        filters = process_filters(filters)
         tables_metadata = self._get_tables_metadata(variables).items()
 
         sqls = list()
@@ -251,8 +250,8 @@ class Enrichment(EnrichmentService):
         return sqls
 
     def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters, agg_operators):
-        filters_str = self._process_filters(filters)
-        agg_operators = self._process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
+        filters_str = process_filters(filters)
+        agg_operators = process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
         tables_metadata = self._get_tables_metadata(variables).items()
 
         if agg_operators:

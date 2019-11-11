@@ -4,12 +4,13 @@ from shapely.geometry.point import Point
 from cartoframes.auth import Credentials
 from cartoframes.data import Dataset
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService
+from cartoframes.data.observatory.enrichment.enrichment_service import EnrichmentService, prepare_variables
+from cartoframes.data.observatory import Variable
 
 try:
-    from unittest.mock import Mock
+    from unittest.mock import Mock, patch
 except ImportError:
-    from mock import Mock
+    from mock import Mock, patch
 
 
 class TestEnrichmentService(object):
@@ -80,3 +81,35 @@ class TestEnrichmentService(object):
         assert result.equals(df_final)
 
         BigQueryClient._init_client = original
+
+    @patch.object(Variable, 'get')
+    def test_prepare_variables(self, get_mock):
+        variable_id = 'project.dataset.table.variable'
+        variable = Variable({
+            'id': variable_id,
+            'column_name': 'column',
+            'dataset_id': 'fake_name'
+        })
+
+        get_mock.return_value = variable
+
+        one_variable_cases = [
+            variable_id,
+            variable
+        ]
+
+        for case in one_variable_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable]
+
+        several_variables_cases = [
+            [variable_id, variable_id],
+            [variable, variable],
+            [variable, variable_id]
+        ]
+
+        for case in several_variables_cases:
+            result = prepare_variables(case)
+
+            assert result == [variable, variable]
