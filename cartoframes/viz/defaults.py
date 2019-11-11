@@ -1,9 +1,3 @@
-CREDENTIALS = {
-    'username': 'cartoframes',
-    'api_key': 'default_public',
-    'base_url': ''
-}
-
 STYLE = {
     'point': {
         'color': 'hex("#EE4D5A")',
