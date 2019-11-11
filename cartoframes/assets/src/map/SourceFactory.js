@@ -28,20 +28,5 @@ function MVT(layer) {
 }
 
 function _decodeJSONData(b64Data) {
-  // Decode base64 (convert ascii to binary)
-  var strData = atob(b64Data);
-
-  // Convert binary string to character-number array
-  var charData = strData.split('').map((x) => { return x.charCodeAt(0); });
-
-  // Turn number array into byte-array
-  var binData = new Uint8Array(charData);
-
-  // Pako magic
-  var data = pako.inflate(binData);
-
-  // Convert gunzipped byteArray back to ascii string:
-  var strData = String.fromCharCode.apply(null, new Uint16Array(data));
-
-  return JSON.parse(strData);
+  return JSON.parse(pako.inflate(atob(b64Data), { to: 'string' }));
 }
