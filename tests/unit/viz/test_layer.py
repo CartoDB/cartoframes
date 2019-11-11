@@ -20,7 +20,7 @@ class TestLayer(object):
         layer = Layer(Source('layer_source', credentials=Credentials('fakeuser')))
 
         assert layer.is_basemap is False
-        assert layer.orig_query == 'SELECT * FROM "public"."layer_source"'
+        assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popup, Popup)
@@ -33,7 +33,7 @@ class TestLayer(object):
         layer = Layer('layer_source', '', credentials=Credentials('fakeuser'))
 
         assert layer.is_basemap is False
-        assert layer.orig_query == 'SELECT * FROM "public"."layer_source"'
+        assert layer.source_data == 'SELECT * FROM "public"."layer_source"'
         assert isinstance(layer.source, Source)
         assert isinstance(layer.style, Style)
         assert isinstance(layer.popup, Popup)

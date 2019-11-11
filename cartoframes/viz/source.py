@@ -81,33 +81,13 @@ class Source(object):
             credentials = Credentials('your_user_name', 'your api key')
 
             Source('table_name', credentials)
-
-        Setting the bounds.
-
-        .. code::
-
-            from cartoframes.auth import set_default_credentials
-            from cartoframes.viz import Source
-
-            set_default_credentials('your_user_name', 'your api key')
-
-            bounds = {
-                'west': -10,
-                'east': 10,
-                'north': -10,
-                'south': 10
-            }
-
-            Source('table_name', bounds=bounds)
     """
 
-    def __init__(self, data, credentials=None, bounds=None, schema=None):
+    def __init__(self, data, credentials=None, schema=None):
         if isinstance(data, Dataset):
             self.dataset = data
         else:
             self.dataset = Dataset(data, credentials, schema)
-
-        self._init_source_dataset(bounds)
 
     def get_geom_type(self):
         return self.dataset.compute_geom_type() or BaseDataset.GEOM_TYPE_POINT
@@ -123,21 +103,28 @@ class Source(object):
                 'base_url': credentials.base_url
             }
 
-    def _init_source_dataset(self, bounds):
+    def compute_metadata(self, columns=None):
         if self.dataset.is_local():
             gdf = compute_geodataframe(self.dataset)
+            gdf = gdf[columns] if columns is not None else gdf
             self.type = SourceType.GEOJSON
-            self.query = encode_geodataframe(gdf)
-            self.bounds = bounds or self._compute_geojson_bounds(gdf)
+            self.data = self._compute_geojson_data(gdf)
+            self.bounds = self._compute_geojson_bounds(gdf)
             reset_geodataframe(self.dataset)
         else:
             self.type = SourceType.QUERY
-            self.query = self.dataset.get_query()
-            self.bounds = bounds or self._compute_query_bounds()
+            self.data = self._compute_query_data()
+            self.bounds = self._compute_query_bounds()
+
+    def _compute_query_data(self):
+        return self.dataset.get_query()
 
     def _compute_query_bounds(self):
         context = self.dataset._strategy._context
-        return get_query_bounds(context, self.query)
+        return get_query_bounds(context, self.data)
+
+    def _compute_geojson_data(self, gdf):
+        return encode_geodataframe(gdf)
 
     def _compute_geojson_bounds(self, gdf):
         return get_geodataframe_bounds(gdf)

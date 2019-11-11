@@ -9,7 +9,7 @@ from ..utils import simple_dataframe
 
 class TestColorBinsLayerHelper(object):
     def setup_method(self):
-        self.source = simple_dataframe()
+        self.source = simple_dataframe(['name', 'time'])
 
     def test_helpers(self):
         "should be defined"
