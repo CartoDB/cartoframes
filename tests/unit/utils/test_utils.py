@@ -144,23 +144,18 @@ class TestUtils(unittest.TestCase):
 
     def test_pg2dtypes(self):
         results = {
-            'smallint': 'int16',
-            'integer': 'int32',
-            'bigint': 'int64',
-            'real': 'float32',
-            'double precision': 'float64',
-            'decimal': 'float64',
-            'numeric': 'float64',
+            'smallint': 'int16', 'int2': 'int16',
+            'integer': 'int32', 'int4': 'int32', 'int': 'int32',
+            'bigint': 'int64', 'int8': 'int64',
+            'real': 'float32', 'float4': 'float32',
+            'double precision': 'float64', 'float8': 'float64',
+            'numeric': 'float64', 'decimal': 'float64',
             'text': 'object',
             'boolean': 'bool',
             'date': 'datetime64[D]',
-            'timestamp': 'datetime64[ns]',
-            'timestampz': 'datetime64[ns]',
-            'timestamp with time zone': 'datetime64[ns]',
-            'timestamp without time zone': 'datetime64[ns]',
-            'geometry': 'object',
+            'timestamp': 'datetime64[ns]', 'timestamp without time zone': 'datetime64[ns]',
+            'timestampz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
             'USER-DEFINED': 'object',
-            'unknown_pgdata': 'object'
         }
         for i in results:
             self.assertEqual(pg2dtypes(i), results[i])
