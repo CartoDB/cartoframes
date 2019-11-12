@@ -5,6 +5,7 @@ import unittest
 from collections import OrderedDict
 
 import requests
+import numpy as np
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
                                      dict_items, importify_params,
@@ -187,3 +188,6 @@ class TestUtils(unittest.TestCase):
         assert encode_row(b'Hello "world"') == b'"Hello ""world"""'
         assert encode_row(b'Hello | world') == b'"Hello | world"'
         assert encode_row(b'Hello \n world') == b'"Hello \n world"'
+        assert encode_row(np.inf) == b'Infinity'
+        assert encode_row(-np.inf) == b'-Infinity'
+        assert encode_row(np.nan) == b'NaN'

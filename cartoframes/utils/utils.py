@@ -325,6 +325,15 @@ def remove_column_from_dataframe(dataframe, name):
 
 
 def encode_row(row):
+    if isinstance(row, float):
+        # Convert numeric types
+        if str(row) == 'inf':
+            row = 'Infinity'
+        elif str(row) == '-inf':
+            row = '-Infinity'
+        elif str(row) == 'nan':
+            row = 'NaN'
+
     if isinstance(row, type(b'')):
         # Decode the input if it's a bytestring
         row = row.decode('utf-8')
