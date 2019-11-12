@@ -128,6 +128,7 @@ class TestUtils(unittest.TestCase):
 
     def test_dtypes2pg(self):
         results = {
+            'int16': 'smallint',
             'int32': 'integer',
             'int64': 'bigint',
             'float32': 'real',
@@ -143,16 +144,26 @@ class TestUtils(unittest.TestCase):
 
     def test_pg2dtypes(self):
         results = {
-            'date': 'datetime64[D]',
-            'number': 'float64',
-            'string': 'object',
+            'smallint': 'int16',
+            'integer': 'int32',
+            'bigint': 'int64',
+            'real': 'float32',
+            'double precision': 'float64',
+            'decimal': 'float64',
+            'numeric': 'float64',
+            'text': 'object',
             'boolean': 'bool',
+            'date': 'datetime64[D]',
+            'timestamp': 'datetime64[ns]',
+            'timestampz': 'datetime64[ns]',
+            'timestamp with time zone': 'datetime64[ns]',
+            'timestamp without time zone': 'datetime64[ns]',
             'geometry': 'object',
+            'USER-DEFINED': 'object',
             'unknown_pgdata': 'object'
         }
         for i in results:
-            result = pg2dtypes(i)
-            self.assertEqual(result, results[i])
+            self.assertEqual(pg2dtypes(i), results[i])
 
     def test_snake_to_camel(self):
         self.assertEqual(snake_to_camel('sneaky_snake'), 'sneakySnake')

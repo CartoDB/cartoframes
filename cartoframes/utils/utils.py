@@ -106,6 +106,7 @@ def temp_ignore_warnings(func):
 def dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
+        'int16': 'smallint',
         'int32': 'integer',
         'int64': 'bigint',
         'float32': 'real',
@@ -121,22 +122,21 @@ def dtypes2pg(dtype):
 def pg2dtypes(pgtype):
     """Returns equivalent dtype for input `pgtype`."""
     mapping = {
-        'bigint': 'float64',
+        'smallint': 'int16',
+        'integer': 'int32',
+        'bigint': 'int64',
+        'real': 'float32',
+        'double precision': 'float64',
+        'decimal': 'float64',
+        'numeric': 'float64',
+        'text': 'object',
         'boolean': 'bool',
         'date': 'datetime64[D]',
-        'double precision': 'float64',
-        'geometry': 'object',
-        'int': 'int64',
-        'integer': 'float64',
-        'number': 'float64',
-        'numeric': 'float64',
-        'real': 'float64',
-        'smallint': 'float64',
-        'string': 'object',
         'timestamp': 'datetime64[ns]',
         'timestampz': 'datetime64[ns]',
         'timestamp with time zone': 'datetime64[ns]',
         'timestamp without time zone': 'datetime64[ns]',
+        'geometry': 'object',
         'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')
