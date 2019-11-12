@@ -90,7 +90,7 @@ class DataFrameDataset(BaseDataset):
             COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
         """.format(
             table_name=self._table_name, null=PG_NULL,
-            columns=','.join(c.database for c in dataframe_columns_info.columns))
+            columns=','.join(c.database for c in dataframe_columns_info.columns)).strip()
 
         data = _rows(self._df, dataframe_columns_info, with_lnglat)
 

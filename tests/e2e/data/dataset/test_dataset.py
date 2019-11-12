@@ -769,7 +769,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'SRID=4326;POINT (1 1)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -785,7 +787,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'SRID=4326;POINT (1 1)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -802,7 +806,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         ds.upload(table_name=table, credentials=credentials)
 
         expected_query = ("COPY {}(geom,the_geom,geometry,cartodb_id)"
-                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');").format(table)
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -821,7 +825,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(geom,the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(geom,the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -837,7 +843,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -854,7 +862,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
         expected_query = ("COPY {}(lng,lat,cartodb_id,the_geom)"
-                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');").format(table)
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -870,8 +878,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
-            table)
+        expected_query = """
+        COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -887,8 +896,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
-            table)
+        expected_query = """
+        COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -904,7 +914,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(col1,col2,col3,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(col1,col2,col3,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|True|text|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -913,15 +925,17 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_dataset_upload_null_values(self):
         table = 'fake_table'
         credentials = 'fake'
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        df = pd.DataFrame.from_dict({'test': [None, None]})
         ds = Dataset(df)
 
         BaseDataset.exists = Mock(return_value=False)
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(test,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
-        expected_data = [b'|0\n', b'|1\n']
+        expected_query = """
+        COPY {}(test,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
+        expected_data = [b'__null|0\n', b'__null|1\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
@@ -937,12 +951,12 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        df = pd.DataFrame.from_dict({'test': [None]})
         with_lnglat = None
         dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
         rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'\n', b'\n'])
+        self.assertEqual(list(rows), [b'__null\n'])
 
     def test_rows_with_geom(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
@@ -953,12 +967,12 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
+        df = pd.DataFrame.from_dict({'test': [None], 'the_geom': [None]})
         with_lnglat = None
         dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
         rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'|\n', b'|\n'])
+        self.assertEqual(list(rows), [b'__null|SRID=4326;GEOMETRYCOLLECTION EMPTY\n'])
 
     def test_rows_non_ascii(self):
         attribute = 'áéí'
