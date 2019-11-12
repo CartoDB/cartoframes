@@ -7,7 +7,7 @@ from tqdm import tqdm
 from ....utils.columns import DataframeColumnsInfo, _first_value
 from ....utils.geom_utils import (compute_geodataframe, decode_geometry,
                                   save_index_as_column)
-from ....utils.utils import is_geojson, load_geojson, map_geom_type, encode_row
+from ....utils.utils import is_geojson, load_geojson, map_geom_type, encode_row, PG_NULL
 from .base_dataset import BaseDataset
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
@@ -86,8 +86,10 @@ class DataFrameDataset(BaseDataset):
         return len(self._df.index)
 
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
-        query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
-            table_name=self._table_name,
+        query = """
+            COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
+        """.format(
+            table_name=self._table_name, null=PG_NULL,
             columns=','.join(c.database for c in dataframe_columns_info.columns))
 
         data = _rows(self._df, dataframe_columns_info, with_lnglat)
@@ -152,9 +154,6 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             else:
                 val = df[col][index]
 
-            if _is_null(val):
-                val = ''
-
             if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
                 geom = decode_geometry(val, dataframe_columns_info.enc_type)
                 if geom:
@@ -177,11 +176,3 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         csv_row += b'\n'
 
         yield csv_row
-
-
-def _is_null(val):
-    vnull = pd.isnull(val)
-    if isinstance(vnull, bool):
-        return vnull
-    else:
-        return vnull.all()

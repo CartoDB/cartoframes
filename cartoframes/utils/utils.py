@@ -25,6 +25,8 @@ GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
 GEOM_TYPE_POLYGON = 'polygon'
 
+PG_NULL = '__null'
+
 
 def map_geom_type(geom_type):
     return {
@@ -349,8 +351,10 @@ def remove_column_from_dataframe(dataframe, name):
 
 
 def encode_row(row):
+    if row is None:
+        row = PG_NULL
+
     if isinstance(row, float):
-        # Convert numeric types
         if str(row) == 'inf':
             row = 'Infinity'
         elif str(row) == '-inf':
