@@ -6,12 +6,9 @@ import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
 from ....lib import context
-from ....utils import utils
-from ....utils.columns import (Column, bool_columns_names, date_columns_names,
-                               dtypes, normalize_name)
-from ....utils.geom_utils import (ENC_WKB_BHEX, compute_query, convert_bool,
-                                  decode_geometry,
-                                  get_context_with_public_creds)
+from ....utils.utils import debug_print, get_query_geom_type, PG_NULL
+from ....utils.columns import Column, obtain_dtypes, obtain_converters, date_columns_names, normalize_name
+from ....utils.geom_utils import compute_query, get_context_with_public_creds
 from ..dataset_info import DatasetInfo
 
 
@@ -121,7 +118,7 @@ class BaseDataset():
             raise err
         except CartoException as err:
             # If table doesn't exist, we get an error from the SQL API
-            utils.debug_print(self._verbose, err=err)
+            debug_print(self._verbose, err=err)
             return False
 
     def is_public(self):
@@ -167,23 +164,19 @@ class BaseDataset():
             raise ValueError('You should provide a credentials and a table_name or query to download data.')
 
     def _copyto(self, columns, query, limit, decode_geom, retry_times):
-        copy_query = """COPY ({}) TO stdout WITH (FORMAT csv, HEADER true)""".format(query)
+        copy_query = """COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL '{1}')""".format(query, PG_NULL)
         raw_result = self._context.download(copy_query, retry_times)
 
-        df_types = dtypes(columns, exclude_dates=True, exclude_the_geom=True, exclude_bools=True)
-        date_column_names = date_columns_names(columns)
-        bool_column_names = bool_columns_names(columns)
+        dtypes = obtain_dtypes(columns)
+        converters = obtain_converters(columns, decode_geom)
+        parse_dates = date_columns_names(columns)
 
-        converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
-        for bool_column_name in bool_column_names:
-            converters[bool_column_name] = convert_bool
-
-        df = pd.read_csv(raw_result, dtype=df_types,
-                         parse_dates=date_column_names,
-                         true_values=['t'],
-                         false_values=['f'],
-                         index_col='cartodb_id' if 'cartodb_id' in df_types else False,
-                         converters=converters)
+        df = pd.read_csv(
+            raw_result,
+            dtype=dtypes,
+            converters=converters,
+            parse_dates=parse_dates,
+            index_col='cartodb_id' if 'cartodb_id' in dtypes else False)
 
         if decode_geom:
             df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
@@ -196,7 +189,7 @@ class BaseDataset():
         return Column.from_sql_api_fields(table_info['fields'])
 
     def _get_geom_type(self, query=None):
-        return utils.get_query_geom_type(self._context, query or self.get_query())
+        return get_query_geom_type(self._context, query or self.get_query())
 
     def _get_schema(self):
         if self._credentials:

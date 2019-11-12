@@ -255,17 +255,6 @@ def get_context_with_public_creds(credentials):
     return context.create_context(public_creds)
 
 
-def convert_bool(x):
-    if x:
-        if x == 't':
-            return True
-        if x == 'f':
-            return False
-        return bool(x)
-    else:
-        return None
-
-
 def save_index_as_column(df):
     index_name = df.index.name
     if index_name is not None:
