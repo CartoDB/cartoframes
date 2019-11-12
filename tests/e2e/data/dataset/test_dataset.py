@@ -220,7 +220,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        print(result)
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -247,7 +246,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_lnglat_dataset(self):
@@ -264,21 +263,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(result['total_rows'], 50)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
-    def test_dataset_write_null_geometry_column(self):
-        self.assertNotExistsTable(self.test_write_table)
-
-        from cartoframes.examples import read_taxi
-        df = read_taxi(limit=100)
-        dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
-        self.test_write_table = dataset.table_name
-
-        self.assertExistsTable(self.test_write_table)
-
-        query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NULL'.format(self.test_write_table)
-        result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 100)
-
-    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_with_different_geometry_column(self):
         self.assertNotExistsTable(self.test_write_table)
 
@@ -292,7 +276,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_with_different_geom_column(self):
@@ -309,7 +293,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_geopandas(self):
@@ -369,7 +353,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_append(self):
@@ -388,7 +372,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049 * 2)
+        self.assertEqual(result['total_rows'], 2052 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_replace(self):
@@ -404,7 +388,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     def test_dataset_schema_from_parameter(self):
         schema = 'fake_schema'
