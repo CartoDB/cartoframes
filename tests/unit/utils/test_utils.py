@@ -8,8 +8,8 @@ import requests
 import numpy as np
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
-                                     dict_items, importify_params,
-                                     snake_to_camel, dtypes2pg, encode_row)
+                                     dict_items, importify_params, snake_to_camel,
+                                     dtypes2pg, pg2dtypes, encode_row)
 
 
 class TestUtils(unittest.TestCase):
@@ -140,6 +140,19 @@ class TestUtils(unittest.TestCase):
         }
         for i in results:
             self.assertEqual(dtypes2pg(i), results[i])
+
+    def test_pg2dtypes(self):
+        results = {
+            'date': 'datetime64[D]',
+            'number': 'float64',
+            'string': 'object',
+            'boolean': 'bool',
+            'geometry': 'object',
+            'unknown_pgdata': 'object'
+        }
+        for i in results:
+            result = pg2dtypes(i)
+            self.assertEqual(result, results[i])
 
     def test_snake_to_camel(self):
         self.assertEqual(snake_to_camel('sneaky_snake'), 'sneakySnake')

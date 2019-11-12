@@ -5,7 +5,7 @@ import sys
 
 from unidecode import unidecode
 
-from .utils import dtypes2pg
+from .utils import dtypes2pg, pg2dtypes
 from .geom_utils import decode_geometry, detect_encoding_type
 
 
@@ -257,30 +257,6 @@ def date_columns_names(columns):
 
 def bool_columns_names(columns):
     return [x.name for x in columns if x.dtype == 'bool']
-
-
-def pg2dtypes(pgtype):
-    """Returns equivalent dtype for input `pgtype`."""
-    mapping = {
-        'bigint': 'float64',
-        'boolean': 'bool',
-        'date': 'datetime64[D]',
-        'double precision': 'float64',
-        'geometry': 'object',
-        'int': 'int64',
-        'integer': 'float64',
-        'number': 'float64',
-        'numeric': 'float64',
-        'real': 'float64',
-        'smallint': 'float64',
-        'string': 'object',
-        'timestamp': 'datetime64[ns]',
-        'timestampz': 'datetime64[ns]',
-        'timestamp with time zone': 'datetime64[ns]',
-        'timestamp without time zone': 'datetime64[ns]',
-        'USER-DEFINED': 'object',
-    }
-    return mapping.get(str(pgtype), 'object')
 
 
 def _first_value(series):

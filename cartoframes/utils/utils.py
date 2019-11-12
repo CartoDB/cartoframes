@@ -118,6 +118,30 @@ def dtypes2pg(dtype):
     return mapping.get(str(dtype), 'text')
 
 
+def pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'bigint': 'float64',
+        'boolean': 'bool',
+        'date': 'datetime64[D]',
+        'double precision': 'float64',
+        'geometry': 'object',
+        'int': 'int64',
+        'integer': 'float64',
+        'number': 'float64',
+        'numeric': 'float64',
+        'real': 'float64',
+        'smallint': 'float64',
+        'string': 'object',
+        'timestamp': 'datetime64[ns]',
+        'timestampz': 'datetime64[ns]',
+        'timestamp with time zone': 'datetime64[ns]',
+        'timestamp without time zone': 'datetime64[ns]',
+        'USER-DEFINED': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')
+
+
 def gen_variable_name(value):
     return 'v' + get_hash(value)[:6]
 
