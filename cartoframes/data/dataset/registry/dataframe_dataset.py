@@ -152,7 +152,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
                 else:  # we could have filtered columns in the df. See DataframeColumnsInfo
                     continue
             else:
-                val = df[col][index]
+                val = df.at[index, col]
 
             if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
                 geom = decode_geometry(val, dataframe_columns_info.enc_type)
@@ -164,8 +164,8 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             row_data.append(encode_row(val))
 
         if with_lnglat:
-            lng_val = df[with_lnglat[0]][index]
-            lat_val = df[with_lnglat[1]][index]
+            lng_val = df.at[index, with_lnglat[0]]
+            lat_val = df.at[index, with_lnglat[1]]
             if lng_val is not None and lat_val is not None:
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
