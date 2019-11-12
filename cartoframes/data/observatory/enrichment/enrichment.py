@@ -103,7 +103,7 @@ class Enrichment(EnrichmentService):
 
         return self._execute_enrichment(queries, data_copy, data_geom_column)
 
-    def enrich_polygons(self, data, variables, data_geom_column='geometry', filters={}, agg_operators={}, **kwargs):
+    def enrich_polygons(self, data, variables, data_geom_column='geometry', filters={}, **kwargs):
         """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
         When a polygon intersects with multiple geographies of our dataset, the proportional part of the
         intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
@@ -111,19 +111,17 @@ class Enrichment(EnrichmentService):
 
         Args:
             data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
-            variables (Variable, CatalogList, list, str): variable(s), discovered through Catalog,
-                for enriching the `data` argument.
+            variables (list): list of `<cartoframes.data.observatory> Variable` entities discovered through Catalog to
+                enrich your data. To refer to a Variable, You can use a `<cartoframes.data.observatory> Variable`
+                instance, the Variable `id` property or the Variable `slug` property. Please, take a look at the
+                examples. Every `<cartoframes.data.observatory> Variable` has an aggregation method in the Variable
+                `agg_method` property (in case it is not defined, `array_agg` function will be used). If you want to
+                use a different aggregation method for some variable/s, you can do it creating a list for each
+                Variable with 2 elements: the Variable and the aggregation method (for example: [Variable, 'SUM']).
+                Please, take a look at the examples.
             data_geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (dict, optional): dictionary with either a `column` key
                 with the name of the column to filter or a `value` value with the value to filter by.
-            agg_operators (dict, str, optional): dictionary with either a `column` key
-                with the name of the column to aggregate or a `operator` value with the operator to group by.
-                If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
-                will be retrieved from `agg_method` column of the catalog entity. If the `agg_method` column
-                is empty too, default `array_agg` function will be used.
-                If `agg_operators` is a string then all columns will be aggregated by this operator.
-                Since we're using a `group by` clause, all the values which data geometry intersects with will be
-                returned in the array.
 
         Returns:
             A DataFrame as the provided one but with the variables to enrich appended to it
@@ -134,38 +132,60 @@ class Enrichment(EnrichmentService):
 
         Examples:
 
-            Enrich a polygons dataset with Catalog classes and default aggregation methods:
+            Enrich a polygons dataset with one Variable:
 
             .. code::
 
                 from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials(Credentials.from_file())
 
                 catalog = Catalog()
-                enrichment = Enrichment()
+                variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
+                variables = [variable]
 
-                variables = catalog.country('usa').category('demographics').datasets[0].variables
+                enrichment = Enrichment()
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables)
 
 
-            Enrich a polygons dataset with list of ids:
+            Enrich a polygons dataset with all Variables from a Catalog Dataset:
+
+            .. code::
+
+                from cartoframes.data.observatory import Enrichment, Catalog
+                from cartoframes.auth import set_default_credentials, Credentials
+
+                set_default_credentials(Credentials.from_file())
+
+                catalog = Catalog()
+                variables = catalog.country('usa').category('demographics').datasets[0].variables
+
+                enrichment = Enrichment()
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
+
+
+            Enrich a polygons dataset with several Variables using their ids:
 
             .. code::
 
                 from cartoframes.data.observatory import Enrichment
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials(Credentials.from_file())
 
                 enrichment = Enrichment()
 
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0]
+                variable2 = all_variables[1]
                 variables = [
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+                    variable1.id, // you could use the slug too: variable1.slug
+                    variable2.id
                 ]
 
+                enrichment = Enrichment()
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables)
 
 
@@ -174,56 +194,41 @@ class Enrichment(EnrichmentService):
             .. code::
 
                 from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials(Credentials.from_file())
 
                 catalog = Catalog()
-                enrichment = Enrichment()
-
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
                 filters = {'do_date': '2019-09-01'}
 
+                enrichment = Enrichment()
                 dataset_enrich = enrichment.enrich_polygons(dataset, variables, filters)
 
 
-            Enrich a polygons dataset with custom aggregation methods:
+            Enrich a polygons dataset overwriting some of the variables aggregation methods:
 
             .. code::
 
-                from cartoframes.data.observatory import Enrichment
-                from cartoframes.auth import set_default_credentials
+                from cartoframes.data.observatory import Enrichment, Catalog
+                from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials(Credentials.from_file())
 
-                enrichment = Enrichment()
-
-                variables = [
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
-                ]
-
-                agg_operators = {'in_grades_1_to_4_quantile': 'SUM', 'in_school_quantile': 'AVG'}
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
-
-            Enrich a polygons dataset with no aggregation methods:
-
-            .. code::
-
-                from cartoframes.data.observatory import Enrichment
-                from cartoframes.auth import set_default_credentials
-
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
-
-                enrichment = Enrichment()
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0] // variable1.agg_method is 'AVG' but you want 'SUM'
+                variable2 = all_variables[1] // variable2.agg_method is 'AVG' and it is what you want
+                variable3 = all_variables[2] // variable3.agg_method is 'SUM' but you want 'AVG'
 
                 variables = [
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+                    [variable1, 'SUM'],
+                    variable2,           // or [variable2]
+                    [variable3, 'AVG']
                 ]
 
-                agg_operators = {}
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables, agg_operators=agg_operators)
+                enrichment = Enrichment()
+                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
         """
 
         variables = prepare_variables(variables)
@@ -233,7 +238,7 @@ class Enrichment(EnrichmentService):
         self._upload_dataframe(temp_table_name, data_copy, data_geom_column)
 
         queries = self._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         return self._execute_enrichment(queries, data_copy, data_geom_column)
