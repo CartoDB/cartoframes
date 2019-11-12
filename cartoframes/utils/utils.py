@@ -103,17 +103,17 @@ def temp_ignore_warnings(func):
     return wrapper
 
 
-# schema definition functions
 def dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
-        'float64': 'numeric',
-        'int64': 'numeric',
-        'float32': 'numeric',
-        'int32': 'numeric',
+        'int32': 'integer',
+        'int64': 'bigint',
+        'float32': 'real',
+        'float64': 'double precision',
         'object': 'text',
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
+        'datetime64[ns, UTC]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
 

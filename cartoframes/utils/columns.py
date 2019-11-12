@@ -5,6 +5,7 @@ import sys
 
 from unidecode import unidecode
 
+from .utils import dtypes2pg
 from .geom_utils import decode_geometry, detect_encoding_type
 
 
@@ -117,7 +118,7 @@ class DataframeColumnInfo(object):
         if geom_column and self.dataframe == geom_column:
             db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
         else:
-            db_type = _dtypes2pg(dtype)
+            db_type = dtypes2pg(dtype)
 
         return db_type
 
@@ -280,21 +281,6 @@ def pg2dtypes(pgtype):
         'USER-DEFINED': 'object',
     }
     return mapping.get(str(pgtype), 'object')
-
-
-def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'bigint',
-        'float32': 'numeric',
-        'int32': 'integer',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'timestamp',
-        'datetime64[ns, UTC]': 'timestamp',
-    }
-    return mapping.get(str(dtype), 'text')
 
 
 def _first_value(series):

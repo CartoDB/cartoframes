@@ -9,7 +9,7 @@ import numpy as np
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
                                      dict_items, importify_params,
-                                     snake_to_camel, encode_row)
+                                     snake_to_camel, dtypes2pg, encode_row)
 
 
 class TestUtils(unittest.TestCase):
@@ -127,16 +127,15 @@ class TestUtils(unittest.TestCase):
             self.assertTrue(importify_params(p), ans[idx])
 
     def test_dtypes2pg(self):
-        """utils.dtypes2pg"""
-        from cartoframes.utils.utils import dtypes2pg
         results = {
-            'float64': 'numeric',
-            'int64': 'numeric',
-            'float32': 'numeric',
-            'int32': 'numeric',
+            'int32': 'integer',
+            'int64': 'bigint',
+            'float32': 'real',
+            'float64': 'double precision',
             'object': 'text',
             'bool': 'boolean',
             'datetime64[ns]': 'timestamp',
+            'datetime64[ns, UTC]': 'timestamp',
             'unknown_dtype': 'text'
         }
         for i in results:
