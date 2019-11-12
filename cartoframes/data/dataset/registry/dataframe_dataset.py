@@ -139,17 +139,18 @@ def _is_valid_index_for_cartodb_id(index):
 
 
 def _rows(df, dataframe_columns_info, with_lnglat):
-    for i, row in df.iterrows():
+    num_rows = df.shape[0]
+    for index in range(num_rows):
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe
             if col not in df.columns:
                 if df.index.name and col == df.index.name:
-                    val = i
+                    val = index
                 else:  # we could have filtered columns in the df. See DataframeColumnsInfo
                     continue
             else:
-                val = row[col]
+                val = df[col][index]
 
             if _is_null(val):
                 val = ''
@@ -164,8 +165,8 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             row_data.append(encode_row(val))
 
         if with_lnglat:
-            lng_val = row[with_lnglat[0]]
-            lat_val = row[with_lnglat[1]]
+            lng_val = df[with_lnglat[0]][index]
+            lat_val = df[with_lnglat[1]][index]
             if lng_val and lat_val:
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
