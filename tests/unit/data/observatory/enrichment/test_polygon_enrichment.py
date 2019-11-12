@@ -41,8 +41,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        agg_operators = {}
-        agg_operators[column] = agg
         filters = {'a': 'b'}
 
         variable = Variable({
@@ -50,13 +48,15 @@ class TestPolygonEnrichment(object):
             'column_name': column,
             'dataset_id': 'fake_name'
         })
-        variables = [variable]
+        variables = [
+            [variable, agg]
+        ]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -85,9 +85,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        agg_operators = {}
-        agg_operators[column1] = agg
-        agg_operators[column2] = agg
         filters = {'a': 'b'}
 
         variable1 = Variable({
@@ -100,13 +97,16 @@ class TestPolygonEnrichment(object):
             'column_name': column2,
             'dataset_id': 'fake_name'
         })
-        variables = [variable1, variable2]
+        variables = [
+            [variable1, agg],
+            [variable2, agg]
+        ]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -137,9 +137,6 @@ class TestPolygonEnrichment(object):
         view2 = 'view_{}_{}'.format(dataset, table2)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        agg_operators = {}
-        agg_operators[column1] = agg
-        agg_operators[column2] = agg
         filters = {'a': 'b'}
 
         variable1 = Variable({
@@ -152,13 +149,16 @@ class TestPolygonEnrichment(object):
             'column_name': column2,
             'dataset_id': 'fake_name'
         })
-        variables = [variable1, variable2]
+        variables = [
+            [variable1, agg],
+            [variable2, agg]
+        ]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -191,9 +191,6 @@ class TestPolygonEnrichment(object):
         view2 = 'view_{}_{}'.format(dataset2, table2)
         geo_view = 'view_{}_{}'.format(dataset1, geo_table)
         agg = 'AVG'
-        agg_operators = {}
-        agg_operators[column1] = agg
-        agg_operators[column2] = agg
         filters = {'a': 'b'}
 
         variable1 = Variable({
@@ -206,13 +203,16 @@ class TestPolygonEnrichment(object):
             'column_name': column2,
             'dataset_id': 'fake_name'
         })
-        variables = [variable1, variable2]
+        variables = [
+            [variable1, agg],
+            [variable2, agg]
+        ]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset1, geo_table))
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -226,7 +226,7 @@ class TestPolygonEnrichment(object):
         assert actual == expected
 
     @patch.object(CatalogDataset, 'get')
-    def test_enrichment_query_by_polygons_agg_empty_uses_variable_one(self, dataset_get_mock):
+    def test_enrichment_query_by_polygons_without_overwritting_variable_aggregation(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -240,7 +240,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'SUM'
-        agg_operators = {}
         filters = {'a': 'b'}
 
         variable = Variable({
@@ -255,7 +254,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -268,48 +267,7 @@ class TestPolygonEnrichment(object):
         assert actual == expected
 
     @patch.object(CatalogDataset, 'get')
-    def test_enrichment_query_by_polygons_agg_as_string(self, dataset_get_mock):
-        enrichment = Enrichment(credentials=self.credentials)
-
-        temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
-        project = 'project'
-        dataset = 'dataset'
-        table = 'table'
-        variable_name = 'variable1'
-        column = 'column1'
-        geo_table = 'geo_table'
-        view = 'view_{}_{}'.format(dataset, table)
-        geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        agg = 'SUM'
-        agg_operators = agg
-        filters = {'a': 'b'}
-
-        variable = Variable({
-            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
-            'column_name': column,
-            'dataset_id': 'fake_name'
-        })
-        variables = [variable]
-
-        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
-        dataset_get_mock.return_value = catalog
-
-        actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
-        )
-
-        expected_queries = [
-            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column)
-        ]
-
-        actual = sorted(_clean_queries(actual_queries))
-        expected = sorted(_clean_queries(expected_queries))
-
-        assert actual == expected
-
-    @patch.object(CatalogDataset, 'get')
-    def test_enrichment_query_by_polygons_agg_uses_default(self, dataset_get_mock):
+    def test_enrichment_query_by_polygons_usging_default_aggregation(self, dataset_get_mock):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
@@ -323,7 +281,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'array_agg'
-        agg_operators = {}
         filters = {'a': 'b'}
 
         variable = Variable({
@@ -338,7 +295,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
@@ -363,8 +320,6 @@ class TestPolygonEnrichment(object):
         column = 'column1'
         geo_table = 'geo_table'
         agg = 'AVG'
-        agg_operators = {}
-        agg_operators[column] = agg
         filters = {'a': 'b'}
 
         variable = Variable({
@@ -378,7 +333,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, data_geom_column, variables, filters
         )
 
         expected_queries = [
