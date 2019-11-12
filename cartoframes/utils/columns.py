@@ -33,8 +33,8 @@ class Column(object):
     NORMALIZED_GEOM_COL_NAME = 'the_geom'
 
     @staticmethod
-    def from_sql_api_fields(sql_api_fields):
-        return [Column(column, normalize=False, pgtype=sql_api_fields[column]['type']) for column in sql_api_fields]
+    def from_sql_api_fields(fields):
+        return [Column(column, normalize=False, pgtype=_extract_pgtype(fields[column])) for column in fields]
 
     def __init__(self, name, normalize=True, pgtype=None):
         if not name:
@@ -90,6 +90,12 @@ class Column(object):
         value = re.sub(r'-', '_', value)
 
         return value
+
+
+def _extract_pgtype(fields):
+    if 'pgtype' in fields:
+        return fields['pgtype']
+    return None
 
 
 class DataframeColumnInfo(object):
