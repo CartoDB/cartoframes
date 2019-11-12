@@ -166,7 +166,7 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         if with_lnglat:
             lng_val = df[with_lnglat[0]][index]
             lat_val = df[with_lnglat[1]][index]
-            if lng_val and lat_val:
+            if lng_val is not None and lat_val is not None:
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
                 val = ''
