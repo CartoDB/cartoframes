@@ -131,7 +131,7 @@ def pg2dtypes(pgtype):
         'double precision': 'float64', 'float8': 'float64',
         'numeric': 'float64', 'decimal': 'float64',
         'text': 'object',
-        'boolean': 'bool',
+        'boolean': 'bool', 'bool': 'bool',
         'date': 'datetime64[D]',
         'timestamp': 'datetime64[ns]', 'timestamp without time zone': 'datetime64[ns]',
         'timestampz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
