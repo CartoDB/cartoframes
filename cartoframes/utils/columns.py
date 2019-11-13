@@ -15,6 +15,7 @@ class Column(object):
     INT_DTYPES = ['int16', 'int32', 'int64']
     FLOAT_DTYPES = ['float32', 'float64']
     DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
+    INDEX_COLUMN_NAME = 'cartodb_id'
     SUPPORTED_GEOM_COL_NAMES = ['the_geom', 'geom', 'geometry']
     FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
     MAX_LENGTH = 63
@@ -254,16 +255,11 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def obtain_dtypes(columns):
-    return {
-        x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
-        for x in columns if not (x.dtype in Column.DATETIME_DTYPES)
-        and not(x.name in Column.SUPPORTED_GEOM_COL_NAMES)
-        and not(x.dtype in Column.INT_DTYPES)
-        and not(x.dtype in Column.FLOAT_DTYPES)
-        and not(x.dtype == Column.BOOL_DTYPE)
-        and not(x.dtype == Column.OBJECT_DTYPE)
-    }
+def obtain_index_col(columns):
+    for column in columns:
+        if column.name == Column.INDEX_COLUMN_NAME:
+            return Column.INDEX_COLUMN_NAME
+    return False
 
 
 def obtain_converters(columns, decode_geom):

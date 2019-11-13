@@ -7,7 +7,7 @@ from carto.exceptions import CartoException, CartoRateLimitException
 
 from ....lib import context
 from ....utils.utils import debug_print, get_query_geom_type, PG_NULL
-from ....utils.columns import Column, obtain_dtypes, obtain_converters, date_columns_names, normalize_name
+from ....utils.columns import Column, obtain_index_col, obtain_converters, date_columns_names, normalize_name
 from ....utils.geom_utils import compute_query, get_context_with_public_creds
 from ..dataset_info import DatasetInfo
 
@@ -167,16 +167,15 @@ class BaseDataset():
         copy_query = """COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL '{1}')""".format(query, PG_NULL)
         raw_result = self._context.download(copy_query, retry_times)
 
-        dtypes = obtain_dtypes(columns)
+        index_col = obtain_index_col(columns)
         converters = obtain_converters(columns, decode_geom)
         parse_dates = date_columns_names(columns)
 
         df = pd.read_csv(
             raw_result,
-            dtype=dtypes,
+            index_col=index_col,
             converters=converters,
-            parse_dates=parse_dates,
-            index_col='cartodb_id' if 'cartodb_id' in dtypes else False)
+            parse_dates=parse_dates)
 
         if decode_geom:
             df.rename({'the_geom': 'geometry'}, axis='columns', inplace=True)
