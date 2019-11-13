@@ -54,7 +54,7 @@ class TestPointsEnrichment(object):
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
-        actual_queries = enrichment._prepare_points_enrichment_sql(
+        actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters
         )
 
@@ -101,7 +101,7 @@ class TestPointsEnrichment(object):
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
-        actual_queries = enrichment._prepare_points_enrichment_sql(
+        actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters
         )
 
@@ -151,7 +151,7 @@ class TestPointsEnrichment(object):
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
         dataset_get_mock.return_value = catalog
 
-        actual_queries = enrichment._prepare_points_enrichment_sql(
+        actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters
         )
 
@@ -203,7 +203,7 @@ class TestPointsEnrichment(object):
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset1, geo_table))
         dataset_get_mock.return_value = catalog
 
-        actual_queries = enrichment._prepare_points_enrichment_sql(
+        actual_queries = enrichment._get_points_enrichment_sql(
             temp_table_name, data_geom_column, variables, filters
         )
 
