@@ -382,7 +382,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
         Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        # avoid uploading the same cartodb_id
+        # avoid uploading the same index or cartodb_id
+        df.index += df.index.max() + 1
         df['cartodb_id'] += df['cartodb_id'].max() + 1
 
         Dataset(df).upload(if_exists=Dataset.IF_EXISTS_APPEND,
