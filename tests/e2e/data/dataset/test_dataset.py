@@ -6,6 +6,7 @@ import os
 import sys
 import unittest
 import warnings
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 
@@ -199,6 +200,30 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset.upload(table_name=self.test_write_table,
                        credentials=self.credentials,
                        if_exists=Dataset.IF_EXISTS_REPLACE)
+
+    def test_dataset_upload_and_download_special_values(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        orig_df = pd.DataFrame({
+            'lat': [0, 1, 2],
+            'lng': [0, 1, 2],
+            'svals': [np.inf, -np.inf, np.nan]
+        })
+
+        dataset = Dataset(orig_df)
+        dataset.upload(table_name=self.test_write_table,
+                       with_lnglat=('lng', 'lat'),
+                       credentials=self.credentials)
+
+        self.assertExistsTable(self.test_write_table)
+
+        dataset = Dataset(self.test_write_table, credentials=self.credentials)
+        df = dataset.download()
+
+        assert df.lat.equals(orig_df.lat)
+        assert df.lng.equals(orig_df.lng)
+        assert df.svals.equals(orig_df.svals)
+        assert df.the_geom.notnull().all()
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
