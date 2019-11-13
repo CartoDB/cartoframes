@@ -184,7 +184,13 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT 1 as fakec'
         dataset = Dataset(query, credentials=self.credentials)
-        dataset.upload(table_name=self.test_write_table)
+        df = dataset.download()
+
+        dataset = Dataset(df)
+        dataset.upload(table_name=self.test_write_table,
+                       credentials=self.credentials)
+
+        self.assertExistsTable(self.test_write_table)
 
         dataset = Dataset(self.test_write_table, credentials=self.credentials)
         df = dataset.download()
@@ -261,6 +267,21 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
         self.assertEqual(result['total_rows'], 50)
+
+    @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
+    def test_dataset_write_null_geometry_column(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        from cartoframes.examples import read_taxi
+        df = read_taxi(limit=10)
+        dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
+        self.test_write_table = dataset.table_name
+
+        self.assertExistsTable(self.test_write_table)
+
+        query = 'SELECT cartodb_id FROM {} WHERE the_geom_webmercator IS NULL'.format(self.test_write_table)
+        result = self.sql_client.query(query, verbose=True)
+        self.assertEqual(result['total_rows'], 10)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_with_different_geometry_column(self):
