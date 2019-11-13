@@ -1,8 +1,5 @@
 from .enrichment_service import EnrichmentService, prepare_variables, process_filters, process_agg_operators
 
-AGGREGATION_DEFAULT = 'default'
-AGGREGATION_NONE = 'none'
-
 
 class AggregateVariable(object):
     def __init__(self, variable, aggregation=None):
@@ -112,6 +109,12 @@ class Enrichment(EnrichmentService):
 
         return self._execute_enrichment(queries, data_copy, geom_column)
 
+    AGGREGATION_DEFAULT = 'default'
+    """Use default aggregation method for polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
+
+    AGGREGATION_NONE = 'none'
+    """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
+
     def enrich_polygons(self, data, variables, geom_column='geometry', filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
         When a polygon intersects with multiple geographies of our dataset, the proportional part of the
@@ -130,11 +133,11 @@ class Enrichment(EnrichmentService):
             aggregation (str, str, list, optional): set the data aggregation. Your polygons can intersect with one or
             more polygons from the DO. With this method you can select how to aggregate the variables data from the
             intersected polygons. Options are:
-                - :py:attr:`AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable` has an
-                aggregation method in the Variable `agg_method` property and it will be used to aggregate the data. In
-                case it is not defined, `array_agg` function will be used.
-                - :py:attr:`AGGREGATION_NONE`: use this option to do the aggregation locally by yourself. you will
-                receive an array with all the data from each polygon instersected.
+                - :py:attr:`Enrichment.AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable`
+                has an aggregation method in the Variable `agg_method` property and it will be used to aggregate the
+                data. In case it is not defined, `array_agg` function will be used.
+                - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
+                you will receive an array with all the data from each polygon instersected.
                 - list of `<cartoframes.data.observatory> AggregateVariable`: if you want to overwrite some default
                 aggregation methods from your selected variables, you can do it using a list of
                 `<cartoframes.data.observatory> AggregateVariable`. For example: [AggregateVariable(variable1, 'SUM')]
