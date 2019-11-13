@@ -22,12 +22,27 @@ AGGREGATION_NONE = 'none'
 
 
 class VariableAggregation(object):
+    """Class to overwrite some default aggregation methods.
+
+        Examples:
+            VariableAggregation(variable, 'SUM')
+    """
     def __init__(self, variable, aggregation=None):
         self.variable = variable
         self.aggregation = aggregation
 
 
 class VariableFilter(object):
+    """Class for filtering in enrichment. It receives 3 parameters: variable: a
+        `<cartoframes.data.observatory> Variable` instance,
+        operator: the operation to do over the variable column in SQL syntax and
+        value: the value to be used in the SQL operation
+
+        Examples:
+            Equal to number: VariableFilter(variable, '=', 3)
+            Equal to string: VariableFilter(variable, '=', 'the string')
+            Greater that 3: VariableFilter(variable, '>', 3)
+    """
     def __init__(self, variable, operator, value):
         self.variable = variable
         self.operator = operator

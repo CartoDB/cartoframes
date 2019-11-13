@@ -134,7 +134,7 @@ class Enrichment(EnrichmentService):
                 you will receive an array with all the data from each polygon instersected.
                 - list of `<cartoframes.data.observatory> VariableAggregation`: if you want to overwrite some default
                 aggregation methods from your selected variables, you can do it using a list of
-                `<cartoframes.data.observatory> VariableAggregation`. Example: [VariableAggregation(variable1, 'SUM')]
+                `<cartoframes.data.observatory> VariableAggregation`. Example: [VariableAggregation(variable, 'SUM')]
                 - str: if you want to overwrite every default aggregation method, you can pass a string with the
                 aggregation method to use.
 
