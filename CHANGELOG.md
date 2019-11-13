@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add isolines_layer helper method (#1135)
+- Fix DO username (#1189)
 
 ## [1.0b4] - 2019-10-25
 ### Added

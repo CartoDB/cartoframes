@@ -22,6 +22,8 @@ else:
 
 _USER_CONFIG_DIR = appdirs.user_config_dir('cartoframes')
 _DEFAULT_PATH = os.path.join(_USER_CONFIG_DIR, 'cartocreds.json')
+_MIN_GCLOUD_SCHEMA_LENGTH = 6
+_MAX_GCLOUD_SCHEMA_LENGTH = 30
 
 
 class Credentials(object):
@@ -221,7 +223,7 @@ class Credentials(object):
         return token.access_token
 
     def get_do_user_dataset(self):
-        return self._username.replace('-', '_')
+        return self._username.replace('-', '_').rjust(_MIN_GCLOUD_SCHEMA_LENGTH, '_')[0:_MAX_GCLOUD_SCHEMA_LENGTH]
 
     def get_api_key_auth_client(self):
         if not self._api_key_auth_client:

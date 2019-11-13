@@ -157,6 +157,18 @@ class TestCredentials(object):
 
         assert token == access_token
 
+    def test_get_do_user_dataset_short_username(self):
+        credentials = Credentials('pim', self.api_key)
+        username = credentials.get_do_user_dataset()
+
+        assert username == '___pim'
+
+    def test_get_do_user_dataset_long_username(self):
+        credentials = Credentials('1234567890123456789012345678901', self.api_key)
+        username = credentials.get_do_user_dataset()
+
+        assert username == '123456789012345678901234567890'
+
 
 class TestCredentialsFromFile(object):
     def setup_method(self, method):
