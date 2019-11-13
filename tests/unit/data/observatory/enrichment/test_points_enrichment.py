@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset
+from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset, VariableFilter
 
 try:
     from unittest.mock import Mock, patch
@@ -41,7 +41,6 @@ class TestPointsEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        filters = {'a': 'b'}
         area_name = 'view_{}_{}_area'.format(dataset, table)
 
         variable = Variable({
@@ -55,7 +54,7 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, data_geom_column, variables, []
         )
 
         expected_queries = [
@@ -83,7 +82,6 @@ class TestPointsEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        filters = {'a': 'b'}
         area_name = 'view_{}_{}_area'.format(dataset, table)
 
         variable1 = Variable({
@@ -102,7 +100,7 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, data_geom_column, variables, []
         )
 
         expected_queries = [
@@ -132,7 +130,6 @@ class TestPointsEnrichment(object):
         view1 = 'view_{}_{}'.format(dataset, table1)
         view2 = 'view_{}_{}'.format(dataset, table2)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        filters = {'a': 'b'}
         area_name1 = 'view_{}_{}_area'.format(dataset, table1)
         area_name2 = 'view_{}_{}_area'.format(dataset, table2)
 
@@ -152,7 +149,7 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, data_geom_column, variables, []
         )
 
         expected_queries = [
@@ -184,7 +181,6 @@ class TestPointsEnrichment(object):
         view1 = 'view_{}_{}'.format(dataset1, table1)
         view2 = 'view_{}_{}'.format(dataset2, table2)
         geo_view = 'view_{}_{}'.format(dataset1, geo_table)
-        filters = {'a': 'b'}
         area_name1 = 'view_{}_{}_area'.format(dataset1, table1)
         area_name2 = 'view_{}_{}_area'.format(dataset2, table2)
 
@@ -204,12 +200,54 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, data_geom_column, variables, []
         )
 
         expected_queries = [
             get_query([column1], self.username, view1, geo_view, temp_table_name, data_geom_column, area_name1),
             get_query([column2], self.username, view2, geo_view, temp_table_name, data_geom_column, area_name2)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch.object(CatalogDataset, 'get')
+    def test_enrichment_query_by_points_with_filters(self, dataset_get_mock):
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        data_geom_column = 'the_geom'
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        variable_name = 'variable1'
+        column = 'column1'
+        geo_table = 'geo_table'
+        view = 'view_{}_{}'.format(dataset, table)
+        geo_view = 'view_{}_{}'.format(dataset, geo_table)
+        area_name = 'view_{}_{}_area'.format(dataset, table)
+
+        variable = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
+            'column_name': column,
+            'dataset_id': 'fake_name'
+        })
+        variables = [variable]
+
+        variable_filter = VariableFilter(variable, '=', 'a string')
+        filters = [variable_filter]
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_points_enrichment_sql(
+            temp_table_name, data_geom_column, variables, filters
+        )
+
+        expected_queries = [
+            get_query([column], self.username, view, geo_view, temp_table_name, data_geom_column, area_name, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -226,7 +264,7 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def get_query(columns, username, view, geo_table, temp_table_name, data_geom_column, area_name):
+def get_query(columns, username, view, geo_table, temp_table_name, data_geom_column, area_name, filters=[]):
     columns = ', '.join(get_column_sql(column) for column in columns)
 
     return '''
@@ -236,7 +274,7 @@ def get_query(columns, username, view, geo_table, temp_table_name, data_geom_col
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `carto-do-customers.{username}.{temp_table_name}` data_table
         ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
-        WHERE enrichment_table.a='b';
+        {where};
         '''.format(
             columns=columns,
             area_name=area_name,
@@ -244,10 +282,21 @@ def get_query(columns, username, view, geo_table, temp_table_name, data_geom_col
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=data_geom_column)
+            data_geom_column=data_geom_column,
+            where=_get_where(filters))
 
 
 def get_column_sql(column):
     return '''
         enrichment_table.{column}
         '''.format(column=column)
+
+
+def _get_where(filters):
+    where = ''
+    if filters and len(filters) > 0:
+        where_clausules = ["enrichment_table.{} {} '{}'".format(f.variable.column_name, f.operator, f.value)
+                           for f in filters]
+        where = 'WHERE {}'.format(', '.join(where_clausules))
+
+    return where

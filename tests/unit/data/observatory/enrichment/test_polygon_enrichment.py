@@ -1,6 +1,6 @@
 from cartoframes.auth import Credentials
 from cartoframes.data.clients.bigquery_client import BigQueryClient
-from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset, VariableAggregation
+from cartoframes.data.observatory import Enrichment, Variable, CatalogDataset, VariableAggregation, VariableFilter
 from cartoframes.data.observatory.enrichment.enrichment_service import _PUBLIC_PROJECT, _WORKING_PROJECT, \
     AGGREGATION_DEFAULT, AGGREGATION_NONE
 
@@ -42,7 +42,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -56,7 +55,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_DEFAULT
         )
 
         expected_queries = [
@@ -85,7 +84,6 @@ class TestPolygonEnrichment(object):
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        filters = {'a': 'b'}
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable1_name),
@@ -105,7 +103,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_DEFAULT
         )
 
         expected_queries = [
@@ -136,7 +134,6 @@ class TestPolygonEnrichment(object):
         view2 = 'view_{}_{}'.format(dataset, table2)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'AVG'
-        filters = {'a': 'b'}
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table1, variable1_name),
@@ -156,7 +153,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_DEFAULT
         )
 
         expected_queries = [
@@ -189,7 +186,6 @@ class TestPolygonEnrichment(object):
         view2 = 'view_{}_{}'.format(dataset2, table2)
         geo_view = 'view_{}_{}'.format(dataset1, geo_table)
         agg = 'AVG'
-        filters = {'a': 'b'}
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset1, table1, variable1_name),
@@ -209,7 +205,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_DEFAULT
         )
 
         expected_queries = [
@@ -238,7 +234,6 @@ class TestPolygonEnrichment(object):
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'SUM'
         aggregation = Enrichment.AGGREGATION_DEFAULT
-        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -252,7 +247,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, aggregation
+            temp_table_name, data_geom_column, variables, [], aggregation
         )
 
         expected_queries = [
@@ -280,7 +275,6 @@ class TestPolygonEnrichment(object):
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
         agg = 'SUM'
         aggregation = agg
-        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -294,7 +288,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, aggregation
+            temp_table_name, data_geom_column, variables, [], aggregation
         )
 
         expected_queries = [
@@ -320,7 +314,6 @@ class TestPolygonEnrichment(object):
         geo_table = 'geo_table'
         view = 'view_{}_{}'.format(dataset, table)
         geo_view = 'view_{}_{}'.format(dataset, geo_table)
-        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -334,7 +327,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_NONE
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_NONE
         )
 
         expected_queries = [
@@ -367,7 +360,6 @@ class TestPolygonEnrichment(object):
         geo_view = 'view_{}_{}'.format(dataset1, geo_table)
         agg1 = 'AVG'
         agg2 = 'SUM'
-        filters = {'a': 'b'}
 
         variable1 = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset1, table1, variable1_name),
@@ -389,7 +381,7 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, aggregation
+            temp_table_name, data_geom_column, variables, [], aggregation
         )
 
         expected_queries = [
@@ -415,7 +407,6 @@ class TestPolygonEnrichment(object):
         column = 'column1'
         geo_table = 'geo_table'
         agg = 'AVG'
-        filters = {'a': 'b'}
 
         variable = Variable({
             'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
@@ -429,12 +420,55 @@ class TestPolygonEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+            temp_table_name, data_geom_column, variables, [], AGGREGATION_DEFAULT
         )
 
         expected_queries = [
             _get_public_query(agg, [column], self.username, dataset, table, geo_table,
                               temp_table_name, data_geom_column)
+        ]
+
+        actual = sorted(_clean_queries(actual_queries))
+        expected = sorted(_clean_queries(expected_queries))
+
+        assert actual == expected
+
+    @patch.object(CatalogDataset, 'get')
+    def test_enrichment_query_by_polygons_with_filters(self, dataset_get_mock):
+        enrichment = Enrichment(credentials=self.credentials)
+
+        temp_table_name = 'test_table'
+        data_geom_column = 'the_geom'
+        project = 'project'
+        dataset = 'dataset'
+        table = 'table'
+        variable_name = 'variable1'
+        column = 'column1'
+        geo_table = 'geo_table'
+        view = 'view_{}_{}'.format(dataset, table)
+        geo_view = 'view_{}_{}'.format(dataset, geo_table)
+        agg = 'AVG'
+
+        variable = Variable({
+            'id': '{}.{}.{}.{}'.format(project, dataset, table, variable_name),
+            'column_name': column,
+            'agg_method': agg,
+            'dataset_id': 'fake_name'
+        })
+        variables = [variable]
+
+        variable_filter = VariableFilter(variable, '=', 'a string')
+        filters = [variable_filter]
+
+        catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
+        dataset_get_mock.return_value = catalog
+
+        actual_queries = enrichment._get_polygon_enrichment_sql(
+            temp_table_name, data_geom_column, variables, filters, AGGREGATION_DEFAULT
+        )
+
+        expected_queries = [
+            _get_query(agg, [column], self.username, view, geo_view, temp_table_name, data_geom_column, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -451,7 +485,7 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def _get_query(agg, columns, username, view, geo_table, temp_table_name, data_geom_column):
+def _get_query(agg, columns, username, view, geo_table, temp_table_name, data_geom_column, filters=[]):
     if agg:
         columns = ', '.join(_get_column_sql(agg, column, data_geom_column) for column in columns)
         group = 'group by data_table.enrichment_id'
@@ -466,7 +500,7 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, data_ge
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `{project}.{username}.{temp_table_name}` data_table
         ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
-        WHERE enrichment_table.a='b'
+        {where}
         {group};
         '''.format(
             columns=columns,
@@ -476,10 +510,11 @@ def _get_query(agg, columns, username, view, geo_table, temp_table_name, data_ge
             geo_table=geo_table,
             temp_table_name=temp_table_name,
             data_geom_column=data_geom_column,
+            where=_get_where(filters),
             group=group)
 
 
-def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, data_geom_column):
+def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_table_name, data_geom_column, filters=[]):
     columns = ', '.join(_get_column_sql(agg, column, data_geom_column) for column in columns)
 
     return '''
@@ -489,7 +524,7 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
         ON enrichment_table.geoid = enrichment_geo_table.geoid
         JOIN `{project}.{username}.{temp_table_name}` data_table
         ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
-        WHERE enrichment_table.a='b'
+        {where}
         group by data_table.enrichment_id;
         '''.format(
             columns=columns,
@@ -500,7 +535,8 @@ def _get_public_query(agg, columns, username, dataset, table, geo_table, temp_ta
             table=table,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=data_geom_column)
+            data_geom_column=data_geom_column,
+            where=_get_where(filters))
 
 
 def _get_column_sql(agg, column, data_geom_column):
@@ -521,3 +557,13 @@ def _get_column_sql_without_agg(columns, data_geom_column):
         '''.format(
             columns=', '.join(columns),
             data_geom_column=data_geom_column)
+
+
+def _get_where(filters):
+    where = ''
+    if filters and len(filters) > 0:
+        where_clausules = ["enrichment_table.{} {} '{}'".format(f.variable.column_name, f.operator, f.value)
+                           for f in filters]
+        where = 'WHERE {}'.format(', '.join(where_clausules))
+
+    return where
