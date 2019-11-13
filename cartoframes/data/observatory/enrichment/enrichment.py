@@ -1,10 +1,5 @@
-from .enrichment_service import EnrichmentService, prepare_variables, process_filters, process_agg_operators
-
-
-class AggregateVariable(object):
-    def __init__(self, variable, aggregation=None):
-        self.variable = variable
-        self.aggregation = aggregation
+from .enrichment_service import EnrichmentService, prepare_variables, process_filters, get_variable_aggregations, \
+    AGGREGATION_DEFAULT, AGGREGATION_NONE
 
 
 class Enrichment(EnrichmentService):
@@ -105,14 +100,14 @@ class Enrichment(EnrichmentService):
         temp_table_name = self._get_temp_table_name()
         self._upload_dataframe(temp_table_name, data_copy, geom_column)
 
-        queries = self._prepare_points_enrichment_sql(temp_table_name, geom_column, variables, filters)
+        queries = self._get_points_enrichment_sql(temp_table_name, geom_column, variables, filters)
 
         return self._execute_enrichment(queries, data_copy, geom_column)
 
-    AGGREGATION_DEFAULT = 'default'
+    AGGREGATION_DEFAULT = AGGREGATION_DEFAULT
     """Use default aggregation method for polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
-    AGGREGATION_NONE = 'none'
+    AGGREGATION_NONE = AGGREGATION_NONE
     """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
     def enrich_polygons(self, data, variables, geom_column='geometry', filters={}, aggregation=AGGREGATION_DEFAULT):
@@ -138,9 +133,9 @@ class Enrichment(EnrichmentService):
                 data. In case it is not defined, `array_agg` function will be used.
                 - :py:attr:`Enrichment.AGGREGATION_NONE`: use this option to do the aggregation locally by yourself.
                 you will receive an array with all the data from each polygon instersected.
-                - list of `<cartoframes.data.observatory> AggregateVariable`: if you want to overwrite some default
+                - list of `<cartoframes.data.observatory> VariableAggregation`: if you want to overwrite some default
                 aggregation methods from your selected variables, you can do it using a list of
-                `<cartoframes.data.observatory> AggregateVariable`. For example: [AggregateVariable(variable1, 'SUM')]
+                `<cartoframes.data.observatory> VariableAggregation`. Example: [VariableAggregation(variable1, 'SUM')]
                 - str: if you want to overwrite every default aggregation method, you can pass a string with the
                 aggregation method to use.
 
@@ -251,43 +246,21 @@ class Enrichment(EnrichmentService):
         temp_table_name = self._get_temp_table_name()
         self._upload_dataframe(temp_table_name, data_copy, geom_column)
 
-        queries = self._prepare_polygon_enrichment_sql(
+        queries = self._get_polygon_enrichment_sql(
             temp_table_name, geom_column, variables, filters, aggregation
         )
 
         return self._execute_enrichment(queries, data_copy, geom_column)
 
-    def _prepare_points_enrichment_sql(self, temp_table_name, geom_column, variables, filters):
+    def _get_points_enrichment_sql(self, temp_table_name, geom_column, variables, filters):
         filters = process_filters(filters)
         tables_metadata = self._get_tables_metadata(variables).items()
 
-        sqls = list()
-
-        for table, metadata in tables_metadata:
-            sqls.append(self._build_points_query(table, metadata, temp_table_name, geom_column, filters))
-
-        return sqls
-
-    def _prepare_polygon_enrichment_sql(self, temp_table_name, geom_column, variables, filters, agg_operators):
-        filters_str = process_filters(filters)
-        agg_operators = process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
-        tables_metadata = self._get_tables_metadata(variables).items()
-
-        if agg_operators:
-            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
-
-        sqls = list()
-
-        for table, metadata in tables_metadata:
-            sqls.append(self._build_polygons_query(
-                table, metadata, temp_table_name, geom_column, agg_operators, filters_str, grouper)
-            )
-
-        return sqls
+        return [self._build_points_query(table, metadata, temp_table_name, geom_column, filters)
+                for table, metadata in tables_metadata]
 
     def _build_points_query(self, table, metadata, temp_table_name, geom_column, filters):
-        variables = ', '.join(
-            ['enrichment_table.{}'.format(variable) for variable in metadata['variables']])
+        variables = ['enrichment_table.{}'.format(variable.column_name) for variable in metadata['variables']]
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -297,8 +270,7 @@ class Enrichment(EnrichmentService):
         )
 
         return '''
-            SELECT data_table.{enrichment_id},
-                {variables},
+            SELECT data_table.{enrichment_id}, {variables},
                 ST_Area(enrichment_geo_table.geom) AS {table}_area
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
@@ -307,19 +279,26 @@ class Enrichment(EnrichmentService):
                     ON ST_Within(data_table.{geom_column}, enrichment_geo_table.geom)
             {filters};
         '''.format(
+            variables=', '.join(variables),
             geom_column=geom_column,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
             filters=filters,
             data_table=data_table,
-            table=table,
-            variables=variables
+            table=table
         )
 
-    def _build_polygons_query(self, table, metadata, temp_table_name, geom_column, agg_operators,
-                              filters, grouper):
-        variables_list = metadata['variables']
+    def _get_polygon_enrichment_sql(self, temp_table_name, geom_column, variables, filters, aggregation):
+        filters_str = process_filters(filters)
+        variable_aggregations = get_variable_aggregations(variables, aggregation)
+        tables_metadata = self._get_tables_metadata(variable_aggregations).items()
+
+        return [self._build_polygons_query(table, metadata, temp_table_name, geom_column, filters_str, aggregation)
+                for table, metadata in tables_metadata]
+
+    def _build_polygons_query(self, table, metadata, temp_table_name, geom_column, filters, aggregation):
+        variable_aggregations = metadata['variables']
         enrichment_dataset = metadata['dataset']
         enrichment_geo_table = metadata['geo_table']
         data_table = '{project}.{user_dataset}.{temp_table_name}'.format(
@@ -328,11 +307,15 @@ class Enrichment(EnrichmentService):
             temp_table_name=temp_table_name
         )
 
-        variables = self._build_query_variables(agg_operators, variables_list, geom_column)
+        if aggregation == AGGREGATION_NONE:
+            grouper = ''
+            variables = self._build_polygons_query_variables_without_aggregation(variable_aggregations, geom_column)
+        else:
+            grouper = 'group by data_table.{enrichment_id}'.format(enrichment_id=self.enrichment_id)
+            variables = self._build_polygons_query_variables_with_aggregation(variable_aggregations, geom_column)
 
         return '''
-            SELECT data_table.{enrichment_id},
-                {variables}
+            SELECT data_table.{enrichment_id}, {variables}
             FROM `{enrichment_dataset}` enrichment_table
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
@@ -351,20 +334,24 @@ class Enrichment(EnrichmentService):
                 variables=variables
             )
 
-    def _build_query_variables(self, agg_operators, variables, geom_column):
-        sql_variables = []
+    def _build_polygons_query_variables_with_aggregation(self, variable_aggregations, geom_column):
+        return ', '.join(["""
+            {operator}(enrichment_table.{variable} *
+            (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column}))
+            / ST_area(data_table.{geom_column}))) AS {variable}
+            """.format(
+                variable=variable_aggregation.variable.column_name,
+                geom_column=geom_column,
+                operator=variable_aggregation.aggregation) for variable_aggregation in variable_aggregations])
 
-        if agg_operators is not None:
-            sql_variables = ['{operator}(enrichment_table.{variable} * \
-                (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column}))\
-                / ST_area(data_table.{geom_column}))) AS {variable}'.format(
-                    variable=variable,
-                    geom_column=geom_column,
-                    operator=agg_operators.get(variable)) for variable in variables]
-        else:
-            sql_variables = ['enrichment_table.{}'.format(variable) for variable in variables] + \
-                ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column}))\
-                    / ST_area(data_table.{geom_column}) AS measures_proportion'.format(
-                        geom_column=geom_column)]
+    def _build_polygons_query_variables_without_aggregation(self, variable_aggregations, geom_column):
+        variables = ['enrichment_table.{}'.format(variable_aggregation.variable.column_name)
+                     for variable_aggregation in variable_aggregations]
 
-        return ', '.join(sql_variables)
+        return """
+            {variables},
+            ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column})) /
+            ST_area(data_table.{geom_column}) AS measures_proportion
+            """.format(
+                variables=', '.join(variables),
+                geom_column=geom_column)

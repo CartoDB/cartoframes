@@ -7,7 +7,8 @@ from .catalog.dataset import CatalogDataset
 from .catalog.geography import Geography
 from .catalog.provider import Provider
 from .catalog.variable import Variable
-from .enrichment.enrichment import Enrichment, AggregateVariable
+from .enrichment.enrichment import Enrichment
+from .enrichment.enrichment_service import VariableAggregation
 
 __all__ = [
     'Catalog',
@@ -18,5 +19,5 @@ __all__ = [
     'Provider',
     'Variable',
     'Enrichment',
-    'AggregateVariable'
+    'VariableAggregation'
 ]

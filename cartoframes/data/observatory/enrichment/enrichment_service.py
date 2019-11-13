@@ -1,5 +1,4 @@
 import uuid
-import logging
 import geopandas as gpd
 
 from collections import defaultdict
@@ -17,6 +16,9 @@ _ENRICHMENT_ID = 'enrichment_id'
 _DEFAULT_PROJECT = 'carto-do'
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
+
+AGGREGATION_DEFAULT = 'default'
+AGGREGATION_NONE = 'none'
 
 
 class EnrichmentService(object):
@@ -72,9 +74,14 @@ class EnrichmentService(object):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            table_name = self.__get_enrichment_table(variable)
-
-            tables_metadata[table_name]['variables'].append(variable.column_name)
+            if isinstance(variable, VariableAggregation):
+                variable_aggregation = variable
+                table_name = self.__get_enrichment_table(variable_aggregation.variable)
+                tables_metadata[table_name]['variables'].append(variable_aggregation)
+                variable = variable_aggregation.variable
+            else:
+                table_name = self.__get_enrichment_table(variable)
+                tables_metadata[table_name]['variables'].append(variable)
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
@@ -157,6 +164,12 @@ class EnrichmentService(object):
         return data_copy
 
 
+class VariableAggregation(object):
+    def __init__(self, variable, aggregation=None):
+        self.variable = variable
+        self.aggregation = aggregation
+
+
 def prepare_variables(variables):
     if isinstance(variables, list):
         return [__prepare_variable(var) for var in variables]
@@ -169,9 +182,10 @@ def __prepare_variable(variable):
         variable = Variable.get(variable)
 
     if not isinstance(variable, Variable):
-        raise EnrichmentException(
-            'Variable(s) to enrich should be an instance of Variable / CatalogList / str / list'
-        )
+        raise EnrichmentException("""
+            variables should be a list of `<cartoframes.data.observatory> Variable` instances,
+            Variable `id` properties or Variable `slug` properties
+        """)
 
     return variable
 
@@ -189,26 +203,22 @@ def __format_filter(key, value):
     return "enrichment_table.{0}='{1}'".format(key, value)
 
 
-def process_agg_operators(agg_operators, variables, default_agg):
-    agg_operators_result = None
-    if isinstance(agg_operators, str):
-        agg_operators_result = dict()
+def get_variable_aggregations(variables, aggregation):
+    return [VariableAggregation(variable, __get_aggregation(variable, aggregation)) for variable in variables]
 
-        for variable in variables:
-            agg_operators_result[variable.column_name] = agg_operators
 
-    elif isinstance(agg_operators, dict):
-        agg_operators_result = agg_operators.copy()
+def __get_aggregation(variable, aggregation):
+    if aggregation == AGGREGATION_NONE:
+        return None
+    elif aggregation == AGGREGATION_DEFAULT:
+        return variable.agg_method or 'array_agg'
+    elif isinstance(aggregation, str):
+        return aggregation
+    elif isinstance(aggregation, list):
+        agg = variable.agg_method or 'array_agg'
+        for variable_aggregation in aggregation:
+            if variable_aggregation.variable == variable:
+                agg = variable_aggregation.aggregation
+                break
 
-    for variable in variables:
-        if variable.column_name not in agg_operators_result:
-            agg_operators_result[variable.column_name] = variable.agg_method or default_agg
-            if not variable.agg_method:
-                logging.warning(
-                    "Variable '{}' doesn't have defined agg_method.".format(variable.column_name) +
-                    "Default one will be used: '{}' \n".format(default_agg) +
-                    "You can change this by using the 'agg_operators' parameter." +
-                    "See docs for further details and examples."
-                )
-
-    return agg_operators_result
+        return agg
