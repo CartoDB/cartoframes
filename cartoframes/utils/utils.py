@@ -350,7 +350,7 @@ def encode_row(row):
     if row is None:
         row = PG_NULL
 
-    if isinstance(row, float):
+    elif isinstance(row, float):
         if str(row) == 'inf':
             row = 'Infinity'
         elif str(row) == '-inf':
@@ -358,7 +358,7 @@ def encode_row(row):
         elif str(row) == 'nan':
             row = 'NaN'
 
-    if isinstance(row, type(b'')):
+    elif isinstance(row, type(b'')):
         # Decode the input if it's a bytestring
         row = row.decode('utf-8')
 
