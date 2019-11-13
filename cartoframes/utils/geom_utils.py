@@ -44,7 +44,7 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
-RESERVED_GEO_COLUMN_NAME = '__cartoframes_geometry'
+RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
 
 
 def compute_query(dataset):
