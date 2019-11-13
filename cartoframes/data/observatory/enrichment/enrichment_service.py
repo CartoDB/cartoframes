@@ -21,6 +21,19 @@ AGGREGATION_DEFAULT = 'default'
 AGGREGATION_NONE = 'none'
 
 
+class VariableAggregation(object):
+    def __init__(self, variable, aggregation=None):
+        self.variable = variable
+        self.aggregation = aggregation
+
+
+class VariableFilter(object):
+    def __init__(self, variable, operator, value):
+        self.variable = variable
+        self.operator = operator
+        self.value = value
+
+
 class EnrichmentService(object):
     """Base class for the Enrichment utility with commons auxiliary methods"""
 
@@ -164,12 +177,6 @@ class EnrichmentService(object):
         return data_copy
 
 
-class VariableAggregation(object):
-    def __init__(self, variable, aggregation=None):
-        self.variable = variable
-        self.aggregation = aggregation
-
-
 def prepare_variables(variables):
     if isinstance(variables, list):
         return [__prepare_variable(var) for var in variables]
@@ -188,19 +195,6 @@ def __prepare_variable(variable):
         """)
 
     return variable
-
-
-def process_filters(filters_dict):
-    filters = ''
-    if filters_dict:
-        filters = ' AND '.join([__format_filter(key, value) for key, value in filters_dict.items()])
-        filters = 'WHERE {filters}'.format(filters=filters)
-
-    return filters
-
-
-def __format_filter(key, value):
-    return "enrichment_table.{0}='{1}'".format(key, value)
 
 
 def get_variable_aggregations(variables, aggregation):

@@ -1,4 +1,4 @@
-from .enrichment_service import EnrichmentService, prepare_variables, process_filters, get_variable_aggregations, \
+from .enrichment_service import EnrichmentService, prepare_variables, get_variable_aggregations, \
     AGGREGATION_DEFAULT, AGGREGATION_NONE
 
 
@@ -29,9 +29,8 @@ class Enrichment(EnrichmentService):
             variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
                 variable(s), discovered through Catalog, for enriching the `data` argument.
             geom_column (str): string indicating the 4326 geometry column in `data`.
-            filters (dict, optional): dictionary with either a `column` key
-                with the name of the column to filter or a `value` value with the value to filter by.
-                Filters will be used using the `AND` operator
+            filters (list, optional): list of `<cartoframes.data.observatory> VariableFilter` to filter rows from
+                the enrichment data. Example: [VariableFilter(variable1, '=', 'a string')]
 
         Returns:
             A DataFrame as the provided one, but with the variables to enrich appended to it.
@@ -110,7 +109,7 @@ class Enrichment(EnrichmentService):
     AGGREGATION_NONE = AGGREGATION_NONE
     """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
-    def enrich_polygons(self, data, variables, geom_column='geometry', filters={}, aggregation=AGGREGATION_DEFAULT):
+    def enrich_polygons(self, data, variables, geom_column='geometry', filters=[], aggregation=AGGREGATION_DEFAULT):
         """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
         When a polygon intersects with multiple geographies of our dataset, the proportional part of the
         intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
@@ -123,8 +122,8 @@ class Enrichment(EnrichmentService):
                 instance, the Variable `id` property or the Variable `slug` property. Please, take a look at the
                 examples.
             geom_column (str): string indicating the 4326 geometry column in `data`.
-            filters (dict, optional): dictionary with either a `column` key with the name of the column to filter
-                or a `value` value with the value to filter by.
+            filters (list, optional): list of `<cartoframes.data.observatory> VariableFilter` to filter rows from
+                the enrichment data. Example: [VariableFilter(variable1, '=', 'a string')]
             aggregation (str, str, list, optional): set the data aggregation. Your polygons can intersect with one or
             more polygons from the DO. With this method you can select how to aggregate the variables data from the
             intersected polygons. Options are:
@@ -253,7 +252,6 @@ class Enrichment(EnrichmentService):
         return self._execute_enrichment(queries, data_copy, geom_column)
 
     def _get_points_enrichment_sql(self, temp_table_name, geom_column, variables, filters):
-        filters = process_filters(filters)
         tables_metadata = self._get_tables_metadata(variables).items()
 
         return [self._build_points_query(table, metadata, temp_table_name, geom_column, filters)
@@ -277,24 +275,23 @@ class Enrichment(EnrichmentService):
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
                     ON ST_Within(data_table.{geom_column}, enrichment_geo_table.geom)
-            {filters};
+            {where};
         '''.format(
             variables=', '.join(variables),
             geom_column=geom_column,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
-            filters=filters,
+            where=self._build_where_clausule(filters),
             data_table=data_table,
             table=table
         )
 
     def _get_polygon_enrichment_sql(self, temp_table_name, geom_column, variables, filters, aggregation):
-        filters_str = process_filters(filters)
         variable_aggregations = get_variable_aggregations(variables, aggregation)
         tables_metadata = self._get_tables_metadata(variable_aggregations).items()
 
-        return [self._build_polygons_query(table, metadata, temp_table_name, geom_column, filters_str, aggregation)
+        return [self._build_polygons_query(table, metadata, temp_table_name, geom_column, filters, aggregation)
                 for table, metadata in tables_metadata]
 
     def _build_polygons_query(self, table, metadata, temp_table_name, geom_column, filters, aggregation):
@@ -321,14 +318,14 @@ class Enrichment(EnrichmentService):
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
                     ON ST_Intersects(data_table.{geom_column}, enrichment_geo_table.geom)
-            {filters}
+            {where}
             {grouper};
         '''.format(
                 geom_column=geom_column,
                 enrichment_dataset=enrichment_dataset,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=self.enrichment_id,
-                filters=filters,
+                where=self._build_where_clausule(filters),
                 data_table=data_table,
                 grouper=grouper or '',
                 variables=variables
@@ -355,3 +352,12 @@ class Enrichment(EnrichmentService):
             """.format(
                 variables=', '.join(variables),
                 geom_column=geom_column)
+
+    def _build_where_clausule(self, filters):
+        where = ''
+        if len(filters) > 0:
+            where_clausules = ["enrichment_table.{} {} '{}'".format(f.variable.column_name, f.operator, f.value)
+                               for f in filters]
+            where = 'WHERE {}'.format(', '.join(where_clausules))
+
+        return where
