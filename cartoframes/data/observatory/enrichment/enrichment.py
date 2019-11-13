@@ -1,5 +1,14 @@
 from .enrichment_service import EnrichmentService, prepare_variables, process_filters, process_agg_operators
 
+AGGREGATION_DEFAULT = 'default'
+AGGREGATION_NONE = 'none'
+
+
+class AggregateVariable(object):
+    def __init__(self, variable, aggregation=None):
+        self.variable = variable
+        self.aggregation = aggregation
+
 
 class Enrichment(EnrichmentService):
 
@@ -17,7 +26,7 @@ class Enrichment(EnrichmentService):
 
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, data, variables, data_geom_column='geometry', filters={}, **kwargs):
+    def enrich_points(self, data, variables, geom_column='geometry', filters={}):
         """Enrich your dataset with columns from our data, intersecting your points with our
         geographies. Extra columns as area and population will be provided with the aims of normalize
         these columns.
@@ -27,7 +36,7 @@ class Enrichment(EnrichmentService):
                 a Dataset, DataFrame or GeoDataFrame object to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
                 variable(s), discovered through Catalog, for enriching the `data` argument.
-            data_geom_column (str): string indicating the 4326 geometry column in `data`.
+            geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (dict, optional): dictionary with either a `column` key
                 with the name of the column to filter or a `value` value with the value to filter by.
                 Filters will be used using the `AND` operator
@@ -94,16 +103,16 @@ class Enrichment(EnrichmentService):
         """
 
         variables = prepare_variables(variables)
-        data_copy = self._prepare_data(data, data_geom_column)
+        data_copy = self._prepare_data(data, geom_column)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_dataframe(temp_table_name, data_copy, data_geom_column)
+        self._upload_dataframe(temp_table_name, data_copy, geom_column)
 
-        queries = self._prepare_points_enrichment_sql(temp_table_name, data_geom_column, variables, filters)
+        queries = self._prepare_points_enrichment_sql(temp_table_name, geom_column, variables, filters)
 
-        return self._execute_enrichment(queries, data_copy, data_geom_column)
+        return self._execute_enrichment(queries, data_copy, geom_column)
 
-    def enrich_polygons(self, data, variables, data_geom_column='geometry', filters={}, agg_operators={}, **kwargs):
+    def enrich_polygons(self, data, variables, geom_column='geometry', filters={}, aggregation=AGGREGATION_DEFAULT):
         """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
         When a polygon intersects with multiple geographies of our dataset, the proportional part of the
         intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
@@ -111,19 +120,26 @@ class Enrichment(EnrichmentService):
 
         Args:
             data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
-            variables (Variable, CatalogList, list, str): variable(s), discovered through Catalog,
-                for enriching the `data` argument.
-            data_geom_column (str): string indicating the 4326 geometry column in `data`.
-            filters (dict, optional): dictionary with either a `column` key
-                with the name of the column to filter or a `value` value with the value to filter by.
-            agg_operators (dict, str, optional): dictionary with either a `column` key
-                with the name of the column to aggregate or a `operator` value with the operator to group by.
-                If `agg_operators`' dictionary is empty (default argument value) then aggregation operators
-                will be retrieved from `agg_method` column of the catalog entity. If the `agg_method` column
-                is empty too, default `array_agg` function will be used.
-                If `agg_operators` is a string then all columns will be aggregated by this operator.
-                Since we're using a `group by` clause, all the values which data geometry intersects with will be
-                returned in the array.
+            variables (list): list of `<cartoframes.data.observatory> Variable` entities discovered through Catalog to
+                enrich your data. To refer to a Variable, You can use a `<cartoframes.data.observatory> Variable`
+                instance, the Variable `id` property or the Variable `slug` property. Please, take a look at the
+                examples.
+            geom_column (str): string indicating the 4326 geometry column in `data`.
+            filters (dict, optional): dictionary with either a `column` key with the name of the column to filter
+                or a `value` value with the value to filter by.
+            aggregation (str, str, list, optional): set the data aggregation. Your polygons can intersect with one or
+            more polygons from the DO. With this method you can select how to aggregate the variables data from the
+            intersected polygons. Options are:
+                - :py:attr:`AGGREGATION_DEFAULT` (default): Every `<cartoframes.data.observatory> Variable` has an
+                aggregation method in the Variable `agg_method` property and it will be used to aggregate the data. In
+                case it is not defined, `array_agg` function will be used.
+                - :py:attr:`AGGREGATION_NONE`: use this option to do the aggregation locally by yourself. you will
+                receive an array with all the data from each polygon instersected.
+                - list of `<cartoframes.data.observatory> AggregateVariable`: if you want to overwrite some default
+                aggregation methods from your selected variables, you can do it using a list of
+                `<cartoframes.data.observatory> AggregateVariable`. For example: [AggregateVariable(variable1, 'SUM')]
+                - str: if you want to overwrite every default aggregation method, you can pass a string with the
+                aggregation method to use.
 
         Returns:
             A DataFrame as the provided one but with the variables to enrich appended to it
@@ -227,29 +243,29 @@ class Enrichment(EnrichmentService):
         """
 
         variables = prepare_variables(variables)
-        data_copy = self._prepare_data(data, data_geom_column)
+        data_copy = self._prepare_data(data, geom_column)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_dataframe(temp_table_name, data_copy, data_geom_column)
+        self._upload_dataframe(temp_table_name, data_copy, geom_column)
 
         queries = self._prepare_polygon_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters, agg_operators
+            temp_table_name, geom_column, variables, filters, aggregation
         )
 
-        return self._execute_enrichment(queries, data_copy, data_geom_column)
+        return self._execute_enrichment(queries, data_copy, geom_column)
 
-    def _prepare_points_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters):
+    def _prepare_points_enrichment_sql(self, temp_table_name, geom_column, variables, filters):
         filters = process_filters(filters)
         tables_metadata = self._get_tables_metadata(variables).items()
 
         sqls = list()
 
         for table, metadata in tables_metadata:
-            sqls.append(self._build_points_query(table, metadata, temp_table_name, data_geom_column, filters))
+            sqls.append(self._build_points_query(table, metadata, temp_table_name, geom_column, filters))
 
         return sqls
 
-    def _prepare_polygon_enrichment_sql(self, temp_table_name, data_geom_column, variables, filters, agg_operators):
+    def _prepare_polygon_enrichment_sql(self, temp_table_name, geom_column, variables, filters, agg_operators):
         filters_str = process_filters(filters)
         agg_operators = process_agg_operators(agg_operators, variables, default_agg='ARRAY_AGG')
         tables_metadata = self._get_tables_metadata(variables).items()
@@ -261,12 +277,12 @@ class Enrichment(EnrichmentService):
 
         for table, metadata in tables_metadata:
             sqls.append(self._build_polygons_query(
-                table, metadata, temp_table_name, data_geom_column, agg_operators, filters_str, grouper)
+                table, metadata, temp_table_name, geom_column, agg_operators, filters_str, grouper)
             )
 
         return sqls
 
-    def _build_points_query(self, table, metadata, temp_table_name, data_geom_column, filters):
+    def _build_points_query(self, table, metadata, temp_table_name, geom_column, filters):
         variables = ', '.join(
             ['enrichment_table.{}'.format(variable) for variable in metadata['variables']])
         enrichment_dataset = metadata['dataset']
@@ -285,10 +301,10 @@ class Enrichment(EnrichmentService):
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
-                    ON ST_Within(data_table.{data_geom_column}, enrichment_geo_table.geom)
+                    ON ST_Within(data_table.{geom_column}, enrichment_geo_table.geom)
             {filters};
         '''.format(
-            data_geom_column=data_geom_column,
+            geom_column=geom_column,
             enrichment_dataset=enrichment_dataset,
             enrichment_geo_table=enrichment_geo_table,
             enrichment_id=self.enrichment_id,
@@ -298,7 +314,7 @@ class Enrichment(EnrichmentService):
             variables=variables
         )
 
-    def _build_polygons_query(self, table, metadata, temp_table_name, data_geom_column, agg_operators,
+    def _build_polygons_query(self, table, metadata, temp_table_name, geom_column, agg_operators,
                               filters, grouper):
         variables_list = metadata['variables']
         enrichment_dataset = metadata['dataset']
@@ -309,7 +325,7 @@ class Enrichment(EnrichmentService):
             temp_table_name=temp_table_name
         )
 
-        variables = self._build_query_variables(agg_operators, variables_list, data_geom_column)
+        variables = self._build_query_variables(agg_operators, variables_list, geom_column)
 
         return '''
             SELECT data_table.{enrichment_id},
@@ -318,11 +334,11 @@ class Enrichment(EnrichmentService):
                 JOIN `{enrichment_geo_table}` enrichment_geo_table
                     ON enrichment_table.geoid = enrichment_geo_table.geoid
                 JOIN `{data_table}` data_table
-                    ON ST_Intersects(data_table.{data_geom_column}, enrichment_geo_table.geom)
+                    ON ST_Intersects(data_table.{geom_column}, enrichment_geo_table.geom)
             {filters}
             {grouper};
         '''.format(
-                data_geom_column=data_geom_column,
+                geom_column=geom_column,
                 enrichment_dataset=enrichment_dataset,
                 enrichment_geo_table=enrichment_geo_table,
                 enrichment_id=self.enrichment_id,
@@ -332,20 +348,20 @@ class Enrichment(EnrichmentService):
                 variables=variables
             )
 
-    def _build_query_variables(self, agg_operators, variables, data_geom_column):
+    def _build_query_variables(self, agg_operators, variables, geom_column):
         sql_variables = []
 
         if agg_operators is not None:
             sql_variables = ['{operator}(enrichment_table.{variable} * \
-                (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                / ST_area(data_table.{data_geom_column}))) AS {variable}'.format(
+                (ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column}))\
+                / ST_area(data_table.{geom_column}))) AS {variable}'.format(
                     variable=variable,
-                    data_geom_column=data_geom_column,
+                    geom_column=geom_column,
                     operator=agg_operators.get(variable)) for variable in variables]
         else:
             sql_variables = ['enrichment_table.{}'.format(variable) for variable in variables] + \
-                ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{data_geom_column}))\
-                    / ST_area(data_table.{data_geom_column}) AS measures_proportion'.format(
-                        data_geom_column=data_geom_column)]
+                ['ST_Area(ST_Intersection(enrichment_geo_table.geom, data_table.{geom_column}))\
+                    / ST_area(data_table.{geom_column}) AS measures_proportion'.format(
+                        geom_column=geom_column)]
 
         return ', '.join(sql_variables)
