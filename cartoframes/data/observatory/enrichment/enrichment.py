@@ -184,7 +184,7 @@ class Enrichment(EnrichmentService):
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
+                dataset_enrich = enrichment.enrich_polygons(df, variables)
 
 
             Enrich a polygons dataset with several Variables using their ids:
@@ -209,7 +209,7 @@ class Enrichment(EnrichmentService):
                 ]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables)
+                dataset_enrich = enrichment.enrich_polygons(df, variables)
 
 
             Enrich a polygons dataset with filters:
@@ -229,7 +229,7 @@ class Enrichment(EnrichmentService):
                 filter = VariableFilter(variable, '=', '2019-09-01')
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables=[variable], filters=[filter])
+                dataset_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
 
 
             Enrich a polygons dataset overwriting some of the variables aggregation methods:
@@ -258,7 +258,7 @@ class Enrichment(EnrichmentService):
                 ]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(dataset, variables, aggregations=aggregations)
+                dataset_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
         """
 
         variables = prepare_variables(variables)
