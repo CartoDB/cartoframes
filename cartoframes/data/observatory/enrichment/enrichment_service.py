@@ -22,13 +22,14 @@ AGGREGATION_NONE = 'none'
 
 
 class VariableAggregation(object):
-    """Class to overwrite some default aggregation methods.
+    """Class to overwrite a `<cartoframes.data.observatory> Variable` default aggregation method in
+        enrichment funcitons
 
-        Examples:
+        Example:
             VariableAggregation(variable, 'SUM')
     """
     def __init__(self, variable, aggregation=None):
-        self.variable = variable
+        self.variable = _prepare_variable(variable)
         self.aggregation = aggregation
 
 
@@ -44,7 +45,7 @@ class VariableFilter(object):
             Greater that 3: VariableFilter(variable, '>', 3)
     """
     def __init__(self, variable, operator, value):
-        self.variable = variable
+        self.variable = _prepare_variable(variable)
         self.operator = operator
         self.value = value
 
@@ -194,19 +195,19 @@ class EnrichmentService(object):
 
 def prepare_variables(variables):
     if isinstance(variables, list):
-        return [__prepare_variable(var) for var in variables]
+        return [_prepare_variable(var) for var in variables]
     else:
-        return [__prepare_variable(variables)]
+        return [_prepare_variable(variables)]
 
 
-def __prepare_variable(variable):
+def _prepare_variable(variable):
     if isinstance(variable, str):
         variable = Variable.get(variable)
 
     if not isinstance(variable, Variable):
         raise EnrichmentException("""
-            variables should be a list of `<cartoframes.data.observatory> Variable` instances,
-            Variable `id` properties or Variable `slug` properties
+            variable should be a `<cartoframes.data.observatory> Variable` instance,
+            Variable `id` property or Variable `slug` property
         """)
 
     return variable
