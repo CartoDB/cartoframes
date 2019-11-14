@@ -44,7 +44,7 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
-RESERVED_GEO_COLUMN_NAME = '__cartoframes_geometry'
+RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
 
 
 def compute_query(dataset):
@@ -253,17 +253,6 @@ def get_context_with_public_creds(credentials):
     public_creds = deepcopy(credentials)
     public_creds.api_key = 'default_public'
     return context.create_context(public_creds)
-
-
-def convert_bool(x):
-    if x:
-        if x == 't':
-            return True
-        if x == 'f':
-            return False
-        return bool(x)
-    else:
-        return None
 
 
 def save_index_as_column(df):
