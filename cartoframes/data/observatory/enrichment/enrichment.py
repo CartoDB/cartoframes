@@ -169,7 +169,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials(Credentials.from_file())
+                set_default_credentials()
 
                 df = pandas.read_csv('...')
 
@@ -189,7 +189,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials(Credentials.from_file())
+                set_default_credentials()
 
                 df = pandas.read_csv('...')
 
@@ -208,7 +208,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials(Credentials.from_file())
+                set_default_credentials()
 
                 df = pandas.read_csv('...')
 
@@ -233,7 +233,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
                 from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials(Credentials.from_file())
+                set_default_credentials()
 
                 df = pandas.read_csv('...')
 
@@ -253,7 +253,7 @@ class Enrichment(EnrichmentService):
                 from cartoframes.data.observatory import Enrichment, Catalog, VariableAggregation
                 from cartoframes.auth import set_default_credentials, Credentials
 
-                set_default_credentials(Credentials.from_file())
+                set_default_credentials()
 
                 df = pandas.read_csv('...')
 
