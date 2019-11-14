@@ -45,52 +45,65 @@ class Enrichment(EnrichmentService):
 
             .. code::
 
+                import pandas
                 from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials()
+
+                df = pandas.read_csv('...')
 
                 catalog = Catalog()
-                enrichment = Enrichment()
-
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
-                dataset_enrich = enrichment.enrich_points(dataset, variables)
+
+                enrichment = Enrichment()
+                dataset_enrich = enrichment.enrich_points(df, variables)
 
 
-            Enrich a points dataset with list of ids:
+            Enrich a points dataset with several Variables using their ids:
 
             .. code::
 
-                from cartoframes.data.observatory import Enrichment
+                import pandas
+                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials()
 
-                enrichment = Enrichment()
+                df = pandas.read_csv('...')
 
+                catalog = Catalog()
+                all_variables = catalog.country('usa').category('demographics').datasets[0].variables
+                variable1 = all_variables[0]
+                variable2 = all_variables[1]
                 variables = [
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_grades_1_to_4_quantile',
-                    'carto-do-public-data.acsquantiles.demographics_acsquantiles_usa_schooldistrictelementaryclipped_2015_5yrs_20062010.in_school_quantile'
+                    variable1.id,
+                    variable2.id
                 ]
 
-                dataset_enrich = enrichment.enrich_points(dataset, variables)
+                enrichment = Enrichment()
+                dataset_enrich = enrichment.enrich_points(df, variables)
 
 
-            Enrich a points dataset filtering our data:
+            Enrich a points dataset with filters:
 
             .. code::
 
-                from cartoframes.data.observatory import Enrichment, Catalog
+                import pandas
+                from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
                 from cartoframes.auth import set_default_credentials
 
-                set_default_credentials('YOUR_USER_NAME', 'YOUR_API_KEY')
+                set_default_credentials()
+
+                df = pandas.read_csv('...')
 
                 catalog = Catalog()
-                enrichment = Enrichment()
+                variable = catalog.country('usa').category('demographics').datasets[0].variables[0]
+                filter = VariableFilter(variable, '=', '2019-09-01')
 
-                variables = catalog.country('usa').category('demographics').datasets[0].variables
-                filters = {'do_date': '2019-09-01'}
-                dataset_enrich = enrichment.enrich_points(dataset, variables, filters)
+                enrichment = Enrichment()
+                dataset_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
+
         """
 
         variables = prepare_variables(variables)
@@ -192,7 +205,7 @@ class Enrichment(EnrichmentService):
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment
+                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials, Credentials
 
                 set_default_credentials(Credentials.from_file())
