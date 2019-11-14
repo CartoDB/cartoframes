@@ -30,7 +30,7 @@ class Enrichment(EnrichmentService):
                 variable(s), discovered through Catalog, for enriching the `data` argument.
             geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (list, optional): list of `<cartoframes.data.observatory> VariableFilter` to filter rows from
-                the enrichment data. Example: [VariableFilter(variable1, '=', 'a string')]
+                the enrichment data. Example: [VariableFilter(variable1, "= 'a string'")]
 
         Returns:
             A DataFrame as the provided one, but with the variables to enrich appended to it.
@@ -136,7 +136,7 @@ class Enrichment(EnrichmentService):
                 examples.
             geom_column (str): string indicating the 4326 geometry column in `data`.
             filters (list, optional): list of `<cartoframes.data.observatory> VariableFilter` to filter rows from
-                the enrichment data. Example: [VariableFilter(variable1, '=', 'a string')]
+                the enrichment data. Example: [VariableFilter(variable1, "= 'a string'")]
             aggregation (str, str, list, optional): set the data aggregation. Your polygons can intersect with one or
             more polygons from the DO. With this method you can select how to aggregate the variables data from the
             intersected polygons. Options are:
@@ -391,8 +391,7 @@ class Enrichment(EnrichmentService):
     def _build_where_clausule(self, filters):
         where = ''
         if len(filters) > 0:
-            where_clausules = ["enrichment_table.{} {} '{}'".format(f.variable.column_name, f.operator, f.value)
-                               for f in filters]
-            where = 'WHERE {}'.format(', '.join(where_clausules))
+            where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query) for f in filters]
+            where = 'WHERE {}'.format('AND '.join(where_clausules))
 
         return where

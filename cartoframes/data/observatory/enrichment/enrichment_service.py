@@ -40,14 +40,13 @@ class VariableFilter(object):
         value: the value to be used in the SQL operation
 
         Examples:
-            Equal to number: VariableFilter(variable, '=', 3)
-            Equal to string: VariableFilter(variable, '=', 'the string')
-            Greater that 3: VariableFilter(variable, '>', 3)
+            Equal to number: VariableFilter(variable, '= 3')
+            Equal to string: VariableFilter(variable, "= 'the string'")
+            Greater that 3: VariableFilter(variable, '> 3')
     """
-    def __init__(self, variable, operator, value):
+    def __init__(self, variable, query):
         self.variable = _prepare_variable(variable)
-        self.operator = operator
-        self.value = value
+        self.query = query
 
 
 class EnrichmentService(object):

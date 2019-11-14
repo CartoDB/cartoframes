@@ -236,7 +236,7 @@ class TestPointsEnrichment(object):
         })
         variables = [variable]
 
-        variable_filter = VariableFilter(variable, '=', 'a string')
+        variable_filter = VariableFilter(variable, "= 'a string'")
         filters = [variable_filter]
 
         catalog = CatalogEntityWithGeographyMock('{}.{}.{}'.format(project, dataset, geo_table))
@@ -295,8 +295,8 @@ def get_column_sql(column):
 def _get_where(filters):
     where = ''
     if filters and len(filters) > 0:
-        where_clausules = ["enrichment_table.{} {} '{}'".format(f.variable.column_name, f.operator, f.value)
+        where_clausules = ["enrichment_table.{} {}".format(f.variable.column_name, f.query)
                            for f in filters]
-        where = 'WHERE {}'.format(', '.join(where_clausules))
+        where = 'WHERE {}'.format('AND '.join(where_clausules))
 
     return where
