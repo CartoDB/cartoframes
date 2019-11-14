@@ -10,8 +10,8 @@ from cartoframes.data import Dataset
 from cartoframes.utils.geom_utils import (ENC_EWKT, ENC_SHAPELY, ENC_WKB,
                                           ENC_WKB_BHEX, ENC_WKB_HEX, ENC_WKT,
                                           compute_geodataframe, compute_query,
-                                          decode_geometry,
-                                          detect_encoding_type)
+                                          decode_geometry, detect_encoding_type,
+                                          extract_viz_columns, remove_comments)
 from tests.unit.mocks import mock_create_context
 
 
@@ -218,3 +218,16 @@ class TestDataUtils(object):
         geom = decode_geometry('SRID=4326;POINT (1234 5789)', ENC_EWKT)  # ext
         assert lgeos.GEOSGetSRID(geom._geom) == 4326
         assert geom.wkt == 'POINT (1234 5789)'
+
+    def test_extract_viz_columns(self):
+        viz = 'color: $hello + $A_0123'
+        assert 'hello' in extract_viz_columns(viz)
+        assert 'A_0123' in extract_viz_columns(viz)
+
+    def test_remove_comments(self):
+        viz = """
+        color: blue // This is a line comment
+        /* This is a
+           multiline comment */
+        """
+        assert remove_comments(viz) == 'color: blue'
