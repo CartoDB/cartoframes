@@ -48,9 +48,9 @@
             "file": "points_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygon Enrichment - Public Dataset",
-            "desc": "Polygon Enrichment - Public Dataset",
-            "file": "polygon_enrichment_public_dataset",
+            "title": "Polygons Enrichment - Public Dataset",
+            "desc": "Polygons Enrichment - Public Dataset",
+            "file": "polygons_enrichment_public_dataset",
             "path": "data_enrichment"
         }, {
             "title": "Points Enrichment - Private Dataset",
@@ -58,9 +58,9 @@
             "file": "points_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
-            "title": "Polygon Enrichment - Private Dataset",
-            "desc": "Polygon Enrichment - Private Dataset",
-            "file": "polygon_enrichment_private_dataset",
+            "title": "Polygons Enrichment - Private Dataset",
+            "desc": "Polygons Enrichment - Private Dataset",
+            "file": "polygons_enrichment_private_dataset",
             "path": "data_enrichment"
         }, {
             "title": "Enrichment Subscription Workflow",
