@@ -457,8 +457,14 @@ var init = (function () {
   }
 
   function _decodeJSONData(b64Data) {
+    const start = (new Date()).getTime();
+
     const data = atob(b64Data).split('').map((x) => x.charCodeAt(0));
-    return geobuf.decode(new Pbf(data));
+    const output = geobuf.decode(new Pbf(data));
+
+    const end = (new Date()).getTime();
+    console.log(end - start);
+    return output;
   }
 
   const factory = new SourceFactory();

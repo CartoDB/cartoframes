@@ -108,7 +108,15 @@ class Source(object):
             gdf = compute_geodataframe(self.dataset)
             gdf = gdf[columns] if columns is not None else gdf
             self.type = SourceType.GEOJSON
+
+            import time
+            start = time.time()
+
             self.data = self._compute_geojson_data(gdf)
+
+            end = time.time()
+            print('TIME', int(round((end - start) * 1000)))
+
             self.bounds = self._compute_geojson_bounds(gdf)
             reset_geodataframe(self.dataset)
         else:
