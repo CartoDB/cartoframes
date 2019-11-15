@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import re
 import sys
+import gzip
 import json
 import base64
 import decimal
@@ -19,6 +20,18 @@ try:
     basestring
 except NameError:
     basestring = str
+
+if sys.version_info < (3, 0):
+    from io import BytesIO
+    from gzip import GzipFile
+
+    def compress(data):
+        buf = BytesIO()
+        with GzipFile(fileobj=buf, mode='wb') as f:
+            f.write(data)
+        return buf.getvalue()
+
+    gzip.compress = compress
 
 
 GEOM_TYPE_POINT = 'point'
@@ -282,10 +295,9 @@ class CustomJSONEncoder(json.JSONEncoder):
 
 def encode_geodataframe(data):
     filtered_geometries = _filter_null_geometries(data)
-    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder)
-    encoded_data = base64.b64encode(data.encode('utf-8')).decode('utf-8')
-
-    return encoded_data
+    data = _set_time_cols_epoc(filtered_geometries).to_json(cls=CustomJSONEncoder, separators=(',', ':'))
+    compressed_data = gzip.compress(data.encode('utf-8'))
+    return base64.b64encode(compressed_data).decode('utf-8')
 
 
 def _filter_null_geometries(data):

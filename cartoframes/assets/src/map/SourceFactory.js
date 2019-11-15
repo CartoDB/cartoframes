@@ -27,6 +27,6 @@ function MVT(layer) {
   return new carto.source.MVT(layer.data.file, JSON.parse(layer.data.metadata));
 }
 
-function _decodeJSONData(data) {
-  return JSON.parse(Base64.decode(data.replace(/b\'/, '\'')));
+function _decodeJSONData(b64Data) {
+  return JSON.parse(pako.inflate(atob(b64Data), { to: 'string' }));
 }
