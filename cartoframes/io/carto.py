@@ -48,10 +48,10 @@ def read_carto(source, credentials=None, limit=None, retry_times=3,
     df = _copyto(columns, copy_query, limit, retry_times, context)
     df.index.name = None
 
-    gdf = geodataframe_from_dataframe(df)
-
     if keep_cartodb_id:
-        gdf['cartodb_id'] = gdf.index
+        df['cartodb_id'] = df.index
+
+    gdf = geodataframe_from_dataframe(df)
 
     if not keep_the_geom:
         del gdf['the_geom']
