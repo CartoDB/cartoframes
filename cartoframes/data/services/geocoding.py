@@ -264,9 +264,9 @@ def _dup_dataset(dataset):
     # with a `table_name` attribute (of the temporary table, that will be deleted),
     # so we'll use duplicates of the datasets for temporary uploads`
     if dataset.get_query():
-        return Dataset(dataset.get_query())
+        return Dataset(dataset.get_query(), credentials=dataset.credentials)
     elif dataset.table_name:
-        return Dataset(dataset.table_name)
+        return Dataset(dataset.table_name, credentials=dataset.credentials)
     return Dataset(dataset.dataframe)
 
 
@@ -543,7 +543,7 @@ class Geocoding(Service):
                 # TODO: select only needed columns
                 query = 'SELECT * FROM {table}'.format(table=input_dataset.table_name)
                 input_table_name = table_name
-                input_dataset = Dataset(query)
+                input_dataset = Dataset(query, credentials=self._credentials)
                 input_dataset.upload(table_name=input_table_name, credentials=self._credentials, if_exists=if_exists)
             else:
                 input_table_name = input_dataset.table_name

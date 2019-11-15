@@ -7,7 +7,7 @@ from tqdm import tqdm
 from ....utils.columns import DataframeColumnsInfo, _first_value
 from ....utils.geom_utils import (compute_geodataframe, decode_geometry,
                                   save_index_as_column)
-from ....utils.utils import is_geojson, load_geojson, map_geom_type, encode_row
+from ....utils.utils import is_geojson, load_geojson, map_geom_type, encode_row, PG_NULL
 from .base_dataset import BaseDataset
 
 # avoid _lock issue: https://github.com/tqdm/tqdm/issues/457
@@ -86,9 +86,11 @@ class DataFrameDataset(BaseDataset):
         return len(self._df.index)
 
     def _copyfrom(self, dataframe_columns_info, with_lnglat):
-        query = """COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|');""".format(
-            table_name=self._table_name,
-            columns=','.join(c.database for c in dataframe_columns_info.columns))
+        query = """
+            COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
+        """.format(
+            table_name=self._table_name, null=PG_NULL,
+            columns=','.join(c.database for c in dataframe_columns_info.columns)).strip()
 
         data = _rows(self._df, dataframe_columns_info, with_lnglat)
 
@@ -139,20 +141,17 @@ def _is_valid_index_for_cartodb_id(index):
 
 
 def _rows(df, dataframe_columns_info, with_lnglat):
-    for i, row in df.iterrows():
+    for index, _ in df.iterrows():
         row_data = []
         for c in dataframe_columns_info.columns:
             col = c.dataframe
             if col not in df.columns:
                 if df.index.name and col == df.index.name:
-                    val = i
+                    val = index
                 else:  # we could have filtered columns in the df. See DataframeColumnsInfo
                     continue
             else:
-                val = row[col]
-
-            if _is_null(val):
-                val = ''
+                val = df.at[index, col]
 
             if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
                 geom = decode_geometry(val, dataframe_columns_info.enc_type)
@@ -164,9 +163,9 @@ def _rows(df, dataframe_columns_info, with_lnglat):
             row_data.append(encode_row(val))
 
         if with_lnglat:
-            lng_val = row[with_lnglat[0]]
-            lat_val = row[with_lnglat[1]]
-            if lng_val and lat_val:
+            lng_val = df.at[index, with_lnglat[0]]
+            lat_val = df.at[index, with_lnglat[1]]
+            if lng_val is not None and lat_val is not None:
                 val = 'SRID=4326;POINT ({lng} {lat})'.format(lng=lng_val, lat=lat_val)
             else:
                 val = ''
@@ -176,11 +175,3 @@ def _rows(df, dataframe_columns_info, with_lnglat):
         csv_row += b'\n'
 
         yield csv_row
-
-
-def _is_null(val):
-    vnull = pd.isnull(val)
-    if isinstance(vnull, bool):
-        return vnull
-    else:
-        return vnull.all()

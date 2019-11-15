@@ -1,5 +1,4 @@
 import uuid
-import logging
 import geopandas as gpd
 
 from collections import defaultdict
@@ -17,6 +16,37 @@ _ENRICHMENT_ID = 'enrichment_id'
 _DEFAULT_PROJECT = 'carto-do'
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
+
+AGGREGATION_DEFAULT = 'default'
+AGGREGATION_NONE = 'none'
+
+
+class VariableAggregation(object):
+    """Class to overwrite a `<cartoframes.data.observatory> Variable` default aggregation method in
+        enrichment funcitons
+
+        Example:
+            VariableAggregation(variable, 'SUM')
+    """
+    def __init__(self, variable, aggregation=None):
+        self.variable = _prepare_variable(variable)
+        self.aggregation = aggregation
+
+
+class VariableFilter(object):
+    """Class for filtering in enrichment. It receives 3 parameters: variable: a
+        `<cartoframes.data.observatory> Variable` instance,
+        operator: the operation to do over the variable column in SQL syntax and
+        value: the value to be used in the SQL operation
+
+        Examples:
+            Equal to number: VariableFilter(variable, '= 3')
+            Equal to string: VariableFilter(variable, "= 'the string'")
+            Greater that 3: VariableFilter(variable, '> 3')
+    """
+    def __init__(self, variable, query):
+        self.variable = _prepare_variable(variable)
+        self.query = query
 
 
 class EnrichmentService(object):
@@ -68,71 +98,18 @@ class EnrichmentService(object):
             dataset=self.user_dataset
         )
 
-    def _prepare_variables(self, variables):
-        variables_result = list()
-        if isinstance(variables, Variable):
-            variables_result = [variables]
-        elif isinstance(variables, str):
-            variables_result = [Variable.get(variables)]
-        elif isinstance(variables, list):
-            first_element = variables[0]
-
-            if isinstance(first_element, str):
-                variables_result = Variable.get_list(variables)
-            else:
-                variables_result = variables
-        else:
-            raise EnrichmentException(
-                'Variable(s) to enrich should be an instance of Variable / CatalogList / str / list'
-            )
-
-        return variables_result
-
-    def _process_filters(self, filters_dict):
-        filters = ''
-        if filters_dict:
-            filters_list = list()
-
-            for key, value in filters_dict.items():
-                filters_list.append('='.join(["enrichment_table.{}".format(key), "'{}'".format(value)]))
-
-            filters = ' AND '.join(filters_list)
-            filters = 'WHERE {filters}'.format(filters=filters)
-
-        return filters
-
-    def _process_agg_operators(self, agg_operators, variables, default_agg):
-        agg_operators_result = None
-        if isinstance(agg_operators, str):
-            agg_operators_result = dict()
-
-            for variable in variables:
-                agg_operators_result[variable.column_name] = agg_operators
-
-        elif isinstance(agg_operators, dict):
-            agg_operators_result = agg_operators.copy()
-
-        for variable in variables:
-            if variable.column_name not in agg_operators_result.keys():
-                agg_operators_result[variable.column_name] = variable.agg_method or default_agg
-                if not variable.agg_method:
-                    logging.warning(
-                        "Variable '{}' doesn't have defined agg_method.".format(variable.column_name) +
-                        "Default one will be used: '{}' \n".format(default_agg) +
-                        "You can change this by using the 'agg_operators' parameter." +
-                        "See docs for further details and examples."
-                    )
-
-        return agg_operators_result
-
     def _get_tables_metadata(self, variables):
         tables_metadata = defaultdict(lambda: defaultdict(list))
 
         for variable in variables:
-            variable_name = variable.column_name
-            table_name = self.__get_enrichment_table(variable)
-
-            tables_metadata[table_name]['variables'].append(variable_name)
+            if isinstance(variable, VariableAggregation):
+                variable_aggregation = variable
+                table_name = self.__get_enrichment_table(variable_aggregation.variable)
+                tables_metadata[table_name]['variables'].append(variable_aggregation)
+                variable = variable_aggregation.variable
+            else:
+                table_name = self.__get_enrichment_table(variable)
+                tables_metadata[table_name]['variables'].append(variable)
 
             if 'dataset' not in tables_metadata[table_name].keys():
                 tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
@@ -213,3 +190,44 @@ class EnrichmentService(object):
         data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
 
         return data_copy
+
+
+def prepare_variables(variables):
+    if isinstance(variables, list):
+        return [_prepare_variable(var) for var in variables]
+    else:
+        return [_prepare_variable(variables)]
+
+
+def _prepare_variable(variable):
+    if isinstance(variable, str):
+        variable = Variable.get(variable)
+
+    if not isinstance(variable, Variable):
+        raise EnrichmentException("""
+            variable should be a `<cartoframes.data.observatory> Variable` instance,
+            Variable `id` property or Variable `slug` property
+        """)
+
+    return variable
+
+
+def get_variable_aggregations(variables, aggregation):
+    return [VariableAggregation(variable, __get_aggregation(variable, aggregation)) for variable in variables]
+
+
+def __get_aggregation(variable, aggregation):
+    if aggregation == AGGREGATION_NONE:
+        return None
+    elif aggregation == AGGREGATION_DEFAULT:
+        return variable.agg_method or 'array_agg'
+    elif isinstance(aggregation, str):
+        return aggregation
+    elif isinstance(aggregation, list):
+        agg = variable.agg_method or 'array_agg'
+        for variable_aggregation in aggregation:
+            if variable_aggregation.variable == variable:
+                agg = variable_aggregation.aggregation
+                break
+
+        return agg
