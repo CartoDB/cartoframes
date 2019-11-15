@@ -303,7 +303,7 @@ class TestDataObsClient(unittest.TestCase, _UserUrlLoader):
         df = Dataset(self.test_write_table, credentials=self.credentials).download(decode_geom=False)
 
         self.assertEqual(df.index.name, 'cartodb_id')
-        self.assertEqual(dataset.dataframe.index.dtype, 'int64')
+        self.assertEqual(df.index.dtype, 'int64')
 
         # same number of rows
         self.assertEqual(len(df), len(dataset.dataframe),

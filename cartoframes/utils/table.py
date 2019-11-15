@@ -14,7 +14,8 @@ def tables(credentials=None):
     Returns:
         :obj:`list` of :py:class:`Dataset <cartoframes.data.Dataset>`
     """
-    auth_client = _create_auth_client(credentials or get_default_credentials())
+    credentials = credentials or get_default_credentials()
+    auth_client = _create_auth_client(credentials)
     table_names = DatasetManager(auth_client).filter(
         show_table_size_and_row_count='false',
         show_table='false',
@@ -25,7 +26,7 @@ def tables(credentials=None):
         show_uses_builder_features='false',
         show_synchronization='false',
         load_totals='false')
-    return [Dataset(str(table_name)) for table_name in table_names]
+    return [Dataset(str(table_name), credentials=credentials) for table_name in table_names]
 
 
 def _create_auth_client(credentials):
