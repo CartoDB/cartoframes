@@ -5,18 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Optimize local data visualizations size using gzip compression (#1202)
+
 ## [1.0b5] - 2019-11-14
-# Added
+### Added
 - Add isolines_layer helper method (#1135, #1159)
 - Add range_min/max params to the continuous layer helper methods (#1120)
 - Add with_lnglat param to the Isolines service functions (#1134)
 
-# Changed
+### Changed
 - Refactor DO Enrichment into classes (#1127, #1137, #1170, #1196)
 - Improve Credentials UX (#1028, #776, #1022)
 - Optimize local data columns used in the map (#551)
 
-# Fixed
+### Fixed
 - Fix encoding in data upload (#1133, CartoDB/support#2219)
 - Fix dataset.geom_coverage method: (#1153)
 - Allow iterables in the breaks param of color_bins_layer (#1146)
