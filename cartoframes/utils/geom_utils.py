@@ -56,6 +56,15 @@ def compute_query(dataset):
     return ''
 
 
+def compute_query_from_table(table, schema):
+    if table:
+        return 'SELECT * FROM "{schema}"."{table}"'.format(
+            schema=schema or 'public',
+            table=table
+        )
+    return ''
+
+
 def compute_geodataframe(dataset):
     return geodataframe_from_dataframe(dataset.dataframe)
 

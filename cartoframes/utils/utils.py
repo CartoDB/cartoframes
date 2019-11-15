@@ -16,6 +16,8 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
+from ..auth.credentials import Credentials
+
 try:
     basestring
 except NameError:
@@ -336,7 +338,7 @@ def is_table_name(data):
 
 
 def check_credentials(credentials):
-    if credentials is None:
+    if not isinstance(credentials, Credentials):
         raise AttributeError('Credentials attribute is required. '
                              'Please pass a `Credentials` instance '
                              'or use the `set_default_credentials` function.')
