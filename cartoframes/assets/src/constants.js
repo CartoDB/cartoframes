@@ -8,4 +8,4 @@ export const attributionControl = new mapboxgl.AttributionControl({
   compact: false
 });
 
-export const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 14 };
+export const FIT_BOUNDS_SETTINGS = { animate: false, padding: 50, maxZoom: 16 };
