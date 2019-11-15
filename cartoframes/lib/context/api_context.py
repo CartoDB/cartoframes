@@ -55,3 +55,11 @@ class APIContext(BaseContext):
         query = 'select current_schema()'
         result = self.execute_query(query, do_post=False)
         return result['rows'][0]['current_schema']
+
+    def exists(self, query):
+        exists_query = 'SELECT EXISTS({})'.format(query)
+        try:
+            self.execute_query(exists_query, do_post=False)
+            return True, ''
+        except Exception as e:
+            return False, str(e)

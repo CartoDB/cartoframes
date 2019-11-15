@@ -2,16 +2,16 @@
 
 import pandas as pd
 
-from ..cartodataframe import CartoDataFrame
+from ..core.cartodataframe import CartoDataFrame
 from ..auth.defaults import get_default_credentials
 from ..lib.context import create_context
 from ..utils.utils import is_sql_query, check_credentials, PG_NULL
 from ..utils.geom_utils import compute_query_from_table, geodataframe_from_dataframe
-from ..utils.columns import Column, normalize_name, obtain_index_col, obtain_converters, date_columns_names
+from ..utils.columns import Column, obtain_index_col, obtain_converters, date_columns_names
 
 
-def read_carto(source, credentials=None, limit=None, retry_times=3,
-               keep_cartodb_id=False, keep_the_geom=False, schema=None):
+def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
+               keep_cartodb_id=False, keep_the_geom=False, keep_the_geom_webmercator=False):
     """
     Read a table or a SQL query from a CARTO account.
 
@@ -28,7 +28,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3,
         schema (str, optional):
 
     Returns:
-        :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
+        :py:class:`CartoDataFrame <cartoframes.core.CartoDataFrame>`
 
     """
     _check_source(source)
@@ -37,24 +37,24 @@ def read_carto(source, credentials=None, limit=None, retry_times=3,
     check_credentials(credentials)
 
     context = create_context(credentials)
-    schema = schema or context.get_schema()
 
-    query = _compute_query(source, schema)
+    query = _compute_query(source, schema, context)
+
+    _check_exists(query, context)
 
     columns = _get_query_columns(query, context)
 
-    copy_query = _get_copy_query(query, columns, limit)
+    copy_query = _get_copy_query(query, columns, limit, keep_the_geom_webmercator)
 
-    df = _copyto(columns, copy_query, limit, retry_times, context)
-    df.index.name = None
-
-    if keep_cartodb_id:
-        df['cartodb_id'] = df.index
+    df = _copyto(copy_query, columns, retry_times, context)
 
     gdf = geodataframe_from_dataframe(df)
 
+    if not keep_cartodb_id:
+        del df['cartodb_id']
+
     if not keep_the_geom:
-        del gdf['the_geom']
+        del df['the_geom']
 
     return CartoDataFrame(gdf)
 
@@ -64,15 +64,19 @@ def _check_source(source):
         raise ValueError('Wrong source. You should provide a valid table_name or SQL query.')
 
 
-def _compute_query(source, schema):
+def _compute_query(source, schema, context):
     if is_sql_query(source):
         print('Debug: SQL query detected')
         return source
     print('Debug: table name detected')
-    table_name = normalize_name(source)
-    if table_name != source:
-        print('Debug: table name normalized: {}'.format(table_name))
-    return compute_query_from_table(table_name, schema)
+    schema = schema or context.get_schema()
+    return compute_query_from_table(source, schema)
+
+
+def _check_exists(query, context):
+    exists, msg = context.exists(query)
+    if not exists:
+        raise ValueError(msg)
 
 
 def _get_query_columns(query, context):
@@ -81,12 +85,14 @@ def _get_query_columns(query, context):
     return Column.from_sql_api_fields(table_info['fields'])
 
 
-def _get_copy_query(query, columns, limit=None):
-    query_columns = [column.name for column in columns if column.name != 'the_geom_webmercator']
+def _get_copy_query(query, columns, limit=None, keep_the_geom_webmercator=False):
+    query_columns = [
+        column.name for column in columns if (column.name != 'the_geom_webmercator'
+                                              or keep_the_geom_webmercator)]
 
     query = 'SELECT {columns} FROM ({query}) _q'.format(
         query=query,
-        columns=', '.join(query_columns))
+        columns=','.join(query_columns))
 
     if limit is not None:
         if isinstance(limit, int) and (limit >= 0):
@@ -97,7 +103,7 @@ def _get_copy_query(query, columns, limit=None):
     return query
 
 
-def _copyto(columns, query, limit, retry_times, context):
+def _copyto(query, columns, retry_times, context):
     copy_query = 'COPY ({0}) TO stdout WITH (FORMAT csv, HEADER true, NULL \'{1}\')'.format(query, PG_NULL)
     raw_result = context.download(copy_query, retry_times)
 
@@ -107,9 +113,12 @@ def _copyto(columns, query, limit, retry_times, context):
 
     df = pd.read_csv(
         raw_result,
-        index_col=index_col,
         converters=converters,
         parse_dates=parse_dates)
+
+    if index_col:
+        df.index = df[index_col]
+        df.index.name = None
 
     return df
 
