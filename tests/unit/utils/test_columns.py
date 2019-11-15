@@ -6,8 +6,7 @@ import unittest
 import pandas as pd
 
 from cartoframes.utils.columns import (Column, DataframeColumnInfo,
-                                       DataframeColumnsInfo, normalize_names,
-                                       pg2dtypes)
+                                       DataframeColumnsInfo, normalize_names)
 
 
 class TestColumns(unittest.TestCase):
@@ -73,19 +72,6 @@ class TestColumns(unittest.TestCase):
 
     def test_normalize_names_unchanged(self):
         self.assertListEqual(normalize_names(self.cols_ans), self.cols_ans)
-
-    def test_pg2dtypes(self):
-        results = {
-            'date': 'datetime64[D]',
-            'number': 'float64',
-            'string': 'object',
-            'boolean': 'bool',
-            'geometry': 'object',
-            'unknown_pgdata': 'object'
-        }
-        for i in results:
-            result = pg2dtypes(i)
-            self.assertEqual(result, results[i])
 
     def test_database_column_name_the_geom(self):
         geom_column = 'the_geom'

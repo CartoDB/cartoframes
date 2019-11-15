@@ -115,7 +115,7 @@ class Source(object):
             self.data = self._compute_geojson_data(gdf)
 
             end = time.time()
-            print(end - start)
+            print('TIME', int(round((end - start) * 1000)))
 
             self.bounds = self._compute_geojson_bounds(gdf)
             reset_geodataframe(self.dataset)

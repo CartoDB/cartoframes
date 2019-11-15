@@ -659,9 +659,9 @@ class DataObsClient(object):
 
     def _fetch(self, query, decode_geom=False, table_name=None):
         dataset = Dataset(query, credentials=self._credentials)
+        dataset.download(decode_geom=decode_geom)
         if table_name:
             dataset.upload(table_name=table_name)
-        dataset.download(decode_geom=decode_geom)
         return dataset
 
     def _geom_type(self, table):

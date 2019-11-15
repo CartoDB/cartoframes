@@ -5,11 +5,17 @@ import sys
 
 from unidecode import unidecode
 
-from .geom_utils import decode_geometry, detect_encoding_type
+from .utils import dtypes2pg, pg2dtypes, PG_NULL
+from .geom_utils import decode_geometry, detect_encoding_type, ENC_WKB_BHEX
 
 
 class Column(object):
+    BOOL_DTYPE = 'bool'
+    OBJECT_DTYPE = 'object'
+    INT_DTYPES = ['int16', 'int32', 'int64']
+    FLOAT_DTYPES = ['float32', 'float64']
     DATETIME_DTYPES = ['datetime64[D]', 'datetime64[ns]', 'datetime64[ns, UTC]']
+    INDEX_COLUMN_NAME = 'cartodb_id'
     SUPPORTED_GEOM_COL_NAMES = ['the_geom', 'geom', 'geometry']
     FORBIDDEN_COLUMN_NAMES = ['the_geom_webmercator']
     MAX_LENGTH = 63
@@ -28,8 +34,8 @@ class Column(object):
     NORMALIZED_GEOM_COL_NAME = 'the_geom'
 
     @staticmethod
-    def from_sql_api_fields(sql_api_fields):
-        return [Column(column, normalize=False, pgtype=sql_api_fields[column]['type']) for column in sql_api_fields]
+    def from_sql_api_fields(fields):
+        return [Column(column, normalize=False, pgtype=_extract_pgtype(fields[column])) for column in fields]
 
     def __init__(self, name, normalize=True, pgtype=None):
         if not name:
@@ -87,6 +93,12 @@ class Column(object):
         return value
 
 
+def _extract_pgtype(fields):
+    if 'pgtype' in fields:
+        return fields['pgtype']
+    return None
+
+
 class DataframeColumnInfo(object):
     def __init__(self, column, geom_column=None, geom_type=None, dtype=None):
         if column:
@@ -117,7 +129,7 @@ class DataframeColumnInfo(object):
         if geom_column and self.dataframe == geom_column:
             db_type = 'geometry({}, 4326)'.format(geom_type or 'Point')
         else:
-            db_type = _dtypes2pg(dtype)
+            db_type = dtypes2pg(dtype)
 
         return db_type
 
@@ -243,58 +255,81 @@ def normalize_name(column_name):
     return normalize_names([column_name])[0]
 
 
-def dtypes(columns, exclude_dates=False, exclude_the_geom=False, exclude_bools=False):
-    return {x.name: x.dtype if not x.name == 'cartodb_id' else 'int64'
-            for x in columns if not (exclude_dates is True and x.dtype in Column.DATETIME_DTYPES)
-            and not(exclude_the_geom is True and x.name in Column.SUPPORTED_GEOM_COL_NAMES)
-            and not(exclude_bools is True and x.dtype == 'bool')}
+def obtain_index_col(columns):
+    for column in columns:
+        if column.name == Column.INDEX_COLUMN_NAME:
+            return Column.INDEX_COLUMN_NAME
+    return False
+
+
+def obtain_converters(columns, decode_geom):
+    converters = {'the_geom': lambda x: decode_geometry(x, ENC_WKB_BHEX) if decode_geom else x}
+
+    for int_column_name in int_columns_names(columns):
+        converters[int_column_name] = _convert_int
+
+    for float_column_name in float_columns_names(columns):
+        converters[float_column_name] = _convert_float
+
+    for bool_column_name in bool_columns_names(columns):
+        converters[bool_column_name] = _convert_bool
+
+    for object_column_name in object_columns_names(columns):
+        converters[object_column_name] = _convert_object
+
+    return converters
 
 
 def date_columns_names(columns):
     return [x.name for x in columns if x.dtype in Column.DATETIME_DTYPES]
 
 
+def int_columns_names(columns):
+    return [x.name for x in columns if x.dtype in Column.INT_DTYPES]
+
+
+def float_columns_names(columns):
+    return [x.name for x in columns if x.dtype in Column.FLOAT_DTYPES]
+
+
 def bool_columns_names(columns):
-    return [x.name for x in columns if x.dtype == 'bool']
+    return [x.name for x in columns if x.dtype == Column.BOOL_DTYPE]
 
 
-def pg2dtypes(pgtype):
-    """Returns equivalent dtype for input `pgtype`."""
-    mapping = {
-        'bigint': 'float64',
-        'boolean': 'bool',
-        'date': 'datetime64[D]',
-        'double precision': 'float64',
-        'geometry': 'object',
-        'int': 'int64',
-        'integer': 'float64',
-        'number': 'float64',
-        'numeric': 'float64',
-        'real': 'float64',
-        'smallint': 'float64',
-        'string': 'object',
-        'timestamp': 'datetime64[ns]',
-        'timestampz': 'datetime64[ns]',
-        'timestamp with time zone': 'datetime64[ns]',
-        'timestamp without time zone': 'datetime64[ns]',
-        'USER-DEFINED': 'object',
-    }
-    return mapping.get(str(pgtype), 'object')
+def object_columns_names(columns):
+    return [x.name for x in columns if x.dtype == Column.OBJECT_DTYPE]
 
 
-def _dtypes2pg(dtype):
-    """Returns equivalent PostgreSQL type for input `dtype`"""
-    mapping = {
-        'float64': 'numeric',
-        'int64': 'bigint',
-        'float32': 'numeric',
-        'int32': 'integer',
-        'object': 'text',
-        'bool': 'boolean',
-        'datetime64[ns]': 'timestamp',
-        'datetime64[ns, UTC]': 'timestamp',
-    }
-    return mapping.get(str(dtype), 'text')
+def _convert_int(x):
+    if _is_none_null(x):
+        return None
+    return int(x)
+
+
+def _convert_float(x):
+    if _is_none_null(x):
+        return None
+    return float(x)
+
+
+def _convert_bool(x):
+    if _is_none_null(x):
+        return None
+    if x == 't':
+        return True
+    if x == 'f':
+        return False
+    return bool(x)
+
+
+def _convert_object(x):
+    if _is_none_null(x):
+        return None
+    return x
+
+
+def _is_none_null(x):
+    return x is None or x == PG_NULL
 
 
 def _first_value(series):

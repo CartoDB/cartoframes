@@ -457,7 +457,11 @@ var init = (function () {
   }
 
   function _decodeJSONData(b64Data) {
-    return JSON.parse(pako.inflate(atob(b64Data), { to: 'string' }));
+    const start = (new Date()).getTime();
+    const output = JSON.parse(pako.inflate(atob(b64Data), { to: 'string' }));
+    const end = (new Date()).getTime();
+    console.log(end - start);
+    return output
   }
 
   const factory = new SourceFactory();
