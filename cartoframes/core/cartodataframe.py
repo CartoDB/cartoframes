@@ -1,16 +1,31 @@
 from geopandas import GeoDataFrame
 
+from ..utils.geom_utils import generate_index, generate_geometry
+
 
 class CartoDataFrame(GeoDataFrame):
 
     def __init__(self, *args, **kwargs):
+        index_column = kwargs.pop('index_column', None)
+        geom_column = kwargs.pop('geom_column', None)
+        lnglat_column = kwargs.pop('lnglat_column', None)
+        keep_index = kwargs.pop('keep_index', False)
+        keep_geom = kwargs.pop('keep_geom', False)
+        keep_lnglat = kwargs.pop('keep_lnglat', False)
+
         super(CartoDataFrame, self).__init__(*args, **kwargs)
+
+        generate_index(self, index_column, keep_index)
+        generate_geometry(self, geom_column, lnglat_column, keep_geom, keep_lnglat)
 
     @staticmethod
     def from_carto(*args, **kwargs):
         from ..io.carto import read_carto
         return read_carto(*args, **kwargs)
 
-    def render(self):
+    def to_carto():
+        pass
+
+    def render(self, *args, **kwargs):
         from ..viz import Map, Layer
-        return Map(Layer(self))
+        return Map(Layer(self, *args, **kwargs))

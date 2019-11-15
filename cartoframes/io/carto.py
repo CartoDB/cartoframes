@@ -6,7 +6,7 @@ from ..core.cartodataframe import CartoDataFrame
 from ..auth.defaults import get_default_credentials
 from ..lib.context import create_context
 from ..utils.utils import is_sql_query, check_credentials, PG_NULL
-from ..utils.geom_utils import compute_query_from_table, geodataframe_from_dataframe
+from ..utils.geom_utils import compute_query_from_table
 from ..utils.columns import Column, obtain_index_col, obtain_converters, date_columns_names
 
 
@@ -48,15 +48,13 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     df = _copyto(copy_query, columns, retry_times, context)
 
-    gdf = geodataframe_from_dataframe(df)
-
-    if not keep_cartodb_id:
-        del df['cartodb_id']
-
-    if not keep_the_geom:
-        del df['the_geom']
-
-    return CartoDataFrame(gdf)
+    return CartoDataFrame(
+        df,
+        index_column='cartodb_id',
+        geom_column='the_geom',
+        keep_index=keep_cartodb_id,
+        keep_geom=keep_the_geom
+    )
 
 
 def _check_source(source):

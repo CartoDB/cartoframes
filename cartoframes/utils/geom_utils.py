@@ -11,6 +11,9 @@ from carto.exceptions import CartoException
 
 from ..lib import context
 
+INDEX_COL_NAMES = [
+    'cartodb_id'
+]
 
 GEOM_COLUMN_NAMES = [
     'geometry',
@@ -100,10 +103,40 @@ def geodataframe_from_dataframe(dataframe):
     return geopandas.GeoDataFrame(dataframe, geometry=RESERVED_GEO_COLUMN_NAME)
 
 
-def _get_column(df, options):
-    for name in options:
-        if name in df:
-            return df[name]
+def generate_index(dataframe, index_column, keep_index):
+    index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
+    if index_column is not None:
+        dataframe.set_index(index_column, drop=(not keep_index), inplace=True)
+        dataframe.index.name = None
+
+
+def generate_geometry(dataframe, geom_column, lnglat_column, keep_geom, keep_lnglat):
+    if RESERVED_GEO_COLUMN_NAME not in dataframe:
+        geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
+        if geom_column is not None:
+            dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
+            if not keep_geom:
+                del dataframe[geom_column.name]
+        else:
+            lng_column = _get_column(dataframe, lnglat_column and lnglat_column[0], LNG_COLUMN_NAMES)
+            lat_column = _get_column(dataframe, lnglat_column and lnglat_column[1], LAT_COLUMN_NAMES)
+            if lng_column is not None and lat_column is not None:
+                dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
+                if not keep_lnglat:
+                    del dataframe[lng_column.name]
+                    del dataframe[lat_column.name]
+            else:
+                print('Debug: no geographic data found.')
+
+
+def _get_column(df, main=None, options=[]):
+    if main is None:
+        for name in options:
+            if name in df:
+                return df[name]
+    else:
+        if main in df:
+            return df[main]
     return None
 
 
@@ -117,6 +150,10 @@ def _compute_geometry_from_geom(geom_column):
 
 
 def _compute_geometry_from_latlng(lat, lng):
+    return [geometry.Point(xy) for xy in zip(lng, lat)]
+
+
+def _compute_geometry_from_lnglat(lng, lat):
     return [geometry.Point(xy) for xy in zip(lng, lat)]
 
 
