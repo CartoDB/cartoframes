@@ -339,16 +339,17 @@ class Map(object):
             layers=_get_layer_defs(self._publisher.get_layers()),
             bounds=self.bounds,
             size=None,
+            camera=self.camera,
             basemap=self.basemap,
             default_legend=self.default_legend,
             show_info=False,
             theme=self.theme,
-            _carto_vl_path=self._carto_vl_path,
-            _airship_path=self._airship_path,
             title=name,
             description=self.description,
+            is_static=self.is_static,
             is_embed=True,
-            is_static=self.is_static)
+            _carto_vl_path=self._carto_vl_path,
+            _airship_path=self._airship_path)
 
         return html_map.html
 
@@ -390,8 +391,8 @@ def _get_layer_def(layer):
         'legend': layer.legend_info,
         'has_legend_list': layer.has_legend_list,
         'widgets': layer.widgets_info,
-        'data': layer.source.data,
-        'type': layer.source.type,
+        'data': layer.source_data,
+        'type': layer.source_type,
         'viz': layer.viz
     }
 
@@ -451,10 +452,11 @@ def _conv2nan(val):
 
 
 def _compute_bounds(layers):
-    if layers is None or len(layers) == 0:
-        return None
+    init_bounds = None
+    if layers is not None and len(layers) > 0:
+        init_bounds = layers[0].bounds
 
-    bounds = _format_bounds(layers[0].bounds)
+    bounds = _format_bounds(init_bounds)
 
     for layer in layers[1:]:
         layer_bounds = _format_bounds(layer.bounds)

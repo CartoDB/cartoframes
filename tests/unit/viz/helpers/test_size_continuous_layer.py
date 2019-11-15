@@ -1,9 +1,14 @@
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
 class TestSizeContinuousLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe(['name', 'time'])
+
     def test_helpers(self):
         "should be defined"
         assert helpers.size_continuous_layer is not None
@@ -12,14 +17,16 @@ class TestSizeContinuousLayerHelper(object):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            source='sf_neighborhoods',
-            value='name'
+            source='SELECT * FROM faketable',
+            value='name',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
         assert layer.style._style['point']['width'] == 'ramp(linear(sqrt($name), ' + \
-            'sqrt(globalMin($name)), sqrt(globalMax($name))), [2, 40])'
-        assert layer.style._style['line']['width'] == 'ramp(linear($name), [1, 10])'
+            'sqrt(globalMIN($name)), sqrt(globalMAX($name))), [2, 40])'
+        assert layer.style._style['line']['width'] == 'ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), [1, 10])'
         assert layer.style._style['point']['color'] == 'opacity(#FFB927, 0.8)'
         assert layer.style._style['point']['strokeColor'] == 'opacity(#222,ramp(linear(zoom(),0,18),[0,0.6]))'
         assert layer.style._style['line']['color'] == 'opacity(#4CC8A3, 0.8)'
@@ -41,7 +48,7 @@ class TestSizeContinuousLayerHelper(object):
         "should create a point type layer"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             size=[10, 20],
@@ -49,28 +56,29 @@ class TestSizeContinuousLayerHelper(object):
         )
 
         assert layer.style._style['point']['width'] == 'ramp(linear(sqrt($name), ' + \
-            'sqrt(globalMin($name)), sqrt(globalMax($name))), [10, 20])'
+            'sqrt(globalMIN($name)), sqrt(globalMAX($name))), [10, 20])'
         assert layer.style._style['point']['color'] == 'opacity(blue, 0.8)'
 
     def test_size_continuous_layer_line(self, mocker):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             size=[10, 20],
             color='blue'
         )
 
-        assert layer.style._style['line']['width'] == 'ramp(linear($name), [10, 20])'
+        assert layer.style._style['line']['width'] == 'ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), [10, 20])'
         assert layer.style._style['line']['color'] == 'opacity(blue, 0.8)'
 
     def test_size_continuous_layer_legend(self, mocker):
         "should show/hide the legend"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=False
         )
@@ -79,7 +87,7 @@ class TestSizeContinuousLayerHelper(object):
         assert layer.legend._title == ''
 
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=True
         )
@@ -95,7 +103,7 @@ class TestSizeContinuousLayerHelper(object):
         "should show/hide the popup"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=False
         )
@@ -103,7 +111,7 @@ class TestSizeContinuousLayerHelper(object):
         assert layer.popup._hover == []
 
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=True
         )
@@ -117,7 +125,7 @@ class TestSizeContinuousLayerHelper(object):
         "should show/hide the widget"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=False
         )
@@ -125,7 +133,7 @@ class TestSizeContinuousLayerHelper(object):
         assert layer.widgets._widgets == []
 
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=True
         )
@@ -137,7 +145,7 @@ class TestSizeContinuousLayerHelper(object):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
         layer = helpers.size_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             animate='time'
         )

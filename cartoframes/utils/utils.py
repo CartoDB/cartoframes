@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import os
 import re
 import sys
 import json
@@ -16,10 +15,17 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 GEOM_TYPE_POINT = 'point'
 GEOM_TYPE_LINE = 'line'
 GEOM_TYPE_POLYGON = 'polygon'
+
+PG_NULL = '__null'
 
 
 def map_geom_type(geom_type):
@@ -99,19 +105,39 @@ def temp_ignore_warnings(func):
     return wrapper
 
 
-# schema definition functions
 def dtypes2pg(dtype):
     """Returns equivalent PostgreSQL type for input `dtype`"""
     mapping = {
-        'float64': 'numeric',
-        'int64': 'numeric',
-        'float32': 'numeric',
-        'int32': 'numeric',
+        'int16': 'smallint',
+        'int32': 'integer',
+        'int64': 'bigint',
+        'float32': 'real',
+        'float64': 'double precision',
         'object': 'text',
         'bool': 'boolean',
         'datetime64[ns]': 'timestamp',
+        'datetime64[ns, UTC]': 'timestamp',
     }
     return mapping.get(str(dtype), 'text')
+
+
+def pg2dtypes(pgtype):
+    """Returns equivalent dtype for input `pgtype`."""
+    mapping = {
+        'smallint': 'int16', 'int2': 'int16',
+        'integer': 'int32', 'int4': 'int32', 'int': 'int32',
+        'bigint': 'int64', 'int8': 'int64',
+        'real': 'float32', 'float4': 'float32',
+        'double precision': 'float64', 'float8': 'float64',
+        'numeric': 'float64', 'decimal': 'float64',
+        'text': 'object',
+        'boolean': 'bool', 'bool': 'bool',
+        'date': 'datetime64[D]',
+        'timestamp': 'datetime64[ns]', 'timestamp without time zone': 'datetime64[ns]',
+        'timestampz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
+        'USER-DEFINED': 'object',
+    }
+    return mapping.get(str(pgtype), 'object')
 
 
 def gen_variable_name(value):
@@ -227,6 +253,8 @@ def load_geojson(input_data):
                 'properties': {},
                 'geometry': input_data
             }])
+        else:
+            data = geopandas.GeoDataFrame()
 
     else:
         raise ValueError(
@@ -282,7 +310,7 @@ def is_geojson_file(data):
 
 
 def is_geojson_file_path(data):
-    return is_geojson_file(data) and os.path.exists(data)
+    return is_geojson_file(data)
 
 
 def is_geojson(data):
@@ -293,6 +321,13 @@ def is_table_name(data):
     # avoid circular dependecies
     from .columns import normalize_name
     return isinstance(data, str) and normalize_name(data) == data
+
+
+def check_credentials(credentials):
+    if credentials is None:
+        raise AttributeError('Credentials attribute is required. '
+                             'Please pass a `Credentials` instance '
+                             'or use the `set_default_credentials` function.')
 
 
 def get_center(center):
@@ -309,3 +344,29 @@ def remove_column_from_dataframe(dataframe, name):
     if dataframe.index.name == name:
         dataframe.reset_index(inplace=True)
         del dataframe[name]
+
+
+def encode_row(row):
+    if row is None:
+        row = PG_NULL
+
+    elif isinstance(row, float):
+        if str(row) == 'inf':
+            row = 'Infinity'
+        elif str(row) == '-inf':
+            row = '-Infinity'
+        elif str(row) == 'nan':
+            row = 'NaN'
+
+    elif isinstance(row, type(b'')):
+        # Decode the input if it's a bytestring
+        row = row.decode('utf-8')
+
+    special_keys = ['"', '|', '\n']
+    if isinstance(row, basestring) and any(key in row for key in special_keys):
+        # If the input contains any special key:
+        # - replace " by ""
+        # - cover the row with "..."
+        row = '"{}"'.format(row.replace('"', '""'))
+
+    return '{}'.format(row).encode('utf-8')

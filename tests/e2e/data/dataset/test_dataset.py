@@ -6,6 +6,7 @@ import os
 import sys
 import unittest
 import warnings
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 
@@ -184,7 +185,13 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT 1 as fakec'
         dataset = Dataset(query, credentials=self.credentials)
-        dataset.upload(table_name=self.test_write_table)
+        df = dataset.download()
+
+        dataset = Dataset(df)
+        dataset.upload(table_name=self.test_write_table,
+                       credentials=self.credentials)
+
+        self.assertExistsTable(self.test_write_table)
 
         dataset = Dataset(self.test_write_table, credentials=self.credentials)
         df = dataset.download()
@@ -193,6 +200,30 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         dataset.upload(table_name=self.test_write_table,
                        credentials=self.credentials,
                        if_exists=Dataset.IF_EXISTS_REPLACE)
+
+    def test_dataset_upload_and_download_special_values(self):
+        self.assertNotExistsTable(self.test_write_table)
+
+        orig_df = pd.DataFrame({
+            'lat': [0, 1, 2],
+            'lng': [0, 1, 2],
+            'svals': [np.inf, -np.inf, np.nan]
+        })
+
+        dataset = Dataset(orig_df)
+        dataset.upload(table_name=self.test_write_table,
+                       with_lnglat=('lng', 'lat'),
+                       credentials=self.credentials)
+
+        self.assertExistsTable(self.test_write_table)
+
+        dataset = Dataset(self.test_write_table, credentials=self.credentials)
+        df = dataset.download()
+
+        assert df.lat.equals(orig_df.lat)
+        assert df.lng.equals(orig_df.lng)
+        assert df.svals.equals(orig_df.svals)
+        assert df.the_geom.notnull().all()
 
     def test_dataset_download_bool_null(self):
         self.assertNotExistsTable(self.test_write_table)
@@ -220,7 +251,6 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        print(result)
         self.assertEqual(result['total_rows'], 100)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
@@ -247,7 +277,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_lnglat_dataset(self):
@@ -268,15 +298,15 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         self.assertNotExistsTable(self.test_write_table)
 
         from cartoframes.examples import read_taxi
-        df = read_taxi(limit=100)
+        df = read_taxi(limit=10)
         dataset = Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
         self.test_write_table = dataset.table_name
 
         self.assertExistsTable(self.test_write_table)
 
-        query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NULL'.format(self.test_write_table)
+        query = 'SELECT cartodb_id FROM {} WHERE the_geom_webmercator IS NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 100)
+        self.assertEqual(result['total_rows'], 10)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_with_different_geometry_column(self):
@@ -292,7 +322,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_with_different_geom_column(self):
@@ -309,7 +339,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_geopandas(self):
@@ -369,7 +399,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_append(self):
@@ -377,7 +407,8 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
         df = read_brooklyn_poverty()
         Dataset(df).upload(table_name=self.test_write_table, credentials=self.credentials)
 
-        # avoid uploading the same cartodb_id
+        # avoid uploading the same index or cartodb_id
+        df.index += df.index.max() + 1
         df['cartodb_id'] += df['cartodb_id'].max() + 1
 
         Dataset(df).upload(if_exists=Dataset.IF_EXISTS_APPEND,
@@ -388,7 +419,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049 * 2)
+        self.assertEqual(result['total_rows'], 2052 * 2)
 
     @unittest.skipIf(WILL_SKIP, 'no carto credentials, skipping this test')
     def test_dataset_write_if_exists_replace(self):
@@ -404,7 +435,7 @@ class TestDataset(unittest.TestCase, _UserUrlLoader):
 
         query = 'SELECT cartodb_id FROM {} WHERE the_geom IS NOT NULL'.format(self.test_write_table)
         result = self.sql_client.query(query, verbose=True)
-        self.assertEqual(result['total_rows'], 2049)
+        self.assertEqual(result['total_rows'], 2052)
 
     def test_dataset_schema_from_parameter(self):
         schema = 'fake_schema'
@@ -611,11 +642,6 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_creation_from_valid_localgeojson(self):
         self.assertIsDataFrameDatasetInstance(self.test_geojson)
 
-    def test_creation_from_invalid_localgeojson(self):
-        geojson = object
-        with self.assertRaises(ValueError, msg='We can not detect the Dataset type'):
-            self.assertIsDataFrameDatasetInstance(geojson)
-
     def test_creation_from_valid_geojson_file_path(self):
         paths = [os.path.abspath('tests/e2e/data/dataset/fixtures/valid.geojson'),
                  os.path.abspath('tests/e2e/data/dataset/fixtures/validgeo.json')]
@@ -676,6 +702,22 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertIsNotNone(dataset.dataframe)
         self.assertIsNone(dataset.table_name)
         self.assertIsNone(dataset.credentials)
+
+    def test_dataset_from_table_without_credentials(self):
+        table_name = 'fake_table'
+        error_msg = ('Credentials attribute is required. '
+                     'Please pass a `Credentials` instance '
+                     'or use the `set_default_credentials` function.')
+        with self.assertRaises(AttributeError, msg=error_msg):
+            Dataset(table_name)
+
+    def test_dataset_from_query_without_credentials(self):
+        query = 'SELECT * FROM fake_table'
+        error_msg = ('Credentials attribute is required. '
+                     'Please pass a `Credentials` instance '
+                     'or use the `set_default_credentials` function.')
+        with self.assertRaises(AttributeError, msg=error_msg):
+            Dataset(query)
 
     def test_dataset_get_table_names_from_table(self):
         table_name = 'fake_table'
@@ -758,7 +800,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'SRID=4326;POINT (1 1)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -774,7 +818,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'SRID=4326;POINT (1 1)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -791,7 +837,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         ds.upload(table_name=table, credentials=credentials)
 
         expected_query = ("COPY {}(geom,the_geom,geometry,cartodb_id)"
-                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');").format(table)
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (1 1)|POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -810,7 +856,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(geom,the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(geom,the_geom,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'POINT (0 0)|SRID=4326;POINT (2 2)|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -826,7 +874,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -843,7 +893,7 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
         expected_query = ("COPY {}(lng,lat,cartodb_id,the_geom)"
-                          " FROM stdin WITH (FORMAT csv, DELIMITER '|');").format(table)
+                          " FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');").format(table)
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -859,8 +909,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
-            table)
+        expected_query = """
+        COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -876,8 +927,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials, with_lnglat=('lng', 'lat'))
 
-        expected_query = "COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(
-            table)
+        expected_query = """
+        COPY {}(lng,lat,cartodb_id,the_geom) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|1|0|SRID=4326;POINT (1 1)\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -893,7 +945,9 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(col1,col2,col3,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
+        expected_query = """
+        COPY {}(col1,col2,col3,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
         expected_data = [b'1|True|text|0\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
@@ -902,15 +956,17 @@ class TestDatasetUnit(unittest.TestCase, _UserUrlLoader):
     def test_dataset_upload_null_values(self):
         table = 'fake_table'
         credentials = 'fake'
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        df = pd.DataFrame.from_dict({'test': [None, None]})
         ds = Dataset(df)
 
         BaseDataset.exists = Mock(return_value=False)
 
         ds.upload(table_name=table, credentials=credentials)
 
-        expected_query = "COPY {}(test,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|');".format(table)
-        expected_data = [b'|0\n', b'|1\n']
+        expected_query = """
+        COPY {}(test,cartodb_id) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '__null');
+        """.format(table).strip()
+        expected_data = [b'__null|0\n', b'__null|1\n']
 
         self.assertEqual(ds._strategy._context.query, expected_query)
         self.assertEqual(list(ds._strategy._context.response), expected_data)
@@ -926,12 +982,12 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(list(rows), [b'True\n', b'[1, 2]\n'])
 
     def test_rows_null(self):
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]]})
+        df = pd.DataFrame.from_dict({'test': [None]})
         with_lnglat = None
         dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
         rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'\n', b'\n'])
+        self.assertEqual(list(rows), [b'__null\n'])
 
     def test_rows_with_geom(self):
         df = pd.DataFrame.from_dict({'test': [True, [1, 2]], 'the_geom': ['Point (0 0)', 'Point (1 1)']})
@@ -942,12 +998,12 @@ class TestDataFrameDatasetUnit(unittest.TestCase, _UserUrlLoader):
         self.assertEqual(list(rows), [b'True|SRID=4326;POINT (0 0)\n', b'[1, 2]|SRID=4326;POINT (1 1)\n'])
 
     def test_rows_null_geom(self):
-        df = pd.DataFrame.from_dict({'test': [None, [None, None]], 'the_geom': [None, None]})
+        df = pd.DataFrame.from_dict({'test': [None], 'the_geom': [None]})
         with_lnglat = None
         dataframe_columns_info = DataframeColumnsInfo(df, with_lnglat)
         rows = _rows(df, dataframe_columns_info, with_lnglat)
 
-        self.assertEqual(list(rows), [b'|\n', b'|\n'])
+        self.assertEqual(list(rows), [b'__null|SRID=4326;GEOMETRYCOLLECTION EMPTY\n'])
 
     def test_rows_non_ascii(self):
         attribute = 'áéí'

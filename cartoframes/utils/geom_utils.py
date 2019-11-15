@@ -5,7 +5,6 @@ import geopandas
 import binascii as ba
 
 from copy import deepcopy
-from warnings import warn
 from shapely import wkb, wkt, geometry, geos
 
 from carto.exceptions import CartoException
@@ -45,6 +44,8 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
+RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
+
 
 def compute_query(dataset):
     if dataset.table_name:
@@ -59,30 +60,35 @@ def compute_geodataframe(dataset):
     return geodataframe_from_dataframe(dataset.dataframe)
 
 
+def reset_geodataframe(dataframe):
+    if dataframe is not None and RESERVED_GEO_COLUMN_NAME in dataframe:
+        del dataframe[RESERVED_GEO_COLUMN_NAME]
+
+
 def geodataframe_from_dataframe(dataframe):
-    if dataframe is not None:
-        dataframe = dataframe.copy()
+    if dataframe is None:
+        return None
+
+    if RESERVED_GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
         if geom_column is not None:
-            dataframe['geometry'] = _compute_geometry_from_geom(geom_column)
-            _warn_new_geometry_column(dataframe)
+            dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
         else:
             lat_column = _get_column(dataframe, LAT_COLUMN_NAMES)
             lng_column = _get_column(dataframe, LNG_COLUMN_NAMES)
             if lat_column is not None and lng_column is not None:
-                dataframe['geometry'] = _compute_geometry_from_latlng(lat_column, lng_column)
-                _warn_new_geometry_column(dataframe)
+                dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_latlng(lat_column, lng_column)
             else:
                 raise ValueError('''No geographic data found. '''
                                  '''If a geometry exists, change the column name ({0}) or '''
                                  '''ensure it is a DataFrame with a valid geometry. '''
                                  '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
-                                     ', '.join(GEOM_COLUMN_NAMES),
-                                     ', '.join(LAT_COLUMN_NAMES),
-                                     ', '.join(LNG_COLUMN_NAMES)
+                                    ', '.join(GEOM_COLUMN_NAMES),
+                                    ', '.join(LAT_COLUMN_NAMES),
+                                    ', '.join(LNG_COLUMN_NAMES)
                                  ))
-        return geopandas.GeoDataFrame(dataframe)
-    return None
+
+    return geopandas.GeoDataFrame(dataframe, geometry=RESERVED_GEO_COLUMN_NAME)
 
 
 def _get_column(df, options):
@@ -92,15 +98,13 @@ def _get_column(df, options):
     return None
 
 
-def _warn_new_geometry_column(df):
-    if 'geometry' not in df:
-        warn('A new "geometry" column has been added to the original dataframe.')
-
-
 def _compute_geometry_from_geom(geom_column):
-    first_geom = next(item for item in geom_column if item is not None)
-    enc_type = detect_encoding_type(first_geom)
-    return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+    if geom_column.size > 0:
+        first_geom = next(item for item in geom_column if item is not None)
+        enc_type = detect_encoding_type(first_geom)
+        return geom_column.apply(lambda g: decode_geometry(g, enc_type))
+    else:
+        return geom_column
 
 
 def _compute_geometry_from_latlng(lat, lng):
@@ -134,7 +138,7 @@ def decode_geometry(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return ''
+    return geometry.base.BaseGeometry()
 
 
 def detect_encoding_type(input_geom):
@@ -251,20 +255,31 @@ def get_context_with_public_creds(credentials):
     return context.create_context(public_creds)
 
 
-def convert_bool(x):
-    if x:
-        if x == 't':
-            return True
-        if x == 'f':
-            return False
-        return bool(x)
-    else:
-        return None
-
-
 def save_index_as_column(df):
     index_name = df.index.name
     if index_name is not None:
         if index_name not in df.columns:
             df.reset_index(inplace=True)
             df.set_index(index_name, drop=False, inplace=True)
+
+
+def extract_viz_columns(viz):
+    """Extract columns ($name) in viz"""
+    columns = [RESERVED_GEO_COLUMN_NAME]
+    viz_nocomments = remove_comments(viz)
+    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
+    if viz_columns is not None:
+        columns += viz_columns
+    return columns
+
+
+def remove_comments(text):
+    """Remove C-style comments"""
+    def replacer(match):
+        s = match.group(0)
+        return ' ' if s.startswith('/') else s
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
+    return re.sub(pattern, replacer, text).strip()

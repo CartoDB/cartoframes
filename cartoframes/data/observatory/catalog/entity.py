@@ -75,7 +75,7 @@ class CatalogEntity(ABC):
 
     def _download(self, credentials=None):
         credentials = self._get_credentials(credentials)
-        user_dataset = credentials.get_do_dataset()
+        user_dataset = credentials.get_do_user_dataset()
         bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
 
         project, dataset, table = self.id.split('.')

@@ -14,7 +14,7 @@ from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
 from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock
 
-from .utils import build_geojson
+from .utils import build_geodataframe
 
 try:
     from unittest.mock import patch
@@ -64,8 +64,8 @@ class TestKuvizPublisher():
         _get_kuviz_manager_mock.return_value = None
         _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
-        source_2 = Source(build_geojson([0, 10], [10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
+        source_2 = Source(build_geodataframe([0, 10], [10, 0]))
         layer_1 = Layer(source_1)
         layer_2 = Layer(source_2)
         vmap = Map([
@@ -109,7 +109,7 @@ class TestKuvizPublisher():
         _get_kuviz_manager_mock.return_value = None
         _sync_layer.return_value = Layer(CartoDataFrame('fake_table', credentials=self.credentials, download=False))
 
-        source_1 = Source(build_geojson([-10, 0], [-10, 0]))
+        source_1 = Source(build_geodataframe([-10, 0], [-10, 0]))
         layer_1 = Layer(source_1)
         vmap = Map(layer_1)
 

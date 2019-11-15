@@ -1,9 +1,14 @@
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
 class TestColorContinuousLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe(['name', 'time'])
+
     def test_helpers(self):
         "should be defined"
         assert helpers.color_continuous_layer is not None
@@ -12,14 +17,18 @@ class TestColorContinuousLayerHelper(object):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            source='sf_neighborhoods',
-            value='name'
+            source='SELECT * FROM faketable',
+            value='name',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
-        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name), bluyl),1)'
-        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name), bluyl),1)'
-        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name), bluyl), 0.9)'
+        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), bluyl), 1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), bluyl), 1)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), bluyl), 0.9)'
         assert layer.popup, None
         assert layer.popup._hover == [{
             'title': 'name',
@@ -38,43 +47,46 @@ class TestColorContinuousLayerHelper(object):
         "should create a point type layer"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             palette='prism'
         )
 
-        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name), prism),1)'
+        assert layer.style._style['point']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), prism), 1)'
 
     def test_color_continuous_layer_line(self, mocker):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             palette='[blue,#F00]'
         )
 
-        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name), [blue,#F00]),1)'
+        assert layer.style._style['line']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), [blue,#F00]), 1)'
 
     def test_color_continuous_layer_polygon(self, mocker):
         "should create a polygon type layer"
         setup_mocks(mocker, 'polygon')
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             palette=['blue', '#F00']
         )
 
-        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name), [blue,#F00]), 0.9)'
+        assert layer.style._style['polygon']['color'] == 'opacity(ramp(linear($name, ' + \
+            'globalMIN($name), globalMAX($name)), [blue,#F00]), 0.9)'
 
     def test_color_continuous_layer_legend(self, mocker):
         "should show/hide the legend"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=False
         )
@@ -83,7 +95,7 @@ class TestColorContinuousLayerHelper(object):
         assert layer.legend._title == ''
 
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=True
         )
@@ -99,7 +111,7 @@ class TestColorContinuousLayerHelper(object):
         "should show/hide the popup"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=False
         )
@@ -107,7 +119,7 @@ class TestColorContinuousLayerHelper(object):
         assert layer.popup._hover == []
 
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=True
         )
@@ -121,7 +133,7 @@ class TestColorContinuousLayerHelper(object):
         "should show/hide the widget"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=False
         )
@@ -129,7 +141,7 @@ class TestColorContinuousLayerHelper(object):
         assert layer.widgets._widgets == []
 
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=True
         )
@@ -141,7 +153,7 @@ class TestColorContinuousLayerHelper(object):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
         layer = helpers.color_continuous_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             animate='time'
         )

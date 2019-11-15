@@ -31,12 +31,12 @@ REQUIRES = [
     'carto>=1.8.1,<2.0',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
+    'pyproj==2.2.2',
     'tqdm>=4.32.1,<5.0',
     'unidecode>=1.1.0,<2.0',
     'pyarrow>=0.14.1,<1.0',
     'google-cloud-bigquery>=1.19.0,<2.0',
     'geojson>=2.5.0,<3.0',
-    'matplotlib>=2.0.2',
     # 'Rtree>=0.8.3,<1.0'
 ]
 

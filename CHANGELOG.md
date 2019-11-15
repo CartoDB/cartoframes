@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0b5] - 2019-11-14
+# Added
+- Add isolines_layer helper method (#1135, #1159)
+- Add range_min/max params to the continuous layer helper methods (#1120)
+- Add with_lnglat param to the Isolines service functions (#1134)
+
+# Changed
+- Refactor DO Enrichment into classes (#1127, #1137, #1170, #1196)
+- Improve Credentials UX (#1028, #776, #1022)
+- Optimize local data columns used in the map (#551)
+
+# Fixed
+- Fix encoding in data upload (#1133, CartoDB/support#2219)
+- Fix dataset.geom_coverage method: (#1153)
+- Allow iterables in the breaks param of color_bins_layer (#1146)
+- Fix missing link in the documentation (#1150)
+- Fix params with value 0 in the helper methods (#971)
+- Fix rendering an empty Map (#975)
+- Fix viewport in published maps (#1128)
+- Restore dataframe after visualization (#1181)
+- Fix COPY data types issues (#1190)
+
 ## [1.0b4] - 2019-10-25
 ### Added
 - Add support for variable groups in the catalog (#983)

@@ -1,9 +1,14 @@
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
-class TestColorCategoryLayerHelper():
+class TestColorCategoryLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe(['name', 'time'])
+
     def test_helpers(self):
         "should be defined"
         assert helpers.color_category_layer is not None
@@ -12,9 +17,10 @@ class TestColorCategoryLayerHelper():
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            source='sf_neighborhoods',
+            source='SELECT * FROM faketable',
             value='name',
-            title='Neighborhoods'
+            title='Neighborhoods',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
@@ -40,7 +46,7 @@ class TestColorCategoryLayerHelper():
         "should create a point type layer"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             top=5,
@@ -50,7 +56,7 @@ class TestColorCategoryLayerHelper():
         assert layer.style._style['point']['color'] == 'opacity(ramp(top($name, 5), prism),1)'
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
@@ -63,7 +69,7 @@ class TestColorCategoryLayerHelper():
         "should create a line type layer"
         setup_mocks(mocker, 'line')
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             top=5,
@@ -73,7 +79,7 @@ class TestColorCategoryLayerHelper():
         assert layer.style._style['line']['color'] == 'opacity(ramp(top($name, 5), prism),1)'
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
@@ -86,7 +92,7 @@ class TestColorCategoryLayerHelper():
         "should create a polygon type layer"
         setup_mocks(mocker, 'polygon')
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             top=5,
@@ -96,7 +102,7 @@ class TestColorCategoryLayerHelper():
         assert layer.style._style['polygon']['color'] == 'opacity(ramp(top($name, 5), prism), 0.9)'
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
@@ -109,7 +115,7 @@ class TestColorCategoryLayerHelper():
         "should show/hide the legend"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=False
         )
@@ -118,7 +124,7 @@ class TestColorCategoryLayerHelper():
         assert layer.legend._title == ''
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=True
         )
@@ -134,7 +140,7 @@ class TestColorCategoryLayerHelper():
         "should show/hide the popup"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=False
         )
@@ -142,7 +148,7 @@ class TestColorCategoryLayerHelper():
         assert layer.popup._hover == []
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=True
         )
@@ -156,7 +162,7 @@ class TestColorCategoryLayerHelper():
         "should show/hide the widget"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=False
         )
@@ -164,7 +170,7 @@ class TestColorCategoryLayerHelper():
         assert layer.widgets._widgets == []
 
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=True
         )
@@ -176,7 +182,7 @@ class TestColorCategoryLayerHelper():
         "should animate a property and disable the popups"
         setup_mocks(mocker)
         layer = helpers.color_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             animate='time'
         )

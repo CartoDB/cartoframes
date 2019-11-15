@@ -1,23 +1,27 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import serialize_palette, get_value
+
 from ..layer import Layer
-from .utils import serialize_palette
 
 
 def color_continuous_layer(
-        source, value, title='', palette=None, size=None,
-        opacity=None, stroke_color=None, stroke_width=None,
-        description='', footer='', legend=True, popup=True,
-        widget=False, animate=None):
+        source, value, title='', range_min=None, range_max=None,
+        palette=None, size=None, opacity=None, stroke_color=None,
+        stroke_width=None, description='', footer='', legend=True, popup=True,
+        widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a continuous color map.
 
     Args:
         source (:py:class:`Dataset <cartoframes.data.Dataset>` or str): Dataset
           or text representing a table or query associated with user account.
         value (str): Column to symbolize by.
-        title (str, optional): Title of legend
-        palette (str, optional): Palette that can be a named cartocolor palette
+        title (str, optional): Title of legend and popup hover.
+        range_min (int, optional): The minimum value of the data range for the continuous
+          color ramp. Defaults to the globalMIN of the dataset.
+        range_max (int, optional): The maximum value of the data range for the continuous
+          color ramp. Defaults to the globalMAX of the dataset.
+        palette (str, optional): Palette that can be a named CARTOColor palette
           or other valid CARTO VL palette expression. Default is `bluyl`.
         size (int, optional): Size of point or line features.
         opacity (int, optional): Opacity value for point color and line features.
@@ -34,6 +38,12 @@ def color_continuous_layer(
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
+
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -42,37 +52,43 @@ def color_continuous_layer(
     default_palette = 'bluyl'
     animation_filter = 'animation(linear(${}), 20, fade(1,1))'.format(animate) if animate else '1'
 
+    if range_min is None:
+        range_min = 'globalMIN(${0})'.format(value)
+
+    if range_max is None:
+        range_max = 'globalMAX(${0})'.format(value)
+
     return Layer(
         source,
         style={
             'point': {
-                'color': 'opacity(ramp(linear(${0}), {1}),{2})'.format(
-                    value, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
+                    value, range_min, range_max,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'point', 'opacity')
+                ),
+                'width': get_value(size, 'point', 'width'),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
-                'color': 'opacity(ramp(linear(${0}), {1}),{2})'.format(
-                    value, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
+                    value, range_min, range_max,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'line', 'opacity')
+                ),
+                'width': get_value(size, 'line', 'width'),
                 'filter': animation_filter
             },
             'polygon': {
-                'color': 'opacity(ramp(linear(${0}), {1}), {2})'.format(
-                    value, serialize_palette(palette) or default_palette,
-                    opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                'color': 'opacity(ramp(linear(${0}, {1}, {2}), {3}), {4})'.format(
+                    value, range_min, range_max,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'polygon', 'opacity')
+                ),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': animation_filter
             }
         },
@@ -103,5 +119,6 @@ def color_continuous_layer(
                 'value': value,
                 'title': 'Distribution'
             }
-        ]
+        ],
+        credentials=credentials
     )

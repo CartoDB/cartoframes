@@ -12,6 +12,8 @@ from .source import Source
 from .style import Style
 from .widget_list import WidgetList
 
+from ..utils.geom_utils import extract_viz_columns
+
 
 class Layer(object):
     """Layer to display data on a map. This class can be used as one or more
@@ -38,10 +40,10 @@ class Layer(object):
           "title", "description" and "footer". See :py:class:`Legend
           <cartoframes.viz.Legend>` for more information.
         widgets (dict, list, or :py:class:`WidgetList <cartoframes.viz.WidgetList>`, optional):
-           Widget or list of widgets for a layer. It contains the information to display
-           different widget types on the top right of the map. See
-           :py:class:`WidgetList` for more information.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
+          Widget or list of widgets for a layer. It contains the information to display
+          different widget types on the top right of the map. See
+          :py:class:`WidgetList` for more information.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. This is only used for the simplified Source API.
           When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
           these credentials is simply ignored. If not provided the credentials will be
@@ -136,36 +138,38 @@ class Layer(object):
 
         self.is_basemap = False
 
-        self.source = _set_source(source, credentials, bounds)
+        self.source = _set_source(source, credentials)
         self.style = _set_style(style)
         self.popup = _set_popup(popup)
         self.legend = _set_legend(legend)
-        self.has_legend_list = isinstance(self.legend, LegendList)
         self.widgets = _set_widgets(widgets)
 
         geom_type = self.source.get_geom_type()
         popup_variables = self.popup.get_variables()
         widget_variables = self.widgets.get_variables()
-        variables = merge_dicts(popup_variables, widget_variables)
+        external_variables = merge_dicts(popup_variables, widget_variables)
+        self.viz = self.style.compute_viz(geom_type, external_variables)
+        viz_columns = extract_viz_columns(self.viz)
 
-        self.bounds = self.source.bounds
-        self.orig_data = self.source.data
+        self.source.compute_metadata(viz_columns)
+        self.source_type = self.source.type
+        self.source_data = self.source.data
+        self.bounds = bounds or self.source.bounds
         self.credentials = self.source.get_credentials()
         self.interactivity = self.popup.get_interactivity()
-        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
         self.widgets_info = self.widgets.get_widgets_info()
-        self.viz = self.style.compute_viz(geom_type, variables)
+        self.legend_info = self.legend.get_info(geom_type) if self.legend is not None else None
+        self.has_legend_list = isinstance(self.legend, LegendList)
 
     def _repr_html_(self):
         from .map import Map
         return Map(self)._repr_html_()
 
 
-def _set_source(source, credentials, bounds):
+def _set_source(source, credentials):
     """Set a Source class from the input"""
-    options = (str, list, dict, CartoDataFrame, pandas.DataFrame, geopandas.GeoDataFrame)
-    if isinstance(source, options):
-        return Source(source, credentials, bounds)
+    if isinstance(source, (str, list, dict, CartoDataFrame, pandas.DataFrame, geopandas.GeoDataFrame)):
+        return Source(source, credentials)
     elif isinstance(source, Source):
         return source
     else:

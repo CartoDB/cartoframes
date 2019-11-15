@@ -16,6 +16,7 @@ from cartoframes.auth import Credentials
 from cartoframes.data.clients import SQLClient
 from cartoframes.data.services import Geocoding
 from cartoframes.utils.columns import normalize_name
+from cartoframes.utils.geom_utils import RESERVED_GEO_COLUMN_NAME
 
 from ...helpers import _UserUrlLoader, _ReportQuotas
 
@@ -157,7 +158,7 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
 
         # Incremental geocoding: modify one row
-        gc_df.set_value(1, 'address', 'Gran Via 48')
+        gc_df.at[1, 'address'] = 'Gran Via 48'
         info = gc.geocode(gc_df, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 1)
         self.assertEqual(self.used_quota(gc), quota)
@@ -212,7 +213,7 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         dataset = Dataset(table_name, credentials=self.credentials)
         dl_df = dataset.download()
         self.assertIsNotNone(dl_df.the_geom)
-        self.assertTrue(dl_df.equals(gc_df.drop('geometry', 1)))
+        self.assertTrue(dl_df.equals(gc_df.drop(RESERVED_GEO_COLUMN_NAME, 1)))
         self.assertTrue('cartodb_id' in dataset.get_column_names())
         self.assertEqual(dl_df.index.name, 'cartodb_id')
 
@@ -435,8 +436,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.gc_status_rel)
-        expected_columns = [
-            'address', 'carto_geocode_hash', 'cartodb_id', 'city', 'gc_status_rel', 'geometry', 'the_geom']
+        expected_columns = [RESERVED_GEO_COLUMN_NAME, 'address', 'carto_geocode_hash', 'cartodb_id', 'city',
+                            'gc_status_rel', 'the_geom']
         self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_json_status(self):
@@ -464,7 +465,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
-        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'geometry', 'meta', 'the_geom']
+        expected_columns = [RESERVED_GEO_COLUMN_NAME, 'address', 'carto_geocode_hash', 'cartodb_id', 'city', 'meta',
+                            'the_geom']
         self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_json_legacy_status(self):
@@ -492,7 +494,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.meta)
         self.assertEqual(sorted(gc_df['meta'].apply(json.loads)[1].keys()), ['match_types', 'precision', 'relevance'])
-        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'geometry', 'meta', 'the_geom']
+        expected_columns = [RESERVED_GEO_COLUMN_NAME, 'address', 'carto_geocode_hash', 'cartodb_id', 'city', 'meta',
+                            'the_geom']
         self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_no_status(self):
@@ -518,7 +521,7 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         quota += 2
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
-        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'geometry', 'the_geom']
+        expected_columns = [RESERVED_GEO_COLUMN_NAME, 'address', 'carto_geocode_hash', 'cartodb_id', 'city', 'the_geom']
         self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_with_custom_status(self):
@@ -547,7 +550,8 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
         self.assertIsNotNone(gc_df.the_geom)
         self.assertIsNotNone(gc_df.gc_rel)
-        expected_columns = ['address', 'carto_geocode_hash', 'cartodb_id', 'city', 'gc_rel', 'geometry', 'the_geom']
+        expected_columns = [RESERVED_GEO_COLUMN_NAME, 'address', 'carto_geocode_hash', 'cartodb_id', 'city', 'gc_rel',
+                            'the_geom']
         self.assertEqual(sorted(gc_df.columns), expected_columns)
 
     def test_geocode_dataframe_fails_with_invalid_status_fields(self):
@@ -606,7 +610,7 @@ class TestGeocoding(unittest.TestCase, _UserUrlLoader, _ReportQuotas):
         self.assertEqual(self.used_quota(gc), quota)
 
         # Incremental geocoding: modify one row
-        df.set_value(1, 'address', 'Gran Via 48')
+        df.at[1, 'address'] = 'Gran Via 48'
         info = gc.geocode(
             df, cached=table_name, street='address', city='city', country={'value': 'Spain'}, dry_run=True).metadata
         self.assertEqual(info.get('required_quota'), 1)

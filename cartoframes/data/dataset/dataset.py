@@ -156,7 +156,6 @@ class Dataset(object):
 
     def get_query(self):
         """Get the computed query"""
-
         return self._strategy.get_query()
 
     def get_geodataframe(self):
@@ -463,7 +462,8 @@ class Dataset(object):
     def _init_strategy(self, data, credentials=None, schema=None):
         credentials = credentials or get_default_credentials()
         for strategy in self._registry.get_strategies():
-            if strategy.can_work_with(data):
+            print(data, credentials)
+            if strategy.can_work_with(data, credentials):
                 return strategy.create(data, credentials, schema)
 
         raise ValueError('We can not detect the Dataset type')

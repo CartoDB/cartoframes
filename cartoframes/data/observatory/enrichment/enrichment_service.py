@@ -13,216 +13,221 @@ from ....utils.geom_utils import _compute_geometry_from_geom, geojson_to_wkt, wk
 
 
 _ENRICHMENT_ID = 'enrichment_id'
+_DEFAULT_PROJECT = 'carto-do'
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
-_PUBLIC_DATASET = 'open_data'
+
+AGGREGATION_DEFAULT = 'default'
+AGGREGATION_NONE = 'none'
 
 
-def enrich(query_function, **kwargs):
-    credentials = _get_credentials(kwargs['credentials'])
-    user_dataset = credentials.get_do_dataset()
-    bq_client = _get_bigquery_client(_WORKING_PROJECT, credentials)
+class VariableAggregation(object):
+    """Class to overwrite a `<cartoframes.data.observatory> Variable` default aggregation method in
+        enrichment funcitons
 
-    data_copy = _prepare_data(kwargs['data'], kwargs['data_geom_column'])
-    tablename = _upload_dataframe(bq_client, user_dataset, data_copy, kwargs['data_geom_column'])
-
-    queries = _enrichment_queries(user_dataset, tablename, query_function, **kwargs)
-
-    data_enriched = _execute_enrichment(bq_client, queries, data_copy, kwargs['data_geom_column'])
-
-    data_enriched[kwargs['data_geom_column']] = _compute_geometry_from_geom(data_enriched[kwargs['data_geom_column']])
-
-    return data_enriched
+        Example:
+            VariableAggregation(variable, 'SUM')
+    """
+    def __init__(self, variable, aggregation=None):
+        self.variable = _prepare_variable(variable)
+        self.aggregation = aggregation
 
 
-def _get_credentials(credentials=None):
-    return credentials or get_default_credentials()
+class VariableFilter(object):
+    """Class for filtering in enrichment. It receives 3 parameters: variable: a
+        `<cartoframes.data.observatory> Variable` instance,
+        operator: the operation to do over the variable column in SQL syntax and
+        value: the value to be used in the SQL operation
+
+        Examples:
+            Equal to number: VariableFilter(variable, '= 3')
+            Equal to string: VariableFilter(variable, "= 'the string'")
+            Greater that 3: VariableFilter(variable, '> 3')
+    """
+    def __init__(self, variable, query):
+        self.variable = _prepare_variable(variable)
+        self.query = query
 
 
-def _get_bigquery_client(project, credentials):
-    return bigquery_client.BigQueryClient(project, credentials)
+class EnrichmentService(object):
+    """Base class for the Enrichment utility with commons auxiliary methods"""
 
+    def __init__(self, credentials=None):
+        self.credentials = credentials = credentials or get_default_credentials()
+        self.user_dataset = self.credentials.get_do_user_dataset()
+        self.bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
+        self.working_project = _WORKING_PROJECT
+        self.enrichment_id = _ENRICHMENT_ID
+        self.public_project = _PUBLIC_PROJECT
 
-def _prepare_data(data, data_geom_column):
-    data_copy = __copy_data_and_generate_enrichment_id(data, _ENRICHMENT_ID, data_geom_column)
-    data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
-    return data_copy
+    def _execute_enrichment(self, queries, data, data_geom_column):
+        dfs_enriched = list()
 
+        for query in queries:
+            df_enriched = self.bq_client.query(query).to_dataframe()
+            dfs_enriched.append(df_enriched)
 
-def _upload_dataframe(bq_client, user_dataset, data_copy, data_geom_column):
-    data_geometry_id_copy = data_copy[[data_geom_column, _ENRICHMENT_ID]]
-    schema = {data_geom_column: 'GEOGRAPHY', _ENRICHMENT_ID: 'INTEGER'}
+        for df in dfs_enriched:
+            data = data.merge(df, on=self.enrichment_id, how='left')
 
-    id_tablename = uuid.uuid4().hex
-    data_tablename = 'temp_{id}'.format(id=id_tablename)
+        data.drop(self.enrichment_id, axis=1, inplace=True)
+        data[data_geom_column] = data[data_geom_column].apply(geojson_to_wkt)
 
-    bq_client.upload_dataframe(data_geometry_id_copy, schema, data_tablename,
-                               project=_WORKING_PROJECT, dataset=user_dataset)
+        data[data_geom_column] = _compute_geometry_from_geom(data[data_geom_column])
 
-    return data_tablename
+        return data
 
+    def _prepare_data(self, data, data_geom_column):
+        data_copy = self.__copy_data_and_generate_enrichment_id(data, data_geom_column)
+        data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
+        return data_copy
 
-def _enrichment_queries(user_dataset, tablename, query_function, **kwargs):
-    is_polygon_enrichment = 'agg_operators' in kwargs
-    variables = __process_variables(kwargs['variables'], is_polygon_enrichment)
+    def _get_temp_table_name(self):
+        id_tablename = uuid.uuid4().hex
+        return 'temp_{id}'.format(id=id_tablename)
 
-    table_to_geotable, table_to_variables,\
-        table_to_project, table_to_dataset = __process_enrichment_variables(variables, user_dataset)
+    def _upload_dataframe(self, tablename, data_copy, data_geom_column):
+        data_geometry_id_copy = data_copy[[data_geom_column, self.enrichment_id]]
+        schema = {data_geom_column: 'GEOGRAPHY', self.enrichment_id: 'INTEGER'}
 
-    filters_str = __process_filters(kwargs['filters'])
+        self.bq_client.upload_dataframe(
+            dataframe=data_geometry_id_copy,
+            schema=schema,
+            tablename=tablename,
+            project=self.working_project,
+            dataset=self.user_dataset
+        )
 
-    if kwargs.get('agg_operators') is not None:
-        kwargs['agg_operators'] = __process_agg_operators(kwargs['agg_operators'], variables)
+    def _get_tables_metadata(self, variables):
+        tables_metadata = defaultdict(lambda: defaultdict(list))
 
-    return query_function(_ENRICHMENT_ID, filters_str, table_to_geotable, table_to_variables, table_to_project,
-                          table_to_dataset, user_dataset, _WORKING_PROJECT, tablename, **kwargs)
+        for variable in variables:
+            if isinstance(variable, VariableAggregation):
+                variable_aggregation = variable
+                table_name = self.__get_enrichment_table(variable_aggregation.variable)
+                tables_metadata[table_name]['variables'].append(variable_aggregation)
+                variable = variable_aggregation.variable
+            else:
+                table_name = self.__get_enrichment_table(variable)
+                tables_metadata[table_name]['variables'].append(variable)
 
+            if 'dataset' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['dataset'] = self.__get_dataset(variable, table_name)
 
-def _execute_enrichment(bq_client, queries, data_copy, data_geom_column):
+            if 'geo_table' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['geo_table'] = self.__get_geo_table(variable)
 
-    dfs_enriched = list()
+            if 'project' not in tables_metadata[table_name].keys():
+                tables_metadata[table_name]['project'] = self.__get_project(variable)
 
-    for query in queries:
+        return tables_metadata
 
-        df_enriched = bq_client.query(query).to_dataframe()
-
-        dfs_enriched.append(df_enriched)
-
-    for df in dfs_enriched:
-        data_copy = data_copy.merge(df, on=_ENRICHMENT_ID, how='left')
-
-    data_copy.drop(_ENRICHMENT_ID, axis=1, inplace=True)
-    data_copy[data_geom_column] = data_copy[data_geom_column].apply(geojson_to_wkt)
-
-    return data_copy
-
-
-def __copy_data_and_generate_enrichment_id(data, enrichment_id_column, geometry_column):
-
-    has_to_decode_geom = True
-
-    if isinstance(data, Dataset):
-        if data.dataframe is None:
-            has_to_decode_geom = False
-            geometry_column = 'the_geom'
-            data.download(decode_geom=True)
-
-        data = data.dataframe
-    elif isinstance(data, gpd.GeoDataFrame):
-        has_to_decode_geom = False
-
-    data_copy = data.copy()
-    data_copy[enrichment_id_column] = range(data_copy.shape[0])
-
-    if has_to_decode_geom:
-        data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
-
-    data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
-
-    return data_copy
-
-
-def __process_variables(variables, is_polygon_enrichment):
-    variables_result = list()
-    if isinstance(variables, Variable):
-        variables_result = [variables]
-    elif isinstance(variables, str):
-        variables_result = [Variable.get(variables)]
-    elif isinstance(variables, list):
-        first_element = variables[0]
-
-        if isinstance(first_element, str):
-            variables_result = Variable.get_list(variables)
+    def __get_enrichment_table(self, variable):
+        if variable.project_name != self.public_project:
+            return 'view_{dataset}_{table}'.format(
+                dataset=variable.schema_name,
+                table=variable.dataset_name
+            )
         else:
-            variables_result = variables
+            return variable.dataset_name
+
+    def __get_dataset(self, variable, table_name):
+        if variable.project_name != self.public_project:
+            return '{project}.{dataset}.{table_name}'.format(
+                project=self.working_project,
+                dataset=self.user_dataset,
+                table_name=table_name
+            )
+        else:
+            return variable.dataset
+
+    def __get_geo_table(self, variable):
+        geography_id = CatalogDataset.get(variable.dataset).geography
+        _, dataset_geo_table, geo_table = geography_id.split('.')
+
+        if variable.project_name != self.public_project:
+            return '{project}.{dataset}.view_{dataset_geo_table}_{geo_table}'.format(
+                project=self.working_project,
+                dataset=self.user_dataset,
+                dataset_geo_table=dataset_geo_table,
+                geo_table=geo_table
+            )
+        else:
+            return '{project}.{dataset}.{geo_table}'.format(
+                project=self.public_project,
+                dataset=dataset_geo_table,
+                geo_table=geo_table
+            )
+
+    def __get_project(self, variable):
+        project = self.public_project
+
+        if variable.project_name != self.public_project:
+            project = self.working_project
+
+        return project
+
+    def __copy_data_and_generate_enrichment_id(self, data, geometry_column):
+        has_to_decode_geom = True
+        enrichment_id_column = self.enrichment_id
+
+        if isinstance(data, Dataset):
+            if data.dataframe is None:
+                has_to_decode_geom = False
+                geometry_column = 'the_geom'
+                data.download(decode_geom=True)
+
+            data = data.dataframe
+        elif isinstance(data, gpd.GeoDataFrame):
+            has_to_decode_geom = False
+
+        data_copy = data.copy()
+        data_copy[enrichment_id_column] = range(data_copy.shape[0])
+
+        if has_to_decode_geom:
+            data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
+
+        data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
+
+        return data_copy
+
+
+def prepare_variables(variables):
+    if isinstance(variables, list):
+        return [_prepare_variable(var) for var in variables]
     else:
-        raise EnrichmentException('Variable(s) to enrich should be an instance of Variable / CatalogList / str / list')
-
-    if is_polygon_enrichment:
-        variables_result = [variable for variable in variables_result if variable.agg_method is not None]
-
-    return variables_result
+        return [_prepare_variable(variables)]
 
 
-def __process_filters(filters_dict):
-    filters = ''
-    # TODO: Add data table ref in fields of filters
-    if filters_dict:
-        filters_list = list()
+def _prepare_variable(variable):
+    if isinstance(variable, str):
+        variable = Variable.get(variable)
 
-        for key, value in filters_dict.items():
-            filters_list.append('='.join(["{}".format(key), "'{}'".format(value)]))
+    if not isinstance(variable, Variable):
+        raise EnrichmentException("""
+            variable should be a `<cartoframes.data.observatory> Variable` instance,
+            Variable `id` property or Variable `slug` property
+        """)
 
-        filters = ' AND '.join(filters_list)
-        filters = 'WHERE {filters}'.format(filters=filters)
-
-    return filters
+    return variable
 
 
-def __process_agg_operators(agg_operators, variables):
-    if isinstance(agg_operators, str):
-        agg_operators_result = dict()
-
-        for variable in variables:
-            agg_operators_result[variable.column_name] = agg_operators
-
-    elif isinstance(agg_operators, dict):
-        agg_operators_result = agg_operators.copy()
-
-        for variable in variables:
-            if variable.column_name not in agg_operators_result:
-                agg_operators_result[variable.column_name] = variable.agg_method
-    else:
-        raise EnrichmentException('agg_operators param must be a string or a dict')
-
-    return agg_operators_result
+def get_variable_aggregations(variables, aggregation):
+    return [VariableAggregation(variable, __get_aggregation(variable, aggregation)) for variable in variables]
 
 
-def __process_enrichment_variables(variables, user_dataset):
-    table_to_geotable = dict()
-    table_to_variables = defaultdict(list)
-    table_to_project = dict()
-    table_to_dataset = dict()
+def __get_aggregation(variable, aggregation):
+    if aggregation == AGGREGATION_NONE:
+        return None
+    elif aggregation == AGGREGATION_DEFAULT:
+        return variable.agg_method or 'array_agg'
+    elif isinstance(aggregation, str):
+        return aggregation
+    elif isinstance(aggregation, list):
+        agg = variable.agg_method or 'array_agg'
+        for variable_aggregation in aggregation:
+            if variable_aggregation.variable == variable:
+                agg = variable_aggregation.aggregation
+                break
 
-    for variable in variables:
-        project_name = variable.project_name
-        dataset_name = variable.schema_name
-        table_name = variable.dataset_name
-        variable_name = variable.column_name
-        dataset_geotable, geotable = __get_properties_geotable(variable)
-
-        if project_name != _PUBLIC_PROJECT:
-            table_name = 'view_{dataset}_{table}'.format(dataset=dataset_name,
-                                                         table=table_name,
-                                                         user_dataset=user_dataset)
-
-        if table_name not in table_to_dataset:
-            if project_name != _PUBLIC_PROJECT:
-                table_to_dataset[table_name] = user_dataset
-            else:
-                table_to_dataset[table_name] = _PUBLIC_DATASET
-
-        if table_name not in table_to_geotable:
-            if project_name != _PUBLIC_PROJECT:
-                geotable = 'view_{dataset}_{geotable}'.format(dataset=dataset_geotable,
-                                                              geotable=geotable)
-            table_to_geotable[table_name] = geotable
-
-        if table_name not in table_to_project:
-            if project_name == _PUBLIC_PROJECT:
-                table_to_project[table_name] = _PUBLIC_PROJECT
-            else:
-                table_to_project[table_name] = _WORKING_PROJECT
-
-        table_to_variables[table_name].append(variable_name)
-
-    return table_to_geotable, table_to_variables, table_to_project, table_to_dataset
-
-
-def __get_properties_geotable(variable):
-
-    geography_id = CatalogDataset.get(variable.dataset).geography
-
-    _, geo_dataset, geo_table = geography_id.split('.')
-
-    return geo_dataset, geo_table
+        return agg

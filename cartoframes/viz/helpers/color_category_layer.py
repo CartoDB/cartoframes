@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 
-from .. import defaults
+from .utils import serialize_palette, get_value
+
 from ..layer import Layer
-from .utils import serialize_palette
 
 
 def color_category_layer(
         source, value, title='', top=11, cat=None, palette=None,
         size=None, opacity=None, stroke_color=None, stroke_width=None,
         description='', footer='', legend=True, popup=True,
-        widget=False, animate=None):
+        widget=False, animate=None, credentials=None):
     """Helper function for quickly creating a category color map.
 
     Args:
@@ -19,8 +19,7 @@ def color_category_layer(
         title (str, optional): Title of legend.
         top (int, optional): Number of category for map. Default is 11. Values
           can range from 1 to 16.
-        cat (str, optional): Category list. Must be a valid CARTO VL category
-          list.
+        cat (list<str>, optional): Category list. Must be a valid list of categories.
         palette (str, optional): Palette that can be a named CARTOColor palette
           or other valid CARTO VL palette expression. Default is `bold`.
         size (int, optional): Size of point or line features.
@@ -38,6 +37,11 @@ def color_category_layer(
         widget (bool, optional): Display a widget for mapped data.
           Set to "False" by default.
         animate (str, optional): Animate features by date/time or other numeric field.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+          A Credentials instance. This is only used for the simplified Source API.
+          When a :py:class:`Source <cartoframes.viz.Source>` is pased as source,
+          these credentials is simply ignored. If not provided the credentials will be
+          automatically obtained from the default credentials.
 
     Returns:
         cartoframes.viz.Layer: Layer styled by `value`.
@@ -52,32 +56,32 @@ def color_category_layer(
         style={
             'point': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['point']['width']),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['point']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['point']['strokeWidth']),
+                    func, value, cat or top,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'point', 'opacity')
+                ),
+                'width': get_value(size, 'point', 'width'),
+                'strokeColor': get_value(stroke_color, 'point', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'point', 'strokeWidth'),
                 'filter': animation_filter
             },
             'line': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}),{4})'.format(
-                    func, value, cat or top, serialize_palette(palette) or default_palette,
-                    opacity or '1'),
-                'width': '{0}'.format(
-                    size or defaults.STYLE['line']['width']),
+                    func, value, cat or top,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'line', 'opacity')
+                ),
+                'width': get_value(size, 'line', 'width'),
                 'filter': animation_filter
             },
             'polygon': {
                 'color': 'opacity(ramp({0}(${1}, {2}), {3}), {4})'.format(
-                    func, value, cat or top, serialize_palette(palette) or default_palette,
-                    opacity or '0.9'),
-                'strokeColor': '{0}'.format(
-                    stroke_color or defaults.STYLE['polygon']['strokeColor']),
-                'strokeWidth': '{0}'.format(
-                    stroke_width or defaults.STYLE['polygon']['strokeWidth']),
+                    func, value, cat or top,
+                    serialize_palette(palette) or default_palette,
+                    get_value(opacity, 'polygon', 'opacity')
+                ),
+                'strokeColor': get_value(stroke_color, 'polygon', 'strokeColor'),
+                'strokeWidth': get_value(stroke_width, 'polygon', 'strokeWidth'),
                 'filter': animation_filter
             }
         },
@@ -108,5 +112,6 @@ def color_category_layer(
                 'value': value,
                 'title': 'Categories'
             }
-        ]
+        ],
+        credentials=credentials
     )

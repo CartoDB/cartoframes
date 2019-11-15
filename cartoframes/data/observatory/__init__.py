@@ -7,8 +7,8 @@ from .catalog.dataset import CatalogDataset
 from .catalog.geography import Geography
 from .catalog.provider import Provider
 from .catalog.variable import Variable
-from .enrichment.points_enrichment import enrich_points
-from .enrichment.polygons_enrichment import enrich_polygons
+from .enrichment.enrichment import Enrichment
+from .enrichment.enrichment_service import VariableAggregation, VariableFilter
 
 __all__ = [
     'Catalog',
@@ -18,6 +18,7 @@ __all__ = [
     'Geography',
     'Provider',
     'Variable',
-    'enrich_points',
-    'enrich_polygons'
+    'Enrichment',
+    'VariableAggregation',
+    'VariableFilter'
 ]

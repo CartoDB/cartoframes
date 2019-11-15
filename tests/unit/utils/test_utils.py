@@ -5,10 +5,11 @@ import unittest
 from collections import OrderedDict
 
 import requests
+import numpy as np
 
 from cartoframes.utils.utils import (camel_dictionary, cssify, debug_print,
-                                     dict_items, importify_params,
-                                     snake_to_camel)
+                                     dict_items, importify_params, snake_to_camel,
+                                     dtypes2pg, pg2dtypes, encode_row)
 
 
 class TestUtils(unittest.TestCase):
@@ -126,20 +127,38 @@ class TestUtils(unittest.TestCase):
             self.assertTrue(importify_params(p), ans[idx])
 
     def test_dtypes2pg(self):
-        """utils.dtypes2pg"""
-        from cartoframes.utils.utils import dtypes2pg
         results = {
-            'float64': 'numeric',
-            'int64': 'numeric',
-            'float32': 'numeric',
-            'int32': 'numeric',
+            'int16': 'smallint',
+            'int32': 'integer',
+            'int64': 'bigint',
+            'float32': 'real',
+            'float64': 'double precision',
             'object': 'text',
             'bool': 'boolean',
             'datetime64[ns]': 'timestamp',
+            'datetime64[ns, UTC]': 'timestamp',
             'unknown_dtype': 'text'
         }
         for i in results:
             self.assertEqual(dtypes2pg(i), results[i])
+
+    def test_pg2dtypes(self):
+        results = {
+            'smallint': 'int16', 'int2': 'int16',
+            'integer': 'int32', 'int4': 'int32', 'int': 'int32',
+            'bigint': 'int64', 'int8': 'int64',
+            'real': 'float32', 'float4': 'float32',
+            'double precision': 'float64', 'float8': 'float64',
+            'numeric': 'float64', 'decimal': 'float64',
+            'text': 'object',
+            'boolean': 'bool',
+            'date': 'datetime64[D]',
+            'timestamp': 'datetime64[ns]', 'timestamp without time zone': 'datetime64[ns]',
+            'timestampz': 'datetime64[ns]', 'timestamp with time zone': 'datetime64[ns]',
+            'USER-DEFINED': 'object',
+        }
+        for i in results:
+            self.assertEqual(pg2dtypes(i), results[i])
 
     def test_snake_to_camel(self):
         self.assertEqual(snake_to_camel('sneaky_snake'), 'sneakySnake')
@@ -175,3 +194,18 @@ class TestUtils(unittest.TestCase):
         # verbose = False
         verbose = 0
         self.assertIsNone(debug_print(verbose, resp=test_str))
+
+    def test_encode_row(self):
+        assert encode_row('Hello') == b'Hello'
+        assert encode_row('Hello \'world\'') == b'Hello \'world\''
+        assert encode_row('Hello "world"') == b'"Hello ""world"""'
+        assert encode_row('Hello | world') == b'"Hello | world"'
+        assert encode_row('Hello \n world') == b'"Hello \n world"'
+        assert encode_row(b'Hello') == b'Hello'
+        assert encode_row(b'Hello \'world\'') == b'Hello \'world\''
+        assert encode_row(b'Hello "world"') == b'"Hello ""world"""'
+        assert encode_row(b'Hello | world') == b'"Hello | world"'
+        assert encode_row(b'Hello \n world') == b'"Hello \n world"'
+        assert encode_row(np.inf) == b'Infinity'
+        assert encode_row(-np.inf) == b'-Infinity'
+        assert encode_row(np.nan) == b'NaN'

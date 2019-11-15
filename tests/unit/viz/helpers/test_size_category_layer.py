@@ -1,9 +1,14 @@
 from cartoframes.viz import helpers
+from cartoframes.auth import Credentials
 
 from . import setup_mocks
+from ..utils import simple_dataframe
 
 
 class TestSizeCategoryLayerHelper(object):
+    def setup_method(self):
+        self.source = simple_dataframe(['name', 'time'])
+
     def test_helpers(self):
         "should be defined"
         assert helpers.size_category_layer is not None
@@ -12,9 +17,10 @@ class TestSizeCategoryLayerHelper(object):
         "should create a layer with the proper attributes"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            source='sf_neighborhoods',
+            source='SELECT * FROM faketable',
             value='name',
-            title='Neighborhoods'
+            title='Neighborhoods',
+            credentials=Credentials('fakeuser')
         )
 
         assert layer.style is not None
@@ -40,7 +46,7 @@ class TestSizeCategoryLayerHelper(object):
         "should create a point type layer"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             top=5,
@@ -52,7 +58,7 @@ class TestSizeCategoryLayerHelper(object):
         assert layer.style._style['point']['color'] == 'opacity(blue, 0.8)'
 
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
@@ -67,7 +73,7 @@ class TestSizeCategoryLayerHelper(object):
         "should create a line type layer"
         setup_mocks(mocker, 'line')
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             top=5,
@@ -79,7 +85,7 @@ class TestSizeCategoryLayerHelper(object):
         assert layer.style._style['line']['color'] == 'opacity(blue, 0.8)'
 
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             'Neighborhoods',
             cat=['A', 'B'],
@@ -94,7 +100,7 @@ class TestSizeCategoryLayerHelper(object):
         "should show/hide the legend"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=False
         )
@@ -103,7 +109,7 @@ class TestSizeCategoryLayerHelper(object):
         assert layer.legend._title == ''
 
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             legend=True
         )
@@ -119,7 +125,7 @@ class TestSizeCategoryLayerHelper(object):
         "should show/hide the popup"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=False
         )
@@ -127,7 +133,7 @@ class TestSizeCategoryLayerHelper(object):
         assert layer.popup._hover == []
 
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             popup=True
         )
@@ -141,7 +147,7 @@ class TestSizeCategoryLayerHelper(object):
         "should show/hide the widget"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=False
         )
@@ -149,7 +155,7 @@ class TestSizeCategoryLayerHelper(object):
         assert layer.widgets._widgets == []
 
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             widget=True
         )
@@ -161,7 +167,7 @@ class TestSizeCategoryLayerHelper(object):
         "should animate a property and disable the popups"
         setup_mocks(mocker)
         layer = helpers.size_category_layer(
-            'sf_neighborhoods',
+            self.source,
             'name',
             animate='time'
         )

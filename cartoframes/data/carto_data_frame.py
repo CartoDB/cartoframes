@@ -294,9 +294,9 @@ class CartoDataFrame(GeoDataFrame):
 
     def _create_strategy(self, data, schema, credentials):
         if data is not None:
-            if is_sql_query(data):
+            if is_sql_query(data) and QueryDataset.can_work_with(data, credentials):
                 return QueryDataset.create(data, credentials)
-            elif is_table_name(data):
+            elif is_table_name(data) and TableDataset.can_work_with(data, credentials):
                 return TableDataset.create(data, credentials, schema)
         return DataFrameDataset.create(self, credentials)
 

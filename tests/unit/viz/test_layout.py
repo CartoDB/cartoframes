@@ -3,9 +3,9 @@ from carto.exceptions import CartoException
 
 from cartoframes.viz import Layer, Layout, Map, Source
 
-from .utils import build_geojson
+from .utils import build_geodataframe
 
-SOURCE = build_geojson([-10, 0], [-10, 0])
+SOURCE = build_geodataframe([-10, 0], [-10, 0])
 
 
 class TestLayout(object):
