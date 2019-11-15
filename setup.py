@@ -31,7 +31,6 @@ REQUIRES = [
     'carto>=1.8.1,<2.0',
     'jinja2>=2.10.1,<3.0',
     'geopandas>=0.6.0,<1.0',
-    'pyproj==2.2.2',
     'tqdm>=4.32.1,<5.0',
     'unidecode>=1.1.0,<2.0',
     'pyarrow>=0.14.1,<1.0',
