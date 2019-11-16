@@ -23,6 +23,16 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import read_carto
         return read_carto(*args, **kwargs)
 
+    @classmethod
+    def from_file(cls, filename, **kwargs):
+        gdf = GeoDataFrame.from_file(filename, **kwargs)
+        return cls(gdf)
+
+    @classmethod
+    def from_features(cls, features, **kwargs):
+        gdf = GeoDataFrame.from_features(features, **kwargs)
+        return cls(gdf)
+
     def to_carto(*args, **kwargs):
         from ..io.carto import to_carto
         return to_carto(*args, **kwargs)
