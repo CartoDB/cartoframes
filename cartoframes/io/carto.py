@@ -14,7 +14,7 @@ from ..utils.columns import Column, DataframeColumnsInfo, obtain_index_col, \
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
                keep_cartodb_id=False, keep_the_geom=False, keep_the_geom_webmercator=False):
     """
-    Read a table or a SQL query from a CARTO account.
+    Read a table or a SQL query from the CARTO account.
 
     Args:
         source (str): table name or SQL query.
@@ -60,6 +60,75 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
     )
 
 
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
+    """
+    Read a table or a SQL query from the CARTO account.
+
+    Args:
+        dataframe (DataFrame): data frame to upload.
+        table_name (str): name of the table to upload the data.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    """
+    _check_dataframe(dataframe)
+    _check_table_name(table_name)
+
+    norm_table_name = normalize_name(table_name)
+    if norm_table_name != table_name:
+        print('Debug: table name normalized: "{}"'.format(norm_table_name))
+
+    credentials = credentials or get_default_credentials()
+    check_credentials(credentials)
+
+    context = create_context(credentials)
+
+    cdf = CartoDataFrame(dataframe, copy=True)
+
+    dataframe_columns_info = DataframeColumnsInfo(cdf)
+
+    schema = context.get_schema()
+
+    if if_exists == 'replace' or not _has_table(norm_table_name, schema, context):
+        print('Debug: creating table')
+        _create_table(norm_table_name, dataframe_columns_info.columns, schema, context)
+    elif if_exists == 'fail':
+        raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+                        'Please choose a different `table_name` or use '
+                        'if_exists="replace" to overwrite it'.format(
+                            table_name=norm_table_name, schema=schema))
+    elif if_exists == 'append':
+        pass
+
+    _copyfrom(cdf, norm_table_name, dataframe_columns_info, context)
+    print('Success! Data uploaded correctly')
+
+
+def has_table(table_name, credentials=None, schema=None):
+    """
+    Check if the table exists in the CARTO account.
+
+    Args:
+        table_name (str): name of the table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        schema (str, optional):prefix of the table. By default, it gets the
+            `current_schema()` using the credentials.
+    """
+
+    _check_table_name(table_name)
+
+    credentials = credentials or get_default_credentials()
+    check_credentials(credentials)
+
+    context = create_context(credentials)
+
+    schema = context.get_schema()
+
+    return _has_table(table_name, schema, context)
+
+
 def _check_source(source):
     if not isinstance(source, str):
         raise ValueError('Wrong source. You should provide a valid table_name or SQL query.')
@@ -80,9 +149,10 @@ def _check_exists(query, context):
         raise ValueError(msg)
 
 
-def _has_table(table, context):
+def _has_table(table, schema, context):
     try:
-        _check_exists('SELECT * FROM {}'.format(table), context)
+        query = compute_query_from_table(table, schema)
+        _check_exists(query, context)
         return True
     except Exception:
         return False
@@ -130,51 +200,6 @@ def _copyto(query, columns, retry_times, context):
         df.index.name = None
 
     return df
-
-
-def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
-    """
-    Read a table or a SQL query from a CARTO account.
-
-    Args:
-        dataframe (DataFrame): data frame to upload.
-        table_name (str): name of the table to upload the data.
-        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
-            instance of Credentials (username, api_key, etc).
-        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
-
-    """
-    _check_dataframe(dataframe)
-    _check_table_name(table_name)
-
-    norm_table_name = normalize_name(table_name)
-    if norm_table_name != table_name:
-        print('Debug: table name normalized: "{}"'.format(norm_table_name))
-
-    credentials = credentials or get_default_credentials()
-    check_credentials(credentials)
-
-    context = create_context(credentials)
-
-    cdf = CartoDataFrame(dataframe.copy())
-
-    dataframe_columns_info = DataframeColumnsInfo(cdf)
-
-    schema = context.get_schema()
-
-    if if_exists == 'replace' or not _has_table(norm_table_name, context):
-        print('Debug: creating table')
-        _create_table(norm_table_name, dataframe_columns_info.columns, schema, context)
-    elif if_exists == 'fail':
-        raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
-                        'Please choose a different `table_name` or use '
-                        'if_exists="replace" to overwrite it'.format(
-                             table_name=norm_table_name, schema=schema))
-    elif if_exists == 'append':
-        pass
-
-    _copyfrom(cdf, norm_table_name, dataframe_columns_info, context)
-    print('Success! Data uploaded correctly')
 
 
 def _check_dataframe(dataframe):
