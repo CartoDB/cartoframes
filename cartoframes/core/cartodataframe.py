@@ -8,7 +8,7 @@ class CartoDataFrame(GeoDataFrame):
     def __init__(self, *args, **kwargs):
         index_column = kwargs.pop('index_column', None)
         geom_column = kwargs.pop('geom_column', None)
-        lnglat_column = kwargs.pop('lnglat_column', None)
+        lnglat_columns = kwargs.pop('lnglat_columns', None)
         keep_index = kwargs.pop('keep_index', False)
         keep_geom = kwargs.pop('keep_geom', False)
         keep_lnglat = kwargs.pop('keep_lnglat', False)
@@ -16,7 +16,7 @@ class CartoDataFrame(GeoDataFrame):
         super(CartoDataFrame, self).__init__(*args, **kwargs)
 
         generate_index(self, index_column, keep_index)
-        generate_geometry(self, geom_column, lnglat_column, keep_geom, keep_lnglat)
+        generate_geometry(self, geom_column, lnglat_columns, keep_geom, keep_lnglat)
 
     @staticmethod
     def from_carto(*args, **kwargs):
@@ -37,6 +37,8 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import to_carto
         return to_carto(*args, **kwargs)
 
-    def render(self, *args, **kwargs):
+    def visualize(self, *args, **kwargs):
         from ..viz import Map, Layer
         return Map(Layer(self, *args, **kwargs))
+
+    viz = visualize

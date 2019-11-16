@@ -24,9 +24,11 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             The number of rows to download. Default is to download all rows.
         retry_times (int, optional):
             Number of time to retry the download in case it fails. Default is 3.
+        schema (str, optional):prefix of the table. By default, it gets the
+            `current_schema()` using the credentials.
         keep_cartodb_id (bool, optional): retrieve the "cartodb_id" column.
         keep_the_geom (bool, optional): retrieve the "the_geom" column.
-        schema (str, optional):
+        keep_the_goem_webmercator (bool, optional): retrieve the "the_geom_webmercator" column.
 
     Returns:
         :py:class:`CartoDataFrame <cartoframes.core.CartoDataFrame>`

@@ -112,7 +112,7 @@ def generate_index(dataframe, index_column, keep_index):
         dataframe.index.name = None
 
 
-def generate_geometry(dataframe, geom_column, lnglat_column, keep_geom, keep_lnglat):
+def generate_geometry(dataframe, geom_column, lnglat_columns, keep_geom, keep_lnglat):
     if RESERVED_GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
         if geom_column is not None:
@@ -120,8 +120,8 @@ def generate_geometry(dataframe, geom_column, lnglat_column, keep_geom, keep_lng
             if not keep_geom:
                 del dataframe[geom_column.name]
         else:
-            lng_column = _get_column(dataframe, lnglat_column and lnglat_column[0], LNG_COLUMN_NAMES)
-            lat_column = _get_column(dataframe, lnglat_column and lnglat_column[1], LAT_COLUMN_NAMES)
+            lng_column = _get_column(dataframe, lnglat_columns and lnglat_columns[0], LNG_COLUMN_NAMES)
+            lat_column = _get_column(dataframe, lnglat_columns and lnglat_columns[1], LAT_COLUMN_NAMES)
             if lng_column is not None and lat_column is not None:
                 dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
                 if not keep_lnglat:
