@@ -106,7 +106,9 @@ def geodataframe_from_dataframe(dataframe):
 def generate_index(dataframe, index_column, keep_index):
     index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
     if index_column is not None:
-        dataframe.set_index(index_column, drop=(not keep_index), inplace=True)
+        dataframe.set_index(index_column, inplace=True)
+        if not keep_index:
+            del dataframe[index_column.name]
         dataframe.index.name = None
 
 
@@ -127,6 +129,9 @@ def generate_geometry(dataframe, geom_column, lnglat_column, keep_geom, keep_lng
                     del dataframe[lat_column.name]
             else:
                 print('Debug: no geographic data found.')
+
+    if RESERVED_GEO_COLUMN_NAME in dataframe:
+        dataframe._geometry_column_name = RESERVED_GEO_COLUMN_NAME
 
 
 def _get_column(df, main=None, options=[]):

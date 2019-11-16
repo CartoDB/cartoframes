@@ -23,8 +23,9 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import read_carto
         return read_carto(*args, **kwargs)
 
-    def to_carto():
-        pass
+    def to_carto(*args, **kwargs):
+        from ..io.carto import to_carto
+        return to_carto(*args, **kwargs)
 
     def render(self, *args, **kwargs):
         from ..viz import Map, Layer

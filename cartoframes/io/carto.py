@@ -5,9 +5,10 @@ import pandas as pd
 from ..core.cartodataframe import CartoDataFrame
 from ..auth.defaults import get_default_credentials
 from ..lib.context import create_context
-from ..utils.utils import is_sql_query, check_credentials, PG_NULL
-from ..utils.geom_utils import compute_query_from_table
-from ..utils.columns import Column, obtain_index_col, obtain_converters, date_columns_names
+from ..utils.utils import is_sql_query, check_credentials, encode_row, PG_NULL
+from ..utils.geom_utils import compute_query_from_table, decode_geometry
+from ..utils.columns import Column, DataframeColumnsInfo, obtain_index_col, \
+                            obtain_converters, date_columns_names, normalize_name
 
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
@@ -77,6 +78,14 @@ def _check_exists(query, context):
         raise ValueError(msg)
 
 
+def _has_table(table, context):
+    try:
+        _check_exists('SELECT * FROM {}'.format(table), context)
+        return True
+    except Exception:
+        return False
+
+
 def _get_query_columns(query, context):
     query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
     table_info = context.execute_query(query)
@@ -121,5 +130,124 @@ def _copyto(query, columns, retry_times, context):
     return df
 
 
-def to_carto():
-    pass
+def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
+    """
+    Read a table or a SQL query from a CARTO account.
+
+    Args:
+        dataframe (DataFrame): data frame to upload.
+        table_name (str): name of the table to upload the data.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        if_exists (str, optional): 'fail', 'replace', 'append'. Default is 'fail'.
+
+    """
+    _check_dataframe(dataframe)
+    _check_table_name(table_name)
+
+    norm_table_name = normalize_name(table_name)
+    if norm_table_name != table_name:
+        print('Debug: table name normalized: "{}"'.format(norm_table_name))
+
+    credentials = credentials or get_default_credentials()
+    check_credentials(credentials)
+
+    context = create_context(credentials)
+
+    cdf = CartoDataFrame(dataframe.copy())
+
+    dataframe_columns_info = DataframeColumnsInfo(cdf)
+
+    schema = context.get_schema()
+
+    if if_exists == 'replace' or not _has_table(norm_table_name, context):
+        print('Debug: creating table')
+        _create_table(norm_table_name, dataframe_columns_info.columns, schema, context)
+    elif if_exists == 'fail':
+        raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+                        'Please choose a different `table_name` or use '
+                        'if_exists="replace" to overwrite it'.format(
+                             table_name=norm_table_name, schema=schema))
+    elif if_exists == 'append':
+        pass
+
+    _copyfrom(cdf, norm_table_name, dataframe_columns_info, context)
+    print('Success! Data uploaded correctly')
+
+
+def _check_dataframe(dataframe):
+    if not isinstance(dataframe, pd.DataFrame):
+        raise ValueError('Wrong dataframe. You should provide a valid DataFrame instance.')
+
+
+def _check_table_name(table_name):
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+
+def _create_table(table_name, columns, schema, context):
+    query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
+        drop=_drop_table_query(table_name),
+        create=_create_table_query(table_name, columns),
+        cartodbfy=_cartodbfy_query(table_name, schema))
+
+    context.execute_long_running_query(query)
+
+
+def _drop_table_query(table_name, if_exists=True):
+    return '''DROP TABLE {if_exists} {table_name}'''.format(
+        table_name=table_name,
+        if_exists='IF EXISTS' if if_exists else '')
+
+
+def _create_table_query(table_name, columns):
+    cols = ['{column} {type}'.format(column=c.database, type=c.database_type) for c in columns]
+
+    return '''CREATE TABLE {table_name} ({cols})'''.format(
+        table_name=table_name,
+        cols=', '.join(cols))
+
+
+def _cartodbfy_query(table_name, schema):
+    return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
+        .format(schema=schema, table_name=table_name)
+
+
+def _copyfrom(dataframe, table_name, dataframe_columns_info, context):
+    query = """
+        COPY {table_name}({columns}) FROM stdin WITH (FORMAT csv, DELIMITER '|', NULL '{null}');
+    """.format(
+        table_name=table_name, null=PG_NULL,
+        columns=','.join(c.database for c in dataframe_columns_info.columns)).strip()
+
+    data = _rows(dataframe, dataframe_columns_info)
+
+    context.upload(query, data)
+
+
+def _rows(df, dataframe_columns_info):
+    for index, _ in df.iterrows():
+        row_data = []
+        for c in dataframe_columns_info.columns:
+            col = c.dataframe
+            if col not in df.columns:
+                if df.index.name and col == df.index.name:
+                    val = index
+                else:  # we could have filtered columns in the df. See DataframeColumnsInfo
+                    continue
+            else:
+                val = df.at[index, col]
+
+            if dataframe_columns_info.geom_column and col == dataframe_columns_info.geom_column:
+                geom = decode_geometry(val, dataframe_columns_info.enc_type)
+                if geom:
+                    val = 'SRID=4326;{}'.format(geom.wkt)
+                else:
+                    val = ''
+
+            row_data.append(encode_row(val))
+
+        csv_row = b'|'.join(row_data)
+        csv_row += b'\n'
+
+        yield csv_row
