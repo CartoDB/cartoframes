@@ -90,3 +90,20 @@ def has_table(table_name, credentials=None, schema=None):
     manager = ContextManager(credentials)
 
     return manager.has_table(table_name, schema)
+
+
+def delete_table(table_name, credentials=None):
+    """
+    Delete the table from the CARTO account.
+
+    Args:
+        table_name (str): name of the table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+    """
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    manager = ContextManager(credentials)
+
+    return manager.delete_table(table_name)

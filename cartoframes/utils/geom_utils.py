@@ -4,12 +4,10 @@ import geojson
 import geopandas
 import binascii as ba
 
-from copy import deepcopy
 from shapely import wkb, wkt, geometry, geos
 
 from carto.exceptions import CartoException
 
-from ..lib import context
 
 INDEX_COL_NAMES = [
     'cartodb_id'
@@ -300,10 +298,10 @@ def setting_value_exception(prop, value):
                            "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
 
 
-def get_context_with_public_creds(credentials):
-    public_creds = deepcopy(credentials)
-    public_creds.api_key = 'default_public'
-    return context.create_context(public_creds)
+# def get_context_with_public_creds(credentials):
+#     public_creds = deepcopy(credentials)
+#     public_creds.api_key = 'default_public'
+#     return context.create_context(public_creds)
 
 
 def save_index_as_column(df):

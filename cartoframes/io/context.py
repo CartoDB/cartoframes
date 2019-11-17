@@ -55,7 +55,7 @@ class ContextManager(object):
         schema = self.get_schema()
         table_name = self._normalize_table_name(table_name)
 
-        if if_exists == 'replace' or not self.has_table(table_name):
+        if if_exists == 'replace' or not self.has_table(table_name, schema):
             print('Debug: creating table')
             self._create_table(table_name, dataframe_columns_info.columns, schema)
         elif if_exists == 'fail':
@@ -68,7 +68,7 @@ class ContextManager(object):
 
         return self._copy_from(cdf, table_name, dataframe_columns_info)
 
-    def has_table(self, table_name, schema):
+    def has_table(self, table_name, schema=None):
         schema = schema or self.get_schema()
         query = compute_query_from_table(table_name, schema)
         try:
@@ -76,6 +76,14 @@ class ContextManager(object):
             return True
         except Exception:
             return False
+
+    def delete_table(self, table_name):
+        query = _drop_table_query(table_name)
+        output = self.execute_query(query)
+        if ('does not exist' in output['notices'][0]):
+            print('Debug: table "{}" does not exist'.format(table_name))
+        else:
+            print('Debug: table "{}" removed'.format(table_name))
 
     def get_schema(self):
         """Get user schema from current credentials"""

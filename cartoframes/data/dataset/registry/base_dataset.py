@@ -5,7 +5,6 @@ from abc import ABCMeta, abstractmethod
 import pandas as pd
 from carto.exceptions import CartoException, CartoRateLimitException
 
-from ....lib import context
 from ....utils.utils import debug_print, get_query_geom_type, PG_NULL
 from ....utils.columns import Column, obtain_index_col, obtain_converters, date_columns_names, normalize_name
 from ....utils.geom_utils import compute_query, get_context_with_public_creds
@@ -26,7 +25,7 @@ class BaseDataset():
     def __init__(self, credentials=None):
         self._verbose = 0
         self._credentials = credentials
-        self._context = self._create_context()
+        self._context = None
         self._df = None
         self._table_name = None
         self._schema = None
@@ -134,11 +133,6 @@ class BaseDataset():
 
     def get_table_names(self):
         return [self._table_name]
-
-    def _create_context(self):
-        if self._credentials:
-            return context.create_context(self._credentials)
-        return None
 
     def _cartodbfy_query(self):
         return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
