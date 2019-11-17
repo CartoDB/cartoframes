@@ -82,6 +82,11 @@ class Source(object):
 
     def get_geom_type(self):
         return self.cdf.geom_type() or 'point'
+        # if not self._df.empty and 'geometry' in self._df and len(self._df.geometry) > 0:
+        #     geometry = _first_value(self._df.geometry)
+        #     if geometry and geometry.geom_type:
+        #         return map_geom_type(geometry.geom_type)
+        # return None
 
     def get_credentials(self):
         credentials = self.cdf._strategy.credentials

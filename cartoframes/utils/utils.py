@@ -213,21 +213,6 @@ def debug_print(verbose=0, **kwargs):
         print('{key}: {value}'.format(key=key, value=str_value))
 
 
-def get_query_geom_type(context, query):
-    """Fetch geom type of a remote table"""
-    distict_query = '''
-        SELECT distinct ST_GeometryType(the_geom) AS geom_type
-        FROM ({}) q
-        LIMIT 5
-    '''.format(query)
-    response = context.execute_query(distict_query, do_post=False)
-    if response and response.get('rows') and len(response.get('rows')) > 0:
-        st_geom_type = response.get('rows')[0].get('geom_type')
-        if st_geom_type:
-            return map_geom_type(st_geom_type[3:])
-    return None
-
-
 def get_query_bounds(context, query):
     extent_query = '''
         SELECT ARRAY[

@@ -9,7 +9,7 @@ from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from ..auth.defaults import get_default_credentials
 
-from ..utils.utils import is_sql_query, check_credentials, encode_row, PG_NULL
+from ..utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
 from ..utils.geom_utils import compute_query_from_table, decode_geometry
 from ..utils.columns import Column, DataframeColumnsInfo, obtain_index_col, obtain_converters, \
                             date_columns_names, normalize_name
@@ -90,6 +90,21 @@ class ContextManager(object):
         query = 'SELECT current_schema()'
         result = self.execute_query(query, do_post=False)
         return result['rows'][0]['current_schema']
+
+    def get_geom_type(self, source):
+        """Fetch geom type of a remote table or query"""
+        query = self._compute_query(source)
+        distict_query = '''
+            SELECT distinct ST_GeometryType(the_geom) AS geom_type
+            FROM ({}) q
+            LIMIT 5
+        '''.format(query)
+        response = self.execute_query(distict_query, do_post=False)
+        if response and response.get('rows') and len(response.get('rows')) > 0:
+            st_geom_type = response.get('rows')[0].get('geom_type')
+            if st_geom_type:
+                return map_geom_type(st_geom_type[3:])
+        return None
 
     def _create_table(self, table_name, columns, schema):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(

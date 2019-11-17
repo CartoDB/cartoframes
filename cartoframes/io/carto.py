@@ -107,3 +107,19 @@ def delete_table(table_name, credentials=None):
     manager = ContextManager(credentials)
 
     return manager.delete_table(table_name)
+
+
+def update_table(table_name, credential=None, privacy=None, new_table_name=None):
+    """
+    Update the table information in the CARTO account.
+    """
+    # Update new_table_name | privady
+    pass
+
+
+def describe_table(table_name, credential=None):
+    """
+    Describe the table in the CARTO account.
+    """
+    # Return num_rows, privacy, geom type
+    pass
