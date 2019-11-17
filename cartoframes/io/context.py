@@ -4,7 +4,7 @@ import pandas as pd
 from warnings import warn
 
 from carto.auth import APIKeyAuthClient
-from carto.exceptions import CartoRateLimitException
+from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
 from ..auth.defaults import get_default_credentials
@@ -45,7 +45,6 @@ class ContextManager(object):
 
     def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES, keep_the_geom_webmercator=False):
         query = self._compute_query(source, schema)
-        self._check_exists(query)
         columns = self._get_columns(query)
         copy_query = self._get_copy_query(query, columns, limit, keep_the_geom_webmercator)
         return self._copy_to(copy_query, columns, retry_times)
@@ -71,11 +70,7 @@ class ContextManager(object):
     def has_table(self, table_name, schema=None):
         schema = schema or self.get_schema()
         query = compute_query_from_table(table_name, schema)
-        try:
-            self._check_exists(query)
-            return True
-        except Exception:
-            return False
+        return self._check_exists(query)
 
     def delete_table(self, table_name):
         query = _drop_table_query(table_name)
@@ -122,11 +117,12 @@ class ContextManager(object):
         return compute_query_from_table(source, schema)
 
     def _check_exists(self, query):
-        exists_query = 'SELECT EXISTS ({})'.format(query)
+        exists_query = 'EXPLAIN {}'.format(query)
         try:
             self.execute_query(exists_query, do_post=False)
-        except Exception as e:
-            raise ValueError(e)
+            return True
+        except CartoException:
+            return False
 
     def _get_columns(self, query):
         query = 'SELECT * FROM ({}) _q LIMIT 0'.format(query)
