@@ -166,15 +166,6 @@ class Dataset(object):
         """Get column names from a dataset"""
         return self._strategy.get_column_names(exclude)
 
-    def get_table_names(self):
-        """Get table names used by Dataset instance"""
-        if self.is_local():
-            raise CartoException('Your data is not synchronized with CARTO. If you want to upload it to CARTO, '
-                                 'you should use: `Dataset.upload(table_name="new_table")` '
-                                 'Then, if you want to work with the remote data, use `Dataset("new_table")`')
-
-        return self._strategy.get_table_names()
-
     def get_num_rows(self):
         """Get the number of rows in the dataset"""
         return self._strategy.get_num_rows()

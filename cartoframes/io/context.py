@@ -101,6 +101,23 @@ class ContextManager(object):
                 return map_geom_type(st_geom_type[3:])
         return None
 
+    def get_column_names(self, source, schema=None, exclude=None):
+        schema = schema or self.get_schema()
+        query = self._compute_query(source, schema)
+        columns = [c.name for c in self._get_columns(query)]
+
+        if exclude and isinstance(exclude, list):
+            columns = list(set(columns) - set(exclude))
+
+        return columns
+
+    def get_num_rows(self, source, schema=None):
+        """Get the number of rows in the query"""
+        schema = schema or self.get_schema()
+        query = self._compute_query(source, schema)
+        result = self.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=query))
+        return result.get('rows')[0].get('count')
+
     def _create_table(self, table_name, columns, schema):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=_drop_table_query(table_name),
@@ -241,3 +258,19 @@ def _rows(df, dataframe_columns_info):
         csv_row += b'\n'
 
         yield csv_row
+
+
+#     def _rename_index_for_upload(self):
+#         if self._df.index.name != 'cartodb_id':
+#             if 'cartodb_id' not in self._df:
+#                 if _is_valid_index_for_cartodb_id(self._df.index):
+#                     # rename a integer unnamed index to cartodb_id
+#                     self._df.index.rename('cartodb_id', inplace=True)
+#             else:
+#                 if self._df.index.name is None:
+#                     # replace an unnamed index by a cartodb_id column
+#                     self._df.set_index('cartodb_id')
+
+
+# def _is_valid_index_for_cartodb_id(index):
+#     return index.name is None and index.nlevels == 1 and index.dtype == 'int' and index.is_unique

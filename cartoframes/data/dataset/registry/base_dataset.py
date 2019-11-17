@@ -34,8 +34,5 @@ class BaseDataset():
         except CartoException:
             return False
 
-    def get_table_names(self):
-        return [self._table_name]
-
     def _get_dataset_info(self, table_name=None):
         return DatasetInfo(self._context, table_name or self._table_name)
