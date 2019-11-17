@@ -7,6 +7,8 @@ from carto.auth import APIKeyAuthClient
 from carto.exceptions import CartoException, CartoRateLimitException
 from carto.sql import SQLClient, BatchSQLClient, CopySQLClient
 
+from .dataset_info import DatasetInfo
+
 from ..auth.defaults import get_default_credentials
 
 from ..utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
@@ -25,7 +27,7 @@ class ContextManager(object):
         credentials = credentials or get_default_credentials()
         check_credentials(credentials)
 
-        auth_client = APIKeyAuthClient(
+        self._auth_client = APIKeyAuthClient(
             base_url=credentials.base_url,
             api_key=credentials.api_key,
             session=credentials.session,
@@ -33,9 +35,9 @@ class ContextManager(object):
             user_agent='cartoframes_{}'.format(__version__)
         )
 
-        self.sql_client = SQLClient(auth_client)
-        self.copy_client = CopySQLClient(auth_client)
-        self.batch_sql_client = BatchSQLClient(auth_client)
+        self.sql_client = SQLClient(self._auth_client)
+        self.copy_client = CopySQLClient(self._auth_client)
+        self.batch_sql_client = BatchSQLClient(self._auth_client)
 
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query.strip(), parse_json, do_post, format, **request_args)
@@ -79,6 +81,14 @@ class ContextManager(object):
             print('Debug: table "{}" does not exist'.format(table_name))
         else:
             print('Debug: table "{}" removed'.format(table_name))
+
+    def update_table(self, table_name, privacy=None, new_table_name=None):
+        dataset_info = DatasetInfo(self._auth_client, table_name)
+        dataset_info.update(privacy, new_table_name)
+
+    def get_privacy(self, table_name):
+        dataset_info = DatasetInfo(self._auth_client, table_name)
+        return dataset_info.privacy
 
     def get_schema(self):
         """Get user schema from current credentials"""
@@ -125,7 +135,7 @@ class ContextManager(object):
             cartodbfy=_cartodbfy_query(table_name, schema))
         self.execute_long_running_query(query)
 
-    def _compute_query(self, source, schema):
+    def _compute_query(self, source, schema=None):
         if is_sql_query(source):
             print('Debug: SQL query detected')
             return source

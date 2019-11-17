@@ -109,17 +109,44 @@ def delete_table(table_name, credentials=None):
     return manager.delete_table(table_name)
 
 
-def update_table(table_name, credential=None, privacy=None, new_table_name=None):
-    """
-    Update the table information in the CARTO account.
-    """
-    # Update new_table_name | privady
-    pass
-
-
-def describe_table(table_name, credential=None):
+def describe_table(table_name, credentials=None):
     """
     Describe the table in the CARTO account.
+
+    Args:
+        table_name (str): name of the table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
     """
-    # Return num_rows, privacy, geom type
-    pass
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    manager = ContextManager(credentials)
+
+    return {
+        'privacy': manager.get_privacy(table_name),
+        'num_rows': manager.get_num_rows(table_name),
+        'geom_type': manager.get_geom_type(table_name)
+    }
+
+
+def update_table(table_name, credentials=None, privacy=None, new_table_name=None):
+    """
+    Update the table information in the CARTO account.
+
+    Args:
+        table_name (str): name of the table.
+        credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+            instance of Credentials (username, api_key, etc).
+        privacy (str, optional): privacy of the table: 'PRIVATE', 'PUBLIC', 'LINK'.
+        new_table_name(str, optional): new name for the table.
+    """
+    if not isinstance(table_name, str):
+        raise ValueError('Wrong table name. You should provide a valid table name.')
+
+    valid_privacy_values = ['PRIVATE', 'PUBLIC', 'LINK']
+    if privacy not in valid_privacy_values:
+        raise ValueError('Wrong privacy. Valid names are {}'.format(', '.join(valid_privacy_values)))
+
+    manager = ContextManager(credentials)
+    manager.update_table(table_name, privacy, new_table_name)
