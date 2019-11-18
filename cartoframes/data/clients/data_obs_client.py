@@ -2,17 +2,16 @@
 
 from __future__ import absolute_import
 
-import collections
 import json
-from warnings import warn
-
+import collections
 import pandas as pd
+
+from warnings import warn
 from carto.exceptions import CartoException
 
-from ...auth import get_default_credentials
-from ...lib import context
+from ...io.context import ContextManager
+from ...io.carto import read_carto
 from ...utils import utils
-from ..dataset.dataset import Dataset
 
 
 class DataObsClient(object):
@@ -21,10 +20,10 @@ class DataObsClient(object):
     <https://carto.com/developers/data-observatory/>`__.
 
     This class provides the following methods to interact with Data Observatory:
-        - boundary: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with
+        - boundary: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with
             the geographic boundaries (geometries) or their metadata.
         - discovery: returns a pandas.DataFrame with the measures found.
-        - augment: returns a :py:class:`Dataset <cartoframes.data.Dataset>` with the augmented data.
+        - augment: returns a :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the augmented data.
 
     Args:
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`):
@@ -34,8 +33,8 @@ class DataObsClient(object):
 
     def __init__(self, credentials=None):
         self._verbose = 0
-        self._credentials = credentials or get_default_credentials()
-        self._context = context.create_context(self._credentials)
+        self._credentials = credentials
+        self._manager = ContextManager(credentials)
 
     def boundaries(self, boundary=None, region=None, decode_geom=False,
                    timespan=None, include_nonclipped=False):
@@ -85,7 +84,7 @@ class DataObsClient(object):
                 credentials = Credentials('user name', 'api key')
                 # Note: default credentials will be supported in a future release
                 do = DataObsClient(credentials)
-                # will return Dataset with columns `the_geom` and `geom_ref`
+                # will return CartoDataFrame with columns `the_geom` and `geom_ref`
                 tracts = do.boundaries(
                     boundary='us.census.tiger.census_tract',
                     region=[-112.096642,43.429932,-111.974213,43.553539])
@@ -96,12 +95,12 @@ class DataObsClient(object):
                     'idaho_falls_tracts',
                     keywords='median income',
                     boundaries='us.census.tiger.census_tract')
-                # get median income data and original table as new Dataset
+                # get median income data and original table as new CartoDataFrame
                 idaho_falls_income = do.augment(
                     'idaho_falls_tracts',
                     median_income_meta,
                     how='geom_refs')
-                # overwrite existing table with newly-enriched Dataset
+                # overwrite existing table with newly-enriched CartoDataFrame
                 idaho_falls_income.upload('idaho_falls_tracts', if_exists='replace')
 
         Args:
@@ -141,11 +140,11 @@ class DataObsClient(object):
                 US Census Tiger.
 
         Returns:
-            :py:class:`Dataset <cartoframes.data.Dataset>`:
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
                 If `boundary` is specified, then all available
                 boundaries and accompanying `geom_refs` in `region` (or the world
                 if `region` is ``None`` or not specified) are returned. If
-                `boundary` is not specified, then a Dataset of all available
+                `boundary` is not specified, then a CartoDataFrame of all available
                 boundaries in `region` (or the world if `region` is ``None``).
         """
         # TODO: create a function out of this?
@@ -323,7 +322,7 @@ class DataObsClient(object):
                 catalog <http://cartodb.github.io/bigmetadata/>`__.
             include_quantiles (bool, optional):
                 Include quantiles calculations which are a calculation
-                of how a measure compares to all measures in the full dataset.
+                of how a measure compares to all measures in the full CartoDataFrame.
                 Defaults to ``False``. If ``True``, quantiles columns will be returned
                 for each column which has it pre-calculated.
 
@@ -347,7 +346,7 @@ class DataObsClient(object):
             except ValueError:
                 # TODO: make this work for general queries
                 # see if it's a table
-                self._context.execute_query(
+                self._manager.execute_query(
                     'EXPLAIN SELECT * FROM {}'.format(region))
                 boundary = (
                     'SELECT ST_SetSRID(ST_Extent(the_geom), 4326) AS env, '
@@ -541,8 +540,8 @@ class DataObsClient(object):
                 metadata.
 
         Returns:
-            :py:class:`Dataset <cartoframes.data.Dataset>`:
-                A Dataset representation of `table_name` which
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`:
+                A CartoDataFrame representation of `table_name` which
                 has new columns for each measure in `metadata`.
 
         Raises:
@@ -609,8 +608,7 @@ class DataObsClient(object):
                              '`pandas.concat`')
 
         # get column names except the_geom_webmercator
-        dataset = Dataset(table_name, credentials=self._credentials)
-        table_columns = dataset.get_column_names(exclude=['the_geom_webmercator'])
+        table_columns = self._manager.get_column_names(table_name, exclude=['the_geom_webmercator'])
 
         names = {}
         for suggested in _meta['suggested_name']:
@@ -657,17 +655,16 @@ class DataObsClient(object):
 
         return self._fetch(query, decode_geom=False, table_name=persist_as)
 
-    def _fetch(self, query, decode_geom=False, table_name=None):
-        dataset = Dataset(query, credentials=self._credentials)
-        dataset.download(decode_geom=decode_geom)
+    def _fetch(self, query, table_name=None):
+        cdf = read_carto(query, self._credentials)
         if table_name:
-            dataset.upload(table_name=table_name)
-        return dataset
+            cdf.to_carto(table_name, self._credentials)
+        return cdf
 
     def _geom_type(self, table):
         """gets geometry type(s) of specified layer"""
         query = 'SELECT * FROM "{table}"'.format(table=table)
-        return utils.get_query_geom_type(self._context, query)
+        return self._manager.get_geom_type(query)
 
 
 # Country names are pegged to the following query:
