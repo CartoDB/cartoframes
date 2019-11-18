@@ -379,7 +379,7 @@ def extract_viz_columns(viz):
     viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
     if viz_columns is not None:
         columns += viz_columns
-    return columns
+    return list(set(columns))
 
 
 def remove_comments(text):

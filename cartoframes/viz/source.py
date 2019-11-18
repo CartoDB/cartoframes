@@ -88,7 +88,7 @@ class Source(object):
         elif isinstance(source, pandas.DataFrame):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
-            self.cdf = CartoDataFrame(source, copy=True)
+            self.cdf = CartoDataFrame(source, copy=True).convert()
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
