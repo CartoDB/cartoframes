@@ -1,9 +1,7 @@
 from __future__ import absolute_import
 
 import pandas
-import geopandas
 
-from ..data import CartoDataFrame
 from ..utils.utils import merge_dicts
 from .legend import Legend
 from .legend_list import LegendList
@@ -168,7 +166,7 @@ class Layer(object):
 
 def _set_source(source, credentials):
     """Set a Source class from the input"""
-    if isinstance(source, (str, list, dict, CartoDataFrame, pandas.DataFrame, geopandas.GeoDataFrame)):
+    if isinstance(source, (str, pandas.DataFrame)):
         return Source(source, credentials)
     elif isinstance(source, Source):
         return source

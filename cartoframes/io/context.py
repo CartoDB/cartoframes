@@ -20,6 +20,8 @@ from .. import __version__
 
 DEFAULT_RETRY_TIMES = 3
 
+# TODO: refactor
+
 
 class ContextManager(object):
 
@@ -27,14 +29,7 @@ class ContextManager(object):
         credentials = credentials or get_default_credentials()
         check_credentials(credentials)
 
-        self._auth_client = APIKeyAuthClient(
-            base_url=credentials.base_url,
-            api_key=credentials.api_key,
-            session=credentials.session,
-            client_id='cartoframes_{}'.format(__version__),
-            user_agent='cartoframes_{}'.format(__version__)
-        )
-
+        self._auth_client = _create_auth_client(credentials)
         self.sql_client = SQLClient(self._auth_client)
         self.copy_client = CopySQLClient(self._auth_client)
         self.batch_sql_client = BatchSQLClient(self._auth_client)
@@ -46,7 +41,7 @@ class ContextManager(object):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
     def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES, keep_the_geom_webmercator=False):
-        query = self._compute_query(source, schema)
+        query = self.compute_query(source, schema)
         columns = self._get_columns(query)
         copy_query = self._get_copy_query(query, columns, limit, keep_the_geom_webmercator)
         return self._copy_to(copy_query, columns, retry_times)
@@ -70,8 +65,7 @@ class ContextManager(object):
         return self._copy_from(cdf, table_name, dataframe_columns_info)
 
     def has_table(self, table_name, schema=None):
-        schema = schema or self.get_schema()
-        query = compute_query_from_table(table_name, schema)
+        query = self.compute_query(table_name, schema)
         return self._check_exists(query)
 
     def delete_table(self, table_name):
@@ -96,9 +90,8 @@ class ContextManager(object):
         result = self.execute_query(query, do_post=False)
         return result['rows'][0]['current_schema']
 
-    def get_geom_type(self, source):
+    def get_geom_type(self, query):
         """Fetch geom type of a remote table or query"""
-        query = self._compute_query(source)
         distict_query = '''
             SELECT distinct ST_GeometryType(the_geom) AS geom_type
             FROM ({}) q
@@ -111,22 +104,34 @@ class ContextManager(object):
                 return map_geom_type(st_geom_type[3:])
         return None
 
+    def get_num_rows(self, query):
+        """Get the number of rows in the query"""
+        result = self.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=query))
+        return result.get('rows')[0].get('count')
+
+    def get_bounds(self, query):
+        extent_query = '''
+            SELECT ARRAY[
+                ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
+                ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
+            ] bounds FROM (
+                SELECT ST_Extent(the_geom) geom_env
+                FROM ({}) q
+            ) q;
+        '''.format(query)
+        response = self.execute_query(extent_query, do_post=False)
+        if response and response.get('rows') and len(response.get('rows')) > 0:
+            return response.get('rows')[0].get('bounds')
+        return None
+
     def get_column_names(self, source, schema=None, exclude=None):
-        schema = schema or self.get_schema()
-        query = self._compute_query(source, schema)
+        query = self.compute_query(source, schema)
         columns = [c.name for c in self._get_columns(query)]
 
         if exclude and isinstance(exclude, list):
             columns = list(set(columns) - set(exclude))
 
         return columns
-
-    def get_num_rows(self, source, schema=None):
-        """Get the number of rows in the query"""
-        schema = schema or self.get_schema()
-        query = self._compute_query(source, schema)
-        result = self.execute_query("SELECT COUNT(*) FROM ({query}) _query".format(query=query))
-        return result.get('rows')[0].get('count')
 
     def _create_table(self, table_name, columns, schema):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
@@ -135,7 +140,7 @@ class ContextManager(object):
             cartodbfy=_cartodbfy_query(table_name, schema))
         self.execute_long_running_query(query)
 
-    def _compute_query(self, source, schema=None):
+    def compute_query(self, source, schema=None):
         if is_sql_query(source):
             print('Debug: SQL query detected')
             return source
@@ -240,6 +245,16 @@ def _create_table_query(table_name, columns):
 def _cartodbfy_query(table_name, schema):
     return "SELECT CDB_CartodbfyTable('{schema}', '{table_name}')" \
         .format(schema=schema, table_name=table_name)
+
+
+def _create_auth_client(credentials):
+    return APIKeyAuthClient(
+        base_url=credentials.base_url,
+        api_key=credentials.api_key,
+        session=credentials.session,
+        client_id='cartoframes_{}'.format(__version__),
+        user_agent='cartoframes_{}'.format(__version__)
+    )
 
 
 def _rows(df, dataframe_columns_info):

@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
-from ..data import CartoDataFrame
-from ..utils.utils import get_query_bounds, get_geodataframe_bounds, encode_geodataframe
-from ..utils.geom_utils import geodataframe_from_dataframe, reset_geodataframe
+import pandas
+
+from ..io.context import ContextManager
+from ..core.cartodataframe import CartoDataFrame
+from ..utils.utils import encode_geodataframe, get_geodataframe_bounds, get_geodataframe_geom_type
 
 
 class SourceType:
@@ -74,19 +76,18 @@ class Source(object):
             Source('table_name', credentials)
     """
 
-    def __init__(self, data, credentials=None, schema=None):
-        if isinstance(data, CartoDataFrame):
-            self.cdf = data
+    def __init__(self, source, credentials=None, schema=None):
+        if isinstance(source, str):
+            # Table, SQL query
+            self.type = SourceType.QUERY
+            self._manager = ContextManager(credentials)
+            self._query = self._manager.compute_query(source, schema)
+        elif isinstance(self._data, pandas.DataFrame):
+            # DataFrame, GeoDataFrame, CartoDataFrame
+            self.type = SourceType.GEOJSON
+            self._cdf = CartoDataFrame(source, copy=True)  # Fixme: copy
         else:
-            self.cdf = CartoDataFrame(data, credentials=credentials, schema=schema, download=False)
-
-    def get_geom_type(self):
-        return self.cdf.geom_type() or 'point'
-        # if not self._df.empty and 'geometry' in self._df and len(self._df.geometry) > 0:
-        #     geometry = _first_value(self._df.geometry)
-        #     if geometry and geometry.geom_type:
-        #         return map_geom_type(geometry.geom_type)
-        # return None
+            raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
         credentials = self.cdf._strategy.credentials
@@ -99,28 +100,17 @@ class Source(object):
                 'base_url': credentials.base_url
             }
 
+    def get_geom_type(self):
+        if self.type == SourceType.QUERY:
+            return self._manager.get_geom_type(self._query) or 'point'
+        elif self.type == SourceType.GEOJSON:
+            return get_geodataframe_geom_type(self._cdf)
+
     def compute_metadata(self, columns=None):
-        if self.cdf.is_local():
-            gdf = geodataframe_from_dataframe(self.cdf)
-            gdf = gdf[columns] if columns is not None else gdf
-            self.type = SourceType.GEOJSON
-            self.data = self._compute_geojson_data(gdf)
-            self.bounds = self._compute_geojson_bounds(gdf)
-            reset_geodataframe(self.cdf)
-        else:
-            self.type = SourceType.QUERY
-            self.data = self._compute_query_data()
-            self.bounds = self._compute_query_bounds()
-
-    def _compute_query_data(self):
-        return self.cdf.get_query()
-
-    def _compute_query_bounds(self):
-        context = self.cdf._strategy._context
-        return get_query_bounds(context, self.data)
-
-    def _compute_geojson_data(self, gdf):
-        return encode_geodataframe(gdf)
-
-    def _compute_geojson_bounds(self, gdf):
-        return get_geodataframe_bounds(gdf)
+        if self.type == SourceType.QUERY:
+            self.data = self._query
+            self.bounds = self._manager.get_bounds(self._query)
+        elif self.type == SourceType.GEOJSON:
+            self._cdf = self._cdf[columns] if columns is not None else self._cdf
+            self.data = encode_geodataframe(self._cdf)
+            self.bounds = get_geodataframe_bounds(self._cdf)

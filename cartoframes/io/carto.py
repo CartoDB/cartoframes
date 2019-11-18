@@ -109,7 +109,7 @@ def delete_table(table_name, credentials=None):
     return manager.delete_table(table_name)
 
 
-def describe_table(table_name, credentials=None):
+def describe_table(table_name, credentials=None, schema=None):
     """
     Describe the table in the CARTO account.
 
@@ -117,16 +117,19 @@ def describe_table(table_name, credentials=None):
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
+        schema (str, optional):prefix of the table. By default, it gets the
+            `current_schema()` using the credentials.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     manager = ContextManager(credentials)
+    query = manager.compute_query(table_name, schema)
 
     return {
         'privacy': manager.get_privacy(table_name),
-        'num_rows': manager.get_num_rows(table_name),
-        'geom_type': manager.get_geom_type(table_name)
+        'num_rows': manager.get_num_rows(query),
+        'geom_type': manager.get_geom_type(query)
     }
 
 

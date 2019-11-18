@@ -213,22 +213,6 @@ def debug_print(verbose=0, **kwargs):
         print('{key}: {value}'.format(key=key, value=str_value))
 
 
-def get_query_bounds(context, query):
-    extent_query = '''
-        SELECT ARRAY[
-            ARRAY[st_xmin(geom_env), st_ymin(geom_env)],
-            ARRAY[st_xmax(geom_env), st_ymax(geom_env)]
-        ] bounds FROM (
-            SELECT ST_Extent(the_geom) geom_env
-            FROM ({}) q
-        ) q;
-    '''.format(query)
-    response = context.execute_query(extent_query, do_post=False)
-    if response and response.get('rows') and len(response.get('rows')) > 0:
-        return response.get('rows')[0].get('bounds')
-    return None
-
-
 def load_geojson(input_data):
     if isinstance(input_data, str):
         # File name
@@ -266,11 +250,27 @@ def load_geojson(input_data):
     return data
 
 
-def get_geodataframe_bounds(data):
-    filtered_geometries = _filter_null_geometries(data)
+def get_geodataframe_bounds(gdf):
+    filtered_geometries = _filter_null_geometries(gdf)
     xmin, ymin, xmax, ymax = filtered_geometries.total_bounds
 
     return [[xmin, ymin], [xmax, ymax]]
+
+
+def get_geodataframe_geom_type(gdf):
+    if not gdf.empty and 'geometry' in gdf and len(gdf.geometry) > 0:
+        geometry = _first_value(gdf.geometry)
+        if geometry and geometry.geom_type:
+            return map_geom_type(geometry.geom_type)
+    return None
+
+
+# Dup
+def _first_value(series):
+    series = series.loc[~series.isnull()]  # Remove null values
+    if len(series) > 0:
+        return series.iloc[0]
+    return None
 
 
 class CustomJSONEncoder(json.JSONEncoder):
