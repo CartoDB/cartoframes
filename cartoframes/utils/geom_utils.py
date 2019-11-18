@@ -129,7 +129,7 @@ def generate_geometry(dataframe, geom_column, lnglat_columns, keep_geom, keep_ln
                 print('Debug: no geographic data found.')
 
     if RESERVED_GEO_COLUMN_NAME in dataframe:
-        dataframe._geometry_column_name = RESERVED_GEO_COLUMN_NAME
+        dataframe.set_geometry(RESERVED_GEO_COLUMN_NAME, inplace=True)
 
 
 def _get_column(df, main=None, options=[]):

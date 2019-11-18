@@ -258,7 +258,7 @@ def get_geodataframe_bounds(gdf):
 
 
 def get_geodataframe_geom_type(gdf):
-    if not gdf.empty and 'geometry' in gdf and len(gdf.geometry) > 0:
+    if not gdf.empty and hasattr(gdf, 'geometry') and len(gdf.geometry) > 0:
         geometry = _first_value(gdf.geometry)
         if geometry and geometry.geom_type:
             return map_geom_type(geometry.geom_type)

@@ -77,12 +77,14 @@ class Source(object):
     """
 
     def __init__(self, source, credentials=None, schema=None):
+        self._credentials = credentials
+
         if isinstance(source, str):
             # Table, SQL query
             self.type = SourceType.QUERY
             self._manager = ContextManager(credentials)
             self._query = self._manager.compute_query(source, schema)
-        elif isinstance(self._data, pandas.DataFrame):
+        elif isinstance(source, pandas.DataFrame):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
             self._cdf = CartoDataFrame(source, copy=True)  # Fixme: copy
@@ -90,14 +92,13 @@ class Source(object):
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
-        credentials = self.cdf._strategy.credentials
-        if credentials:
+        if self._credentials:
             return {
                 # CARTO VL requires a username but CARTOframes allows passing only the base_url.
                 # That's why 'user' is used by default if username is empty.
-                'username': credentials.username or 'user',
-                'api_key': credentials.api_key,
-                'base_url': credentials.base_url
+                'username': self._credentials.username or 'user',
+                'api_key': self._credentials.api_key,
+                'base_url': self._credentials.base_url
             }
 
     def get_geom_type(self):

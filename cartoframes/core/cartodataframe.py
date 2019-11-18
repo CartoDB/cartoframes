@@ -33,9 +33,9 @@ class CartoDataFrame(GeoDataFrame):
         gdf = GeoDataFrame.from_features(features, **kwargs)
         return cls(gdf)
 
-    def to_carto(*args, **kwargs):
+    def to_carto(self, *args, **kwargs):
         from ..io.carto import to_carto
-        return to_carto(*args, **kwargs)
+        return to_carto(self, *args, **kwargs)
 
     def visualize(self, *args, **kwargs):
         from ..viz import Map, Layer
