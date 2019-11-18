@@ -37,8 +37,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     df = manager.copy_to(source, schema, limit, retry_times, drop_the_geom_webmercator)
 
-    return CartoDataFrame(
-        df,
+    return CartoDataFrame(df).convert(
         index_column='cartodb_id',
         geom_column='the_geom',
         drop_index=drop_cartodb_id,
@@ -66,7 +65,7 @@ def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
 
     manager = ContextManager(credentials)
 
-    cdf = CartoDataFrame(dataframe, copy=True)
+    cdf = CartoDataFrame(dataframe, copy=True).convert()
 
     manager.copy_from(cdf, table_name, if_exists)
 

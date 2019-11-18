@@ -39,7 +39,7 @@ ENC_EWKT = 'ewkt'
 if sys.version_info < (3, 0):
     ENC_WKB_BHEX = ENC_WKB_HEX
 
-RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
+GEO_COLUMN_NAME = 'geometry'
 
 
 def generate_index(dataframe, index_column, drop_index):
@@ -52,25 +52,25 @@ def generate_index(dataframe, index_column, drop_index):
 
 
 def generate_geometry(dataframe, geom_column, lnglat_columns, drop_geom, drop_lnglat):
-    if RESERVED_GEO_COLUMN_NAME not in dataframe:
+    if GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
         if geom_column is not None:
-            dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
+            dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
             if drop_geom:
                 del dataframe[geom_column.name]
         else:
             lng_column = _get_column(dataframe, lnglat_columns and lnglat_columns[0], LNG_COLUMN_NAMES)
             lat_column = _get_column(dataframe, lnglat_columns and lnglat_columns[1], LAT_COLUMN_NAMES)
             if lng_column is not None and lat_column is not None:
-                dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
+                dataframe[GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
                 if drop_lnglat:
                     del dataframe[lng_column.name]
                     del dataframe[lat_column.name]
             else:
                 print('Debug: no geographic data found.')
 
-    if RESERVED_GEO_COLUMN_NAME in dataframe:
-        dataframe.set_geometry(RESERVED_GEO_COLUMN_NAME, inplace=True)
+    if GEO_COLUMN_NAME in dataframe:
+        dataframe.set_geometry(GEO_COLUMN_NAME, inplace=True)
 
 
 def _compute_geometry_from_geom(geom_column):
