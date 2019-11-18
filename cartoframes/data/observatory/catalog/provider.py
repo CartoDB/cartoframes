@@ -12,8 +12,17 @@ class Provider(CatalogEntity):
 
     @property
     def datasets(self):
+        """Get the list of datasets related to this provider.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
+
+        """
+
         return get_dataset_repo().get_all({PROVIDER_FILTER: self.id})
 
     @property
     def name(self):
+        """Name of this provider."""
+
         return self.data['name']
