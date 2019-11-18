@@ -11,8 +11,8 @@ from .dataset_info import DatasetInfo
 
 from ..auth.defaults import get_default_credentials
 
+from ..utils.geom_utils import decode_geometry
 from ..utils.utils import is_sql_query, check_credentials, encode_row, map_geom_type, PG_NULL
-from ..utils.geom_utils import compute_query_from_table, decode_geometry
 from ..utils.columns import Column, DataframeColumnsInfo, obtain_index_col, obtain_converters, \
                             date_columns_names, normalize_name
 
@@ -144,7 +144,13 @@ class ContextManager(object):
         if is_sql_query(source):
             return source
         schema = schema or self.get_schema()
-        return compute_query_from_table(source, schema)
+        return self._compute_query_from_table(source, schema)
+
+    def _compute_query_from_table(self, table_name, schema):
+        return 'SELECT * FROM "{schema}"."{table_name}"'.format(
+            schema=schema or 'public',
+            table_name=table_name
+        )
 
     def _check_exists(self, query):
         exists_query = 'EXPLAIN {}'.format(query)
@@ -283,16 +289,16 @@ def _rows(df, dataframe_columns_info):
         yield csv_row
 
 
-#     def _rename_index_for_upload(self):
-#         if self._df.index.name != 'cartodb_id':
-#             if 'cartodb_id' not in self._df:
-#                 if _is_valid_index_for_cartodb_id(self._df.index):
-#                     # rename a integer unnamed index to cartodb_id
-#                     self._df.index.rename('cartodb_id', inplace=True)
-#             else:
-#                 if self._df.index.name is None:
-#                     # replace an unnamed index by a cartodb_id column
-#                     self._df.set_index('cartodb_id')
+# def _rename_index_for_upload(self):
+#     if self._df.index.name != 'cartodb_id':
+#         if 'cartodb_id' not in self._df:
+#             if _is_valid_index_for_cartodb_id(self._df.index):
+#                 # rename a integer unnamed index to cartodb_id
+#                 self._df.index.rename('cartodb_id', inplace=True)
+#         else:
+#             if self._df.index.name is None:
+#                 # replace an unnamed index by a cartodb_id column
+#                 self._df.set_index('cartodb_id')
 
 
 # def _is_valid_index_for_cartodb_id(index):

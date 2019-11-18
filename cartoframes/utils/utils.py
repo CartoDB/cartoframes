@@ -16,6 +16,7 @@ import numpy as np
 from functools import wraps
 from warnings import catch_warnings, filterwarnings
 
+from .geom_utils import RESERVED_GEO_COLUMN_NAME
 from ..auth.credentials import Credentials
 
 try:
@@ -369,3 +370,25 @@ def encode_row(row):
         row = '"{}"'.format(row.replace('"', '""'))
 
     return '{}'.format(row).encode('utf-8')
+
+
+def extract_viz_columns(viz):
+    """Extract columns ($name) in viz"""
+    columns = [RESERVED_GEO_COLUMN_NAME]
+    viz_nocomments = remove_comments(viz)
+    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
+    if viz_columns is not None:
+        columns += viz_columns
+    return columns
+
+
+def remove_comments(text):
+    """Remove C-style comments"""
+    def replacer(match):
+        s = match.group(0)
+        return ' ' if s.startswith('/') else s
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
+    return re.sub(pattern, replacer, text).strip()

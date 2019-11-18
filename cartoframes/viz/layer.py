@@ -10,7 +10,7 @@ from .source import Source
 from .style import Style
 from .widget_list import WidgetList
 
-from ..utils.geom_utils import extract_viz_columns
+from ..utils.utils import extract_viz_columns
 
 
 class Layer(object):

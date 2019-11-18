@@ -7,7 +7,6 @@ from carto.datasets import DatasetManager
 from carto.exceptions import CartoException
 
 from ..utils.columns import normalize_name
-from ..utils.geom_utils import setting_value_exception
 
 from warnings import filterwarnings
 filterwarnings("ignore", category=FutureWarning, module="carto")
@@ -101,3 +100,8 @@ class DatasetInfo(object):
             return True
 
         return False
+
+
+def setting_value_exception(prop, value):
+    return CartoException(("Error setting {prop}. You must use the `update` method: "
+                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))

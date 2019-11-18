@@ -1,13 +1,7 @@
 import re
 import sys
-import geojson
-import geopandas
+import shapely
 import binascii as ba
-
-from shapely import wkb, wkt, geometry, geos
-
-from carto.exceptions import CartoException
-
 
 INDEX_COL_NAMES = [
     'cartodb_id'
@@ -48,59 +42,6 @@ if sys.version_info < (3, 0):
 RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
 
 
-def compute_query(dataset):
-    if dataset.table_name:
-        return 'SELECT * FROM "{schema}"."{table}"'.format(
-            schema=dataset.schema or dataset._get_schema() or 'public',
-            table=dataset.table_name
-        )
-    return ''
-
-
-def compute_query_from_table(table, schema):
-    if table:
-        return 'SELECT * FROM "{schema}"."{table}"'.format(
-            schema=schema or 'public',
-            table=table
-        )
-    return ''
-
-
-def compute_geodataframe(dataset):
-    return geodataframe_from_dataframe(dataset.dataframe)
-
-
-def reset_geodataframe(dataframe):
-    if dataframe is not None and RESERVED_GEO_COLUMN_NAME in dataframe:
-        del dataframe[RESERVED_GEO_COLUMN_NAME]
-
-
-def geodataframe_from_dataframe(dataframe):
-    if dataframe is None:
-        return None
-
-    if RESERVED_GEO_COLUMN_NAME not in dataframe:
-        geom_column = _get_column(dataframe, GEOM_COLUMN_NAMES)
-        if geom_column is not None:
-            dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
-        else:
-            lat_column = _get_column(dataframe, LAT_COLUMN_NAMES)
-            lng_column = _get_column(dataframe, LNG_COLUMN_NAMES)
-            if lat_column is not None and lng_column is not None:
-                dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_latlng(lat_column, lng_column)
-            else:
-                raise ValueError('''No geographic data found. '''
-                                 '''If a geometry exists, change the column name ({0}) or '''
-                                 '''ensure it is a DataFrame with a valid geometry. '''
-                                 '''If there are latitude/longitude columns, rename to ({1}), ({2}).'''.format(
-                                    ', '.join(GEOM_COLUMN_NAMES),
-                                    ', '.join(LAT_COLUMN_NAMES),
-                                    ', '.join(LNG_COLUMN_NAMES)
-                                 ))
-
-    return geopandas.GeoDataFrame(dataframe, geometry=RESERVED_GEO_COLUMN_NAME)
-
-
 def generate_index(dataframe, index_column, keep_index):
     index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
     if index_column is not None:
@@ -132,17 +73,6 @@ def generate_geometry(dataframe, geom_column, lnglat_columns, keep_geom, keep_ln
         dataframe.set_geometry(RESERVED_GEO_COLUMN_NAME, inplace=True)
 
 
-def _get_column(df, main=None, options=[]):
-    if main is None:
-        for name in options:
-            if name in df:
-                return df[name]
-    else:
-        if main in df:
-            return df[main]
-    return None
-
-
 def _compute_geometry_from_geom(geom_column):
     if geom_column.size > 0:
         first_geom = next(item for item in geom_column if item is not None)
@@ -152,12 +82,19 @@ def _compute_geometry_from_geom(geom_column):
         return geom_column
 
 
-def _compute_geometry_from_latlng(lat, lng):
-    return [geometry.Point(xy) for xy in zip(lng, lat)]
-
-
 def _compute_geometry_from_lnglat(lng, lat):
-    return [geometry.Point(xy) for xy in zip(lng, lat)]
+    return [shapely.geometry.Point(xy) for xy in zip(lng, lat)]
+
+
+def _get_column(df, main=None, options=[]):
+    if main is None:
+        for name in options:
+            if name in df:
+                return df[name]
+    else:
+        if main in df:
+            return df[main]
+    return None
 
 
 def _encode_decode_decorator(func):
@@ -187,7 +124,7 @@ def decode_geometry(geom, enc_type):
             ENC_EWKT: lambda: _load_ewkt(geom)
         }.get(enc_type)
         return func() if func else geom
-    return geometry.base.BaseGeometry()
+    return shapely.geometry.base.BaseGeometry()
 
 
 def detect_encoding_type(input_geom):
@@ -202,7 +139,7 @@ def detect_encoding_type(input_geom):
     - ENC_WKT: 'POINT (1234 5789)'
     - ENC_EWKT: 'SRID=4326;POINT (1234 5789)'
     """
-    if isinstance(input_geom, geometry.base.BaseGeometry):
+    if isinstance(input_geom, shapely.geometry.base.BaseGeometry):
         return ENC_SHAPELY
 
     if isinstance(input_geom, str):
@@ -234,24 +171,24 @@ def detect_encoding_type(input_geom):
 
 def _load_wkb(geom):
     """Load WKB or EWKB geometry."""
-    return wkb.loads(geom)
+    return shapely.wkb.loads(geom)
 
 
 def _load_wkb_hex(geom):
     """Load WKB_HEX or EWKB_HEX geometry."""
-    return wkb.loads(geom, hex=True)
+    return shapely.wkb.loads(geom, hex=True)
 
 
 def _load_wkb_bhex(geom):
     """Load WKB_BHEX or EWKB_BHEX geometry.
     The geom must be converted to WKB/EWKB before loading.
     """
-    return wkb.loads(ba.unhexlify(geom))
+    return shapely.wkb.loads(ba.unhexlify(geom))
 
 
 def _load_wkt(geom):
     """Load WKT geometry."""
-    return wkt.loads(geom)
+    return shapely.wkt.loads(geom)
 
 
 def _load_ewkt(egeom):
@@ -261,7 +198,7 @@ def _load_ewkt(egeom):
     srid, geom = _extract_srid(egeom)
     ogeom = _load_wkt(geom)
     if srid:
-        geos.lgeos.GEOSSetSRID(ogeom._geom, int(srid))
+        shapely.geos.lgeos.GEOSSetSRID(ogeom._geom, int(srid))
     return ogeom
 
 
@@ -278,6 +215,7 @@ def _extract_srid(egeom):
 
 
 def wkt_to_geojson(wkt_input):
+    import geojson
     shapely_geom = _load_wkt(wkt_input)
     geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
 
@@ -285,44 +223,10 @@ def wkt_to_geojson(wkt_input):
 
 
 def geojson_to_wkt(geojson_str):
+    import geojson
     geojson_geom = geojson.loads(geojson_str)
-    wkt_geometry = geometry.shape(geojson_geom)
+    wkt_geometry = shapely.geometry.shape(geojson_geom)
 
     shapely_geom = _load_wkt(wkt_geometry.wkt)
 
     return shapely_geom
-
-
-def setting_value_exception(prop, value):
-    return CartoException(("Error setting {prop}. You must use the `update` method: "
-                           "dataset_info.update({prop}='{value}')").format(prop=prop, value=value))
-
-
-def save_index_as_column(df):
-    index_name = df.index.name
-    if index_name is not None:
-        if index_name not in df.columns:
-            df.reset_index(inplace=True)
-            df.set_index(index_name, drop=False, inplace=True)
-
-
-def extract_viz_columns(viz):
-    """Extract columns ($name) in viz"""
-    columns = [RESERVED_GEO_COLUMN_NAME]
-    viz_nocomments = remove_comments(viz)
-    viz_columns = re.findall(r'\$([A-Za-z0-9_]+)', viz_nocomments)
-    if viz_columns is not None:
-        columns += viz_columns
-    return columns
-
-
-def remove_comments(text):
-    """Remove C-style comments"""
-    def replacer(match):
-        s = match.group(0)
-        return ' ' if s.startswith('/') else s
-    pattern = re.compile(
-        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-        re.DOTALL | re.MULTILINE
-    )
-    return re.sub(pattern, replacer, text).strip()
