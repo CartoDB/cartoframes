@@ -52,7 +52,7 @@ class ContextManager(object):
         table_name = self._normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
-            print('Debug: creating table')
+            print('Debug: creating table "{}"'.format(table_name))
             self._create_table(table_name, dataframe_columns_info.columns, schema)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '

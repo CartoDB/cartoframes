@@ -153,3 +153,5 @@ def update_table(table_name, credentials=None, privacy=None, new_table_name=None
 
     manager = ContextManager(credentials)
     manager.update_table(table_name, privacy, new_table_name)
+
+    print('Success! Table updated correctly')
