@@ -42,28 +42,28 @@ if sys.version_info < (3, 0):
 RESERVED_GEO_COLUMN_NAME = '__carto_geometry'
 
 
-def generate_index(dataframe, index_column, keep_index):
+def generate_index(dataframe, index_column, drop_index):
     index_column = _get_column(dataframe, index_column, INDEX_COL_NAMES)
     if index_column is not None:
         dataframe.set_index(index_column, inplace=True)
-        if not keep_index:
+        if drop_index:
             del dataframe[index_column.name]
         dataframe.index.name = None
 
 
-def generate_geometry(dataframe, geom_column, lnglat_columns, keep_geom, keep_lnglat):
+def generate_geometry(dataframe, geom_column, lnglat_columns, drop_geom, drop_lnglat):
     if RESERVED_GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
         if geom_column is not None:
             dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_geom(geom_column)
-            if not keep_geom:
+            if drop_geom:
                 del dataframe[geom_column.name]
         else:
             lng_column = _get_column(dataframe, lnglat_columns and lnglat_columns[0], LNG_COLUMN_NAMES)
             lat_column = _get_column(dataframe, lnglat_columns and lnglat_columns[1], LAT_COLUMN_NAMES)
             if lng_column is not None and lat_column is not None:
                 dataframe[RESERVED_GEO_COLUMN_NAME] = _compute_geometry_from_lnglat(lng_column, lat_column)
-                if not keep_lnglat:
+                if drop_lnglat:
                     del dataframe[lng_column.name]
                     del dataframe[lat_column.name]
             else:

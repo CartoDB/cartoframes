@@ -9,14 +9,14 @@ class CartoDataFrame(GeoDataFrame):
         index_column = kwargs.pop('index_column', None)
         geom_column = kwargs.pop('geom_column', None)
         lnglat_columns = kwargs.pop('lnglat_columns', None)
-        keep_index = kwargs.pop('keep_index', False)
-        keep_geom = kwargs.pop('keep_geom', False)
-        keep_lnglat = kwargs.pop('keep_lnglat', False)
+        drop_index = kwargs.pop('drop_index', True)
+        drop_geom = kwargs.pop('drop_geom', True)
+        drop_lnglat = kwargs.pop('drop_lnglat', True)
 
         super(CartoDataFrame, self).__init__(*args, **kwargs)
 
-        generate_index(self, index_column, keep_index)
-        generate_geometry(self, geom_column, lnglat_columns, keep_geom, keep_lnglat)
+        generate_index(self, index_column, drop_index)
+        generate_geometry(self, geom_column, lnglat_columns, drop_geom, drop_lnglat)
 
     @staticmethod
     def from_carto(*args, **kwargs):

@@ -8,7 +8,7 @@ from ..core.cartodataframe import CartoDataFrame
 
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
-               keep_cartodb_id=False, keep_the_geom=False, keep_the_geom_webmercator=False):
+               drop_cartodb_id=True, drop_the_geom=True, drop_the_geom_webmercator=True):
     """
     Read a table or a SQL query from the CARTO account.
 
@@ -22,9 +22,9 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             Number of time to retry the download in case it fails. Default is 3.
         schema (str, optional):prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
-        keep_cartodb_id (bool, optional): retrieve the "cartodb_id" column.
-        keep_the_geom (bool, optional): retrieve the "the_geom" column.
-        keep_the_goem_webmercator (bool, optional): retrieve the "the_geom_webmercator" column.
+        drop_cartodb_id (bool, optional): drop the "cartodb_id" column used as index.
+        drop_the_geom (bool, optional): drop the "the_geom" column used as geometry.
+        drop_the_goem_webmercator (bool, optional): drop the "the_geom_webmercator" column.
 
     Returns:
         :py:class:`CartoDataFrame <cartoframes.core.CartoDataFrame>`
@@ -35,14 +35,14 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
     manager = ContextManager(credentials)
 
-    df = manager.copy_to(source, schema, limit, retry_times, keep_the_geom_webmercator)
+    df = manager.copy_to(source, schema, limit, retry_times, drop_the_geom_webmercator)
 
     return CartoDataFrame(
         df,
         index_column='cartodb_id',
         geom_column='the_geom',
-        keep_index=keep_cartodb_id,
-        keep_geom=keep_the_geom
+        drop_index=drop_cartodb_id,
+        drop_geom=drop_the_geom
     )
 
 

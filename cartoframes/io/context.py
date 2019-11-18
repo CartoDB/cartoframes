@@ -40,10 +40,10 @@ class ContextManager(object):
     def execute_long_running_query(self, query):
         return self.batch_sql_client.create_and_wait_for_completion(query.strip())
 
-    def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES, keep_the_geom_webmercator=False):
+    def copy_to(self, source, schema, limit=None, retry_times=DEFAULT_RETRY_TIMES, drop_the_geom_webmercator=False):
         query = self.compute_query(source, schema)
         columns = self._get_columns(query)
-        copy_query = self._get_copy_query(query, columns, limit, keep_the_geom_webmercator)
+        copy_query = self._get_copy_query(query, columns, limit, drop_the_geom_webmercator)
         return self._copy_to(copy_query, columns, retry_times)
 
     def copy_from(self, cdf, table_name, if_exists):
@@ -189,10 +189,10 @@ class ContextManager(object):
         table_info = self.execute_query(query)
         return Column.from_sql_api_fields(table_info['fields'])
 
-    def _get_copy_query(self, query, columns, limit, keep_the_geom_webmercator):
+    def _get_copy_query(self, query, columns, limit, drop_the_geom_webmercator):
         query_columns = [
             column.name for column in columns if (column.name != 'the_geom_webmercator'
-                                                  or keep_the_geom_webmercator)]
+                                                  or not drop_the_geom_webmercator)]
 
         query = 'SELECT {columns} FROM ({query}) _q'.format(
             query=query,
