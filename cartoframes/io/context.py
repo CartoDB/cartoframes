@@ -133,6 +133,30 @@ class ContextManager(object):
 
         return columns
 
+    def is_public(self, query):
+        # Used to detect public tables in queries in the publication,
+        # because privacy only works for tables.
+        public_auth_client = _create_auth_client(self.credentials, public=True)
+        public_sql_client = SQLClient(public_auth_client)
+        exists_query = 'EXPLAIN {}'.format(query)
+        try:
+            public_sql_client.send(exists_query, do_post=False)
+            return True
+        except CartoException:
+            return False
+
+    def get_table_names(self, query):
+        # Used to detect tables in queries in the publication
+        # However, I think there is a bug because it does not
+        # distinguish between private and public tables inside a query.
+        query = 'SELECT CDB_QueryTablesText(\'{}\') as tables'.format(query)
+        result = self.execute_query(query)
+        tables = []
+        if result['total_rows'] > 0 and result['rows'][0]['tables']:
+            # Dataset_info only works with tables without schema
+            tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
+        return tables
+
     def _create_table(self, table_name, columns, schema):
         query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
             drop=_drop_table_query(table_name),
@@ -251,10 +275,10 @@ def _cartodbfy_query(table_name, schema):
         .format(schema=schema, table_name=table_name)
 
 
-def _create_auth_client(credentials):
+def _create_auth_client(credentials, public=False):
     return APIKeyAuthClient(
         base_url=credentials.base_url,
-        api_key=credentials.api_key,
+        api_key='default_public' if public else credentials.api_key,
         session=credentials.session,
         client_id='cartoframes_{}'.format(__version__),
         user_agent='cartoframes_{}'.format(__version__)

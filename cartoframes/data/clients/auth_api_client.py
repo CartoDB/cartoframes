@@ -20,12 +20,12 @@ class AuthAPIClient(object):
         credentials = credentials or get_default_credentials()
         self._api_key_manager = _get_api_key_manager(credentials)
 
-    def create_api_key(self, datasets, name, apis=['sql', 'maps'], permissions=['select']):
+    def create_api_key(self, sources, name, apis=['sql', 'maps'], permissions=['select']):
         tables = []
-        for dataset in datasets:
-            table_names = dataset.get_table_names()
+        for source in sources:
+            table_names = source.get_table_names()
             for table_name in table_names:
-                tables.append(_get_table_dict(dataset.schema, table_name, permissions))
+                tables.append(_get_table_dict(source.schema(), table_name, permissions))
 
         api_key = self._api_key_manager.create(
             name=name,
@@ -46,13 +46,3 @@ def _get_table_dict(schema, table, permissions):
 def _get_api_key_manager(credentials):
     auth_client = credentials.get_api_key_auth_client()
     return APIKeyManager(auth_client)
-
-#  def get_table_names(self):
-#     query = "SELECT CDB_QueryTablesText('{}') as tables".format(self._query)
-#     result = self._context.execute_query(query)
-#     tables = []
-#     if result['total_rows'] > 0 and result['rows'][0]['tables']:
-#         # Dataset_info only works with tables without schema
-#         tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
-
-#     return tables

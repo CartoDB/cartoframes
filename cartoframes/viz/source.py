@@ -77,42 +77,63 @@ class Source(object):
     """
 
     def __init__(self, source, credentials=None, schema=None):
-        self._credentials = credentials
+        self.credentials = None
 
         if isinstance(source, str):
             # Table, SQL query
             self.type = SourceType.QUERY
-            self._manager = ContextManager(credentials)
-            self._query = self._manager.compute_query(source, schema)
+            self.manager = ContextManager(credentials)
+            self.query = self.manager.compute_query(source, schema)
+            self.credentials = self.manager.credentials
         elif isinstance(source, pandas.DataFrame):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
-            self._cdf = CartoDataFrame(source, copy=True)
+            self.cdf = CartoDataFrame(source, copy=True)
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
-        if hasattr(self, '_manager') and self._manager.credentials:
+        if self.credentials:
             return {
                 # CARTO VL requires a username but CARTOframes allows passing only the base_url.
                 # That's why 'user' is used by default if username is empty.
-                'username': self._manager.credentials.username or 'user',
-                'api_key': self._manager.credentials.api_key,
-                'base_url': self._manager.credentials.base_url
+                'username': self.credentials.username or 'user',
+                'api_key': self.credentials.api_key,
+                'base_url': self.credentials.base_url
             }
 
     def get_geom_type(self):
         if self.type == SourceType.QUERY:
-            return self._manager.get_geom_type(self._query) or 'point'
+            return self.manager.get_geom_type(self.query) or 'point'
         elif self.type == SourceType.GEOJSON:
-            return get_geodataframe_geom_type(self._cdf)
+            return get_geodataframe_geom_type(self.cdf)
 
     def compute_metadata(self, columns=None):
         if self.type == SourceType.QUERY:
-            self.data = self._query
-            self.bounds = self._manager.get_bounds(self._query)
+            self.data = self.query
+            self.bounds = self.manager.get_bounds(self.query)
         elif self.type == SourceType.GEOJSON:
-            self._cdf = self._cdf[columns] if columns is not None else self._cdf
-            self.data = encode_geodataframe(self._cdf)
-            self.bounds = get_geodataframe_bounds(self._cdf)
-            del self._cdf
+            self.cdf = CartoDataFrame(self.cdf[columns]) if columns is not None else self.cdf
+            self.data = encode_geodataframe(self.cdf)
+            self.bounds = get_geodataframe_bounds(self.cdf)
+
+    def is_local(self):
+        return self.type == SourceType.GEOJSON
+
+    def is_public(self):
+        if self.type == SourceType.QUERY:
+            return self.manager.is_public(self.query)
+        elif self.type == SourceType.GEOJSON:
+            return True
+
+    def schema(self):
+        if self.type == SourceType.QUERY:
+            return self.manager.get_schema()
+        elif self.type == SourceType.GEOJSON:
+            return None
+
+    def get_table_names(self):
+        if self.type == SourceType.QUERY:
+            return self.manager.get_table_names(self.query)
+        elif self.type == SourceType.GEOJSON:
+            return []
