@@ -4,16 +4,6 @@
 import os
 from setuptools import setup, find_packages
 
-from cartoframes import (
-    __version__,
-    __title__,
-    __description__,
-    __url__,
-    __author__,
-    __email__,
-    __license__
-)
-
 
 def walk_subpkg(name):
     data_files = []
@@ -24,6 +14,13 @@ def walk_subpkg(name):
         for _file in files:
             data_files.append(os.path.join(sub_dir, _file))
     return data_files
+
+
+def get_version():
+    _version = {}
+    with open('cartoframes/_version.py') as fp:
+        exec(fp.read(), _version)
+    return _version['__version__']
 
 
 REQUIRES = [
@@ -58,17 +55,26 @@ PACKAGE_DATA = {
     ] + walk_subpkg('assets'),
 }
 
+
+DISTNAME = 'cartoframes'
+DESCRIPTION = 'CARTO Python package for data scientists'
+LICENSE = 'BSD'
+URL = 'https://github.com/CartoDB/cartoframes'
+AUTHOR = 'Andy Eschbacher'
+EMAIL = 'andy@carto.com'
+
+
 setup(
-    name=__title__,
-    version=__version__,
+    name=DISTNAME,
+    version=get_version(),
 
-    description=__description__,
+    description=DESCRIPTION,
     long_description=open('README.rst').read(),
-    license=__license__,
-    url=__url__,
+    license=LICENSE,
+    url=URL,
 
-    author=__author__,
-    author_email=__email__,
+    author=AUTHOR,
+    author_email=EMAIL,
 
     classifiers=[
         'Development Status :: 4 - Beta',

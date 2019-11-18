@@ -1,7 +1,15 @@
-__title__ = 'cartoframes'
-__description__ = 'CARTO Python package for data scientists'
-__version__ = '1.0b5'
-__url__ = 'https://github.com/CartoDB/cartoframes'
-__author__ = 'Andy Eschbacher'
-__email__ = 'andy@carto.com'
-__license__ = 'BSD'
+from ._version import __version__
+from .core.cartodataframe import CartoDataFrame
+from .io.carto import read_carto, to_carto, has_table, delete_table, describe_table, update_table
+
+
+__all__ = [
+    '__version__',
+    'CartoDataFrame',
+    'read_carto',
+    'to_carto',
+    'has_table',
+    'delete_table',
+    'describe_table',
+    'update_table'
+]
