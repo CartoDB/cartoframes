@@ -87,18 +87,18 @@ class Source(object):
         elif isinstance(source, pandas.DataFrame):
             # DataFrame, GeoDataFrame, CartoDataFrame
             self.type = SourceType.GEOJSON
-            self._cdf = CartoDataFrame(source, copy=True)  # Fixme: copy
+            self._cdf = CartoDataFrame(source, copy=True)
         else:
             raise ValueError('Wrong source input. Valid values are str and DataFrame.')
 
     def get_credentials(self):
-        if self._credentials:
+        if hasattr(self, '_manager') and self._manager.credentials:
             return {
                 # CARTO VL requires a username but CARTOframes allows passing only the base_url.
                 # That's why 'user' is used by default if username is empty.
-                'username': self._credentials.username or 'user',
-                'api_key': self._credentials.api_key,
-                'base_url': self._credentials.base_url
+                'username': self._manager.credentials.username or 'user',
+                'api_key': self._manager.credentials.api_key,
+                'base_url': self._manager.credentials.base_url
             }
 
     def get_geom_type(self):
@@ -115,3 +115,4 @@ class Source(object):
             self._cdf = self._cdf[columns] if columns is not None else self._cdf
             self.data = encode_geodataframe(self._cdf)
             self.bounds = get_geodataframe_bounds(self._cdf)
+            del self._cdf

@@ -26,13 +26,13 @@ DEFAULT_RETRY_TIMES = 3
 class ContextManager(object):
 
     def __init__(self, credentials):
-        credentials = credentials or get_default_credentials()
-        check_credentials(credentials)
+        self.credentials = credentials or get_default_credentials()
+        check_credentials(self.credentials)
 
-        self._auth_client = _create_auth_client(credentials)
-        self.sql_client = SQLClient(self._auth_client)
-        self.copy_client = CopySQLClient(self._auth_client)
-        self.batch_sql_client = BatchSQLClient(self._auth_client)
+        self.auth_client = _create_auth_client(self.credentials)
+        self.sql_client = SQLClient(self.auth_client)
+        self.copy_client = CopySQLClient(self.auth_client)
+        self.batch_sql_client = BatchSQLClient(self.auth_client)
 
     def execute_query(self, query, parse_json=True, do_post=True, format=None, **request_args):
         return self.sql_client.send(query.strip(), parse_json, do_post, format, **request_args)
@@ -77,11 +77,11 @@ class ContextManager(object):
             print('Debug: table "{}" removed'.format(table_name))
 
     def update_table(self, table_name, privacy=None, new_table_name=None):
-        dataset_info = DatasetInfo(self._auth_client, table_name)
+        dataset_info = DatasetInfo(self.auth_client, table_name)
         dataset_info.update(privacy, new_table_name)
 
     def get_privacy(self, table_name):
-        dataset_info = DatasetInfo(self._auth_client, table_name)
+        dataset_info = DatasetInfo(self.auth_client, table_name)
         return dataset_info.privacy
 
     def get_schema(self):
@@ -142,9 +142,7 @@ class ContextManager(object):
 
     def compute_query(self, source, schema=None):
         if is_sql_query(source):
-            print('Debug: SQL query detected')
             return source
-        print('Debug: table name detected')
         schema = schema or self.get_schema()
         return compute_query_from_table(source, schema)
 
