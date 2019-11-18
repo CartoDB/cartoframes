@@ -20,70 +20,129 @@ DATASET_TYPE = 'dataset'
 
 
 class CatalogDataset(CatalogEntity):
+    """A CatalogDataset represents the metadata of a particular dataset in the Data Observatory platform."""
+
     entity_repo = get_dataset_repo()
 
     @property
     def variables(self):
+        """Get the list of variables that correspond to this dataset.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
+
+        """
+
         return get_variable_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def variables_groups(self):
+        """Get the list of variables groups related to this dataset.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of VariableGroup instances.
+
+        """
         return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def name(self):
+        """Name of this dataset."""
+
         return self.data['name']
 
     @property
     def description(self):
+        """Description of this dataset."""
+
         return self.data['description']
 
     @property
     def provider(self):
+        """Id of the Provider of this dataset."""
+
         return self.data['provider_id']
 
     @property
+    def provider_name(self):
+        return self.data['provider_name']
+
+    @property
     def category(self):
+        """Id of the Category assigned to this dataset."""
+
         return self.data['category_id']
 
     @property
+    def category_name(self):
+        return self.data['category_name']
+
+    @property
     def data_source(self):
+        """Id of the data source of this dataset."""
+
         return self.data['data_source_id']
 
     @property
     def country(self):
+        """Code (ISO 3166-1 alpha-3) of the country of this dataset."""
+
         return self.data['country_id']
 
     @property
     def language(self):
+        """Code (ISO 639-3) of the language that corresponds to the data of this dataset. """
+
         return self.data['lang']
 
     @property
     def geography(self):
+        """Id of the Geography associated to this dataset."""
+
         return self.data['geography_id']
 
     @property
+    def geography_name(self):
+        return self.data['geography_name']
+
+    @property
+    def geography_description(self):
+        return self.data['geography_description']
+
+    @property
     def temporal_aggregation(self):
+        """Time amount in which data is aggregated in this dataset."""
+
         return self.data['temporal_aggregation']
 
     @property
     def time_coverage(self):
+        """Time range that covers the data of this dataset."""
+
         return self.data['time_coverage']
 
     @property
     def update_frequency(self):
+        """Frequency in which the dataset is updated."""
+
         return self.data['update_frequency']
 
     @property
     def version(self):
+        """Version info of this dataset."""
+
         return self.data['version']
 
     @property
     def is_public_data(self):
+        """True if the content of this dataset can be accessed with public credentials. False otherwise."""
+
         return self.data['is_public_data']
 
     @property
     def summary(self):
+        """JSON object with extra metadata that summarizes different properties of the dataset content."""
+
         return self.data['summary_json']
 
     def head(self):
@@ -110,6 +169,23 @@ class CatalogDataset(CatalogEntity):
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
+        """Get all the CatalogDataset instances that comply with the indicated filters (or all of them if no filters
+        are passed. If credentials are given, only the datasets granted for those credentials are returned.
+
+        Args:
+            credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
+                credentials of CARTO user account. If provided, only datasets granted for those credentials are
+                returned.
+
+            filters (dict, optional):
+                Dict containing pairs of dataset properties and its value to be used as filters to query the available
+                datasets. If none is provided, no filters will be applied to the query.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
+
+        """
+
         return cls.entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):

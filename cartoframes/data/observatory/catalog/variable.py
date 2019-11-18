@@ -16,14 +16,25 @@ class Variable(CatalogEntity):
 
     @property
     def datasets(self):
+        """Get the list of datasets related to this variable.
+
+        Returns:
+            :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Dataset instances.
+
+        """
+
         return get_dataset_repo().get_all({VARIABLE_FILTER: self.id})
 
     @property
     def name(self):
+        """Name of this variable."""
+
         return self.data['name']
 
     @property
     def description(self):
+        """Description of this variable."""
+
         return self.data['description']
 
     @property
@@ -36,6 +47,8 @@ class Variable(CatalogEntity):
 
     @property
     def dataset(self):
+        """ID of the dataset to which this variable belongs."""
+
         return self.data['dataset_id']
 
     @property
@@ -44,14 +57,20 @@ class Variable(CatalogEntity):
 
     @property
     def variable_group(self):
+        """If any, ID of the variable group to which this variable belongs."""
+
         return self.data['variable_group_id']
 
     @property
     def starred(self):
+        """Boolean indicating whether this variable is a starred one or not.."""
+
         return self.data['starred']
 
     @property
     def summary(self):
+        """JSON object with extra metadata that summarizes different properties of this variable."""
+
         return self.data['summary_json']
 
     @property
