@@ -51,7 +51,7 @@ def generate_index(dataframe, index_column, drop_index):
         dataframe.index.name = None
 
 
-def generate_geometry(dataframe, geom_column, lnglat_columns, drop_geom, drop_lnglat):
+def generate_geometry(dataframe, geom_column=None, lnglat_columns=None, drop_geom=True, drop_lnglat=True):
     if GEO_COLUMN_NAME not in dataframe:
         geom_column = _get_column(dataframe, geom_column, GEOM_COLUMN_NAMES)
         if geom_column is not None:

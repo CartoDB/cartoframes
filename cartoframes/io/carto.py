@@ -27,7 +27,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
         drop_the_goem_webmercator (bool, optional): drop the "the_geom_webmercator" column.
 
     Returns:
-        :py:class:`CartoDataFrame <cartoframes.core.CartoDataFrame>`
+        :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
 
     """
     if not isinstance(source, str):

@@ -19,7 +19,7 @@ class Layer(object):
     notebook to get a preview of a Layer.
 
     Args:
-        source (str, :py:class:`CartoDataFrame <cartoframes.data.CartoDataFrame>`,
+        source (str, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`,
                 pandas.DataFrame, geopandas.GeoDataFrame):
           The source data.
         style (str, dict, or :py:class:`Style <cartoframes.viz.Style>`, optional):

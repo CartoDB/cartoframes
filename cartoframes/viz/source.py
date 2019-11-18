@@ -17,7 +17,7 @@ class Source(object):
 
     Args:
         data (str, pandas.DataFrame, geopandas.GeoDataFrame,
-          :py:class:`CartoDataFrame <cartoframes.data.CartoDataFrame>` ): a table name,
+          :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` ): a table name,
           SQL query, DataFrame, GeoDataFrame or CartoDataFrame instance.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
           A Credentials instance. If not provided, the credentials will be automatically
