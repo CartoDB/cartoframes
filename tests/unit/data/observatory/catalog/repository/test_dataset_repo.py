@@ -97,7 +97,6 @@ class TestDatasetRepo(object):
         repo = DatasetRepository()
 
         # When
-        print(requested_id)
         dataset = repo.get_by_id(requested_id)
 
         # Then
