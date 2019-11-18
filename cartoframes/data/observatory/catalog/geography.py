@@ -56,6 +56,10 @@ class Geography(CatalogEntity):
         return self.data['provider_id']
 
     @property
+    def provider_name(self):
+        return self.data['provider_name']
+
+    @property
     def geom_coverage(self):
         """Info about the geometric coverage of this geography."""
 

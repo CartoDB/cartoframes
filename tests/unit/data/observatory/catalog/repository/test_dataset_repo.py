@@ -97,7 +97,6 @@ class TestDatasetRepo(object):
         repo = DatasetRepository()
 
         # When
-        print(requested_id)
         dataset = repo.get_by_id(requested_id)
 
         # Then
@@ -183,11 +182,15 @@ class TestDatasetRepo(object):
             'name': None,
             'description': None,
             'provider_id': None,
+            'provider_name': None,
             'category_id': None,
+            'category_name': None,
             'data_source_id': None,
             'country_id': None,
             'lang': None,
             'geography_id': None,
+            'geography_name': None,
+            'geography_description': None,
             'temporal_aggregation': None,
             'time_coverage': None,
             'update_frequency': None,

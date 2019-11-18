@@ -64,10 +64,18 @@ class CatalogDataset(CatalogEntity):
         return self.data['provider_id']
 
     @property
+    def provider_name(self):
+        return self.data['provider_name']
+
+    @property
     def category(self):
         """Id of the Category assigned to this dataset."""
 
         return self.data['category_id']
+
+    @property
+    def category_name(self):
+        return self.data['category_name']
 
     @property
     def data_source(self):
@@ -92,6 +100,14 @@ class CatalogDataset(CatalogEntity):
         """Id of the Geography associated to this dataset."""
 
         return self.data['geography_id']
+
+    @property
+    def geography_name(self):
+        return self.data['geography_name']
+
+    @property
+    def geography_description(self):
+        return self.data['geography_description']
 
     @property
     def temporal_aggregation(self):
