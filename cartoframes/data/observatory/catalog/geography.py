@@ -40,6 +40,10 @@ class Geography(CatalogEntity):
         return self.data['provider_id']
 
     @property
+    def provider_name(self):
+        return self.data['provider_name']
+
+    @property
     def geom_coverage(self):
         return self.data['geom_coverage']
 
