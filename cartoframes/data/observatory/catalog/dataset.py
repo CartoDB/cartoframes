@@ -340,6 +340,9 @@ class CatalogDataset(CatalogEntity):
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
+        Returns:
+            A string with the local file path with the file downloaded
+
         :raises CartoException: If you have not a valid license for the dataset being downloaded.
         :raises ValueError: If the credentials argument is not valud.
         """
