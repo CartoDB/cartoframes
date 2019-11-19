@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Optimize local data visualizations size using gzip compression (#1202)
+- Discover API reference (#1183)
 
 ## [1.0b5] - 2019-11-14
 ### Added
