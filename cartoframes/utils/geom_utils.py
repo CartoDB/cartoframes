@@ -1,5 +1,6 @@
 import re
 import sys
+import json
 import shapely
 import binascii as ba
 
@@ -187,8 +188,8 @@ def _load_wkb_bhex(geom):
 
 
 def _load_wkt(geom):
-    """Load WKT geometry."""
     return shapely.wkt.loads(geom)
+    """Load WKT geometry."""
 
 
 def _load_ewkt(egeom):
@@ -214,9 +215,5 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-def wkt_to_geojson(wkt_input):
-    import geojson
-    shapely_geom = _load_wkt(wkt_input)
-    geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
-
-    return str(geojson_geometry.geometry)
+def to_geojson(geom):
+    return json.dumps(shapely.geometry.mapping(geom))

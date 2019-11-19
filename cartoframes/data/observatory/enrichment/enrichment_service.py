@@ -8,8 +8,7 @@ from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
-
-from ....utils.geom_utils import wkt_to_geojson
+from ....utils.geom_utils import to_geojson
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -84,8 +83,7 @@ class EnrichmentService(object):
 
         # Add extra columns for the enrichment
         cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
-        cartodataframe[self.geojson_column] = cartodataframe.geometry.apply(
-            lambda geometry: geometry.wkt).apply(wkt_to_geojson)
+        cartodataframe[self.geojson_column] = cartodataframe.geometry.apply(to_geojson)
 
         return cartodataframe
 
