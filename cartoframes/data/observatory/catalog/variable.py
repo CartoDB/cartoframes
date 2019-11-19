@@ -12,7 +12,7 @@ _DESCRIPTION_LENGTH_LIMIT = 30
 
 class Variable(CatalogEntity):
     """This class represents a :py:class:`Variable <cartoframes.data.observatory.Variable>`
-    of datasets in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`. 
+    of datasets in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
     Variables contain column names, description, data type, aggregation method and some other metadata that is
     useful to understand the underlying data inside a :obj:`CatalogDataset`
@@ -65,7 +65,7 @@ class Variable(CatalogEntity):
     @property
     def db_type(self):
         """Type in the database.
-        
+
         Examples: INTEGER, STRING, FLOAT, GEOGRAPHY, JSON, BOOL, etc.
         """
         return self.data['db_type']

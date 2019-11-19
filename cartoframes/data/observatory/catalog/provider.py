@@ -8,7 +8,7 @@ from .repository.constants import PROVIDER_FILTER
 
 class Provider(CatalogEntity):
     """This class represents a :py:class:`Provider <cartoframes.data.observatory.Provider>`
-    of datasets and geographies in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`. 
+    of datasets and geographies in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
 
     Examples:
         List the available providers in the :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
