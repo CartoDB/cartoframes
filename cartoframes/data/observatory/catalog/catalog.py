@@ -19,7 +19,7 @@ class Catalog(object):
     data available in the Data Observatory for download and enrichment purposes.
 
     You can get more information about the Data Observatory catalog in the
-    `CARTO website <https://carto.com/platform/location-data-streams/>`__
+    `CARTO website <https://carto.com/platform/location-data-streams/>`__ and in your CARTO user account dashboard.
 
     The Catalog has three main purposes:
       - Explore and discover the datasets available in the repository (both public and premium datasets)
