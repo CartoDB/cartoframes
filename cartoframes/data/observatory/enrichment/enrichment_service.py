@@ -1,5 +1,4 @@
 import uuid
-import geopandas as gpd
 
 from collections import defaultdict
 
@@ -10,8 +9,11 @@ from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
 from ....core.cartodataframe import CartoDataFrame
 
+from ....utils.geom_utils import wkt_to_geojson
+
 
 _ENRICHMENT_ID = 'enrichment_id'
+_GEOJSON_COLUMN = '__geojson_geom'
 _DEFAULT_PROJECT = 'carto-do'
 _WORKING_PROJECT = 'carto-do-customers'
 _PUBLIC_PROJECT = 'carto-do-public-data'
@@ -55,8 +57,9 @@ class EnrichmentService(object):
         self.credentials = credentials = credentials or get_default_credentials()
         self.user_dataset = self.credentials.get_do_user_dataset()
         self.bq_client = bigquery_client.BigQueryClient(_WORKING_PROJECT, credentials)
-        self.working_project = _WORKING_PROJECT
         self.enrichment_id = _ENRICHMENT_ID
+        self.geojson_column = _GEOJSON_COLUMN
+        self.working_project = _WORKING_PROJECT
         self.public_project = _PUBLIC_PROJECT
 
     def _execute_enrichment(self, queries, cartodataframe):
@@ -69,17 +72,20 @@ class EnrichmentService(object):
         for df in dfs_enriched:
             cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
 
+        # Remove extra columns
         cartodataframe.drop(self.enrichment_id, axis=1, inplace=True)
-        # TODO: geojson to wkt?
+        cartodataframe.drop(self.geojson_column, axis=1, inplace=True)
 
         return cartodataframe
 
-    def _prepare_cartodataframe(self, dataframe, geom_column):
+    def _prepare_data(self, dataframe, geom_column):
         cartodataframe = CartoDataFrame(dataframe, copy=True)
-        cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
+        cartodataframe.convert(geom_column=geom_column)  # Decode geom
 
-        if not isinstance(dataframe, gpd.GeoDataFrame):
-            cartodataframe.convert(geom_column=geom_column)
+        # Add extra columns for the enrichment
+        cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
+        cartodataframe[self.geojson_column] = cartodataframe.geometry.apply(
+            lambda geometry: geometry.wkt).apply(wkt_to_geojson)
 
         return cartodataframe
 
@@ -87,12 +93,12 @@ class EnrichmentService(object):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
 
-    def _upload_dataframe(self, tablename, cartodataframe, geom_column):
-        data_geometry_id_copy = cartodataframe[[geom_column, self.enrichment_id]]
-        schema = {geom_column: 'GEOGRAPHY', self.enrichment_id: 'INTEGER'}
+    def _upload_data(self, tablename, cartodataframe):
+        bq_dataframe = cartodataframe[[self.enrichment_id, self.geojson_column]]
+        schema = {self.enrichment_id: 'INTEGER', self.geojson_column: 'GEOGRAPHY'}
 
         self.bq_client.upload_dataframe(
-            dataframe=data_geometry_id_copy,
+            dataframe=bq_dataframe,
             schema=schema,
             tablename=tablename,
             project=self.working_project,
@@ -167,15 +173,6 @@ class EnrichmentService(object):
             project = self.working_project
 
         return project
-
-    def __copy_datadrame_and_generate_enrichment_id(self, dataframe, geom_colum):
-        cdf = CartoDataFrame(dataframe, copy=True)
-        cdf[self.enrichment_id] = range(cdf.shape[0])
-
-        if not isinstance(dataframe, gpd.GeoDataFrame):
-            cdf.convert(geom_column=geom_colum)
-
-        return cdf
 
 
 def prepare_variables(variables):

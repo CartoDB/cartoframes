@@ -214,19 +214,9 @@ def _extract_srid(egeom):
         return (0, egeom)
 
 
-# def wkt_to_geojson(wkt_input):
-#     import geojson
-#     shapely_geom = _load_wkt(wkt_input)
-#     geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
+def wkt_to_geojson(wkt_input):
+    import geojson
+    shapely_geom = _load_wkt(wkt_input)
+    geojson_geometry = geojson.Feature(geometry=shapely_geom, properties={})
 
-#     return str(geojson_geometry.geometry)
-
-
-# def geojson_to_wkt(geojson_str):
-#     import geojson
-#     geojson_geom = geojson.loads(geojson_str)
-#     wkt_geometry = shapely.geometry.shape(geojson_geom)
-
-#     shapely_geom = _load_wkt(wkt_geometry.wkt)
-
-#     return shapely_geom
+    return str(geojson_geometry.geometry)
