@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import pandas as pd
 import geopandas as gpd
+
 from shapely import wkt
-from cartoframes.data import Dataset as CFDataset
 
 from .entity import CatalogEntity
 from .repository.dataset_repo import get_dataset_repo
@@ -142,11 +142,6 @@ class CatalogDataset(CatalogEntity):
         if isinstance(filter_dataset, gpd.GeoDataFrame):
             # Geopandas dataframe
             return filter_dataset
-
-        if isinstance(filter_dataset, CFDataset):
-            # CARTOFrames Dataset
-            user_df = filter_dataset.download(decode_geom=True)
-            return gpd.GeoDataFrame(user_df, geometry='geometry')
 
         if isinstance(filter_dataset, str):
             # String WKT

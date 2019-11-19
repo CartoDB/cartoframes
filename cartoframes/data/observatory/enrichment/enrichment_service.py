@@ -5,11 +5,10 @@ from collections import defaultdict
 
 from ..catalog.variable import Variable
 from ..catalog.dataset import CatalogDataset
-from ...dataset.dataset import Dataset
 from ...clients import bigquery_client
 from ....auth import get_default_credentials
 from ....exceptions import EnrichmentException
-from ....utils.geom_utils import _compute_geometry_from_geom, geojson_to_wkt, wkt_to_geojson
+from ....core.cartodataframe import CartoDataFrame
 
 
 _ENRICHMENT_ID = 'enrichment_id'
@@ -60,7 +59,7 @@ class EnrichmentService(object):
         self.enrichment_id = _ENRICHMENT_ID
         self.public_project = _PUBLIC_PROJECT
 
-    def _execute_enrichment(self, queries, data, data_geom_column):
+    def _execute_enrichment(self, queries, cartodataframe):
         dfs_enriched = list()
 
         for query in queries:
@@ -68,27 +67,29 @@ class EnrichmentService(object):
             dfs_enriched.append(df_enriched)
 
         for df in dfs_enriched:
-            data = data.merge(df, on=self.enrichment_id, how='left')
+            cartodataframe = cartodataframe.merge(df, on=self.enrichment_id, how='left')
 
-        data.drop(self.enrichment_id, axis=1, inplace=True)
-        data[data_geom_column] = data[data_geom_column].apply(geojson_to_wkt)
+        cartodataframe.drop(self.enrichment_id, axis=1, inplace=True)
+        # TODO: geojson to wkt?
 
-        data[data_geom_column] = _compute_geometry_from_geom(data[data_geom_column])
+        return cartodataframe
 
-        return data
+    def _prepare_cartodataframe(self, dataframe, geom_column):
+        cartodataframe = CartoDataFrame(dataframe, copy=True)
+        cartodataframe[self.enrichment_id] = range(cartodataframe.shape[0])
 
-    def _prepare_data(self, data, data_geom_column):
-        data_copy = self.__copy_data_and_generate_enrichment_id(data, data_geom_column)
-        data_copy[data_geom_column] = data_copy[data_geom_column].apply(wkt_to_geojson)
-        return data_copy
+        if not isinstance(dataframe, gpd.GeoDataFrame):
+            cartodataframe.convert(geom_column=geom_column)
+
+        return cartodataframe
 
     def _get_temp_table_name(self):
         id_tablename = uuid.uuid4().hex
         return 'temp_{id}'.format(id=id_tablename)
 
-    def _upload_dataframe(self, tablename, data_copy, data_geom_column):
-        data_geometry_id_copy = data_copy[[data_geom_column, self.enrichment_id]]
-        schema = {data_geom_column: 'GEOGRAPHY', self.enrichment_id: 'INTEGER'}
+    def _upload_dataframe(self, tablename, cartodataframe, geom_column):
+        data_geometry_id_copy = cartodataframe[[geom_column, self.enrichment_id]]
+        schema = {geom_column: 'GEOGRAPHY', self.enrichment_id: 'INTEGER'}
 
         self.bq_client.upload_dataframe(
             dataframe=data_geometry_id_copy,
@@ -167,29 +168,14 @@ class EnrichmentService(object):
 
         return project
 
-    def __copy_data_and_generate_enrichment_id(self, data, geometry_column):
-        has_to_decode_geom = True
-        enrichment_id_column = self.enrichment_id
+    def __copy_datadrame_and_generate_enrichment_id(self, dataframe, geom_colum):
+        cdf = CartoDataFrame(dataframe, copy=True)
+        cdf[self.enrichment_id] = range(cdf.shape[0])
 
-        if isinstance(data, Dataset):
-            if data.dataframe is None:
-                has_to_decode_geom = False
-                geometry_column = 'the_geom'
-                data.download(decode_geom=True)
+        if not isinstance(dataframe, gpd.GeoDataFrame):
+            cdf.convert(geom_column=geom_colum)
 
-            data = data.dataframe
-        elif isinstance(data, gpd.GeoDataFrame):
-            has_to_decode_geom = False
-
-        data_copy = data.copy()
-        data_copy[enrichment_id_column] = range(data_copy.shape[0])
-
-        if has_to_decode_geom:
-            data_copy[geometry_column] = _compute_geometry_from_geom(data_copy[geometry_column])
-
-        data_copy[geometry_column] = data_copy[geometry_column].apply(lambda geometry: geometry.wkt)
-
-        return data_copy
+        return cdf
 
 
 def prepare_variables(variables):

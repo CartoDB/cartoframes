@@ -6,7 +6,7 @@ class Enrichment(EnrichmentService):
 
     def __init__(self, credentials=None):
         """
-        Dataset enrichment with `Data Observatory <https://carto.com/platform/location-data-streams/>` data
+        Data enrichment with `Data Observatory <https://carto.com/platform/location-data-streams/>` data
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -18,14 +18,14 @@ class Enrichment(EnrichmentService):
 
         super(Enrichment, self).__init__(credentials)
 
-    def enrich_points(self, data, variables, geom_column='geometry', filters={}):
-        """Enrich your dataset with columns from our data, intersecting your points with our
+    def enrich_points(self, dataframe, variables, geom_column='geometry', filters={}):
+        """Enrich your dataframe with columns from our data, intersecting your points with our
         geographies. Extra columns as area and population will be provided with the aims of normalize
         these columns.
 
         Args:
-            data (:py:class:`Dataset <cartoframes.data.Dataset>`, DataFrame, GeoDataFrame):
-                a Dataset, DataFrame or GeoDataFrame object to be enriched.
+            dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+                a dataframe object to be enriched.
             variables (:py:class:`Variable <cartoframes.data.observatory.Catalog>`, CatalogList, list, str):
                 variable(s), discovered through Catalog, for enriching the `data` argument.
             geom_column (str): string indicating the 4326 geometry column in `data`.
@@ -33,21 +33,21 @@ class Enrichment(EnrichmentService):
                 the enrichment data. Example: [VariableFilter(variable1, "= 'a string'")]
 
         Returns:
-            A DataFrame as the provided one, but with the variables to enrich appended to it.
+            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the variables to enrich appended to it.
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
-            in the enrichment dataset, the number of rows of the returned DataFrame could be different
+            in the enrichment dataframe, the number of rows of the returned CartoDataFrame could be different
             than the `data` argument number of rows.
 
         Examples:
 
-            Enrich a points dataset with Catalog classes:
+            Enrich a points dataframe with Catalog classes:
 
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
+                from cartoframes.data.observatory import Enrichment, Catalog
 
                 set_default_credentials()
 
@@ -57,16 +57,16 @@ class Enrichment(EnrichmentService):
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_points(df, variables)
+                cdf_enrich = enrichment.enrich_points(df, variables)
 
 
-            Enrich a points dataset with several Variables using their ids:
+            Enrich a points dataframe with several Variables using their ids:
 
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog
                 from cartoframes.auth import set_default_credentials
+                from cartoframes.data.observatory import Enrichment, Catalog
 
                 set_default_credentials()
 
@@ -82,16 +82,16 @@ class Enrichment(EnrichmentService):
                 ]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_points(df, variables)
+                cdf_enrich = enrichment.enrich_points(df, variables)
 
 
-            Enrich a points dataset with filters:
+            Enrich a points dataframe with filters:
 
             .. code::
 
                 import pandas
-                from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
                 from cartoframes.auth import set_default_credentials
+                from cartoframes.data.observatory import Enrichment, Catalog, VariableFilter
 
                 set_default_credentials()
 
@@ -102,19 +102,19 @@ class Enrichment(EnrichmentService):
                 filter = VariableFilter(variable, '=', '2019-09-01')
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
+                cdf_enrich = enrichment.enrich_points(df, variables=[variable], filters=[filter])
 
         """
 
         variables = prepare_variables(variables)
-        data_copy = self._prepare_data(data, geom_column)
+        cartodataframe = self._prepare_cartodataframe(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_dataframe(temp_table_name, data_copy, geom_column)
+        self._upload_dataframe(temp_table_name, cartodataframe, geom_column)
 
         queries = self._get_points_enrichment_sql(temp_table_name, geom_column, variables, filters)
 
-        return self._execute_enrichment(queries, data_copy, geom_column)
+        return self._execute_enrichment(queries, cartodataframe)
 
     AGGREGATION_DEFAULT = AGGREGATION_DEFAULT
     """Use default aggregation method for polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
@@ -122,14 +122,16 @@ class Enrichment(EnrichmentService):
     AGGREGATION_NONE = AGGREGATION_NONE
     """Do not aggregate data in polygons enrichment. More info in :py:attr:`Enrichment.enrich_polygons`"""
 
-    def enrich_polygons(self, data, variables, geom_column='geometry', filters=[], aggregation=AGGREGATION_DEFAULT):
-        """Enrich your dataset with columns from our data, intersecting your polygons with our geographies.
-        When a polygon intersects with multiple geographies of our dataset, the proportional part of the
+    def enrich_polygons(self, dataframe, variables, geom_column='geometry', filters=[],
+                        aggregation=AGGREGATION_DEFAULT):
+        """Enrich your dataframe with columns from our data, intersecting your polygons with our geographies.
+        When a polygon intersects with multiple geographies of our dataframe, the proportional part of the
         intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
         with the operator provided by `agg_operators` argument.
 
         Args:
-            data (Dataset, DataFrame, GeoDataFrame): a Dataset, DataFrame or GeoDataFrame object to be enriched.
+            dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+                a dataframe object to be enriched.
             variables (list): list of `<cartoframes.data.observatory> Variable` entities discovered through Catalog to
                 enrich your data. To refer to a Variable, You can use a `<cartoframes.data.observatory> Variable`
                 instance, the Variable `id` property or the Variable `slug` property. Please, take a look at the
@@ -152,22 +154,22 @@ class Enrichment(EnrichmentService):
                 aggregation method to use.
 
         Returns:
-            A DataFrame as the provided one but with the variables to enrich appended to it
+            A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the variables to enrich appended to it.
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
-            in the enrichment dataset, the number of rows of the returned DataFrame could be different
+            in the enrichment dataframe, the number of rows of the returned CartoDataFrame could be different
             than the `data` argument number of rows.
 
 
         Examples:
 
-            Enrich a polygons dataset with one Variable:
+            Enrich a polygons dataframe with one Variable:
 
             .. code::
 
                 import pandas
+                from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials, Credentials
 
                 set_default_credentials()
 
@@ -178,16 +180,16 @@ class Enrichment(EnrichmentService):
                 variables = [variable]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(df, variables)
+                cdf_enrich = enrichment.enrich_polygons(df, variables)
 
 
-            Enrich a polygons dataset with all Variables from a Catalog Dataset:
+            Enrich a polygons dataframe with all Variables from a Catalog Dataset:
 
             .. code::
 
                 import pandas
+                from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials, Credentials
 
                 set_default_credentials()
 
@@ -197,16 +199,16 @@ class Enrichment(EnrichmentService):
                 variables = catalog.country('usa').category('demographics').datasets[0].variables
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(df, variables)
+                cdf_enrich = enrichment.enrich_polygons(df, variables)
 
 
-            Enrich a polygons dataset with several Variables using their ids:
+            Enrich a polygons dataframe with several Variables using their ids:
 
             .. code::
 
                 import pandas
+                from cartoframes.auth import set_default_credentials
                 from cartoframes.data.observatory import Enrichment, Catalog
-                from cartoframes.auth import set_default_credentials, Credentials
 
                 set_default_credentials()
 
@@ -222,10 +224,10 @@ class Enrichment(EnrichmentService):
                 ]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(df, variables)
+                cdf_enrich = enrichment.enrich_polygons(df, variables)
 
 
-            Enrich a polygons dataset with filters:
+            Enrich a polygons dataframe with filters:
 
             .. code::
 
@@ -242,10 +244,10 @@ class Enrichment(EnrichmentService):
                 filter = VariableFilter(variable, '=', '2019-09-01')
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
+                cdf_enrich = enrichment.enrich_polygons(df, variables=[variable], filters=[filter])
 
 
-            Enrich a polygons dataset overwriting some of the variables aggregation methods:
+            Enrich a polygons dataframe overwriting some of the variables aggregation methods:
 
             .. code::
 
@@ -271,20 +273,20 @@ class Enrichment(EnrichmentService):
                 ]
 
                 enrichment = Enrichment()
-                dataset_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
+                cdf_enrich = enrichment.enrich_polygons(df, variables, aggregations=aggregations)
         """
 
         variables = prepare_variables(variables)
-        data_copy = self._prepare_data(data, geom_column)
+        cartodataframe = self._prepare_cartodataframe(dataframe, geom_column)
 
         temp_table_name = self._get_temp_table_name()
-        self._upload_dataframe(temp_table_name, data_copy, geom_column)
+        self._upload_dataframe(temp_table_name, cartodataframe, geom_column)
 
         queries = self._get_polygon_enrichment_sql(
             temp_table_name, geom_column, variables, filters, aggregation
         )
 
-        return self._execute_enrichment(queries, data_copy, geom_column)
+        return self._execute_enrichment(queries, cartodataframe)
 
     def _get_points_enrichment_sql(self, temp_table_name, geom_column, variables, filters):
         tables_metadata = self._get_tables_metadata(variables).items()
