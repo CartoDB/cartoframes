@@ -158,7 +158,7 @@ class Geography(CatalogEntity):
 
     @property
     def summary(self):
-        """JSON object with extra metadata that summarizes different properties of the geography content."""
+        """dict with extra metadata that summarizes different properties of the geography content."""
 
         return self.data['summary_json']
 

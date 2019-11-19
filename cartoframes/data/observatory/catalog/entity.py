@@ -22,7 +22,7 @@ class CatalogEntity(ABC):
     This is an internal class the rest of the classes related to the catalog discovery extend.
 
     It contains:
-      - Properties: `id`, `slug` (a shorter ID)
+      - Properties: `id`, `slug` (a shorter ID).
       - Static methods: `get`, `get_all`, `get_list` to retrieve elements or lists of objects in the catalog such as
         datasets, categories, variables, etc.
       - Instance methods to convert to pandas Series, Python dict, compare instances, etc.

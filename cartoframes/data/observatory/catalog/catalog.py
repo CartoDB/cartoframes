@@ -22,8 +22,8 @@ class Catalog(object):
     `CARTO website <https://carto.com/platform/location-data-streams/>`__ and in your CARTO user account dashboard.
 
     The Catalog has three main purposes:
-      - Explore and discover the datasets available in the repository (both public and premium datasets)
-      - Subscribe to premium datasets and manage your datasets licenses
+      - Explore and discover the datasets available in the repository (both public and premium datasets).
+      - Subscribe to premium datasets and manage your datasets licenses.
       - Download data and use your licensed datasets and variables to enrich your own data.
 
     The Catalog is public and you can explore it without the need of a CARTO account. Once you discover a

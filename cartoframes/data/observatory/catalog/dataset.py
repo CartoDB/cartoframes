@@ -231,8 +231,6 @@ class CatalogDataset(CatalogEntity):
     def is_public_data(self):
         """True if the content of this dataset can be accessed with public credentials.
         False if it needs a subscription (AKA premium datasets).
-
-        See the subscription guide for more details about accessing premium datasets.
         """
 
         return self.data['is_public_data']
@@ -327,11 +325,8 @@ class CatalogDataset(CatalogEntity):
         return cls._entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):
-        """Download Dataset data as a local file. You need Data Observatory enabled in your CARTO
+        """Download dataset data as a local file. You need Data Observatory enabled in your CARTO
         account.
-
-        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset. Check
-        the subscription guides for more information.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -384,7 +379,7 @@ class CatalogDataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     def subscribe(self, credentials=None):
-        """Subscribe to a Dataset. You need Data Observatory enabled in your CARTO account.
+        """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account.
 
         Datasets with `is_public_data` set to True, do not need a license (i.e. a subscription) to be used.
         Datasets with `is_public_data` set to False, do need a license (i.e. a subscription) to be used. You'll get a
