@@ -20,28 +20,82 @@ DATASET_TYPE = 'dataset'
 
 
 class CatalogDataset(CatalogEntity):
-    """A CatalogDataset represents the metadata of a particular dataset in the Data Observatory platform."""
+    """A CatalogDataset represents the metadata of a particular dataset in the catalog.
 
-    entity_repo = get_dataset_repo()
+    If you have Data Observatory enabled in your CARTO account you can:
+
+      - Use any public dataset to enrich your data with the variables in it.
+      - Subscribe to any premium dataset, to get a license, that grants you
+        the right to enrich your data with the variables in it.
+
+    See the enrichment guides for more information about datasets, variables and
+    enrichment functions.
+
+    The metadata of a dataset allows you to understand the underlying data,
+    from variables (the actual columns in the dataset, data types, etc.), to a
+    description of the provider, source, country, geography available, etc.
+
+    See the attributes reference in this class to understand the metadata available
+    for each dataset in the catalog.
+
+    Examples:
+        There are many different ways to explore the available datasets in the
+        catalog.
+
+        You can just list all the available datasets:
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            datasets = catalog.datasets
+
+        Since the catalog contains thousands of datasets, you can convert the
+        list of `datasets` to a pandas DataFrame for further filtering:
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            dataframe = catalog.datasets.to_dataframe()
+
+        The catalog supports nested filters for a hierarchical exploration.
+        This way you could list the datasets available for different hierarchies:
+        country, provider, category, geography or a combination of them.
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+
+    """
+
+    _entity_repo = get_dataset_repo()
 
     @property
     def variables(self):
-        """Get the list of variables that correspond to this dataset.
+        """Get the list of :obj:`Variable` that correspond to this dataset.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of Variable instances.
 
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         return get_variable_repo().get_all({DATASET_FILTER: self.id})
 
     @property
     def variables_groups(self):
-        """Get the list of variables groups related to this dataset.
+        """Get the list of :obj:`VariableGroup` related to this dataset.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of VariableGroup instances.
 
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
         return get_variable_group_repo().get_all({DATASET_FILTER: self.id})
 
@@ -59,22 +113,48 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def provider(self):
-        """Id of the Provider of this dataset."""
+        """Id of the :obj:`Provider` of this dataset.
+
+        Examples:
+            You can list datasets by provider in this way:
+
+            .. code::
+
+                from cartoframes.data.observatory import Catalog
+
+                catalog = Catalog()
+                datasets = catalog.provider(PROVIDER_ID).datasets
+        """
 
         return self.data['provider_id']
 
     @property
     def provider_name(self):
+        """Name of the :obj:`Provider` of this dataset."""
+
         return self.data['provider_name']
 
     @property
     def category(self):
-        """Id of the Category assigned to this dataset."""
+        """Id of the :obj:`Category` assigned to this dataset.
+
+        Examples:
+            You can list datasets by category in this way:
+
+            .. code::
+
+                from cartoframes.data.observatory import Catalog
+
+                catalog = Catalog()
+                datasets = catalog.category('demographics').datasets
+        """
 
         return self.data['category_id']
 
     @property
     def category_name(self):
+        """Name of the :obj:`Category` assigned to this dataset."""
+
         return self.data['category_name']
 
     @property
@@ -85,7 +165,7 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def country(self):
-        """Code (ISO 3166-1 alpha-3) of the country of this dataset."""
+        """Code (ISO 3166-1 alpha-3) of the :obj:`Country` of this dataset."""
 
         return self.data['country_id']
 
@@ -97,45 +177,63 @@ class CatalogDataset(CatalogEntity):
 
     @property
     def geography(self):
-        """Id of the Geography associated to this dataset."""
+        """Id of the :obj:`Geography` associated to this dataset."""
 
         return self.data['geography_id']
 
     @property
     def geography_name(self):
+        """Name of the :obj:`Geography` associated to this dataset."""
+
         return self.data['geography_name']
 
     @property
     def geography_description(self):
+        """Description of the :obj:`Geography` associated to this dataset."""
+
         return self.data['geography_description']
 
     @property
     def temporal_aggregation(self):
-        """Time amount in which data is aggregated in this dataset."""
+        """Time amount in which data is aggregated in this dataset.
+
+        This is a free text field in this form: seconds, daily, hourly, monthly, yearly, etc.
+        """
 
         return self.data['temporal_aggregation']
 
     @property
     def time_coverage(self):
-        """Time range that covers the data of this dataset."""
+        """Time range that covers the data of this dataset.
+
+        Example: [2015-01-01,2016-01-01)
+
+        """
 
         return self.data['time_coverage']
 
     @property
     def update_frequency(self):
-        """Frequency in which the dataset is updated."""
+        """Frequency in which the dataset is updated.
+
+        Example: monthly, yearly, etc.
+        """
 
         return self.data['update_frequency']
 
     @property
     def version(self):
-        """Version info of this dataset."""
+        """Internal version info of this dataset."""
 
         return self.data['version']
 
     @property
     def is_public_data(self):
-        """True if the content of this dataset can be accessed with public credentials. False otherwise."""
+        """True if the content of this dataset can be accessed with public credentials.
+        False if it needs a subscription (AKA premium datasets).
+
+        See the subscription guide for more details about accessing premium datasets.
+        """
 
         return self.data['is_public_data']
 
@@ -146,31 +244,70 @@ class CatalogDataset(CatalogEntity):
         return self.data['summary_json']
 
     def head(self):
+        """Returns a sample of the 10 first rows of the dataset data.
+
+        For the cases of datasets with a content fewer than 10 rows
+        (i.e. zip codes of small countries), this method won't return anything
+        """
+
         data = self.data['summary_json']
         return head(self.__class__, data)
 
     def tail(self):
+        """Returns a sample of the 10 last rows of the dataset data.
+
+        For the cases of datasets with a content fewer than 10 rows
+        (i.e. zip codes of small countries), this method won't return anything
+        """
         data = self.data['summary_json']
         return tail(self.__class__, data)
 
     def counts(self):
+        """Returns a summary of different counts over the actual dataset data.
+
+        Example:
+
+            .. code::
+
+                # rows                    217182
+                # cells                 23672838
+                # null_cells                   0
+                # null_cells_percent           0
+        """
+
         data = self.data['summary_json']
         return counts(data)
 
     def fields_by_type(self):
+        """Returns a summary of the number of columns per data type in the dataset.
+
+        Example:
+
+            .. code::
+
+                # float        5
+                # string       2
+                # integer    102
+        """
         data = self.data['summary_json']
         return fields_by_type(data)
 
     def geom_coverage(self):
+        """Shows a map to visualize the geographical coverage of the dataset.
+        """
         return geom_coverage(self.geography)
 
     def describe(self):
+        """Shows a summary of the actual stats of the variables (columns) of the dataset.
+        Some of the stats provided per variable are: avg, max, min, sum, range,
+        stdev, q1, q3, median and interquartile_range
+        """
         return dataset_describe(self.variables)
 
     @classmethod
     def get_all(cls, filters=None, credentials=None):
         """Get all the CatalogDataset instances that comply with the indicated filters (or all of them if no filters
-        are passed. If credentials are given, only the datasets granted for those credentials are returned.
+        are passed). If credentials are given, only the datasets granted for those credentials are returned.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
@@ -184,18 +321,27 @@ class CatalogDataset(CatalogEntity):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>` List of CatalogDataset instances.
 
+        :raises DiscoveryException: When no datasets found.
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
-        return cls.entity_repo.get_all(filters, credentials)
+        return cls._entity_repo.get_all(filters, credentials)
 
     def download(self, credentials=None):
-        """Download Dataset data.
+        """Download Dataset data as a local file. You need Data Observatory enabled in your CARTO
+        account.
+
+        For premium datasets (those with `is_public_data` set to False), you need a subscription to the dataset. Check
+        the subscription guides for more information.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+
+        :raises CartoException: If you have not a valid license for the dataset being downloaded.
+        :raises ValueError: If the credentials argument is not valud.
         """
 
         return self._download(credentials)
@@ -236,13 +382,29 @@ class CatalogDataset(CatalogEntity):
         return join_gdf['id'].unique()
 
     def subscribe(self, credentials=None):
-        """Subscribe to a Dataset.
+        """Subscribe to a Dataset. You need Data Observatory enabled in your CARTO account.
+
+        Datasets with `is_public_data` set to True, do not need a license (i.e. a subscription) to be used.
+        Datasets with `is_public_data` set to False, do need a license (i.e. a subscription) to be used. You'll get a
+        license to use this `dataset` depending on the `estimated_delivery_days` set for this specific dataset.
+
+        See :py:meth:`subscription_info <cartoframes.data.observatory.CatalogDataset.subscription_info>` for more
+        info
+
+        Once you subscribe to a dataset you can `download` its data and use the enrichment functions. See the
+        enrichment guides for more info.
+
+        You can check the status of your subscriptions by calling the
+        :py:meth:`subscriptions <cartoframes.data.observatory.Catalog.subscriptions>` method in the :obj:`Catalog` with
+        your CARTO credentials.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         _credentials = self._get_credentials(credentials)
@@ -254,13 +416,19 @@ class CatalogDataset(CatalogEntity):
             utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
-        """Get the subscription information of a Dataset.
+        """Get the subscription information of a Dataset, which includes the license, TOS, rights, prize and
+        estimated_time_of_delivery, among other metadata of interest during the subscription process.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
                 credentials of CARTO user account. If not provided,
                 a default credentials (if set with :py:meth:`set_default_credentials
                 <cartoframes.auth.set_default_credentials>`) will be used.
+
+        Returns:
+            :py:class:`SubscriptionInfo <cartoframes.data.observatory.SubscriptionInfo>` SubscriptionInfo instance.
+
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         _credentials = self._get_credentials(credentials)

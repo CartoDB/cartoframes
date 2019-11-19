@@ -9,6 +9,7 @@ from .catalog.provider import Provider
 from .catalog.variable import Variable
 from .enrichment.enrichment import Enrichment
 from .enrichment.enrichment_service import VariableAggregation, VariableFilter
+from .catalog.entity import CatalogEntity, CatalogList
 
 __all__ = [
     'Catalog',
@@ -20,5 +21,7 @@ __all__ = [
     'Variable',
     'Enrichment',
     'VariableAggregation',
-    'VariableFilter'
+    'VariableFilter',
+    'CatalogEntity',
+    'CatalogList',
 ]

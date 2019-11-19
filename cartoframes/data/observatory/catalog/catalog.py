@@ -69,7 +69,7 @@ class Catalog(object):
               Id value of the country to be used for filtering the Catalog.
 
         Returns:
-            :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
+            :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
 
@@ -84,7 +84,7 @@ class Catalog(object):
               Id value of the category to be used for filtering the Catalog.
 
         Returns:
-            :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
+            :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
 
@@ -99,7 +99,7 @@ class Catalog(object):
               Id or slug value of the geography to be used for filtering the Catalog
 
         Returns:
-            :py:class:`Catalog <cartoframes.data.observatory.catalog.Catalog>`
+            :py:class:`Catalog <cartoframes.data.observatory.Catalog>`
 
         """
 
@@ -160,7 +160,7 @@ class Catalog(object):
     def datasets_filter(self, filter_dataset):
         """Get all the datasets in the Catalog filtered
         Returns:
-            :py:class:`Datasets <cartoframes.data.observatory.Datasets>`
+            :py:class:`Dataset <cartoframes.data.observatory.Dataset>`
         """
 
         return CatalogDataset.get_datasets_spatial_filtered(filter_dataset)
