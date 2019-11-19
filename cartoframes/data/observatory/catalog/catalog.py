@@ -12,18 +12,142 @@ from ....auth import Credentials, defaults
 
 
 class Catalog(object):
-    """Data Observatory Catalog"""
+    """This class represents the Data Observatory metadata
+    :py:class:`Catalog <cartoframes.data.observatory.Catalog>`.
+
+    The catalog contains metadata that helps to discover and understand the
+    data available in the Data Observatory for download and enrichment purposes.
+
+    You can get more information about the Data Observatory catalog in the
+    `CARTO website <https://carto.com/platform/location-data-streams/>`__
+
+    The Catalog has three main purposes:
+      - Explore and discover the datasets available in the repository (both public and premium datasets)
+      - Subscribe to premium datasets and manage your datasets licenses
+      - Download data and use your licensed datasets and variables to enrich your own data.
+
+    The Catalog is public and you can explore it without the need of a CARTO account. Once you discover a
+    dataset of your interest and want to acquire a license to use it, then you'll need a CARTO account to
+    subsribe to it.
+
+    The Catalog is composed by three main entities:
+      - :obj:`CatalogDataset`: It is the main :obj:`CatalogEntity`. It contains metadata of the actual data
+        you can use to download or enrichment purposes.
+      - :obj:`Geography`: Datasets in the Data Observatory are aggregated by different geographic boundaries.
+        The `Geography` entity contains metadata to understand the boundaries of a :obj:`CatalogDataset`.
+      - :obj:`Variable`: Variables contain metadata about the columns available in each dataset for enrichment.
+        Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level. The
+        variables give you information about the actual columns you have available, such as: `Total Population`,
+        `Total males`, etc. You use `Variable` names to enrich your own data.
+
+    Every `CatalogDataset` is related to a `Geography`. You can have for example, demographics data at the Census
+    tract, block groups or blocks levels.
+
+    When subscribing to a premium dataset, you should subscribe both to the `CatalogDataset` and the `Geography`
+    to be able to access both tables to enrich your own data.
+
+    The two main entities of the Catalog (`CatalogDataset` and `Geography`) are related to other entities, that
+    are useful for a hierarchical categorization and discovery of available data in the Data Observatory:
+      - :obj:`Category`: Groups datasets of the same topic, for example, `demographics`, `financial`, etc.
+      - :obj:`Country`: Groups datasets available by country
+      - :obj:`Provider`: Gives you information about the provider of the source data
+
+    You can just list all the grouping entities. Take into account this is not the preferred way
+    to discover the catalog metadata, since there can be thousands of entities on it:
+
+        .. code::
+
+            from cartoframes.data.observatory import Category
+            from cartoframes.data.observatory import Country
+            from cartoframes.data.observatory import Provider
+
+            Category.get_all()
+            Country.get_all()
+            Provider.get_all()
+
+    Or you can get them by ID:
+
+        .. code::
+
+            from cartoframes.data.observatory import Category
+            from cartoframes.data.observatory import Country
+            from cartoframes.data.observatory import Provider
+
+            Category.get('demographics')
+            Country.get('usa')
+            Provider.get('mrli')
+
+    Examples:
+        The preferred way of discover the available datasets in the Catalog is through nested filters
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            catalog.country('usa').category('demographics').datasets
+
+        You can include the geography as part of the nested filter like this:
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+
+        Once you have applied a filter over the datasets in the catalog, to do a new hierarchical search with the
+        same catalog instance you have to `clear_filters` like this:
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets
+            catalog.clear_filters()
+            catalog.country('esp').category('demographics').datasets
+
+        Otherwise the filters accumulate and you'll get unexpected results.
+
+        During the discovery process, it's useful to understand the related metadata to a given Geography or Dataset.
+        A useful way of reading or filtering by metadata values consists on converting the entities to a pandas
+        DataFrame:
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            catalog.country('usa').category('demographics').geography('ags_blockgroup_1c63771c').datasets.to_dataframe()
+
+        For each dataset in the Catalog, you can explore its variables, get a summary of its stats, etc.
+
+        .. code::
+
+            from cartoframes.data.observatory import Catalog
+
+            catalog = Catalog()
+            dataset = catalog.country('usa').category('demographics').datasets.get('od_acs_13345497')
+            dataset.variables()
+
+    See the Catalog guides and examples in our
+    `public documentation website <https://carto.com/developers/cartoframes/guides/Introduction/>`__
+    for more information.
+    """
 
     def __init__(self):
         self.filters = {}
 
     @property
     def countries(self):
-        """Get all the countries in the Catalog.
+        """Get all the countries with datasets available in the Catalog.
 
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
+        :raises DiscoveryException: When no datasets found.
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         return Country.get_all(self.filters)
@@ -35,6 +159,8 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
+        :raises DiscoveryException: When no datasets found.
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         return Category.get_all(self.filters)
@@ -46,6 +172,8 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
+        :raises DiscoveryException: When no datasets found.
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         return CatalogDataset.get_all(self.filters)
@@ -57,6 +185,8 @@ class Catalog(object):
         Returns:
             :py:class:`CatalogList <cartoframes.data.observatory.entity.CatalogList>`
 
+        :raises DiscoveryException: When no datasets found.
+        :raises CartoException: If there's a problem when connecting to the catalog.
         """
 
         return Geography.get_all(self.filters)
@@ -142,7 +272,7 @@ class Catalog(object):
                 <cartoframes.auth.set_default_credentials>`) will be used.
 
         Returns:
-            :py:class:`CatalogDatasets <cartoframes.data.observatory.CatalogDatasets>`
+            :py:class:`Subscriptions <cartoframes.data.observatory.Subscriptions>`
 
         """
 
