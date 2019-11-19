@@ -1,6 +1,6 @@
-from cartoframes.viz import Layer, Legend, Popup, Source, Style
-from cartoframes.io.context import ContextManager
 from cartoframes.auth import Credentials
+from cartoframes.viz import Layer, Legend, Popup, Source, Style
+from cartoframes.core.managers.context_manager import ContextManager
 
 
 def setup_mocks(mocker, table_name):

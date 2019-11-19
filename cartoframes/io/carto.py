@@ -2,9 +2,8 @@
 
 import pandas as pd
 
-from .context import ContextManager
-
 from ..core.cartodataframe import CartoDataFrame
+from ..core.managers.context_manager import ContextManager
 
 
 def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,

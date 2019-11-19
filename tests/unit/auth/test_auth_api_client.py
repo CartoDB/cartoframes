@@ -1,7 +1,7 @@
 from cartoframes.viz import Source
 from cartoframes.auth import Credentials
-from cartoframes.io.context import ContextManager
 from cartoframes.data.clients.auth_api_client import AuthAPIClient
+from cartoframes.core.managers.context_manager import ContextManager
 
 from ..mocks.api_key_mock import APIKeyManagerMock
 

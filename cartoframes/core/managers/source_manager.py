@@ -1,0 +1,2 @@
+class SourceManager(object):
+    pass

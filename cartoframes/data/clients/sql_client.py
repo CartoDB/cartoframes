@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from ...io.context import ContextManager
+from ...core.managers.context_manager import ContextManager
 
 
 class SQLClient(object):

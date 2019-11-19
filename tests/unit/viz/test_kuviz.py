@@ -7,7 +7,7 @@ from carto.exceptions import CartoException
 from cartoframes.auth import Credentials
 from cartoframes.viz import Map, Layer, Source
 from cartoframes.viz.kuviz import KuvizPublisher, DEFAULT_PUBLIC, kuviz_to_dict
-from cartoframes.io.context import ContextManager
+from cartoframes.core.managers.context_manager import ContextManager
 
 from ..mocks.kuviz_mock import CartoKuvizMock
 from ..mocks.api_key_mock import APIKeyManagerMock

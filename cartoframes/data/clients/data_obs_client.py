@@ -9,7 +9,7 @@ import pandas as pd
 from warnings import warn
 from carto.exceptions import CartoException
 
-from ...io.context import ContextManager
+from ...core.managers.context_manager import ContextManager
 from ...io.carto import read_carto
 from ...utils import utils
 
