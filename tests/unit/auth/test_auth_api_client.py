@@ -1,64 +1,49 @@
-from cartoframes.data import Dataset
-from cartoframes.data.clients.auth_api_client import AuthAPIClient
+from cartoframes.viz import Source
 from cartoframes.auth import Credentials
-from cartoframes.lib.context.api_context import APIContext
+from cartoframes.io.context import ContextManager
+from cartoframes.data.clients.auth_api_client import AuthAPIClient
 
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from ..mocks.api_key_mock import APIKeyManagerMock
 
 TOKEN_MOCK = '1234'
 
 
-class APIKeyMock():
-    def __init__(self, name):
-        self.name = name
-        self.token = TOKEN_MOCK
-        self.type = None
-        self.created_at = None
-        self.updated_at = None
-        self.grants = None
+def setup_mocks(mocker):
+    mocker.patch(
+        'cartoframes.data.clients.auth_api_client._get_api_key_manager',
+        return_value=APIKeyManagerMock(TOKEN_MOCK))
+    mocker.patch.object(ContextManager, 'compute_query')
+    mocker.patch.object(ContextManager, 'get_schema')
+    mocker.patch.object(ContextManager, 'get_table_names')
 
 
-class APIKeyManagerMock():
-    def create(self, name, **kwargs):
-        return APIKeyMock(name)
-
-
-class TestSQLClient(object):
-    @patch('cartoframes.data.clients.auth_api_client._get_api_key_manager')
-    def test_instantiation(self, get_api_key_manager_mock):
-        get_api_key_manager_mock.return_value = APIKeyManagerMock()
+class TestAuthAPIClient(object):
+    def test_instantiation(self, mocker):
+        setup_mocks(mocker)
 
         auth_api_client = AuthAPIClient()
 
         assert isinstance(auth_api_client, AuthAPIClient)
         assert isinstance(auth_api_client._api_key_manager, APIKeyManagerMock)
 
-    @patch.object(APIContext, 'get_schema')
-    @patch('cartoframes.data.clients.auth_api_client._get_api_key_manager')
-    def test_create_api_key(self, get_api_key_manager_mock, get_schema_mock):
-        get_api_key_manager_mock.return_value = APIKeyManagerMock()
+    def test_create_api_key(self, mocker):
+        setup_mocks(mocker)
 
-        dataset = Dataset('fake_table', credentials=Credentials('fakeuser'))
+        source = Source('fake_table', credentials=Credentials('fakeuser'))
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()
-        token = auth_api_client.create_api_key([dataset], api_key_name)
+        token = auth_api_client.create_api_key([source], api_key_name)
 
         assert token == TOKEN_MOCK
 
-    @patch.object(APIContext, 'get_schema')
-    @patch('cartoframes.data.clients.auth_api_client._get_api_key_manager')
-    def test_create_api_key_several_datasets(self, get_api_key_manager_mock, get_schema_mock):
-        get_api_key_manager_mock.return_value = APIKeyManagerMock()
+    def test_create_api_key_several_sources(self, mocker):
+        setup_mocks(mocker)
 
-        dataset = Dataset('fake_table', credentials=Credentials('fakeuser'))
+        source = Source('fake_table', credentials=Credentials('fakeuser'))
         api_key_name = 'fake_name'
 
         auth_api_client = AuthAPIClient()
-        token = auth_api_client.create_api_key([dataset, dataset, dataset], api_key_name)
+        token = auth_api_client.create_api_key([source, source, source], api_key_name)
 
         assert token == TOKEN_MOCK
