@@ -36,9 +36,10 @@ class Catalog(object):
       - :obj:`Geography`: Datasets in the Data Observatory are aggregated by different geographic boundaries.
         The `Geography` entity contains metadata to understand the boundaries of a :obj:`CatalogDataset`.
       - :obj:`Variable`: Variables contain metadata about the columns available in each dataset for enrichment.
-        Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level. The
-        variables give you information about the actual columns you have available, such as: `Total Population`,
-        `Total males`, etc. You use `Variable` names to enrich your own data.
+        Let's say you explore a `dataset` with demographic data for the whole US at the Census tract level.
+        The variables give you information about the actual columns you have available, such as: total_population,
+        total_males, etc.
+        On the other hand, you use `Variable` instances or IDs to enrich your own data.
 
     Every `CatalogDataset` is related to a `Geography`. You can have for example, demographics data at the Census
     tract, block groups or blocks levels.

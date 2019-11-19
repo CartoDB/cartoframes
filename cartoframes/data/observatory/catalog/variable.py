@@ -168,7 +168,6 @@ class Variable(CatalogEntity):
                 # extreme             6.329720e+05
                 # distinct            8.473600e+04
                 # outliers            1.009540e+06
-                # null_percent        6.051412e-01
                 # zero_percent        9.929672e+00
                 # extreme_percent     1.303957e-01
                 # distinct_percent    1.745608e+00
