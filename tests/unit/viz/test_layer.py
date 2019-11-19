@@ -1,12 +1,13 @@
 from cartoframes.viz import Layer, Legend, Popup, Source, Style
-from cartoframes.lib.context.api_context import APIContext
+from cartoframes.io.context import ContextManager
 from cartoframes.auth import Credentials
 
 
-def setup_mocks(mocker):
-    mocker.patch.object(Source, 'get_geom_type', return_value='point')
-    mocker.patch.object(Source, '_compute_query_bounds')
-    mocker.patch.object(APIContext, 'get_schema', return_value='public')
+def setup_mocks(mocker, table_name):
+    query = 'SELECT * FROM "public"."{}"'.format(table_name)
+    mocker.patch.object(ContextManager, 'compute_query', return_value=query)
+    mocker.patch.object(ContextManager, 'get_geom_type', return_value='point')
+    mocker.patch.object(ContextManager, 'get_bounds')
 
 
 class TestLayer(object):
@@ -16,7 +17,7 @@ class TestLayer(object):
 
     def test_initialization_objects(self, mocker):
         """Layer should initialize layer attributes"""
-        setup_mocks(mocker)
+        setup_mocks(mocker, 'layer_source')
         layer = Layer(Source('layer_source', credentials=Credentials('fakeuser')))
 
         assert layer.is_basemap is False
@@ -29,7 +30,7 @@ class TestLayer(object):
 
     def test_initialization_simple(self, mocker):
         """Layer should initialize layer attributes"""
-        setup_mocks(mocker)
+        setup_mocks(mocker, 'layer_source')
         layer = Layer('layer_source', '', credentials=Credentials('fakeuser'))
 
         assert layer.is_basemap is False
@@ -45,7 +46,7 @@ class TestLayerStyle(object):
 
     def test_style_dict(self, mocker):
         """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker)
+        setup_mocks(mocker, 'layer_source')
         layer = Layer(
             'layer_source',
             {
@@ -69,7 +70,7 @@ class TestLayerStyle(object):
 
     def test_style_str(self, mocker):
         """Layer style should set the style when it is a dict"""
-        setup_mocks(mocker)
+        setup_mocks(mocker, 'layer_source')
         layer = Layer(
             'layer_source',
             """

@@ -1,16 +1,12 @@
 import pytest
 
 from cartoframes.viz import Source
-from cartoframes.lib.context.api_context import APIContext
 from cartoframes.auth import Credentials
-
-from .utils import simple_dataframe
+from cartoframes.io.context import ContextManager
 
 
 def setup_mocks(mocker):
-    mocker.patch.object(Source, 'get_geom_type', return_value='point')
-    mocker.patch.object(Source, '_compute_query_bounds')
-    mocker.patch.object(APIContext, 'get_schema', return_value='public')
+    mocker.patch.object(ContextManager, 'compute_query')
 
 
 class TestSource(object):
@@ -50,10 +46,3 @@ class TestSource(object):
         assert str(e.value) == ('Credentials attribute is required. '
                                 'Please pass a `Credentials` instance or use '
                                 'the `set_default_credentials` function.')
-
-    def test_source_not_change_dataframe(self):
-        """Source should return the correct credentials when username is provided"""
-        df = simple_dataframe()
-        source = Source(df.copy())
-
-        assert str(df) == str(source.cdf)

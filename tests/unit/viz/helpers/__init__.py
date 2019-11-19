@@ -1,6 +1,7 @@
-from cartoframes.viz import Source
+from cartoframes.io.context import ContextManager
 
 
 def setup_mocks(mocker, geom_type='point'):
-    mocker.patch.object(Source, 'get_geom_type', return_value=geom_type)
-    mocker.patch.object(Source, '_compute_query_bounds')
+    mocker.patch.object(ContextManager, 'compute_query')
+    mocker.patch.object(ContextManager, 'get_geom_type', return_value=geom_type)
+    mocker.patch.object(ContextManager, 'get_bounds')

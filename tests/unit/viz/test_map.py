@@ -1,22 +1,22 @@
 import pytest
-import unittest
+
 from carto.exceptions import CartoException
 
-from cartoframes.lib import context
+from cartoframes.auth import Credentials
+from cartoframes.io.context import ContextManager
 from cartoframes.viz import Map, Layer, Source, constants
 from cartoframes.viz.kuviz import KuvizPublisher, kuviz_to_dict
-from cartoframes.auth import Credentials
-from cartoframes.data import CartoDataFrame
 
 from .utils import build_geodataframe
 
-from ..mocks.context_mock import ContextMock
 from ..mocks.kuviz_mock import CartoKuvizMock, PRIVACY_PUBLIC, PRIVACY_PASSWORD
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+
+def setup_mocks(mocker):
+    mocker.patch('cartoframes.viz.map._get_publisher', return_value=KuvizPublisherMock())
+    mocker.patch.object(ContextManager, 'compute_query')
+    mocker.patch.object(ContextManager, 'get_geom_type', return_value='point')
+    mocker.patch.object(ContextManager, 'get_bounds', return_value=None)
 
 
 class TestMap(object):
@@ -193,13 +193,11 @@ class KuvizPublisherMock(KuvizPublisher):
         return kuviz_to_dict(self.kuviz)
 
 
-class TestMapPublication(unittest.TestCase):
-    def setUp(self):
+class TestMapPublication(object):
+    def setup_method(self):
         self.username = 'fake_username'
         self.api_key = 'fake_api_key'
         self.credentials = Credentials(username=self.username, api_key=self.api_key)
-        self._context_mock = ContextMock()
-
         self.test_geojson = {
             "type": "FeatureCollection",
             "features": [
@@ -217,13 +215,6 @@ class TestMapPublication(unittest.TestCase):
             ]
         }
 
-        # Mock create_context method
-        self.original_create_context = context.create_context
-        context.create_context = lambda c: self._context_mock
-
-    def tearDown(self):
-        context.create_context = self.original_create_context
-
     # def assert_kuviz(self, kuviz, name, privacy):
     #     self.assertIsNotNone(kuviz.id)
     #     self.assertIsNotNone(kuviz.url)
@@ -236,13 +227,11 @@ class TestMapPublication(unittest.TestCase):
         assert kuviz_dict['name'] == name
         assert kuviz_dict['privacy'] == privacy
 
-    @patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_remote_default(self, _get_publisher, mock_set_content):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_remote_default(self, mocker):
+        setup_mocks(mocker)
+        mock_set_content = mocker.patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
-        vmap = Map(Layer(cdf))
+        vmap = Map(Layer('fake_table', credentials=self.credentials))
 
         name = 'cf_publish'
         kuviz_dict = vmap.publish(name)
@@ -264,14 +253,12 @@ class TestMapPublication(unittest.TestCase):
             title='cf_publish'
         )
 
-    @patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_remote_params(self, _get_publisher, mock_set_content):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_remote_params(self, mocker):
+        setup_mocks(mocker)
+        mock_set_content = mocker.patch('cartoframes.viz.html.html_map.HTMLMap.set_content')
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
         vmap = Map(
-            Layer(cdf),
+            Layer('fake_table', credentials=self.credentials),
             basemap='yellow',
             bounds={'west': 1, 'east': 2, 'north': 3, 'south': 4},
             viewport={'zoom': 5, 'lat': 50, 'lng': -10},
@@ -302,36 +289,30 @@ class TestMapPublication(unittest.TestCase):
             title='cf_publish'
         )
 
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_with_password(self, _get_publisher):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_with_password(self, mocker):
+        setup_mocks(mocker)
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
-        map = Map(Layer(Source(cdf)))
+        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         kuviz_dict = map.publish(name, credentials=self.credentials, password="1234")
         self.assert_kuviz_dict(kuviz_dict, name, PRIVACY_PASSWORD)
 
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_deletion(self, _get_publisher):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_deletion(self, mocker):
+        setup_mocks(mocker)
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
-        map = Map(Layer(Source(cdf)))
+        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
         response = map.delete_publication()
 
-        self.assertTrue(response)
+        assert response is True
 
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_update_name(self, _get_publisher):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_update_name(self, mocker):
+        setup_mocks(mocker)
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
-        map = Map(Layer(Source(cdf)))
+        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
@@ -341,12 +322,10 @@ class TestMapPublication(unittest.TestCase):
 
         self.assert_kuviz_dict(kuviz_dict, new_name, PRIVACY_PUBLIC)
 
-    @patch('cartoframes.viz.map._get_publisher')
-    def test_map_publish_update_password(self, _get_publisher):
-        _get_publisher.return_value = KuvizPublisherMock()
+    def test_map_publish_update_password(self, mocker):
+        setup_mocks(mocker)
 
-        cdf = CartoDataFrame('fake_table', credentials=self.credentials, download=False)
-        map = Map(Layer(Source(cdf)))
+        map = Map(Layer(Source('fake_table', credentials=self.credentials)))
 
         name = 'cf_publish'
         map.publish(name, credentials=self.credentials)
