@@ -176,15 +176,6 @@ class Variable(CatalogEntity):
 
     def quantiles(self):
         """Returns information about the quantiles of the variable data.
-
-        Example:
-
-            .. code::
-
-                # q1                      8.09
-                # q3                     38.82
-                # median                 20.42
-                # interquartile_range    30.73
         """
         data = self.data['summary_json']
         return quantiles(data)
