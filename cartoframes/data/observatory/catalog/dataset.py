@@ -272,7 +272,6 @@ class CatalogDataset(CatalogEntity):
                 # rows                    217182
                 # cells                 23672838
                 # null_cells                   0
-                # null_cells_percent           0
         """
 
         data = self.data['summary_json']
