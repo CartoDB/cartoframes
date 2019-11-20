@@ -163,7 +163,7 @@ def update_table(table_name, credentials=None, privacy=None, new_table_name=None
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
     valid_privacy_values = ['PRIVATE', 'PUBLIC', 'LINK']
-    if privacy not in valid_privacy_values:
+    if privacy.upper() not in valid_privacy_values:
         raise ValueError('Wrong privacy. Valid names are {}'.format(', '.join(valid_privacy_values)))
 
     manager = ContextManager(credentials)
