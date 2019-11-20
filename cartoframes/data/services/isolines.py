@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
 from .service import Service
-from ...io.carto import read_carto, to_carto, delete_table
 from ...core.managers.source_manager import SourceManager
+from ...io.carto import read_carto, to_carto, delete_table
 
 QUOTA_SERVICE = 'isolines'
 DATA_RANGE_KEY = 'data_range'
@@ -175,7 +175,11 @@ class Isolines(Service):
         if temporary_table_name:
             delete_table(temporary_table_name, self._credentials)
 
-        return self.result(data=cdf, metadata=metadata)
+        result = self.result(data=cdf, metadata=metadata)
+
+        print('Success! Isolines correctly created')
+
+        return result
 
 
 def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id):

@@ -1,11 +1,13 @@
 from pandas import DataFrame
 
 from .context_manager import ContextManager
+from ...utils.utils import is_sql_query
 
 
 class SourceManager(object):
 
     def __init__(self, source, credentials):
+        self._source = source
         if isinstance(source, str):
             # Table, SQL query
             self._remote_data = True
@@ -23,6 +25,15 @@ class SourceManager(object):
 
     def is_local(self):
         return not self._remote_data
+
+    def is_table(self):
+        return isinstance(self._source, str) and not self.is_query()
+
+    def is_query(self):
+        return is_sql_query(self._source)
+
+    def is_dataframe(self):
+        return isinstance(self._source, DataFrame)
 
     def get_query(self):
         if self.is_remote():

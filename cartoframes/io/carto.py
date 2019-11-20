@@ -132,7 +132,7 @@ def describe_table(table_name, credentials=None, schema=None):
     }
 
 
-def update_table(table_name, credentials=None, privacy=None, new_table_name=None):
+def update_table(table_name, credentials=None, new_table_name=None, privacy=None):
     """
     Update the table information in the CARTO account.
 
@@ -140,8 +140,8 @@ def update_table(table_name, credentials=None, privacy=None, new_table_name=None
         table_name (str): name of the table.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
-        privacy (str, optional): privacy of the table: 'PRIVATE', 'PUBLIC', 'LINK'.
         new_table_name(str, optional): new name for the table.
+        privacy (str, optional): privacy of the table: 'PRIVATE', 'PUBLIC', 'LINK'.
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
