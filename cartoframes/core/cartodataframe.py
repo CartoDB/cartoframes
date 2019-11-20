@@ -45,7 +45,6 @@ class CartoDataFrame(GeoDataFrame):
         gdf = GeoDataFrame.from_features(features, **kwargs)
         return cls(gdf)
 
-    @staticmethod
     def to_carto(self, *args, **kwargs):
         """
         Upload a CartoDataFrame to CARTO.
@@ -60,7 +59,6 @@ class CartoDataFrame(GeoDataFrame):
         from ..io.carto import to_carto
         return to_carto(self, *args, **kwargs)
 
-    @staticmethod
     def convert(self, index_column=None, geom_column=None, lnglat_columns=None,
                 drop_index=True, drop_geom=True, drop_lnglat=True):
         """
