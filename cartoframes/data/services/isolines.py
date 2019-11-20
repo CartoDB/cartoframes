@@ -5,6 +5,8 @@ from ...io.carto import read_carto, to_carto, delete_table
 from ...core.managers.source_manager import SourceManager
 
 QUOTA_SERVICE = 'isolines'
+DATA_RANGE_KEY = 'data_range'
+RANGE_LABEL_KEY = 'range_label'
 
 
 class Isolines(Service):
@@ -161,6 +163,10 @@ class Isolines(Service):
 
         # Execute and download the query to generate the isolines
         cdf = read_carto(sql, self._credentials)
+
+        if exclusive:
+            # Add range label column
+            cdf[RANGE_LABEL_KEY] = cdf.apply(lambda r: '%.0f min.' % (r[DATA_RANGE_KEY]/60), axis=1)
 
         if table_name:
             # save result in a table
