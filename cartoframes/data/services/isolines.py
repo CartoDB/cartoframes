@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 
-import pandas as pd
-
-from ...utils.geom_utils import geodataframe_from_dataframe
-from ...data import Dataset
 from .service import Service
+from ...io.carto import read_carto, to_carto, delete_table
+from ...core.managers.source_manager import SourceManager
 
 QUOTA_SERVICE = 'isolines'
 
@@ -22,9 +20,9 @@ class Isolines(Service):
         This method computes areas delimited by isochrone lines (lines of constant travel time) based upon public roads.
 
         Args:
-            source (Dataset, Dataframe): containing the source points for the isochrones:
-                travel routes from the source points are computed to determine areas within
-                specified travel times.
+            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+                table, SQL query or DataFrame containing the source points for the isochrones: travel routes from the
+                source points are computed to determine areas within specified travel times.
             ranges (list): travel time values in seconds; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
@@ -49,15 +47,10 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
-            with_lnglat (tuple, optional): Two columns that have the longitude
-                and latitude information. If used, a point geometry will be
-                created upon upload to CARTO. Example input: `('long', 'lat')`.
-                Defaults to `None`.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
-            (same type as the input ``source``) and a ``metadata`` dictionary.
-            For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` CartoDataFrame and
+            a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
@@ -72,9 +65,9 @@ class Isolines(Service):
         roads.
 
         Args:
-            source (Dataset, Dataframe): containing the source points for the isochrones:
-                travel routes from the source points are computed to determine areas within
-                specified travel distances.
+            source (str, DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+                table, SQL query or DataFrame containing the source points for the isodistances: travel routes from the
+                source points are computed to determine areas within specified travel distances.
             ranges (list): travel distance values in meters; for each range value and source point a result polygon
                 will be produced enclosing the area within range of the source.
             exclusive (bool, optional): when False (the default), inclusive range areas are generated, each one
@@ -99,15 +92,10 @@ class Isolines(Service):
                 Increasing the number of maxpoints may increase the response time of the service.
             quality: (int, optional): Allows you to reduce the quality of the polygons in favor of the response time.
                 Admitted values: 1/2/3.
-            with_lnglat (tuple, optional): Two columns that have the longitude
-                and latitude information. If used, a point geometry will be
-                created upon upload to CARTO. Example input: `('long', 'lat')`.
-                Defaults to `None`.
 
         Returns:
-            A named-tuple ``(data, metadata)`` containing  either a ``data`` Dataset or DataFrame
-            (same type as the input ``source``) and a ``metadata`` dictionary.
-            For dry runs the data will be ``None``.
+            A named-tuple ``(data, metadata)`` containing a ``data`` CartoDataFrame and
+            a ``metadata`` dictionary. For dry runs the data will be ``None``.
             The data contains a ``range_data`` column with a numeric value and a ``the_geom``
             geometry with the corresponding area. It will also contain a ``source_id`` column
             that identifies the source point corresponding to each area if the source has a
@@ -129,36 +117,27 @@ class Isolines(Service):
                    maxpoints=None,
                    quality=None,
                    exclusive=False,
-                   with_lnglat=None,
                    function=None):
         metadata = {}
 
-        input_dataframe = None
-        if isinstance(source, pd.DataFrame):
-            input_dataframe = source
-            source = Dataset(input_dataframe)
+        source_manager = SourceManager(source, self._credentials)
 
-        num_rows = source.get_num_rows()
+        num_rows = source_manager.get_num_rows()
         metadata['required_quota'] = num_rows * len(ranges)
 
         if dry_run:
             return self.result(data=None, metadata=metadata)
 
-        source_columns = source.get_column_names()
-
-        temporary_table_name = False
-
-        if source.table_name:
-            source_query = 'SELECT * FROM {table}'.format(table=source.table_name)
-        elif source.get_query():
-            source_query = source.get_query()
-        else:  # source.is_local()
+        if source_manager.is_remote():
+            temporary_table_name = False
+            source_query = source_manager.get_query()
+        else:
             # upload to temporary table
             temporary_table_name = self._new_temporary_table_name()
-            source.upload(table_name=temporary_table_name, credentials=self._credentials, with_lnglat=with_lnglat)
+            to_carto(source, temporary_table_name, self._credentials)
             source_query = 'SELECT * FROM {table}'.format(table=temporary_table_name)
-            source_columns = source.get_column_names()
 
+        source_columns = source_manager.get_column_names()
         source_has_id = 'cartodb_id' in source_columns
 
         iso_function = '_cdb_{function}_exception_safe'.format(function=function)
@@ -180,21 +159,17 @@ class Isolines(Service):
         if exclusive:
             sql = _rings_query(sql, source_has_id)
 
-        dataset = Dataset(sql, credentials=self._credentials)
+        # Execute and download the query to generate the isolines
+        cdf = read_carto(sql, self._credentials)
+
         if table_name:
-            dataset.upload(table_name=table_name, if_exists=if_exists)
-            result = Dataset(table_name, credentials=self._credentials)
-            if input_dataframe is not None:
-                result = geodataframe_from_dataframe(result.download())
-        else:
-            result = geodataframe_from_dataframe(dataset.download())
-            if input_dataframe is None:
-                result = Dataset(result, credentials=self._credentials)
+            # save result in a table
+            to_carto(cdf, table_name, self._credentials, if_exists)
 
         if temporary_table_name:
-            Dataset(temporary_table_name, credentials=self._credentials).delete()
+            delete_table(temporary_table_name, self._credentials)
 
-        return self.result(data=result, metadata=metadata)
+        return self.result(data=cdf, metadata=metadata)
 
 
 def _areas_query(source_query, source_columns, iso_function, mode, iso_ranges, iso_options, with_source_id):
