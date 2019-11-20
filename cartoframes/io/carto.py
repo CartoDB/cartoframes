@@ -47,10 +47,11 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
 
 def to_carto(dataframe, table_name, credentials=None, if_exists='fail'):
     """
-    Read a table or a SQL query from the CARTO account.
+    Upload a Dataframe to CARTO.
 
     Args:
-        dataframe (DataFrame): data frame to upload.
+        dataframe (DataFrame, GeoDataFrame, :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`):
+            data to be uploaded.
         table_name (str): name of the table to upload the data.
         credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
             instance of Credentials (username, api_key, etc).
@@ -118,7 +119,15 @@ def describe_table(table_name, credentials=None, schema=None):
             instance of Credentials (username, api_key, etc).
         schema (str, optional):prefix of the table. By default, it gets the
             `current_schema()` using the credentials.
+
+    Returns:
+        A dict with the `privacy`, `num_rows` and `geom_type` of the table.
+
+    Raises:
+        ValueError:
+            If the table name is not a string.
     """
+
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
 
@@ -142,6 +151,13 @@ def update_table(table_name, credentials=None, privacy=None, new_table_name=None
             instance of Credentials (username, api_key, etc).
         privacy (str, optional): privacy of the table: 'PRIVATE', 'PUBLIC', 'LINK'.
         new_table_name(str, optional): new name for the table.
+
+    Raises:
+        ValueError:
+            If the table name is not a string.
+        ValueError:
+            If the privacy name is not 'PRIVATE', 'PUBLIC', or 'LINK'.
+
     """
     if not isinstance(table_name, str):
         raise ValueError('Wrong table name. You should provide a valid table name.')
