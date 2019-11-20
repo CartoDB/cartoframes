@@ -19,7 +19,7 @@ class Enrichment(EnrichmentService):
         super(Enrichment, self).__init__(credentials)
 
     def enrich_points(self, dataframe, variables, geom_column='geometry', filters={}):
-        """Enrich your dataframe with columns from our data, intersecting your points with our
+        """Enrich youar dataframe with columns from our data, intersecting the points with our
         geographies. Extra columns as area and population will be provided with the aims of normalize
         these columns.
 
@@ -36,7 +36,8 @@ class Enrichment(EnrichmentService):
             A :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` with the variables to enrich appended to it.
 
             Note that if the geometry of the `data` you provide intersects with more than one geometry
-            in the enrichment dataframe, the number of rows of the returned CartoDataFrame could be different
+            in the enrichment dataframe, the number of rows of the returned
+            :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>` could be different
             than the `data` argument number of rows.
 
         Examples:
@@ -124,7 +125,7 @@ class Enrichment(EnrichmentService):
 
     def enrich_polygons(self, dataframe, variables, geom_column='geometry', filters=[],
                         aggregation=AGGREGATION_DEFAULT):
-        """Enrich your dataframe with columns from our data, intersecting your polygons with our geographies.
+        """Enrich a dataframe with columns from our data, intersecting the polygons with our geographies.
         When a polygon intersects with multiple geographies of our dataframe, the proportional part of the
         intersection will be used to interpolate the quantity of the polygon value intersected, aggregating them
         with the operator provided by `agg_operators` argument.

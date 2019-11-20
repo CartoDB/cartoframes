@@ -24,7 +24,7 @@ def read_carto(source, credentials=None, limit=None, retry_times=3, schema=None,
             `current_schema()` using the credentials.
         drop_cartodb_id (bool, optional): drop the "cartodb_id" column used as index.
         drop_the_geom (bool, optional): drop the "the_geom" column used as geometry.
-        drop_the_goem_webmercator (bool, optional): drop the "the_geom_webmercator" column.
+        drop_the_geom_webmercator (bool, optional): drop the "the_geom_webmercator" column.
 
     Returns:
         :py:class:`CartoDataFrame <cartoframes.CartoDataFrame>`
