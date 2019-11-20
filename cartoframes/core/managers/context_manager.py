@@ -49,20 +49,31 @@ class ContextManager(object):
     def copy_from(self, cdf, table_name, if_exists):
         dataframe_columns_info = DataframeColumnsInfo(cdf)
         schema = self.get_schema()
-        table_name = self._normalize_table_name(table_name)
+        table_name = self.normalize_table_name(table_name)
 
         if if_exists == 'replace' or not self.has_table(table_name, schema):
             print('Debug: creating table "{}"'.format(table_name))
-            self._create_table(table_name, dataframe_columns_info.columns, schema)
+            self.create_table_from_columns(table_name, dataframe_columns_info.columns, schema)
         elif if_exists == 'fail':
             raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
                             'Please choose a different `table_name` or use '
                             'if_exists="replace" to overwrite it'.format(
                                 table_name=table_name, schema=schema))
-        elif if_exists == 'append':
-            pass
 
         return self._copy_from(cdf, table_name, dataframe_columns_info)
+
+    def create_table_from_query(self, table_name, query, if_exists):
+        schema = self.get_schema()
+        table_name = self.normalize_table_name(table_name)
+
+        if if_exists == 'replace' or not self.has_table(table_name, schema):
+            print('Debug: creating table "{}"'.format(table_name))
+            self._create_table_from_query(table_name, query, schema)
+        elif if_exists == 'fail':
+            raise Exception('Table "{schema}.{table_name}" already exists in CARTO. '
+                            'Please choose a different `table_name` or use '
+                            'if_exists="replace" to overwrite it'.format(
+                                table_name=table_name, schema=schema))
 
     def has_table(self, table_name, schema=None):
         query = self.compute_query(table_name, schema)
@@ -146,9 +157,7 @@ class ContextManager(object):
             return False
 
     def get_table_names(self, query):
-        # Used to detect tables in queries in the publication
-        # However, I think there is a bug because it does not
-        # distinguish between private and public tables inside a query.
+        # Used to detect tables in queries in the publication.
         query = 'SELECT CDB_QueryTablesText(\'{}\') as tables'.format(query)
         result = self.execute_query(query)
         tables = []
@@ -157,10 +166,17 @@ class ContextManager(object):
             tables = [table.split('.')[1] if '.' in table else table for table in result['rows'][0]['tables']]
         return tables
 
-    def _create_table(self, table_name, columns, schema):
-        query = '''BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'''.format(
+    def _create_table_from_query(self, table_name, query, schema):
+        query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
             drop=_drop_table_query(table_name),
-            create=_create_table_query(table_name, columns),
+            create=_create_table_from_query_query(table_name, query),
+            cartodbfy=_cartodbfy_query(table_name, schema))
+        self.execute_long_running_query(query)
+
+    def _create_table_from_columns(self, table_name, columns, schema):
+        query = 'BEGIN; {drop}; {create}; {cartodbfy}; COMMIT;'.format(
+            drop=_drop_table_query(table_name),
+            create=_create_table_from_columns_query(table_name, columns),
             cartodbfy=_cartodbfy_query(table_name, schema))
         self.execute_long_running_query(query)
 
@@ -249,7 +265,7 @@ class ContextManager(object):
 
         self.copy_client.copyfrom(query.strip(), data)
 
-    def _normalize_table_name(self, table_name):
+    def normalize_table_name(self, table_name):
         norm_table_name = normalize_name(table_name)
         if norm_table_name != table_name:
             print('Debug: table name normalized: "{}"'.format(norm_table_name))
@@ -262,12 +278,16 @@ def _drop_table_query(table_name, if_exists=True):
         if_exists='IF EXISTS' if if_exists else '')
 
 
-def _create_table_query(table_name, columns):
+def _create_table_from_columns_query(table_name, columns):
     cols = ['{column} {type}'.format(column=c.database, type=c.database_type) for c in columns]
 
-    return '''CREATE TABLE {table_name} ({cols})'''.format(
+    return 'CREATE TABLE {table_name} ({cols})'.format(
         table_name=table_name,
         cols=', '.join(cols))
+
+
+def _create_table_from_query_query(table_name, query):
+    return 'CREATE TABLE {table_name} AS ({query})'.format(table_name=table_name, query=query)
 
 
 def _cartodbfy_query(table_name, schema):
