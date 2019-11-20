@@ -32,7 +32,6 @@ class TestPointsEnrichment(object):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -54,11 +53,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, data_geom_column, area_name)
+            get_query([column], self.username, view, geo_view, temp_table_name, area_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -71,7 +70,6 @@ class TestPointsEnrichment(object):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -100,11 +98,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1, column2], self.username, view, geo_view, temp_table_name, data_geom_column, area_name)
+            get_query([column1, column2], self.username, view, geo_view, temp_table_name, area_name)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -117,7 +115,6 @@ class TestPointsEnrichment(object):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table1 = 'table1'
@@ -149,12 +146,12 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, data_geom_column, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, data_geom_column, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
+            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -167,7 +164,6 @@ class TestPointsEnrichment(object):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset1 = 'dataset1'
         dataset2 = 'dataset2'
@@ -200,12 +196,12 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, []
+            temp_table_name, variables, []
         )
 
         expected_queries = [
-            get_query([column1], self.username, view1, geo_view, temp_table_name, data_geom_column, area_name1),
-            get_query([column2], self.username, view2, geo_view, temp_table_name, data_geom_column, area_name2)
+            get_query([column1], self.username, view1, geo_view, temp_table_name, area_name1),
+            get_query([column2], self.username, view2, geo_view, temp_table_name, area_name2)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -218,7 +214,6 @@ class TestPointsEnrichment(object):
         enrichment = Enrichment(credentials=self.credentials)
 
         temp_table_name = 'test_table'
-        data_geom_column = 'the_geom'
         project = 'project'
         dataset = 'dataset'
         table = 'table'
@@ -243,11 +238,11 @@ class TestPointsEnrichment(object):
         dataset_get_mock.return_value = catalog
 
         actual_queries = enrichment._get_points_enrichment_sql(
-            temp_table_name, data_geom_column, variables, filters
+            temp_table_name, variables, filters
         )
 
         expected_queries = [
-            get_query([column], self.username, view, geo_view, temp_table_name, data_geom_column, area_name, filters)
+            get_query([column], self.username, view, geo_view, temp_table_name, area_name, filters)
         ]
 
         actual = sorted(_clean_queries(actual_queries))
@@ -264,7 +259,7 @@ def _clean_query(query):
     return query.replace('\n', '').replace(' ', '').lower()
 
 
-def get_query(columns, username, view, geo_table, temp_table_name, data_geom_column, area_name, filters=[]):
+def get_query(columns, username, view, geo_table, temp_table_name, area_name, filters=[]):
     columns = ', '.join(get_column_sql(column) for column in columns)
 
     return '''
@@ -282,7 +277,7 @@ def get_query(columns, username, view, geo_table, temp_table_name, data_geom_col
             view=view,
             geo_table=geo_table,
             temp_table_name=temp_table_name,
-            data_geom_column=data_geom_column,
+            data_geom_column='__geojson_geom',
             where=_get_where(filters))
 
 
