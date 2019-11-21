@@ -251,7 +251,7 @@ class CatalogDataset(CatalogEntity):
         return head(self.__class__, data)
 
     def tail(self):
-        """Returns a sample of the 10 last rows of the dataset data.
+        """"Returns the last ten rows of the dataset"
 
         If a dataset has fewer than 10 rows (e.g., zip codes of small countries), this method will return None
 
@@ -394,14 +394,14 @@ class CatalogDataset(CatalogEntity):
     def subscribe(self, credentials=None):
         """Subscribe to a dataset. You need Data Observatory enabled in your CARTO account.
 
-        Datasets with `is_public_data` set to True, do not need a license (i.e. a subscription) to be used.
-        Datasets with `is_public_data` set to False, do need a license (i.e. a subscription) to be used. You'll get a
+        Datasets with `is_public_data` set to True do not need a license (i.e., a subscription) to be used.
+        Datasets with `is_public_data` set to False do need a license (i.e., a subscription) to be used. You'll get a
         license to use this `dataset` depending on the `estimated_delivery_days` set for this specific dataset.
 
         See :py:meth:`subscription_info <cartoframes.data.observatory.CatalogDataset.subscription_info>` for more
         info
 
-        Once you subscribe to a dataset you can `download` its data and use the enrichment functions. See the
+        Once you subscribe to a dataset, you can `download` its data and use the enrichment functions. See the
         enrichment guides for more info.
 
         You can check the status of your subscriptions by calling the
@@ -426,8 +426,8 @@ class CatalogDataset(CatalogEntity):
             utils.display_subscription_form(self.id, DATASET_TYPE, _credentials)
 
     def subscription_info(self, credentials=None):
-        """Get the subscription information of a Dataset, which includes the license, TOS, rights, prize and
-        estimated_time_of_delivery, among other metadata of interest during the subscription process.
+        """Get the subscription information of a Dataset, which includes the license, Terms of Service, rights, price, and
+        estimated time of delivery, among other metadata of interest during the subscription process.
 
         Args:
             credentials (:py:class:`Credentials <cartoframes.auth.Credentials>`, optional):
